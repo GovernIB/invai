@@ -4,7 +4,7 @@
         <ssl-required>EXTERNAL</ssl-required>
     </realm>
     <!-- API INTERNA START -->
-    <secure-deployment name="invai-api-interna.war">
+    <secure-deployment name="invai-back-interna.war">
         <realm>GOIB</realm>
         <resource>goib-ws</resource>
         <use-resource-role-mappings>true</use-resource-role-mappings>

@@ -74,7 +74,7 @@
             </dependency>
             <dependency>
                 <groupId>es.caib.invai</groupId>
-                <artifactId>invai-api</artifactId>
+                <artifactId>invai-back</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
             </dependency>
@@ -180,7 +180,7 @@
     </repositories>
 
     <modules>
-        <module>invai-api</module>
+        <module>invai-back</module>
         <module>invai-ear</module>
         <module>invai-front</module>
     </modules>

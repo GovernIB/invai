@@ -3,7 +3,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.jboss.org/schema/jbossas http://www.jboss.org/schema/jbossas/jboss-web_10_0.xsd">
 
-    <context-root>/invai-api</context-root>
+    <context-root>/invai-back</context-root>
 
     <persistence-unit-ref>
         <persistence-unit-ref-name>persistence/invaiDS</persistence-unit-ref-name>

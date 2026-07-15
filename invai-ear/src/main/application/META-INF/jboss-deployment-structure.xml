@@ -7,6 +7,6 @@
         </dependencies>
     </deployment>
 
-    <sub-deployment name="invai-api.war">
+    <sub-deployment name="invai-back.war">
     </sub-deployment>
 </jboss-deployment-structure>

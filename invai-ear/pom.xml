@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>es.caib.invai</groupId>
-            <artifactId>invai-api</artifactId>
+            <artifactId>invai-back</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -52,8 +52,8 @@
                     <modules>
                         <webModule>
                             <groupId>es.caib.invai</groupId>
-                            <artifactId>invai-api</artifactId>
-                            <bundleFileName>invai-api.war</bundleFileName>
+                            <artifactId>invai-back</artifactId>
+                            <bundleFileName>invai-back.war</bundleFileName>
                             <contextRoot>/invaiapi</contextRoot>
                         </webModule>
                         <webModule>
