@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "INV_STATUS")
+@Table(name = "INV_LKUP_STATUS")
 public class StatusEntity {
 
     @Id

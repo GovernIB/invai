@@ -6,13 +6,13 @@ estructura y datos mínimos necesarios para el funcionamiento de la aplicación.
 
 ## ¿Qué incluye este conjunto de scripts?
 
-- **00_drop_database.sql**: Elimina los objetos existentes para garantizar una instalación limpia (opcional, usar con
+- **00_invai_1.0.1_drop_database_pl.sql**: Elimina los objetos existentes para garantizar una instalación limpia (opcional, usar con
   precaución).
-- **01_create_sequence.sql**: Crea todas las secuencias necesarias para la generación de claves primarias y otros usos.
-- **02_create_table.sql**: Crea todas las tablas de la base de datos SIVAP.
-- **03_create_index.sql**: Crea los índices requeridos para optimizar el rendimiento de las consultas.
-- **04_create_constraints.sql**: Define todas las restricciones (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, etc.).
-- **05_grants.sql**: (Si existe) Concede los permisos necesarios a los usuarios de la base de datos.
+- **01_invai_1.0.1_create_sequence_ddl.sql**: Crea todas las secuencias necesarias para la generación de claves primarias y otros usos.
+- **02_invai_1.0.1_create_table_ddl.sql**: Crea todas las tablas de la base de datos SIVAP.
+- **03_invai_1.0.1_create_index_ddl.sql**: Crea los índices requeridos para optimizar el rendimiento de las consultas.
+- **04_invai_1.0.1_create_constraints_ddl.sql**: Define todas las restricciones (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, etc.).
+- **05_invai_1.0.1_grants_ddl.sql**: (Si existe) Concede los permisos necesarios a los usuarios de la base de datos.
 - **06_.._XX_dml_sentences.sql**: Scripts de inserción de datos mínimos y de configuración inicial (valores de
   catálogos, parámetros, etc.).
 
