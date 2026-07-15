@@ -1,0 +1,13 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21
+    container_name: LocalOracle
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=oracle
+      - ORACLE_CHARACTERSET=AL32UTF8
+    volumes:
+      # Mapea tu ruta exacta según la estructura de la imagen
+      - ./scripts/bbdd/oracle/init-scripts:/container-entrypoint-initdb.d
+    restart: always

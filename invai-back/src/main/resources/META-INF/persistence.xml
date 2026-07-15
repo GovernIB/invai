@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <persistence-unit name="invaiDS" transaction-type="JTA">
+        <jta-data-source>java:jboss/datasources/invaiDS</jta-data-source>
+
+        <class>es.caib.invai.api.persistence.model.ApplicationEntity</class>
+        <class>es.caib.invai.api.persistence.model.ApplicationAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.AdmUnitEntity</class>
+        <class>es.caib.invai.api.persistence.model.AdmUnitAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.CategoryEntity</class>
+        <class>es.caib.invai.api.persistence.model.CategoryAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.FieldEntity</class>
+        <class>es.caib.invai.api.persistence.model.FieldAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.CommissionEntity</class>
+        <class>es.caib.invai.api.persistence.model.CommissionAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.SystemTypeEntity</class>
+        <class>es.caib.invai.api.persistence.model.SystemTypeAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.StatusEntity</class>
+
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+        <validation-mode>CALLBACK</validation-mode>
+
+        <properties>
+            <property name="wildfly.jpa.twophase" value="true"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>
+
+            <property name="wildfly.jpa.default-unit" value="true"/>
+            <property name="hibernate.archive.autodetection" value="class"/>
+
+            <property name="hibernate.query.substitutions" value="true 1, false 0"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

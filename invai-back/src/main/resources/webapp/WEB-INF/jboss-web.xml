@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-web xmlns="http://www.jboss.org/schema/jbossas"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.jboss.org/schema/jbossas http://www.jboss.org/schema/jbossas/jboss-web_10_0.xsd">
+
+    <context-root>/invai-api</context-root>
+
+    <persistence-unit-ref>
+        <persistence-unit-ref-name>persistence/invaiDS</persistence-unit-ref-name>
+        <jndi-name>java:jboss/Value/invai/invaiDS</jndi-name>
+    </persistence-unit-ref>
+
+</jboss-web>

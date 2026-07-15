@@ -1,0 +1,70 @@
+app-applications-table {
+  .invai-scrollable-table {
+    .p-datatable-table {
+      min-width: max-content;
+    }
+
+    .p-datatable-thead > tr > th,
+    .p-datatable-tbody > tr > td {
+      white-space: nowrap;
+    }
+
+    .p-datatable-thead > tr > th {
+      vertical-align: top;
+    }
+
+    .invai-table-actions-column {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      width: 9rem;
+      min-width: 9rem;
+      max-width: 9rem;
+      box-sizing: border-box;
+      padding-left: 1rem;
+      background: var(--p-datatable-body-cell-background, var(--p-content-background, #fff));
+      border-left: 1px solid
+        var(--p-datatable-body-cell-border-color, var(--p-content-border-color, #d9e2ef));
+    }
+
+    .p-datatable-thead > tr > .invai-table-actions-column {
+      background: var(--p-datatable-header-cell-background, var(--p-content-background, #fff));
+      z-index: 4;
+    }
+
+    .invai-table-actions {
+      align-items: center;
+      min-width: 0;
+      overflow: visible;
+      white-space: nowrap;
+
+      p-button {
+        flex: 0 0 auto;
+      }
+
+      .p-button {
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+      }
+    }
+  }
+
+  .invai-table-header-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+
+    p-sorticon {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+  }
+
+  .invai-table-header-label {
+    min-width: 0;
+    white-space: normal;
+  }
+}

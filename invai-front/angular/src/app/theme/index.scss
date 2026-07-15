@@ -1,0 +1,14 @@
+/* Brand styling for PrimeNG Lara.
+   Component theming is configured via `invai-preset.ts` (PrimeNG token engine).
+   This file provides the raw design tokens, fonts, resets and palette helpers.
+   Loaded as a dedicated entry in angular.json (not via a CSS @import). */
+
+@use "./design-tokens";
+@use "./primeng/lara/blue/fonts";
+@use "./extended-blue-palette";
+@use "./extended-surface-palette";
+@use "./normalize";
+@use "./reset";
+@use "./full-calendar";
+
+@import "../../../node_modules/primeflex/primeflex.css";

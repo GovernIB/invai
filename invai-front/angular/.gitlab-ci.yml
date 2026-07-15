@@ -1,0 +1,103 @@
+stages:
+  - build-prod
+  - test
+  - upload-to-invai-back
+  - update-client-repo
+
+cache:
+  paths:
+    - node_modules/
+
+#############################
+#    BUILD PROD             #
+#  Compila la app localizada #
+#  (ca+es) en la rama develop #
+#############################
+build-prod:
+  stage: build-prod
+  tags:
+    - node24-bookworm
+  script:
+    - npm install
+    - rm -rf dist
+    - npm run build:i18n
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  artifacts:
+    paths:
+      - dist
+
+#############################
+#    TEST                   #
+#  (placeholder, deshabilitado) #
+#############################
+# tests:
+#   stage: test
+#   tags:
+#     - node24-bookworm
+#   script:
+#     - npm install
+#     - npm test
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "develop"'
+
+#############################
+#    UPLOAD A INVAI-BACK    #
+#  Sincroniza dist al repo   #
+#  backend en Plexus (develop)#
+#############################
+upload-to-invai-back:
+  stage: upload-to-invai-back
+  tags:
+    - alpine
+  before_script:
+    - apk add --no-cache git jq
+  script:
+    - rm -rf invai
+    - git clone https://invaifrontbot:${GITLAB_PLEXUS_TOKEN}@repo.plexus.services/dependencia/invai.git
+    - cd invai
+    - git checkout develop
+    - rm -rf invai-front/dist
+    - mkdir -p invai-front
+    - cp -R "$CI_PROJECT_DIR/dist" invai-front/dist
+    - git config user.email "invaifrontbot@plexus.es"
+    - git config user.name "Invai Front Bot"
+    - git add --all
+    - git commit --allow-empty -m "Automatic syncro from invai-front repository"
+    - git push origin develop --force
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+#############################
+#    UPDATE CLIENT REPO     #
+#  Crea rama release-X.Y.Z   #
+#  en GitHub GovernIB (main) #
+#############################
+update-client-repo:
+  stage: update-client-repo
+  tags:
+    - alpine
+  before_script:
+    - apk add --no-cache git jq rsync
+  script: |
+    set -euo pipefail
+    PKG_JSON="$CI_PROJECT_DIR/package.json"
+    VERSION=$(jq -r '.version' "$PKG_JSON")
+    echo "Version detectada: $VERSION"
+
+    GITHUB_URL="https://invaifrontbot:${GITHUB_CAIB_TOKEN}@github.com/GovernIB/invai-front.git"
+    TMP=$(mktemp -d)
+
+    git clone --depth 1 --branch develop "$GITHUB_URL" "$TMP/caib"
+    cd "$TMP/caib"
+    git checkout -b "release-${VERSION}"
+    find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+    rsync -a --delete "$CI_PROJECT_DIR/" . --exclude '.git' --exclude '.gitlab-ci.yml'
+    git config user.email "invaifrontbot@plexus.es"
+    git config user.name  "Invai Front Bot"
+    git add .
+    git commit -m "Release ${VERSION} desde Plexus"
+    git push origin "release-${VERSION}"
+    echo "Rama release-${VERSION} creada en GitHub GovernIB/invai-front"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

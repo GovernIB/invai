@@ -1,0 +1,72 @@
+<header class="application-detail-header">
+  <h2>{{ header() }}</h2>
+</header>
+
+<app-section-container>
+  @if (isGeneralActive() && detailState.application()) {
+    <div class="application-detail-actions">
+      @if (detailState.isEditing()) {
+        <p-button
+          type="button"
+          severity="secondary"
+          [outlined]="true"
+          [label]="cancelLabel"
+          [ariaLabel]="cancelAriaLabel"
+          [icon]="cancelIcon"
+          (onClick)="cancelEditing()"
+        />
+        <p-button
+          type="button"
+          [label]="saveLabel"
+          [ariaLabel]="saveAriaLabel"
+          [icon]="saveIcon"
+          [loading]="isSaving()"
+          [disabled]="isSaving()"
+          (onClick)="save()"
+        />
+      } @else {
+        <p-button
+          type="button"
+          [label]="editLabel"
+          [ariaLabel]="editAriaLabel"
+          [icon]="editIcon"
+          (onClick)="startEditing()"
+        />
+      }
+    </div>
+  } @else if (isSystemsDatabasesActive()) {
+    <div class="application-detail-actions">
+      <p-button
+        type="button"
+        severity="secondary"
+        [outlined]="true"
+        [label]="cancelLabel"
+        [ariaLabel]="systemsDatabasesCancelAriaLabel"
+        [icon]="cancelIcon"
+        (onClick)="cancelSystemsDatabasesChanges()"
+      />
+      <p-button
+        type="button"
+        [label]="saveLabel"
+        [ariaLabel]="systemsDatabasesSaveAriaLabel"
+        [icon]="saveIcon"
+        (onClick)="saveSystemsDatabasesChanges()"
+      />
+    </div>
+  }
+
+  <nav class="application-detail-tabs" [attr.aria-label]="sectionsAriaLabel">
+    @for (tab of tabs; track tab.route) {
+      <a
+        class="application-detail-tab"
+        [routerLink]="tab.route"
+        routerLinkActive="application-detail-tab--active"
+        (click)="onTabNavigation(tab.route)"
+      >
+        {{ tab.label }}
+      </a>
+    }
+  </nav>
+
+  <router-outlet />
+</app-section-container>

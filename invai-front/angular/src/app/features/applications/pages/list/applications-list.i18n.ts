@@ -1,0 +1,27 @@
+export const APPLICATIONS_TITLE = $localize`Aplicacions`;
+export const APPLICATIONS_FILTER_PREFIX = $localize`Prefix`;
+export const APPLICATIONS_FILTER_APPLICATION = $localize`Aplicació`;
+export const APPLICATIONS_FILTER_CATEGORY = $localize`Categoria`;
+export const APPLICATIONS_FILTER_INFORMATION_SYSTEM = $localize`Sistema d'informació`;
+export const APPLICATIONS_FILTER_SCOPE = $localize`Àmbit`;
+export const APPLICATIONS_FILTER_COMMISSION = $localize`Comissió d'informàtica`;
+export const APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT = $localize`Ut. Administrativa`;
+export const APPLICATIONS_FILTER_STATUS = $localize`Estat`;
+export const APPLICATIONS_FILTER_DESCRIPTION = $localize`Descripció`;
+export const APPLICATIONS_FILTER_INCOMPLETE = $localize`Incomplets`;
+export const APPLICATIONS_LOAD_ERROR_SUMMARY = $localize`Error`;
+export const APPLICATIONS_LOAD_ERROR_DETAIL = $localize`No s'han pogut carregar les aplicacions.`;
+export const APPLICATIONS_QUICK_SEARCH_ARIA_LABEL = $localize`Cerca ràpida d'aplicacions`;
+export const APPLICATIONS_EXPORT_ARIA_LABEL = $localize`Exporta aplicacions a Excel`;
+export const APPLICATIONS_ADD_ARIA_LABEL = $localize`Afegeix una aplicació`;
+export const APPLICATIONS_WITHDRAWAL_DIALOG_TITLE = $localize`Donar de baixa l'aplicació?`;
+export const APPLICATIONS_WITHDRAWAL_DIALOG_CANCEL_LABEL = $localize`Cancel·la`;
+export const APPLICATIONS_WITHDRAWAL_DIALOG_CONFIRM_LABEL = $localize`Donar de baixa`;
+export const APPLICATIONS_WITHDRAWAL_DIALOG_CANCEL_ARIA_LABEL = $localize`Cancel·la la baixa de l'aplicació`;
+export const APPLICATIONS_WITHDRAWAL_DIALOG_CONFIRM_ARIA_LABEL = $localize`Confirma la baixa de l'aplicació`;
+export const APPLICATIONS_WITHDRAWAL_DIALOG_MESSAGE = (applicationName: string) =>
+  $localize`Estàs a punt de donar de baixa «${applicationName}:applicationName:». L'aplicació deixarà d'aparèixer al llistat.`;
+export const APPLICATIONS_WITHDRAWAL_SUCCESS_SUMMARY = $localize`Aplicació donada de baixa`;
+export const APPLICATIONS_WITHDRAWAL_SUCCESS_DETAIL = $localize`L'aplicació s'ha donat de baixa correctament.`;
+export const APPLICATIONS_WITHDRAWAL_ERROR_SUMMARY = $localize`Error`;
+export const APPLICATIONS_WITHDRAWAL_ERROR_DETAIL = $localize`No s'ha pogut donar de baixa l'aplicació.`;

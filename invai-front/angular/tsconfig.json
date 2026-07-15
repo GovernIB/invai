@@ -1,0 +1,54 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      // TODO: Revisar los que sobran
+      "@pkg": ["package.json"],
+      "@app/*": ["src/app"],
+      "@components/*": ["src/app/shared/components/*"],
+      //"@components": ["src/app/shared/components/index.ts"],
+      "@core/*": ["src/app/core/*"],
+      "@core": ["src/app/core/index.ts"],
+      "@environments/*": ["src/environments/*"],
+      "@models/*": ["src/app/shared/models/*"],
+      /* "@models": ["src/app/models/index.ts"], */
+      "@features/*": ["src/app/features/*"],
+      "@services/*": ["src/app/services/*"],
+      "@services": ["src/app/services/index.ts"],
+      "@shared/*": ["src/app/shared/*"],
+      "@shared": ["src/app/shared/index.ts"],
+      "@utils/*": ["src/app/utils/*"],
+      "@utils": ["src/app/utils/index.ts"]
+    },
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

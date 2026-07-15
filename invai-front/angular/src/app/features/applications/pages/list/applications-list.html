@@ -1,0 +1,55 @@
+<app-section-container [header]="header">
+  <app-section-actions
+    [(isFiltersCollapsed)]="isFiltersCollapsed"
+    [(quickSearchValue)]="quickSearchTerm"
+    [(selectedColumns)]="selectedColumns"
+    [availableColumns]="selectableColumns()"
+    [addButtonAriaLabel]="addAriaLabel"
+    [exportButtonAriaLabel]="exportAriaLabel"
+    [filtersSelected]="selectedFilters()"
+    [isSearchLoading]="isSearchIndicatorLoading()"
+    [quickSearchAriaLabel]="quickSearchAriaLabel"
+    (onAdd)="onNewApplication()"
+    (onExport)="onExport()"
+    (onQuickSearchChange)="onQuickSearchChange($event)"
+    right-top
+  />
+
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <app-application-filters-form
+        [form]="filtersForm"
+        [labels]="filterLabels"
+        [options]="filterOptions()"
+      />
+    </app-search-filters>
+  }
+
+  <app-applications-table
+    [columns]="sortedSelectedColumns()"
+    [first]="tableFirst()"
+    [isLoading]="isLoading()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableActions($event)"
+  />
+
+  <app-confirmation-dialog
+    [(visible)]="isWithdrawalDialogVisible"
+    [title]="withdrawalDialogTitle"
+    [message]="getWithdrawalDialogMessage()"
+    [cancelLabel]="withdrawalDialogCancelLabel"
+    [confirmLabel]="withdrawalDialogConfirmLabel"
+    [cancelAriaLabel]="withdrawalDialogCancelAriaLabel"
+    [confirmAriaLabel]="withdrawalDialogConfirmAriaLabel"
+    [confirmIcon]="withdrawalDialogConfirmIcon"
+    (cancel)="onWithdrawalDialogClose()"
+    (confirm)="onWithdrawalDialogConfirm()"
+  />
+</app-section-container>

@@ -1,0 +1,56 @@
+<aside
+  [class]="asideClass()"
+  class="transition-[width] duration-300 bg-white h-full shadow-[8px_0_12px_-8px_#0000001A]"
+>
+  @if (isVisible()) {
+    <div
+      class="w-full flex"
+      [class.justify-content-center]="isCollapsed()"
+      [class.justify-content-end]="!isCollapsed()"
+    >
+      <p-button
+        styleClass="py-1 px-2 m-2"
+        [outlined]="true"
+        (onClick)="toggleCollapsed()"
+        severity="secondary"
+        [ariaLabel]="isCollapsed() ? sidebarCollapseOpenName : sidebarCollapseCloseName"
+      >
+        <app-svg-menu-collapsed />
+      </p-button>
+    </div>
+
+    <p-tieredMenu
+      [styleClass]="tieredMenuClass()"
+      [model]="menuItems()"
+      [ariaLabel]="navigationAriaLabel"
+    >
+      <ng-template let-isParentMenu="hasSubmenu" let-menuItem pTemplate="menuItem">
+        @if (isParentMenu) {
+          <a
+            class="p-tieredmenu-item-link sidebar-menu-link"
+            pRipple
+            [attr.aria-label]="menuItem.label"
+            [attr.aria-haspopup]="true"
+            [class.p-menuitem-active]="isFragmentActive(menuItem.fragment)"
+          >
+            <span class="p-tieredmenu-item-icon sidebar-menu-icon" [class]="menuItem.icon"></span>
+            <span class="p-tieredmenu-item-label sidebar-menu-label">{{ menuItem.label }}</span>
+            <i class="pi pi-angle-right p-tieredmenu-submenu-icon sidebar-submenu-icon"></i>
+          </a>
+        } @else {
+          <a
+            class="p-tieredmenu-item-link sidebar-menu-link"
+            pRipple
+            [class.pointer-events-none]="menuItem.disabled"
+            [routerLink]="menuItem.routerLink"
+            [attr.aria-label]="menuItem.label"
+            routerLinkActive="p-menuitem-active"
+          >
+            <span class="p-tieredmenu-item-icon sidebar-menu-icon" [class]="menuItem.icon"></span>
+            <span class="p-tieredmenu-item-label sidebar-menu-label">{{ menuItem.label }}</span>
+          </a>
+        }
+      </ng-template>
+    </p-tieredMenu>
+  }
+</aside>

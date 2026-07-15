@@ -1,0 +1,30 @@
+app-search-filters {
+  .invai-search-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      var(--invai-search-filter-mobile-columns, 1),
+      minmax(0, 1fr)
+    );
+    gap: 1.75rem 1.5rem;
+    width: 100%;
+
+    > * {
+      min-width: 0;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .invai-search-filter-grid {
+      grid-template-columns: repeat(
+        var(--invai-search-filter-tablet-columns, 2),
+        minmax(0, 1fr)
+      );
+    }
+  }
+
+  @media (min-width: 992px) {
+    .invai-search-filter-grid {
+      grid-template-columns: repeat(var(--invai-search-filter-columns, 3), minmax(0, 1fr));
+    }
+  }
+}

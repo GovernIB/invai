@@ -1,0 +1,115 @@
+:host {
+  display: flex;
+  height: 100%;
+}
+
+:host .sidebar-menu-label {
+  display: inline-block;
+  max-width: 10rem;
+  min-width: 0;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    max-width 300ms ease,
+    opacity 200ms ease;
+  white-space: nowrap;
+}
+
+:host .sidebar-submenu-icon {
+  max-width: 1rem;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    margin-left 300ms ease,
+    max-width 300ms ease,
+    opacity 200ms ease;
+}
+
+:host ::ng-deep {
+  .p-tieredmenu {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .p-tieredmenu-root-list,
+  .p-tieredmenu-submenu {
+    padding: 0;
+  }
+
+  .p-tieredmenu-item-content {
+    border-radius: 0;
+  }
+
+  .p-tieredmenu-item-content:hover {
+    background: var(--blue-50);
+  }
+
+  .p-tieredmenu-item-link,
+  .sidebar-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--p-text-color, var(--text-color, #334155));
+    text-decoration: none;
+    width: 100%;
+  }
+
+  .p-tieredmenu-item-icon,
+  .sidebar-menu-icon {
+    color: var(--blue-500);
+    flex: 0 0 1rem;
+    font-size: 1rem;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .p-tieredmenu-item-label,
+  .sidebar-menu-label {
+    color: var(--p-text-color, var(--text-color, #334155));
+    line-height: 1.15;
+    min-width: 0;
+  }
+
+  .p-tieredmenu-submenu-icon,
+  .sidebar-submenu-icon {
+    margin-left: auto;
+  }
+
+  .p-menuitem-active,
+  .p-menuitem-link-active {
+    background: var(--blue-75);
+    box-shadow: inset 4px 0 0 0 var(--blue-500);
+  }
+
+  .p-menuitem-active .p-tieredmenu-item-label,
+  .p-menuitem-active .p-tieredmenu-item-icon,
+  .p-menuitem-link-active .p-tieredmenu-item-label,
+  .p-menuitem-link-active .p-tieredmenu-item-icon {
+    color: var(--blue-500);
+  }
+
+  .sidebar-collapsed .p-tieredmenu-item-link,
+  .sidebar-collapsed .sidebar-menu-link {
+    gap: 0;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .sidebar-collapsed .p-tieredmenu-item-label,
+  .sidebar-collapsed .sidebar-menu-label,
+  .sidebar-collapsed .p-tieredmenu-submenu-icon,
+  .sidebar-collapsed .sidebar-submenu-icon {
+    max-width: 0;
+    opacity: 0;
+  }
+
+  .sidebar-collapsed .p-tieredmenu-submenu-icon,
+  .sidebar-collapsed .sidebar-submenu-icon {
+    margin-left: 0;
+  }
+}

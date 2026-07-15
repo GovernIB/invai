@@ -1,0 +1,188 @@
+@layer theme, base, primeng, utilities;
+
+@import url('tailwindcss');
+@import url('tailwindcss-primeui');
+@import url('primeicons/primeicons.css');
+@import url('github-markdown-css/github-markdown.css');
+
+html {
+  scroll-behavior: smooth;
+  font-size: var(--font-size);
+}
+
+.app-initial-loader {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+  background: #f8fafc;
+  color: #1f2937;
+  font-family:
+    'Noto Sans',
+    Arial,
+    sans-serif;
+}
+
+.app-initial-loader__logo {
+  width: auto;
+  height: 100px;
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+}
+
+.app-initial-loader__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  text-align: left;
+}
+
+.app-initial-loader__title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.app-initial-loader__text {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 30rem) {
+  .app-initial-loader {
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+  .app-initial-loader__title {
+    font-size: 1.6rem;
+  }
+}
+
+.picklist-hide-bulk-buttons {
+  .p-picklist-buttons > button:nth-child(2),
+  .p-picklist-buttons > button:nth-child(4) {
+    display: none;
+  }
+
+  .p-picklist-buttons > button:nth-child(3) {
+    margin-top: 1rem;
+  }
+}
+
+.white-space-pre-wrap {
+  white-space: pre-wrap;
+}
+
+/* tab colors */
+.red-tab-bg .p-tabview-panels {
+  background-color: var(--red-50) !important;
+}
+
+.red-tab-bg-nav .p-tabview-nav {
+  background-color: var(--red-50) !important;
+}
+
+.yellow-tab-bg .p-tabview-panels {
+  background-color: var(--yellow-50) !important;
+}
+
+.yellow-tab-bg-nav .p-tabview-nav {
+  background-color: var(--yellow-50) !important;
+}
+
+.purple-tab-bg .p-tabview-panels {
+  background-color: var(--purple-50) !important;
+}
+
+.purple-tab-bg-nav .p-tabview-nav {
+  background-color: var(--purple-50) !important;
+}
+
+/* accordion colors*/
+
+.yellow-acc-bg .p-accordion-header {
+  background-color: var(--yellow-100) !important;
+}
+
+.yellow-acc-bg .p-accordion-content {
+  background-color: var(--yellow-50) !important;
+}
+
+.red-acc-bg .p-accordion-header {
+  background-color: var(--red-100) !important;
+}
+
+.red-acc-bg .p-accordion-content {
+  background-color: var(--red-50) !important;
+}
+
+.purple-acc-bg .p-accordion-header {
+  background-color: var(--purple-100) !important;
+}
+
+.purple-acc-bg .p-accordion-content {
+  background-color: var(--purple-50) !important;
+}
+
+.surface-acc-bg .p-accordion-header {
+  background-color: var(--surface-50) !important;
+}
+
+/* table colors */
+.yellow-table-bg .p-datatable-table th {
+  background-color: var(--yellow-100) !important;
+}
+
+.yellow-table-bg .p-datatable-table td {
+  background-color: var(--yellow-50) !important;
+}
+
+.yellow-table-bg .p-paginator {
+  background-color: var(-yellow-50) !important;
+}
+
+.red-table-bg .p-datatable-table th {
+  background-color: var(--red-100) !important;
+}
+
+.red-table-bg .p-datatable-table td {
+  background-color: var(--red-50) !important;
+}
+
+.red-table-bg .p-paginator {
+  background-color: var(--red-50) !important;
+}
+
+.purple-table-bg .p-datatable-table th {
+  background-color: var(--purple-100) !important;
+}
+
+.purple-table-bg .p-datatable-table td {
+  background-color: var(--purple-50) !important;
+}
+
+.purple-table-bg .p-paginator {
+  background-color: var(--purple-50) !important;
+}
+
+.surface-table-bg .p-datatable-table th {
+  background-color: var(--surface-50) !important;
+}
+
+.input-full {
+  width: 100% !important;
+}
+
+.input-full .p-inputnumber {
+  width: 100% !important;
+}
+
+.input-full .p-inputnumber-input {
+  width: 100% !important;
+}

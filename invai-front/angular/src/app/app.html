@@ -1,0 +1,45 @@
+@if (isLoggedIn) {
+  <app-main-layout>
+    <section class="flex shrink-0 items-center gap-4" header-left>
+      <a
+        class="flex items-center gap-2.5 font-semibold text-surface-700 no-underline"
+        [routerLink]="homeRoute"
+        [attr.aria-label]="homeAriaLabel"
+      >
+        <img class="h-6 w-auto" src="assets/images/logo.svg" alt="" />
+        <span>{{ title }}</span>
+      </a>
+
+      <p-divider class="m-0 h-7" layout="vertical" />
+    </section>
+
+    <section class="flex shrink-0 items-center gap-1" header-right>
+      <p-button
+        data-testid="button-notifications-testid"
+        icon="pi pi-bell"
+        severity="secondary"
+        [text]="true"
+        [rounded]="true"
+        [ariaLabel]="notificationsAriaLabel"
+      />
+
+      <p-divider class="mx-2 my-0 h-7" layout="vertical" />
+
+      <app-user-menu />
+    </section>
+
+    <ng-container content>
+      <section class="w-9/10 mx-auto">
+        @if (!isBreadcrumbsHidden()) {
+          <app-breadcrumbs styleClass="mt-4 mb-3 border-1 border-round surface-border p-3" />
+        }
+        <router-outlet />
+      </section>
+    </ng-container>
+  </app-main-layout>
+}
+
+<aside>
+  <p-toast />
+  <app-help-modal />
+</aside>

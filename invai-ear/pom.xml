@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://www.w3.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>es.caib.invai</groupId>
+        <artifactId>invai</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>invai-ear</artifactId>
+    <packaging>ear</packaging>
+    <name>INVAI - EAR</name>
+    <description>Arxiu d'aplicació EAR de INVAI</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.spec</groupId>
+            <artifactId>jboss-javaee-8.0</artifactId>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>es.caib.invai</groupId>
+            <artifactId>invai-api</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>es.caib.invai</groupId>
+            <artifactId>invai-front</artifactId>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.parent.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <generateApplicationXml>true</generateApplicationXml>
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <includeLibInApplicationXml>false</includeLibInApplicationXml>
+                    <outputFileNameMapping>@{artifactId}@-@{version}@.@{extension}@</outputFileNameMapping>
+                    <version>8</version>
+                    <modules>
+                        <webModule>
+                            <groupId>es.caib.invai</groupId>
+                            <artifactId>invai-api</artifactId>
+                            <bundleFileName>invai-api.war</bundleFileName>
+                            <contextRoot>/invaiapi</contextRoot>
+                        </webModule>
+                        <webModule>
+                            <groupId>es.caib.invai</groupId>
+                            <artifactId>invai-front</artifactId>
+                            <contextRoot>/invaifront</contextRoot>
+                            <bundleFileName>invai-front.war</bundleFileName>
+                        </webModule>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

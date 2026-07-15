@@ -1,0 +1,11 @@
+<form [formGroup]="form()" novalidate>
+  <app-application-form-fields
+    idPrefix="detail-application"
+    [controls]="form().controls"
+    [auditControls]="form().controls"
+    [labels]="labels"
+    [options]="options()"
+    [requiredError]="requiredError"
+    [selectPlaceholder]="selectPlaceholder"
+  />
+</form>

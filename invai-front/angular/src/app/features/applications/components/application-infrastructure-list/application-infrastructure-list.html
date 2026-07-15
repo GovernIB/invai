@@ -1,0 +1,21 @@
+<section class="application-infrastructure-list">
+  <div class="application-infrastructure-list__header">
+    <h3>{{ title() }}</h3>
+    <app-section-actions
+      [(selectedColumns)]="selectedColumns"
+      [availableColumns]="selectableColumns()"
+      [addButtonAriaLabel]="addAriaLabel()"
+      [hideCollapseButton]="true"
+      [hideExportButton]="true"
+      [hideQuickSearch]="true"
+      (onAdd)="onAdd()"
+    />
+  </div>
+
+  <app-application-infrastructure-table
+    [columns]="visibleColumns()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+</section>

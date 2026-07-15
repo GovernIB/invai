@@ -1,0 +1,70 @@
+<p-dialog
+  [style]="{ width: '95vw', height: '95vh' }"
+  [(visible)]="visible"
+  [closable]="true"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [maximizable]="true"
+  [modal]="true"
+>
+  <ng-template #header>
+    <header class="flex items-center justify-between w-full">
+      <h3 class="text-primary font-semibold text-lg">{{ title }}</h3>
+
+      <span class="text-xs text-muted-color mr-2" i18n>Ctrl + K</span>
+    </header>
+  </ng-template>
+
+  <section class="grid grid-cols-12 gap-4">
+    <section class="col-span-12">
+      <p-autoComplete
+        inputStyleClass="w-full p-4 text-lg"
+        class="w-full"
+        #autoCompleteRef
+        inputId="help-modal-search"
+        [ariaLabel]="searchAriaLabel"
+        [dropdown]="false"
+        [forceSelection]="true"
+        [minLength]="1"
+        [showClear]="true"
+        [suggestions]="searchResults()"
+        (completeMethod)="onSearchComplete($event)"
+        (onSelect)="onSelectResult($event.value); autoCompleteRef.clear()"
+        appendTo="body"
+        [emptyMessage]="emptyMessage"
+        [placeholder]="searchPlaceholder"
+      >
+        <ng-template let-result #item>
+          <div class="flex flex-col">
+            <span class="font-semibold mb-1">
+              {{ result.label }}
+            </span>
+
+            <markdown [data]="result.snippet" />
+          </div>
+        </ng-template>
+      </p-autoComplete>
+    </section>
+
+    <aside class="col-span-12 md:col-span-3">
+      <p-panelMenu [model]="helpMenu()" />
+    </aside>
+
+    <p-card class="bg-surface-0 dark:bg-surface-900 markdown-body col-span-12 md:col-span-9">
+      <ng-template #header>
+        @if (!selectedDoc()) {
+          <div class="flex items-center justify-center">
+            <h3 class="text-primary font-semibold mt-12">
+              {{ emptySelection }}
+            </h3>
+          </div>
+        }
+      </ng-template>
+
+      @if (selectedDoc()) {
+        <markdown [data]="content()" />
+      }
+    </p-card>
+  </section>
+</p-dialog>

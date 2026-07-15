@@ -1,0 +1,105 @@
+<div class="flex items-center gap-2">
+  @if (!hideQuickSearch()) {
+    <div class="relative flex w-[400px] max-w-full items-center">
+      <span
+        class="section-actions-search__icon pointer-events-none absolute z-[1] text-color-secondary"
+        [class.section-actions-search__icon--loading]="isSearchLoading()"
+        aria-hidden="true"
+      >
+        <i class="section-actions-search__magnifier" [class]="PrimeIcons.SEARCH"></i>
+        @if (isSearchLoading()) {
+          <span class="section-actions-search__spinner"></span>
+        }
+      </span>
+      <input
+        class="section-actions-search__input h-[48px] w-full pr-12 pl-11"
+        type="text"
+        [attr.aria-label]="quickSearchAriaLabel()"
+        [attr.aria-busy]="isSearchLoading()"
+        [value]="quickSearchValue()"
+        [placeholder]="quickSearchPlaceholder()"
+        (input)="onSearchInput($event)"
+        pInputText
+      />
+      @if (quickSearchValue()) {
+        <p-button
+          class="section-actions-search__clear"
+          [icon]="PrimeIcons.TIMES"
+          [rounded]="true"
+          [text]="true"
+          [ariaLabel]="quickSearchClearAriaLabel()"
+          styleClass="h-8 w-8 p-0"
+          (onClick)="onClearSearch()"
+        />
+      }
+    </div>
+  }
+
+  @if (!hideCollapseButton()) {
+    <p-button
+      badgeStyleClass="bg-primary text-secondary"
+      [badgeDisabled]="!filtersSelected()"
+      [icon]="PrimeIcons.FILTER"
+      [outlined]="true"
+      [ariaLabel]="filtersButtonAriaLabel()"
+      [attr.aria-expanded]="!isFiltersCollapsed()"
+      [value]="filtersSelected() ?? 0"
+      styleClass="h-[48px] w-[48px]"
+      (onClick)="onToggleFilters()"
+      pBadge
+      pTooltip="Filtres"
+      tooltipPosition="top"
+      i18n-pTooltip
+    />
+  }
+  @if (!hideColumnsButton()) {
+    <p-multiSelect
+      class="custom-multiselect-button h-[48px] w-[48px] min-w-[48px] max-w-[48px] flex-none border-primary font-semibold text-primary"
+      [(ngModel)]="selectedColumns"
+      [displaySelectedLabel]="false"
+      [ariaLabel]="columnsButtonAriaLabel()"
+      inputId="section-actions-columns"
+      [options]="availableColumns()"
+      appendTo="self"
+      [filter]="true"
+      filterBy="label"
+      [filterPlaceHolder]="columnsFilterPlaceholder()"
+      panelStyleClass="section-actions-columns-panel"
+      [showHeader]="true"
+      [showToggleAll]="false"
+      optionLabel="label"
+      tooltip="Mostra / oculta columnes"
+      tooltipPosition="top"
+      i18n-tooltip
+    >
+      <ng-template pTemplate="selectedItems">
+        <i class="text-primary" [class]="PrimeIcons.OBJECTS_COLUMN"></i>
+      </ng-template>
+    </p-multiSelect>
+  }
+  @if (!hideExportButton()) {
+    <p-button
+      [disabled]="isExportLoading()"
+      [icon]="PrimeIcons.FILE_EXCEL"
+      [loading]="isExportLoading()"
+      [outlined]="true"
+      [ariaLabel]="exportButtonAriaLabel()"
+      styleClass="h-[48px] w-[48px]"
+      (onClick)="onExportExcel()"
+      pTooltip="Exporta excel (.xls)"
+      tooltipPosition="top"
+      i18n-pTooltip
+    />
+  }
+  @if (!hideAddButton()) {
+    <p-button
+      [icon]="PrimeIcons.PLUS"
+      [ariaLabel]="addButtonAriaLabel()"
+      styleClass="h-[48px] w-[48px]"
+      (onClick)="onAddItem()"
+      pTooltip="Afegeix"
+      tooltipPosition="top"
+      i18n-pTooltip
+    />
+  }
+</div>

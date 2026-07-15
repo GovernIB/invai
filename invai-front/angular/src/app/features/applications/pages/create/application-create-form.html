@@ -1,0 +1,32 @@
+<form class="application-create-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <app-application-form-fields
+    idPrefix="create-application"
+    [controls]="form.controls"
+    [codeControl]="form.controls.code"
+    [codeMinLengthError]="codeMinLengthError"
+    [labels]="labels"
+    [options]="options()"
+    [requiredError]="requiredError"
+    [selectPlaceholder]="selectPlaceholder"
+  />
+
+  <div class="application-create-form__actions">
+    <p-button
+      type="submit"
+      [label]="submitLabel"
+      [ariaLabel]="submitAriaLabel"
+      [icon]="addIcon"
+      [loading]="isSaving()"
+      [disabled]="isSaving()"
+    />
+
+    <p-button
+      type="button"
+      [label]="backLabel"
+      [ariaLabel]="backAriaLabel"
+      [icon]="backIcon"
+      [text]="true"
+      (onClick)="goBack()"
+    />
+  </div>
+</form>

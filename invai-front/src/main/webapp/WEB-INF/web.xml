@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <display-name>invai: FRONT</display-name>
+
+    <filter>
+        <filter-name>LocaleRedirectFilter</filter-name>
+        <filter-class>es.caib.invai.front.LocaleRedirectFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LocaleRedirectFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>ErrorRedirectServlet</servlet-name>
+        <servlet-class>es.caib.invai.front.ErrorRedirectServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ErrorRedirectServlet</servlet-name>
+        <url-pattern>/handle404</url-pattern>
+    </servlet-mapping>
+
+    <error-page>
+        <error-code>404</error-code>
+        <location>/handle404</location>
+    </error-page>
+
+</web-app>

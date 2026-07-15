@@ -1,0 +1,42 @@
+<div class="application-systems-databases">
+  <app-application-infrastructure-list
+    [columns]="serverColumns"
+    [resourceName]="serverName"
+    [sourceItems]="servers"
+    [title]="serversTitle"
+  />
+
+  <app-application-infrastructure-list
+    [columns]="databaseColumns"
+    [resourceName]="databaseName"
+    [sourceItems]="databases"
+    [title]="databasesTitle"
+  />
+
+  <div class="application-systems-databases__footer">
+    <div class="application-systems-databases__documentation">
+      <p-button
+        type="button"
+        [outlined]="true"
+        [label]="documentationLabel"
+        [ariaLabel]="documentationAriaLabel"
+        [icon]="documentationIcon"
+        iconPos="right"
+        (onClick)="onDocumentation()"
+      />
+    </div>
+
+    <div
+      class="application-systems-databases__observations"
+      role="group"
+      [attr.aria-labelledby]="observationsLabelId"
+    >
+      <label [id]="observationsLabelId" [for]="observationsId">{{ observationsLabel }}</label>
+      <p-editor
+        [id]="observationsId"
+        [formControl]="detailState.systemsDatabasesForm.controls.observations"
+        [style]="{ height: '10rem' }"
+      />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,212 @@
+stages:
+  - build-ear-with-maven
+  - build-docker-image
+  - deploy-docker-image
+  # - build-jacoco-report
+  # - analyze
+  # - build-docker-image-pre
+  # - deploy-docker-image-pre
+  # - update-client-repo
+
+build-ear-with-maven:
+  stage: build-ear-with-maven
+  tags:
+    - maven-3.9
+  script:
+    - mvn clean install -PauthBasic -Pswagger-ui
+  artifacts:
+    paths:
+      - ${DEPENDENCY_PROJECT_NAME}-ear/target/${DEPENDENCY_PROJECT_NAME}.ear
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+build-docker-image:
+  stage: build-docker-image
+  tags:
+    - docker
+  script:
+    - docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD $CI_REGISTRY_BASE_URL
+    - docker pull $CI_REGISTRY_BASE_URL/jboss-eap-7-2:latest
+    - docker build -t $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME:$CI_REGISTRY_REPO_TAG -f ${DEPENDENCY_PROJECT_NAME}-cicd/Dockerfile .
+    - docker push $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME:$CI_REGISTRY_REPO_TAG
+    - docker rmi -f $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME:$CI_REGISTRY_REPO_TAG
+  dependencies:
+    - build-ear-with-maven
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+deploy-docker-image:
+  stage: deploy-docker-image
+  tags:
+    - kubectl
+  dependencies:
+    - build-docker-image    
+  script:
+    - kubectl -n ${DEPENDENCY_PROJECT_NAME}-helm rollout restart deployment ${DEPENDENCY_PROJECT_NAME}-helm-jboss
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'    
+
+# ##############################
+# #  build-jacoco-report       #
+# #  Ejecuta tests y genera    #
+# #  el informe de cobertura   #
+# #  JaCoCo para SonarQube     #
+# ##############################
+# build-jacoco-report:
+#   stage: build-jacoco-report
+#   tags:
+#     - maven-3.9
+#   allow_failure: true
+#   script:
+#     - echo "START Test stage and generate JaCoCo Report for SonarQube"
+#     - mvn test jacoco:report
+#     - find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -name "jacoco.xml" -print0 | xargs -0 echo | tr ' ' ','
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH =~ /^sprint.*|^Sprint.*/'
+#     - if: '$CI_COMMIT_BRANCH == "develop"'
+#     - if: '$CI_COMMIT_BRANCH == "release"'
+#     - if: '$CI_COMMIT_BRANCH == "main"'
+#   artifacts:
+#     paths:
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-interna/target/site/jacoco/jacoco.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-externa/target/site/jacoco/jacoco.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-commons/target/site/jacoco/jacoco.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-ejb/target/site/jacoco/jacoco.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-persistence/target/site/jacoco/jacoco.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-service/target/site/jacoco/jacoco.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-rest/target/site/jacoco/jacoco.xml
+#       # Añadir los resultados de tests
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-interna/target/surefire-reports/TEST-*.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-externa/target/surefire-reports/TEST-*.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-commons/target/surefire-reports/TEST-*.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-ejb/target/surefire-reports/TEST-*.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-persistence/target/surefire-reports/TEST-*.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-service/target/surefire-reports/TEST-*.xml
+#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-rest/target/surefire-reports/TEST-*.xml
+
+# ##############################
+# #  analyze                   #
+# #  Analiza el código con     #
+# #  SonarQube usando los      #
+# #  informes de cobertura     #
+# ##############################
+# analyze:
+#   stage: analyze
+#   tags:
+#     - sonar
+#   script:
+#     - VERSION=`grep -E "<version>" pom.xml | awk 'NR==1' | cut -d">" -f2 | cut -d"<" -f1`
+#     - jacoco_paths=$(find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -name "jacoco.xml" -print0 | xargs -0 echo | tr ' ' ',')
+#     - test_report_paths=$(find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -path "*/target/surefire-reports/TEST-*.xml" | while IFS= read -r f; do dirname "$f"; done | sort -u | tr '\n' ',' | sed 's/,$//')
+#     - echo "$jacoco_paths"
+#     - echo "$test_report_paths"
+#     - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.projectKey=1583-001_${DEPENDENCY_PROJECT_NAME} -Dsonar.projectVersion=$VERSION -Dsonar.sources=. -Dsonar.java.binaries=. -Dsonar.coverage.jacoco.xmlReportPaths="$jacoco_paths" -Dsonar.junit.reportPaths="$test_report_paths"
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH =~ /^sprint.*|^Sprint.*/'
+#     - if: '$CI_COMMIT_BRANCH == "develop"'
+#     - if: '$CI_COMMIT_BRANCH == "release"'
+#     - if: '$CI_COMMIT_BRANCH == "main"'
+
+# ##############################
+# #  build-docker-image        #
+# #  Construye y sube la       #
+# #  imagen Docker principal   #
+# ##############################
+
+
+# ##############################
+# #  build-docker-image-pre    #
+# #  Construye y sube la       #
+# #  imagen Docker para pre    #
+# ##############################
+# build-docker-image-pre:
+#   stage: build-docker-image-pre
+#   tags:
+#     - docker
+#   script:
+#     - docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD $CI_REGISTRY_BASE_URL
+#     - docker pull $CI_REGISTRY_BASE_URL/jboss-eap-7-2:latest
+#     - docker build -t $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME_PRE:$CI_REGISTRY_REPO_TAG -f ${DEPENDENCY_PROJECT_NAME}-cicd/pre.Dockerfile .
+#     - docker push $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME_PRE:$CI_REGISTRY_REPO_TAG
+#     - docker rmi -f $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME_PRE:$CI_REGISTRY_REPO_TAG
+#   dependencies:
+#     - build-ear-with-maven
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "release"'
+
+# ##############################
+# #  deploy-docker-image       #
+# #  Despliega la imagen       #
+# #  Docker en el entorno      #
+# #  principal con kubectl     #
+# ##############################
+# deploy-docker-image:
+#   stage: deploy-docker-image
+#   tags:
+#     - kubectl
+#   script:
+#     - kubectl -n adis-helm rollout restart deployment adis-helm-jboss
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "develop"'
+
+# ##############################
+# #  deploy-docker-image-pre   #
+# #  Despliega la imagen       #
+# #  Docker en el entorno pre  #
+# #  con kubectl               #
+# ##############################
+# deploy-docker-image-pre:
+#   stage: deploy-docker-image-pre
+#   tags:
+#     - kubectl
+#   script:
+#     - kubectl -n adis-pre-helm rollout restart deployment adis-pre-helm-jboss
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "release"'
+
+# ##############################
+# #  update-client-repo        #
+# #  Actualiza el repositorio  #
+# #  cliente CAIB con la nueva #
+# #  release desde main        #
+# #  merge release a main      #
+# ##############################
+# update-client-repo:
+#   stage: update-client-repo
+#   tags:
+#     - alpine
+#   before_script:
+#     - apk add --no-cache git rsync xmlstarlet
+#   script: |
+#     set -euo pipefail
+#     # 1) Detectar versión desde pom.xml
+#     POM="$CI_PROJECT_DIR/adis/pom.xml"
+#     if [ ! -f "$POM" ]; then
+#       POM="$CI_PROJECT_DIR/pom.xml"
+#     fi
+#     VERSION=$(xmlstarlet sel -T -t -v '/*[local-name()="project"]/*[local-name()="version"][1]' "$POM")
+#     echo "📦  Versión detectada: $VERSION"
+#     # 2) Variables de destino
+#     CAIB_URL="https://adisbot:${GITLAB_CAIB_TOKEN}@git.caib.es/fund-dependencia/adis.git"
+#     TMP=$(mktemp -d)
+#     echo "🗂  TMP dir: $TMP"
+#     # 3) Clonar rama develop del repo CAIB
+#     git clone --depth 1 --branch develop "$CAIB_URL" "$TMP/caib"
+#     cd "$TMP/caib"
+#     # 4) Crear nueva rama release-X.Y.Z
+#     git checkout -b "release-${VERSION}"
+#     # 5) Limpiar todo (salvo .git) para evitar historial arrastrado
+#     find . -mindepth 1 -maxdepth 1 ! -name ".git" -exec rm -rf {} +
+#     # 6) Copiar tu release sobre este árbol limpio
+#     rsync -a --delete "$CI_PROJECT_DIR/" . --exclude '.git' --exclude '.gitlab-ci.yml'
+#     # 7) Commit y push
+#     git config user.email "adisbot@plexus.es"
+#     git config user.name  "adis Bot"
+#     git add .
+#     git commit -m "Release ${VERSION} desde Plexus backend"
+#     git push origin "release-${VERSION}"
+#     # 8) Mensaje de éxito
+#     echo "✅  Rama release-${VERSION} creada en CAIB"
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "main"'
+

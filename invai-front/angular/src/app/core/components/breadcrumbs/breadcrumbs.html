@@ -1,0 +1,15 @@
+<p-breadcrumb [styleClass]="styleClass()" [home]="HOME" [model]="items()">
+  <ng-template let-item pTemplate="item">
+    @if (item.routerLink) {
+      <a
+        class="no-underline text-primary hover:underline"
+        [routerLink]="item.routerLink"
+        [attr.aria-label]="item.label"
+      >
+        {{ item.label }}
+      </a>
+    } @else {
+      <span class="text-color-secondary">{{ item.label }}</span>
+    }
+  </ng-template>
+</p-breadcrumb>

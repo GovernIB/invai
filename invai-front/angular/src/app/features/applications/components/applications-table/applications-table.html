@@ -1,0 +1,99 @@
+<p-table
+  [paginatorStyleClass]="PAGINATOR_STYLE_CLASS"
+  [columns]="columns()"
+  [currentPageReportTemplate]="CURRENT_PAGE_REPORT_TEMPLATE"
+  [first]="first()"
+  [lazy]="true"
+  [lazyLoadOnInit]="false"
+  [loading]="isLoading()"
+  [paginator]="true"
+  [rowHover]="true"
+  [rows]="PAGINATOR_ROWS"
+  [rowsPerPageOptions]="ROWS_PER_PAGE_OPTIONS"
+  [scrollable]="true"
+  [showCurrentPageReport]="true"
+  [totalRecords]="totalRecords()"
+  [value]="value()"
+  (onLazyLoad)="onPage($event)"
+  dataKey="id"
+  paginatorDropdownAppendTo="body"
+  styleClass="invai-scrollable-table"
+>
+  <ng-template let-columns pTemplate="header">
+    <tr>
+      @for (column of columns; track column.key) {
+        @if (column.sortBy) {
+          <th
+            [pSortableColumn]="column.sortBy"
+            [style.min-width]="column.minWidth"
+            [style.width]="column.width"
+          >
+            <div class="invai-table-header-content">
+              <span class="invai-table-header-label">{{ column.label }}</span>
+              <p-sortIcon [field]="column.sortBy"></p-sortIcon>
+            </div>
+          </th>
+        } @else {
+          <th [style.min-width]="column.minWidth" [style.width]="column.width">
+            <div class="invai-table-header-content">
+              <span class="invai-table-header-label">{{ column.label }}</span>
+            </div>
+          </th>
+        }
+      }
+      <th class="invai-table-actions-column">
+        <span class="sr-only">{{ actionsHeader }}</span>
+      </th>
+    </tr>
+  </ng-template>
+
+  <ng-template let-columns="columns" let-rowData pTemplate="body">
+    <tr>
+      @for (column of columns; track column.key) {
+        <td [style.min-width]="column.minWidth" [style.width]="column.width">
+          <span>{{ rowData[column.key] }}</span>
+        </td>
+      }
+      <td class="invai-table-actions-column">
+        <div class="invai-table-actions flex justify-content-end gap-1">
+          <p-button
+            [text]="true"
+            [severity]="'danger'"
+            [icon]="PrimeIcons.TRASH"
+            [ariaLabel]="deleteAriaLabel"
+            (onClick)="onSelectedAction(ApplicationTableAction.Delete, rowData)"
+            pTooltip="Elimina"
+            tooltipPosition="top"
+            i18n-pTooltip
+          />
+          <p-button
+            [text]="true"
+            [severity]="'secondary'"
+            [icon]="PrimeIcons.EYE"
+            [ariaLabel]="detailAriaLabel"
+            (onClick)="onSelectedAction(ApplicationTableAction.Detail, rowData)"
+            pTooltip="Consulta"
+            tooltipPosition="top"
+            i18n-pTooltip
+          />
+          <p-button
+            [text]="true"
+            [severity]="'secondary'"
+            [icon]="PrimeIcons.PENCIL"
+            [ariaLabel]="updateAriaLabel"
+            (onClick)="onSelectedAction(ApplicationTableAction.Update, rowData)"
+            pTooltip="Modifica"
+            tooltipPosition="top"
+            i18n-pTooltip
+          />
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="columns().length + 1">{{ RESULTS_NOT_FOUND }}</td>
+    </tr>
+  </ng-template>
+</p-table>

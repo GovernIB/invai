@@ -1,0 +1,33 @@
+.application-systems-databases {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.application-systems-databases__footer,
+.application-systems-databases__observations {
+  display: flex;
+  flex-direction: column;
+}
+
+.application-systems-databases__footer {
+  gap: 1.25rem;
+}
+
+.application-systems-databases__documentation {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.application-systems-databases__observations {
+  gap: 0.5rem;
+}
+
+.application-systems-databases__observations > label {
+  color: var(--p-text-muted-color);
+  font-size: 0.75rem;
+}
+
+.application-systems-databases__observations > p-editor {
+  width: 100%;
+}

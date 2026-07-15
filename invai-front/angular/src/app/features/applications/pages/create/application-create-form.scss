@@ -1,0 +1,19 @@
+.application-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.application-create-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 767px) {
+  .application-create-form__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

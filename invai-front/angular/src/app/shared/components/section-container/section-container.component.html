@@ -1,0 +1,15 @@
+<div
+  [class]="
+    'flex flex-column gap-4 p-6 border-round-2xl shadow-2 w-full text-color' +
+    ' ' +
+    bgStyle()
+  "
+>
+  @if (header()) {
+    <div class="flex justify-content-between">
+      <h2 class="text-3xl text-primary font-semibold mt-0">{{ header() }}</h2>
+      <ng-content select="[right-top]"></ng-content>
+    </div>
+  }
+  <ng-content></ng-content>
+</div>

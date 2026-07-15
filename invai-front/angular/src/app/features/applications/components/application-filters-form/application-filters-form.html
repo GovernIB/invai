@@ -1,0 +1,175 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="applications-filter-prefix"
+        class="w-full"
+        type="text"
+        formControlName="prefix"
+        pInputText
+      />
+      <label id="applications-filter-prefix-label" for="applications-filter-prefix">
+        {{ labels().prefix }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="applications-filter-application"
+        class="w-full"
+        type="text"
+        formControlName="application"
+        pInputText
+      />
+      <label id="applications-filter-application-label" for="applications-filter-application">
+        {{ labels().application }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-category"
+        styleClass="w-full"
+        formControlName="category"
+        ariaLabelledBy="applications-filter-category-label"
+        [options]="options()?.categories ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-category-label" for="applications-filter-category">
+        {{ labels().category }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-information-system"
+        styleClass="w-full"
+        formControlName="informationSystem"
+        ariaLabelledBy="applications-filter-information-system-label"
+        [options]="options()?.informationSystems ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        id="applications-filter-information-system-label"
+        for="applications-filter-information-system"
+      >
+        {{ labels().informationSystem }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-scope"
+        styleClass="w-full"
+        formControlName="scope"
+        ariaLabelledBy="applications-filter-scope-label"
+        [options]="options()?.scopes ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-scope-label" for="applications-filter-scope">
+        {{ labels().scope }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-commission"
+        styleClass="w-full"
+        formControlName="commission"
+        ariaLabelledBy="applications-filter-commission-label"
+        [options]="options()?.commissions ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-commission-label" for="applications-filter-commission">
+        {{ labels().commission }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-administrative-unit"
+        styleClass="w-full"
+        formControlName="administrativeUnit"
+        ariaLabelledBy="applications-filter-administrative-unit-label"
+        [options]="options()?.administrativeUnits ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        id="applications-filter-administrative-unit-label"
+        for="applications-filter-administrative-unit"
+      >
+        {{ labels().administrativeUnit }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="applications-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-status-label" for="applications-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="applications-filter-description"
+        class="w-full"
+        type="text"
+        formControlName="description"
+        pInputText
+      />
+      <label id="applications-filter-description-label" for="applications-filter-description">
+        {{ labels().description }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <span
+      id="applications-filter-incomplete-label"
+      class="flex items-center gap-2 text-color-secondary"
+    >
+      <span>{{ labels().incomplete }}</span>
+      <i class="pi pi-exclamation-circle text-red-500" aria-hidden="true"></i>
+    </span>
+    <p-toggleswitch
+      inputId="applications-filter-incomplete"
+      ariaLabelledBy="applications-filter-incomplete-label"
+      formControlName="incomplete"
+    />
+  </div>
+</form>

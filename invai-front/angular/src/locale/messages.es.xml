@@ -1,0 +1,2943 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="ca" target-language="es" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="7565809316008288938" datatype="html">
+        <source>Torna a l&apos;inici</source>
+        <target>Volver al inicio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/app.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="appNotificationsAriaLabel" datatype="html">
+        <source>Notificacions</source>
+        <target>Notificaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/app.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2470163767232005699" datatype="html">
+        <source>Aplicacions</source>
+        <target>Aplicaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/app.routes.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6251722551409558918" datatype="html">
+        <source>Documentació</source>
+        <target>Documentación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/app.routes.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/documentation/documentation.html</context>
+          <context context-type="linenumber">1,2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8287706908365513205" datatype="html">
+        <source>Inici</source>
+        <target>Inicio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/breadcrumbs/breadcrumbs.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8030440494045207134" datatype="html">
+        <source>Obre el menú</source>
+        <target>Abrir el menú</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/sidebar/sidebar.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3568388383058662871" datatype="html">
+        <source>Tanca el menú</source>
+        <target>Cerrar el menú</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/sidebar/sidebar.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3673928592513451390" datatype="html">
+        <source>Navegació lateral</source>
+        <target>Navegación lateral</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/sidebar/sidebar.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3684380173234971806" datatype="html">
+        <source>Hi ha hagut un error al carregar el menú</source>
+        <target>Se ha producido un error al cargar el menú</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/top-menu/top-menu.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5209508834639073737" datatype="html">
+        <source>Reintentar</source>
+        <target>Reintentar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/top-menu/top-menu.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1519954996184640001" datatype="html">
+        <source>Error</source>
+        <target>Error</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/top-menu/top-menu.ts</context>
+          <context context-type="linenumber">71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1545719883746105255" datatype="html">
+        <source>No s&apos;ha pogut carregar el menú.</source>
+        <target>No se ha podido cargar el menú.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/top-menu/top-menu.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8785907386781102623" datatype="html">
+        <source>gestio-expedients</source>
+        <target>gestion-expedientes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="615127924812501496" datatype="html">
+        <source>nomina</source>
+        <target>nomina</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5787840034364923156" datatype="html">
+        <source>partida-presupuestaria</source>
+        <target>partida-presupuestaria</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1308561435895214101" datatype="html">
+        <source>periodes-suspensio</source>
+        <target>periodos-suspension</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1706206404566507414" datatype="html">
+        <source>detall</source>
+        <target>detalle</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">67</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">139</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">152</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">163</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">169</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">175</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">187</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">201</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">207</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">214</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">256</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">259</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">266</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">304</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/documentation/documentation.routes.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4670094433801402730" datatype="html">
+        <source>solicitud</source>
+        <target>solicitud</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2314893428341546009" datatype="html">
+        <source>tramits-electronics</source>
+        <target>tramites-electronicos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3697846864002059665" datatype="html">
+        <source>safata</source>
+        <target>bandeja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="102528024839006614" datatype="html">
+        <source>nova</source>
+        <target>nueva</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/documentation/documentation.routes.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5276172031906098369" datatype="html">
+        <source>mode</source>
+        <target>modo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8037753816821401013" datatype="html">
+        <source>editar</source>
+        <target>editar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">71</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">151</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">156</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">162</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">180</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">188</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">202</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">208</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">215</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">220</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">225</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">265</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/documentation/documentation.routes.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="309604021975404268" datatype="html">
+        <source>valoracions-dependencia</source>
+        <target>valoraciones-dependencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5602245641662191125" datatype="html">
+        <source>valoracions</source>
+        <target>valoraciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6353732298797030822" datatype="html">
+        <source>crear</source>
+        <target>crear</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">150</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">155</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">161</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">203</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">209</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">216</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">221</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">226</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">264</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7363328929839543362" datatype="html">
+        <source>consultar-agenda</source>
+        <target>consultar-agenda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3804638165166948124" datatype="html">
+        <source>revisio</source>
+        <target>revision</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="383161087946975193" datatype="html">
+        <source>gestio-diagnostic</source>
+        <target>gestion-diagnostico</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6245897924717512954" datatype="html">
+        <source>valoracions-discapacitat</source>
+        <target>valoraciones-discapacidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5307717834805583914" datatype="html">
+        <source>gestio-tramits-urgents-discapacitat</source>
+        <target>gestion-tramites-urgentes-discapacidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5884347021593935316" datatype="html">
+        <source>pendent-revisar</source>
+        <target>pendiente-revisar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4789063701333119359" datatype="html">
+        <source>consulta-informes</source>
+        <target>consulta-informes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4273727534697166932" datatype="html">
+        <source>informe</source>
+        <target>informe</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6154795176369085500" datatype="html">
+        <source>informe-sanitari</source>
+        <target>informe-sanitario</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3995557794916040386" datatype="html">
+        <source>informe-psicologic</source>
+        <target>informe-psicologico</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="742845246870336413" datatype="html">
+        <source>informe-social</source>
+        <target>informe-social</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">263</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7309313303178942856" datatype="html">
+        <source>informe-baredi</source>
+        <target>informe-baredi</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="100604151770400341" datatype="html">
+        <source>crear-editar-informe</source>
+        <target>crear-editar-informe</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1396345607272694885" datatype="html">
+        <source>proposta-informe</source>
+        <target>propuesta-informe</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="607493494882113456" datatype="html">
+        <source>consulta-expedients</source>
+        <target>consulta-expedientes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8974716030118653542" datatype="html">
+        <source>consulta</source>
+        <target>consulta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1031422363101961626" datatype="html">
+        <source>cicle-de-vida</source>
+        <target>ciclo-de-vida</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1189808949889566065" datatype="html">
+        <source>tramits-inicials</source>
+        <target>tramites-iniciales</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7601387579473020359" datatype="html">
+        <source>validacio</source>
+        <target>validacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3094915901616968946" datatype="html">
+        <source>pendent-informes-salut</source>
+        <target>pendiente-informes-salud</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1159114586371677322" datatype="html">
+        <source>incidencies</source>
+        <target>incidencias</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8293170869410419173" datatype="html">
+        <source>estadistiques</source>
+        <target>estadisticas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="899233337182727438" datatype="html">
+        <source>migrat</source>
+        <target>migrado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1356096489433084861" datatype="html">
+        <source>tramits-ofici</source>
+        <target>tramites-oficio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7295907037139934408" datatype="html">
+        <source>citacio</source>
+        <target>citacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5302523399816009737" datatype="html">
+        <source>manteniments</source>
+        <target>mantenimientos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7014726032980817172" datatype="html">
+        <source>responsable-valorador</source>
+        <target>responsable-valorador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4502370838717405825" datatype="html">
+        <source>tecnic-valorador</source>
+        <target>tecnico-valorador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5226176630196987837" datatype="html">
+        <source>gestio-cites-dependencia</source>
+        <target>gestion-citas-dependencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">120</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="799374225363672651" datatype="html">
+        <source>cites-dependencia</source>
+        <target>citas-dependencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5983950559705707948" datatype="html">
+        <source>gestio-cites</source>
+        <target>gestion-citas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2432748661524418651" datatype="html">
+        <source>cites</source>
+        <target>citas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9102111111016290674" datatype="html">
+        <source>gestio-cites-ts</source>
+        <target>gestion-citas-ts</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">128</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6430977464623795670" datatype="html">
+        <source>cites-ts</source>
+        <target>citas-ts</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5740059832493968242" datatype="html">
+        <source>treballador-social</source>
+        <target>trabajador-social</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8126705618195164989" datatype="html">
+        <source>intervencio</source>
+        <target>intervencion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4321189194770416442" datatype="html">
+        <source>gestio-ts</source>
+        <target>gestion-ts</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5839481910205783252" datatype="html">
+        <source>persones</source>
+        <target>personas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">148</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="834841845775253090" datatype="html">
+        <source>cercador</source>
+        <target>buscador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">149</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">179</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">186</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">294</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">298</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">303</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4428163108242550568" datatype="html">
+        <source>cuidadores</source>
+        <target>cuidadores</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">154</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="521616457204924893" datatype="html">
+        <source>representants</source>
+        <target>representantes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">160</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4077070227677829620" datatype="html">
+        <source>requeriments</source>
+        <target>requerimientos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">167</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">250</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1602950070087897781" datatype="html">
+        <source>cerca</source>
+        <target>busqueda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">168</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">174</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">231</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">235</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">270</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">312</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">316</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">321</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5038335603393567950" datatype="html">
+        <source>subsanar</source>
+        <target>subsanar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">170</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9195008805268946768" datatype="html">
+        <source>comunicacio</source>
+        <target>comunicacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">173</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="94296158321415650" datatype="html">
+        <source>pendents-presentar</source>
+        <target>pendientes-presentar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">178</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="837775544636935907" datatype="html">
+        <source>dictamen</source>
+        <target>dictamen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">183</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="167372960166760979" datatype="html">
+        <source>manual</source>
+        <target>manual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">184</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2440774556766413350" datatype="html">
+        <source>pendents-organ</source>
+        <target>pendientes-organo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">191</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5630530707880978008" datatype="html">
+        <source>gestio-tramits-audiencia</source>
+        <target>gestion-tramites-audiencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">195</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8461690836361729055" datatype="html">
+        <source>tramits-instruccio</source>
+        <target>tramites-instruccion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">198</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6792571565523205536" datatype="html">
+        <source>subsanacio</source>
+        <target>subsanacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">200</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5378372291776190723" datatype="html">
+        <source>urgencia-discapacitat</source>
+        <target>urgencia-discapacidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">206</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3439910263746952017" datatype="html">
+        <source>urgencia-dependencia</source>
+        <target>urgencia-dependencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">213</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7250230660350414188" datatype="html">
+        <source>canvi-cuidador</source>
+        <target>cambio-cuidador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">219</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4146577981495416199" datatype="html">
+        <source>canvi-jornada-cuidador</source>
+        <target>cambio-jornada-cuidador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">224</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2921333444359719441" datatype="html">
+        <source>gestio-trasllats</source>
+        <target>gestion-traslados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">230</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">302</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1429376251836881476" datatype="html">
+        <source>gestio-trasllats-vinculats</source>
+        <target>gestion-traslados-vinculados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">234</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="666009688337781452" datatype="html">
+        <source>resolucions</source>
+        <target>resoluciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">239</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5157703591584232126" datatype="html">
+        <source>grau</source>
+        <target>grado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">241</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3517299527859236043" datatype="html">
+        <source>impressions</source>
+        <target>impresiones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">245</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4749051565983740033" datatype="html">
+        <source>resolucions-grau</source>
+        <target>resoluciones-grado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">247</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6340015470702941025" datatype="html">
+        <source>pia</source>
+        <target>pia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">254</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4045123489361376451" datatype="html">
+        <source>pendents</source>
+        <target>pendientes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">255</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7110514122241730420" datatype="html">
+        <source>beneficiari</source>
+        <target>beneficiario</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">258</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5554302573071347337" datatype="html">
+        <source>capacitat-economica</source>
+        <target>capacidad-economica</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">269</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5809755561073596184" datatype="html">
+        <source>antics</source>
+        <target>antiguos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">271</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2463409349464666666" datatype="html">
+        <source>nou</source>
+        <target>nuevo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">272</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9020330965166981595" datatype="html">
+        <source>pendent-aportar-documentacio</source>
+        <target>pendiente-aportar-documentacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">273</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6738646712431167053" datatype="html">
+        <source>tramits-prestacions-serveis</source>
+        <target>tramites-prestaciones-servicios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">276</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4496074897970541053" datatype="html">
+        <source>central-de-reserves-de-gent-gran</source>
+        <target>central-de-reservas-de-personas-mayores</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">279</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4398319084395770130" datatype="html">
+        <source>general</source>
+        <target>general</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">281</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">297</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3768714036805672734" datatype="html">
+        <source>reserva</source>
+        <target>reserva</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">284</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="360192490254926549" datatype="html">
+        <source>ocupacions</source>
+        <target>ocupaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">287</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3273739592565159024" datatype="html">
+        <source>asignacions</source>
+        <target>asignaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">290</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3684358839116783278" datatype="html">
+        <source>validacio-adequacio</source>
+        <target>validacion-adecuacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">293</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="948185427763141074" datatype="html">
+        <source>avs-sad-vinculades</source>
+        <target>avs-sad-vinculadas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">309</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2430111953253407291" datatype="html">
+        <source>llista-despera</source>
+        <target>lista-espera</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">311</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7547258603882189478" datatype="html">
+        <source>llista-reserva</source>
+        <target>lista-reserva</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">315</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">334</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6849184123647989478" datatype="html">
+        <source>gestio-de-factures</source>
+        <target>gestion-de-facturas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">319</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5339950599509858429" datatype="html">
+        <source>detall-de-factura</source>
+        <target>detalle-de-factura</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">320</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6900521024707532614" datatype="html">
+        <source>gestio-canvi-cuidadors</source>
+        <target>gestion-cambio-cuidadores</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">326</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1489833193212061418" datatype="html">
+        <source>llista-espera</source>
+        <target>lista-espera</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">329</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8279668615814003044" datatype="html">
+        <source>llista-general</source>
+        <target>lista-general</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">331</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3809687971138715897" datatype="html">
+        <source>llista-d-assignacio</source>
+        <target>lista-de-asignacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">337</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6608946089076051615" datatype="html">
+        <source>llista-d-ocupacio</source>
+        <target>lista-de-ocupacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/file-management.routes.ts</context>
+          <context context-type="linenumber">340</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6466117073273325774" datatype="html">
+        <source>gestions</source>
+        <target>gestiones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="131000803863552106" datatype="html">
+        <source>dies-festius</source>
+        <target>dias-festivos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3397897180718914176" datatype="html">
+        <source>entitat-juridica</source>
+        <target>entidad-juridica</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4254692567163353765" datatype="html">
+        <source>membres-organ</source>
+        <target>miembros-organo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9073693872155957844" datatype="html">
+        <source>requisits</source>
+        <target>requisitos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="54064304498133075" datatype="html">
+        <source>gestio-usuaris</source>
+        <target>gestion-usuarios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6015583269203470580" datatype="html">
+        <source>sql</source>
+        <target>sql</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="782992775594669934" datatype="html">
+        <source>gestio-centres</source>
+        <target>gestion-centros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2724118689796902231" datatype="html">
+        <source>crear-centres</source>
+        <target>crear-centros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7689230252992348024" datatype="html">
+        <source>svodd</source>
+        <target>svodd</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2842522183613525770" datatype="html">
+        <source>gestio-associacions</source>
+        <target>gestion-asociaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8958319584941924245" datatype="html">
+        <source>no-autoritzat</source>
+        <target>no-autorizado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4931247553125097349" datatype="html">
+        <source>centres</source>
+        <target>centros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5403809691768700622" datatype="html">
+        <source>concerts</source>
+        <target>conciertos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="572869452245357402" datatype="html">
+        <source>incidencies-baixa</source>
+        <target>incidencias-baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4690015219907727012" datatype="html">
+        <source>incidencies-ocupacio</source>
+        <target>incidencias-ocupacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4206673871572638258" datatype="html">
+        <source>cost-grau</source>
+        <target>coste-grado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8643130337311249036" datatype="html">
+        <source>min-financiacio</source>
+        <target>min-financiacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4284271729159748292" datatype="html">
+        <source>socio-sanitaris</source>
+        <target>sociosanitarios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7811696311455245298" datatype="html">
+        <source>escenaris</source>
+        <target>escenarios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8807318533260300039" datatype="html">
+        <source>cartera-serveis</source>
+        <target>cartera-servicios</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2161952766880752851" datatype="html">
+        <source>pensions-minimes</source>
+        <target>pensiones-minimas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2172614710667243524" datatype="html">
+        <source>heritage-percentage</source>
+        <target>porcentaje-patrimonio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3755276582490064497" datatype="html">
+        <source>variable-anual</source>
+        <target>variable-anual</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8657066873628622944" datatype="html">
+        <source>preus-referencia</source>
+        <target>precios-referencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6561926960624907147" datatype="html">
+        <source>sad</source>
+        <target>sad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4442806260490482546" datatype="html">
+        <source>contractes</source>
+        <target>contratos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="522743934455960017" datatype="html">
+        <source>preu-hores</source>
+        <target>precio-horas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8604349475093357678" datatype="html">
+        <source>sad-vinculada</source>
+        <target>sad-vinculada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7097000899169790290" datatype="html">
+        <source>proveidors</source>
+        <target>proveedores</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8996444529682378462" datatype="html">
+        <source>exitus-gestio</source>
+        <target>exitus-gestion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4573650661259506451" datatype="html">
+        <source>exitus-imserso</source>
+        <target>exitus-imserso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2135897944205698708" datatype="html">
+        <source> títols-incidència</source>
+        <target> titulos-incidencia</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8555492749847255933" datatype="html">
+        <source>departaments</source>
+        <target>departamentos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/routes/maintenances.routes.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4249324484211564661" datatype="html">
+        <source>Font</source>
+        <target>Fuente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/font-size-switcher/font-size-switcher.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2629286489995345635" datatype="html">
+        <source>Redueix la mida de la font</source>
+        <target>Reducir el tamaño de la fuente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/font-size-switcher/font-size-switcher.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4637213445114057924" datatype="html">
+        <source>Restableix la mida de la font</source>
+        <target>Restablecer el tamaño de la fuente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/font-size-switcher/font-size-switcher.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7335275833413527471" datatype="html">
+        <source>Augmenta la mida de la font</source>
+        <target>Aumentar el tamaño de la fuente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/font-size-switcher/font-size-switcher.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4768286436551152077" datatype="html">
+        <source>Ctrl + K</source>
+        <target>Ctrl + K</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5315782073930690406" datatype="html">
+        <source>Centre d&apos;ajuda</source>
+        <target>Centro de ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9144802843265396593" datatype="html">
+        <source>Cerca en tota l&apos;ajuda</source>
+        <target>Buscar en toda la ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3837851089154424816" datatype="html">
+        <source>Cercar en tota l&apos;ajuda...</source>
+        <target>Buscar en toda la ayuda...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9115321636464642612" datatype="html">
+        <source>No s&apos;han trobat resultats</source>
+        <target>No se han encontrado resultados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/constants/table.constants.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7315584262890229466" datatype="html">
+        <source>Seleccioneu un tema d&apos;ajuda a la llista de l&apos;esquerra</source>
+        <target>Seleccione un tema de ayuda en la lista de la izquierda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2932353828576119109" datatype="html">
+        <source>Llenguatge</source>
+        <target>Idioma</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/language-switcher/language-switcher.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5975893009658777309" datatype="html">
+        <source>Versió: <x id="INTERPOLATION" equiv-text="{{ appVersion }}"/></source>
+        <target>Versión: <x id="INTERPOLATION" equiv-text="{{ appVersion }}"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/user-menu.component.html</context>
+          <context context-type="linenumber">51,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6917134327748230488" datatype="html">
+        <source>Obre el menú d&apos;usuari</source>
+        <target>Abrir el menú de usuario</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/user-menu.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8980564660506939104" datatype="html">
+        <source>Ajuda (Ctrl + K)</source>
+        <target>Ayuda (Ctrl + K)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/user-menu.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6959449928457862551" datatype="html">
+        <source>Obrir ajuda</source>
+        <target>Abrir ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/user-menu.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1884562833084606829" datatype="html">
+        <source>Tancar sessió</source>
+        <target>Cerrar sesión</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/user-menu.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7445216676712681988" datatype="html">
+        <source>Codi</source>
+        <target>Código</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2942230580917375982" datatype="html">
+        <source>Prefix</source>
+        <target>Prefijo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1267337886842545541" datatype="html">
+        <source>Aplicació</source>
+        <target>Aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5923041569817566400" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4297014649353312228" datatype="html">
+        <source>Sistema d&apos;informació</source>
+        <target>Sistema de información</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3704029413710638910" datatype="html">
+        <source>Àmbit</source>
+        <target>Ámbito</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2501827135222547668" datatype="html">
+        <source>Comissió informàtica</source>
+        <target>Comisión informática</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8219316676904270252" datatype="html">
+        <source>Ut. Administrativa</source>
+        <target>Ud. Administrativa</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3197846198359668904" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2888871015325938537" datatype="html">
+        <source>DRASSANA</source>
+        <target>DRASSANA</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1427966493175404923" datatype="html">
+        <source>Instrumental</source>
+        <target>Instrumental</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="674890718632461524" datatype="html">
+        <source>Departamental</source>
+        <target>Departamental</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7189412554123446599" datatype="html">
+        <source>Direcció General</source>
+        <target>Dirección General</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="979015418454467433" datatype="html">
+        <source>Aplicació interna</source>
+        <target>Aplicación interna</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7639439177070470160" datatype="html">
+        <source>Gestió funcional</source>
+        <target>Gestión funcional</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3094027259203226210" datatype="html">
+        <source>Aplicació corporativa</source>
+        <target>Aplicación corporativa</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1755286316226969221" datatype="html">
+        <source>Comissió d&apos;informàtica</source>
+        <target>Comisión de informática</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3932422567516820409" datatype="html">
+        <source>Descripció</source>
+        <target>Descripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6697830808716428616" datatype="html">
+        <source>Incomplets</source>
+        <target>Incompletos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8140385779252737770" datatype="html">
+        <source>No s&apos;han pogut carregar les aplicacions.</source>
+        <target>No se han podido cargar las aplicaciones.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3299542573380947817" datatype="html">
+        <source>Cerca ràpida d&apos;aplicacions</source>
+        <target>Búsqueda rápida de aplicaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3264252265683767899" datatype="html">
+        <source>Exporta aplicacions a Excel</source>
+        <target>Exportar aplicaciones a Excel</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1308701896023077128" datatype="html">
+        <source>Afegeix una aplicació</source>
+        <target>Añadir una aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.i18n.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7909899493450077251" datatype="html">
+        <source>Donar de baixa l&apos;aplicació?</source>
+        <target>¿Dar de baja la aplicación?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1936847454303106765" datatype="html">
+        <source>Cancel·la</source>
+        <target>Cancelar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3757869692285153060" datatype="html">
+        <source>Donar de baixa</source>
+        <target>Dar de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1510814923226255291" datatype="html">
+        <source>Cancel·la la baixa de l&apos;aplicació</source>
+        <target>Cancelar la baja de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3251972372289659988" datatype="html">
+        <source>Confirma la baixa de l&apos;aplicació</source>
+        <target>Confirmar la baja de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2952244262035234758" datatype="html">
+        <source>Estàs a punt de donar de baixa «<x id="applicationName" equiv-text="applicationName"/>». L&apos;aplicació deixarà d&apos;aparèixer al llistat.</source>
+        <target>Estás a punto de dar de baja «<x id="applicationName" equiv-text="applicationName"/>». La aplicación dejará de aparecer en el listado.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9190821786817643658" datatype="html">
+        <source>Aplicació donada de baixa</source>
+        <target>Aplicación dada de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8562866548880253809" datatype="html">
+        <source>L&apos;aplicació s&apos;ha donat de baixa correctament.</source>
+        <target>La aplicación se ha dado de baja correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4710509548100789744" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa l&apos;aplicació.</source>
+        <target>No se ha podido dar de baja la aplicación.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5796177058430877975" datatype="html">
+        <source>Informació</source>
+        <target>Información</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.ts</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/classes/search-component-base.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8302075237838277566" datatype="html">
+        <source>L&apos;exportació encara no està implementada.</source>
+        <target>La exportación todavía no está implementada.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.ts</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2402846969362487836" datatype="html">
+        <source>Elimina</source>
+        <target>Eliminar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.html</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8735549703481409024" datatype="html">
+        <source>Consulta</source>
+        <target>Consultar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4439715233794834274" datatype="html">
+        <source>Modifica</source>
+        <target>Modificar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.html</context>
+          <context context-type="linenumber">95,96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4922393716341836265" datatype="html">
+        <source>Accions</source>
+        <target>Acciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/constants/table.constants.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2165211412125043081" datatype="html">
+        <source>Elimina l&apos;aplicació</source>
+        <target>Eliminar la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2523184850575990706" datatype="html">
+        <source>Consulta l&apos;aplicació</source>
+        <target>Consultar la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6356651458524233527" datatype="html">
+        <source>Modifica l&apos;aplicació</source>
+        <target>Modificar la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2180870980186162872" datatype="html">
+        <source>Aplicació incompleta</source>
+        <target>Aplicación incompleta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3971609588070574627" datatype="html">
+        <source>documentació</source>
+        <target>documentacion</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/documentation/documentation.routes.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3614046575958090607" datatype="html">
+        <source>Avui</source>
+        <target>Hoy</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1827958129008613521" datatype="html">
+        <source>Neteja</source>
+        <target>Limpiar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/search-filters/search-filters.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4953200139758878157" datatype="html">
+        <source>Diumenge</source>
+        <target>Domingo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4840013487316223318" datatype="html">
+        <source>Dilluns</source>
+        <target>Lunes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7269437267524997215" datatype="html">
+        <source>Dimarts</source>
+        <target>Martes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7208971273933458583" datatype="html">
+        <source>Dimecres</source>
+        <target>Miércoles</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5449702133353747386" datatype="html">
+        <source>Dijous</source>
+        <target>Jueves</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2490869083726857479" datatype="html">
+        <source>Divendres</source>
+        <target>Viernes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8041057126946658628" datatype="html">
+        <source>Dissabte</source>
+        <target>Sábado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5827639305845031869" datatype="html">
+        <source>Dg</source>
+        <target>Do</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7773071870129722870" datatype="html">
+        <source>Dl</source>
+        <target>Lu</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1605270428416879791" datatype="html">
+        <source>Dt</source>
+        <target>Ma</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8248546037488163362" datatype="html">
+        <source>Dc</source>
+        <target>Mi</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1310322077330454483" datatype="html">
+        <source>Dj</source>
+        <target>Ju</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1196606358967105186" datatype="html">
+        <source>Dv</source>
+        <target>Vi</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2873970249364746779" datatype="html">
+        <source>Ds</source>
+        <target>Sa</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2023019844845587761" datatype="html">
+        <source>Gener </source>
+        <target>Enero </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8048183147666106224" datatype="html">
+        <source>Febrer </source>
+        <target>Febrero </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2416180326342704233" datatype="html">
+        <source>Març </source>
+        <target>Marzo </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6178121204036121416" datatype="html">
+        <source>Abril </source>
+        <target>Abril </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1844890394429112595" datatype="html">
+        <source>Maig </source>
+        <target>Mayo </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3663703361967251722" datatype="html">
+        <source>Juny </source>
+        <target>Junio </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="922032786075439358" datatype="html">
+        <source>Juliol </source>
+        <target>Julio </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="10834678664640768" datatype="html">
+        <source>Agost </source>
+        <target>Agosto </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2590508035394207413" datatype="html">
+        <source>Setembre </source>
+        <target>Septiembre </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1241894308766412284" datatype="html">
+        <source>Octubre </source>
+        <target>Octubre </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2924566048849294757" datatype="html">
+        <source>Novembre </source>
+        <target>Noviembre </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3941130154581083091" datatype="html">
+        <source>Desembre </source>
+        <target>Diciembre </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8253074520541450336" datatype="html">
+        <source>Ge </source>
+        <target>Ene </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6289924421754989770" datatype="html">
+        <source>Feb </source>
+        <target>Feb </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1041269145616441788" datatype="html">
+        <source>Mar </source>
+        <target>Mar </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8156425810013763973" datatype="html">
+        <source>Abr </source>
+        <target>Abr </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="650154816740265798" datatype="html">
+        <source>Mai </source>
+        <target>May </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5111266736508630566" datatype="html">
+        <source>Jun </source>
+        <target>Jun </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3029727184388094701" datatype="html">
+        <source>Jul </source>
+        <target>Jul </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4209175514043048520" datatype="html">
+        <source>Ago </source>
+        <target>Ago </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7087972193903491265" datatype="html">
+        <source>Set </source>
+        <target>Sep </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3620355301298496657" datatype="html">
+        <source>Oct </source>
+        <target>Oct </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="890364042606183858" datatype="html">
+        <source>Nov </source>
+        <target>Nov </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1693647645861601495" datatype="html">
+        <source>Des </source>
+        <target>Dic </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3419634855739890676" datatype="html">
+        <source>Has de realitzar la cerca abans d&apos;exportar.</source>
+        <target>Debe realizar la búsqueda antes de exportar.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/classes/search-component-base.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1607075854221804687" datatype="html">
+        <source>Confirma</source>
+        <target>Confirmar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4932645286796875412" datatype="html">
+        <source>Cancel·la l&apos;acció</source>
+        <target>Cancelar la acción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8186263638348101562" datatype="html">
+        <source>Confirma l&apos;acció</source>
+        <target>Confirmar la acción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7605655394644457033" datatype="html">
+        <source>Cercador</source>
+        <target>Buscador</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/search-filters/search-filters.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6370516276869833424" datatype="html">
+        <source>Més filtres</source>
+        <target>Más filtros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/search-filters/search-filters.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/search-filters/search-filters.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5578467346539053376" datatype="html">
+        <source>Cerca</source>
+        <target>Buscar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/search-filters/search-filters.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5563917281901541448" datatype="html">
+        <source>Amaga més filtres</source>
+        <target>Ocultar más filtros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/search-filters/search-filters.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5491081266313732174" datatype="html">
+        <source>Filtres</source>
+        <target>Filtros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.component.html</context>
+          <context context-type="linenumber">50,51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="332378715268361803" datatype="html">
+        <source>Mostra / oculta columnes</source>
+        <target>Mostrar / ocultar columnas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.component.html</context>
+          <context context-type="linenumber">71,72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5138762141075014348" datatype="html">
+        <source>Exporta excel (.xls)</source>
+        <target>Exportar Excel (.xls)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.component.html</context>
+          <context context-type="linenumber">89,90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6668305521815104519" datatype="html">
+        <source>Afegeix</source>
+        <target>Añadir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.component.html</context>
+          <context context-type="linenumber">100,101</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6665998476308833667" datatype="html">
+        <source>Cerca ràpida</source>
+        <target>Búsqueda rápida</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="211852516539445750" datatype="html">
+        <source>Neteja la cerca ràpida</source>
+        <target>Limpiar la búsqueda rápida</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5903360323497083615" datatype="html">
+        <source>Cerca columna</source>
+        <target>Buscar columna</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2100509720259651743" datatype="html">
+        <source>Mostra o amaga els filtres</source>
+        <target>Mostrar u ocultar los filtros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1694484243257851899" datatype="html">
+        <source>Mostra o oculta columnes</source>
+        <target>Mostrar u ocultar columnas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6830853798862648524" datatype="html">
+        <source>Exporta a Excel</source>
+        <target>Exportar a Excel</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6634377344055946852" datatype="html">
+        <source>Mostrant</source>
+        <target>Mostrando</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/constants/table.constants.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6849203771505216986" datatype="html">
+        <source>registres</source>
+        <target>registros</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/constants/table.constants.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5274671755332708772" datatype="html">
+        <source>A04026930</source>
+        <target>A04026930</target>
+      </trans-unit>
+      <trans-unit id="2072503787714975533" datatype="html">
+        <source>CVF</source>
+        <target>CVF</target>
+      </trans-unit>
+      <trans-unit id="5372042065236928298" datatype="html">
+        <source>DGEDOT</source>
+        <target>DGEDOT</target>
+      </trans-unit>
+      <trans-unit id="5344939496632670200" datatype="html">
+        <source>Afegir aplicació</source>
+        <target>Añadir aplicación</target>
+      </trans-unit>
+      <trans-unit id="1695495109946681403" datatype="html">
+        <source>Unitat administrativa</source>
+        <target>Unidad administrativa</target>
+      </trans-unit>
+      <trans-unit id="2303359723056134799" datatype="html">
+        <source>Descripció (opcional)</source>
+        <target>Descripción (opcional)</target>
+      </trans-unit>
+      <trans-unit id="6693022392792791727" datatype="html">
+        <source>Camp obligatori</source>
+        <target>Campo obligatorio</target>
+      </trans-unit>
+      <trans-unit id="1322848226833728059" datatype="html">
+        <source>El codi ha de tenir com a mínim 4 caràcters</source>
+        <target>El código debe tener al menos 4 caracteres</target>
+      </trans-unit>
+      <trans-unit id="2242628299079321068" datatype="html">
+        <source>Selecciona una opció</source>
+        <target>Selecciona una opción</target>
+      </trans-unit>
+      <trans-unit id="7042574918880765341" datatype="html">
+        <source>Afegeix l&apos;aplicació</source>
+        <target>Añade la aplicación</target>
+      </trans-unit>
+      <trans-unit id="4137505410783370305" datatype="html">
+        <source>Tornar</source>
+        <target>Volver</target>
+      </trans-unit>
+      <trans-unit id="6236859198247935684" datatype="html">
+        <source>Torna al llistat d&apos;aplicacions</source>
+        <target>Vuelve al listado de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="288701646401139716" datatype="html">
+        <source>Aplicació afegida</source>
+        <target>Aplicación añadida</target>
+      </trans-unit>
+      <trans-unit id="3175640910469299377" datatype="html">
+        <source>Aplicació afegida correctament.</source>
+        <target>Aplicación añadida correctamente.</target>
+      </trans-unit>
+      <trans-unit id="462200911009917777" datatype="html">
+        <source>No s&apos;ha pogut afegir l&apos;aplicació.</source>
+        <target>No se ha podido añadir la aplicación.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/create/application-create.i18n.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7452854968505872432" datatype="html">
+        <source>Detall</source>
+        <target>Detalle</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6439365426343089851" datatype="html">
+        <source>General</source>
+        <target>General</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.ts</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5053485827612204865" datatype="html">
+        <source>Responsable</source>
+        <target>Responsable</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/responsible/application-responsible-section.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2153980152639237955" datatype="html">
+        <source>Editar</source>
+        <target>Editar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5121461809892268956" datatype="html">
+        <source>Editar aplicació</source>
+        <target>Editar aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8691559639909078545" datatype="html">
+        <source>Cancel·lar</source>
+        <target>Cancelar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2543487530311264122" datatype="html">
+        <source>Cancel·lar l&apos;edició de l&apos;aplicació</source>
+        <target>Cancelar la edición de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8024411912963745537" datatype="html">
+        <source>Desar</source>
+        <target>Guardar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8923950445430743775" datatype="html">
+        <source>Desar els canvis de l&apos;aplicació</source>
+        <target>Guardar los cambios de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8188044453558630942" datatype="html">
+        <source>Seccions de l&apos;aplicació</source>
+        <target>Secciones de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9218759263635690459" datatype="html">
+        <source>Aplicació actualitzada</source>
+        <target>Aplicación actualizada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1197723516396249530" datatype="html">
+        <source>Els canvis s&apos;han desat correctament.</source>
+        <target>Los cambios se han guardado correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7222990836000876649" datatype="html">
+        <source>No s&apos;han pogut desar els canvis.</source>
+        <target>No se han podido guardar los cambios.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2424204837645803303" datatype="html">
+        <source>Cancel·lar els canvis de sistemes i bases de dades</source>
+        <target>Cancelar los cambios de sistemas y bases de datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7568725377111583206" datatype="html">
+        <source>Desar els canvis de sistemes i bases de dades</source>
+        <target>Guardar los cambios de sistemas y bases de datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4389170230675246178" datatype="html">
+        <source>La cancel·lació dels canvis de sistemes i bases de dades encara no està implementada.</source>
+        <target>La cancelación de los cambios de sistemas y bases de datos todavía no está implementada.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8273514179923295892" datatype="html">
+        <source>El desament dels canvis de sistemes i bases de dades encara no està implementat.</source>
+        <target>El guardado de los cambios de sistemas y bases de datos todavía no está implementado.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6167118338310490892" datatype="html">
+        <source>Responsables</source>
+        <target>Responsables</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4452173768088552634" datatype="html">
+        <source>Detall de l&apos;aplicació</source>
+        <target>Detalle de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.ts</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7634849161150434038" datatype="html">
+        <source>Aplicació <x id="PH" equiv-text="id"/></source>
+        <target>Aplicación <x id="PH" equiv-text="id"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3402649429958817402" datatype="html">
+        <source>Codi: <x id="PH" equiv-text="application.code"/></source>
+        <target>Código: <x id="PH" equiv-text="application.code"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.ts</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2963084820645597156" datatype="html">
+        <source>Nom de l&apos;aplicació</source>
+        <target>Nombre de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/general/application-general.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3862400681118606310" datatype="html">
+        <source>Data de creació</source>
+        <target>Fecha de creación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/general/application-general.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8739301243705262256" datatype="html">
+        <source>Data de modificació</source>
+        <target>Fecha de modificación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/general/application-general.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3157050871470551328" datatype="html">
+        <source>Data de baixa</source>
+        <target>Fecha de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/general/application-general.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4742593444290175784" datatype="html">
+        <source>El formulari de responsable encara no està implementat.</source>
+        <target>El formulario de responsable todavía no está implementado.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/responsible/application-responsible-form.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationsRoute" datatype="html">
+        <source>aplicacions</source>
+        <target>aplicaciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.routes.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2353883959900038390" datatype="html">
+        <source>Entorn</source>
+        <target>Entorno</target>
+      </trans-unit>
+      <trans-unit id="4340807736935009609" datatype="html">
+        <source>Servidor</source>
+        <target>Servidor</target>
+      </trans-unit>
+      <trans-unit id="208471366252682039" datatype="html">
+        <source>Instància</source>
+        <target>Instancia</target>
+      </trans-unit>
+      <trans-unit id="6117946241126833991" datatype="html">
+        <source>Port</source>
+        <target>Puerto</target>
+      </trans-unit>
+      <trans-unit id="8313957794194287136" datatype="html">
+        <source>Versió</source>
+        <target>Versión</target>
+      </trans-unit>
+      <trans-unit id="3885146522471920820" datatype="html">
+        <source>Observacions</source>
+        <target>Observaciones</target>
+      </trans-unit>
+      <trans-unit id="3239473383982084176" datatype="html">
+        <source>Base de dades</source>
+        <target>Base de datos</target>
+      </trans-unit>
+      <trans-unit id="4521911906640032256" datatype="html">
+        <source>Servei</source>
+        <target>Servicio</target>
+      </trans-unit>
+      <trans-unit id="5669484410959590381" datatype="html">
+        <source>Tipus</source>
+        <target>Tipo</target>
+      </trans-unit>
+      <trans-unit id="249499677179030875" datatype="html">
+        <source>Sistemes i BBDD</source>
+        <target>Sistemas y BBDD</target>
+      </trans-unit>
+      <trans-unit id="5795375051141902264" datatype="html">
+        <source>Afegir <x id="PH" equiv-text="resource" /></source>
+        <target>Añadir <x id="PH" equiv-text="resource" /></target>
+      </trans-unit>
+      <trans-unit id="3648767025288220506" datatype="html">
+        <source>Cercar <x id="PH" equiv-text="resource" /></source>
+        <target>Buscar <x id="PH" equiv-text="resource" /></target>
+      </trans-unit>
+      <trans-unit id="1103728520400599914" datatype="html">
+        <source>L'alta de <x id="PH" equiv-text="resource" /> encara no està implementada.</source>
+        <target>El alta de <x id="PH" equiv-text="resource" /> todavía no está implementada.</target>
+      </trans-unit>
+      <trans-unit id="8381533717527775820" datatype="html">
+        <source>L'edició de <x id="PH" equiv-text="resource" /> encara no està implementada.</source>
+        <target>La edición de <x id="PH" equiv-text="resource" /> todavía no está implementada.</target>
+      </trans-unit>
+      <trans-unit id="6778911578762663761" datatype="html">
+        <source>La baixa de <x id="PH" equiv-text="resource" /> encara no està implementada.</source>
+        <target>La baja de <x id="PH" equiv-text="resource" /> todavía no está implementada.</target>
+      </trans-unit>
+      <trans-unit id="494434698617642494" datatype="html">
+        <source>Obrir les accions del registre</source>
+        <target>Abrir las acciones del registro</target>
+      </trans-unit>
+      <trans-unit id="6532890474767193907" datatype="html">
+        <source>Baixa</source>
+        <target>Baja</target>
+      </trans-unit>
+      <trans-unit id="1948437473792786411" datatype="html">
+        <source>Servidors</source>
+        <target>Servidores</target>
+      </trans-unit>
+      <trans-unit id="1557385332367665108" datatype="html">
+        <source>servidor</source>
+        <target>servidor</target>
+      </trans-unit>
+      <trans-unit id="6720533035985122166" datatype="html">
+        <source>Bases de dades</source>
+        <target>Bases de datos</target>
+      </trans-unit>
+      <trans-unit id="2526373237227019037" datatype="html">
+        <source>base de dades</source>
+        <target>base de datos</target>
+      </trans-unit>
+      <trans-unit id="8866817169381969103" datatype="html">
+        <source>Obrir la documentació de sistemes i bases de dades</source>
+        <target>Abrir la documentación de sistemas y bases de datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/systems-databases/application-systems-databases-section.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2558952374054704387" datatype="html">
+        <source>La documentació de sistemes i bases de dades encara no està implementada.</source>
+        <target>La documentación de sistemas y bases de datos todavía no está implementada.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/systems-databases/application-systems-databases-section.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="643298477372018785" datatype="html">
+        <source>Actiu</source>
+        <target>Activo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="686779848974134906" datatype="html">
+        <source>Manteniment</source>
+        <target>Mantenimiento</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6882724821222319836" datatype="html">
+        <source>Deprecat</source>
+        <target>Deprecado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

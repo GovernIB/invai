@@ -1,0 +1,8 @@
+{
+  "/invaiapi": {
+    "target": "https://invai.plexus.services",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

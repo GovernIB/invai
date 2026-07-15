@@ -1,0 +1,26 @@
+:root {
+  --fc-button-text-color: var(--primary-500);
+  --fc-button-bg-color: var(--surface-0);
+  --fc-button-border-color: var(--primary-500);
+  --fc-button-hover-bg-color: var(--primary-50);
+  --fc-button-hover-border-color: var(--primary-500);
+  --fc-button-active-bg-color: var(--primary-500);
+  --fc-button-active-border-color: var(--primary-500);
+}
+
+.fc-direction-ltr .fc-timegrid-col-events {
+  margin: 0;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  color: var(--surface-0);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active:focus {
+  box-shadow: none;
+}
+
+.fc-toolbar-title {
+  font-size: 1.5rem;
+}

@@ -1,0 +1,53 @@
+<p-button
+  data-testid="button-user-menu-testid"
+  severity="secondary"
+  [text]="true"
+  [ariaLabel]="userMenuAriaLabel"
+  [attr.aria-expanded]="popoverRef.overlayVisible"
+  (onClick)="popoverRef.toggle($event)"
+>
+  <section class="flex items-center gap-2">
+    <span class="font-medium hidden sm:inline">
+      {{ username() | titlecase }}
+    </span>
+
+    <p-avatar class="bg-surface-200 text-surface-700" [label]="userInitial()" />
+  </section>
+</p-button>
+
+<p-popover #popoverRef>
+  <section class="text-center flex gap-4 flex-col">
+    <app-language-switcher />
+
+    <app-font-size-switcher />
+
+    <section>
+      <h3 class="text-primary font-semibold mb-4">{{ helpTitle }}</h3>
+
+      <p-button
+        [outlined]="true"
+        [rounded]="true"
+        [text]="true"
+        (onClick)="openHelp()"
+        [label]="openHelpLabel"
+        severity="secondary"
+        size="small"
+      />
+    </section>
+
+    <p-button
+      [outlined]="true"
+      [rounded]="true"
+      [text]="true"
+      (onClick)="logout()"
+      icon="pi pi-sign-out"
+      [label]="logoutLabel"
+      severity="secondary"
+      size="small"
+    />
+
+    <div class="text-xs text-surface-500 dark:text-surface-300">
+      <span i18n>Versió: {{ appVersion }}</span>
+    </div>
+  </section>
+</p-popover>

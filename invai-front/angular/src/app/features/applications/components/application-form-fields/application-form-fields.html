@@ -1,0 +1,212 @@
+<div class="application-form-fields__grid">
+  <div class="application-form-fields__field">
+    <label [for]="fieldId('application')">{{ labels().application }}</label>
+    <input
+      [id]="fieldId('application')"
+      type="text"
+      pInputText
+      [formControl]="controls().application"
+      [attr.aria-invalid]="isInvalid(controls().application)"
+      [attr.aria-describedby]="
+        isInvalid(controls().application) ? errorId('application') : null
+      "
+    />
+    @if (isInvalid(controls().application)) {
+      <small [id]="errorId('application')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  <div class="application-form-fields__field">
+    <label [id]="fieldId('category-label')" [for]="fieldId('category')">
+      {{ labels().category }}
+    </label>
+    <p-select
+      [inputId]="fieldId('category')"
+      [formControl]="controls().category"
+      [ariaLabelledBy]="fieldId('category-label')"
+      [options]="categoryOptions"
+      [placeholder]="selectPlaceholder()"
+      [attr.aria-invalid]="isInvalid(controls().category)"
+      [attr.aria-describedby]="isInvalid(controls().category) ? errorId('category') : null"
+      optionLabel="label"
+      optionValue="value"
+    />
+    @if (isInvalid(controls().category)) {
+      <small [id]="errorId('category')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  <div class="application-form-fields__field">
+    <label [id]="fieldId('information-system-label')" [for]="fieldId('information-system')">
+      {{ labels().informationSystem }}
+    </label>
+    <p-select
+      [inputId]="fieldId('information-system')"
+      [formControl]="controls().informationSystem"
+      [ariaLabelledBy]="fieldId('information-system-label')"
+      [options]="informationSystemOptions"
+      [placeholder]="selectPlaceholder()"
+      [attr.aria-invalid]="isInvalid(controls().informationSystem)"
+      [attr.aria-describedby]="
+        isInvalid(controls().informationSystem) ? errorId('information-system') : null
+      "
+      optionLabel="label"
+      optionValue="value"
+    />
+    @if (isInvalid(controls().informationSystem)) {
+      <small [id]="errorId('information-system')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  <div class="application-form-fields__field">
+    <label [id]="fieldId('scope-label')" [for]="fieldId('scope')">
+      {{ labels().scope }}
+    </label>
+    <p-select
+      [inputId]="fieldId('scope')"
+      [formControl]="controls().scope"
+      [ariaLabelledBy]="fieldId('scope-label')"
+      [options]="scopeOptions"
+      [placeholder]="selectPlaceholder()"
+      [attr.aria-invalid]="isInvalid(controls().scope)"
+      [attr.aria-describedby]="isInvalid(controls().scope) ? errorId('scope') : null"
+      optionLabel="label"
+      optionValue="value"
+    />
+    @if (isInvalid(controls().scope)) {
+      <small [id]="errorId('scope')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  <div class="application-form-fields__field">
+    <label [id]="fieldId('commission-label')" [for]="fieldId('commission')">
+      {{ labels().commission }}
+    </label>
+    <p-select
+      [inputId]="fieldId('commission')"
+      [formControl]="controls().commission"
+      [ariaLabelledBy]="fieldId('commission-label')"
+      [options]="commissionOptions"
+      [placeholder]="selectPlaceholder()"
+      [attr.aria-invalid]="isInvalid(controls().commission)"
+      [attr.aria-describedby]="isInvalid(controls().commission) ? errorId('commission') : null"
+      optionLabel="label"
+      optionValue="value"
+    />
+    @if (isInvalid(controls().commission)) {
+      <small [id]="errorId('commission')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  <div class="application-form-fields__field">
+    <label [for]="fieldId('prefix')">{{ labels().prefix }}</label>
+    <input
+      [id]="fieldId('prefix')"
+      type="text"
+      pInputText
+      [formControl]="controls().prefix"
+      [attr.aria-invalid]="isInvalid(controls().prefix)"
+      [attr.aria-describedby]="isInvalid(controls().prefix) ? errorId('prefix') : null"
+    />
+    @if (isInvalid(controls().prefix)) {
+      <small [id]="errorId('prefix')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  @if (codeControl(); as code) {
+    <div class="application-form-fields__field">
+      <label [for]="fieldId('code')">{{ labels().code }}</label>
+      <input
+        [id]="fieldId('code')"
+        type="text"
+        pInputText
+        [formControl]="code"
+        [attr.aria-invalid]="isInvalid(code)"
+        [attr.aria-describedby]="isInvalid(code) ? errorId('code') : null"
+      />
+      @if (isInvalid(code)) {
+        <small [id]="errorId('code')" class="application-form-fields__error">
+          {{ codeError(code) }}
+        </small>
+      }
+    </div>
+  }
+
+  <div class="application-form-fields__field">
+    <label [id]="fieldId('administrative-unit-label')" [for]="fieldId('administrative-unit')">
+      {{ labels().administrativeUnit }}
+    </label>
+    <p-select
+      [inputId]="fieldId('administrative-unit')"
+      [formControl]="controls().administrativeUnit"
+      [ariaLabelledBy]="fieldId('administrative-unit-label')"
+      [options]="administrativeUnitOptions"
+      [placeholder]="selectPlaceholder()"
+      [attr.aria-invalid]="isInvalid(controls().administrativeUnit)"
+      [attr.aria-describedby]="
+        isInvalid(controls().administrativeUnit) ? errorId('administrative-unit') : null
+      "
+      optionLabel="label"
+      optionValue="value"
+    />
+    @if (isInvalid(controls().administrativeUnit)) {
+      <small [id]="errorId('administrative-unit')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+  </div>
+
+  @if (auditControls(); as audit) {
+    <div class="application-form-fields__field">
+      <label [for]="fieldId('creation-date')">{{ labels().creationDate }}</label>
+      <input
+        [id]="fieldId('creation-date')"
+        type="text"
+        pInputText
+        [formControl]="audit.creationDate"
+      />
+    </div>
+
+    <div class="application-form-fields__field">
+      <label [for]="fieldId('modification-date')">{{ labels().modificationDate }}</label>
+      <input
+        [id]="fieldId('modification-date')"
+        type="text"
+        pInputText
+        [formControl]="audit.modificationDate"
+      />
+    </div>
+
+    <div class="application-form-fields__field">
+      <label [for]="fieldId('withdrawal-date')">{{ labels().withdrawalDate }}</label>
+      <input
+        [id]="fieldId('withdrawal-date')"
+        type="text"
+        pInputText
+        [formControl]="audit.withdrawalDate"
+      />
+    </div>
+  }
+
+  <div class="application-form-fields__field application-form-fields__field--full">
+    <label [for]="fieldId('description')">{{ labels().description }}</label>
+    <textarea
+      [id]="fieldId('description')"
+      rows="4"
+      pTextarea
+      [formControl]="controls().description"
+    ></textarea>
+  </div>
+</div>

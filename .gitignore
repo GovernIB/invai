@@ -1,0 +1,17 @@
+# Excloure del repositori
+# Directoris de resultat del Maven
+target/
+# Fitxers d'Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated/
+.apt_generated_tests/
+# Fitxers d'IntelliJ IDEA
+*.iml
+.idea/
+# Fitxers de Netbeans
+nb-configuration.xml
+faces-config.NavData
+/poc-front/

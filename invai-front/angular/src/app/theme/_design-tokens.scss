@@ -1,0 +1,160 @@
+// Brand design tokens (CSS custom properties).
+//
+// Extracted from the legacy PrimeNG Lara SCSS theme so the rest of the app
+// (utility classes in `_extended-*-palette.scss`, `app.css`, `_full-calendar.scss`)
+// keeps working without depending on the removed `primeng/resources` package.
+//
+// The semantic component theming now lives in `invai-preset.ts` (PrimeNG token engine);
+// this file only provides the raw `--<color>-<shade>` variables those styles reference.
+
+@use "sass:color";
+
+@function tint($color, $percentage) {
+  @return color.mix(#fff, $color, $percentage);
+}
+
+@function shade($color, $percentage) {
+  @return color.mix(#000, $color, $percentage);
+}
+
+$colors: (
+  "green": #22c55e,
+  "yellow": #eab308,
+  "cyan": #06b6d4,
+  "pink": #ec4899,
+  "indigo": #6366f1,
+  "teal": #14b8a6,
+  "orange": #f97316,
+  "bluegray": #64748b,
+  "purple": #a855f7,
+  "red": #ff3d32,
+);
+
+// Generated accent palettes (--red-50 … --red-900, etc.)
+:root {
+  @each $name, $color in $colors {
+    @for $i from 0 through 5 {
+      @if ($i == 0) {
+        --#{$name}-50: #{tint($color, (5 - $i) * 19%)};
+      } @else {
+        --#{$name}-#{$i * 100}: #{tint($color, (5 - $i) * 19%)};
+      }
+    }
+
+    @for $i from 1 through 4 {
+      --#{$name}-#{($i + 5) * 100}: #{shade($color, $i * 15%)};
+    }
+  }
+}
+
+// Core brand / surface tokens
+:root {
+  font-family: "Noto Sans", sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-variation-settings: normal;
+  color-scheme: light;
+
+  --font-family: "Noto Sans", sans-serif;
+  --font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  --font-size: 0.9rem;
+
+  --surface-a: #ffffff;
+  --surface-b: #f9fafb;
+  --surface-c: #f3f4f6;
+  --surface-d: #e5e7eb;
+  --surface-e: #ffffff;
+  --surface-f: #ffffff;
+  --text-color: #4b5563;
+  --text-color-secondary: #6b7280;
+  --primary-color: #005aeb;
+  --primary-color-text: #ffffff;
+
+  --primary-50: #f3f8ff;
+  --primary-75: #e6effd;
+  --primary-100: #ccdefb;
+  --primary-150: #ccdefb;
+  --primary-200: #99bdf7;
+  --primary-250: #80adf5;
+  --primary-300: #669cf3;
+  --primary-350: #4d8cf1;
+  --primary-400: #337bef;
+  --primary-450: #196bed;
+  --primary-500: #005aeb;
+  --primary-550: #0051d3;
+  --primary-600: #0048bc;
+  --primary-650: #003fa4;
+  --primary-700: #00368d;
+  --primary-750: #002d76;
+  --primary-800: #00245e;
+  --primary-850: #001b47;
+  --primary-900: #00122f;
+  --primary-950: #000918;
+
+  --blue-50: #f3f8ff;
+  --blue-75: #e6effd;
+  --blue-100: #ccdefb;
+  --blue-150: #b3cef9;
+  --blue-200: #99bdf7;
+  --blue-250: #80adf5;
+  --blue-300: #669cf3;
+  --blue-350: #4d8cf1;
+  --blue-400: #337bef;
+  --blue-450: #196bed;
+  --blue-500: #005aeb;
+  --blue-550: #0051d3;
+  --blue-600: #0048bc;
+  --blue-650: #003fa4;
+  --blue-700: #00368d;
+  --blue-750: #002d76;
+  --blue-800: #00245e;
+  --blue-850: #001b47;
+  --blue-900: #00122f;
+  --blue-950: #000918;
+
+  --surface-0: #ffffff;
+  --surface-50: #f9fafb;
+  --surface-75: #f6f7f9;
+  --surface-100: #f3f4f6;
+  --surface-150: #ecedf0;
+  --surface-200: #e5e7eb;
+  --surface-250: #dbdee3;
+  --surface-300: #d1d5db;
+  --surface-350: #b6bcc5;
+  --surface-400: #9ca3af;
+  --surface-450: #838b99;
+  --surface-500: #6b7280;
+  --surface-550: #5b6470;
+  --surface-600: #4b5563;
+  --surface-650: #35404d;
+  --surface-700: #374151;
+  --surface-750: #2a3441;
+  --surface-800: #1f2937;
+  --surface-850: #182230;
+  --surface-900: #111827;
+  --surface-950: #0b121f;
+
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --content-padding: 1.25rem;
+  --inline-spacing: 0.5rem;
+  --border-radius: 6px;
+  --surface-ground: #f9fafb;
+  --surface-section: #ffffff;
+  --surface-card: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-border: #dfe7ef;
+  --surface-hover: #f6f9fc;
+  --focus-ring: 0 0 0 0.2rem #e6effd;
+  --maskbg: rgba(0, 0, 0, 0.4);
+  --highlight-bg: #eff6ff;
+  --highlight-text-color: #00245e;
+}

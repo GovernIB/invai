@@ -1,0 +1,37 @@
+@if (menuOptionsResource.isLoading()) {
+  <div class="flex flex-row items-center gap-1">
+    <p-skeleton width="10rem" height="3rem" />
+    <p-skeleton width="10rem" height="3rem" />
+  </div>
+} @else if (menuOptionsResource.error()) {
+  <div class="p-2 flex items-center gap-2">
+    <span class="text-sm opacity-60" i18n>Hi ha hagut un error al carregar el menú</span>
+    <p-button [text]="true" [label]="retryLabel" (onClick)="menuOptionsResource.reload()" />
+  </div>
+} @else {
+  <nav class="flex flex-row items-center gap-1">
+    @for (menuItem of menuItems(); track $index) {
+      <p-button
+        [attr.data-testid]="'button-' + menuItem.id?.toLowerCase() + '-testid'"
+        [ariaLabel]="menuItem.label"
+        [attr.aria-expanded]="isExpanded(menuItem)"
+        [severity]="getSeverity(menuItem)"
+        [text]="true"
+        (onClick)="toggleSidebarMenu(menuItem)"
+      >
+        @if (menuItem.icon) {
+          <i [class]="menuItem.icon + ' text-sm shrink-0'"></i>
+        }
+
+        <span class="whitespace-nowrap">
+          {{ menuItem.label }}
+        </span>
+
+        <i
+          class="pi pi-angle-down text-xs shrink-0 transition-transform duration-200"
+          [class.rotate-180]="getSeverity(menuItem) === 'primary'"
+        ></i>
+      </p-button>
+    }
+  </nav>
+}
