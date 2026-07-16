@@ -1,4 +1,4 @@
-# Scripts de Inicialización Completa de Base de Datos (`full-scripts-init`)
+# Scripts de Inicialización Completa de Base de Datos
 
 Esta carpeta contiene el conjunto de scripts SQL necesarios para la creación e inicialización completa de la base de
 datos SIVAP en Oracle. Los scripts aquí presentes permiten desplegar una base de datos desde cero, incluyendo toda la

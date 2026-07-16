@@ -12,7 +12,7 @@
     </parent>
     <groupId>es.caib.invai</groupId>
     <artifactId>invai</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
 
     <name>INVAI</name>
