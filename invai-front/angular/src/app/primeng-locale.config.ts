@@ -2,6 +2,7 @@ export const primengLocale = {
   firstDayOfWeek: 1,
   today: $localize`Avui`,
   clear: $localize`Neteja`,
+  emptyFilterMessage: $localize`No s'han trobat resultats`,
   dayNames: [
     $localize`Diumenge`,
     $localize`Dilluns`,

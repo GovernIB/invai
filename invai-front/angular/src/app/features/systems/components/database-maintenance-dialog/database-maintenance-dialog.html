@@ -1,0 +1,128 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="44rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div class="md:col-span-6">
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="database-host-server"
+          styleClass="w-full"
+          formControlName="server"
+          [ariaFilterLabel]="labels.server"
+          [attr.aria-describedby]="isInvalid(form().controls.server) ? 'database-host-server-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.server)"
+          [filter]="true"
+          [options]="serverOptions()"
+          appendTo="body"
+          dataKey="id"
+          optionLabel="label"
+        />
+        <label for="database-host-server">{{ labels.server }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.server)) {
+        <p id="database-host-server-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-6">
+      <p-floatlabel class="w-full">
+        <input
+          id="database-host-service"
+          class="w-full"
+          type="text"
+          formControlName="service"
+          maxlength="255"
+          [attr.aria-describedby]="isInvalid(form().controls.service) ? 'database-host-service-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.service)"
+          pInputText
+        />
+        <label for="database-host-service">{{ labels.service }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.service)) {
+        <p id="database-host-service-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-4">
+      <p-floatlabel class="w-full">
+        <p-inputnumber
+          inputId="database-host-port"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          formControlName="port"
+          [attr.aria-describedby]="isInvalid(form().controls.port) ? 'database-host-port-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.port)"
+          [max]="65535"
+          [min]="1"
+          [useGrouping]="false"
+        />
+        <label for="database-host-port">{{ labels.port }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.port)) {
+        <p id="database-host-port-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ portError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-8">
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="database-host-type"
+          styleClass="w-full"
+          formControlName="databaseType"
+          [ariaFilterLabel]="labels.databaseType"
+          [attr.aria-describedby]="isInvalid(form().controls.databaseType) ? 'database-host-type-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.databaseType)"
+          [filter]="true"
+          [options]="databaseTypeOptions()"
+          appendTo="body"
+          dataKey="id"
+          optionLabel="name"
+        />
+        <label for="database-host-type">{{ labels.databaseType }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.databaseType)) {
+        <p id="database-host-type-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-12">
+      <label class="mb-2 block" for="database-host-description">
+        {{ labels.observations }}
+      </label>
+      <textarea
+        id="database-host-description"
+        class="w-full"
+        rows="4"
+        formControlName="description"
+        pTextarea
+      ></textarea>
+    </div>
+  </form>
+</app-crud-entity-dialog>

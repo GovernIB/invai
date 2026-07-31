@@ -1,0 +1,87 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="technology-dialog-name"
+            class="w-full"
+            type="text"
+            maxlength="100"
+            formControlName="name"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.name) ? 'technology-dialog-name-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.name)"
+            pInputText
+          />
+          <label for="technology-dialog-name">{{ labels.name }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.name)) {
+          <p id="technology-dialog-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.name.hasError('required') || form().controls.name.hasError('pattern')
+                ? requiredError
+                : nameMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+      <div>
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="technology-dialog-layer"
+            styleClass="w-full"
+            formControlName="layerId"
+            ariaLabelledBy="technology-dialog-layer-label"
+            appendTo="body"
+            [ariaFilterLabel]="labels.layer"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.layerId) ? 'technology-dialog-layer-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.layerId)"
+            [filter]="true"
+            [options]="layerOptions()"
+            optionLabel="label"
+            optionValue="id"
+          />
+          <label id="technology-dialog-layer-label" for="technology-dialog-layer">
+            {{ labels.layer }}
+          </label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.layerId)) {
+          <p id="technology-dialog-layer-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+</app-crud-entity-dialog>

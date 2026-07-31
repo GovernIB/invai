@@ -1,0 +1,11 @@
+.section-container__header {
+  gap: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .section-container__header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

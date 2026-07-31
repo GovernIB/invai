@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, signal, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  signal,
+  ViewEncapsulation,
+} from '@angular/core';
 import { TableComponentBase } from '@shared/classes/table-component-base';
 import { MenuItem, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
@@ -9,13 +16,15 @@ import { ApplicationInfrastructureResource } from '../../applications.model';
 import {
   APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_ARIA_LABEL,
   APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_HEADER,
+  APPLICATION_INFRASTRUCTURE_TABLE_DELETE_LABEL,
   APPLICATION_INFRASTRUCTURE_TABLE_EDIT_LABEL,
-  APPLICATION_INFRASTRUCTURE_TABLE_WITHDRAW_LABEL,
+  APPLICATION_INFRASTRUCTURE_TABLE_VIEW_LABEL,
 } from './application-infrastructure-table.i18n';
 
 export enum ApplicationInfrastructureTableAction {
-  Edit = 1,
-  Withdraw = 2,
+  View = 1,
+  Edit,
+  Delete,
 }
 
 @Component({
@@ -23,28 +32,45 @@ export enum ApplicationInfrastructureTableAction {
   standalone: true,
   imports: [Button, Menu, TableModule],
   templateUrl: './application-infrastructure-table.html',
-  styleUrl: './application-infrastructure-table.scss',
+  styleUrls: [
+    './application-infrastructure-table.scss',
+    '../../../../shared/styles/development-maintenance-table.scss',
+  ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationInfrastructureTable extends TableComponentBase<ApplicationInfrastructureResource> {
+  first = input(0);
+  isReadOnly = input(false);
   private readonly selectedRow = signal<ApplicationInfrastructureResource | null>(null);
 
   protected readonly PrimeIcons = PrimeIcons;
+  protected readonly ApplicationInfrastructureTableAction =
+    ApplicationInfrastructureTableAction;
   protected readonly actionsHeader = APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_HEADER;
   protected readonly actionsAriaLabel = APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_ARIA_LABEL;
-  protected readonly rowActions: MenuItem[] = [
-    {
-      label: APPLICATION_INFRASTRUCTURE_TABLE_EDIT_LABEL,
-      icon: PrimeIcons.PENCIL,
-      command: () => this.emitRowAction(ApplicationInfrastructureTableAction.Edit),
-    },
-    {
-      label: APPLICATION_INFRASTRUCTURE_TABLE_WITHDRAW_LABEL,
-      icon: PrimeIcons.TIMES,
-      command: () => this.emitRowAction(ApplicationInfrastructureTableAction.Withdraw),
-    },
-  ];
+  protected readonly rowActions = computed<MenuItem[]>(() => {
+    const isMutationDisabled = this.isReadOnly() || Boolean(this.selectedRow()?.deletedAt);
+    return [
+      {
+        label: APPLICATION_INFRASTRUCTURE_TABLE_VIEW_LABEL,
+        icon: PrimeIcons.EYE,
+        command: () => this.emitRowAction(ApplicationInfrastructureTableAction.View),
+      },
+      {
+        label: APPLICATION_INFRASTRUCTURE_TABLE_EDIT_LABEL,
+        icon: PrimeIcons.PENCIL,
+        disabled: isMutationDisabled,
+        command: () => this.emitRowAction(ApplicationInfrastructureTableAction.Edit),
+      },
+      {
+        label: APPLICATION_INFRASTRUCTURE_TABLE_DELETE_LABEL,
+        icon: PrimeIcons.TRASH,
+        disabled: isMutationDisabled,
+        command: () => this.emitRowAction(ApplicationInfrastructureTableAction.Delete),
+      },
+    ];
+  });
 
   protected openActionsMenu(
     event: Event,

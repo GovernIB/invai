@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Breadcrumbs } from '@core/components/breadcrumbs';
 import { FULL_ROUTES } from '@core/components/main-layout/routes/full.routes';
+import { ServerErrorDialog } from '@core/components/server-error-dialog/server-error-dialog';
+import { InitialNavigationLoadingService } from '@core/services/initial-navigation-loading.service';
 import HelpModalComponent from '@core/components/user-menu/components/help-modal/help-modal';
 import { UserMenuComponent } from '@core/components/user-menu/user-menu.component';
 import { MenuItem } from 'primeng/api';
@@ -17,6 +19,7 @@ import { MainLayout } from './core/components/main-layout/main-layout';
     ButtonModule,
     DividerModule,
     HelpModalComponent,
+    ServerErrorDialog,
     MainLayout,
     RouterLink,
     RouterOutlet,
@@ -28,6 +31,7 @@ import { MainLayout } from './core/components/main-layout/main-layout';
   styleUrl: './app.scss',
 })
 export class App {
+  protected readonly isInitialLoading = inject(InitialNavigationLoadingService).isLoading;
   protected readonly title = 'INVAI';
   protected readonly homeRoute = FULL_ROUTES.HOME;
   protected readonly homeAriaLabel = APP_HOME_ARIA_LABEL;

@@ -1,0 +1,71 @@
+<section class="flex flex-column gap-4" [attr.aria-label]="title">
+  <app-section-actions
+    class="flex justify-content-end"
+    [(isFiltersCollapsed)]="isFiltersCollapsed"
+    [(quickSearchValue)]="quickSearchTerm"
+    [(selectedColumns)]="selectedColumns"
+    [availableColumns]="selectableColumns()"
+    [addButtonAriaLabel]="addAriaLabel"
+    [filtersSelected]="selectedFilters()"
+    [hideExportButton]="true"
+    [isSearchLoading]="isSearchIndicatorLoading()"
+    [quickSearchAriaLabel]="quickSearchAriaLabel"
+    [quickSearchPlaceholder]="quickSearchPlaceholder"
+    (onAdd)="openCreateDialog()"
+    (onQuickSearchChange)="onQuickSearchChange($event)"
+  />
+
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <app-field-filters-form [form]="filtersForm" [labels]="filterLabels" />
+    </app-search-filters>
+  }
+
+  <app-fields-table
+    [columns]="sortedSelectedColumns()"
+    [first]="tableFirst()"
+    [isInitialLoading]="isInitialTableLoading()"
+    [isLoading]="isLoading()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+
+  @if (isDialogVisible()) {
+    <app-field-dialog
+      [(visible)]="isDialogVisible"
+      [canRestore]="selectedEntityCanRestore()"
+      [form]="entityForm"
+      [isDeleting]="isDeleting()"
+      [isLoading]="isEntityLoading()"
+      [isSaving]="isSaving()"
+      [mode]="dialogMode()"
+      (cancelEdit)="cancelEntityEdit()"
+      (closed)="closeEntityDialog()"
+      (deactivate)="deactivateSelectedEntity()"
+      (edit)="startEntityEdit()"
+      (restore)="restoreSelectedEntity()"
+      (submitForm)="submitEntity()"
+    />
+  }
+
+  @if (isDeleteDialogVisible()) {
+    <app-confirmation-dialog
+      [(visible)]="isDeleteDialogVisible"
+      [cancelAriaLabel]="deleteDialogCancelAriaLabel"
+      [cancelLabel]="deleteDialogCancelLabel"
+      [confirmAriaLabel]="deleteDialogConfirmAriaLabel"
+      [confirmLabel]="deleteDialogConfirmLabel"
+      [message]="deleteDialogMessage()"
+      [title]="deleteDialogTitle"
+      (cancel)="closeDeleteDialog()"
+      (confirm)="confirmDelete()"
+    />
+  }
+</section>

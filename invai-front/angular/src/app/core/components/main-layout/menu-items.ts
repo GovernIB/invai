@@ -3,6 +3,15 @@ import {
   APPLICATIONS_ROUTES_LOC,
 } from '@features/applications/applications.routes.i18n';
 import { DOCUMENTATION_ROUTES_LOC } from '@features/documentation/documentation.routes.i18n';
+import { MAINTENANCE_TABS } from '@features/maintenances/maintenances.constants';
+import {
+  MAINTENANCES_ROUTES_LABELS,
+  MAINTENANCES_ROUTES_LOC,
+} from '@features/maintenances/maintenances.routes.i18n';
+import {
+  SYSTEMS_ROUTES_LABELS,
+  SYSTEMS_ROUTES_LOC,
+} from '@features/systems/systems.routes.i18n';
 import { MenuItem, PrimeIcons } from 'primeng/api';
 
 export const MENU_ITEMS: MenuItem[] = [
@@ -23,6 +32,22 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     label: 'Informes',
     icon: PrimeIcons.CHART_BAR,
+  },
+  {
+    label: SYSTEMS_ROUTES_LABELS.BASE,
+    icon: PrimeIcons.SERVER,
+    routerLink: SYSTEMS_ROUTES_LOC.BASE,
+  },
+  {
+    label: MAINTENANCES_ROUTES_LABELS.BASE,
+    icon: PrimeIcons.WRENCH,
+    fragment: `/${MAINTENANCES_ROUTES_LOC.BASE}`,
+    items: MAINTENANCE_TABS.map((tab) => ({
+      id: tab.id,
+      label: tab.label,
+      icon: tab.icon,
+      routerLink: tab.routerLink,
+    })),
   },
 ];
 

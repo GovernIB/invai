@@ -39,6 +39,7 @@ export class SectionActionsComponent {
   hideColumnsButton = input(false);
   hideExportButton = input(false);
   hideAddButton = input(false);
+  disableAddButton = input(false);
   isExportLoading = input(false);
   isSearchLoading = input(false);
   filtersSelected = input<number | null>(null);

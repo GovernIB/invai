@@ -1,17 +1,35 @@
 import { KeyLabel } from '@models/table.model';
+import { CommissionType } from '@features/commissions/commissions.model';
 import {
   Application,
-  ApplicationDatabase,
-  ApplicationServer,
+  ApplicationInfrastructureStatus,
+  ApplicationStatus,
+  DevelopmentModality,
+  DevelopmentStandardAdaption,
   SelectOption,
 } from './applications.model';
 
-export const APPLICATION_STATUS_ACTIVE_ID = 1;
+export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
+  [ApplicationStatus.ACTIVE]: $localize`Actiu`,
+  [ApplicationStatus.INACTIVE]: $localize`Inactiu`,
+};
 
-export const APPLICATION_STATUS_OPTIONS: SelectOption<number>[] = [
-  { label: $localize`Actiu`, value: APPLICATION_STATUS_ACTIVE_ID },
-  { label: $localize`Manteniment`, value: 2 },
-  { label: $localize`Deprecat`, value: 3 },
+export const APPLICATION_STATUS_ACTIVE_ID = ApplicationStatus.ACTIVE;
+
+export const APPLICATION_COMMISSION_TYPE_LABELS: Record<CommissionType, string> = {
+  [CommissionType.TECNICA]: $localize`Tècnica`,
+  [CommissionType.SUPERIOR]: $localize`Superior`,
+};
+
+export const APPLICATION_STATUS_OPTIONS: SelectOption<ApplicationStatus>[] = [
+  {
+    label: APPLICATION_STATUS_LABELS[ApplicationStatus.ACTIVE],
+    value: ApplicationStatus.ACTIVE,
+  },
+  {
+    label: APPLICATION_STATUS_LABELS[ApplicationStatus.INACTIVE],
+    value: ApplicationStatus.INACTIVE,
+  },
 ];
 
 export const APPLICATIONS_TABLE_COLUMNS: KeyLabel[] = [
@@ -44,43 +62,177 @@ export const APPLICATIONS_TABLE_COLUMNS: KeyLabel[] = [
     minWidth: '10.5rem',
   },
   { key: 'status', label: $localize`Estat`, sortBy: 'status.name', minWidth: '7rem' },
+  { key: 'environment', label: $localize`Entorn`, minWidth: '8rem' },
+  { key: 'database', label: $localize`Bases de dades`, minWidth: '11rem' },
+  { key: 'server', label: $localize`Servidor`, minWidth: '11rem' },
+  { key: 'responsible', label: $localize`Responsables`, minWidth: '11rem' },
 ];
 
 export const APPLICATION_SERVERS_TABLE_COLUMNS: KeyLabel[] = [
-  { key: 'environment', label: $localize`Entorn`, sortBy: 'environment', minWidth: '8rem' },
-  { key: 'server', label: $localize`Servidor`, sortBy: 'server', minWidth: '17rem' },
-  { key: 'instance', label: $localize`Instància`, sortBy: 'instance', minWidth: '10rem' },
-  { key: 'port', label: $localize`Port`, sortBy: 'port', minWidth: '6rem' },
-  { key: 'version', label: $localize`Versió`, sortBy: 'version', minWidth: '10rem' },
-  { key: 'status', label: $localize`Estat`, sortBy: 'status', minWidth: '8rem' },
+  {
+    key: 'environment',
+    label: $localize`Entorn`,
+    sortBy: 'system.server.environment.name',
+    minWidth: '8rem',
+  },
+  {
+    key: 'server',
+    label: $localize`Servidor`,
+    sortBy: 'system.server.name',
+    minWidth: '17rem',
+  },
+  {
+    key: 'instance',
+    label: $localize`Instància`,
+    sortBy: 'system.instance',
+    minWidth: '10rem',
+  },
+  { key: 'port', label: $localize`Port`, sortBy: 'system.port', minWidth: '6rem' },
+  { key: 'version', label: $localize`Versió`, sortBy: 'system.version', minWidth: '10rem' },
+  { key: 'status', label: $localize`Estat`, sortBy: 'deletedAt', minWidth: '8rem' },
   {
     key: 'observations',
     label: $localize`Observacions`,
-    sortBy: 'observations',
+    sortBy: 'system.description',
     minWidth: '10rem',
   },
 ];
 
 export const APPLICATION_DATABASES_TABLE_COLUMNS: KeyLabel[] = [
-  { key: 'environment', label: $localize`Entorn`, sortBy: 'environment', minWidth: '8rem' },
-  { key: 'server', label: $localize`Servidor`, sortBy: 'server', minWidth: '17rem' },
-  { key: 'version', label: $localize`Versió`, sortBy: 'version', minWidth: '10rem' },
+  {
+    key: 'environment',
+    label: $localize`Entorn`,
+    sortBy: 'database.server.environment.name',
+    minWidth: '8rem',
+  },
+  {
+    key: 'server',
+    label: $localize`Servidor`,
+    sortBy: 'database.server.name',
+    minWidth: '17rem',
+  },
   {
     key: 'database',
     label: $localize`Base de dades`,
-    sortBy: 'database',
+    sortBy: 'database.service',
     minWidth: '11rem',
   },
-  { key: 'service', label: $localize`Servei`, sortBy: 'service', minWidth: '9rem' },
-  { key: 'port', label: $localize`Port`, sortBy: 'port', minWidth: '6rem' },
-  { key: 'type', label: $localize`Tipus`, sortBy: 'type', minWidth: '7rem' },
+  { key: 'port', label: $localize`Port`, sortBy: 'database.port', minWidth: '6rem' },
+  {
+    key: 'type',
+    label: $localize`Tipus`,
+    sortBy: 'database.databaseType.name',
+    minWidth: '7rem',
+  },
+  { key: 'status', label: $localize`Estat`, sortBy: 'deletedAt', minWidth: '8rem' },
   {
     key: 'observations',
     label: $localize`Observacions`,
-    sortBy: 'observations',
+    sortBy: 'database.description',
     minWidth: '10rem',
   },
 ];
+
+export const APPLICATION_SYSTEM_CATALOG_COLUMNS: KeyLabel[] = [
+  { key: 'server', label: $localize`Servidor`, sortBy: 'server.name', minWidth: '15rem' },
+  {
+    key: 'environment',
+    label: $localize`Entorn`,
+    sortBy: 'server.environment.name',
+    minWidth: '10rem',
+  },
+  { key: 'instance', label: $localize`Instància`, sortBy: 'instance', minWidth: '9rem' },
+  { key: 'port', label: $localize`Port`, sortBy: 'port', minWidth: '6rem' },
+  { key: 'version', label: $localize`Versió`, sortBy: 'version', minWidth: '8rem' },
+  {
+    key: 'description',
+    label: $localize`Observacions`,
+    sortBy: 'description',
+    minWidth: '12rem',
+  },
+];
+
+export const APPLICATION_DATABASE_CATALOG_COLUMNS: KeyLabel[] = [
+  {
+    key: 'server',
+    label: $localize`Servidor de BD`,
+    sortBy: 'server.name',
+    minWidth: '15rem',
+  },
+  {
+    key: 'environment',
+    label: $localize`Entorn`,
+    sortBy: 'server.environment.name',
+    minWidth: '10rem',
+  },
+  { key: 'service', label: $localize`Servei / SID`, sortBy: 'service', minWidth: '10rem' },
+  { key: 'port', label: $localize`Port`, sortBy: 'port', minWidth: '6rem' },
+  {
+    key: 'databaseType',
+    label: $localize`Proveïdor`,
+    sortBy: 'databaseType.name',
+    minWidth: '9rem',
+  },
+  {
+    key: 'description',
+    label: $localize`Observacions`,
+    sortBy: 'description',
+    minWidth: '12rem',
+  },
+];
+
+export const APPLICATION_INFRASTRUCTURE_STATUS_LABELS: Record<
+  ApplicationInfrastructureStatus,
+  string
+> = {
+  [ApplicationInfrastructureStatus.ACTIVE]: $localize`Actiu`,
+  [ApplicationInfrastructureStatus.INACTIVE]: $localize`Inactiu`,
+};
+
+export const APPLICATION_INFRASTRUCTURE_STATUS_OPTIONS: SelectOption<ApplicationInfrastructureStatus>[] = [
+  {
+    label: APPLICATION_INFRASTRUCTURE_STATUS_LABELS[ApplicationInfrastructureStatus.ACTIVE],
+    value: ApplicationInfrastructureStatus.ACTIVE,
+  },
+  {
+    label: APPLICATION_INFRASTRUCTURE_STATUS_LABELS[ApplicationInfrastructureStatus.INACTIVE],
+    value: ApplicationInfrastructureStatus.INACTIVE,
+  },
+];
+
+export const APPLICATION_DEVELOPMENT_MODALITY_LABELS: Record<DevelopmentModality, string> = {
+  [DevelopmentModality.INTERNAL]: $localize`Desenvolupament intern`,
+  [DevelopmentModality.EXTERNAL]: $localize`Desenvolupament extern`,
+  [DevelopmentModality.MIXED]: $localize`Desenvolupament mixt`,
+};
+
+export const APPLICATION_DEVELOPMENT_MODALITY_OPTIONS: SelectOption<DevelopmentModality>[] = [
+  DevelopmentModality.INTERNAL,
+  DevelopmentModality.EXTERNAL,
+  DevelopmentModality.MIXED,
+].map((value) => ({
+  value,
+  label: APPLICATION_DEVELOPMENT_MODALITY_LABELS[value],
+}));
+
+export const APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_LABELS: Record<
+  DevelopmentStandardAdaption,
+  string
+> = {
+  [DevelopmentStandardAdaption.CONFORMING]: $localize`Conforme`,
+  [DevelopmentStandardAdaption.PARTIALLY_CONFORMING]: $localize`Parcialment conforme`,
+  [DevelopmentStandardAdaption.NON_CONFORMING]: $localize`No conforme`,
+};
+
+export const APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_OPTIONS: SelectOption<DevelopmentStandardAdaption>[] =
+  [
+    DevelopmentStandardAdaption.CONFORMING,
+    DevelopmentStandardAdaption.PARTIALLY_CONFORMING,
+    DevelopmentStandardAdaption.NON_CONFORMING,
+  ].map((value) => ({
+    value,
+    label: APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_LABELS[value],
+  }));
 
 export const APPLICATIONS_SEED_DATA: Application[] = [
   {
@@ -93,7 +245,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     scope: 'Departamental',
     commission: 'Equip directiu',
     administrativeUnit: 'Direcció General',
-    status: 'Activa',
+    status: ApplicationStatus.ACTIVE,
     description: 'Aplicació interna',
     creationDate: '19/03/2024',
     modificationDate: '19/03/2025',
@@ -109,7 +261,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     scope: 'Departamental',
     commission: 'Equip directiu',
     administrativeUnit: 'Direcció General',
-    status: 'Activa',
+    status: ApplicationStatus.ACTIVE,
     description: 'Gestió funcional',
     creationDate: '19/03/2024',
     modificationDate: '19/03/2025',
@@ -125,80 +277,11 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     scope: 'Departamental',
     commission: 'Equip directiu',
     administrativeUnit: 'Direcció General',
-    status: 'Activa',
+    status: ApplicationStatus.ACTIVE,
     description: 'Aplicació corporativa',
     creationDate: '19/03/2024',
     modificationDate: '19/03/2025',
     withdrawalDate: '',
-  },
-];
-
-export const APPLICATION_SERVERS_SEED_DATA: ApplicationServer[] = [
-  {
-    id: 'server-1',
-    environment: 'Producció',
-    server: 'exappdb01.caib.es/bbdd02.caib.es',
-    instance: 'PostgreSQL 15',
-    port: '5432',
-    version: 'invai_svc',
-    status: 'Actiu',
-    observations: '5432',
-  },
-  {
-    id: 'server-2',
-    environment: 'Preproducció',
-    server: 'exappdb02.caib.es/bbdd02.caib.es',
-    instance: 'PostgreSQL 15',
-    port: '5432',
-    version: 'invai_svc',
-    status: 'Actiu',
-    observations: '',
-  },
-  {
-    id: 'server-3',
-    environment: 'Desenvolupament',
-    server: 'exappdb03.caib.es/bbdd02.caib.es',
-    instance: 'PostgreSQL 15',
-    port: '5432',
-    version: 'invai_svc',
-    status: 'Actiu',
-    observations: '',
-  },
-];
-
-export const APPLICATION_DATABASES_SEED_DATA: ApplicationDatabase[] = [
-  {
-    id: 'database-1',
-    environment: 'Producció',
-    server: 'exappdb01.caib.es/bbdd02.caib.es',
-    version: 'PostgreSQL 15',
-    database: 'INVAI_PRD',
-    service: 'invai_svc',
-    port: '5432',
-    type: 'noSQL',
-    observations: 'Relacional',
-  },
-  {
-    id: 'database-2',
-    environment: 'Preproducció',
-    server: 'exappdb02.caib.es/bbdd02.caib.es',
-    version: 'PostgreSQL 15',
-    database: 'INVAI_PRE',
-    service: 'invai_svc',
-    port: '5432',
-    type: 'noSQL',
-    observations: 'Relacional',
-  },
-  {
-    id: 'database-3',
-    environment: 'Desenvolupament',
-    server: 'exappdb03.caib.es/bbdd02.caib.es',
-    version: 'PostgreSQL 15',
-    database: 'INVAI_DEV',
-    service: 'invai_svc',
-    port: '5432',
-    type: 'noSQL',
-    observations: 'Relacional',
   },
 ];
 
@@ -214,11 +297,10 @@ export const APPLICATION_SCOPE_OPTIONS: SelectOption[] = [
   { label: $localize`Departamental`, value: 'Departamental' },
 ];
 
-export const APPLICATION_COMMISSION_OPTIONS: SelectOption[] = [
-  { label: $localize`A04026930`, value: 'A04026930' },
-];
-
 export const APPLICATION_ADMINISTRATIVE_UNIT_OPTIONS: SelectOption[] = [
   { label: $localize`DGEDOT`, value: 'DGEDOT' },
   { label: $localize`Direcció General`, value: 'Direcció General' },
 ];
+
+export const APPLICATION_CONSELLERIA_MOCK_VALUE =
+  $localize`Conselleria d'Educació, Universitats i Ocupació`;

@@ -1,42 +1,148 @@
-<div class="application-systems-databases">
-  <app-application-infrastructure-list
-    [columns]="serverColumns"
-    [resourceName]="serverName"
-    [sourceItems]="servers"
-    [title]="serversTitle"
-  />
+<app-application-detail-section-layout
+  titleId="application-systems-databases-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('systems-databases')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
 
-  <app-application-infrastructure-list
-    [columns]="databaseColumns"
-    [resourceName]="databaseName"
-    [sourceItems]="databases"
-    [title]="databasesTitle"
-  />
-
-  <div class="application-systems-databases__footer">
-    <div class="application-systems-databases__documentation">
-      <p-button
-        type="button"
-        [outlined]="true"
-        [label]="documentationLabel"
-        [ariaLabel]="documentationAriaLabel"
-        [icon]="documentationIcon"
-        iconPos="right"
-        (onClick)="onDocumentation()"
-      />
-    </div>
-
-    <div
-      class="application-systems-databases__observations"
-      role="group"
-      [attr.aria-labelledby]="observationsLabelId"
+  <div class="application-systems-databases">
+    <app-application-infrastructure-list
+      [appliedStatus]="appliedServerStatus()"
+      [columns]="serverColumns"
+      [filtersButtonAriaLabel]="serversFiltersAriaLabel"
+      [filtersSelected]="selectedServerFilters()"
+      [first]="serverFirst()"
+      [isLoading]="isServersLoading()"
+      [isReadOnly]="!detailState.isEditing('systems-databases')"
+      [itemsList]="servers()"
+      [resourceName]="serverName"
+      [title]="serversTitle"
+      (filterReset)="onServerFilterReset()"
+      (filterSearch)="onServerFilterSearch()"
+      (addRequested)="openSystemCreateDialog()"
+      (pageChange)="onServersPageChange($event)"
+      (rowAction)="onSystemTableAction($event)"
     >
-      <label [id]="observationsLabelId" [for]="observationsId">{{ observationsLabel }}</label>
-      <p-editor
-        [id]="observationsId"
-        [formControl]="detailState.systemsDatabasesForm.controls.observations"
-        [style]="{ height: '10rem' }"
+      <app-application-server-filters-form
+        [environmentOptions]="environmentOptions()"
+        [form]="serverFiltersForm"
+        [labels]="serverFilterLabels"
+        [serverOptions]="serverOptions()"
       />
+    </app-application-infrastructure-list>
+
+    <app-application-infrastructure-list
+      [appliedStatus]="appliedDatabaseStatus()"
+      [columns]="databaseColumns"
+      [filtersButtonAriaLabel]="databasesFiltersAriaLabel"
+      [filtersSelected]="selectedDatabaseFilters()"
+      [first]="databaseFirst()"
+      [isLoading]="isDatabasesLoading()"
+      [isReadOnly]="!detailState.isEditing('systems-databases')"
+      [itemsList]="databases()"
+      [resourceName]="databaseName"
+      [title]="databasesTitle"
+      (filterReset)="onDatabaseFilterReset()"
+      (filterSearch)="onDatabaseFilterSearch()"
+      (addRequested)="openDatabaseCreateDialog()"
+      (pageChange)="onDatabasesPageChange($event)"
+      (rowAction)="onDatabaseTableAction($event)"
+    >
+      <app-application-database-filters-form
+        [databaseOptions]="databaseOptions()"
+        [environmentOptions]="environmentOptions()"
+        [form]="databaseFiltersForm"
+        [labels]="databaseFilterLabels"
+      />
+    </app-application-infrastructure-list>
+
+    <div class="application-systems-databases__footer">
+      <div class="application-systems-databases__documentation">
+        <p-button
+          type="button"
+          [outlined]="true"
+          [label]="documentationLabel"
+          [ariaLabel]="documentationAriaLabel"
+          [icon]="documentationIcon"
+          iconPos="right"
+          (onClick)="onDocumentation()"
+        />
+      </div>
+
+      <div
+        class="application-systems-databases__observations"
+        role="group"
+        [attr.aria-labelledby]="observationsLabelId"
+      >
+        <label [id]="observationsLabelId" [for]="observationsId">{{ observationsLabel }}</label>
+        <p-editor
+          [id]="observationsId"
+          [formControl]="detailState.systemsDatabasesForm.controls.observations"
+          [readonly]="!detailState.isEditing('systems-databases')"
+          [style]="{ height: '10rem' }"
+        />
+      </div>
     </div>
   </div>
-</div>
+</app-application-detail-section-layout>
+
+@if (systemDialogVisible()) {
+  <app-application-system-relation-dialog
+    [(visible)]="systemDialogVisible"
+    [canDeactivate]="canMutateSelectedSystemRelation()"
+    [canEdit]="canEditSelectedSystemRelation()"
+    [catalog]="systemCatalog()"
+    [first]="systemCatalogFirst()"
+    [form]="systemRelationForm"
+    [isLoading]="isSystemCatalogLoading()"
+    [isSaving]="isSystemRelationSaving()"
+    [mode]="systemDialogMode()"
+    (cancelEdit)="cancelSystemEdit()"
+    (closed)="closeSystemDialog()"
+    (deactivate)="deleteSelectedSystem()"
+    (edit)="startSystemEdit()"
+    (pageChange)="onSystemCatalogPageChange($event)"
+    (submitForm)="submitSystemRelation()"
+  />
+}
+
+@if (databaseDialogVisible()) {
+  <app-application-database-relation-dialog
+    [(visible)]="databaseDialogVisible"
+    [canDeactivate]="canMutateSelectedDatabaseRelation()"
+    [canEdit]="canEditSelectedDatabaseRelation()"
+    [catalog]="databaseCatalog()"
+    [first]="databaseCatalogFirst()"
+    [form]="databaseRelationForm"
+    [isLoading]="isDatabaseCatalogLoading()"
+    [isSaving]="isDatabaseRelationSaving()"
+    [mode]="databaseDialogMode()"
+    (cancelEdit)="cancelDatabaseEdit()"
+    (closed)="closeDatabaseDialog()"
+    (deactivate)="deleteSelectedDatabase()"
+    (edit)="startDatabaseEdit()"
+    (pageChange)="onDatabaseCatalogPageChange($event)"
+    (submitForm)="submitDatabaseRelation()"
+  />
+}
+
+@if (deleteDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="deleteDialogVisible"
+    [cancelLabel]="deleteCancel"
+    [confirmLabel]="deleteConfirm"
+    [message]="deleteMessage()"
+    [title]="deleteTitle()"
+    (cancel)="closeDeleteDialog()"
+    (confirm)="confirmDelete()"
+  />
+}

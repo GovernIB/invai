@@ -1,0 +1,47 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="72rem"
+  [ariaLabels]="actionAriaLabels"
+  [canDeactivate]="canDeactivate()"
+  [canEdit]="canEdit()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="submitForm.emit()"
+>
+  <div
+    role="group"
+    aria-labelledby="application-system-relation-selection-label"
+    [attr.aria-describedby]="isInvalid() ? 'application-system-relation-selection-error' : null"
+    [attr.aria-invalid]="isInvalid()"
+  >
+    <span id="application-system-relation-selection-label" class="sr-only">
+      {{ title() }}
+    </span>
+    <app-application-infrastructure-catalog-table
+      [columns]="columns"
+      [first]="mode() === 'view' ? 0 : first()"
+      [isLoading]="isLoading()"
+      [isReadOnly]="mode() === 'view'"
+      [itemsList]="displayedCatalog()"
+      [selection]="form().controls.system.value"
+      (pageChange)="pageChange.emit($event)"
+      (selectionChange)="select($event)"
+    />
+    @if (isInvalid()) {
+      <p
+        id="application-system-relation-selection-error"
+        class="mb-0 mt-2 text-sm text-red-600"
+        role="alert"
+      >
+        {{ requiredError }}
+      </p>
+    }
+  </div>
+</app-crud-entity-dialog>

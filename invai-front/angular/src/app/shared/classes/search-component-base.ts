@@ -8,13 +8,17 @@ import {
   fnCountSelectedFilters,
   fnGetPaginatedBody,
   fnGetVisibleColumns,
+  fnSetColumnVisibility,
   fnTrimObjectStrings,
 } from '@shared/utils/table.utils';
+
+const STATUS_COLUMN_KEY = 'status';
 
 @Directive({ standalone: true })
 export abstract class SearchComponentBase<TItem, TFilters extends object> implements OnInit {
   protected abstract readonly ALL_TABLE_COLUMNS: KeyLabel[];
   protected readonly DEFAULT_TABLE_COLUMNS: KeyLabel[] | null = null;
+  protected readonly DEFAULT_HIDDEN_TABLE_COLUMN_KEYS: string[] = [STATUS_COLUMN_KEY];
   protected readonly REQUIRED_TABLE_COLUMN_KEYS: string[] = [];
 
   protected readonly fb = inject(FormBuilder);
@@ -30,9 +34,12 @@ export abstract class SearchComponentBase<TItem, TFilters extends object> implem
   itemsList = signal<PaginatedList<TItem>>(EMPTY_LIST as PaginatedList<TItem>);
   filterExport: TFilters | null = null;
   paginatedBodyInfo: PaginatedBodyInfo | null = null;
+  private appliedStatusFilter: unknown;
 
   selectableColumns = computed(() =>
-    this.ALL_TABLE_COLUMNS.filter((column) => !this.REQUIRED_TABLE_COLUMN_KEYS.includes(column.key)),
+    this.ALL_TABLE_COLUMNS.filter(
+      (column) => !this.REQUIRED_TABLE_COLUMN_KEYS.includes(column.key),
+    ),
   );
 
   sortedSelectedColumns = computed(() =>
@@ -45,24 +52,59 @@ export abstract class SearchComponentBase<TItem, TFilters extends object> implem
   ngOnInit() {
     const initialColumns = this.DEFAULT_TABLE_COLUMNS ?? this.ALL_TABLE_COLUMNS;
     this.selectedColumns.set(
-      initialColumns.filter((column) => !this.REQUIRED_TABLE_COLUMN_KEYS.includes(column.key)),
+      initialColumns.filter(
+        (column) =>
+          !this.REQUIRED_TABLE_COLUMN_KEYS.includes(column.key) &&
+          !this.DEFAULT_HIDDEN_TABLE_COLUMN_KEYS.includes(column.key),
+      ),
     );
-    this.onSearch();
+    this.synchronizeStatusColumnSelection(true);
+    this.initializeResults();
   }
 
   onSearch($event?: TableLazyLoadEvent) {
+    const filters = this.filterExport ?? this.updateSearchState($event);
+    this.paginatedBodyInfo = fnGetPaginatedBody($event);
+    this.fetchFilteredList(filters, $event);
+  }
+
+  protected applyFiltersAndSearch($event?: TableLazyLoadEvent): void {
+    const filters = this.updateSearchState($event);
+    this.fetchFilteredList(filters, $event);
+  }
+
+  protected updateSearchState($event?: TableLazyLoadEvent): TFilters {
+    this.synchronizeStatusColumnSelection();
     const filters = this.parseFormToFilters();
     this.filterExport = filters;
     this.paginatedBodyInfo = fnGetPaginatedBody($event);
-    this.fetchFilteredList(filters, $event);
     this.selectedFilters.set(fnCountSelectedFilters(this.filtersForm));
     this.isSubmitted.set(true);
+    return filters;
   }
 
   reset(): void {
     this.filtersForm.reset();
-    this.selectedFilters.set(0);
-    this.onSearch();
+    this.synchronizeStatusColumnSelection(true);
+    this.applyFiltersAndSearch();
+  }
+
+  protected synchronizeStatusColumnSelection(force = false): void {
+    const statusControl = this.filtersForm.get(STATUS_COLUMN_KEY);
+    if (!statusControl) return;
+
+    const status = statusControl.value;
+    if (!force && Object.is(status, this.appliedStatusFilter)) return;
+
+    this.selectedColumns.set(
+      fnSetColumnVisibility(
+        this.ALL_TABLE_COLUMNS,
+        this.selectedColumns(),
+        STATUS_COLUMN_KEY,
+        status == null,
+      ),
+    );
+    this.appliedStatusFilter = status;
   }
 
   protected onExport(): void {
@@ -80,8 +122,14 @@ export abstract class SearchComponentBase<TItem, TFilters extends object> implem
 
   protected abstract fetchFilteredList(filters: TFilters, $event?: TableLazyLoadEvent): void;
 
+  protected initializeResults(): void {
+    this.applyFiltersAndSearch();
+  }
+
   protected parseFormToFilters(): TFilters {
-    return fnTrimObjectStrings(this.filtersForm.getRawValue() as Record<string, unknown>) as TFilters;
+    return fnTrimObjectStrings(
+      this.filtersForm.getRawValue() as Record<string, unknown>,
+    ) as TFilters;
   }
 
   protected exportExcel(): void {}

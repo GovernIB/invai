@@ -1,6 +1,6 @@
 {
   "name": "invai-front",
-  "version": "0.0.0",
+  "version": "1.0.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config=proxy.dev.conf.json",
@@ -15,7 +15,9 @@
     "preview:i18n": "npm run build:i18n && live-server dist/invai_front/browser --mount=/invaifront:dist/invai_front/browser --open=/invaifront/ca/",
     "i18n": "ng extract-i18n --format xlf --output-path src/locale --out-file messages.xml",
     "watch": "ng build --watch --configuration=development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed"
   },
   "prettier": {
     "printWidth": 100,
@@ -55,7 +57,10 @@
     "@angular/cli": "^21.1.5",
     "@angular/compiler-cli": "^21.1.0",
     "@angular/localize": "^21.1.5",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.1.12",
+    "@types/node": "^24.13.3",
+    "dotenv": "^17.4.2",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.12",

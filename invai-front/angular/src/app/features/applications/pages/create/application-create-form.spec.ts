@@ -1,10 +1,16 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CommissionType } from '@features/commissions/commissions.model';
 import { MessageService } from 'primeng/api';
 import { of, throwError } from 'rxjs';
 
+import { ApplicationStatus } from '../../applications.model';
 import { ApplicationCreateFormGroup } from '../../forms/application-form.factory';
-import { ApplicationOptionsService } from '../../services/application-options.service';
+import {
+  ApplicationCommissionOption,
+  ApplicationSelectOptions,
+} from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
 import { ApplicationCreateForm } from './application-create-form';
 
@@ -16,10 +22,27 @@ class ResizeObserverMock implements ResizeObserver {
 
 globalThis.ResizeObserver ??= ResizeObserverMock;
 
+const OPTIONS: ApplicationSelectOptions = {
+  categories: [{ label: 'DRASSANA', value: 1 }],
+  informationSystems: [{ label: 'Instrumental', value: 2 }],
+  scopes: [{ label: 'Departamental', value: 3 }],
+  commissions: [
+    {
+      label: 'Comissió tècnica',
+      value: 4,
+      expedientNumber: 'EXP-4',
+      approvalDate: '2026-07-14',
+      commissionType: CommissionType.TECNICA,
+    },
+  ],
+  administrativeUnits: [{ label: 'DGEDOT', value: 5 }],
+};
+
 describe('ApplicationCreateForm', () => {
   let fixture: ComponentFixture<ApplicationCreateForm>;
   let formComponent: {
     form: ApplicationCreateFormGroup;
+    selectCommission: (commission: ApplicationCommissionOption | null) => void;
     submit: () => void;
   };
   let messageService: MessageService;
@@ -36,25 +59,13 @@ describe('ApplicationCreateForm', () => {
       providers: [
         MessageService,
         { provide: ActivatedRoute, useValue: route },
-        {
-          provide: ApplicationOptionsService,
-          useValue: {
-            getOptions: () =>
-              of({
-                categories: [{ label: 'DRASSANA', value: 1 }],
-                informationSystems: [{ label: 'Instrumental', value: 2 }],
-                scopes: [{ label: 'Departamental', value: 3 }],
-                commissions: [{ label: 'A04026930', value: 4 }],
-                administrativeUnits: [{ label: 'DGEDOT', value: 5 }],
-              }),
-          },
-        },
         { provide: ApplicationsService, useValue: { create } },
         { provide: Router, useValue: router },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApplicationCreateForm);
+    fixture.componentRef.setInput('options', OPTIONS);
     formComponent = fixture.componentInstance as unknown as typeof formComponent;
     messageService = TestBed.inject(MessageService);
     fixture.detectChanges();
@@ -83,7 +94,7 @@ describe('ApplicationCreateForm', () => {
   it('submits a valid form to the server and navigates back to the list', () => {
     const addSpy = vi.spyOn(messageService, 'add');
 
-    formComponent.form.setValue({
+    formComponent.form.patchValue({
       application: 'Invai',
       category: 1,
       informationSystem: 2,
@@ -107,16 +118,14 @@ describe('ApplicationCreateForm', () => {
       admUnitId: 5,
       commissionId: 4,
       description: null,
-      statusId: 1,
+      statusId: ApplicationStatus.ACTIVE,
     });
-    expect(addSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ severity: 'success' }),
-    );
+    expect(addSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
     expect(router.navigate).toHaveBeenCalledWith(['..'], { relativeTo: route });
   });
 
   it('does not submit an application code shorter than four characters', () => {
-    formComponent.form.setValue({
+    formComponent.form.patchValue({
       application: 'Invai',
       category: 1,
       informationSystem: 2,
@@ -144,11 +153,54 @@ describe('ApplicationCreateForm', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
+  it.each([
+    {
+      field: 'prefix' as const,
+      value: 'INVAI',
+      error: 'El prefix ha de tenir com a màxim 3 caràcters',
+    },
+    {
+      field: 'code' as const,
+      value: '12345678901',
+      error: 'El codi ha de tenir com a màxim 10 caràcters',
+    },
+  ])('does not submit when $field exceeds its maximum length', ({ field, value, error }) => {
+    formComponent.form.patchValue({
+      application: 'Invai',
+      category: 1,
+      informationSystem: 2,
+      scope: 3,
+      commission: 4,
+      prefix: 'CVF',
+      code: '0001',
+      administrativeUnit: 5,
+      description: '',
+    });
+    formComponent.form.controls[field].setValue(value);
+
+    formComponent.submit();
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector(
+      `#create-application-${field}`,
+    ) as HTMLInputElement;
+    const validationError = fixture.nativeElement.querySelector(
+      `#create-application-${field}-error`,
+    );
+
+    expect(formComponent.form.controls[field].touched).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-describedby')).toBe(`create-application-${field}-error`);
+    expect(validationError?.textContent.trim()).toBe(error);
+    expect(create).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
   it('shows an error and stays on the form when creating fails', () => {
     const addSpy = vi.spyOn(messageService, 'add');
     create.mockReturnValueOnce(throwError(() => new Error('Request failed')));
 
-    formComponent.form.setValue({
+    formComponent.form.patchValue({
       application: 'Invai',
       category: 1,
       informationSystem: 2,
@@ -168,5 +220,59 @@ describe('ApplicationCreateForm', () => {
       detail: "No s'ha pogut afegir l'aplicació.",
     });
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not duplicate the global dialog with a toast for a structured bad request', () => {
+    const addSpy = vi.spyOn(messageService, 'add');
+    create.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              error: 'Error de validació',
+              message: 'El prefix ja està assignat a una altra aplicació.',
+            },
+          }),
+      ),
+    );
+
+    formComponent.form.patchValue({
+      application: 'Invai',
+      category: 1,
+      informationSystem: 2,
+      scope: 3,
+      commission: 4,
+      prefix: 'CVF',
+      code: '0001',
+      administrativeUnit: 5,
+      description: 'Desc',
+    });
+
+    formComponent.submit();
+
+    expect(addSpy).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('fills the read-only commission details from the selected option', () => {
+    formComponent.selectCommission({
+      label: 'Comissió tècnica',
+      value: 4,
+      expedientNumber: 'EXP-4',
+      approvalDate: '2026-07-14',
+      commissionType: CommissionType.TECNICA,
+    });
+
+    expect(formComponent.form.getRawValue()).toEqual(
+      expect.objectContaining({
+        commissionExpedientNumber: 'EXP-4',
+        commissionApprovalDate: '2026-07-14',
+        commissionType: CommissionType.TECNICA,
+      }),
+    );
+    expect(formComponent.form.controls.commissionExpedientNumber.disabled).toBe(true);
+    expect(formComponent.form.controls.commissionApprovalDate.disabled).toBe(true);
+    expect(formComponent.form.controls.commissionType.disabled).toBe(true);
   });
 });

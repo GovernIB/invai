@@ -36,6 +36,8 @@
         styleClass="w-full"
         formControlName="category"
         ariaLabelledBy="applications-filter-category-label"
+        [ariaFilterLabel]="labels().category"
+        [filter]="true"
         [options]="options()?.categories ?? []"
         [showClear]="true"
         optionLabel="label"
@@ -54,6 +56,8 @@
         styleClass="w-full"
         formControlName="informationSystem"
         ariaLabelledBy="applications-filter-information-system-label"
+        [ariaFilterLabel]="labels().informationSystem"
+        [filter]="true"
         [options]="options()?.informationSystems ?? []"
         [showClear]="true"
         optionLabel="label"
@@ -75,6 +79,8 @@
         styleClass="w-full"
         formControlName="scope"
         ariaLabelledBy="applications-filter-scope-label"
+        [ariaFilterLabel]="labels().scope"
+        [filter]="true"
         [options]="options()?.scopes ?? []"
         [showClear]="true"
         optionLabel="label"
@@ -93,6 +99,8 @@
         styleClass="w-full"
         formControlName="commission"
         ariaLabelledBy="applications-filter-commission-label"
+        [ariaFilterLabel]="labels().commission"
+        [filter]="true"
         [options]="options()?.commissions ?? []"
         [showClear]="true"
         optionLabel="label"
@@ -111,6 +119,8 @@
         styleClass="w-full"
         formControlName="administrativeUnit"
         ariaLabelledBy="applications-filter-administrative-unit-label"
+        [ariaFilterLabel]="labels().administrativeUnit"
+        [filter]="true"
         [options]="options()?.administrativeUnits ?? []"
         [showClear]="true"
         optionLabel="label"
@@ -154,6 +164,81 @@
       />
       <label id="applications-filter-description-label" for="applications-filter-description">
         {{ labels().description }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="applications-filter-responsible"
+        class="w-full"
+        type="text"
+        formControlName="responsible"
+        pInputText
+      />
+      <label id="applications-filter-responsible-label" for="applications-filter-responsible">
+        {{ labels().responsible }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-database"
+        styleClass="w-full"
+        formControlName="database"
+        ariaLabelledBy="applications-filter-database-label"
+        [ariaFilterLabel]="labels().database"
+        [filter]="true"
+        [options]="infrastructureOptions()?.databases ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-database-label" for="applications-filter-database">
+        {{ labels().database }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-server"
+        styleClass="w-full"
+        formControlName="server"
+        ariaLabelledBy="applications-filter-server-label"
+        [ariaFilterLabel]="labels().server"
+        [filter]="true"
+        [options]="infrastructureOptions()?.servers ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-server-label" for="applications-filter-server">
+        {{ labels().server }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="applications-filter-environment"
+        styleClass="w-full"
+        formControlName="environment"
+        ariaLabelledBy="applications-filter-environment-label"
+        [ariaFilterLabel]="labels().environment"
+        [filter]="true"
+        [options]="infrastructureOptions()?.environments ?? []"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="applications-filter-environment-label" for="applications-filter-environment">
+        {{ labels().environment }}
       </label>
     </p-floatlabel>
   </div>

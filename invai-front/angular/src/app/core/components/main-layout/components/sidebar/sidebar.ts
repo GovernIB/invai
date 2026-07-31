@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import {
   IsActiveMatchOptions,
   Router,
@@ -10,6 +10,7 @@ import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { TieredMenuModule } from 'primeng/tieredmenu';
+import { Tooltip } from 'primeng/tooltip';
 import { MENU_ITEMS } from '../../menu-items';
 import { SvgMenuCollapsedComponent } from './assets/svg-menu-collapsed.component';
 import {
@@ -18,6 +19,8 @@ import {
   SIDEBAR_NAVIGATION_ARIA_LABEL,
 } from './sidebar.i18n';
 import { SidebarService } from './sidebar.service';
+
+export type SidebarVariant = 'inline' | 'drawer';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +31,7 @@ import { SidebarService } from './sidebar.service';
     RouterLinkActive,
     SvgMenuCollapsedComponent,
     TieredMenuModule,
+    Tooltip,
   ],
   selector: 'app-sidebar',
   templateUrl: './sidebar.html',
@@ -37,9 +41,21 @@ export class Sidebar {
   private readonly _router = inject(Router);
   private readonly _sidebarService = inject(SidebarService);
 
+  readonly variant = input<SidebarVariant>('inline');
+
   protected readonly menuItems = computed<MenuItem[]>(() => MENU_ITEMS);
   protected readonly isVisible = this._sidebarService.isVisible;
-  protected readonly isCollapsed = this._sidebarService.isCollapsed;
+  protected readonly isDrawerVisible = this._sidebarService.isDrawerVisible;
+  protected readonly isTablet = this._sidebarService.isTablet;
+  protected readonly isDrawerVariant = computed(() => this.variant() === 'drawer');
+  protected readonly isCollapsed = computed(
+    () => !this.isDrawerVariant() && this._sidebarService.isCollapsed(),
+  );
+  protected readonly isToggleExpanded = computed(() => {
+    if (this.isTablet()) return this.isDrawerVisible();
+
+    return !this.isCollapsed();
+  });
 
   protected readonly sidebarCollapseOpenName = SIDEBAR_COLLAPSE_OPEN;
   protected readonly sidebarCollapseCloseName = SIDEBAR_COLLAPSE_CLOSE;
@@ -50,7 +66,7 @@ export class Sidebar {
   protected readonly asideClass = computed(() => {
     if (!this.isVisible()) return 'shrink-0 w-0 border-r-0 overflow-hidden';
 
-    const width = this.isCollapsed() ? 'w-14' : 'w-56';
+    const width = this.isDrawerVariant() ? 'w-full' : this.isCollapsed() ? 'w-14' : 'w-56';
     const state = this.isCollapsed() ? 'sidebar-collapsed' : 'sidebar-expanded';
     return ['shrink-0', width, state, 'overflow-visible'].join(' ');
   });
@@ -71,5 +87,16 @@ export class Sidebar {
     };
 
     return this._router.isActive(urlTree, matchOptions);
+  }
+
+  protected onLeafMenuClick(): void {
+    if (this.isDrawerVariant()) this._sidebarService.closeDrawer();
+  }
+
+  protected onParentMenuFocus(event: FocusEvent): void {
+    const itemContent = (event.currentTarget as HTMLElement).closest(
+      '.p-tieredmenu-item-content',
+    );
+    itemContent?.dispatchEvent(new MouseEvent('mouseenter'));
   }
 }

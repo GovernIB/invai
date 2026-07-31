@@ -2,6 +2,57 @@ app-section-actions .p-button.p-button-outlined {
   border-color: var(--primary-color);
 }
 
+app-section-actions {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.section-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.section-actions__search {
+  flex: 0 1 25rem;
+  min-width: 0;
+}
+
+.section-actions__buttons {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+}
+
+@media (max-width: 991px) {
+  .section-actions:not(.section-actions--without-search) {
+    align-items: stretch;
+    flex-direction: column;
+    max-width: 100%;
+    width: 25rem;
+
+    .section-actions__buttons {
+      justify-content: flex-end;
+      order: 1;
+    }
+
+    .section-actions__search {
+      flex-basis: auto;
+      order: 2;
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .section-actions:not(.section-actions--without-search) {
+    width: 100%;
+  }
+}
+
 .section-actions-search__input {
   background: var(--surface-a);
   border-color: var(--surface-border);

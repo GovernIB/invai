@@ -1,0 +1,48 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="physical-servers-filter-name"
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+      />
+      <label for="physical-servers-filter-name">{{ labels.name }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="physical-servers-filter-environment"
+        styleClass="w-full"
+        formControlName="environmentId"
+        [ariaFilterLabel]="labels.environment"
+        [filter]="true"
+        [options]="environmentOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="id"
+      />
+      <label for="physical-servers-filter-environment">
+        {{ labels.environment }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="physical-servers-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label for="physical-servers-filter-status">{{ labels.status }}</label>
+    </p-floatlabel>
+  </div>
+</form>

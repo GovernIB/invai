@@ -4,9 +4,16 @@ import {
   TestRequest,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { Application, ApplicationInput, ApplicationOutput } from '../applications.model';
+import {
+  Application,
+  ApplicationInput,
+  ApplicationOutput,
+  ApplicationStatus,
+  ApplicationStatusCode,
+} from '../applications.model';
 import { ApplicationsService } from './applications.service';
 
 const APPLICATION_URL = '/invaiapi/interna/application';
@@ -18,10 +25,12 @@ const EXPECTED_APPLICATION: Application = {
   name: 'Invai',
   category: 'DRASSANA',
   informationSystem: 'Instrumental',
+  informationSystemDbId: 70,
+  appDevelopmentId: 90,
   scope: 'Departamental',
   commission: 'Equip directiu',
   administrativeUnit: 'Direcció General',
-  status: 'Activa',
+  status: ApplicationStatus.ACTIVE,
   description: 'Aplicació interna',
   creationDate: '2026-01-02T10:30:00',
   modificationDate: '',
@@ -31,7 +40,7 @@ const EXPECTED_APPLICATION: Application = {
   scopeId: 3,
   commissionId: 5,
   administrativeUnitId: 4,
-  statusId: 6,
+  statusId: ApplicationStatus.ACTIVE,
 };
 
 const APPLICATION_INPUT: ApplicationInput = {
@@ -44,7 +53,7 @@ const APPLICATION_INPUT: ApplicationInput = {
   admUnitId: 4,
   commissionId: 5,
   description: 'Aplicació interna',
-  statusId: 6,
+  statusId: ApplicationStatus.ACTIVE,
 };
 
 const APPLICATION_OUTPUT: ApplicationOutput = {
@@ -52,13 +61,26 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   code: 'APP-7',
   prefix: 'INV',
   name: 'Invai',
-  category: { id: 1, name: 'DRASSANA' },
-  systemType: { id: 2, name: 'Instrumental' },
-  field: { id: 3, name: 'Departamental' },
-  admUnit: { id: 4, code: 'DG', name: 'Direcció General' },
-  csCommission: { id: 5, name: 'Equip directiu' },
+  category: { id: 1, name: 'DRASSANA', nameEs: 'ASTILLERO', deletedAt: null },
+  systemType: { id: 2, name: 'Instrumental', nameEs: 'Instrumental ES', deletedAt: null },
+  field: { id: 3, name: 'Departamental', nameEs: 'Departamental ES', deletedAt: null },
+  admUnit: {
+    id: 4,
+    code: 'DG',
+    name: 'Direcció General',
+    nameEs: 'Dirección General',
+  },
+  csCommission: {
+    id: 5,
+    name: 'Equip directiu',
+    nameEs: 'Equipo directivo',
+    expedientNumber: 'EXP-5',
+    approvalDate: '2026-07-14',
+    commissionType: null,
+    deletedAt: null,
+  },
   description: 'Aplicació interna',
-  status: { id: 6, name: 'Activa' },
+  status: ApplicationStatusCode.ACTIVE,
   expirationDate: null,
   createdAt: '2026-01-02T10:30:00',
   createdBy: null,
@@ -66,6 +88,8 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   updatedBy: null,
   loadUser: null,
   loadDate: null,
+  appInformationSystemDbId: 70,
+  appDevelopmentId: 90,
 };
 
 const OTHER_APPLICATION_OUTPUT: ApplicationOutput = {
@@ -81,7 +105,11 @@ describe('ApplicationsService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: LOCALE_ID, useValue: 'ca' },
+      ],
     });
 
     service = TestBed.inject(ApplicationsService);
@@ -102,6 +130,58 @@ describe('ApplicationsService', () => {
     flushApplications(request);
 
     expect(result).toHaveBeenCalledWith([EXPECTED_APPLICATION]);
+  });
+
+  it('maps API status codes and missing application statuses to their numeric ids', () => {
+    expect(
+      service.toApplication({
+        ...APPLICATION_OUTPUT,
+        status: ApplicationStatusCode.INACTIVE,
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        status: ApplicationStatus.INACTIVE,
+        statusId: ApplicationStatus.INACTIVE,
+      }),
+    );
+    expect(service.toApplication({ ...APPLICATION_OUTPUT, status: null })).toEqual(
+      expect.objectContaining({
+        status: null,
+        statusId: undefined,
+      }),
+    );
+  });
+
+  it('maps the backend aggregate identifiers to the application model', () => {
+    expect(service.toApplication(APPLICATION_OUTPUT)).toEqual(
+      expect.objectContaining({
+        informationSystemDbId: 70,
+        appDevelopmentId: 90,
+      }),
+    );
+  });
+
+  it('maps catalog display names from nameEs for the Spanish locale', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: LOCALE_ID, useValue: 'es' },
+      ],
+    });
+    service = TestBed.inject(ApplicationsService);
+    httpTesting = TestBed.inject(HttpTestingController);
+
+    expect(service.toApplication(APPLICATION_OUTPUT)).toEqual(
+      expect.objectContaining({
+        category: 'ASTILLERO',
+        informationSystem: 'Instrumental ES',
+        scope: 'Departamental ES',
+        commission: 'Equipo directivo',
+        administrativeUnit: 'Dirección General',
+      }),
+    );
   });
 
   it('shares and reuses the cached applications request', () => {
@@ -126,10 +206,14 @@ describe('ApplicationsService', () => {
 
   it('keeps cached application pages separated by criteria', () => {
     const activeResult = vi.fn();
-    const maintenanceResult = vi.fn();
+    const inactiveResult = vi.fn();
 
-    service.getPage({ page: 0, size: 10, statusId: 1 }).subscribe(activeResult);
-    service.getPage({ page: 0, size: 10, statusId: 2 }).subscribe(maintenanceResult);
+    service
+      .getPage({ page: 0, size: 10, statusId: ApplicationStatus.ACTIVE })
+      .subscribe(activeResult);
+    service
+      .getPage({ page: 0, size: 10, statusId: ApplicationStatus.INACTIVE })
+      .subscribe(inactiveResult);
 
     const requests = httpTesting.match(
       (request) => request.method === 'GET' && request.url === APPLICATION_URL,
@@ -142,7 +226,7 @@ describe('ApplicationsService', () => {
     requests.forEach(flushApplications);
 
     expect(activeResult).toHaveBeenCalledOnce();
-    expect(maintenanceResult).toHaveBeenCalledOnce();
+    expect(inactiveResult).toHaveBeenCalledOnce();
   });
 
   it('does not cache quick searches', () => {
@@ -220,7 +304,7 @@ describe('ApplicationsService', () => {
         fieldId: 3,
         commissionId: 5,
         admUnitId: 4,
-        statusId: 6,
+        statusId: ApplicationStatus.ACTIVE,
         description: 'interna',
         quickSearch: 'inv',
       })
@@ -240,7 +324,7 @@ describe('ApplicationsService', () => {
         req.params.get('fieldId') === '3' &&
         req.params.get('commissionId') === '5' &&
         req.params.get('admUnitId') === '4' &&
-        req.params.get('statusId') === '6' &&
+        req.params.get('statusId') === '1' &&
         req.params.get('description') === 'interna' &&
         req.params.get('quickSearch') === 'inv',
     );

@@ -36,4 +36,17 @@ export abstract class TableComponentBase<TItem> {
   protected onSelectedAction(action: number, params: TItem) {
     this.onSelectAction.emit({ action, params });
   }
+
+  protected onRowActivate(event: Event, action: number, params: TItem): void {
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target.closest('button, a, input, select, textarea, [role="button"], [role="menuitem"]')
+    ) {
+      return;
+    }
+
+    if (event instanceof KeyboardEvent) event.preventDefault();
+    this.onSelectedAction(action, params);
+  }
 }

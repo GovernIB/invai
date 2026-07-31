@@ -1,0 +1,129 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="application-servers-filter-environment"
+        styleClass="w-full"
+        formControlName="environment"
+        ariaLabelledBy="application-servers-filter-environment-label"
+        [ariaFilterLabel]="labels().environment"
+        [filter]="true"
+        [options]="environmentOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        id="application-servers-filter-environment-label"
+        for="application-servers-filter-environment"
+      >
+        {{ labels().environment }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="application-servers-filter-server"
+        styleClass="w-full"
+        formControlName="server"
+        ariaLabelledBy="application-servers-filter-server-label"
+        [ariaFilterLabel]="labels().server"
+        [filter]="true"
+        [options]="serverOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="application-servers-filter-server-label" for="application-servers-filter-server">
+        {{ labels().server }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-servers-filter-instance"
+        class="w-full"
+        type="text"
+        formControlName="instance"
+        pInputText
+      />
+      <label
+        id="application-servers-filter-instance-label"
+        for="application-servers-filter-instance"
+      >
+        {{ labels().instance }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-inputnumber
+        inputId="application-servers-filter-port"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        formControlName="port"
+        ariaLabelledBy="application-servers-filter-port-label"
+        [useGrouping]="false"
+      />
+      <label id="application-servers-filter-port-label" for="application-servers-filter-port">
+        {{ labels().port }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-servers-filter-version"
+        class="w-full"
+        type="text"
+        formControlName="version"
+        pInputText
+      />
+      <label id="application-servers-filter-version-label" for="application-servers-filter-version">
+        {{ labels().version }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="application-servers-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="application-servers-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="application-servers-filter-status-label" for="application-servers-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-servers-filter-observations"
+        class="w-full"
+        type="text"
+        formControlName="observations"
+        pInputText
+      />
+      <label
+        id="application-servers-filter-observations-label"
+        for="application-servers-filter-observations"
+      >
+        {{ labels().observations }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

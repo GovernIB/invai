@@ -3,11 +3,14 @@
     idPrefix="create-application"
     [controls]="form.controls"
     [codeControl]="form.controls.code"
+    [codeMaxLengthError]="codeMaxLengthError"
     [codeMinLengthError]="codeMinLengthError"
     [labels]="labels"
     [options]="options()"
+    [prefixMaxLengthError]="prefixMaxLengthError"
     [requiredError]="requiredError"
     [selectPlaceholder]="selectPlaceholder"
+    (commissionSelected)="selectCommission($event)"
   />
 
   <div class="application-create-form__actions">

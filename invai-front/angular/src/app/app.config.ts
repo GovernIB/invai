@@ -5,7 +5,9 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { initApp } from '@core/auth/app.initializer';
+import { initAuth } from '@core/auth/auth.initializer';
+import { acceptLanguageInterceptor } from '@core/interceptors/accept-language.interceptor';
+import { authSessionInterceptor } from '@core/interceptors/auth-session.interceptor';
 import { credentialsInterceptor } from '@core/interceptors/credentials.interceptor';
 import { httpErrorLoggingInterceptor } from '@core/interceptors/http-error-logging.interceptor';
 import { provideMarkdown } from 'ngx-markdown';
@@ -20,10 +22,15 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([credentialsInterceptor, httpErrorLoggingInterceptor]),
+      withInterceptors([
+        credentialsInterceptor,
+        acceptLanguageInterceptor,
+        authSessionInterceptor,
+        httpErrorLoggingInterceptor,
+      ]),
       withInterceptorsFromDi(),
     ),
-    provideAppInitializer(initApp),
+    provideAppInitializer(initAuth),
     providePrimeNG({
       theme: {
         preset: InvaiPreset,

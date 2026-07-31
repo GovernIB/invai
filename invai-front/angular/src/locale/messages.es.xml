@@ -2,6 +2,38 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="ca" target-language="es" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="applicationGeneralSectionTitle" datatype="html">
+        <source>Dades generals de l&apos;aplicació</source>
+        <target>Datos generales de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/general/application-general.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationResponsibleSectionTitle" datatype="html">
+        <source>Responsables de l&apos;aplicació</source>
+        <target>Responsables de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/responsible/application-responsible-section.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSystemsDatabasesSectionTitle" datatype="html">
+        <source>Infraestructura de sistemes i bases de dades</source>
+        <target>Infraestructura de sistemas y bases de datos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/systems-databases/application-systems-databases-section.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationDevelopmentSectionTitle" datatype="html">
+        <source>Configuració del desenvolupament</source>
+        <target>Configuración del desarrollo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/development/application-development-section.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="7565809316008288938" datatype="html">
         <source>Torna a l&apos;inici</source>
         <target>Volver al inicio</target>
@@ -16,6 +48,26 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/app.i18n.ts</context>
           <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6444028391153709155" datatype="html">
+        <source>Conselleria</source>
+        <target>Consejería</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/create/application-create.i18n.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/general/application-general.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3414095445846146409" datatype="html">
+        <source>Conselleria d&apos;Educació, Universitats i Ocupació</source>
+        <target>Consejería de Educación, Universidades y Empleo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">240</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2470163767232005699" datatype="html">
@@ -76,6 +128,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/main-layout/components/sidebar/sidebar.i18n.ts</context>
           <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3819174265199824373" datatype="html">
+        <source>Carregant la pàgina</source>
+        <target>Cargando la página</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/main-layout.ts</context>
+          <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3684380173234971806" datatype="html">
@@ -1862,82 +1922,6 @@
           <context context-type="linenumber">14</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="7909899493450077251" datatype="html">
-        <source>Donar de baixa l&apos;aplicació?</source>
-        <target>¿Dar de baja la aplicación?</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="1936847454303106765" datatype="html">
-        <source>Cancel·la</source>
-        <target>Cancelar</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
-          <context context-type="linenumber">1</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="3757869692285153060" datatype="html">
-        <source>Donar de baixa</source>
-        <target>Dar de baja</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="1510814923226255291" datatype="html">
-        <source>Cancel·la la baixa de l&apos;aplicació</source>
-        <target>Cancelar la baja de la aplicación</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="3251972372289659988" datatype="html">
-        <source>Confirma la baixa de l&apos;aplicació</source>
-        <target>Confirmar la baja de la aplicación</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">19</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2952244262035234758" datatype="html">
-        <source>Estàs a punt de donar de baixa «<x id="applicationName" equiv-text="applicationName"/>». L&apos;aplicació deixarà d&apos;aparèixer al llistat.</source>
-        <target>Estás a punto de dar de baja «<x id="applicationName" equiv-text="applicationName"/>». La aplicación dejará de aparecer en el listado.</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">21</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="9190821786817643658" datatype="html">
-        <source>Aplicació donada de baixa</source>
-        <target>Aplicación dada de baja</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="8562866548880253809" datatype="html">
-        <source>L&apos;aplicació s&apos;ha donat de baixa correctament.</source>
-        <target>La aplicación se ha dado de baja correctamente.</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">24</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4710509548100789744" datatype="html">
-        <source>No s&apos;ha pogut donar de baixa l&apos;aplicació.</source>
-        <target>No se ha podido dar de baja la aplicación.</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="5796177058430877975" datatype="html">
         <source>Informació</source>
         <target>Información</target>
@@ -1958,14 +1942,6 @@
           <context context-type="linenumber">144</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2402846969362487836" datatype="html">
-        <source>Elimina</source>
-        <target>Eliminar</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.html</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="8735549703481409024" datatype="html">
         <source>Consulta</source>
         <target>Consultar</target>
@@ -1974,56 +1950,12 @@
           <context context-type="linenumber">85,86</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4439715233794834274" datatype="html">
-        <source>Modifica</source>
-        <target>Modificar</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.html</context>
-          <context context-type="linenumber">95,96</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="4922393716341836265" datatype="html">
         <source>Accions</source>
         <target>Acciones</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
-          <context context-type="linenumber">1</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/constants/table.constants.ts</context>
           <context context-type="linenumber">10</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2165211412125043081" datatype="html">
-        <source>Elimina l&apos;aplicació</source>
-        <target>Eliminar la aplicación</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
-          <context context-type="linenumber">2</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2523184850575990706" datatype="html">
-        <source>Consulta l&apos;aplicació</source>
-        <target>Consultar la aplicación</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
-          <context context-type="linenumber">3</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="6356651458524233527" datatype="html">
-        <source>Modifica l&apos;aplicació</source>
-        <target>Modificar la aplicación</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
-          <context context-type="linenumber">4</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2180870980186162872" datatype="html">
-        <source>Aplicació incompleta</source>
-        <target>Aplicación incompleta</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/components/applications-table/applications-table.i18n.ts</context>
-          <context context-type="linenumber">5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3971609588070574627" datatype="html">
@@ -2366,30 +2298,6 @@
           <context context-type="linenumber">66</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1607075854221804687" datatype="html">
-        <source>Confirma</source>
-        <target>Confirmar</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
-          <context context-type="linenumber">2</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4932645286796875412" datatype="html">
-        <source>Cancel·la l&apos;acció</source>
-        <target>Cancelar la acción</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
-          <context context-type="linenumber">3</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="8186263638348101562" datatype="html">
-        <source>Confirma l&apos;acció</source>
-        <target>Confirmar la acción</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
-          <context context-type="linenumber">4</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="7605655394644457033" datatype="html">
         <source>Cercador</source>
         <target>Buscador</target>
@@ -2554,9 +2462,17 @@
         <source>Camp obligatori</source>
         <target>Campo obligatorio</target>
       </trans-unit>
+      <trans-unit id="7786931415809792460" datatype="html">
+        <source>El prefix ha de tenir com a màxim 3 caràcters</source>
+        <target>El prefijo debe tener como máximo 3 caracteres</target>
+      </trans-unit>
       <trans-unit id="1322848226833728059" datatype="html">
         <source>El codi ha de tenir com a mínim 4 caràcters</source>
         <target>El código debe tener al menos 4 caracteres</target>
+      </trans-unit>
+      <trans-unit id="264571501708745374" datatype="html">
+        <source>El codi ha de tenir com a màxim 10 caràcters</source>
+        <target>El código debe tener como máximo 10 caracteres</target>
       </trans-unit>
       <trans-unit id="2242628299079321068" datatype="html">
         <source>Selecciona una opció</source>
@@ -2850,9 +2766,9 @@
         <source>Tipus</source>
         <target>Tipo</target>
       </trans-unit>
-      <trans-unit id="249499677179030875" datatype="html">
-        <source>Sistemes i BBDD</source>
-        <target>Sistemas y BBDD</target>
+      <trans-unit id="4260680816597512668" datatype="html">
+        <source>Sistemes i BD</source>
+        <target>Sistemas y BD</target>
       </trans-unit>
       <trans-unit id="5795375051141902264" datatype="html">
         <source>Afegir <x id="PH" equiv-text="resource" /></source>
@@ -2919,24 +2835,2419 @@
         <target>Activo</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7610525611076372208" datatype="html">
+        <source>Inactiu</source>
+        <target>Inactivo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
           <context context-type="linenumber">12</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="686779848974134906" datatype="html">
-        <source>Manteniment</source>
-        <target>Mantenimiento</target>
+      <trans-unit id="2408143314504491830" datatype="html">
+        <source>Donar d&apos;alta</source>
+        <target>Dar de alta</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7321991329220023298" datatype="html">
+        <source>Restaurar</source>
+        <target>Restaurar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="534593418483985491" datatype="html">
+        <source>Donar d&apos;alta l&apos;aplicació</source>
+        <target>Dar de alta la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1776513506486328633" datatype="html">
+        <source>L&apos;aplicació està donada de baixa</source>
+        <target>Aplicación está dada de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="26647045660350182" datatype="html">
+        <source>Donar d&apos;alta l&apos;aplicació?</source>
+        <target>¿Dar de alta la aplicación?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2747708036405217252" datatype="html">
+        <source>Cancel·la l&apos;alta de l&apos;aplicació</source>
+        <target>Cancelar el alta de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2074872038501898395" datatype="html">
+        <source>Confirma l&apos;alta de l&apos;aplicació</source>
+        <target>Confirmar el alta de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
           <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="6882724821222319836" datatype="html">
-        <source>Deprecat</source>
-        <target>Deprecado</target>
+      <trans-unit id="8958700537918284810" datatype="html">
+        <source>Estàs a punt de donar d&apos;alta «<x id="applicationName" equiv-text="applicationName"/>».</source>
+        <target>Estás a punto de dar de alta «<x id="applicationName" equiv-text="applicationName"/>».</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/applications/applications.constants.ts</context>
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5541839689823061341" datatype="html">
+        <source>Aplicació donada d&apos;alta</source>
+        <target>Aplicación dada de alta</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5577633197693662469" datatype="html">
+        <source>L&apos;aplicació s&apos;ha donat d&apos;alta correctament.</source>
+        <target>La aplicación se ha dado de alta correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="670087490343235719" datatype="html">
+        <source>No s&apos;ha pogut donar d&apos;alta l&apos;aplicació.</source>
+        <target>No se ha podido dar de alta la aplicación.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3757869692285153060" datatype="html">
+        <source>Donar de baixa</source>
+        <target>Dar de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2993395548261508766" datatype="html">
+        <source>Donar de baixa l&apos;aplicació</source>
+        <target>Dar de baja la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7909899493450077251" datatype="html">
+        <source>Donar de baixa l&apos;aplicació?</source>
+        <target>¿Dar de baja la aplicación?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
           <context context-type="linenumber">14</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="1936847454303106765" datatype="html">
+        <source>Cancel·la</source>
+        <target>Cancelar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1510814923226255291" datatype="html">
+        <source>Cancel·la la baixa de l&apos;aplicació</source>
+        <target>Cancelar la baja de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3251972372289659988" datatype="html">
+        <source>Confirma la baixa de l&apos;aplicació</source>
+        <target>Confirmar la baja de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2952244262035234758" datatype="html">
+        <source>Estàs a punt de donar de baixa «<x id="applicationName" equiv-text="applicationName"/>». L&apos;aplicació deixarà d&apos;aparèixer al llistat.</source>
+        <target>Estás a punto de dar de baja «<x id="applicationName" equiv-text="applicationName"/>». La aplicación dejará de aparecer en el listado.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9190821786817643658" datatype="html">
+        <source>Aplicació donada de baixa</source>
+        <target>Aplicación dada de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8562866548880253809" datatype="html">
+        <source>L&apos;aplicació s&apos;ha donat de baixa correctament.</source>
+        <target>La aplicación se ha dado de baja correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4710509548100789744" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa l&apos;aplicació.</source>
+        <target>No se ha podido dar de baja la aplicación.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1607075854221804687" datatype="html">
+        <source>Confirma</source>
+        <target>Confirmar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4932645286796875412" datatype="html">
+        <source>Cancel·la l&apos;acció</source>
+        <target>Cancelar la acción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8186263638348101562" datatype="html">
+        <source>Confirma l&apos;acció</source>
+        <target>Confirmar la acción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/confirmation-dialog/confirmation-dialog.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4680007557790409418" datatype="html">
+        <source>Tanca</source>
+        <target>Cerrar</target>
+      </trans-unit>
+      <trans-unit id="9016064923311606673" datatype="html">
+        <source>Tanca el missatge d&apos;error</source>
+        <target>Cerrar el mensaje de error</target>
+      </trans-unit>
+      <trans-unit id="1570214266881487651" datatype="html">
+        <source>Tècnica</source>
+        <target>Técnica</target>
+      </trans-unit>
+      <trans-unit id="3377875459195748831" datatype="html">
+        <source>Superior</source>
+        <target>Superior</target>
+      </trans-unit>
+      <trans-unit id="5363451304863092478" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+      </trans-unit>
+      <trans-unit id="8333378022673079324" datatype="html">
+        <source>Número d&apos;expedient</source>
+        <target>Número de expediente</target>
+      </trans-unit>
+      <trans-unit id="8599498868856282848" datatype="html">
+        <source>Data de la comissió informàtica</source>
+        <target>Fecha de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="39437477485894353" datatype="html">
+        <source>Tipus de comissió</source>
+        <target>Tipo de comisión</target>
+      </trans-unit>
+      <trans-unit id="8179963467407100314" datatype="html">
+        <source>Nom en castellà</source>
+        <target>Nombre en castellano</target>
+      </trans-unit>
+      <trans-unit id="1902100407096396858" datatype="html">
+        <source>Categories</source>
+        <target>Categorías</target>
+      </trans-unit>
+      <trans-unit id="1932455824753189033" datatype="html">
+        <source>Cerca per nom</source>
+        <target>Buscar por nombre</target>
+      </trans-unit>
+      <trans-unit id="6136789011542442987" datatype="html">
+        <source>Cerca ràpida de categories</source>
+        <target>Búsqueda rápida de categorías</target>
+      </trans-unit>
+      <trans-unit id="7015564698657355076" datatype="html">
+        <source>No s&apos;han pogut carregar les categories.</source>
+        <target>No se han podido cargar las categorías.</target>
+      </trans-unit>
+      <trans-unit id="2972615029703090927" datatype="html">
+        <source>Data d&apos;aprovació</source>
+        <target>Fecha de aprobación</target>
+      </trans-unit>
+      <trans-unit id="5557755433236193401" datatype="html">
+        <source>Data d&apos;aprovació des de</source>
+        <target>Fecha de aprobación desde</target>
+      </trans-unit>
+      <trans-unit id="1525301538296299555" datatype="html">
+        <source>Data d&apos;aprovació fins a</source>
+        <target>Fecha de aprobación hasta</target>
+      </trans-unit>
+      <trans-unit id="5345055033032093037" datatype="html">
+        <source>La data inicial no pot ser posterior a la data final.</source>
+        <target>La fecha inicial no puede ser posterior a la fecha final.</target>
+      </trans-unit>
+      <trans-unit id="2693230379448838050" datatype="html">
+        <source>Cerca per nom o expedient</source>
+        <target>Buscar por nombre o expediente</target>
+      </trans-unit>
+      <trans-unit id="6128988002310556013" datatype="html">
+        <source>Cerca ràpida de comissions</source>
+        <target>Búsqueda rápida de comisiones</target>
+      </trans-unit>
+      <trans-unit id="275104648413398408" datatype="html">
+        <source>No s&apos;han pogut carregar les comissions.</source>
+        <target>No se han podido cargar las comisiones.</target>
+      </trans-unit>
+      <trans-unit id="maintenancesRoute" datatype="html">
+        <source>manteniments</source>
+        <target>mantenimientos</target>
+      </trans-unit>
+      <trans-unit id="maintenanceCategoriesRoute" datatype="html">
+        <source>categories</source>
+        <target>categorias</target>
+      </trans-unit>
+      <trans-unit id="maintenanceCommissionsRoute" datatype="html">
+        <source>comissio-informatica</source>
+        <target>comision-informatica</target>
+      </trans-unit>
+      <trans-unit id="20090712190766852" datatype="html">
+        <source>Manteniments</source>
+        <target>Mantenimientos</target>
+      </trans-unit>
+      <trans-unit id="857242767730148096" datatype="html">
+        <source>Seccions de manteniments</source>
+        <target>Secciones de mantenimientos</target>
+      </trans-unit>
+      <trans-unit id="6124884871552650124" datatype="html">
+        <source>Edita</source>
+        <target>Editar</target>
+      </trans-unit>
+      <trans-unit id="2402846969362487836" datatype="html">
+        <source>Elimina</source>
+        <target>Eliminar</target>
+      </trans-unit>
+      <trans-unit id="4880092233765469971" datatype="html">
+        <source>Consulta la categoria</source>
+        <target>Consultar la categoría</target>
+      </trans-unit>
+      <trans-unit id="4967677561723297527" datatype="html">
+        <source>Edita la categoria</source>
+        <target>Editar la categoría</target>
+      </trans-unit>
+      <trans-unit id="7309647698044207650" datatype="html">
+        <source>Elimina la categoria</source>
+        <target>Eliminar la categoría</target>
+      </trans-unit>
+      <trans-unit id="3155310059837438345" datatype="html">
+        <source>Afegir categoria</source>
+        <target>Añadir categoría</target>
+      </trans-unit>
+      <trans-unit id="8534489680297978336" datatype="html">
+        <source>Consultar categoria</source>
+        <target>Consultar categoría</target>
+      </trans-unit>
+      <trans-unit id="561398803601217950" datatype="html">
+        <source>Editar categoria</source>
+        <target>Editar categoría</target>
+      </trans-unit>
+      <trans-unit id="197579512946958477" datatype="html">
+        <source>El nom ha de tenir com a màxim 50 caràcters</source>
+        <target>El nombre debe tener como máximo 50 caracteres</target>
+      </trans-unit>
+      <trans-unit id="847762260568801003" datatype="html">
+        <source>El nom en castellà ha de tenir com a màxim 100 caràcters</source>
+        <target>El nombre en castellano debe tener como máximo 100 caracteres</target>
+      </trans-unit>
+      <trans-unit id="2924465172696240809" datatype="html">
+        <source>Tancar</source>
+        <target>Cerrar</target>
+      </trans-unit>
+      <trans-unit id="6249800614174411686" datatype="html">
+        <source>Afegir</source>
+        <target>Añadir</target>
+      </trans-unit>
+      <trans-unit id="4103349401075438172" datatype="html">
+        <source>Cancel·la els canvis de la categoria</source>
+        <target>Cancelar los cambios de la categoría</target>
+      </trans-unit>
+      <trans-unit id="6160088687794468815" datatype="html">
+        <source>Tanca la consulta de la categoria</source>
+        <target>Cerrar la consulta de la categoría</target>
+      </trans-unit>
+      <trans-unit id="1021452183725970601" datatype="html">
+        <source>Afegeix la categoria</source>
+        <target>Añadir la categoría</target>
+      </trans-unit>
+      <trans-unit id="2779232773799406396" datatype="html">
+        <source>Desa els canvis de la categoria</source>
+        <target>Guardar los cambios de la categoría</target>
+      </trans-unit>
+      <trans-unit id="1121991884713043072" datatype="html">
+        <source>Carregant la categoria</source>
+        <target>Cargando la categoría</target>
+      </trans-unit>
+      <trans-unit id="289396431152831090" datatype="html">
+        <source>Afegeix una categoria</source>
+        <target>Añadir una categoría</target>
+      </trans-unit>
+      <trans-unit id="6801978522570369956" datatype="html">
+        <source>No s&apos;ha pogut carregar la categoria.</source>
+        <target>No se ha podido cargar la categoría.</target>
+      </trans-unit>
+      <trans-unit id="3255988058065797073" datatype="html">
+        <source>Categoria afegida</source>
+        <target>Categoría añadida</target>
+      </trans-unit>
+      <trans-unit id="4072251126433476613" datatype="html">
+        <source>La categoria s&apos;ha afegit correctament.</source>
+        <target>La categoría se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7664212846889504823" datatype="html">
+        <source>Categoria actualitzada</source>
+        <target>Categoría actualizada</target>
+      </trans-unit>
+      <trans-unit id="2514405381794845678" datatype="html">
+        <source>La categoria s&apos;ha actualitzat correctament.</source>
+        <target>La categoría se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7191219088202240715" datatype="html">
+        <source>Categoria eliminada</source>
+        <target>Categoría eliminada</target>
+      </trans-unit>
+      <trans-unit id="5005721355855391555" datatype="html">
+        <source>La categoria s&apos;ha eliminat correctament.</source>
+        <target>La categoría se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="8725894677577042770" datatype="html">
+        <source>No s&apos;ha pogut desar la categoria.</source>
+        <target>No se ha podido guardar la categoría.</target>
+      </trans-unit>
+      <trans-unit id="7217545195053649227" datatype="html">
+        <source>No s&apos;ha pogut eliminar la categoria.</source>
+        <target>No se ha podido eliminar la categoría.</target>
+      </trans-unit>
+      <trans-unit id="567359140478221936" datatype="html">
+        <source>Eliminar la categoria?</source>
+        <target>¿Eliminar la categoría?</target>
+      </trans-unit>
+      <trans-unit id="2455933201650208906" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="categoryName" equiv-text="name"/>».</source>
+        <target>Estás a punto de eliminar «<x id="categoryName" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="6665903341931535342" datatype="html">
+        <source>Eliminar</source>
+        <target>Eliminar</target>
+      </trans-unit>
+      <trans-unit id="1775497635101455752" datatype="html">
+        <source>Cancel·la l&apos;eliminació de la categoria</source>
+        <target>Cancelar la eliminación de la categoría</target>
+      </trans-unit>
+      <trans-unit id="2245946090675315613" datatype="html">
+        <source>Confirma l&apos;eliminació de la categoria</source>
+        <target>Confirmar la eliminación de la categoría</target>
+      </trans-unit>
+      <trans-unit id="6465811058804553038" datatype="html">
+        <source>Afegir comissió informàtica</source>
+        <target>Añadir comisión informática</target>
+      </trans-unit>
+      <trans-unit id="4876222727145673346" datatype="html">
+        <source>Consultar comissió informàtica</source>
+        <target>Consultar comisión informática</target>
+      </trans-unit>
+      <trans-unit id="5532424654409562358" datatype="html">
+        <source>Editar comissió informàtica</source>
+        <target>Editar comisión informática</target>
+      </trans-unit>
+      <trans-unit id="8297112376257271568" datatype="html">
+        <source>El nom ha de tenir com a màxim 100 caràcters</source>
+        <target>El nombre debe tener como máximo 100 caracteres</target>
+      </trans-unit>
+      <trans-unit id="632978077416534316" datatype="html">
+        <source>El número d&apos;expedient ha de tenir com a màxim 50 caràcters</source>
+        <target>El número de expediente debe tener como máximo 50 caracteres</target>
+      </trans-unit>
+      <trans-unit id="9029147034459987562" datatype="html">
+        <source>Cancel·la els canvis de la comissió informàtica</source>
+        <target>Cancelar los cambios de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="1705340509452214919" datatype="html">
+        <source>Tanca la consulta de la comissió informàtica</source>
+        <target>Cerrar la consulta de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="2724462108214083297" datatype="html">
+        <source>Afegeix la comissió informàtica</source>
+        <target>Añadir la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="5034531013335271899" datatype="html">
+        <source>Desa els canvis de la comissió informàtica</source>
+        <target>Guardar los cambios de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="6109433689556515994" datatype="html">
+        <source>Carregant la comissió informàtica</source>
+        <target>Cargando la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="3091183377145552365" datatype="html">
+        <source>Consulta la comissió informàtica</source>
+        <target>Consultar la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="8916904014312159966" datatype="html">
+        <source>Edita la comissió informàtica</source>
+        <target>Editar la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="7506470434443891497" datatype="html">
+        <source>Elimina la comissió informàtica</source>
+        <target>Eliminar la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="1851786652155036421" datatype="html">
+        <source>Afegeix una comissió informàtica</source>
+        <target>Añadir una comisión informática</target>
+      </trans-unit>
+      <trans-unit id="5797363109835780165" datatype="html">
+        <source>No s&apos;ha pogut carregar la comissió.</source>
+        <target>No se ha podido cargar la comisión.</target>
+      </trans-unit>
+      <trans-unit id="3085186195096884016" datatype="html">
+        <source>Comissió afegida</source>
+        <target>Comisión añadida</target>
+      </trans-unit>
+      <trans-unit id="213313442211092190" datatype="html">
+        <source>La comissió informàtica s&apos;ha afegit correctament.</source>
+        <target>La comisión informática se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3792550615231102185" datatype="html">
+        <source>Comissió actualitzada</source>
+        <target>Comisión actualizada</target>
+      </trans-unit>
+      <trans-unit id="7846200047635508602" datatype="html">
+        <source>La comissió informàtica s&apos;ha actualitzat correctament.</source>
+        <target>La comisión informática se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="1606712213396344529" datatype="html">
+        <source>Comissió eliminada</source>
+        <target>Comisión eliminada</target>
+      </trans-unit>
+      <trans-unit id="1177323169071104495" datatype="html">
+        <source>La comissió informàtica s&apos;ha eliminat correctament.</source>
+        <target>La comisión informática se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3189563203617399044" datatype="html">
+        <source>No s&apos;ha pogut desar la comissió informàtica.</source>
+        <target>No se ha podido guardar la comisión informática.</target>
+      </trans-unit>
+      <trans-unit id="3776908866308197427" datatype="html">
+        <source>No s&apos;ha pogut eliminar la comissió informàtica.</source>
+        <target>No se ha podido eliminar la comisión informática.</target>
+      </trans-unit>
+      <trans-unit id="7641041082030191987" datatype="html">
+        <source>Eliminar la comissió informàtica?</source>
+        <target>¿Eliminar la comisión informática?</target>
+      </trans-unit>
+      <trans-unit id="7269635053874500479" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="commissionName" equiv-text="name"/>».</source>
+        <target>Estás a punto de eliminar «<x id="commissionName" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="3971449479720976751" datatype="html">
+        <source>Cancel·la l&apos;eliminació de la comissió informàtica</source>
+        <target>Cancelar la eliminación de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="5151286360465095173" datatype="html">
+        <source>Confirma l&apos;eliminació de la comissió informàtica</source>
+        <target>Confirmar la eliminación de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="9062273417443966276" datatype="html">
+        <source>Afegir àmbit</source>
+        <target>Añadir ámbito</target>
+      </trans-unit>
+      <trans-unit id="4020396259203263905" datatype="html">
+        <source>Consultar àmbit</source>
+        <target>Consultar ámbito</target>
+      </trans-unit>
+      <trans-unit id="2896978036363602043" datatype="html">
+        <source>Editar àmbit</source>
+        <target>Editar ámbito</target>
+      </trans-unit>
+      <trans-unit id="8286813272557597925" datatype="html">
+        <source>Cancel·la els canvis de l&apos;àmbit</source>
+        <target>Cancelar los cambios del ámbito</target>
+      </trans-unit>
+      <trans-unit id="2686009639852289853" datatype="html">
+        <source>Tanca la consulta de l&apos;àmbit</source>
+        <target>Cerrar la consulta del ámbito</target>
+      </trans-unit>
+      <trans-unit id="9058558486044205045" datatype="html">
+        <source>Afegeix l&apos;àmbit</source>
+        <target>Añadir el ámbito</target>
+      </trans-unit>
+      <trans-unit id="7415484727947181498" datatype="html">
+        <source>Desa els canvis de l&apos;àmbit</source>
+        <target>Guardar los cambios del ámbito</target>
+      </trans-unit>
+      <trans-unit id="3179952823623210522" datatype="html">
+        <source>Carregant l&apos;àmbit</source>
+        <target>Cargando el ámbito</target>
+      </trans-unit>
+      <trans-unit id="1252880714911971431" datatype="html">
+        <source>Consulta l&apos;àmbit</source>
+        <target>Consultar el ámbito</target>
+      </trans-unit>
+      <trans-unit id="7039390618634175344" datatype="html">
+        <source>Edita l&apos;àmbit</source>
+        <target>Editar el ámbito</target>
+      </trans-unit>
+      <trans-unit id="436890015115872738" datatype="html">
+        <source>Elimina l&apos;àmbit</source>
+        <target>Eliminar el ámbito</target>
+      </trans-unit>
+      <trans-unit id="15099572491095915" datatype="html">
+        <source>Àmbits</source>
+        <target>Ámbitos</target>
+      </trans-unit>
+      <trans-unit id="7698265656010925899" datatype="html">
+        <source>Cerca ràpida d&apos;àmbits</source>
+        <target>Búsqueda rápida de ámbitos</target>
+      </trans-unit>
+      <trans-unit id="4562634075128717098" datatype="html">
+        <source>Afegeix un àmbit</source>
+        <target>Añadir un ámbito</target>
+      </trans-unit>
+      <trans-unit id="3237880133931858732" datatype="html">
+        <source>No s&apos;han pogut carregar els àmbits.</source>
+        <target>No se han podido cargar los ámbitos.</target>
+      </trans-unit>
+      <trans-unit id="8277681618512426599" datatype="html">
+        <source>La cerca i els filtres d&apos;àmbits encara no estan suportats pel backend.</source>
+        <target>La búsqueda y los filtros de ámbitos todavía no están soportados por el backend.</target>
+      </trans-unit>
+      <trans-unit id="1360075604703278442" datatype="html">
+        <source>No s&apos;ha pogut carregar l&apos;àmbit.</source>
+        <target>No se ha podido cargar el ámbito.</target>
+      </trans-unit>
+      <trans-unit id="7842928710275255342" datatype="html">
+        <source>Àmbit afegit</source>
+        <target>Ámbito añadido</target>
+      </trans-unit>
+      <trans-unit id="7997778318608772740" datatype="html">
+        <source>L&apos;àmbit s&apos;ha afegit correctament.</source>
+        <target>El ámbito se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7775384525283951563" datatype="html">
+        <source>Àmbit actualitzat</source>
+        <target>Ámbito actualizado</target>
+      </trans-unit>
+      <trans-unit id="4644148729870549991" datatype="html">
+        <source>L&apos;àmbit s&apos;ha actualitzat correctament.</source>
+        <target>El ámbito se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5712580837781851188" datatype="html">
+        <source>Àmbit eliminat</source>
+        <target>Ámbito eliminado</target>
+      </trans-unit>
+      <trans-unit id="7445212884073404241" datatype="html">
+        <source>L&apos;àmbit s&apos;ha eliminat correctament.</source>
+        <target>El ámbito se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5643087933099881489" datatype="html">
+        <source>No s&apos;ha pogut desar l&apos;àmbit.</source>
+        <target>No se ha podido guardar el ámbito.</target>
+      </trans-unit>
+      <trans-unit id="8180706918540728408" datatype="html">
+        <source>No s&apos;ha pogut eliminar l&apos;àmbit.</source>
+        <target>No se ha podido eliminar el ámbito.</target>
+      </trans-unit>
+      <trans-unit id="5538326805980720532" datatype="html">
+        <source>Eliminar l&apos;àmbit?</source>
+        <target>¿Eliminar el ámbito?</target>
+      </trans-unit>
+      <trans-unit id="397589134177878550" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="fieldName" equiv-text="name"/>».</source>
+        <target>Estás a punto de eliminar «<x id="fieldName" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="6616042383937760557" datatype="html">
+        <source>Cancel·la l&apos;eliminació de l&apos;àmbit</source>
+        <target>Cancelar la eliminación del ámbito</target>
+      </trans-unit>
+      <trans-unit id="8485029649215981203" datatype="html">
+        <source>Confirma l&apos;eliminació de l&apos;àmbit</source>
+        <target>Confirmar la eliminación del ámbito</target>
+      </trans-unit>
+      <trans-unit id="maintenanceSystemTypesRoute" datatype="html">
+        <source>sistemes-informacio</source>
+        <target>sistemas-informacion</target>
+      </trans-unit>
+      <trans-unit id="maintenanceFieldsRoute" datatype="html">
+        <source>ambits</source>
+        <target>ambitos</target>
+      </trans-unit>
+      <trans-unit id="5123841664508531659" datatype="html">
+        <source>Sistemes d&apos;informació</source>
+        <target>Sistemas de información</target>
+      </trans-unit>
+      <trans-unit id="6475920289980622255" datatype="html">
+        <source>Afegir sistema d&apos;informació</source>
+        <target>Añadir sistema de información</target>
+      </trans-unit>
+      <trans-unit id="6296863575681047698" datatype="html">
+        <source>Consultar sistema d&apos;informació</source>
+        <target>Consultar sistema de información</target>
+      </trans-unit>
+      <trans-unit id="1807607367832799375" datatype="html">
+        <source>Editar sistema d&apos;informació</source>
+        <target>Editar sistema de información</target>
+      </trans-unit>
+      <trans-unit id="8936676680256053181" datatype="html">
+        <source>Cancel·la els canvis del sistema d&apos;informació</source>
+        <target>Cancelar los cambios del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="4734655321746530610" datatype="html">
+        <source>Tanca la consulta del sistema d&apos;informació</source>
+        <target>Cerrar la consulta del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="4561080760789563070" datatype="html">
+        <source>Afegeix el sistema d&apos;informació</source>
+        <target>Añadir el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="2331320363309329838" datatype="html">
+        <source>Desa els canvis del sistema d&apos;informació</source>
+        <target>Guardar los cambios del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="7866990705746420871" datatype="html">
+        <source>Carregant el sistema d&apos;informació</source>
+        <target>Cargando el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="3797922103668598247" datatype="html">
+        <source>Consulta el sistema d&apos;informació</source>
+        <target>Consultar el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="3469859307685870303" datatype="html">
+        <source>Edita el sistema d&apos;informació</source>
+        <target>Editar el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="7829610965033640374" datatype="html">
+        <source>Elimina el sistema d&apos;informació</source>
+        <target>Eliminar el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="7389491493017216692" datatype="html">
+        <source>Cerca ràpida de sistemes d&apos;informació</source>
+        <target>Búsqueda rápida de sistemas de información</target>
+      </trans-unit>
+      <trans-unit id="8008096566996438816" datatype="html">
+        <source>Afegeix un sistema d&apos;informació</source>
+        <target>Añadir un sistema de información</target>
+      </trans-unit>
+      <trans-unit id="1176517225052313133" datatype="html">
+        <source>No s&apos;han pogut carregar els sistemes d&apos;informació.</source>
+        <target>No se han podido cargar los sistemas de información.</target>
+      </trans-unit>
+      <trans-unit id="3055702175764500737" datatype="html">
+        <source>La cerca i els filtres de sistemes d&apos;informació encara no estan suportats pel backend.</source>
+        <target>La búsqueda y los filtros de sistemas de información todavía no están soportados por el backend.</target>
+      </trans-unit>
+      <trans-unit id="5192951030375768117" datatype="html">
+        <source>No s&apos;ha pogut carregar el sistema d&apos;informació.</source>
+        <target>No se ha podido cargar el sistema de información.</target>
+      </trans-unit>
+      <trans-unit id="7509326154068567202" datatype="html">
+        <source>Sistema d&apos;informació afegit</source>
+        <target>Sistema de información añadido</target>
+      </trans-unit>
+      <trans-unit id="2202531774642959575" datatype="html">
+        <source>El sistema d&apos;informació s&apos;ha afegit correctament.</source>
+        <target>El sistema de información se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="1174840030623373197" datatype="html">
+        <source>Sistema d&apos;informació actualitzat</source>
+        <target>Sistema de información actualizado</target>
+      </trans-unit>
+      <trans-unit id="6776008100012809893" datatype="html">
+        <source>El sistema d&apos;informació s&apos;ha actualitzat correctament.</source>
+        <target>El sistema de información se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5179936954167015277" datatype="html">
+        <source>Sistema d&apos;informació eliminat</source>
+        <target>Sistema de información eliminado</target>
+      </trans-unit>
+      <trans-unit id="1834952101026404609" datatype="html">
+        <source>El sistema d&apos;informació s&apos;ha eliminat correctament.</source>
+        <target>El sistema de información se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="274217942280701719" datatype="html">
+        <source>No s&apos;ha pogut desar el sistema d&apos;informació.</source>
+        <target>No se ha podido guardar el sistema de información.</target>
+      </trans-unit>
+      <trans-unit id="4325808965001148393" datatype="html">
+        <source>No s&apos;ha pogut eliminar el sistema d&apos;informació.</source>
+        <target>No se ha podido eliminar el sistema de información.</target>
+      </trans-unit>
+      <trans-unit id="8457147246200765407" datatype="html">
+        <source>Eliminar el sistema d&apos;informació?</source>
+        <target>¿Eliminar el sistema de información?</target>
+      </trans-unit>
+      <trans-unit id="6657998267003788098" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="systemTypeName" equiv-text="name"/>».</source>
+        <target>Estás a punto de eliminar «<x id="systemTypeName" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="1899291426210296935" datatype="html">
+        <source>Cancel·la l&apos;eliminació del sistema d&apos;informació</source>
+        <target>Cancelar la eliminación del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="6154014441617032797" datatype="html">
+        <source>Confirma l&apos;eliminació del sistema d&apos;informació</source>
+        <target>Confirmar la eliminación del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="6477997354920912770" datatype="html"><source>Afegir entorn</source><target>Añadir entorno</target></trans-unit>
+      <trans-unit id="5302417001997385109" datatype="html"><source>Consultar entorn</source><target>Consultar entorno</target></trans-unit>
+      <trans-unit id="2080703853874115945" datatype="html"><source>Editar entorn</source><target>Editar entorno</target></trans-unit>
+      <trans-unit id="2932381452099609117" datatype="html"><source>El codi ha de tenir com a màxim 50 caràcters</source><target>El código debe tener como máximo 50 caracteres</target></trans-unit>
+      <trans-unit id="6455167971454363221" datatype="html"><source>Cancel·la els canvis de l&apos;entorn</source><target>Cancelar los cambios del entorno</target></trans-unit>
+      <trans-unit id="7664518578761217547" datatype="html"><source>Tanca la consulta de l&apos;entorn</source><target>Cerrar la consulta del entorno</target></trans-unit>
+      <trans-unit id="7489774134295585604" datatype="html"><source>Afegeix l&apos;entorn</source><target>Añadir el entorno</target></trans-unit>
+      <trans-unit id="2581286539958131757" datatype="html"><source>Desa els canvis de l&apos;entorn</source><target>Guardar los cambios del entorno</target></trans-unit>
+      <trans-unit id="177801395124429364" datatype="html"><source>Carregant l&apos;entorn</source><target>Cargando el entorno</target></trans-unit>
+      <trans-unit id="4800487236819084917" datatype="html"><source>Consulta l&apos;entorn</source><target>Consultar el entorno</target></trans-unit>
+      <trans-unit id="8925455897087993647" datatype="html"><source>Edita l&apos;entorn</source><target>Editar el entorno</target></trans-unit>
+      <trans-unit id="5797357627836850721" datatype="html"><source>Elimina l&apos;entorn</source><target>Eliminar el entorno</target></trans-unit>
+      <trans-unit id="5013961067121171221" datatype="html"><source>Entorns</source><target>Entornos</target></trans-unit>
+      <trans-unit id="850400248758461371" datatype="html"><source>Cerca per codi o nom</source><target>Buscar por código o nombre</target></trans-unit>
+      <trans-unit id="891525479824694992" datatype="html"><source>Cerca ràpida d&apos;entorns</source><target>Búsqueda rápida de entornos</target></trans-unit>
+      <trans-unit id="7320549877518198736" datatype="html"><source>Afegeix un entorn</source><target>Añadir un entorno</target></trans-unit>
+      <trans-unit id="3665902569994288889" datatype="html"><source>No s&apos;han pogut carregar els entorns.</source><target>No se han podido cargar los entornos.</target></trans-unit>
+      <trans-unit id="23267951328846118" datatype="html"><source>No s&apos;ha pogut carregar l&apos;entorn.</source><target>No se ha podido cargar el entorno.</target></trans-unit>
+      <trans-unit id="2036780639483776830" datatype="html"><source>Entorn afegit</source><target>Entorno añadido</target></trans-unit>
+      <trans-unit id="7620573435764911196" datatype="html"><source>L&apos;entorn s&apos;ha afegit correctament.</source><target>El entorno se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="5737004077551970897" datatype="html"><source>Entorn actualitzat</source><target>Entorno actualizado</target></trans-unit>
+      <trans-unit id="340338899192472738" datatype="html"><source>L&apos;entorn s&apos;ha actualitzat correctament.</source><target>El entorno se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="6928627400677655610" datatype="html"><source>Entorn eliminat</source><target>Entorno eliminado</target></trans-unit>
+      <trans-unit id="3782535357119726829" datatype="html"><source>L&apos;entorn s&apos;ha eliminat correctament.</source><target>El entorno se ha eliminado correctamente.</target></trans-unit>
+      <trans-unit id="5487650462258587561" datatype="html"><source>No s&apos;ha pogut desar l&apos;entorn.</source><target>No se ha podido guardar el entorno.</target></trans-unit>
+      <trans-unit id="7529916373957555709" datatype="html"><source>No s&apos;ha pogut eliminar l&apos;entorn.</source><target>No se ha podido eliminar el entorno.</target></trans-unit>
+      <trans-unit id="6983731964593261120" datatype="html"><source>Eliminar l&apos;entorn?</source><target>¿Eliminar el entorno?</target></trans-unit>
+      <trans-unit id="7545085681350565095" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="environmentCode" equiv-text="code"/>».</source>
+        <target>Estás a punto de eliminar «<x id="environmentCode" equiv-text="code"/>».</target>
+      </trans-unit>
+      <trans-unit id="1811416502351783624" datatype="html"><source>Cancel·la l&apos;eliminació de l&apos;entorn</source><target>Cancelar la eliminación del entorno</target></trans-unit>
+      <trans-unit id="8297702464016457723" datatype="html"><source>Confirma l&apos;eliminació de l&apos;entorn</source><target>Confirmar la eliminación del entorno</target></trans-unit>
+      <trans-unit id="4268921559331506833" datatype="html"><source>No s&apos;han pogut carregar els servidors de l&apos;aplicació.</source><target>No se han podido cargar los servidores de la aplicación.</target></trans-unit>
+      <trans-unit id="8319041499060972831" datatype="html"><source>No s&apos;han pogut carregar les bases de dades de l&apos;aplicació.</source><target>No se han podido cargar las bases de datos de la aplicación.</target></trans-unit>
+      <trans-unit id="1381276674188756043" datatype="html"><source>Mostra o oculta els filtres</source><target>Muestra u oculta los filtros</target></trans-unit>
+      <trans-unit id="732656038439577613" datatype="html"><source>Mostra o oculta els filtres de servidors</source><target>Muestra u oculta los filtros de servidores</target></trans-unit>
+      <trans-unit id="2121683746611315953" datatype="html"><source>Mostra o oculta els filtres de bases de dades</source><target>Muestra u oculta los filtros de bases de datos</target></trans-unit>
+      <trans-unit id="7554167090709881863" datatype="html"><source>Atenció</source><target>Atención</target></trans-unit>
+      <trans-unit id="5720652198775917757" datatype="html">
+        <source>El filtre «<x id="PH" equiv-text="label"/>» encara no està suportat pel servidor i no s&apos;aplicarà.</source>
+        <target>El filtro «<x id="PH" equiv-text="label"/>» aún no está soportado por el servidor y no se aplicará.</target>
+      </trans-unit>
+      <trans-unit id="4315029627537817378" datatype="html">
+        <source>El filtre «<x id="PH" equiv-text="label"/>» encara no està implementat i no s&apos;aplicarà.</source>
+        <target>El filtro «<x id="PH" equiv-text="label"/>» todavía no está implementado y no se aplicará.</target>
+      </trans-unit>
+      <trans-unit id="6396540636841709256" datatype="html"><source>Alguns filtres encara no estan suportats pel servidor i no s&apos;aplicaran.</source><target>Algunos filtros aún no están soportados por el servidor y no se aplicarán.</target></trans-unit>
+      <trans-unit id="2641016520345625751" datatype="html"><source>No s&apos;han pogut carregar les opcions de servidors.</source><target>No se han podido cargar las opciones de servidores.</target></trans-unit>
+      <trans-unit id="6124220389332698882" datatype="html"><source>No s&apos;han pogut carregar les opcions de bases de dades.</source><target>No se han podido cargar las opciones de bases de datos.</target></trans-unit>
+      <trans-unit id="7722275323104527212" datatype="html"><source>No s&apos;han pogut carregar les opcions d&apos;entorns.</source><target>No se han podido cargar las opciones de entornos.</target></trans-unit>
+      <trans-unit id="5764394404954860434" datatype="html"><source>Obrir les accions del registre inactiu</source><target>Abrir las acciones del registro inactivo</target></trans-unit>
+      <trans-unit id="7108434477545808769" datatype="html"><source>Restaura</source><target>Restaurar</target></trans-unit>
+      <trans-unit id="4339540144515489166" datatype="html"><source>La consulta de registres inactius encara no està disponible.</source><target>La consulta de registros inactivos todavía no está disponible.</target></trans-unit>
+      <trans-unit id="2036360843294955496" datatype="html"><source>La restauració de registres encara no està implementada.</source><target>La restauración de registros todavía no está implementada.</target></trans-unit>
+      <trans-unit id="4648946792823890192" datatype="html"><source>Cerca ràpida de bases de dades</source><target>Búsqueda rápida de bases de datos</target></trans-unit>
+      <trans-unit id="5461005933478322850" datatype="html"><source>Afegir una base de dades</source><target>Añadir una base de datos</target></trans-unit>
+      <trans-unit id="5080635427495534562" datatype="html"><source>No s&apos;han pogut carregar les bases de dades</source><target>No se han podido cargar las bases de datos</target></trans-unit>
+      <trans-unit id="3968058303648025141" datatype="html"><source>Torna-ho a provar més tard.</source><target>Vuelve a intentarlo más tarde.</target></trans-unit>
+      <trans-unit id="5820003257859237665" datatype="html"><source>Funcionalitat pendent</source><target>Funcionalidad pendiente</target></trans-unit>
+      <trans-unit id="2303104012225084699" datatype="html"><source>La cerca i els filtres de bases de dades encara no estan suportats pel backend.</source><target>La búsqueda y los filtros de bases de datos todavía no están soportados por el backend.</target></trans-unit>
+      <trans-unit id="1651081615593957482" datatype="html"><source>L&apos;alta, la consulta, l&apos;edició i l&apos;eliminació de bases de dades estaran disponibles pròximament.</source><target>El alta, la consulta, la edición y la eliminación de bases de datos estarán disponibles próximamente.</target></trans-unit>
+      <trans-unit id="1359976933948112827" datatype="html"><source>Cerca ràpida de servidors</source><target>Búsqueda rápida de servidores</target></trans-unit>
+      <trans-unit id="3542190503621373157" datatype="html"><source>Afegir un servidor</source><target>Añadir un servidor</target></trans-unit>
+      <trans-unit id="3673376312249518253" datatype="html"><source>No s&apos;han pogut carregar els servidors</source><target>No se han podido cargar los servidores</target></trans-unit>
+      <trans-unit id="7722140857249266818" datatype="html"><source>La cerca i els filtres de servidors encara no estan suportats pel backend.</source><target>La búsqueda y los filtros de servidores todavía no están soportados por el backend.</target></trans-unit>
+      <trans-unit id="5208014144375856998" datatype="html"><source>L&apos;alta, la consulta, l&apos;edició i l&apos;eliminació de servidors estaran disponibles pròximament.</source><target>El alta, la consulta, la edición y la eliminación de servidores estarán disponibles próximamente.</target></trans-unit>
+      <trans-unit id="systemsRoute" datatype="html"><source>sistemes</source><target>sistemas</target></trans-unit>
+      <trans-unit id="systemsDatabasesRoute" datatype="html"><source>bases-de-dades</source><target>bases-de-datos</target></trans-unit>
+      <trans-unit id="systemsServersRoute" datatype="html"><source>servidors</source><target>servidores</target></trans-unit>
+      <trans-unit id="3231696763980156523" datatype="html"><source>Sistemes</source><target>Sistemas</target></trans-unit>
+      <trans-unit id="5311167198964631792" datatype="html"><source>Gestiona les bases de dades disponibles per a les aplicacions.</source><target>Gestiona las bases de datos disponibles para las aplicaciones.</target></trans-unit>
+      <trans-unit id="5092579938664750473" datatype="html"><source>Gestiona els servidors disponibles per a les aplicacions.</source><target>Gestiona los servidores disponibles para las aplicaciones.</target></trans-unit>
+      <trans-unit id="maintenanceEnvironmentsRoute" datatype="html"><source>entorns</source><target>entornos</target></trans-unit>
+      <trans-unit id="8243229672194808669" datatype="html"><source>Gestiona les categories disponibles per classificar les aplicacions.</source><target>Gestiona las categorías disponibles para clasificar las aplicaciones.</target></trans-unit>
+      <trans-unit id="1747495897481365708" datatype="html"><source>Gestiona els sistemes d&apos;informació als quals es poden associar les aplicacions.</source><target>Gestiona los sistemas de información a los que se pueden asociar las aplicaciones.</target></trans-unit>
+      <trans-unit id="1333144702886810920" datatype="html"><source>Gestiona els àmbits funcionals als quals es poden associar les aplicacions.</source><target>Gestiona los ámbitos funcionales a los que se pueden asociar las aplicaciones.</target></trans-unit>
+      <trans-unit id="4724005879984087317" datatype="html"><source>Gestiona les comissions informàtiques associades a les aplicacions.</source><target>Gestiona las comisiones informáticas asociadas a las aplicaciones.</target></trans-unit>
+      <trans-unit id="8613259319668932076" datatype="html"><source>Gestiona els entorns disponibles per als sistemes i les bases de dades de les aplicacions.</source><target>Gestiona los entornos disponibles para los sistemas y las bases de datos de las aplicaciones.</target></trans-unit>
+      <trans-unit id="5124625055902609064" datatype="html"><source>Encara no hi ha manteniments disponibles per a aquesta secció.</source><target>Todavía no hay mantenimientos disponibles para esta sección.</target></trans-unit>
+      <trans-unit id="maintenanceGeneralRoute" datatype="html"><source>general</source><target>general</target></trans-unit>
+      <trans-unit id="maintenanceResponsiblesRoute" datatype="html"><source>responsables</source><target>responsables</target></trans-unit>
+      <trans-unit id="maintenanceSystemsDatabasesRoute" datatype="html"><source>sistemes-i-bd</source><target>sistemas-y-bd</target></trans-unit>
+      <trans-unit id="1737693233851043870" datatype="html"><source>Afegir host de base de dades</source><target>Añadir host de base de datos</target></trans-unit>
+      <trans-unit id="6086193971562214211" datatype="html"><source>Afegir servidor de base de dades</source><target>Añadir servidor de base de datos</target></trans-unit>
+      <trans-unit id="3163107411388523034" datatype="html"><source>Afegir servei de base de dades</source><target>Añadir servicio de base de datos</target></trans-unit>
+      <trans-unit id="7733791249806851808" datatype="html"><source>Servidor de BD</source><target>Servidor de BD</target></trans-unit>
+      <trans-unit id="3915208994899075606" datatype="html"><source>Aquest camp és obligatori.</source><target>Este campo es obligatorio.</target></trans-unit>
+      <trans-unit id="7533314751539478325" datatype="html"><source>El port ha de ser un nombre enter entre 1 i 65535.</source><target>El puerto debe ser un número entero entre 1 y 65535.</target></trans-unit>
+      <trans-unit id="6183487456786259771" datatype="html"><source>Afegir host d&apos;aplicació</source><target>Añadir host de aplicación</target></trans-unit>
+      <trans-unit id="6542402315900720665" datatype="html"><source>Afegir servidor</source><target>Añadir servidor</target></trans-unit>
+      <trans-unit id="8179261918859759981" datatype="html"><source>Afegir instància d&apos;aplicació</source><target>Añadir instancia de aplicación</target></trans-unit>
+      <trans-unit id="6939949553733490006" datatype="html"><source>Hosts de base de dades</source><target>Hosts de base de datos</target></trans-unit>
+      <trans-unit id="1994210816898973063" datatype="html"><source>Servidors de BD</source><target>Servidores de BD</target></trans-unit>
+      <trans-unit id="9184900054064815921" datatype="html"><source>Serveis de BD</source><target>Servicios de BD</target></trans-unit>
+      <trans-unit id="702775331534775303" datatype="html"><source>Canvi desat només en local</source><target>Cambio guardado solo localmente</target></trans-unit>
+      <trans-unit id="5974957998318436804" datatype="html"><source>La persistència d&apos;aquest canvi en el servidor encara està pendent d&apos;implementar.</source><target>La persistencia de este cambio en el servidor todavía está pendiente de implementar.</target></trans-unit>
+      <trans-unit id="4719224488261661980" datatype="html">
+        <source>No es pot donar de baixa el catàleg perquè està relacionat amb <x id="PH" equiv-text="count"/> hosts actius.</source>
+        <target>No se puede dar de baja el catálogo porque está relacionado con <x id="PH" equiv-text="count"/> hosts activos.</target>
+      </trans-unit>
+      <trans-unit id="8660400382197729430" datatype="html"><source>Donar de baixa el registre?</source><target>¿Dar de baja el registro?</target></trans-unit>
+      <trans-unit id="738735075454047834" datatype="html">
+        <source>El registre #<x id="PH" equiv-text="id"/> quedarà inactiu i es conservarà en les dades locals.</source>
+        <target>El registro #<x id="PH" equiv-text="id"/> quedará inactivo y se conservará en los datos locales.</target>
+      </trans-unit>
+      <trans-unit id="2540413592839053927" datatype="html"><source>Dona de baixa</source><target>Dar de baja</target></trans-unit>
+      <trans-unit id="7169077993039152530" datatype="html"><source>Hosts d&apos;aplicació</source><target>Hosts de aplicación</target></trans-unit>
+      <trans-unit id="5030105342607057252" datatype="html"><source>Instàncies</source><target>Instancias</target></trans-unit>
+      <trans-unit id="5092388149491940913" datatype="html"><source>La consulta, l&apos;edició i la restauració encara no estan implementades.</source><target>La consulta, la edición y la restauración todavía no están implementadas.</target></trans-unit>
+      <trans-unit id="3354878108767754728" datatype="html"><source>Consultar host de base de dades</source><target>Consultar host de base de datos</target></trans-unit>
+      <trans-unit id="1508866741960877651" datatype="html"><source>Editar host de base de dades</source><target>Editar host de base de datos</target></trans-unit>
+      <trans-unit id="119439757421830641" datatype="html"><source>Desa</source><target>Guardar</target></trans-unit>
+      <trans-unit id="4107662535380171593" datatype="html"><source>Consultar host d&apos;aplicació</source><target>Consultar host de aplicación</target></trans-unit>
+      <trans-unit id="5663546952944291761" datatype="html"><source>Editar host d&apos;aplicació</source><target>Editar host de aplicación</target></trans-unit>
+      <trans-unit id="5190728371612563121" datatype="html"><source>No es pot donar de baixa l&apos;host</source><target>No se puede dar de baja el host</target></trans-unit>
+      <trans-unit id="4398004259591070619" datatype="html">
+        <source>L&apos;host està associat a <x id="PH" equiv-text="count"/> aplicacions. Retira aquestes associacions abans de donar-lo de baixa.</source>
+        <target>El host está asociado a <x id="PH" equiv-text="count"/> aplicaciones. Retira estas asociaciones antes de darlo de baja.</target>
+      </trans-unit>
+      <trans-unit id="7734018814025331334" datatype="html"><source>Donar de baixa l&apos;host?</source><target>¿Dar de baja el host?</target></trans-unit>
+      <trans-unit id="963378519974918124" datatype="html">
+        <source>L&apos;host #<x id="PH" equiv-text="id"/> quedarà inactiu i es conservarà en les dades locals.</source>
+        <target>El host #<x id="PH" equiv-text="id"/> quedará inactivo y se conservará en los datos locales.</target>
+      </trans-unit>
+      <trans-unit id="8039629442462468421" datatype="html"><source>No s&apos;han pogut carregar els entorns actius.</source><target>No se han podido cargar los entornos activos.</target></trans-unit>
+      <trans-unit id="1834015837739186286" datatype="html"><source>Producció</source><target>Producción</target></trans-unit>
+      <trans-unit id="5887204469177324813" datatype="html"><source>Preproducció</source><target>Preproducción</target></trans-unit>
+      <trans-unit id="7524135478800869410" datatype="html"><source>Desenvolupament</source><target>Desarrollo</target></trans-unit>
+      <trans-unit id="5767605497215177376" datatype="html"><source>Desenvolupament intern</source><target>Desarrollo interno</target></trans-unit>
+      <trans-unit id="6840064780385463176" datatype="html"><source>Desenvolupament extern</source><target>Desarrollo externo</target></trans-unit>
+      <trans-unit id="6764049647115901987" datatype="html"><source>Desenvolupament mixt</source><target>Desarrollo mixto</target></trans-unit>
+      <trans-unit id="519604185391202290" datatype="html"><source>Conforme</source><target>Conforme</target></trans-unit>
+      <trans-unit id="4566648093136465003" datatype="html"><source>Parcialment conforme</source><target>Parcialmente conforme</target></trans-unit>
+      <trans-unit id="4293378086160921630" datatype="html"><source>No conforme</source><target>No conforme</target></trans-unit>
+      <trans-unit id="1116408455124984780" datatype="html"><source>Modalitat</source><target>Modalidad</target></trans-unit>
+      <trans-unit id="3123283186079509875" datatype="html"><source>Codi font</source><target>Código fuente</target></trans-unit>
+      <trans-unit id="47249112680169945" datatype="html"><source>Adequació estàndards GOIB</source><target>Adecuación a los estándares GOIB</target></trans-unit>
+      <trans-unit id="1356370549304424451" datatype="html"><source>Darrera revisió d&apos;estàndards</source><target>Última revisión de estándares</target></trans-unit>
+      <trans-unit id="1051149857301413143" datatype="html"><source>Proveïdor</source><target>Proveedor</target></trans-unit>
+      <trans-unit id="7968846505716383922" datatype="html"><source>Tecnologia</source><target>Tecnología</target></trans-unit>
+      <trans-unit id="7080789422538094067" datatype="html"><source>Obrir la documentació del desenvolupament</source><target>Abrir la documentación del desarrollo</target></trans-unit>
+      <trans-unit id="2092054526533174032" datatype="html"><source>Obrir el repositori de codi font</source><target>Abrir el repositorio de código fuente</target></trans-unit>
+      <trans-unit id="7338905374493937282" datatype="html"><source>Raó social</source><target>Razón social</target></trans-unit>
+      <trans-unit id="6459338148967667237" datatype="html"><source>Rol</source><target>Rol</target></trans-unit>
+      <trans-unit id="7744114391988867010" datatype="html"><source>Data inici</source><target>Fecha de inicio</target></trans-unit>
+      <trans-unit id="287324578944567535" datatype="html"><source>Data fi</source><target>Fecha de fin</target></trans-unit>
+      <trans-unit id="1813809101356289927" datatype="html"><source>Capa</source><target>Capa</target></trans-unit>
+      <trans-unit id="3148368423412461451" datatype="html"><source>Arquitectura</source><target>Arquitectura</target></trans-unit>
+      <trans-unit id="9146585989339432550" datatype="html"><source>Introdueix una URL HTTP o HTTPS vàlida</source><target>Introduce una URL HTTP o HTTPS válida</target></trans-unit>
+      <trans-unit id="8143251979181494675" datatype="html"><source>La URL ha de tenir com a màxim 1000 caràcters</source><target>La URL debe tener como máximo 1000 caracteres</target></trans-unit>
+      <trans-unit id="7535914180203587005" datatype="html"><source>La documentació del desenvolupament encara no està implementada.</source><target>La documentación del desarrollo todavía no está implementada.</target></trans-unit>
+      <trans-unit id="5034417416475099765" datatype="html"><source>No s&apos;han pogut carregar les dades de desenvolupament.</source><target>No se han podido cargar los datos de desarrollo.</target></trans-unit>
+      <trans-unit id="4092571060038791149" datatype="html"><source>No s&apos;han pogut carregar els proveïdors.</source><target>No se han podido cargar los proveedores.</target></trans-unit>
+      <trans-unit id="6990567629639538984" datatype="html"><source>No s&apos;han pogut carregar les tecnologies.</source><target>No se han podido cargar las tecnologías.</target></trans-unit>
+      <trans-unit id="8590109102084543521" datatype="html"><source>-</source><target>-</target></trans-unit>
+      <trans-unit id="7897475522925152310" datatype="html"><source>dd/mm/aaaa</source><target>dd/mm/aaaa</target></trans-unit>
+      <trans-unit id="8742887219325936185" datatype="html">
+        <source>Canvis desats</source>
+        <target>Cambios guardados</target>
+      </trans-unit>
+      <trans-unit id="1879409691152189969" datatype="html">
+        <source>S&apos;han desat correctament els canvis de <x id="sectionLabel" equiv-text="sectionLabel"/>.</source>
+        <target>Se han guardado correctamente los cambios de <x id="sectionLabel" equiv-text="sectionLabel"/>.</target>
+      </trans-unit>
+      <trans-unit id="3666713763487671381" datatype="html">
+        <source>Els canvis de <x id="sectionLabel" equiv-text="sectionLabel"/> s&apos;han conservat localment, però encara no s&apos;han enviat al servidor.</source>
+        <target>Los cambios de <x id="sectionLabel" equiv-text="sectionLabel"/> se han conservado localmente, pero todavía no se han enviado al servidor.</target>
+      </trans-unit>
+      <trans-unit id="3486898687911319234" datatype="html">
+        <source>Canvis sense desar</source>
+        <target>Cambios sin guardar</target>
+      </trans-unit>
+      <trans-unit id="2816671244730679058" datatype="html">
+        <source>Has de desar o cancel·lar els canvis de les pestanyes següents abans de sortir:
+<x id="sectionLabels" equiv-text="sectionLabels"/></source>
+        <target>Debes guardar o cancelar los cambios de las siguientes pestañas antes de salir:
+<x id="sectionLabels" equiv-text="sectionLabels"/></target>
+      </trans-unit>
+      <trans-unit id="3030662363900918821" datatype="html">
+        <source>Entesos</source>
+        <target>Entendido</target>
+      </trans-unit>
+      <trans-unit id="6333298591452743927" datatype="html">
+        <source>Tanca l&apos;avís de canvis sense desar</source>
+        <target>Cierra el aviso de cambios sin guardar</target>
+      </trans-unit>
+      <trans-unit id="975610603106062582" datatype="html">
+        <source>Editar <x id="sectionLabel" equiv-text="this.sectionLabel()"/></source>
+        <target>Editar <x id="sectionLabel" equiv-text="this.sectionLabel()"/></target>
+      </trans-unit>
+      <trans-unit id="3028594396579298424" datatype="html">
+        <source>Cancel·lar els canvis de <x id="sectionLabel" equiv-text="this.sectionLabel()"/></source>
+        <target>Cancelar los cambios de <x id="sectionLabel" equiv-text="this.sectionLabel()"/></target>
+      </trans-unit>
+      <trans-unit id="2683541133860074665" datatype="html">
+        <source>Desar els canvis de <x id="sectionLabel" equiv-text="this.sectionLabel()"/></source>
+        <target>Guardar los cambios de <x id="sectionLabel" equiv-text="this.sectionLabel()"/></target>
+      </trans-unit>
+      <trans-unit id="8439789119334627983" datatype="html">
+        <source>Acceptar</source>
+        <target>Aceptar</target>
+      </trans-unit>
+      <trans-unit id="1574245919627002512" datatype="html">
+        <source>Accepta la consulta de la categoria</source>
+        <target>Acepta la consulta de la categoría</target>
+      </trans-unit>
+      <trans-unit id="5907757254900014752" datatype="html">
+        <source>Restaura la categoria</source>
+        <target>Restaura la categoría</target>
+      </trans-unit>
+      <trans-unit id="2153640000311322460" datatype="html">
+        <source>Accepta la consulta de la comissió informàtica</source>
+        <target>Acepta la consulta de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="5810361817226454786" datatype="html">
+        <source>Restaura la comissió informàtica</source>
+        <target>Restaura la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="3456917430087720588" datatype="html">
+        <source>Accepta la consulta de l&apos;entorn</source>
+        <target>Acepta la consulta del entorno</target>
+      </trans-unit>
+      <trans-unit id="4972666443235553876" datatype="html">
+        <source>Restaura l&apos;entorn</source>
+        <target>Restaura el entorno</target>
+      </trans-unit>
+      <trans-unit id="7835399862990772349" datatype="html">
+        <source>Accepta la consulta de l&apos;àmbit</source>
+        <target>Acepta la consulta del ámbito</target>
+      </trans-unit>
+      <trans-unit id="225565079582447367" datatype="html">
+        <source>Restaura l&apos;àmbit</source>
+        <target>Restaura el ámbito</target>
+      </trans-unit>
+      <trans-unit id="4476749464041570885" datatype="html">
+        <source>Accepta la consulta del sistema d&apos;informació</source>
+        <target>Acepta la consulta del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="8916155876766325339" datatype="html">
+        <source>Restaura el sistema d&apos;informació</source>
+        <target>Restaura el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="9096392712170879558" datatype="html">
+        <source>Restaura el host de base de dades</source>
+        <target>Restaura el host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="1438889076528842828" datatype="html">
+        <source>Restaura el host d&apos;aplicació</source>
+        <target>Restaura el host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="288406191922065736" datatype="html">
+        <source>Dona de baixa la categoria</source>
+        <target>Da de baja la categoría</target>
+      </trans-unit>
+      <trans-unit id="5542593749412722110" datatype="html">
+        <source>Tanca el formulari de la categoria</source>
+        <target>Cierra el formulario de la categoría</target>
+      </trans-unit>
+      <trans-unit id="1061727402088137812" datatype="html">
+        <source>Dona de baixa la comissió informàtica</source>
+        <target>Da de baja la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="2611369730720202938" datatype="html">
+        <source>Tanca el formulari de la comissió informàtica</source>
+        <target>Cierra el formulario de la comisión informática</target>
+      </trans-unit>
+      <trans-unit id="3256352678589590" datatype="html">
+        <source>Dona de baixa l&apos;entorn</source>
+        <target>Da de baja el entorno</target>
+      </trans-unit>
+      <trans-unit id="8205248879773226197" datatype="html">
+        <source>Tanca el formulari de l&apos;entorn</source>
+        <target>Cierra el formulario del entorno</target>
+      </trans-unit>
+      <trans-unit id="6691995482534379224" datatype="html">
+        <source>Dona de baixa l&apos;àmbit</source>
+        <target>Da de baja el ámbito</target>
+      </trans-unit>
+      <trans-unit id="5584797220854642174" datatype="html">
+        <source>Tanca el formulari de l&apos;àmbit</source>
+        <target>Cierra el formulario del ámbito</target>
+      </trans-unit>
+      <trans-unit id="4775608635426617904" datatype="html">
+        <source>Dona de baixa el sistema d&apos;informació</source>
+        <target>Da de baja el sistema de información</target>
+      </trans-unit>
+      <trans-unit id="7773196149964435024" datatype="html">
+        <source>Tanca el formulari del sistema d&apos;informació</source>
+        <target>Cierra el formulario del sistema de información</target>
+      </trans-unit>
+      <trans-unit id="4863620358460914136" datatype="html">
+        <source>Accepta la consulta del host de base de dades</source>
+        <target>Acepta la consulta del host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="7965093672256051635" datatype="html">
+        <source>Afegeix el host de base de dades</source>
+        <target>Añade el host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="2468522775503174373" datatype="html">
+        <source>Cancel·la els canvis del host de base de dades</source>
+        <target>Cancela los cambios del host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="1565808341106472282" datatype="html">
+        <source>Tanca el formulari del host de base de dades</source>
+        <target>Cierra el formulario del host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="1516935043998915388" datatype="html">
+        <source>Dona de baixa el host de base de dades</source>
+        <target>Da de baja el host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="5889686128090232750" datatype="html">
+        <source>Edita el host de base de dades</source>
+        <target>Edita el host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="9145126101748611776" datatype="html">
+        <source>Desa els canvis del host de base de dades</source>
+        <target>Guarda los cambios del host de base de datos</target>
+      </trans-unit>
+      <trans-unit id="4582370627559183344" datatype="html">
+        <source>Accepta la consulta del host d&apos;aplicació</source>
+        <target>Acepta la consulta del host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="2619471120111997727" datatype="html">
+        <source>Afegeix el host d&apos;aplicació</source>
+        <target>Añade el host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="6448057745835208958" datatype="html">
+        <source>Cancel·la els canvis del host d&apos;aplicació</source>
+        <target>Cancela los cambios del host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="1588782958288385364" datatype="html">
+        <source>Tanca el formulari del host d&apos;aplicació</source>
+        <target>Cierra el formulario del host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="6461938081928369374" datatype="html">
+        <source>Dona de baixa el host d&apos;aplicació</source>
+        <target>Da de baja el host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="8511964706659387541" datatype="html">
+        <source>Edita el host d&apos;aplicació</source>
+        <target>Edita el host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="5280148468904837190" datatype="html">
+        <source>Desa els canvis del host d&apos;aplicació</source>
+        <target>Guarda los cambios del host de aplicación</target>
+      </trans-unit>
+      <trans-unit id="4067402575981949169" datatype="html">
+        <source>Hi ha canvis sense desar. Vols descartar-los o desar-los abans de sortir?</source>
+        <target>Hay cambios sin guardar. ¿Quieres descartarlos o guardarlos antes de salir?</target>
+      </trans-unit>
+      <trans-unit id="6654258202807359701" datatype="html">
+        <source>Descartar</source>
+        <target>Descartar</target>
+      </trans-unit>
+      <trans-unit id="1227267366949817044" datatype="html">
+        <source>Descarta els canvis i tanca el formulari</source>
+        <target>Descarta los cambios y cierra el formulario</target>
+      </trans-unit>
+      <trans-unit id="626803716364540239" datatype="html">
+        <source>Desa els canvis i tanca el formulari</source>
+        <target>Guarda los cambios y cierra el formulario</target>
+      </trans-unit>
+      <trans-unit id="1777505201581360509" datatype="html">
+        <source>Entorn restaurat</source>
+        <target>Entorno restaurado</target>
+      </trans-unit>
+      <trans-unit id="7053511121474219985" datatype="html">
+        <source>L&apos;entorn s&apos;ha restaurat correctament.</source>
+        <target>El entorno se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2699653711554961334" datatype="html">
+        <source>No s&apos;ha pogut restaurar l&apos;entorn.</source>
+        <target>No se ha podido restaurar el entorno.</target>
+      </trans-unit>
+      <trans-unit id="3579908837305437064" datatype="html">
+        <source>Afegir base de dades</source>
+        <target>Añadir base de datos</target>
+      </trans-unit>
+      <trans-unit id="4163133000527596572" datatype="html">
+        <source>Consultar base de dades</source>
+        <target>Consultar base de datos</target>
+      </trans-unit>
+      <trans-unit id="1517860181890880595" datatype="html">
+        <source>Editar base de dades</source>
+        <target>Editar base de datos</target>
+      </trans-unit>
+      <trans-unit id="5473413462998749361" datatype="html">
+        <source>Servei / SID</source>
+        <target>Servicio / SID</target>
+      </trans-unit>
+      <trans-unit id="5555034994931142033" datatype="html">
+        <source>Restaura la base de dades</source>
+        <target>Restaura la base de datos</target>
+      </trans-unit>
+      <trans-unit id="1287582971318574961" datatype="html">
+        <source>Accepta la consulta de la base de dades</source>
+        <target>Acepta la consulta de la base de datos</target>
+      </trans-unit>
+      <trans-unit id="2216120922317829362" datatype="html">
+        <source>Afegeix la base de dades</source>
+        <target>Añade la base de datos</target>
+      </trans-unit>
+      <trans-unit id="6108719258713369907" datatype="html">
+        <source>Cancel·la els canvis de la base de dades</source>
+        <target>Cancela los cambios de la base de datos</target>
+      </trans-unit>
+      <trans-unit id="6305315894060344663" datatype="html">
+        <source>Tanca el formulari de la base de dades</source>
+        <target>Cierra el formulario de la base de datos</target>
+      </trans-unit>
+      <trans-unit id="569222570837092782" datatype="html">
+        <source>Dona de baixa la base de dades</source>
+        <target>Da de baja la base de datos</target>
+      </trans-unit>
+      <trans-unit id="5615811481439214392" datatype="html">
+        <source>Edita la base de dades</source>
+        <target>Edita la base de datos</target>
+      </trans-unit>
+      <trans-unit id="5482516019648981160" datatype="html">
+        <source>Desa els canvis de la base de dades</source>
+        <target>Guarda los cambios de la base de datos</target>
+      </trans-unit>
+      <trans-unit id="6713724284607797461" datatype="html">
+        <source>Afegir proveïdor de base de dades</source>
+        <target>Añadir proveedor de base de datos</target>
+      </trans-unit>
+      <trans-unit id="278233877940461655" datatype="html">
+        <source>Consultar proveïdor de base de dades</source>
+        <target>Consultar proveedor de base de datos</target>
+      </trans-unit>
+      <trans-unit id="7209268619817111278" datatype="html">
+        <source>Editar proveïdor de base de dades</source>
+        <target>Editar proveedor de base de datos</target>
+      </trans-unit>
+      <trans-unit id="1655205076144593773" datatype="html">
+        <source>Port per defecte</source>
+        <target>Puerto predeterminado</target>
+      </trans-unit>
+      <trans-unit id="3914330532494779279" datatype="html">
+        <source>Accepta la consulta del proveïdor</source>
+        <target>Acepta la consulta del proveedor</target>
+      </trans-unit>
+      <trans-unit id="4044360394253213936" datatype="html">
+        <source>Afegeix el proveïdor</source>
+        <target>Añade el proveedor</target>
+      </trans-unit>
+      <trans-unit id="8941762196387424576" datatype="html">
+        <source>Cancel·la els canvis del proveïdor</source>
+        <target>Cancela los cambios del proveedor</target>
+      </trans-unit>
+      <trans-unit id="7774683253526905069" datatype="html">
+        <source>Tanca el formulari del proveïdor</source>
+        <target>Cierra el formulario del proveedor</target>
+      </trans-unit>
+      <trans-unit id="4489953218293594353" datatype="html">
+        <source>Dona de baixa el proveïdor</source>
+        <target>Da de baja el proveedor</target>
+      </trans-unit>
+      <trans-unit id="4310072598411275125" datatype="html">
+        <source>Edita el proveïdor</source>
+        <target>Edita el proveedor</target>
+      </trans-unit>
+      <trans-unit id="3997779110133401900" datatype="html">
+        <source>Restaura el proveïdor</source>
+        <target>Restaura el proveedor</target>
+      </trans-unit>
+      <trans-unit id="3866474734911734623" datatype="html">
+        <source>Desa els canvis del proveïdor</source>
+        <target>Guarda los cambios del proveedor</target>
+      </trans-unit>
+      <trans-unit id="1923246542995983208" datatype="html">
+        <source>Afegir servidor físic</source>
+        <target>Añadir servidor físico</target>
+      </trans-unit>
+      <trans-unit id="1279599200604527588" datatype="html">
+        <source>Consultar servidor físic</source>
+        <target>Consultar servidor físico</target>
+      </trans-unit>
+      <trans-unit id="8189623235881065019" datatype="html">
+        <source>Editar servidor físic</source>
+        <target>Editar servidor físico</target>
+      </trans-unit>
+      <trans-unit id="5338221643277868076" datatype="html">
+        <source>Consultar servidor de base de dades</source>
+        <target>Consultar servidor de base de datos</target>
+      </trans-unit>
+      <trans-unit id="3759997197938002468" datatype="html">
+        <source>Editar servidor de base de dades</source>
+        <target>Editar servidor de base de datos</target>
+      </trans-unit>
+      <trans-unit id="3501520431375756362" datatype="html">
+        <source>Accepta la consulta del servidor</source>
+        <target>Acepta la consulta del servidor</target>
+      </trans-unit>
+      <trans-unit id="922183981189832780" datatype="html">
+        <source>Afegeix el servidor</source>
+        <target>Añade el servidor</target>
+      </trans-unit>
+      <trans-unit id="4846680482258038017" datatype="html">
+        <source>Cancel·la els canvis del servidor</source>
+        <target>Cancela los cambios del servidor</target>
+      </trans-unit>
+      <trans-unit id="3107426100613848676" datatype="html">
+        <source>Tanca el formulari del servidor</source>
+        <target>Cierra el formulario del servidor</target>
+      </trans-unit>
+      <trans-unit id="8160435772689639388" datatype="html">
+        <source>Dona de baixa el servidor</source>
+        <target>Da de baja el servidor</target>
+      </trans-unit>
+      <trans-unit id="2178844641626262872" datatype="html">
+        <source>Edita el servidor</source>
+        <target>Edita el servidor</target>
+      </trans-unit>
+      <trans-unit id="7260293022637705510" datatype="html">
+        <source>Restaura el servidor</source>
+        <target>Restaura el servidor</target>
+      </trans-unit>
+      <trans-unit id="2526610032679242439" datatype="html">
+        <source>Desa els canvis del servidor</source>
+        <target>Guarda los cambios del servidor</target>
+      </trans-unit>
+      <trans-unit id="482633690632505974" datatype="html">
+        <source>Proveïdors de bases de dades</source>
+        <target>Proveedores de bases de datos</target>
+      </trans-unit>
+      <trans-unit id="8273436136123170371" datatype="html">
+        <source>Cerca ràpida de proveïdors</source>
+        <target>Búsqueda rápida de proveedores</target>
+      </trans-unit>
+      <trans-unit id="1831641969048376770" datatype="html">
+        <source>No s&apos;han pogut carregar els proveïdors de bases de dades.</source>
+        <target>No se han podido cargar los proveedores de bases de datos.</target>
+      </trans-unit>
+      <trans-unit id="5586276059969647766" datatype="html">
+        <source>No s&apos;ha pogut desar el proveïdor.</source>
+        <target>No se ha podido guardar el proveedor.</target>
+      </trans-unit>
+      <trans-unit id="5645301538496499080" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el proveïdor.</source>
+        <target>No se ha podido dar de baja el proveedor.</target>
+      </trans-unit>
+      <trans-unit id="2044507178084692567" datatype="html">
+        <source>No s&apos;ha pogut restaurar el proveïdor.</source>
+        <target>No se ha podido restaurar el proveedor.</target>
+      </trans-unit>
+      <trans-unit id="6947304701738921569" datatype="html">
+        <source>Proveïdor afegit</source>
+        <target>Proveedor añadido</target>
+      </trans-unit>
+      <trans-unit id="997898482403506502" datatype="html">
+        <source>El proveïdor s&apos;ha afegit correctament.</source>
+        <target>El proveedor se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5975591133946832382" datatype="html">
+        <source>Proveïdor actualitzat</source>
+        <target>Proveedor actualizado</target>
+      </trans-unit>
+      <trans-unit id="7104262731636619479" datatype="html">
+        <source>El proveïdor s&apos;ha actualitzat correctament.</source>
+        <target>El proveedor se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2844833662061696355" datatype="html">
+        <source>Proveïdor donat de baixa</source>
+        <target>Proveedor dado de baja</target>
+      </trans-unit>
+      <trans-unit id="1057457042365227547" datatype="html">
+        <source>El proveïdor s&apos;ha donat de baixa correctament.</source>
+        <target>El proveedor se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7299823324956463834" datatype="html">
+        <source>Proveïdor restaurat</source>
+        <target>Proveedor restaurado</target>
+      </trans-unit>
+      <trans-unit id="3081696764494592660" datatype="html">
+        <source>El proveïdor s&apos;ha restaurat correctament.</source>
+        <target>El proveedor se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6490379506628267862" datatype="html">
+        <source>Donar de baixa el proveïdor?</source>
+        <target>¿Dar de baja el proveedor?</target>
+      </trans-unit>
+      <trans-unit id="1360850164596914478" datatype="html">
+        <source>El proveïdor «<x id="databaseVendorName" equiv-text="name" />» quedarà inactiu.</source>
+        <target>El proveedor «<x id="databaseVendorName" equiv-text="name" />» quedará inactivo.</target>
+      </trans-unit>
+      <trans-unit id="3801405955236479267" datatype="html">
+        <source>No s&apos;han pogut carregar les bases de dades.</source>
+        <target>No se han podido cargar las bases de datos.</target>
+      </trans-unit>
+      <trans-unit id="8442085546311960913" datatype="html">
+        <source>No s&apos;han pogut carregar els servidors o proveïdors disponibles.</source>
+        <target>No se han podido cargar los servidores o proveedores disponibles.</target>
+      </trans-unit>
+      <trans-unit id="7401935823980537071" datatype="html">
+        <source>No s&apos;ha pogut desar la base de dades.</source>
+        <target>No se ha podido guardar la base de datos.</target>
+      </trans-unit>
+      <trans-unit id="5798571621815309624" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa la base de dades.</source>
+        <target>No se ha podido dar de baja la base de datos.</target>
+      </trans-unit>
+      <trans-unit id="811498098255684664" datatype="html">
+        <source>No s&apos;ha pogut restaurar la base de dades.</source>
+        <target>No se ha podido restaurar la base de datos.</target>
+      </trans-unit>
+      <trans-unit id="4827165491035953771" datatype="html">
+        <source>Base de dades afegida</source>
+        <target>Base de datos añadida</target>
+      </trans-unit>
+      <trans-unit id="4812665242940777610" datatype="html">
+        <source>La base de dades s&apos;ha afegit correctament.</source>
+        <target>La base de datos se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2388929321954503743" datatype="html">
+        <source>Base de dades actualitzada</source>
+        <target>Base de datos actualizada</target>
+      </trans-unit>
+      <trans-unit id="1237460918506193281" datatype="html">
+        <source>La base de dades s&apos;ha actualitzat correctament.</source>
+        <target>La base de datos se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5161017007115931561" datatype="html">
+        <source>Base de dades donada de baixa</source>
+        <target>Base de datos dada de baja</target>
+      </trans-unit>
+      <trans-unit id="4164865194643912395" datatype="html">
+        <source>La base de dades s&apos;ha donat de baixa correctament.</source>
+        <target>La base de datos se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3901404908903605189" datatype="html">
+        <source>Base de dades restaurada</source>
+        <target>Base de datos restaurada</target>
+      </trans-unit>
+      <trans-unit id="1573405717859217015" datatype="html">
+        <source>La base de dades s&apos;ha restaurat correctament.</source>
+        <target>La base de datos se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2689712190384259323" datatype="html">
+        <source>Donar de baixa la base de dades?</source>
+        <target>¿Dar de baja la base de datos?</target>
+      </trans-unit>
+      <trans-unit id="9161787842431648327" datatype="html">
+        <source>La base de dades #<x id="PH" equiv-text="id" /> quedarà inactiva.</source>
+        <target>La base de datos #<x id="PH" equiv-text="id" /> quedará inactiva.</target>
+      </trans-unit>
+      <trans-unit id="6412427825858546146" datatype="html">
+        <source>Servidors físics</source>
+        <target>Servidores físicos</target>
+      </trans-unit>
+      <trans-unit id="6214103497482172270" datatype="html">
+        <source>Cerca ràpida de servidors físics</source>
+        <target>Búsqueda rápida de servidores físicos</target>
+      </trans-unit>
+      <trans-unit id="8285843265003473732" datatype="html">
+        <source>Donar de baixa el servidor físic?</source>
+        <target>¿Dar de baja el servidor físico?</target>
+      </trans-unit>
+      <trans-unit id="5887112160013890265" datatype="html">
+        <source>El servidor físic #<x id="PH" equiv-text="id" /> quedarà inactiu.</source>
+        <target>El servidor físico #<x id="PH" equiv-text="id" /> quedará inactivo.</target>
+      </trans-unit>
+      <trans-unit id="1570780684967303058" datatype="html">
+        <source>Servidor físic afegit</source>
+        <target>Servidor físico añadido</target>
+      </trans-unit>
+      <trans-unit id="7113587908804415319" datatype="html">
+        <source>El servidor físic s&apos;ha afegit correctament.</source>
+        <target>El servidor físico se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3950935046184283098" datatype="html">
+        <source>Servidor físic actualitzat</source>
+        <target>Servidor físico actualizado</target>
+      </trans-unit>
+      <trans-unit id="3216007127877111863" datatype="html">
+        <source>El servidor físic s&apos;ha actualitzat correctament.</source>
+        <target>El servidor físico se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="1553441452037010160" datatype="html">
+        <source>Servidor físic donat de baixa</source>
+        <target>Servidor físico dado de baja</target>
+      </trans-unit>
+      <trans-unit id="5282766063244149496" datatype="html">
+        <source>El servidor físic s&apos;ha donat de baixa correctament.</source>
+        <target>El servidor físico se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7706947744756030060" datatype="html">
+        <source>Servidor físic restaurat</source>
+        <target>Servidor físico restaurado</target>
+      </trans-unit>
+      <trans-unit id="5155318395556488849" datatype="html">
+        <source>El servidor físic s&apos;ha restaurat correctament.</source>
+        <target>El servidor físico se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3131311747686714863" datatype="html">
+        <source>Servidors de bases de dades</source>
+        <target>Servidores de bases de datos</target>
+      </trans-unit>
+      <trans-unit id="8990727294523727610" datatype="html">
+        <source>Cerca ràpida de servidors de bases de dades</source>
+        <target>Búsqueda rápida de servidores de bases de datos</target>
+      </trans-unit>
+      <trans-unit id="8098266202143022706" datatype="html">
+        <source>Donar de baixa el servidor de base de dades?</source>
+        <target>¿Dar de baja el servidor de base de datos?</target>
+      </trans-unit>
+      <trans-unit id="4146072659234895646" datatype="html">
+        <source>El servidor de base de dades #<x id="PH" equiv-text="id" /> quedarà inactiu.</source>
+        <target>El servidor de base de datos #<x id="PH" equiv-text="id" /> quedará inactivo.</target>
+      </trans-unit>
+      <trans-unit id="8862795397714274874" datatype="html">
+        <source>Servidor de base de dades afegit</source>
+        <target>Servidor de base de datos añadido</target>
+      </trans-unit>
+      <trans-unit id="5217935889005297414" datatype="html">
+        <source>El servidor de base de dades s&apos;ha afegit correctament.</source>
+        <target>El servidor de base de datos se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6750688108103571212" datatype="html">
+        <source>Servidor de base de dades actualitzat</source>
+        <target>Servidor de base de datos actualizado</target>
+      </trans-unit>
+      <trans-unit id="8527083203503710201" datatype="html">
+        <source>El servidor de base de dades s&apos;ha actualitzat correctament.</source>
+        <target>El servidor de base de datos se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3046359035740498395" datatype="html">
+        <source>Servidor de base de dades donat de baixa</source>
+        <target>Servidor de base de datos dado de baja</target>
+      </trans-unit>
+      <trans-unit id="3389585889955602027" datatype="html">
+        <source>El servidor de base de dades s&apos;ha donat de baixa correctament.</source>
+        <target>El servidor de base de datos se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7195634155633951936" datatype="html">
+        <source>Servidor de base de dades restaurat</source>
+        <target>Servidor de base de datos restaurado</target>
+      </trans-unit>
+      <trans-unit id="545109632759105865" datatype="html">
+        <source>El servidor de base de dades s&apos;ha restaurat correctament.</source>
+        <target>El servidor de base de datos se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5660358840960061334" datatype="html">
+        <source>No s&apos;han pogut carregar els servidors.</source>
+        <target>No se han podido cargar los servidores.</target>
+      </trans-unit>
+      <trans-unit id="9161063584835830534" datatype="html">
+        <source>No s&apos;ha pogut carregar el tipus de servidor.</source>
+        <target>No se ha podido cargar el tipo de servidor.</target>
+      </trans-unit>
+      <trans-unit id="744867915293268731" datatype="html">
+        <source>No s&apos;ha pogut desar el servidor.</source>
+        <target>No se ha podido guardar el servidor.</target>
+      </trans-unit>
+      <trans-unit id="8749692219301310015" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el servidor.</source>
+        <target>No se ha podido dar de baja el servidor.</target>
+      </trans-unit>
+      <trans-unit id="4698730210501351489" datatype="html">
+        <source>No s&apos;ha pogut restaurar el servidor.</source>
+        <target>No se ha podido restaurar el servidor.</target>
+      </trans-unit>
+      <trans-unit id="1217485118390183369" datatype="html">
+        <source>No s&apos;han pogut carregar els hosts d&apos;aplicació.</source>
+        <target>No se han podido cargar los hosts de aplicación.</target>
+      </trans-unit>
+      <trans-unit id="2013421620536147580" datatype="html">
+        <source>No s&apos;han pogut carregar els servidors d&apos;aplicacions actius.</source>
+        <target>No se han podido cargar los servidores de aplicaciones activos.</target>
+      </trans-unit>
+      <trans-unit id="8943746391391595159" datatype="html">
+        <source>No s&apos;ha pogut desar el host d&apos;aplicació.</source>
+        <target>No se ha podido guardar el host de aplicación.</target>
+      </trans-unit>
+      <trans-unit id="5095178307848353811" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el host d&apos;aplicació.</source>
+        <target>No se ha podido dar de baja el host de aplicación.</target>
+      </trans-unit>
+      <trans-unit id="7928406830046316105" datatype="html">
+        <source>No s&apos;ha pogut restaurar el host d&apos;aplicació.</source>
+        <target>No se ha podido restaurar el host de aplicación.</target>
+      </trans-unit>
+      <trans-unit id="2526080984806378675" datatype="html">
+        <source>Host afegit</source>
+        <target>Host añadido</target>
+      </trans-unit>
+      <trans-unit id="837004262686050240" datatype="html">
+        <source>El host d&apos;aplicació s&apos;ha afegit correctament.</source>
+        <target>El host de aplicación se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7445517254375497953" datatype="html">
+        <source>Host actualitzat</source>
+        <target>Host actualizado</target>
+      </trans-unit>
+      <trans-unit id="6576501459982263913" datatype="html">
+        <source>El host d&apos;aplicació s&apos;ha actualitzat correctament.</source>
+        <target>El host de aplicación se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2495898664153292906" datatype="html">
+        <source>Host donat de baixa</source>
+        <target>Host dado de baja</target>
+      </trans-unit>
+      <trans-unit id="8056337439177996801" datatype="html">
+        <source>El host d&apos;aplicació s&apos;ha donat de baixa correctament.</source>
+        <target>El host de aplicación se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6000703470941051991" datatype="html">
+        <source>Host restaurat</source>
+        <target>Host restaurado</target>
+      </trans-unit>
+      <trans-unit id="391991044111837501" datatype="html">
+        <source>El host d&apos;aplicació s&apos;ha restaurat correctament.</source>
+        <target>El host de aplicación se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6131173681536632856" datatype="html">
+        <source>Donar de baixa el host?</source>
+        <target>¿Dar de baja el host?</target>
+      </trans-unit>
+      <trans-unit id="2729784915263162653" datatype="html">
+        <source>El host #<x id="PH" equiv-text="id" /> quedarà inactiu.</source>
+        <target>El host #<x id="PH" equiv-text="id" /> quedará inactivo.</target>
+      </trans-unit>
+      <trans-unit id="6405014111485588394" datatype="html">
+        <source>Gestiona els servidors físics que allotgen bases de dades.</source>
+        <target>Gestiona los servidores físicos que alojan bases de datos.</target>
+      </trans-unit>
+      <trans-unit id="1206301811416081971" datatype="html">
+        <source>Gestiona els proveïdors i ports predeterminats de bases de dades.</source>
+        <target>Gestiona los proveedores y puertos predeterminados de bases de datos.</target>
+      </trans-unit>
+      <trans-unit id="8252751456010473920" datatype="html">
+        <source>Gestiona els servidors físics que allotgen aplicacions.</source>
+        <target>Gestiona los servidores físicos que alojan aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="4527659489154090792" datatype="html">
+        <source>Gestiona les instàncies d&apos;aplicació instal·lades als servidors.</source>
+        <target>Gestiona las instancias de aplicación instaladas en los servidores.</target>
+      </trans-unit>
+      <trans-unit id="5743180790770534194" datatype="html">
+        <source>Afegir servidor d&apos;aplicacions</source>
+        <target>Añadir servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="1189346353721082369" datatype="html">
+        <source>Consultar servidor d&apos;aplicacions</source>
+        <target>Consultar servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="6587281225011266054" datatype="html">
+        <source>Editar servidor d&apos;aplicacions</source>
+        <target>Editar servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="6334722226243289280" datatype="html">
+        <source>Restaura el servidor d&apos;aplicacions</source>
+        <target>Restaura el servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="8970833158439367823" datatype="html">
+        <source>Accepta la consulta del servidor d&apos;aplicacions</source>
+        <target>Acepta la consulta del servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="4924835522123181253" datatype="html">
+        <source>Afegeix el servidor d&apos;aplicacions</source>
+        <target>Añade el servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="3130427365952880737" datatype="html">
+        <source>Cancel·la els canvis del servidor d&apos;aplicacions</source>
+        <target>Cancela los cambios del servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="1049237490120679785" datatype="html">
+        <source>Tanca el formulari del servidor d&apos;aplicacions</source>
+        <target>Cierra el formulario del servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="3351813064243374700" datatype="html">
+        <source>Dona de baixa el servidor d&apos;aplicacions</source>
+        <target>Da de baja el servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="868923387874136813" datatype="html">
+        <source>Edita el servidor d&apos;aplicacions</source>
+        <target>Edita el servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="6714712786236289748" datatype="html">
+        <source>Desa els canvis del servidor d&apos;aplicacions</source>
+        <target>Guarda los cambios del servidor de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="8434160950154629929" datatype="html">
+        <source>Servidors d&apos;aplicacions</source>
+        <target>Servidores de aplicaciones</target>
+      </trans-unit>
+      <trans-unit id="485781343585814239" datatype="html">
+        <source>No s&apos;han pogut carregar els servidors d&apos;aplicacions.</source>
+        <target>No se han podido cargar los servidores de aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="3322678556477418199" datatype="html">
+        <source>No s&apos;ha pogut desar el servidor d&apos;aplicacions.</source>
+        <target>No se ha podido guardar el servidor de aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="8583215930840211344" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el servidor d&apos;aplicacions.</source>
+        <target>No se ha podido dar de baja el servidor de aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="2019720138128227869" datatype="html">
+        <source>No s&apos;ha pogut restaurar el servidor d&apos;aplicacions.</source>
+        <target>No se ha podido restaurar el servidor de aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="5397305403707517826" datatype="html">
+        <source>Servidor afegit</source>
+        <target>Servidor añadido</target>
+      </trans-unit>
+      <trans-unit id="2504867449110155117" datatype="html">
+        <source>El servidor d&apos;aplicacions s&apos;ha afegit correctament.</source>
+        <target>El servidor de aplicaciones se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="8462747444933882569" datatype="html">
+        <source>Servidor actualitzat</source>
+        <target>Servidor actualizado</target>
+      </trans-unit>
+      <trans-unit id="7998714056451446423" datatype="html">
+        <source>El servidor d&apos;aplicacions s&apos;ha actualitzat correctament.</source>
+        <target>El servidor de aplicaciones se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5968021037008551457" datatype="html">
+        <source>Servidor donat de baixa</source>
+        <target>Servidor dado de baja</target>
+      </trans-unit>
+      <trans-unit id="6473761180816920603" datatype="html">
+        <source>El servidor d&apos;aplicacions s&apos;ha donat de baixa correctament.</source>
+        <target>El servidor de aplicaciones se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="534225330420194609" datatype="html">
+        <source>Servidor restaurat</source>
+        <target>Servidor restaurado</target>
+      </trans-unit>
+      <trans-unit id="8566026319139135711" datatype="html">
+        <source>El servidor d&apos;aplicacions s&apos;ha restaurat correctament.</source>
+        <target>El servidor de aplicaciones se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6789508650760117552" datatype="html">
+        <source>Donar de baixa el servidor?</source>
+        <target>¿Dar de baja el servidor?</target>
+      </trans-unit>
+      <trans-unit id="1305276727333703200" datatype="html">
+        <source>El servidor #<x id="PH" equiv-text="id" /> quedarà inactiu.</source>
+        <target>El servidor #<x id="PH" equiv-text="id" /> quedará inactivo.</target>
+      </trans-unit>
+      <trans-unit id="8809608354000489489" datatype="html">
+        <source>Afegir base de dades a l&apos;aplicació</source>
+        <target>Añadir base de datos a la aplicación</target>
+      </trans-unit>
+      <trans-unit id="2911156656816969754" datatype="html">
+        <source>Consultar base de dades de l&apos;aplicació</source>
+        <target>Consultar base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="7708215559353607009" datatype="html">
+        <source>Editar base de dades de l&apos;aplicació</source>
+        <target>Editar base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="3947782089290894763" datatype="html">
+        <source>Selecciona una base de dades.</source>
+        <target>Selecciona una base de datos.</target>
+      </trans-unit>
+      <trans-unit id="5710633823558184925" datatype="html">
+        <source>Accepta la consulta de la base de dades de l&apos;aplicació</source>
+        <target>Acepta la consulta de la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="1680181731887360127" datatype="html">
+        <source>Afegeix la base de dades a l&apos;aplicació</source>
+        <target>Añade la base de datos a la aplicación</target>
+      </trans-unit>
+      <trans-unit id="7940928442771297067" datatype="html">
+        <source>Cancel·la els canvis de la base de dades de l&apos;aplicació</source>
+        <target>Cancela los cambios de la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="4102006998564701365" datatype="html">
+        <source>Tanca el diàleg de la base de dades de l&apos;aplicació</source>
+        <target>Cierra el diálogo de la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="2804831829352041117" datatype="html">
+        <source>Dona de baixa la base de dades de l&apos;aplicació</source>
+        <target>Da de baja la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="6540628673042607740" datatype="html">
+        <source>Edita la base de dades de l&apos;aplicació</source>
+        <target>Edita la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="236420149276147046" datatype="html">
+        <source>Restaura la base de dades de l&apos;aplicació</source>
+        <target>Restaura la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="594931636791023558" datatype="html">
+        <source>Desa els canvis de la base de dades de l&apos;aplicació</source>
+        <target>Guarda los cambios de la base de datos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="6124164990185900326" datatype="html">
+        <source>Selecciona el registre</source>
+        <target>Selecciona el registro</target>
+      </trans-unit>
+      <trans-unit id="7792114314457705442" datatype="html">
+        <source>Afegir servidor a l&apos;aplicació</source>
+        <target>Añadir servidor a la aplicación</target>
+      </trans-unit>
+      <trans-unit id="5639534345947163807" datatype="html">
+        <source>Consultar servidor de l&apos;aplicació</source>
+        <target>Consultar servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="6771142628181808144" datatype="html">
+        <source>Editar servidor de l&apos;aplicació</source>
+        <target>Editar servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="2178115306197204147" datatype="html">
+        <source>Selecciona un servidor.</source>
+        <target>Selecciona un servidor.</target>
+      </trans-unit>
+      <trans-unit id="7682952224337737083" datatype="html">
+        <source>Accepta la consulta del servidor de l&apos;aplicació</source>
+        <target>Acepta la consulta del servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="668290789889331802" datatype="html">
+        <source>Afegeix el servidor a l&apos;aplicació</source>
+        <target>Añade el servidor a la aplicación</target>
+      </trans-unit>
+      <trans-unit id="8450861707275121285" datatype="html">
+        <source>Cancel·la els canvis del servidor de l&apos;aplicació</source>
+        <target>Cancela los cambios del servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="427366761093619563" datatype="html">
+        <source>Tanca el diàleg del servidor de l&apos;aplicació</source>
+        <target>Cierra el diálogo del servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="675607552728084757" datatype="html">
+        <source>Dona de baixa el servidor de l&apos;aplicació</source>
+        <target>Da de baja el servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="5880198848109475242" datatype="html">
+        <source>Edita el servidor de l&apos;aplicació</source>
+        <target>Edita el servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="810122523096717580" datatype="html">
+        <source>Restaura el servidor de l&apos;aplicació</source>
+        <target>Restaura el servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="3473176849248256832" datatype="html">
+        <source>Desa els canvis del servidor de l&apos;aplicació</source>
+        <target>Guarda los cambios del servidor de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="6878722269235656012" datatype="html">
+        <source>No s&apos;han pogut carregar els servidors actius de manteniments.</source>
+        <target>No se han podido cargar los servidores activos de mantenimientos.</target>
+      </trans-unit>
+      <trans-unit id="5591887990052985506" datatype="html">
+        <source>No s&apos;han pogut carregar les bases de dades actives de manteniments.</source>
+        <target>No se han podido cargar las bases de datos activas de mantenimientos.</target>
+      </trans-unit>
+      <trans-unit id="1506602035508181687" datatype="html">
+        <source>No s&apos;han pogut carregar les observacions de sistemes i bases de dades.</source>
+        <target>No se han podido cargar las observaciones de sistemas y bases de datos.</target>
+      </trans-unit>
+      <trans-unit id="6416491798750401892" datatype="html">
+        <source>L&apos;aplicació no té informat l&apos;identificador de sistemes i bases de dades.</source>
+        <target>La aplicación no tiene informado el identificador de sistemas y bases de datos.</target>
+      </trans-unit>
+      <trans-unit id="3229278814873577233" datatype="html">
+        <source>El servidor s&apos;ha afegit correctament a l&apos;aplicació.</source>
+        <target>El servidor se ha añadido correctamente a la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="5090044962323983124" datatype="html">
+        <source>El servidor de l&apos;aplicació s&apos;ha actualitzat correctament.</source>
+        <target>El servidor de la aplicación se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="353117733051240799" datatype="html">
+        <source>El servidor s&apos;ha donat de baixa de l&apos;aplicació.</source>
+        <target>El servidor se ha dado de baja de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="593039302344106512" datatype="html">
+        <source>No s&apos;ha pogut desar el servidor de l&apos;aplicació.</source>
+        <target>No se ha podido guardar el servidor de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="5060413024310768322" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el servidor de l&apos;aplicació.</source>
+        <target>No se ha podido dar de baja el servidor de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="3374636652651815808" datatype="html">
+        <source>La base de dades s&apos;ha afegit correctament a l&apos;aplicació.</source>
+        <target>La base de datos se ha añadido correctamente a la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="7952967917956772393" datatype="html">
+        <source>La base de dades de l&apos;aplicació s&apos;ha actualitzat correctament.</source>
+        <target>La base de datos de la aplicación se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="187315129970780532" datatype="html">
+        <source>La base de dades s&apos;ha donat de baixa de l&apos;aplicació.</source>
+        <target>La base de datos se ha dado de baja de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="2335617603861709122" datatype="html">
+        <source>No s&apos;ha pogut desar la base de dades de l&apos;aplicació.</source>
+        <target>No se ha podido guardar la base de datos de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="771375412432677301" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa la base de dades de l&apos;aplicació.</source>
+        <target>No se ha podido dar de baja la base de datos de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="4969100622310941879" datatype="html">
+        <source>La relació amb el servidor #<x id="id" equiv-text="id" /> quedarà inactiva.</source>
+        <target>La relación con el servidor #<x id="id" equiv-text="id" /> quedará inactiva.</target>
+      </trans-unit>
+      <trans-unit id="2765629439654860522" datatype="html">
+        <source>La relació amb la base de dades #<x id="id" equiv-text="id" /> quedarà inactiva.</source>
+        <target>La relación con la base de datos #<x id="id" equiv-text="id" /> quedará inactiva.</target>
+      </trans-unit>
+      <trans-unit id="2649752320101530265" datatype="html">
+        <source>Afegir proveïdor</source>
+        <target>Añadir proveedor</target>
+      </trans-unit>
+      <trans-unit id="3361429745617551143" datatype="html">
+        <source>Consultar proveïdor</source>
+        <target>Consultar proveedor</target>
+      </trans-unit>
+      <trans-unit id="9007446578698538971" datatype="html">
+        <source>Editar proveïdor</source>
+        <target>Editar proveedor</target>
+      </trans-unit>
+      <trans-unit id="5974658689467265534" datatype="html">
+        <source>La raó social ha de tenir com a màxim 255 caràcters</source>
+        <target>La razón social debe tener como máximo 255 caracteres</target>
+      </trans-unit>
+      <trans-unit id="2822215656152446594" datatype="html">
+        <source>La data de fi no pot ser anterior a la data d&apos;inici</source>
+        <target>La fecha de fin no puede ser anterior a la fecha de inicio</target>
+      </trans-unit>
+      <trans-unit id="2230231051093996789" datatype="html">
+        <source>Obre les accions del proveïdor</source>
+        <target>Abre las acciones del proveedor</target>
+      </trans-unit>
+      <trans-unit id="6525258275551407914" datatype="html">
+        <source>Obre les accions de la tecnologia</source>
+        <target>Abre las acciones de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="3307811195810492774" datatype="html">
+        <source>Afegir tecnologia</source>
+        <target>Añadir tecnología</target>
+      </trans-unit>
+      <trans-unit id="3991166122301673857" datatype="html">
+        <source>Consultar tecnologia</source>
+        <target>Consultar tecnología</target>
+      </trans-unit>
+      <trans-unit id="2888762890993667781" datatype="html">
+        <source>Editar tecnologia</source>
+        <target>Editar tecnología</target>
+      </trans-unit>
+      <trans-unit id="3475124583887636726" datatype="html">
+        <source>El valor ha de tenir com a màxim 255 caràcters</source>
+        <target>El valor debe tener como máximo 255 caracteres</target>
+      </trans-unit>
+      <trans-unit id="3634015144195974122" datatype="html">
+        <source>Accepta la consulta de la tecnologia</source>
+        <target>Acepta la consulta de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="4144538041934379248" datatype="html">
+        <source>Afegeix la tecnologia</source>
+        <target>Añade la tecnología</target>
+      </trans-unit>
+      <trans-unit id="8170594802925771593" datatype="html">
+        <source>Cancel·la els canvis de la tecnologia</source>
+        <target>Cancela los cambios de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="3603601633906292321" datatype="html">
+        <source>Tanca el formulari de la tecnologia</source>
+        <target>Cierra el formulario de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="1972271614941738091" datatype="html">
+        <source>Dona de baixa la tecnologia</source>
+        <target>Da de baja la tecnología</target>
+      </trans-unit>
+      <trans-unit id="4841370193357558816" datatype="html">
+        <source>Edita la tecnologia</source>
+        <target>Edita la tecnología</target>
+      </trans-unit>
+      <trans-unit id="5273939390635961459" datatype="html">
+        <source>Restaura la tecnologia</source>
+        <target>Restaura la tecnología</target>
+      </trans-unit>
+      <trans-unit id="4426701074515631656" datatype="html">
+        <source>Desa els canvis de la tecnologia</source>
+        <target>Guarda los cambios de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="7172092950454629026" datatype="html">
+        <source>Afegeix un proveïdor</source>
+        <target>Añade un proveedor</target>
+      </trans-unit>
+      <trans-unit id="1588090973158951269" datatype="html">
+        <source>Afegeix una tecnologia</source>
+        <target>Añade una tecnología</target>
+      </trans-unit>
+      <trans-unit id="8669916848420653487" datatype="html">
+        <source>No s&apos;han pogut carregar els rols de proveïdor.</source>
+        <target>No se han podido cargar los roles de proveedor.</target>
+      </trans-unit>
+      <trans-unit id="5219903755983302174" datatype="html">
+        <source>No s&apos;ha pogut carregar el catàleg de tecnologies.</source>
+        <target>No se ha podido cargar el catálogo de tecnologías.</target>
+      </trans-unit>
+      <trans-unit id="1422677512109225567" datatype="html">
+        <source>S&apos;ha afegit el proveïdor correctament.</source>
+        <target>Se ha añadido el proveedor correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3596545491789476857" datatype="html">
+        <source>No s&apos;ha pogut afegir el proveïdor.</source>
+        <target>No se ha podido añadir el proveedor.</target>
+      </trans-unit>
+      <trans-unit id="5850850356427746177" datatype="html">
+        <source>S&apos;ha actualitzat el proveïdor correctament.</source>
+        <target>Se ha actualizado el proveedor correctamente.</target>
+      </trans-unit>
+      <trans-unit id="7795817058747280673" datatype="html">
+        <source>No s&apos;ha pogut actualitzar el proveïdor.</source>
+        <target>No se ha podido actualizar el proveedor.</target>
+      </trans-unit>
+      <trans-unit id="7476325914898394022" datatype="html">
+        <source>S&apos;ha donat de baixa el proveïdor correctament.</source>
+        <target>Se ha dado de baja el proveedor correctamente.</target>
+      </trans-unit>
+      <trans-unit id="533435492816464698" datatype="html">
+        <source>S&apos;ha afegit la tecnologia correctament.</source>
+        <target>Se ha añadido la tecnología correctamente.</target>
+      </trans-unit>
+      <trans-unit id="4089845691870737114" datatype="html">
+        <source>No s&apos;ha pogut afegir la tecnologia.</source>
+        <target>No se ha podido añadir la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="7656889355025447275" datatype="html">
+        <source>S&apos;ha actualitzat la tecnologia correctament.</source>
+        <target>Se ha actualizado la tecnología correctamente.</target>
+      </trans-unit>
+      <trans-unit id="8900482107243625032" datatype="html">
+        <source>No s&apos;ha pogut actualitzar la tecnologia.</source>
+        <target>No se ha podido actualizar la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="4224193190983608340" datatype="html">
+        <source>S&apos;ha donat de baixa la tecnologia correctament.</source>
+        <target>Se ha dado de baja la tecnología correctamente.</target>
+      </trans-unit>
+      <trans-unit id="1671813703154836047" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa la tecnologia.</source>
+        <target>No se ha podido dar de baja la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="334207458307385461" datatype="html">
+        <source>Vols donar de baixa el proveïdor <x id="PH" equiv-text="companyName" />?</source>
+        <target>¿Quieres dar de baja el proveedor <x id="PH" equiv-text="companyName" />?</target>
+      </trans-unit>
+      <trans-unit id="757942649694923628" datatype="html">
+        <source>Cancel·la la baixa del proveïdor</source>
+        <target>Cancela la baja del proveedor</target>
+      </trans-unit>
+      <trans-unit id="6930992287527019105" datatype="html">
+        <source>Confirma la baixa del proveïdor</source>
+        <target>Confirma la baja del proveedor</target>
+      </trans-unit>
+      <trans-unit id="5499447123853841385" datatype="html">
+        <source>Vols donar de baixa la tecnologia <x id="PH" equiv-text="technologyName" />?</source>
+        <target>¿Quieres dar de baja la tecnología <x id="PH" equiv-text="technologyName" />?</target>
+      </trans-unit>
+      <trans-unit id="6965778896282473414" datatype="html">
+        <source>Cancel·la la baixa de la tecnologia</source>
+        <target>Cancela la baja de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="1434392679709192280" datatype="html">
+        <source>Confirma la baixa de la tecnologia</source>
+        <target>Confirma la baja de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="327097139011503673" datatype="html">
+        <source>Afegir capa</source>
+        <target>Añadir capa</target>
+      </trans-unit>
+      <trans-unit id="5045929879513047189" datatype="html">
+        <source>Consultar capa</source>
+        <target>Consultar capa</target>
+      </trans-unit>
+      <trans-unit id="3032639906402010592" datatype="html">
+        <source>Editar capa</source>
+        <target>Editar capa</target>
+      </trans-unit>
+      <trans-unit id="2196926247996010294" datatype="html">
+        <source>Cancel·la els canvis de la capa</source>
+        <target>Cancela los cambios de la capa</target>
+      </trans-unit>
+      <trans-unit id="6649038273539413151" datatype="html">
+        <source>Accepta la consulta de la capa</source>
+        <target>Acepta la consulta de la capa</target>
+      </trans-unit>
+      <trans-unit id="6291253743696656745" datatype="html">
+        <source>Restaura la capa</source>
+        <target>Restaura la capa</target>
+      </trans-unit>
+      <trans-unit id="8012456986570504086" datatype="html">
+        <source>Afegeix la capa</source>
+        <target>Añade la capa</target>
+      </trans-unit>
+      <trans-unit id="6050111597206760599" datatype="html">
+        <source>Desa els canvis de la capa</source>
+        <target>Guarda los cambios de la capa</target>
+      </trans-unit>
+      <trans-unit id="7825403000331410482" datatype="html">
+        <source>Edita la capa</source>
+        <target>Edita la capa</target>
+      </trans-unit>
+      <trans-unit id="6466026994748814750" datatype="html">
+        <source>Dona de baixa la capa</source>
+        <target>Da de baja la capa</target>
+      </trans-unit>
+      <trans-unit id="5752450881536195912" datatype="html">
+        <source>Tanca el formulari de la capa</source>
+        <target>Cierra el formulario de la capa</target>
+      </trans-unit>
+      <trans-unit id="5227768312650659873" datatype="html">
+        <source>Carregant la capa</source>
+        <target>Cargando la capa</target>
+      </trans-unit>
+      <trans-unit id="7553731434158992799" datatype="html">
+        <source>Obrir les accions de la capa</source>
+        <target>Abrir las acciones de la capa</target>
+      </trans-unit>
+      <trans-unit id="4234564144103340233" datatype="html">
+        <source>Capes</source>
+        <target>Capas</target>
+      </trans-unit>
+      <trans-unit id="9109053584633132367" datatype="html">
+        <source>Cerca ràpida de capes</source>
+        <target>Búsqueda rápida de capas</target>
+      </trans-unit>
+      <trans-unit id="1483288989354183573" datatype="html">
+        <source>Afegeix una capa</source>
+        <target>Añade una capa</target>
+      </trans-unit>
+      <trans-unit id="3387532994828505041" datatype="html">
+        <source>No s&apos;han pogut carregar les capes.</source>
+        <target>No se han podido cargar las capas.</target>
+      </trans-unit>
+      <trans-unit id="7323320428278475996" datatype="html">
+        <source>No s&apos;ha pogut carregar la capa.</source>
+        <target>No se ha podido cargar la capa.</target>
+      </trans-unit>
+      <trans-unit id="6078325508701890604" datatype="html">
+        <source>Capa afegida</source>
+        <target>Capa añadida</target>
+      </trans-unit>
+      <trans-unit id="8785768344922579474" datatype="html">
+        <source>La capa s&apos;ha afegit correctament.</source>
+        <target>La capa se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6104070528803111496" datatype="html">
+        <source>Capa actualitzada</source>
+        <target>Capa actualizada</target>
+      </trans-unit>
+      <trans-unit id="3645483099998070758" datatype="html">
+        <source>La capa s&apos;ha actualitzat correctament.</source>
+        <target>La capa se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3029355722741992415" datatype="html">
+        <source>Capa eliminada</source>
+        <target>Capa eliminada</target>
+      </trans-unit>
+      <trans-unit id="9133107300837591562" datatype="html">
+        <source>La capa s&apos;ha eliminat correctament.</source>
+        <target>La capa se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="3976259135232921741" datatype="html">
+        <source>Capa restaurada</source>
+        <target>Capa restaurada</target>
+      </trans-unit>
+      <trans-unit id="268837504852677640" datatype="html">
+        <source>La capa s&apos;ha restaurat correctament.</source>
+        <target>La capa se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6521102065169599816" datatype="html">
+        <source>No s&apos;ha pogut desar la capa.</source>
+        <target>No se ha podido guardar la capa.</target>
+      </trans-unit>
+      <trans-unit id="1035971747501752118" datatype="html">
+        <source>No s&apos;ha pogut eliminar la capa.</source>
+        <target>No se ha podido eliminar la capa.</target>
+      </trans-unit>
+      <trans-unit id="5904728280784840246" datatype="html">
+        <source>No s&apos;ha pogut restaurar la capa.</source>
+        <target>No se ha podido restaurar la capa.</target>
+      </trans-unit>
+      <trans-unit id="5276403039812266995" datatype="html">
+        <source>Eliminar la capa?</source>
+        <target>¿Eliminar la capa?</target>
+      </trans-unit>
+      <trans-unit id="8850548287445172901" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="layerName" equiv-text="name" />».</source>
+        <target>Estás a punto de eliminar «<x id="layerName" equiv-text="name" />».</target>
+      </trans-unit>
+      <trans-unit id="2864066169408860598" datatype="html">
+        <source>Cancel·la l&apos;eliminació de la capa</source>
+        <target>Cancela la eliminación de la capa</target>
+      </trans-unit>
+      <trans-unit id="2122711543276678967" datatype="html">
+        <source>Confirma l&apos;eliminació de la capa</source>
+        <target>Confirma la eliminación de la capa</target>
+      </trans-unit>
+      <trans-unit id="4084592934713462698" datatype="html">
+        <source>Gestiona els rols que es poden assignar als proveïdors d&apos;una aplicació.</source>
+        <target>Gestiona los roles que se pueden asignar a los proveedores de una aplicación.</target>
+      </trans-unit>
+      <trans-unit id="2219259704603617047" datatype="html">
+        <source>Gestiona les capes d&apos;arquitectura disponibles per classificar tecnologies.</source>
+        <target>Gestiona las capas de arquitectura disponibles para clasificar tecnologías.</target>
+      </trans-unit>
+      <trans-unit id="6887986199547476360" datatype="html">
+        <source>Gestiona el catàleg de tecnologies i la capa associada a cadascuna.</source>
+        <target>Gestiona el catálogo de tecnologías y la capa asociada a cada una.</target>
+      </trans-unit>
+      <trans-unit id="6724131102960590342" datatype="html">
+        <source>No s&apos;han pogut carregar les capes disponibles per a les tecnologies.</source>
+        <target>No se han podido cargar las capas disponibles para las tecnologías.</target>
+      </trans-unit>
+      <trans-unit id="maintenanceDevelopmentRoute" datatype="html">
+        <source>desenvolupament</source>
+        <target>desarrollo</target>
+      </trans-unit>
+      <trans-unit id="7201796105556904759" datatype="html">
+        <source>Rols de proveïdor</source>
+        <target>Roles de proveedor</target>
+      </trans-unit>
+      <trans-unit id="975748754927247564" datatype="html">
+        <source>Tecnologies</source>
+        <target>Tecnologías</target>
+      </trans-unit>
+      <trans-unit id="2007201722784092382" datatype="html">
+        <source>Afegir rol de proveïdor</source>
+        <target>Añadir rol de proveedor</target>
+      </trans-unit>
+      <trans-unit id="5954634988158977810" datatype="html">
+        <source>Consultar rol de proveïdor</source>
+        <target>Consultar rol de proveedor</target>
+      </trans-unit>
+      <trans-unit id="3231010708924478650" datatype="html">
+        <source>Editar rol de proveïdor</source>
+        <target>Editar rol de proveedor</target>
+      </trans-unit>
+      <trans-unit id="6409059362021348382" datatype="html">
+        <source>Cancel·la els canvis del rol</source>
+        <target>Cancela los cambios del rol</target>
+      </trans-unit>
+      <trans-unit id="3524562384602612815" datatype="html">
+        <source>Accepta la consulta del rol</source>
+        <target>Acepta la consulta del rol</target>
+      </trans-unit>
+      <trans-unit id="3420286728252614202" datatype="html">
+        <source>Restaura el rol</source>
+        <target>Restaura el rol</target>
+      </trans-unit>
+      <trans-unit id="5182441651107851035" datatype="html">
+        <source>Afegeix el rol</source>
+        <target>Añade el rol</target>
+      </trans-unit>
+      <trans-unit id="5674199526336347364" datatype="html">
+        <source>Desa els canvis del rol</source>
+        <target>Guarda los cambios del rol</target>
+      </trans-unit>
+      <trans-unit id="5707729144553374299" datatype="html">
+        <source>Edita el rol</source>
+        <target>Edita el rol</target>
+      </trans-unit>
+      <trans-unit id="4552137099256233424" datatype="html">
+        <source>Dona de baixa el rol</source>
+        <target>Da de baja el rol</target>
+      </trans-unit>
+      <trans-unit id="6856557337184617019" datatype="html">
+        <source>Tanca el formulari del rol</source>
+        <target>Cierra el formulario del rol</target>
+      </trans-unit>
+      <trans-unit id="1244461400925422294" datatype="html">
+        <source>Carregant el rol</source>
+        <target>Cargando el rol</target>
+      </trans-unit>
+      <trans-unit id="9078051695044700022" datatype="html">
+        <source>Obrir les accions del rol</source>
+        <target>Abrir las acciones del rol</target>
+      </trans-unit>
+      <trans-unit id="2440854572605713433" datatype="html">
+        <source>Cerca ràpida de rols de proveïdor</source>
+        <target>Búsqueda rápida de roles de proveedor</target>
+      </trans-unit>
+      <trans-unit id="6065390306108862612" datatype="html">
+        <source>Afegeix un rol de proveïdor</source>
+        <target>Añade un rol de proveedor</target>
+      </trans-unit>
+      <trans-unit id="6309188423717198531" datatype="html">
+        <source>No s&apos;ha pogut carregar el rol de proveïdor.</source>
+        <target>No se ha podido cargar el rol de proveedor.</target>
+      </trans-unit>
+      <trans-unit id="3145950813097729793" datatype="html">
+        <source>Rol afegit</source>
+        <target>Rol añadido</target>
+      </trans-unit>
+      <trans-unit id="4960493172793904122" datatype="html">
+        <source>El rol s&apos;ha afegit correctament.</source>
+        <target>El rol se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="5593085030176265887" datatype="html">
+        <source>Rol actualitzat</source>
+        <target>Rol actualizado</target>
+      </trans-unit>
+      <trans-unit id="7016069254552276701" datatype="html">
+        <source>El rol s&apos;ha actualitzat correctament.</source>
+        <target>El rol se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="1079116691169753546" datatype="html">
+        <source>Rol eliminat</source>
+        <target>Rol eliminado</target>
+      </trans-unit>
+      <trans-unit id="5044239858836583728" datatype="html">
+        <source>El rol s&apos;ha eliminat correctament.</source>
+        <target>El rol se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="6514000701313986428" datatype="html">
+        <source>Rol restaurat</source>
+        <target>Rol restaurado</target>
+      </trans-unit>
+      <trans-unit id="1724056349355698459" datatype="html">
+        <source>El rol s&apos;ha restaurat correctament.</source>
+        <target>El rol se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="8900570300392291952" datatype="html">
+        <source>No s&apos;ha pogut desar el rol.</source>
+        <target>No se ha podido guardar el rol.</target>
+      </trans-unit>
+      <trans-unit id="3689105249314097905" datatype="html">
+        <source>No s&apos;ha pogut eliminar el rol.</source>
+        <target>No se ha podido eliminar el rol.</target>
+      </trans-unit>
+      <trans-unit id="2773872900496018897" datatype="html">
+        <source>No s&apos;ha pogut restaurar el rol.</source>
+        <target>No se ha podido restaurar el rol.</target>
+      </trans-unit>
+      <trans-unit id="5825641464381522988" datatype="html">
+        <source>Eliminar el rol?</source>
+        <target>¿Eliminar el rol?</target>
+      </trans-unit>
+      <trans-unit id="5009342710228420255" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="roleName" equiv-text="name" />».</source>
+        <target>Estás a punto de eliminar «<x id="roleName" equiv-text="name" />».</target>
+      </trans-unit>
+      <trans-unit id="3625747134276553858" datatype="html">
+        <source>Cancel·la l&apos;eliminació del rol</source>
+        <target>Cancela la eliminación del rol</target>
+      </trans-unit>
+      <trans-unit id="6354441152192938781" datatype="html">
+        <source>Confirma l&apos;eliminació del rol</source>
+        <target>Confirma la eliminación del rol</target>
+      </trans-unit>
+      <trans-unit id="444188101030236467" datatype="html">
+        <source>Obrir les accions de la tecnologia</source>
+        <target>Abrir las acciones de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="3393362260640619557" datatype="html">
+        <source>Carregant la tecnologia</source>
+        <target>Cargando la tecnología</target>
+      </trans-unit>
+      <trans-unit id="1319978117061626745" datatype="html">
+        <source>Cerca ràpida de tecnologies</source>
+        <target>Búsqueda rápida de tecnologías</target>
+      </trans-unit>
+      <trans-unit id="7464721826195455929" datatype="html">
+        <source>No s&apos;ha pogut carregar la tecnologia.</source>
+        <target>No se ha podido cargar la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="7899865090141389958" datatype="html">
+        <source>Tecnologia afegida</source>
+        <target>Tecnología añadida</target>
+      </trans-unit>
+      <trans-unit id="6826021589093324106" datatype="html">
+        <source>La tecnologia s&apos;ha afegit correctament.</source>
+        <target>La tecnología se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="690825793334392869" datatype="html">
+        <source>Tecnologia actualitzada</source>
+        <target>Tecnología actualizada</target>
+      </trans-unit>
+      <trans-unit id="8420053566551309891" datatype="html">
+        <source>La tecnologia s&apos;ha actualitzat correctament.</source>
+        <target>La tecnología se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="9183259372716381188" datatype="html">
+        <source>Tecnologia eliminada</source>
+        <target>Tecnología eliminada</target>
+      </trans-unit>
+      <trans-unit id="1234349948972702043" datatype="html">
+        <source>La tecnologia s&apos;ha eliminat correctament.</source>
+        <target>La tecnología se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2858610698469623571" datatype="html">
+        <source>Tecnologia restaurada</source>
+        <target>Tecnología restaurada</target>
+      </trans-unit>
+      <trans-unit id="3587311378208300066" datatype="html">
+        <source>La tecnologia s&apos;ha restaurat correctament.</source>
+        <target>La tecnología se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="8580899098408521159" datatype="html">
+        <source>No s&apos;ha pogut desar la tecnologia.</source>
+        <target>No se ha podido guardar la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="741946938992686442" datatype="html">
+        <source>No s&apos;ha pogut eliminar la tecnologia.</source>
+        <target>No se ha podido eliminar la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="185287312334960189" datatype="html">
+        <source>No s&apos;ha pogut restaurar la tecnologia.</source>
+        <target>No se ha podido restaurar la tecnología.</target>
+      </trans-unit>
+      <trans-unit id="3467567917897691270" datatype="html">
+        <source>Eliminar la tecnologia?</source>
+        <target>¿Eliminar la tecnología?</target>
+      </trans-unit>
+      <trans-unit id="6839413015985847506" datatype="html">
+        <source>Estàs a punt d&apos;eliminar «<x id="technologyName" equiv-text="name" />».</source>
+        <target>Estás a punto de eliminar «<x id="technologyName" equiv-text="name" />».</target>
+      </trans-unit>
+      <trans-unit id="8243984367452495077" datatype="html">
+        <source>Cancel·la l&apos;eliminació de la tecnologia</source>
+        <target>Cancela la eliminación de la tecnología</target>
+      </trans-unit>
+      <trans-unit id="3447598136081114902" datatype="html">
+        <source>Confirma l&apos;eliminació de la tecnologia</source>
+        <target>Confirma la eliminación de la tecnología</target>
       </trans-unit>
     </body>
   </file>

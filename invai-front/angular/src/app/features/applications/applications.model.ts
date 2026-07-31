@@ -2,7 +2,14 @@ import { AdministrativeUnit } from '@features/administrative-units/administrativ
 import { Category } from '@features/categories/categories.model';
 import { Commission } from '@features/commissions/commissions.model';
 import { Field } from '@features/fields/fields.model';
+import { Layer } from '@features/layers/layers.model';
+import { Role } from '@features/roles/roles.model';
+import {
+  DatabaseRecord,
+  InfrastructureSystem,
+} from '@features/systems/systems.model';
 import { SystemType } from '@features/system-types/system-types.model';
+import { Technology } from '@features/technologies/technologies.model';
 import { PageParams } from '@models/page.model';
 
 export interface Application {
@@ -15,22 +22,33 @@ export interface Application {
   scope: string;
   commission: string;
   administrativeUnit: string;
-  status: string;
+  status: ApplicationStatus | null;
   description: string;
   creationDate: string;
   modificationDate: string;
   withdrawalDate: string;
+  environment?: string;
+  database?: string;
+  server?: string;
+  responsible?: string;
   categoryId?: number;
   informationSystemId?: number;
   scopeId?: number;
   commissionId?: number;
   administrativeUnitId?: number;
-  statusId?: number;
+  statusId?: ApplicationStatus;
+  informationSystemDbId?: number | null;
+  appDevelopmentId?: number | null;
 }
 
-export interface ApplicationStatus {
-  id: number;
-  name: string | null;
+export enum ApplicationStatus {
+  ACTIVE = 1,
+  INACTIVE = 2,
+}
+
+export enum ApplicationStatusCode {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
 }
 
 export interface ApplicationOutput {
@@ -44,7 +62,7 @@ export interface ApplicationOutput {
   admUnit: AdministrativeUnit | null;
   csCommission: Commission | null;
   description: string | null;
-  status: ApplicationStatus | null;
+  status: ApplicationStatusCode | null;
   expirationDate: string | null;
   createdAt: string | null;
   createdBy: string | null;
@@ -52,6 +70,8 @@ export interface ApplicationOutput {
   updatedBy: string | null;
   loadUser: string | null;
   loadDate: string | null;
+  appInformationSystemDbId: number | null;
+  appDevelopmentId: number | null;
 }
 
 export interface ApplicationInput {
@@ -64,7 +84,7 @@ export interface ApplicationInput {
   admUnitId: number;
   commissionId: number;
   description?: string | null;
-  statusId: number;
+  statusId: ApplicationStatus;
 }
 
 export interface ApplicationPageParams extends PageParams {
@@ -75,7 +95,7 @@ export interface ApplicationPageParams extends PageParams {
   fieldId?: number;
   commissionId?: number;
   admUnitId?: number;
-  statusId?: number;
+  statusId?: ApplicationStatus;
   description?: string;
   quickSearch?: string;
 }
@@ -88,8 +108,12 @@ export interface ApplicationFilters {
   scope: number | null;
   commission: number | null;
   administrativeUnit: number | null;
-  status: number | null;
+  status: ApplicationStatus | null;
   description: string | null;
+  responsible: string | null;
+  database: number | null;
+  server: number | null;
+  environment: number | null;
   incomplete: boolean;
 }
 
@@ -99,26 +123,229 @@ export interface SelectOption<TValue = string> {
 }
 
 export interface ApplicationServer {
-  id: string;
+  id: number;
+  informationSystemDbId: number;
+  systemId: number;
+  deletedAt: string | null;
   environment: string;
   server: string;
   instance: string;
-  port: string;
+  port: number;
   version: string;
   status: string;
   observations: string;
+  catalogItem: ApplicationSystemCatalogRow;
 }
 
 export interface ApplicationDatabase {
-  id: string;
+  id: number;
+  informationSystemDbId: number;
+  databaseId: number;
+  deletedAt: string | null;
   environment: string;
   server: string;
-  version: string;
   database: string;
   service: string;
-  port: string;
+  port: number;
   type: string;
+  status: string;
   observations: string;
+  catalogItem: ApplicationDatabaseCatalogRow;
 }
 
 export type ApplicationInfrastructureResource = ApplicationServer | ApplicationDatabase;
+
+export enum ApplicationInfrastructureStatus {
+  ACTIVE = 1,
+  INACTIVE = 2,
+}
+
+export interface ApplicationInfrastructureBasePageParams extends PageParams {
+  informationSystemDbId: number;
+  statusId?: ApplicationInfrastructureStatus;
+}
+
+export interface ApplicationSystemsPageParams extends ApplicationInfrastructureBasePageParams {
+  systemId?: number;
+  environmentId?: number;
+}
+
+export interface ApplicationDatabasesPageParams extends ApplicationInfrastructureBasePageParams {
+  databaseId?: number;
+  environmentId?: number;
+}
+
+export interface ApplicationServerFilters {
+  environment: number | null;
+  server: number | null;
+  instance: string | null;
+  port: number | null;
+  version: string | null;
+  status: ApplicationInfrastructureStatus | null;
+  observations: string | null;
+}
+
+export interface ApplicationDatabaseFilters {
+  environment: number | null;
+  server: string | null;
+  version: string | null;
+  database: number | null;
+  service: string | null;
+  port: number | null;
+  type: string | null;
+  status: ApplicationInfrastructureStatus | null;
+  observations: string | null;
+}
+
+export interface ApplicationInfrastructureFilterOptions {
+  servers: SelectOption<number>[];
+  databases: SelectOption<number>[];
+  environments: SelectOption<number>[];
+}
+
+export interface ApplicationInfrastructureEnvironmentOutput {
+  id: number;
+  code: string | null;
+  name: string | null;
+  nameEs: string | null;
+}
+
+export interface ApplicationSystemCatalogRow {
+  id: number;
+  server: string;
+  environment: string;
+  instance: string;
+  port: number;
+  version: string;
+  description: string;
+  source: InfrastructureSystem;
+}
+
+export interface ApplicationDatabaseCatalogRow {
+  id: number;
+  server: string;
+  environment: string;
+  service: string;
+  port: number;
+  databaseType: string;
+  description: string;
+  source: DatabaseRecord;
+}
+
+export type ApplicationInfrastructureCatalogRow =
+  | ApplicationSystemCatalogRow
+  | ApplicationDatabaseCatalogRow;
+
+export interface ApplicationSystemDatabaseOutput {
+  id: number;
+  application: ApplicationOutput;
+  observation: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationSystemDatabaseInput {
+  applicationId: number;
+  observation: string | null;
+}
+
+export interface ApplicationSystemRelationOutput {
+  id: number;
+  informationSystemDb: ApplicationSystemDatabaseOutput;
+  system: InfrastructureSystem;
+  deletedAt: string | null;
+}
+
+export interface ApplicationDatabaseRelationOutput {
+  id: number;
+  informationSystemDb: ApplicationSystemDatabaseOutput;
+  database: DatabaseRecord;
+  deletedAt: string | null;
+}
+
+export interface ApplicationSystemRelationInput {
+  informationSystemDbId: number;
+  systemId: number;
+}
+
+export interface ApplicationDatabaseRelationInput {
+  informationSystemDbId: number;
+  databaseId: number;
+}
+
+export enum DevelopmentModality {
+  INTERNAL = 1,
+  EXTERNAL = 2,
+  MIXED = 3,
+}
+
+export enum DevelopmentStandardAdaption {
+  CONFORMING = 1,
+  PARTIALLY_CONFORMING = 2,
+  NON_CONFORMING = 3,
+}
+
+export interface DevelopmentLookupOutput<TId extends number> {
+  id: TId;
+  name: string | null;
+  nameEs: string | null;
+}
+
+export interface ApplicationDevelopmentOutput {
+  id: number;
+  application: ApplicationOutput;
+  environment: ApplicationInfrastructureEnvironmentOutput;
+  modality: DevelopmentLookupOutput<DevelopmentModality>;
+  code: string;
+  standardAdaption: DevelopmentLookupOutput<DevelopmentStandardAdaption>;
+  revisionDate: string;
+  observation: string;
+  deletedAt: string | null;
+}
+
+export interface ApplicationDevelopmentInput {
+  applicationId: number;
+  environmentId: number;
+  modalityId: DevelopmentModality;
+  code: string;
+  standardAdaptionId: DevelopmentStandardAdaption;
+  revisionDate: string;
+  observation: string;
+}
+
+export interface ApplicationProviderOutput {
+  id: number;
+  companyName: string;
+  role: Role | null;
+  startDate: string | null;
+  expireDate: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationProviderInput {
+  appDevelopmentId: number;
+  companyName: string;
+  roleId: number | null;
+  startDate: string | null;
+  expireDate: string | null;
+}
+
+export interface ApplicationTechnologyOutput {
+  id: number;
+  layer: Layer;
+  technology: Technology;
+  version: string;
+  architecture: string;
+  deletedAt: string | null;
+}
+
+export interface ApplicationTechnologyInput {
+  appDevelopmentId: number;
+  layerId: number;
+  technologyId: number;
+  version: string;
+  architecture: string;
+}
+
+export interface ApplicationDevelopmentResourcePageParams extends PageParams {
+  appDevelopmentId: number;
+}

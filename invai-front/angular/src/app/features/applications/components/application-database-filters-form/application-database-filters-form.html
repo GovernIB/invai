@@ -1,0 +1,171 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="application-databases-filter-environment"
+        styleClass="w-full"
+        formControlName="environment"
+        ariaLabelledBy="application-databases-filter-environment-label"
+        [ariaFilterLabel]="labels().environment"
+        [filter]="true"
+        [options]="environmentOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        id="application-databases-filter-environment-label"
+        for="application-databases-filter-environment"
+      >
+        {{ labels().environment }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-databases-filter-server"
+        class="w-full"
+        type="text"
+        formControlName="server"
+        pInputText
+      />
+      <label
+        id="application-databases-filter-server-label"
+        for="application-databases-filter-server"
+      >
+        {{ labels().server }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-databases-filter-version"
+        class="w-full"
+        type="text"
+        formControlName="version"
+        pInputText
+      />
+      <label
+        id="application-databases-filter-version-label"
+        for="application-databases-filter-version"
+      >
+        {{ labels().version }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="application-databases-filter-database"
+        styleClass="w-full"
+        formControlName="database"
+        ariaLabelledBy="application-databases-filter-database-label"
+        [ariaFilterLabel]="labels().database"
+        [filter]="true"
+        [options]="databaseOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        id="application-databases-filter-database-label"
+        for="application-databases-filter-database"
+      >
+        {{ labels().database }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-databases-filter-service"
+        class="w-full"
+        type="text"
+        formControlName="service"
+        pInputText
+      />
+      <label
+        id="application-databases-filter-service-label"
+        for="application-databases-filter-service"
+      >
+        {{ labels().service }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-inputnumber
+        inputId="application-databases-filter-port"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        formControlName="port"
+        ariaLabelledBy="application-databases-filter-port-label"
+        [useGrouping]="false"
+      />
+      <label id="application-databases-filter-port-label" for="application-databases-filter-port">
+        {{ labels().port }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-databases-filter-type"
+        class="w-full"
+        type="text"
+        formControlName="type"
+        pInputText
+      />
+      <label id="application-databases-filter-type-label" for="application-databases-filter-type">
+        {{ labels().type }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="application-databases-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="application-databases-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        id="application-databases-filter-status-label"
+        for="application-databases-filter-status"
+      >
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="application-databases-filter-observations"
+        class="w-full"
+        type="text"
+        formControlName="observations"
+        pInputText
+      />
+      <label
+        id="application-databases-filter-observations-label"
+        for="application-databases-filter-observations"
+      >
+        {{ labels().observations }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

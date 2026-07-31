@@ -1,0 +1,26 @@
+export const MAINTENANCES_ROUTES_LOC = {
+  BASE: $localize`:@@maintenancesRoute:manteniments`,
+  GENERAL: $localize`:@@maintenanceGeneralRoute:general`,
+  RESPONSIBLES: $localize`:@@maintenanceResponsiblesRoute:responsables`,
+  DEVELOPMENT: $localize`:@@maintenanceDevelopmentRoute:desenvolupament`,
+  SYSTEMS_DATABASES: $localize`:@@maintenanceSystemsDatabasesRoute:sistemes-i-bd`,
+  CATEGORIES: $localize`:@@maintenanceCategoriesRoute:categories`,
+  SYSTEM_TYPES: $localize`:@@maintenanceSystemTypesRoute:sistemes-informacio`,
+  ENVIRONMENTS: $localize`:@@maintenanceEnvironmentsRoute:entorns`,
+  FIELDS: $localize`:@@maintenanceFieldsRoute:ambits`,
+  COMMISSIONS: $localize`:@@maintenanceCommissionsRoute:comissio-informatica`,
+};
+
+export const MAINTENANCES_ROUTES_LABELS = {
+  BASE: $localize`Manteniments`,
+  GENERAL: $localize`General`,
+  RESPONSIBLES: $localize`Responsables`,
+  DEVELOPMENT: $localize`Desenvolupament`,
+  CATEGORIES: $localize`Categories`,
+  SYSTEM_TYPES: $localize`Sistemes d'informació`,
+  FIELDS: $localize`Àmbits`,
+  COMMISSIONS: $localize`Comissió informàtica`,
+  ROLES: $localize`Rols de proveïdor`,
+  LAYERS: $localize`Capes`,
+  TECHNOLOGIES: $localize`Tecnologies`,
+};

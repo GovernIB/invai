@@ -1,0 +1,147 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="46rem"
+  [ariaLabels]="actionAriaLabels"
+  [canEdit]="canEdit()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div>
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="application-technology-dialog-technology"
+          formControlName="technologyId"
+          ariaLabelledBy="application-technology-dialog-technology-label"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="id"
+          [ariaFilterLabel]="labels.technology"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.technologyId)
+              ? 'application-technology-dialog-technology-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.technologyId)"
+          [filter]="true"
+          [fluid]="true"
+          [options]="technologyOptions()"
+          (onChange)="onTechnologyChange($event.value)"
+        />
+        <label
+          id="application-technology-dialog-technology-label"
+          for="application-technology-dialog-technology"
+        >
+          {{ labels.technology }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.technologyId)) {
+        <p
+          id="application-technology-dialog-technology-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="application-technology-dialog-layer"
+          class="w-full"
+          type="text"
+          aria-readonly="true"
+          readonly
+          [value]="layerLabel()"
+          pInputText
+        />
+        <label for="application-technology-dialog-layer">{{ labels.layer }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="application-technology-dialog-version"
+          class="w-full"
+          type="text"
+          maxlength="255"
+          formControlName="version"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.version)
+              ? 'application-technology-dialog-version-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.version)"
+          pInputText
+        />
+        <label for="application-technology-dialog-version">{{ labels.version }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.version)) {
+        <p
+          id="application-technology-dialog-version-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{
+            form().controls.version.hasError('required') ||
+            form().controls.version.hasError('pattern')
+              ? requiredError
+              : maxLengthError
+          }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="application-technology-dialog-architecture"
+          class="w-full"
+          type="text"
+          maxlength="255"
+          formControlName="architecture"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.architecture)
+              ? 'application-technology-dialog-architecture-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.architecture)"
+          pInputText
+        />
+        <label for="application-technology-dialog-architecture">
+          {{ labels.architecture }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.architecture)) {
+        <p
+          id="application-technology-dialog-architecture-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{
+            form().controls.architecture.hasError('required') ||
+            form().controls.architecture.hasError('pattern')
+              ? requiredError
+              : maxLengthError
+          }}
+        </p>
+      }
+    </div>
+  </form>
+</app-crud-entity-dialog>

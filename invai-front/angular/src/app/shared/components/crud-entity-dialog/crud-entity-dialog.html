@@ -1,0 +1,120 @@
+<p-dialog
+  [closable]="false"
+  [closeOnEscape]="false"
+  [dismissableMask]="false"
+  [draggable]="false"
+  [focusOnShow]="false"
+  [modal]="true"
+  [pt]="dialogPassThrough"
+  [resizable]="false"
+  [style]="{ width: width(), maxWidth: 'calc(100vw - 2rem)' }"
+  [visible]="visible()"
+>
+  <ng-template #header>
+    <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
+      <h2 class="m-0 truncate text-base font-semibold text-color">{{ title() }}</h2>
+      <p-button
+        type="button"
+        severity="secondary"
+        [ariaLabel]="ariaLabels().close"
+        [disabled]="isBusy()"
+        [icon]="icons.TIMES"
+        [rounded]="true"
+        [text]="true"
+        (onClick)="requestClose()"
+      />
+    </div>
+  </ng-template>
+
+  <ng-content />
+
+  <ng-template #footer>
+    <div class="flex w-full items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        @if (mode() === 'view' && canRestore()) {
+          <p-button
+            type="button"
+            severity="success"
+            [ariaLabel]="ariaLabels().restore"
+            [disabled]="isBusy()"
+            [icon]="icons.REFRESH"
+            [label]="labels.restore"
+            [outlined]="true"
+            (onClick)="onRestore()"
+          />
+        } @else if (mode() === 'view') {
+          <p-button
+            type="button"
+            [ariaLabel]="ariaLabels().edit"
+            [disabled]="isBusy() || !canEdit()"
+            [icon]="icons.PENCIL"
+            [label]="labels.edit"
+            (onClick)="onEdit()"
+          />
+        } @else if (mode() === 'edit') {
+          <p-button
+            type="button"
+            severity="danger"
+            [ariaLabel]="ariaLabels().deactivate"
+            [disabled]="isBusy() || !canDeactivate()"
+            [icon]="icons.TRASH"
+            [label]="labels.deactivate"
+            [loading]="isDeleting()"
+            [outlined]="true"
+            (onClick)="onDeactivate()"
+          />
+        }
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        @if (mode() === 'view') {
+          <p-button
+            type="button"
+            [ariaLabel]="ariaLabels().accept"
+            [disabled]="isBusy()"
+            [label]="labels.accept"
+            (onClick)="requestClose()"
+          />
+        } @else {
+          <p-button
+            type="button"
+            severity="secondary"
+            [ariaLabel]="ariaLabels().cancel"
+            [disabled]="isBusy()"
+            [icon]="icons.TIMES"
+            [label]="labels.cancel"
+            [outlined]="true"
+            (onClick)="onCancel()"
+          />
+          <p-button
+            type="button"
+            [ariaLabel]="mode() === 'create' ? ariaLabels().add : ariaLabels().save"
+            [disabled]="isBusy()"
+            [icon]="mode() === 'create' ? icons.PLUS : icons.CHECK"
+            [label]="mode() === 'create' ? labels.add : labels.save"
+            [loading]="isSaving()"
+            (onClick)="onSubmit()"
+          />
+        }
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+@if (isUnsavedChangesDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="isUnsavedChangesDialogVisible"
+    severity="primary"
+    [cancelAriaLabel]="discardAriaLabel"
+    [cancelLabel]="discardLabel"
+    [cancelOnHide]="false"
+    [confirmAriaLabel]="saveAndCloseAriaLabel"
+    [confirmLabel]="labels.save"
+    [confirmOutlined]="false"
+    [message]="unsavedMessage"
+    [title]="unsavedTitle"
+    (cancel)="discardAndClose()"
+    (confirm)="saveAndClose()"
+    (dismissed)="closeUnsavedChangesDialog()"
+  />
+}

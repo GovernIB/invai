@@ -1,271 +1,196 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, ParamMap, provideRouter } from '@angular/router';
-import { By } from '@angular/platform-browser';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { BreadcrumbService } from '@core/components/breadcrumbs';
-import { MessageService } from 'primeng/api';
-import { Button } from 'primeng/button';
-import { BehaviorSubject, of, throwError } from 'rxjs';
+import { of } from 'rxjs';
+
 import {
-  APPLICATIONS_ROUTES_LABELS,
-  APPLICATIONS_ROUTES_LOC,
-} from '../../applications.routes.i18n';
-import { Application, ApplicationOutput } from '../../applications.model';
-import { ApplicationDetailFormGroup } from '../../forms/application-form.factory';
+  Application,
+  ApplicationOutput,
+  ApplicationStatus,
+  ApplicationStatusCode,
+} from '../../applications.model';
+import { ApplicationDevelopmentService } from '../../services/application-development.service';
 import { ApplicationsService } from '../../services/applications.service';
 import { ApplicationDetail } from './application-detail';
+import {
+  APPLICATION_DETAIL_RESOLVE_KEY,
+  ApplicationDetailResolvedData,
+} from './application-detail.resolver';
 
 const APPLICATION_OUTPUT: ApplicationOutput = {
-  id: 1,
-  code: '0001',
-  prefix: 'CVF',
-  name: 'Invai',
-  category: { id: 1, name: 'DRASSANA' },
-  systemType: { id: 2, name: 'Instrumental' },
-  field: { id: 3, name: 'Departamental' },
-  admUnit: { id: 5, code: 'DGEDOT', name: 'Direcció General' },
-  csCommission: { id: 4, name: 'Equip directiu' },
-  description: 'Aplicació interna',
-  status: { id: 1, name: 'Activa' },
+  id: 7,
+  code: 'INVAI',
+  prefix: 'INV',
+  name: 'Inventari',
+  category: { id: 1, name: 'Categoria', deletedAt: null },
+  systemType: { id: 2, name: 'Sistema', deletedAt: null },
+  field: { id: 3, name: 'Àmbit', deletedAt: null },
+  admUnit: { id: 4, code: 'UT', name: 'Unitat' },
+  csCommission: null,
+  description: '',
+  status: ApplicationStatusCode.ACTIVE,
   expirationDate: null,
-  createdAt: '2026-01-01T10:00:00',
+  createdAt: null,
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
   loadUser: null,
   loadDate: null,
-};
-
-const APPLICATION: Application = {
-  id: '1',
-  code: '0001',
-  prefix: 'CVF',
-  name: 'Invai',
-  category: 'DRASSANA',
-  informationSystem: 'Instrumental',
-  scope: 'Departamental',
-  commission: 'Equip directiu',
-  administrativeUnit: 'Direcció General',
-  status: 'Activa',
-  description: 'Aplicació interna',
-  creationDate: '2026-01-01T10:00:00',
-  modificationDate: '',
-  withdrawalDate: '',
-  categoryId: 1,
-  informationSystemId: 2,
-  scopeId: 3,
-  commissionId: 4,
-  administrativeUnitId: 5,
-  statusId: 1,
+  appInformationSystemDbId: 70,
+  appDevelopmentId: 90,
 };
 
 describe('ApplicationDetail', () => {
-  let component: ApplicationDetail;
   let fixture: ComponentFixture<ApplicationDetail>;
-  let breadcrumbService: BreadcrumbService;
-  let messageService: MessageService;
-  let getById: ReturnType<typeof vi.fn>;
-  let update: ReturnType<typeof vi.fn>;
-  let toApplication: ReturnType<typeof vi.fn>;
-  let paramMap$: BehaviorSubject<ParamMap>;
-  let activatedRoute: {
-    paramMap: BehaviorSubject<ParamMap>;
-    snapshot: { paramMap: ParamMap };
-    firstChild: { snapshot: { routeConfig: { path: string } } };
-  };
+  let component: ApplicationDetail;
+  let breadcrumbs: { setCustomBreadcrumbs: ReturnType<typeof vi.fn>; clear: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    getById = vi.fn((id: number) =>
-      id === 1 ? of(APPLICATION_OUTPUT) : throwError(() => new Error('Not found')),
-    );
-    update = vi.fn(() => of(APPLICATION_OUTPUT));
-    toApplication = vi.fn(() => APPLICATION);
-    paramMap$ = new BehaviorSubject(convertToParamMap({ id: '1' }));
-    activatedRoute = {
-      paramMap: paramMap$,
-      snapshot: { paramMap: paramMap$.value },
-      firstChild: { snapshot: { routeConfig: { path: 'systems-databases' } } },
+    breadcrumbs = {
+      setCustomBreadcrumbs: vi.fn(),
+      clear: vi.fn(),
     };
+    const resolved: ApplicationDetailResolvedData = {
+      application: APPLICATION_OUTPUT,
+      loadFailed: false,
+    };
+    const paramMap = convertToParamMap({ id: '7' });
 
     await TestBed.configureTestingModule({
       imports: [ApplicationDetail],
       providers: [
-        BreadcrumbService,
-        MessageService,
         provideRouter([]),
-        { provide: ApplicationsService, useValue: { getById, update, toApplication } },
-        { provide: ActivatedRoute, useValue: activatedRoute },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(paramMap),
+            data: of({ [APPLICATION_DETAIL_RESOLVE_KEY]: resolved }),
+            snapshot: {
+              paramMap,
+              data: { [APPLICATION_DETAIL_RESOLVE_KEY]: resolved },
+            },
+          },
+        },
+        { provide: BreadcrumbService, useValue: breadcrumbs },
+        {
+          provide: ApplicationsService,
+          useValue: {
+            toApplication,
+            update: vi.fn(),
+            reactivate: vi.fn(),
+            delete: vi.fn(),
+          },
+        },
+        {
+          provide: ApplicationDevelopmentService,
+          useValue: { create: vi.fn(), update: vi.fn() },
+        },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApplicationDetail);
     component = fixture.componentInstance;
-    breadcrumbService = TestBed.inject(BreadcrumbService);
-    messageService = TestBed.inject(MessageService);
     fixture.detectChanges();
-    await fixture.whenStable();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  it('renders the four tabs without a global edit toolbar', () => {
+    const tabs = [
+      ...fixture.nativeElement.querySelectorAll('.application-detail-tab'),
+    ] as HTMLAnchorElement[];
 
-  it('should show the application name in the header and code in the breadcrumb', () => {
-    const detailComponent = component as unknown as { header: () => string };
-
-    expect(getById).toHaveBeenCalledWith(1);
-    expect(detailComponent.header()).toBe('Invai');
-    expect(breadcrumbService.breadcrumbs()).toEqual([
-      {
-        label: APPLICATIONS_ROUTES_LABELS.BASE,
-        routerLink: ['/', APPLICATIONS_ROUTES_LOC.BASE],
-      },
-      {
-        label: 'Codi: 0001',
-        routerLink: ['/', APPLICATIONS_ROUTES_LOC.BASE, '1', 'general'],
-      },
+    expect(tabs.map((tab) => tab.textContent?.trim())).toEqual([
+      'General',
+      'Responsables',
+      'Sistemes i BD',
+      'Desenvolupament',
     ]);
+    expect(
+      fixture.nativeElement.querySelector('.application-detail-toolbar'),
+    ).toBeNull();
   });
 
-  it('should fallback to "Aplicació {id}" when the application does not exist', async () => {
-    const detailComponent = component as unknown as { header: () => string };
-
-    activatedRoute.snapshot.paramMap = convertToParamMap({ id: '999' });
-    paramMap$.next(activatedRoute.snapshot.paramMap);
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    expect(detailComponent.header()).toBe('Aplicació 999');
-    expect(breadcrumbService.breadcrumbs()).toEqual([
-      {
-        label: APPLICATIONS_ROUTES_LABELS.BASE,
-        routerLink: ['/', APPLICATIONS_ROUTES_LOC.BASE],
-      },
-      {
-        label: 'Aplicació 999',
-        routerLink: ['/', APPLICATIONS_ROUTES_LOC.BASE, '999', 'general'],
-      },
-    ]);
-  });
-
-  it('should save general changes through the applications service', () => {
-    const addSpy = vi.spyOn(messageService, 'add');
-    const detailComponent = component as unknown as {
+  it('initializes the application and breadcrumbs', () => {
+    const access = component as unknown as {
       detailState: {
-        form: ApplicationDetailFormGroup;
-        startEditing: () => void;
+        application: () => Application | null;
       };
-      save: () => void;
     };
 
-    detailComponent.detailState.startEditing();
-    detailComponent.detailState.form.patchValue({
-      application: 'Invai actualitzada',
-      prefix: 'INV',
-      category: 1,
-      informationSystem: 2,
-      scope: 3,
-      commission: 9,
-      administrativeUnit: 5,
-      description: 'Nova descripció',
-    });
-    detailComponent.save();
-
-    expect(update).toHaveBeenCalledWith(1, {
-      name: 'Invai actualitzada',
-      prefix: 'INV',
-      code: '0001',
-      categoryId: 1,
-      systemTypeId: 2,
-      fieldId: 3,
-      admUnitId: 5,
-      commissionId: 9,
-      description: 'Nova descripció',
-      statusId: 1,
-    });
-    expect(addSpy).toHaveBeenCalledWith({
-      severity: 'success',
-      summary: 'Aplicació actualitzada',
-      detail: "Els canvis s'han desat correctament.",
-    });
+    expect(access.detailState.application()?.name).toBe('Inventari');
+    expect(breadcrumbs.setCustomBreadcrumbs).toHaveBeenCalled();
   });
 
-  it('should show an error when saving general changes fails', () => {
-    const addSpy = vi.spyOn(messageService, 'add');
-    update.mockReturnValueOnce(throwError(() => new Error('Request failed')));
-    const detailComponent = component as unknown as {
+  it('allows leaving when there are no dirty tabs', () => {
+    expect(component.canDeactivate()).toBe(true);
+  });
+
+  it('blocks leaving and lists the dirty tabs', () => {
+    const access = component as unknown as {
       detailState: {
-        form: ApplicationDetailFormGroup;
-        startEditing: () => void;
+        form: {
+          controls: { description: { setValue: (value: string) => void } };
+          markAsDirty: () => void;
+        };
+        isUnsavedChangesDialogVisible: () => boolean;
       };
-      save: () => void;
+    };
+    access.detailState.form.controls.description.setValue('Changed');
+    access.detailState.form.markAsDirty();
+
+    expect(component.canDeactivate()).toBe(false);
+    expect(access.detailState.isUnsavedChangesDialogVisible()).toBe(true);
+
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('General');
+  });
+
+  it('requests the native browser warning only for dirty tabs', () => {
+    const event = {
+      preventDefault: vi.fn(),
+      returnValue: undefined,
+    } as unknown as BeforeUnloadEvent;
+    const access = component as unknown as {
+      onBeforeUnload: (event: BeforeUnloadEvent) => void;
+      detailState: {
+        developmentForm: { markAsDirty: () => void };
+      };
     };
 
-    detailComponent.detailState.startEditing();
-    detailComponent.detailState.form.patchValue({
-      application: 'Invai actualitzada',
-      prefix: 'INV',
-      category: 1,
-      informationSystem: 2,
-      scope: 3,
-      commission: 4,
-      administrativeUnit: 5,
-    });
-    detailComponent.save();
+    access.onBeforeUnload(event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
 
-    expect(addSpy).toHaveBeenCalledWith({
-      severity: 'error',
-      summary: 'Error',
-      detail: "No s'han pogut desar els canvis.",
-    });
+    access.detailState.developmentForm.markAsDirty();
+    access.onBeforeUnload(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.returnValue).toBe('');
   });
 
-  it('should clear custom breadcrumbs on destroy', () => {
+  it('clears breadcrumbs on destroy', () => {
     fixture.destroy();
-
-    expect(breadcrumbService.breadcrumbs()).toEqual([]);
-  });
-
-  it('should expose the systems and databases detail tab', () => {
-    const detailComponent = component as unknown as {
-      tabs: { label: string; route: string }[];
-    };
-
-    expect(detailComponent.tabs).toContainEqual({
-      label: 'Sistemes i BBDD',
-      route: 'systems-databases',
-    });
-  });
-
-  it('should show cancel and save actions in the systems and databases section', () => {
-    const buttons = fixture.debugElement.queryAll(By.directive(Button));
-
-    expect(buttons.map((button) => button.componentInstance.label)).toEqual([
-      'Cancel·lar',
-      'Desar',
-    ]);
-  });
-
-  it('should show pending messages for systems and databases actions', () => {
-    const addSpy = vi.spyOn(messageService, 'add');
-    const detailComponent = component as unknown as {
-      cancelSystemsDatabasesChanges: () => void;
-      saveSystemsDatabasesChanges: () => void;
-    };
-
-    detailComponent.cancelSystemsDatabasesChanges();
-    detailComponent.saveSystemsDatabasesChanges();
-
-    expect(addSpy).toHaveBeenNthCalledWith(1, {
-      severity: 'info',
-      summary: 'Informació',
-      detail:
-        'La cancel·lació dels canvis de sistemes i bases de dades encara no està implementada.',
-    });
-    expect(addSpy).toHaveBeenNthCalledWith(2, {
-      severity: 'info',
-      summary: 'Informació',
-      detail:
-        'El desament dels canvis de sistemes i bases de dades encara no està implementat.',
-    });
+    expect(breadcrumbs.clear).toHaveBeenCalled();
   });
 });
+
+function toApplication(response: ApplicationOutput): Application {
+  return {
+    id: String(response.id),
+    code: response.code ?? '',
+    prefix: response.prefix ?? '',
+    name: response.name ?? '',
+    category: response.category?.name ?? '',
+    informationSystem: response.systemType?.name ?? '',
+    scope: response.field?.name ?? '',
+    commission: '',
+    administrativeUnit: response.admUnit?.name ?? '',
+    status: ApplicationStatus.ACTIVE,
+    description: response.description ?? '',
+    creationDate: response.createdAt ?? '',
+    modificationDate: response.updatedAt ?? '',
+    withdrawalDate: response.expirationDate ?? '',
+    categoryId: response.category?.id,
+    informationSystemId: response.systemType?.id,
+    scopeId: response.field?.id,
+    administrativeUnitId: response.admUnit?.id,
+    statusId: ApplicationStatus.ACTIVE,
+  };
+}

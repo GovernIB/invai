@@ -1,0 +1,32 @@
+<div class="flex flex-wrap items-center justify-end gap-2">
+  @if (isEditing()) {
+    <p-button
+      type="button"
+      severity="secondary"
+      [ariaLabel]="cancelAriaLabel()"
+      [disabled]="disabled() || isSaving()"
+      [icon]="icons.TIMES"
+      [label]="cancelLabel"
+      [outlined]="true"
+      (onClick)="cancel.emit()"
+    />
+    <p-button
+      type="button"
+      [ariaLabel]="saveAriaLabel()"
+      [disabled]="disabled() || isSaving()"
+      [icon]="icons.CHECK"
+      [label]="saveLabel"
+      [loading]="isSaving()"
+      (onClick)="save.emit()"
+    />
+  } @else {
+    <p-button
+      type="button"
+      [ariaLabel]="editAriaLabel()"
+      [disabled]="disabled()"
+      [icon]="icons.PENCIL"
+      [label]="editLabel"
+      (onClick)="edit.emit()"
+    />
+  }
+</div>

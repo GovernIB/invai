@@ -1,7 +1,19 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, InjectionToken, computed, inject, signal } from '@angular/core';
 import { environment } from '@environments/environment';
-import { EMPTY, Observable, catchError, finalize, map, of, tap, throwError } from 'rxjs';
+import {
+  EMPTY,
+  Observable,
+  catchError,
+  defaultIfEmpty,
+  finalize,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 
 export interface AuthUser {
   id: string | number;
@@ -44,6 +56,7 @@ export class OAuthService {
 
   private readonly _currentUser = signal<AuthUser | null>(null);
   private readonly _isLoading = signal<boolean>(false);
+  private unauthorizedRecovery: Observable<void> | null = null;
 
   readonly currentUser = this._currentUser.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
@@ -116,6 +129,27 @@ export class OAuthService {
         return throwError(() => error);
       }),
     );
+  }
+
+  recoverFromUnauthorized(): Observable<void> {
+    if (this.unauthorizedRecovery) {
+      return this.unauthorizedRecovery;
+    }
+
+    const recovery = this.checkSession().pipe(
+      switchMap((session) => (session.authenticated ? of(undefined) : this.login())),
+      catchError(() => of(undefined)),
+      defaultIfEmpty(undefined),
+      finalize(() => {
+        if (this.unauthorizedRecovery === recovery) {
+          this.unauthorizedRecovery = null;
+        }
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    this.unauthorizedRecovery = recovery;
+    return recovery;
   }
 
   hasRole(role: string): boolean {

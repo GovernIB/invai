@@ -1,0 +1,161 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="46rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div class="md:col-span-6">
+        <p-floatlabel class="w-full">
+          <input
+            id="commission-dialog-name"
+            class="w-full"
+            type="text"
+            maxlength="100"
+            formControlName="name"
+            [attr.aria-describedby]="isInvalid(form().controls.name) ? 'commission-dialog-name-error' : null"
+            [attr.aria-invalid]="isInvalid(form().controls.name)"
+            pInputText
+          />
+          <label for="commission-dialog-name">{{ labels.name }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.name)) {
+          <p id="commission-dialog-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.name.hasError('required') || form().controls.name.hasError('pattern')
+                ? requiredError
+                : nameMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="md:col-span-6">
+        <p-floatlabel class="w-full">
+          <input
+            id="commission-dialog-name-es"
+            class="w-full"
+            type="text"
+            maxlength="100"
+            formControlName="nameEs"
+            [attr.aria-describedby]="isInvalid(form().controls.nameEs) ? 'commission-dialog-name-es-error' : null"
+            [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+            pInputText
+          />
+          <label for="commission-dialog-name-es">{{ labels.nameEs }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.nameEs)) {
+          <p id="commission-dialog-name-es-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.nameEs.hasError('required') ||
+              form().controls.nameEs.hasError('pattern')
+                ? requiredError
+                : nameEsMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="md:col-span-6">
+        <p-floatlabel class="w-full">
+          <input
+            id="commission-dialog-expedient-number"
+            class="w-full"
+            type="text"
+            maxlength="50"
+            formControlName="expedientNumber"
+            [attr.aria-describedby]="isInvalid(form().controls.expedientNumber) ? 'commission-dialog-expedient-number-error' : null"
+            [attr.aria-invalid]="isInvalid(form().controls.expedientNumber)"
+            pInputText
+          />
+          <label for="commission-dialog-expedient-number">{{ labels.expedientNumber }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.expedientNumber)) {
+          <p id="commission-dialog-expedient-number-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.expedientNumber.hasError('required') ||
+              form().controls.expedientNumber.hasError('pattern')
+                ? requiredError
+                : expedientMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="md:col-span-6">
+        <p-floatlabel class="w-full">
+          <p-datepicker
+            inputId="commission-dialog-approval-date"
+            formControlName="approvalDate"
+            ariaLabelledBy="commission-dialog-approval-date-label"
+            appendTo="body"
+            iconDisplay="input"
+            [dateFormat]="dateFormat"
+            [fluid]="true"
+            [invalid]="isInvalid(form().controls.approvalDate)"
+            [placeholder]="datePlaceholder"
+            [pt]="approvalDatePassThrough()"
+            [showIcon]="true"
+          />
+          <label id="commission-dialog-approval-date-label" for="commission-dialog-approval-date">
+            {{ labels.approvalDate }}
+          </label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.approvalDate)) {
+          <p id="commission-dialog-approval-date-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+
+      <div class="commission-dialog-type-field md:col-span-6">
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="commission-dialog-type"
+            formControlName="commissionType"
+            ariaLabelledBy="commission-dialog-type-label"
+            [attr.aria-describedby]="isInvalid(form().controls.commissionType) ? 'commission-dialog-type-error' : null"
+            [attr.aria-invalid]="isInvalid(form().controls.commissionType)"
+            [fluid]="true"
+            [options]="commissionTypeOptions"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+          />
+          <label id="commission-dialog-type-label" for="commission-dialog-type">
+            {{ labels.commissionType }}
+          </label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.commissionType)) {
+          <p id="commission-dialog-type-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+
+</app-crud-entity-dialog>

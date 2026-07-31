@@ -1,0 +1,69 @@
+<section class="flex flex-column gap-4" [attr.aria-label]="hostsAriaLabel">
+  <app-section-actions
+    class="flex justify-content-end"
+    [(isFiltersCollapsed)]="isFiltersCollapsed"
+    [(selectedColumns)]="selectedColumns"
+    [availableColumns]="columns"
+    [addButtonAriaLabel]="addAriaLabel"
+    [filtersSelected]="selectedFilters()"
+    [hideExportButton]="true"
+    [hideQuickSearch]="true"
+    (onAdd)="openCreateDialog()"
+  />
+
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <app-server-filters-form
+        [form]="filtersForm"
+        [labels]="filterLabels"
+        [serverOptions]="serverOptions()"
+      />
+    </app-search-filters>
+  }
+
+  <app-infrastructure-table
+    [columns]="displayedColumns()"
+    [first]="tableFirst()"
+    [isInitialLoading]="isInitialLoading()"
+    [isLoading]="isLoading()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+</section>
+
+@if (isDialogVisible()) {
+  <app-server-maintenance-dialog
+    [(visible)]="isDialogVisible"
+    [canRestore]="selectedHostCanRestore()"
+    [form]="hostForm"
+    [isLoading]="isEntityLoading()"
+    [isSaving]="isSaving()"
+    [mode]="dialogMode()"
+    [serverOptions]="serverOptions()"
+    (cancelEdit)="cancelEntityEdit()"
+    (closed)="closeDialog()"
+    (deactivate)="deactivateSelectedHost()"
+    (edit)="startEntityEdit()"
+    (restore)="restoreSelectedHost()"
+    (submitForm)="submitEntity()"
+  />
+}
+
+@if (isDeleteDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="isDeleteDialogVisible"
+    [cancelLabel]="deleteCancel"
+    [confirmLabel]="deleteConfirm"
+    [message]="deleteMessage()"
+    [title]="deleteTitle"
+    (cancel)="closeDeleteDialog()"
+    (confirm)="confirmDelete()"
+  />
+}

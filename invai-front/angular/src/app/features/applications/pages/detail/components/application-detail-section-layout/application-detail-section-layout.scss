@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.application-detail-section-layout {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.application-detail-section-layout__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.application-detail-section-layout__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .application-detail-section-layout__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

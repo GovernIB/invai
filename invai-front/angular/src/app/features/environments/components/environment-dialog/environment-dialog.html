@@ -1,0 +1,115 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="environment-dialog-code"
+            class="w-full"
+            type="text"
+            maxlength="50"
+            formControlName="code"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.code) ? 'environment-dialog-code-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.code)"
+            pInputText
+          />
+          <label for="environment-dialog-code">{{ labels.code }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.code)) {
+          <p id="environment-dialog-code-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.code.hasError('required') || form().controls.code.hasError('pattern')
+                ? requiredError
+                : codeMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="environment-dialog-name"
+            class="w-full"
+            type="text"
+            maxlength="100"
+            formControlName="name"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.name) ? 'environment-dialog-name-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.name)"
+            pInputText
+          />
+          <label for="environment-dialog-name">{{ labels.name }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.name)) {
+          <p id="environment-dialog-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.name.hasError('required') || form().controls.name.hasError('pattern')
+                ? requiredError
+                : nameMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="environment-dialog-name-es"
+            class="w-full"
+            type="text"
+            maxlength="100"
+            formControlName="nameEs"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.nameEs) ? 'environment-dialog-name-es-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+            pInputText
+          />
+          <label for="environment-dialog-name-es">{{ labels.nameEs }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.nameEs)) {
+          <p id="environment-dialog-name-es-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.nameEs.hasError('required') ||
+              form().controls.nameEs.hasError('pattern')
+                ? requiredError
+                : nameEsMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+
+</app-crud-entity-dialog>

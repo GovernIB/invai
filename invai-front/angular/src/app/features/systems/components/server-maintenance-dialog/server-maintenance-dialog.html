@@ -1,0 +1,125 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="44rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isLoading]="isLoading()"
+  [mode]="mode()"
+  [isSaving]="isSaving()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div class="md:col-span-7">
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="application-host-server"
+          styleClass="w-full"
+          formControlName="server"
+          [ariaFilterLabel]="labels.server"
+          [attr.aria-describedby]="isInvalid(form().controls.server) ? 'application-host-server-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.server)"
+          [filter]="true"
+          [options]="serverOptions()"
+          appendTo="body"
+          dataKey="id"
+          optionLabel="label"
+        />
+        <label for="application-host-server">{{ labels.server }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.server)) {
+        <p id="application-host-server-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-5">
+      <p-floatlabel class="w-full">
+        <input
+          id="application-host-instance"
+          class="w-full"
+          type="text"
+          formControlName="instance"
+          maxlength="50"
+          [attr.aria-describedby]="isInvalid(form().controls.instance) ? 'application-host-instance-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.instance)"
+          pInputText
+        />
+        <label for="application-host-instance">{{ labels.instance }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.instance)) {
+        <p id="application-host-instance-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-5">
+      <p-floatlabel class="w-full">
+        <p-inputnumber
+          inputId="application-host-port"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          formControlName="port"
+          [attr.aria-describedby]="isInvalid(form().controls.port) ? 'application-host-port-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.port)"
+          [max]="65535"
+          [min]="1"
+          [useGrouping]="false"
+        />
+        <label for="application-host-port">{{ labels.port }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.port)) {
+        <p id="application-host-port-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ portError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-4">
+      <p-floatlabel class="w-full">
+        <input
+          id="application-host-version"
+          class="w-full"
+          type="text"
+          formControlName="version"
+          maxlength="20"
+          [attr.aria-describedby]="isInvalid(form().controls.version) ? 'application-host-version-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.version)"
+          pInputText
+        />
+        <label for="application-host-version">{{ labels.version }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.version)) {
+        <p id="application-host-version-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-12">
+      <label class="mb-2 block" for="application-host-description">
+        {{ labels.observations }}
+      </label>
+      <textarea
+        id="application-host-description"
+        class="w-full"
+        rows="4"
+        formControlName="description"
+        pTextarea
+      ></textarea>
+    </div>
+  </form>
+</app-crud-entity-dialog>

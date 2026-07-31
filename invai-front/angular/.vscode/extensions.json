@@ -1,0 +1,18 @@
+{
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=827846
+  "recommendations": [
+    "angular.ng-template",
+    "johnpapa.angular2",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "usernamehw.errorlens",
+    "yoavbls.pretty-ts-errors",
+    "eamodio.gitlens",
+    "kisstkondoros.vscode-codemetrics",
+    "pkief.material-icon-theme",
+    "doggy8088.quicktype-refresh",
+    "jannisx11.batch-rename-extension",
+    "aykutsarac.jsoncrack-vscode",
+    "humao.rest-client"
+  ]
+}

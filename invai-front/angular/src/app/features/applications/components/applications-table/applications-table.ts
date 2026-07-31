@@ -1,27 +1,24 @@
-import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  ViewEncapsulation,
+} from '@angular/core';
 import { TableComponentBase } from '@shared/classes/table-component-base';
 import { Application } from '../../applications.model';
-import { PrimeIcons } from 'primeng/api';
-import { Button } from 'primeng/button';
+import { Skeleton } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
-import { TooltipModule } from 'primeng/tooltip';
-import {
-  APPLICATIONS_TABLE_ACTIONS_HEADER,
-  APPLICATIONS_TABLE_DELETE_ARIA_LABEL,
-  APPLICATIONS_TABLE_DETAIL_ARIA_LABEL,
-  APPLICATIONS_TABLE_UPDATE_ARIA_LABEL,
-} from './applications-table.i18n';
+import { APPLICATION_STATUS_LABELS } from '../../applications.constants';
 
 export enum ApplicationTableAction {
-  Delete = 1,
-  Detail = 2,
-  Update = 3,
+  Detail = 1,
 }
 
 @Component({
   selector: 'app-applications-table',
   standalone: true,
-  imports: [Button, TableModule, TooltipModule],
+  imports: [Skeleton, TableModule],
   templateUrl: './applications-table.html',
   styleUrl: './applications-table.scss',
   encapsulation: ViewEncapsulation.None,
@@ -29,11 +26,16 @@ export enum ApplicationTableAction {
 })
 export class ApplicationsTable extends TableComponentBase<Application> {
   first = input(0);
+  isInitialLoading = input(false);
 
-  protected readonly PrimeIcons = PrimeIcons;
   protected readonly ApplicationTableAction = ApplicationTableAction;
-  protected readonly actionsHeader = APPLICATIONS_TABLE_ACTIONS_HEADER;
-  protected readonly deleteAriaLabel = APPLICATIONS_TABLE_DELETE_ARIA_LABEL;
-  protected readonly detailAriaLabel = APPLICATIONS_TABLE_DETAIL_ARIA_LABEL;
-  protected readonly updateAriaLabel = APPLICATIONS_TABLE_UPDATE_ARIA_LABEL;
+  protected readonly applicationStatusLabels = APPLICATION_STATUS_LABELS;
+  protected readonly skeletonRows = Array.from({ length: this.PAGINATOR_ROWS });
+  protected readonly isRefreshing = computed(
+    () => this.isLoading() && !this.isInitialLoading(),
+  );
+
+  protected getApplicationStatusLabel(application: Application): string {
+    return application.status ? this.applicationStatusLabels[application.status] : '';
+  }
 }

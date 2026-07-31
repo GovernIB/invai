@@ -1,0 +1,25 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input id="layers-filter-name" class="w-full" type="text" formControlName="name" pInputText />
+      <label for="layers-filter-name">{{ labels().name }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="layers-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="layers-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="layers-filter-status-label" for="layers-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

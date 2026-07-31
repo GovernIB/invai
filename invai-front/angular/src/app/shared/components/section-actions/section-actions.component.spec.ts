@@ -11,6 +11,29 @@ describe('SectionActionsComponent', () => {
     fixture.detectChanges();
   });
 
+  it('should expose separate search and button groups for the responsive layout', () => {
+    const root = fixture.nativeElement.querySelector('.section-actions');
+    const search = fixture.nativeElement.querySelector('.section-actions__search');
+    const buttons = fixture.nativeElement.querySelector('.section-actions__buttons');
+
+    expect(root).toBeTruthy();
+    expect(search).toBeTruthy();
+    expect(buttons).toBeTruthy();
+    expect(search.parentElement).toBe(root);
+    expect(buttons.parentElement).toBe(root);
+  });
+
+  it('should preserve the compact actions layout when quick search is hidden', () => {
+    fixture.componentRef.setInput('hideQuickSearch', true);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('.section-actions');
+
+    expect(root.classList.contains('section-actions--without-search')).toBe(true);
+    expect(fixture.nativeElement.querySelector('.section-actions__search')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('.section-actions__buttons')).toBeTruthy();
+  });
+
   it('should keep the search icon centered inside an accessible loading spinner', () => {
     const input = () => fixture.nativeElement.querySelector('input[type="text"]') as HTMLElement;
     const magnifier = fixture.nativeElement.querySelector('.section-actions-search__magnifier');

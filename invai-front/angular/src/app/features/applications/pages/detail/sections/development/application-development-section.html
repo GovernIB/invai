@@ -1,0 +1,376 @@
+<app-application-detail-section-layout
+  titleId="application-development-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('development')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
+  <section class="application-development">
+    <form
+      class="application-development__general invai-grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
+      [formGroup]="detailState.developmentForm"
+      novalidate
+    >
+      <div class="application-development__field">
+        <label
+          id="application-development-environment-label"
+          for="application-development-environment"
+        >
+          {{ labels.environment }}
+        </label>
+        <p-select
+          inputId="application-development-environment"
+          formControlName="environment"
+          ariaLabelledBy="application-development-environment-label"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="id"
+          [ariaFilterLabel]="labels.environment"
+          [attr.aria-describedby]="
+            isInvalid(detailState.developmentForm.controls.environment)
+              ? 'application-development-environment-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.environment)"
+          [filter]="true"
+          [fluid]="true"
+          [options]="displayedEnvironmentOptions()"
+        />
+        @if (isInvalid(detailState.developmentForm.controls.environment)) {
+          <p
+            id="application-development-environment-error"
+            class="application-development__error"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+
+      <div class="application-development__field">
+        <label
+          id="application-development-modality-label"
+          for="application-development-modality"
+        >
+          {{ labels.modality }}
+        </label>
+        <p-select
+          inputId="application-development-modality"
+          formControlName="modality"
+          ariaLabelledBy="application-development-modality-label"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="value"
+          [attr.aria-describedby]="
+            isInvalid(detailState.developmentForm.controls.modality)
+              ? 'application-development-modality-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.modality)"
+          [fluid]="true"
+          [options]="modalityOptions()"
+        />
+        @if (isInvalid(detailState.developmentForm.controls.modality)) {
+          <p
+            id="application-development-modality-error"
+            class="application-development__error"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+
+      <div class="application-development__field xl:col-span-2">
+        <label for="application-development-code">{{ labels.code }}</label>
+        <div class="application-development__source-code">
+          <input
+            id="application-development-code"
+            type="url"
+            maxlength="1000"
+            formControlName="code"
+            [attr.aria-describedby]="
+              isInvalid(detailState.developmentForm.controls.code)
+                ? 'application-development-code-error'
+                : null
+            "
+            [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.code)"
+            pInputText
+          />
+          @if (sourceCodeUrl(); as url) {
+            <a
+              class="application-development__external-link"
+              [attr.aria-label]="sourceCodeAriaLabel"
+              [href]="url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i [class]="icons.EXTERNAL_LINK" aria-hidden="true"></i>
+            </a>
+          } @else {
+            <span
+              class="application-development__external-link application-development__external-link--disabled"
+              [attr.aria-label]="sourceCodeAriaLabel"
+              aria-disabled="true"
+            >
+              <i [class]="icons.EXTERNAL_LINK" aria-hidden="true"></i>
+            </span>
+          }
+        </div>
+        @if (isInvalid(detailState.developmentForm.controls.code)) {
+          <p
+            id="application-development-code-error"
+            class="application-development__error"
+            role="alert"
+          >
+            {{
+              detailState.developmentForm.controls.code.hasError('pattern')
+                ? urlError
+                : detailState.developmentForm.controls.code.hasError('maxlength')
+                  ? codeMaxLengthError
+                  : requiredError
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="application-development__field">
+        <label
+          id="application-development-standard-label"
+          for="application-development-standard"
+        >
+          {{ labels.standardAdaption }}
+        </label>
+        <p-select
+          inputId="application-development-standard"
+          formControlName="standardAdaption"
+          ariaLabelledBy="application-development-standard-label"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="value"
+          [attr.aria-describedby]="
+            isInvalid(detailState.developmentForm.controls.standardAdaption)
+              ? 'application-development-standard-error'
+              : null
+          "
+          [attr.aria-invalid]="
+            isInvalid(detailState.developmentForm.controls.standardAdaption)
+          "
+          [fluid]="true"
+          [options]="standardAdaptionOptions()"
+        />
+        @if (isInvalid(detailState.developmentForm.controls.standardAdaption)) {
+          <p
+            id="application-development-standard-error"
+            class="application-development__error"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+
+      <div class="application-development__field">
+        <label
+          id="application-development-revision-date-label"
+          for="application-development-revision-date"
+        >
+          {{ labels.revisionDate }}
+        </label>
+        <p-datepicker
+          inputId="application-development-revision-date"
+          formControlName="revisionDate"
+          ariaLabelledBy="application-development-revision-date-label"
+          appendTo="body"
+          iconDisplay="input"
+          [dateFormat]="dateFormat"
+          [fluid]="true"
+          [invalid]="isInvalid(detailState.developmentForm.controls.revisionDate)"
+          [placeholder]="datePlaceholder"
+          [pt]="
+            datePassThrough(
+              'application-development-revision-date-error',
+              isInvalid(detailState.developmentForm.controls.revisionDate)
+            )
+          "
+          [showIcon]="true"
+        />
+        @if (isInvalid(detailState.developmentForm.controls.revisionDate)) {
+          <p
+            id="application-development-revision-date-error"
+            class="application-development__error"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    </form>
+
+    <section class="application-development__resource">
+      <div class="application-development__resource-header">
+        <h3>{{ providerTitle }}</h3>
+        <p-button
+          type="button"
+          tooltipPosition="top"
+          [ariaLabel]="addProviderAriaLabel"
+          [disabled]="!canManageResources()"
+          [icon]="icons.PLUS"
+          [pTooltip]="addProviderAriaLabel"
+          styleClass="h-[48px] w-[48px]"
+          (onClick)="openProviderDialog()"
+        />
+      </div>
+
+      <app-application-providers-table
+        [columns]="providerColumns"
+        [first]="providerFirst()"
+        [isLoading]="isProvidersLoading()"
+        [isReadOnly]="!canManageResources()"
+        [itemsList]="providers()"
+        (onPageChange)="onProvidersPageChange($event)"
+        (onSelectAction)="onProviderTableAction($event)"
+      />
+    </section>
+
+    <section class="application-development__resource">
+      <div class="application-development__resource-header">
+        <h3>{{ technologyTitle }}</h3>
+        <p-button
+          type="button"
+          tooltipPosition="top"
+          [ariaLabel]="addTechnologyAriaLabel"
+          [disabled]="!canManageResources()"
+          [icon]="icons.PLUS"
+          [pTooltip]="addTechnologyAriaLabel"
+          styleClass="h-[48px] w-[48px]"
+          (onClick)="openTechnologyDialog()"
+        />
+      </div>
+
+      <app-application-technologies-table
+        [columns]="technologyColumns"
+        [first]="technologyFirst()"
+        [isLoading]="isTechnologiesLoading()"
+        [isReadOnly]="!canManageResources()"
+        [itemsList]="technologies()"
+        (onPageChange)="onTechnologiesPageChange($event)"
+        (onSelectAction)="onTechnologyTableAction($event)"
+      />
+    </section>
+
+    <div class="application-development__documentation">
+      <p-button
+        type="button"
+        [ariaLabel]="documentationAriaLabel"
+        [icon]="icons.EXTERNAL_LINK"
+        [label]="documentationLabel"
+        [outlined]="true"
+        (onClick)="onDocumentation()"
+      />
+    </div>
+
+    <div class="application-development__observations">
+      <label
+        id="application-development-observation-label"
+        for="application-development-observation"
+      >
+        {{ labels.observation }}
+      </label>
+      <p-editor
+        id="application-development-observation"
+        [formControl]="detailState.developmentForm.controls.observation"
+        [attr.aria-labelledby]="'application-development-observation-label'"
+        [attr.aria-describedby]="
+          isInvalid(detailState.developmentForm.controls.observation)
+            ? 'application-development-observation-error'
+            : null
+        "
+        [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.observation)"
+        [style]="{ height: '10rem' }"
+      />
+      @if (isInvalid(detailState.developmentForm.controls.observation)) {
+        <p
+          id="application-development-observation-error"
+          class="application-development__error"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+  </section>
+</app-application-detail-section-layout>
+
+@if (providerDialogVisible()) {
+  <app-application-provider-dialog
+    [(visible)]="providerDialogVisible"
+    [canEdit]="providerDialogCanEdit()"
+    [form]="providerForm"
+    [isDeleting]="isProviderDeleting()"
+    [isSaving]="isProviderSaving()"
+    [mode]="providerDialogMode()"
+    [roleOptions]="displayedRoleOptions()"
+    (cancelEdit)="cancelProviderEdit()"
+    (closed)="closeProviderDialog()"
+    (deactivate)="requestProviderDelete()"
+    (edit)="startProviderEdit()"
+    (submitForm)="submitProvider()"
+  />
+}
+
+@if (technologyDialogVisible()) {
+  <app-application-technology-dialog
+    [(visible)]="technologyDialogVisible"
+    [canEdit]="technologyDialogCanEdit()"
+    [form]="technologyForm"
+    [isDeleting]="isTechnologyDeleting()"
+    [isSaving]="isTechnologySaving()"
+    [mode]="technologyDialogMode()"
+    [technologyOptions]="displayedTechnologyOptions()"
+    (cancelEdit)="cancelTechnologyEdit()"
+    (closed)="closeTechnologyDialog()"
+    (deactivate)="requestTechnologyDelete()"
+    (edit)="startTechnologyEdit()"
+    (submitForm)="submitTechnology()"
+  />
+}
+
+@if (providerDeleteDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="providerDeleteDialogVisible"
+    [cancelAriaLabel]="providerDeleteDialogCancelAriaLabel"
+    [cancelLabel]="deleteDialogCancelLabel"
+    [confirmAriaLabel]="providerDeleteDialogConfirmAriaLabel"
+    [confirmLabel]="deleteDialogConfirmLabel"
+    [message]="providerDeleteDialogMessage()"
+    [title]="providerDeleteDialogTitle"
+    (cancel)="closeProviderDeleteDialog()"
+    (confirm)="confirmProviderDelete()"
+    (dismissed)="closeProviderDeleteDialog()"
+  />
+}
+
+@if (technologyDeleteDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="technologyDeleteDialogVisible"
+    [cancelAriaLabel]="technologyDeleteDialogCancelAriaLabel"
+    [cancelLabel]="deleteDialogCancelLabel"
+    [confirmAriaLabel]="technologyDeleteDialogConfirmAriaLabel"
+    [confirmLabel]="deleteDialogConfirmLabel"
+    [message]="technologyDeleteDialogMessage()"
+    [title]="technologyDeleteDialogTitle"
+    (cancel)="closeTechnologyDeleteDialog()"
+    (confirm)="confirmTechnologyDelete()"
+    (dismissed)="closeTechnologyDeleteDialog()"
+  />
+}

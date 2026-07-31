@@ -1,0 +1,72 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="databases-filter-server"
+        styleClass="w-full"
+        formControlName="serverId"
+        ariaLabelledBy="databases-filter-server-label"
+        [ariaFilterLabel]="labels().server"
+        [filter]="true"
+        [options]="serverOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="id"
+      />
+      <label id="databases-filter-server-label" for="databases-filter-server">
+        {{ labels().server }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="databases-filter-service"
+        class="w-full"
+        type="text"
+        formControlName="service"
+        pInputText
+      />
+      <label for="databases-filter-service">{{ labels().service }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="databases-filter-type"
+        styleClass="w-full"
+        formControlName="databaseTypeId"
+        ariaLabelledBy="databases-filter-type-label"
+        [ariaFilterLabel]="labels().databaseType"
+        [filter]="true"
+        [options]="databaseTypeOptions()"
+        [showClear]="true"
+        optionLabel="name"
+        optionValue="id"
+      />
+      <label id="databases-filter-type-label" for="databases-filter-type">
+        {{ labels().databaseType }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="databases-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="databases-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="databases-filter-status-label" for="databases-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

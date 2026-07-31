@@ -1,0 +1,98 @@
+<div class="invai-table-loading-container" [attr.aria-busy]="isLoading()">
+  @if (isLoading()) {
+    <div class="invai-table-loading-shield" aria-hidden="true">
+      @if (isRefreshing()) {
+        <span class="invai-table-refresh-indicator"></span>
+      }
+    </div>
+  }
+  <p-table
+    #table
+    dataKey="id"
+    paginatorDropdownAppendTo="body"
+    styleClass="invai-scrollable-table"
+    [columns]="columns()"
+    [currentPageReportTemplate]="CURRENT_PAGE_REPORT_TEMPLATE"
+    [first]="first()"
+    [lazy]="true"
+    [lazyLoadOnInit]="false"
+    [paginator]="true"
+    [paginatorStyleClass]="PAGINATOR_STYLE_CLASS"
+    [rowHover]="true"
+    [rows]="PAGINATOR_ROWS"
+    [rowsPerPageOptions]="ROWS_PER_PAGE_OPTIONS"
+    [scrollable]="true"
+    [showCurrentPageReport]="true"
+    [totalRecords]="totalRecords()"
+    [value]="value()"
+    (onLazyLoad)="onPage($event)"
+  >
+    <ng-template let-columns pTemplate="header">
+      <tr>
+        @for (column of columns; track column.key) {
+          <th [pSortableColumn]="column.sortBy" [style.min-width]="column.minWidth">
+            <div class="invai-table-header-content">
+              <span class="invai-table-header-label">{{ column.label }}</span>
+              <p-sortIcon [field]="column.sortBy" />
+            </div>
+          </th>
+        }
+        <th class="invai-table-actions-column"><span class="sr-only" i18n>Accions</span></th>
+      </tr>
+    </ng-template>
+    <ng-template let-columns="columns" let-rowData pTemplate="body">
+      <tr
+        class="invai-table-consultable-row"
+        tabindex="0"
+        (dblclick)="onRowActivate($event, TechnologyTableAction.View, rowData)"
+        (keydown.enter)="onRowActivate($event, TechnologyTableAction.View, rowData)"
+      >
+        @for (column of columns; track column.key) {
+          <td [style.min-width]="column.minWidth">
+            @switch (column.key) {
+              @case ('layer') {
+                {{ rowData.layer?.name || ('#' + rowData.layer?.id) }}
+              }
+              @case ('status') {
+                {{ statusLabel(rowData.deletedAt) }}
+              }
+              @default {
+                {{ rowData[column.key] }}
+              }
+            }
+          </td>
+        }
+        <td class="invai-table-actions-column">
+          @if (rowData.deletedAt) {
+            <app-restore-record-menu
+              (restore)="onSelectedAction(TechnologyTableAction.Restore, rowData)"
+            />
+          } @else {
+            <p-button
+              severity="secondary"
+              [ariaLabel]="actionsAriaLabel"
+              [icon]="icons.ELLIPSIS_H"
+              [text]="true"
+              (onClick)="openActionsMenu($event, rowData, rowMenu)"
+            />
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      @if (isInitialLoading()) {
+        @for (_ of skeletonRows; track $index) {
+          <tr aria-hidden="true">
+            @for (column of columns(); track column.key) {
+              <td [style.min-width]="column.minWidth"><p-skeleton width="75%" height="1rem" /></td>
+            }
+            <td class="invai-table-actions-column"><p-skeleton shape="circle" size="2rem" /></td>
+          </tr>
+        }
+      } @else {
+        <tr><td [attr.colspan]="columns().length + 1">{{ RESULTS_NOT_FOUND }}</td></tr>
+      }
+    </ng-template>
+  </p-table>
+</div>
+<p-menu #rowMenu [model]="rowActions" [popup]="true" appendTo="body" styleClass="maintenance-row-menu" />

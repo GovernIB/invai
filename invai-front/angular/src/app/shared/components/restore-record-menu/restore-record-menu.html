@@ -1,0 +1,9 @@
+<p-button
+  [text]="true"
+  severity="secondary"
+  [icon]="PrimeIcons.ELLIPSIS_H"
+  [ariaLabel]="actionsAriaLabel"
+  (onClick)="menu.toggle($event)"
+/>
+
+<p-menu #menu [model]="actions" [popup]="true" appendTo="body" />

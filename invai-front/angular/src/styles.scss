@@ -79,6 +79,16 @@ html {
   white-space: pre-wrap;
 }
 
+.sidebar-navigation-drawer {
+  .p-drawer-header {
+    padding: 1rem;
+  }
+
+  .p-drawer-content {
+    padding: 0;
+  }
+}
+
 /* tab colors */
 .red-tab-bg .p-tabview-panels {
   background-color: var(--red-50) !important;
@@ -173,6 +183,30 @@ html {
 
 .surface-table-bg .p-datatable-table th {
   background-color: var(--surface-50) !important;
+}
+
+.p-autocomplete.invai-composite-autocomplete {
+  border-radius: var(--p-autocomplete-border-radius);
+}
+
+.p-autocomplete.invai-composite-autocomplete:focus-within {
+  box-shadow: var(--p-autocomplete-focus-ring-shadow);
+  outline: var(--p-autocomplete-focus-ring-width) var(--p-autocomplete-focus-ring-style)
+    var(--p-autocomplete-focus-ring-color);
+  outline-offset: var(--p-autocomplete-focus-ring-offset);
+}
+
+.p-autocomplete.invai-composite-autocomplete:focus-within .p-autocomplete-input,
+.p-autocomplete.invai-composite-autocomplete:focus-within .p-autocomplete-dropdown {
+  border-color: var(--p-autocomplete-focus-border-color);
+}
+
+.p-autocomplete.invai-composite-autocomplete:focus-within
+  .p-autocomplete-input:enabled:focus,
+.p-autocomplete.invai-composite-autocomplete:focus-within
+  .p-autocomplete-dropdown:focus-visible {
+  box-shadow: none;
+  outline: none;
 }
 
 .input-full {

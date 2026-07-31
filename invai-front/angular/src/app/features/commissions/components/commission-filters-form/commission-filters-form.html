@@ -1,0 +1,120 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input id="commissions-filter-name" class="w-full" formControlName="name" pInputText />
+      <label id="commissions-filter-name-label" for="commissions-filter-name">
+        {{ labels().name }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input id="commissions-filter-name-es" class="w-full" formControlName="nameEs" pInputText />
+      <label id="commissions-filter-name-es-label" for="commissions-filter-name-es">
+        {{ labels().nameEs }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="commissions-filter-expedient-number"
+        class="w-full"
+        formControlName="expedientNumber"
+        pInputText
+      />
+      <label
+        id="commissions-filter-expedient-number-label"
+        for="commissions-filter-expedient-number"
+      >
+        {{ labels().expedientNumber }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="commissions-filter-type"
+        styleClass="w-full"
+        formControlName="commissionType"
+        ariaLabelledBy="commissions-filter-type-label"
+        [options]="commissionTypeOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="commissions-filter-type-label" for="commissions-filter-type">
+        {{ labels().commissionType }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-datepicker
+        inputId="commissions-filter-date-from"
+        formControlName="approvalDateFrom"
+        ariaLabelledBy="commissions-filter-date-from-label"
+        appendTo="body"
+        iconDisplay="input"
+        [dateFormat]="dateFormat"
+        [fluid]="true"
+        [invalid]="isDateRangeErrorVisible()"
+        [placeholder]="datePlaceholder"
+        [pt]="datePassThrough()"
+        [showIcon]="true"
+      />
+      <label id="commissions-filter-date-from-label" for="commissions-filter-date-from">
+        {{ labels().approvalDateFrom }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-datepicker
+        inputId="commissions-filter-date-to"
+        formControlName="approvalDateTo"
+        ariaLabelledBy="commissions-filter-date-to-label"
+        appendTo="body"
+        iconDisplay="input"
+        [dateFormat]="dateFormat"
+        [fluid]="true"
+        [invalid]="isDateRangeErrorVisible()"
+        [placeholder]="datePlaceholder"
+        [pt]="datePassThrough()"
+        [showIcon]="true"
+      />
+      <label id="commissions-filter-date-to-label" for="commissions-filter-date-to">
+        {{ labels().approvalDateTo }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="commissions-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="commissions-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="commissions-filter-status-label" for="commissions-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  @if (isDateRangeErrorVisible()) {
+    <p [id]="dateRangeErrorId" class="col-span-full m-0 text-sm text-red-600" role="alert">
+      {{ labels().invalidDateRange }}
+    </p>
+  }
+</form>

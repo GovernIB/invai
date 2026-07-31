@@ -1,0 +1,50 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="32rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form [formGroup]="form()" (ngSubmit)="onSubmit()" novalidate>
+      <p-floatlabel class="w-full">
+        <input
+          id="layer-dialog-name"
+          class="w-full"
+          type="text"
+          maxlength="100"
+          formControlName="name"
+          [attr.aria-describedby]="isInvalid(form().controls.name) ? 'layer-dialog-name-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.name)"
+          pInputText
+        />
+        <label for="layer-dialog-name">{{ label }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.name)) {
+        <p id="layer-dialog-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{
+            form().controls.name.hasError('required') || form().controls.name.hasError('pattern')
+              ? requiredError
+              : nameMaxLengthError
+          }}
+        </p>
+      }
+    </form>
+  }
+</app-crud-entity-dialog>

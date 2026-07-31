@@ -1,0 +1,39 @@
+.invai-resolver-progress {
+  position: absolute;
+  right: 0;
+  bottom: -3px;
+  left: 0;
+  z-index: 10;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    width: 38%;
+    content: '';
+    background: var(--p-primary-color);
+    transform: translateX(-100%);
+    animation: invai-resolver-progress-move 1.15s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invai-resolver-progress::after {
+    width: 100%;
+    transform: none;
+    animation: none;
+  }
+}
+
+@keyframes invai-resolver-progress-move {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(265%);
+  }
+}

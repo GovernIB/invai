@@ -1,0 +1,49 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="categories-filter-name"
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+      />
+      <label id="categories-filter-name-label" for="categories-filter-name">
+        {{ labels().name }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="categories-filter-name-es"
+        class="w-full"
+        type="text"
+        formControlName="nameEs"
+        pInputText
+      />
+      <label id="categories-filter-name-es-label" for="categories-filter-name-es">
+        {{ labels().nameEs }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="categories-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="categories-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="categories-filter-status-label" for="categories-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

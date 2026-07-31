@@ -1,6 +1,7 @@
 :host {
   display: flex;
   height: 100%;
+  z-index: 20;
 }
 
 :host .sidebar-menu-label {
@@ -37,6 +38,10 @@
   .p-tieredmenu-root-list,
   .p-tieredmenu-submenu {
     padding: 0;
+  }
+
+  .p-tieredmenu-submenu {
+    z-index: 1000;
   }
 
   .p-tieredmenu-item-content {

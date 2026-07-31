@@ -29,17 +29,17 @@ build-prod:
 
 #############################
 #    TEST                   #
-#  (placeholder, deshabilitado) #
+#  Ejecuta los tests unitarios #
 #############################
-# tests:
-#   stage: test
-#   tags:
-#     - node24-bookworm
-#   script:
-#     - npm install
-#     - npm test
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH == "develop"'
+tests:
+  stage: test
+  tags:
+    - node24-bookworm
+  script:
+    - npm ci
+    - npm test -- --no-watch --progress=false
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
 
 #############################
 #    UPLOAD A INVAI-BACK    #

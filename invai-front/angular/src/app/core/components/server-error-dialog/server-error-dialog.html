@@ -1,0 +1,31 @@
+<p-dialog
+  [visible]="visible()"
+  [header]="error()?.error ?? ''"
+  [closable]="true"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [modal]="true"
+  [resizable]="false"
+  [style]="{ width: '28rem', maxWidth: 'calc(100vw - 2rem)' }"
+  (visibleChange)="onVisibleChange($event)"
+>
+  @if (error(); as serverError) {
+    <div class="flex items-start gap-3 text-sm leading-5 text-color-secondary" role="alert">
+      <i class="mt-1 text-red-500" [class]="errorIcon" aria-hidden="true"></i>
+      <p class="m-0 whitespace-pre-line">{{ serverError.message }}</p>
+    </div>
+  }
+
+  <ng-template #footer>
+    <div class="flex justify-end">
+      <p-button
+        [ariaLabel]="closeAriaLabel"
+        [label]="closeLabel"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="close()"
+      />
+    </div>
+  </ng-template>
+</p-dialog>

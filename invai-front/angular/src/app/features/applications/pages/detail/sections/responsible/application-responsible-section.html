@@ -1,4 +1,18 @@
-<section class="flex flex-column gap-3">
-  <h3 class="m-0 text-xl font-semibold">{{ header }}</h3>
+<app-application-detail-section-layout
+  titleId="application-responsible-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('responsible')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
   <app-application-responsible-form />
-</section>
+</app-application-detail-section-layout>

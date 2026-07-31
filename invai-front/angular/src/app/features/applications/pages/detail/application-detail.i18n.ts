@@ -1,26 +1,59 @@
-export const APPLICATION_DETAIL_EDIT_LABEL = $localize`Editar`;
-export const APPLICATION_DETAIL_EDIT_ARIA_LABEL = $localize`Editar aplicació`;
-export const APPLICATION_DETAIL_CANCEL_LABEL = $localize`Cancel·lar`;
-export const APPLICATION_DETAIL_CANCEL_ARIA_LABEL = $localize`Cancel·lar l'edició de l'aplicació`;
-export const APPLICATION_DETAIL_SAVE_LABEL = $localize`Desar`;
-export const APPLICATION_DETAIL_SAVE_ARIA_LABEL = $localize`Desar els canvis de l'aplicació`;
+export const APPLICATION_DETAIL_ACTIVATION_LABEL = $localize`Donar d'alta`;
+export const APPLICATION_DETAIL_RESTORE_LABEL = $localize`Restaurar`;
+export const APPLICATION_DETAIL_ACTIVATION_ARIA_LABEL = $localize`Donar d'alta l'aplicació`;
+export const APPLICATION_DETAIL_INACTIVE_NOTE = $localize`L'aplicació està donada de baixa`;
+export const APPLICATION_DETAIL_ACTIVATION_DIALOG_TITLE = $localize`Donar d'alta l'aplicació?`;
+export const APPLICATION_DETAIL_ACTIVATION_DIALOG_CANCEL_LABEL = $localize`Cancel·la`;
+export const APPLICATION_DETAIL_ACTIVATION_DIALOG_CONFIRM_LABEL =
+  APPLICATION_DETAIL_ACTIVATION_LABEL;
+export const APPLICATION_DETAIL_ACTIVATION_DIALOG_CANCEL_ARIA_LABEL =
+  $localize`Cancel·la l'alta de l'aplicació`;
+export const APPLICATION_DETAIL_ACTIVATION_DIALOG_CONFIRM_ARIA_LABEL =
+  $localize`Confirma l'alta de l'aplicació`;
+export const APPLICATION_DETAIL_ACTIVATION_DIALOG_MESSAGE = (applicationName: string) =>
+  $localize`Estàs a punt de donar d'alta «${applicationName}:applicationName:».`;
+export const APPLICATION_DETAIL_ACTIVATION_SUCCESS_TITLE = $localize`Aplicació donada d'alta`;
+export const APPLICATION_DETAIL_ACTIVATION_SUCCESS_MESSAGE =
+  $localize`L'aplicació s'ha donat d'alta correctament.`;
+export const APPLICATION_DETAIL_ACTIVATION_ERROR_MESSAGE =
+  $localize`No s'ha pogut donar d'alta l'aplicació.`;
 export const APPLICATION_DETAIL_SECTIONS_ARIA_LABEL = $localize`Seccions de l'aplicació`;
-export const APPLICATION_DETAIL_SAVE_SUCCESS_TITLE = $localize`Aplicació actualitzada`;
-export const APPLICATION_DETAIL_SAVE_SUCCESS_MESSAGE = $localize`Els canvis s'han desat correctament.`;
+export const APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE = $localize`Canvis desats`;
+export const APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE = (sectionLabel: string) =>
+  $localize`S'han desat correctament els canvis de ${sectionLabel}:sectionLabel:.`;
+export const APPLICATION_DETAIL_SECTION_SAVE_MOCKED_MESSAGE = (sectionLabel: string) =>
+  $localize`Els canvis de ${sectionLabel}:sectionLabel: s'han conservat localment, però encara no s'han enviat al servidor.`;
 export const APPLICATION_DETAIL_SAVE_ERROR_TITLE = $localize`Error`;
 export const APPLICATION_DETAIL_SAVE_ERROR_MESSAGE = $localize`No s'han pogut desar els canvis.`;
+export const APPLICATION_DETAIL_ACTIVATION_ERROR_TITLE = APPLICATION_DETAIL_SAVE_ERROR_TITLE;
+export const APPLICATION_DETAIL_WITHDRAWAL_LABEL = $localize`Donar de baixa`;
+export const APPLICATION_DETAIL_WITHDRAWAL_ARIA_LABEL = $localize`Donar de baixa l'aplicació`;
+export const APPLICATION_DETAIL_WITHDRAWAL_DIALOG_TITLE = $localize`Donar de baixa l'aplicació?`;
+export const APPLICATION_DETAIL_WITHDRAWAL_DIALOG_CANCEL_LABEL = $localize`Cancel·la`;
+export const APPLICATION_DETAIL_WITHDRAWAL_DIALOG_CONFIRM_LABEL = $localize`Donar de baixa`;
+export const APPLICATION_DETAIL_WITHDRAWAL_DIALOG_CANCEL_ARIA_LABEL =
+  $localize`Cancel·la la baixa de l'aplicació`;
+export const APPLICATION_DETAIL_WITHDRAWAL_DIALOG_CONFIRM_ARIA_LABEL =
+  $localize`Confirma la baixa de l'aplicació`;
+export const APPLICATION_DETAIL_WITHDRAWAL_DIALOG_MESSAGE = (applicationName: string) =>
+  $localize`Estàs a punt de donar de baixa «${applicationName}:applicationName:». L'aplicació deixarà d'aparèixer al llistat.`;
+export const APPLICATION_DETAIL_WITHDRAWAL_SUCCESS_TITLE = $localize`Aplicació donada de baixa`;
+export const APPLICATION_DETAIL_WITHDRAWAL_SUCCESS_MESSAGE =
+  $localize`L'aplicació s'ha donat de baixa correctament.`;
+export const APPLICATION_DETAIL_WITHDRAWAL_ERROR_TITLE = APPLICATION_DETAIL_SAVE_ERROR_TITLE;
+export const APPLICATION_DETAIL_WITHDRAWAL_ERROR_MESSAGE =
+  $localize`No s'ha pogut donar de baixa l'aplicació.`;
 export const APPLICATION_DETAIL_INFO_TITLE = $localize`Informació`;
-export const APPLICATION_DETAIL_SYSTEMS_DATABASES_CANCEL_ARIA_LABEL =
-  $localize`Cancel·lar els canvis de sistemes i bases de dades`;
-export const APPLICATION_DETAIL_SYSTEMS_DATABASES_SAVE_ARIA_LABEL =
-  $localize`Desar els canvis de sistemes i bases de dades`;
-export const APPLICATION_DETAIL_SYSTEMS_DATABASES_CANCEL_PENDING_MESSAGE =
-  $localize`La cancel·lació dels canvis de sistemes i bases de dades encara no està implementada.`;
-export const APPLICATION_DETAIL_SYSTEMS_DATABASES_SAVE_PENDING_MESSAGE =
-  $localize`El desament dels canvis de sistemes i bases de dades encara no està implementat.`;
+export const APPLICATION_DETAIL_UNSAVED_CHANGES_TITLE = $localize`Canvis sense desar`;
+export const APPLICATION_DETAIL_UNSAVED_CHANGES_MESSAGE = (sectionLabels: string) =>
+  $localize`Has de desar o cancel·lar els canvis de les pestanyes següents abans de sortir:\n${sectionLabels}:sectionLabels:`;
+export const APPLICATION_DETAIL_UNSAVED_CHANGES_CLOSE_LABEL = $localize`Entesos`;
+export const APPLICATION_DETAIL_UNSAVED_CHANGES_CLOSE_ARIA_LABEL =
+  $localize`Tanca l'avís de canvis sense desar`;
 
 export const APPLICATION_DETAIL_TABS = {
   general: $localize`General`,
   responsible: $localize`Responsables`,
-  systemsDatabases: $localize`Sistemes i BBDD`,
+  systemsDatabases: $localize`Sistemes i BD`,
+  development: $localize`Desenvolupament`,
 };

@@ -1,0 +1,25 @@
+<p-accordion [value]="activePanel()" (valueChange)="onPanelChange($event)">
+  @for (panel of panels; track panel.id) {
+    <p-accordion-panel [value]="panel.id">
+      <p-accordion-header>
+        <span class="maintenance-panel-header">
+          <span class="maintenance-panel-title">{{ panel.title }}</span>
+          <span class="maintenance-panel-description">{{ panel.description }}</span>
+        </span>
+      </p-accordion-header>
+      <p-accordion-content>
+        @switch (panel.id) {
+          @case ('provider-roles') {
+            <app-roles-list />
+          }
+          @case ('layers') {
+            <app-layers-list (catalogChanged)="reloadLayerOptions()" />
+          }
+          @case ('technologies') {
+            <app-technologies-list [layerOptions]="layerOptions()" />
+          }
+        }
+      </p-accordion-content>
+    </p-accordion-panel>
+  }
+</p-accordion>

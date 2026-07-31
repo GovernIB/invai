@@ -1,0 +1,15 @@
+<app-section-container [header]="header">
+  <nav class="maintenances-tabs" [attr.aria-label]="sectionsAriaLabel">
+    @for (tab of tabs; track tab.id) {
+      <a
+        class="maintenances-tab"
+        [routerLink]="tab.path"
+        routerLinkActive="maintenances-tab--active"
+      >
+        {{ tab.label }}
+      </a>
+    }
+  </nav>
+
+  <router-outlet />
+</app-section-container>

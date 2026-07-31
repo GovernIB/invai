@@ -149,14 +149,18 @@ describe('SystemTypesService', () => {
   it('creates a system type', () => {
     const result = vi.fn();
 
-    service.create({ name: 'Instrumental' }).subscribe(result);
+    service.create({ name: 'Instrumental', nameEs: 'Instrumental ES' }).subscribe(result);
 
     const request = httpTesting.expectOne(SYSTEM_TYPES_URL);
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ name: 'Instrumental' });
-    request.flush({ id: 9, name: 'Instrumental' });
+    expect(request.request.body).toEqual({ name: 'Instrumental', nameEs: 'Instrumental ES' });
+    request.flush({ id: 9, name: 'Instrumental', nameEs: 'Instrumental ES' });
 
-    expect(result).toHaveBeenCalledWith({ id: 9, name: 'Instrumental' });
+    expect(result).toHaveBeenCalledWith({
+      id: 9,
+      name: 'Instrumental',
+      nameEs: 'Instrumental ES',
+    });
   });
 
   it('clears cached system types after creating one', () => {
@@ -165,8 +169,8 @@ describe('SystemTypesService', () => {
     service.getAll().subscribe();
     httpTesting.expectOne(SYSTEM_TYPES_URL).flush(page([{ id: 1, name: 'A' }]));
 
-    service.create({ name: 'B' }).subscribe();
-    httpTesting.expectOne(SYSTEM_TYPES_URL).flush({ id: 2, name: 'B' });
+    service.create({ name: 'B', nameEs: 'B ES' }).subscribe();
+    httpTesting.expectOne(SYSTEM_TYPES_URL).flush({ id: 2, name: 'B', nameEs: 'B ES' });
 
     service.getAll().subscribe(refreshedResult);
     httpTesting.expectOne(SYSTEM_TYPES_URL).flush(page([{ id: 2, name: 'B' }]));
@@ -179,14 +183,18 @@ describe('SystemTypesService', () => {
   it('updates a system type', () => {
     const result = vi.fn();
 
-    service.update(9, { name: 'Corporatiu' }).subscribe(result);
+    service.update(9, { name: 'Corporatiu', nameEs: 'Corporativo' }).subscribe(result);
 
     const request = httpTesting.expectOne(`${SYSTEM_TYPES_URL}/9`);
     expect(request.request.method).toBe('PUT');
-    expect(request.request.body).toEqual({ name: 'Corporatiu' });
-    request.flush({ id: 9, name: 'Corporatiu' });
+    expect(request.request.body).toEqual({ name: 'Corporatiu', nameEs: 'Corporativo' });
+    request.flush({ id: 9, name: 'Corporatiu', nameEs: 'Corporativo' });
 
-    expect(result).toHaveBeenCalledWith({ id: 9, name: 'Corporatiu' });
+    expect(result).toHaveBeenCalledWith({
+      id: 9,
+      name: 'Corporatiu',
+      nameEs: 'Corporativo',
+    });
   });
 
   it('clears cached system types after updating one', () => {
@@ -195,8 +203,10 @@ describe('SystemTypesService', () => {
     service.getAll().subscribe();
     httpTesting.expectOne(SYSTEM_TYPES_URL).flush(page([{ id: 1, name: 'A' }]));
 
-    service.update(1, { name: 'B' }).subscribe();
-    httpTesting.expectOne(`${SYSTEM_TYPES_URL}/1`).flush({ id: 1, name: 'B' });
+    service.update(1, { name: 'B', nameEs: 'B ES' }).subscribe();
+    httpTesting
+      .expectOne(`${SYSTEM_TYPES_URL}/1`)
+      .flush({ id: 1, name: 'B', nameEs: 'B ES' });
 
     service.getAll().subscribe(refreshedResult);
     httpTesting.expectOne(SYSTEM_TYPES_URL).flush(page([{ id: 1, name: 'B' }]));

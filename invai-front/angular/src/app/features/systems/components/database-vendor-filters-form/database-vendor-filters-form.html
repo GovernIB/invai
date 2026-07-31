@@ -1,0 +1,44 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="database-vendors-filter-name"
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+      />
+      <label for="database-vendors-filter-name">{{ labels.name }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-inputnumber
+        inputId="database-vendors-filter-port"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        formControlName="defaultPort"
+        [max]="65535"
+        [min]="1"
+        [useGrouping]="false"
+      />
+      <label for="database-vendors-filter-port">{{ labels.defaultPort }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="database-vendors-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label for="database-vendors-filter-status">{{ labels.status }}</label>
+    </p-floatlabel>
+  </div>
+</form>

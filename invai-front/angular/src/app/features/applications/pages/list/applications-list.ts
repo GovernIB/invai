@@ -1,36 +1,42 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
 import { SearchFiltersComponent } from '@components/search-filters/search-filters.component';
 import { SectionActionsComponent } from '@components/section-actions/section-actions.component';
 import { SectionContainerComponent } from '@components/section-container/section-container.component';
-import { ActionParams } from '@models/table.model';
 import { SearchComponentBase } from '@shared/classes/search-component-base';
-import { PrimeIcons } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   EMPTY,
+  filter,
   finalize,
   map,
+  merge,
+  Observable,
   Subject,
   switchMap,
   tap,
 } from 'rxjs';
 
 import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
-import { Application, ApplicationFilters, ApplicationPageParams } from '../../applications.model';
 import {
-  ApplicationFiltersForm,
-  ApplicationsTable,
-  ApplicationTableAction,
-} from '../../components';
+  Application,
+  ApplicationFilters,
+  ApplicationInfrastructureFilterOptions,
+  ApplicationPageParams,
+} from '../../applications.model';
+import { ApplicationFiltersForm, ApplicationsTable } from '../../components';
 import { createApplicationFiltersForm } from '../../forms/application-form.factory';
-import { ApplicationOptionsService } from '../../services/application-options.service';
+import { ApplicationSelectOptions } from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
+import {
+  APPLICATIONS_LIST_RESOLVE_KEY,
+  ApplicationsListResolvedData,
+} from './applications-list.resolver';
 import {
   APPLICATIONS_ADD_ARIA_LABEL,
   APPLICATIONS_EXPORT_ARIA_LABEL,
@@ -38,34 +44,42 @@ import {
   APPLICATIONS_FILTER_APPLICATION,
   APPLICATIONS_FILTER_CATEGORY,
   APPLICATIONS_FILTER_COMMISSION,
+  APPLICATIONS_FILTER_DATABASE,
   APPLICATIONS_FILTER_DESCRIPTION,
+  APPLICATIONS_FILTER_ENVIRONMENT,
   APPLICATIONS_FILTER_INCOMPLETE,
   APPLICATIONS_FILTER_INFORMATION_SYSTEM,
   APPLICATIONS_FILTER_PREFIX,
+  APPLICATIONS_FILTER_RESPONSIBLE,
   APPLICATIONS_FILTER_SCOPE,
+  APPLICATIONS_FILTER_SERVER,
   APPLICATIONS_FILTER_STATUS,
   APPLICATIONS_LOAD_ERROR_DETAIL,
   APPLICATIONS_LOAD_ERROR_SUMMARY,
   APPLICATIONS_QUICK_SEARCH_ARIA_LABEL,
   APPLICATIONS_TITLE,
-  APPLICATIONS_WITHDRAWAL_DIALOG_CANCEL_ARIA_LABEL,
-  APPLICATIONS_WITHDRAWAL_DIALOG_CANCEL_LABEL,
-  APPLICATIONS_WITHDRAWAL_DIALOG_CONFIRM_ARIA_LABEL,
-  APPLICATIONS_WITHDRAWAL_DIALOG_CONFIRM_LABEL,
-  APPLICATIONS_WITHDRAWAL_DIALOG_MESSAGE,
-  APPLICATIONS_WITHDRAWAL_DIALOG_TITLE,
-  APPLICATIONS_WITHDRAWAL_ERROR_DETAIL,
-  APPLICATIONS_WITHDRAWAL_ERROR_SUMMARY,
-  APPLICATIONS_WITHDRAWAL_SUCCESS_DETAIL,
-  APPLICATIONS_WITHDRAWAL_SUCCESS_SUMMARY,
+  APPLICATIONS_UNSUPPORTED_FILTER_WARNING,
+  APPLICATIONS_UNSUPPORTED_FILTER_WARNING_TITLE,
 } from './applications-list.i18n';
 
 interface ApplicationSearchRequest {
   params: ApplicationPageParams;
 }
 
+interface UnsupportedFilterChange {
+  label: string;
+  value: unknown;
+}
+
+interface UnsupportedFilterEntry {
+  control: AbstractControl;
+  label: string;
+  debounceMs?: number;
+}
+
 const DEFAULT_PAGE_SIZE = 10;
 const QUICK_SEARCH_DEBOUNCE_MS = 400;
+const RESPONSIBLE_FILTER_DEBOUNCE_MS = 400;
 const INCOMPLETE_FILTER_WARNING =
   "El filtre d'aplicacions incompletes encara no està suportat pel backend i s'omet de la petició.";
 
@@ -75,7 +89,6 @@ const INCOMPLETE_FILTER_WARNING =
   imports: [
     ApplicationsTable,
     ApplicationFiltersForm,
-    ConfirmationDialogComponent,
     SearchFiltersComponent,
     SectionActionsComponent,
     SectionContainerComponent,
@@ -89,6 +102,14 @@ export class ApplicationsList
 {
   readonly header = APPLICATIONS_TITLE;
   protected override readonly ALL_TABLE_COLUMNS = APPLICATIONS_TABLE_COLUMNS;
+  protected override readonly DEFAULT_HIDDEN_TABLE_COLUMN_KEYS = [
+    'commission',
+    'status',
+    'environment',
+    'database',
+    'server',
+    'responsible',
+  ];
   protected readonly filterLabels = {
     prefix: APPLICATIONS_FILTER_PREFIX,
     application: APPLICATIONS_FILTER_APPLICATION,
@@ -99,44 +120,42 @@ export class ApplicationsList
     administrativeUnit: APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT,
     status: APPLICATIONS_FILTER_STATUS,
     description: APPLICATIONS_FILTER_DESCRIPTION,
+    responsible: APPLICATIONS_FILTER_RESPONSIBLE,
+    database: APPLICATIONS_FILTER_DATABASE,
+    server: APPLICATIONS_FILTER_SERVER,
+    environment: APPLICATIONS_FILTER_ENVIRONMENT,
     incomplete: APPLICATIONS_FILTER_INCOMPLETE,
   };
   protected readonly quickSearchAriaLabel = APPLICATIONS_QUICK_SEARCH_ARIA_LABEL;
   protected readonly exportAriaLabel = APPLICATIONS_EXPORT_ARIA_LABEL;
   protected readonly addAriaLabel = APPLICATIONS_ADD_ARIA_LABEL;
-  protected readonly withdrawalDialogTitle = APPLICATIONS_WITHDRAWAL_DIALOG_TITLE;
-  protected readonly withdrawalDialogCancelLabel = APPLICATIONS_WITHDRAWAL_DIALOG_CANCEL_LABEL;
-  protected readonly withdrawalDialogConfirmLabel = APPLICATIONS_WITHDRAWAL_DIALOG_CONFIRM_LABEL;
-  protected readonly withdrawalDialogCancelAriaLabel =
-    APPLICATIONS_WITHDRAWAL_DIALOG_CANCEL_ARIA_LABEL;
-  protected readonly withdrawalDialogConfirmAriaLabel =
-    APPLICATIONS_WITHDRAWAL_DIALOG_CONFIRM_ARIA_LABEL;
-  protected readonly withdrawalDialogConfirmIcon = PrimeIcons.TRASH;
 
   quickSearchTerm = '';
   private readonly isQuickSearchPending = signal(false);
   protected readonly isSearchIndicatorLoading = computed(
     () => this.isLoading() || this.isQuickSearchPending(),
   );
+  private readonly hasLoadedResults = signal(false);
+  protected readonly isInitialTableLoading = computed(
+    () => this.isLoading() && !this.hasLoadedResults(),
+  );
   protected readonly tableFirst = signal(0);
-  protected readonly selectedApplicationForWithdrawal = signal<Application | null>(null);
-  protected readonly isWithdrawalDialogVisible = signal(false);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly applicationsService = inject(ApplicationsService);
-  private readonly applicationOptionsService = inject(ApplicationOptionsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly quickSearchChanges = new Subject<string>();
   private readonly searchRequests = new Subject<ApplicationSearchRequest>();
 
   protected override filtersForm = createApplicationFiltersForm(this.fb);
-  protected readonly filterOptions = toSignal(this.applicationOptionsService.getOptions(), {
-    initialValue: null,
-  });
+  protected readonly filterOptions = signal<ApplicationSelectOptions | null>(null);
+  protected readonly infrastructureFilterOptions =
+    signal<ApplicationInfrastructureFilterOptions | null>(null);
 
   override ngOnInit(): void {
     this.observeSearchRequests();
     this.observeQuickSearch();
+    this.observeUnsupportedFilters();
     super.ngOnInit();
   }
 
@@ -153,6 +172,34 @@ export class ApplicationsList
     });
   }
 
+  protected override initializeResults(): void {
+    const resolvedData = this.route.snapshot.data[
+      APPLICATIONS_LIST_RESOLVE_KEY
+    ] as ApplicationsListResolvedData;
+
+    this.updateSearchState();
+    this.filterOptions.set(resolvedData.options);
+    this.infrastructureFilterOptions.set(resolvedData.infrastructureOptions);
+    this.hasLoadedResults.set(true);
+
+    if (resolvedData.page) {
+      this.itemsList.set({
+        items: resolvedData.page.content,
+        total: resolvedData.page.totalElements,
+      });
+      return;
+    }
+
+    this.itemsList.set({ items: [], total: 0 });
+    if (resolvedData.pageLoadFailed) {
+      this.messageService.add({
+        severity: 'error',
+        summary: APPLICATIONS_LOAD_ERROR_SUMMARY,
+        detail: APPLICATIONS_LOAD_ERROR_DETAIL,
+      });
+    }
+  }
+
   protected onQuickSearchChange(value: string): void {
     this.quickSearchTerm = value;
     this.isQuickSearchPending.set(true);
@@ -161,7 +208,7 @@ export class ApplicationsList
 
   protected onFilterSearch(): void {
     this.tableFirst.set(0);
-    this.onSearch();
+    this.applyFiltersAndSearch();
   }
 
   protected onPageChange(event: TableLazyLoadEvent): void {
@@ -174,68 +221,12 @@ export class ApplicationsList
     super.reset();
   }
 
-  protected onTableActions(event: ActionParams<Application>): void {
-    if (event.action === ApplicationTableAction.Delete) {
-      this.selectedApplicationForWithdrawal.set(event.params);
-      this.isWithdrawalDialogVisible.set(true);
-      return;
-    }
-
-    if (
-      event.action === ApplicationTableAction.Detail ||
-      event.action === ApplicationTableAction.Update
-    ) {
-      void this.router.navigate([event.params.id], { relativeTo: this.route });
-      return;
-    }
+  protected onViewApplication(application: Application): void {
+    void this.router.navigate([application.id], { relativeTo: this.route });
   }
 
   protected onNewApplication(): void {
     void this.router.navigate(['new'], { relativeTo: this.route });
-  }
-
-  protected getWithdrawalDialogMessage(): string {
-    return APPLICATIONS_WITHDRAWAL_DIALOG_MESSAGE(
-      this.selectedApplicationForWithdrawal()?.name ?? '',
-    );
-  }
-
-  protected onWithdrawalDialogClose(): void {
-    this.isWithdrawalDialogVisible.set(false);
-    this.selectedApplicationForWithdrawal.set(null);
-  }
-
-  protected onWithdrawalDialogConfirm(): void {
-    const application = this.selectedApplicationForWithdrawal();
-    const id = Number(application?.id);
-
-    if (!application || Number.isNaN(id)) {
-      this.onWithdrawalDialogClose();
-      return;
-    }
-
-    this.applicationsService
-      .delete(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.onWithdrawalDialogClose();
-          this.messageService.add({
-            severity: 'success',
-            summary: APPLICATIONS_WITHDRAWAL_SUCCESS_SUMMARY,
-            detail: APPLICATIONS_WITHDRAWAL_SUCCESS_DETAIL,
-          });
-          this.tableFirst.set(0);
-          this.onSearch();
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: APPLICATIONS_WITHDRAWAL_ERROR_SUMMARY,
-            detail: APPLICATIONS_WITHDRAWAL_ERROR_DETAIL,
-          });
-        },
-      });
   }
 
   protected override exportExcel(): void {
@@ -285,8 +276,60 @@ export class ApplicationsList
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((page) => {
+        this.hasLoadedResults.set(true);
         this.itemsList.set({ items: page.content, total: page.totalElements });
       });
+  }
+
+  private observeUnsupportedFilters(): void {
+    const entries: UnsupportedFilterEntry[] = [
+      {
+        control: this.filtersForm.controls.responsible,
+        label: this.filterLabels.responsible,
+        debounceMs: RESPONSIBLE_FILTER_DEBOUNCE_MS,
+      },
+      {
+        control: this.filtersForm.controls.database,
+        label: this.filterLabels.database,
+      },
+      {
+        control: this.filtersForm.controls.server,
+        label: this.filterLabels.server,
+      },
+      {
+        control: this.filtersForm.controls.environment,
+        label: this.filterLabels.environment,
+      },
+    ];
+    const changes: Observable<UnsupportedFilterChange>[] = entries.map(
+      ({ control, label, debounceMs }) => {
+        const change$ = control.valueChanges.pipe(
+          distinctUntilChanged(),
+          map((value) => ({ label, value })),
+        );
+
+        return debounceMs ? change$.pipe(debounceTime(debounceMs)) : change$;
+      },
+    );
+
+    merge(...changes)
+      .pipe(
+        filter(({ value }) => this.hasValue(value)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ label }) => {
+        this.messageService.add({
+          severity: 'warn',
+          summary: APPLICATIONS_UNSUPPORTED_FILTER_WARNING_TITLE,
+          detail: APPLICATIONS_UNSUPPORTED_FILTER_WARNING(label),
+        });
+      });
+  }
+
+  private hasValue(value: unknown): boolean {
+    return typeof value === 'string'
+      ? value.trim().length > 0
+      : value !== null && value !== undefined;
   }
 
   private toPageParams(

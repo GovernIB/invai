@@ -26,12 +26,15 @@ export class ConfirmationDialogComponent {
   cancelAriaLabel = input(CONFIRMATION_DIALOG_CANCEL_ARIA_LABEL);
   confirmAriaLabel = input(CONFIRMATION_DIALOG_CONFIRM_ARIA_LABEL);
   confirmIcon = input(PrimeIcons.CHECK);
-  severity = input<'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast'>(
-    'danger',
-  );
+  confirmOutlined = input(true);
+  cancelOnHide = input(true);
+  severity = input<
+    'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast'
+  >('danger');
 
   confirm = output<void>();
   cancel = output<void>();
+  dismissed = output<void>();
 
   protected readonly PrimeIcons = PrimeIcons;
   private _closingFromAction = false;
@@ -54,6 +57,10 @@ export class ConfirmationDialogComponent {
       return;
     }
 
-    this.cancel.emit();
+    if (this.cancelOnHide()) {
+      this.cancel.emit();
+    } else {
+      this.dismissed.emit();
+    }
   }
 }

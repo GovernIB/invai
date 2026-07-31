@@ -5,7 +5,9 @@
     [auditControls]="form().controls"
     [labels]="labels"
     [options]="options()"
+    [prefixMaxLengthError]="prefixMaxLengthError"
     [requiredError]="requiredError"
     [selectPlaceholder]="selectPlaceholder"
+    (commissionSelected)="selectCommission($event)"
   />
 </form>

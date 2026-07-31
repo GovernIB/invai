@@ -149,14 +149,21 @@ describe('FieldsService', () => {
   it('creates a field', () => {
     const result = vi.fn();
 
-    service.create({ name: 'Departamental' }).subscribe(result);
+    service.create({ name: 'Departamental', nameEs: 'Departamental ES' }).subscribe(result);
 
     const request = httpTesting.expectOne(FIELDS_URL);
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ name: 'Departamental' });
-    request.flush({ id: 9, name: 'Departamental' });
+    expect(request.request.body).toEqual({
+      name: 'Departamental',
+      nameEs: 'Departamental ES',
+    });
+    request.flush({ id: 9, name: 'Departamental', nameEs: 'Departamental ES' });
 
-    expect(result).toHaveBeenCalledWith({ id: 9, name: 'Departamental' });
+    expect(result).toHaveBeenCalledWith({
+      id: 9,
+      name: 'Departamental',
+      nameEs: 'Departamental ES',
+    });
   });
 
   it('clears cached fields after creating one', () => {
@@ -165,8 +172,8 @@ describe('FieldsService', () => {
     service.getAll().subscribe();
     httpTesting.expectOne(FIELDS_URL).flush(page([{ id: 1, name: 'A' }]));
 
-    service.create({ name: 'B' }).subscribe();
-    httpTesting.expectOne(FIELDS_URL).flush({ id: 2, name: 'B' });
+    service.create({ name: 'B', nameEs: 'B ES' }).subscribe();
+    httpTesting.expectOne(FIELDS_URL).flush({ id: 2, name: 'B', nameEs: 'B ES' });
 
     service.getAll().subscribe(refreshedResult);
     httpTesting.expectOne(FIELDS_URL).flush(page([{ id: 2, name: 'B' }]));
@@ -179,14 +186,18 @@ describe('FieldsService', () => {
   it('updates a field', () => {
     const result = vi.fn();
 
-    service.update(9, { name: 'Transversal' }).subscribe(result);
+    service.update(9, { name: 'Transversal', nameEs: 'Transversal ES' }).subscribe(result);
 
     const request = httpTesting.expectOne(`${FIELDS_URL}/9`);
     expect(request.request.method).toBe('PUT');
-    expect(request.request.body).toEqual({ name: 'Transversal' });
-    request.flush({ id: 9, name: 'Transversal' });
+    expect(request.request.body).toEqual({ name: 'Transversal', nameEs: 'Transversal ES' });
+    request.flush({ id: 9, name: 'Transversal', nameEs: 'Transversal ES' });
 
-    expect(result).toHaveBeenCalledWith({ id: 9, name: 'Transversal' });
+    expect(result).toHaveBeenCalledWith({
+      id: 9,
+      name: 'Transversal',
+      nameEs: 'Transversal ES',
+    });
   });
 
   it('clears cached fields after updating one', () => {
@@ -195,8 +206,8 @@ describe('FieldsService', () => {
     service.getAll().subscribe();
     httpTesting.expectOne(FIELDS_URL).flush(page([{ id: 1, name: 'A' }]));
 
-    service.update(1, { name: 'B' }).subscribe();
-    httpTesting.expectOne(`${FIELDS_URL}/1`).flush({ id: 1, name: 'B' });
+    service.update(1, { name: 'B', nameEs: 'B ES' }).subscribe();
+    httpTesting.expectOne(`${FIELDS_URL}/1`).flush({ id: 1, name: 'B', nameEs: 'B ES' });
 
     service.getAll().subscribe(refreshedResult);
     httpTesting.expectOne(FIELDS_URL).flush(page([{ id: 1, name: 'B' }]));

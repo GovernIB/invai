@@ -1,8 +1,9 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
-import { cachedRequest, pageParamsCacheKey } from '@shared/utils/service-cache.utils';
+import { cachedRequest } from '@shared/utils/service-cache.utils';
 import { Observable, tap } from 'rxjs';
 
 import { Category, CategoryInput, CategoryPageParams } from '../categories.model';
@@ -14,11 +15,14 @@ export class CategoriesService extends BaseApiService {
   private readonly _categoriesCache = new Map<string, Observable<SpringPage<Category>>>();
 
   getAll(params?: CategoryPageParams): Observable<SpringPage<Category>> {
-    return cachedRequest(this._categoriesCache, pageParamsCacheKey(params), () =>
+    const requestFactory = () =>
       this.http.get<SpringPage<Category>>(this.url(), {
-        params: toPageHttpParams(params),
-      }),
-    );
+        params: this.toHttpParams(params),
+      });
+
+    if (params?.quickSearch?.trim()) return requestFactory();
+
+    return cachedRequest(this._categoriesCache, this.pageCacheKey(params), requestFactory);
   }
 
   getById(id: number): Observable<Category> {
@@ -39,5 +43,34 @@ export class CategoriesService extends BaseApiService {
 
   clearCache(): void {
     this._categoriesCache.clear();
+  }
+
+  private toHttpParams(params?: CategoryPageParams): HttpParams | undefined {
+    if (!params) return undefined;
+
+    let httpParams = toPageHttpParams(params) ?? new HttpParams();
+    const criteria: Record<string, string | undefined> = {
+      quickSearch: params.quickSearch?.trim() || undefined,
+      name: params.name,
+      nameEs: params.nameEs,
+    };
+
+    Object.entries(criteria).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') httpParams = httpParams.set(key, value);
+    });
+
+    return httpParams.keys().length ? httpParams : undefined;
+  }
+
+  private pageCacheKey(params?: CategoryPageParams): string {
+    const sort = Array.isArray(params?.sort) ? params.sort.join('|') : (params?.sort ?? '');
+
+    return JSON.stringify({
+      page: params?.page ?? null,
+      size: params?.size ?? null,
+      sort,
+      name: params?.name ?? '',
+      nameEs: params?.nameEs ?? '',
+    });
   }
 }

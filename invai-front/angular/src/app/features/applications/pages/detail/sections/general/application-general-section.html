@@ -1,3 +1,90 @@
-<section>
-  <app-application-general-form [form]="detailState.form" />
-</section>
+<app-application-detail-section-layout
+  titleId="application-general-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('general')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
+  <app-application-general-form
+    [form]="detailState.form"
+    [options]="options"
+    (commissionSelected)="detailState.selectCommission($event)"
+  />
+
+  @if (
+    detailState.application() &&
+    (isInactive() || detailState.isEditing('general'))
+  ) {
+    <div class="application-general-section__lifecycle">
+      @if (isInactive()) {
+        <p class="application-general-section__inactive-note">
+          <i [class]="icons.INFO_CIRCLE" aria-hidden="true"></i>
+          <span>{{ inactiveNote }}</span>
+        </p>
+        <p-button
+          type="button"
+          severity="success"
+          [ariaLabel]="activationAriaLabel"
+          [disabled]="isActivating()"
+          [icon]="icons.PLUS"
+          [label]="restoreLabel"
+          [loading]="isActivating()"
+          [outlined]="true"
+          (onClick)="openActivationDialog()"
+        />
+      } @else {
+        <p-button
+          type="button"
+          severity="danger"
+          [ariaLabel]="withdrawalAriaLabel"
+          [disabled]="isSaving() || isWithdrawing()"
+          [icon]="icons.TRASH"
+          [label]="withdrawalLabel"
+          [loading]="isWithdrawing()"
+          [outlined]="true"
+          (onClick)="openWithdrawalDialog()"
+        />
+      }
+    </div>
+  }
+</app-application-detail-section-layout>
+
+@if (isActivationDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="isActivationDialogVisible"
+    severity="success"
+    [title]="activationDialogTitle"
+    [message]="activationDialogMessage()"
+    [cancelLabel]="activationDialogCancelLabel"
+    [confirmLabel]="activationDialogConfirmLabel"
+    [cancelAriaLabel]="activationDialogCancelAriaLabel"
+    [confirmAriaLabel]="activationDialogConfirmAriaLabel"
+    [confirmIcon]="icons.PLUS"
+    (cancel)="closeActivationDialog()"
+    (confirm)="confirmActivation()"
+  />
+}
+
+@if (isWithdrawalDialogVisible()) {
+  <app-confirmation-dialog
+    [(visible)]="isWithdrawalDialogVisible"
+    [title]="withdrawalDialogTitle"
+    [message]="withdrawalDialogMessage()"
+    [cancelLabel]="withdrawalDialogCancelLabel"
+    [confirmLabel]="withdrawalDialogConfirmLabel"
+    [cancelAriaLabel]="withdrawalDialogCancelAriaLabel"
+    [confirmAriaLabel]="withdrawalDialogConfirmAriaLabel"
+    [confirmIcon]="icons.TRASH"
+    (cancel)="closeWithdrawalDialog()"
+    (confirm)="confirmWithdrawal()"
+  />
+}

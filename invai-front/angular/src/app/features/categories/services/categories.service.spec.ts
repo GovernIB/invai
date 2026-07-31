@@ -168,11 +168,11 @@ describe('CategoriesService', () => {
   it('creates a category', () => {
     const result = vi.fn();
 
-    service.create({ name: 'Sistemes' }).subscribe(result);
+    service.create({ name: 'Sistemes', nameEs: 'Sistemas' }).subscribe(result);
 
     const request = httpTesting.expectOne('/invaiapi/interna/category');
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ name: 'Sistemes' });
+    expect(request.request.body).toEqual({ name: 'Sistemes', nameEs: 'Sistemas' });
     request.flush({ id: 9, name: 'Sistemes' });
 
     expect(result).toHaveBeenCalledWith({ id: 9, name: 'Sistemes' });
@@ -185,7 +185,7 @@ describe('CategoriesService', () => {
     service.getAll().subscribe(cachedResult);
     httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 1, name: 'A' }]));
 
-    service.create({ name: 'B' }).subscribe();
+    service.create({ name: 'B', nameEs: 'B ES' }).subscribe();
     httpTesting.expectOne('/invaiapi/interna/category').flush({ id: 2, name: 'B' });
 
     service.getAll().subscribe(refreshedResult);
@@ -199,11 +199,16 @@ describe('CategoriesService', () => {
   it('updates a category', () => {
     const result = vi.fn();
 
-    service.update(9, { name: 'Sistemes interns' }).subscribe(result);
+    service
+      .update(9, { name: 'Sistemes interns', nameEs: 'Sistemas internos' })
+      .subscribe(result);
 
     const request = httpTesting.expectOne('/invaiapi/interna/category/9');
     expect(request.request.method).toBe('PUT');
-    expect(request.request.body).toEqual({ name: 'Sistemes interns' });
+    expect(request.request.body).toEqual({
+      name: 'Sistemes interns',
+      nameEs: 'Sistemas internos',
+    });
     request.flush({ id: 9, name: 'Sistemes interns' });
 
     expect(result).toHaveBeenCalledWith({ id: 9, name: 'Sistemes interns' });
@@ -215,7 +220,7 @@ describe('CategoriesService', () => {
     service.getAll().subscribe();
     httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 1, name: 'A' }]));
 
-    service.update(1, { name: 'B' }).subscribe();
+    service.update(1, { name: 'B', nameEs: 'B ES' }).subscribe();
     httpTesting.expectOne('/invaiapi/interna/category/1').flush({ id: 1, name: 'B' });
 
     service.getAll().subscribe(refreshedResult);

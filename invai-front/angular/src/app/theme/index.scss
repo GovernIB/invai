@@ -12,3 +12,21 @@
 @use "./full-calendar";
 
 @import "../../../node_modules/primeflex/primeflex.css";
+
+.invai-grid {
+  display: grid;
+}
+
+.invai-dialog-form-grid {
+  padding-top: 1.5rem;
+}
+
+.invai-table-consultable-row {
+  cursor: pointer;
+  user-select: none;
+}
+
+.invai-table-consultable-row:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: -2px;
+}

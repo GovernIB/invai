@@ -5,16 +5,33 @@
       [(selectedColumns)]="selectedColumns"
       [availableColumns]="selectableColumns()"
       [addButtonAriaLabel]="addAriaLabel()"
-      [hideCollapseButton]="true"
+      [disableAddButton]="isReadOnly()"
+      [filtersButtonAriaLabel]="filtersButtonAriaLabel()"
+      [filtersSelected]="filtersSelected()"
       [hideExportButton]="true"
       [hideQuickSearch]="true"
+      [(isFiltersCollapsed)]="isFiltersCollapsed"
       (onAdd)="onAdd()"
     />
   </div>
 
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [hideMoreFiltersButton]="true"
+      [isLoading]="isLoading()"
+      (onSearch)="onFilterSearch()"
+      (onReset)="onFilterReset()"
+    >
+      <ng-content />
+    </app-search-filters>
+  }
+
   <app-application-infrastructure-table
     [columns]="visibleColumns()"
+    [first]="first()"
     [itemsList]="itemsList()"
+    [isLoading]="isLoading()"
+    [isReadOnly]="isReadOnly()"
     (onPageChange)="onPageChange($event)"
     (onSelectAction)="onTableAction($event)"
   />

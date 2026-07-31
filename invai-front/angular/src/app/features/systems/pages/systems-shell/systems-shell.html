@@ -1,0 +1,37 @@
+<app-section-container [header]="header">
+  <p-accordion [value]="activePanel()" (valueChange)="onPanelChange($event)">
+    @for (panel of panels; track panel.id) {
+      <p-accordion-panel [value]="panel.id">
+        <p-accordion-header>
+          <span class="maintenance-panel-header">
+            <span class="maintenance-panel-title">{{ panel.title }}</span>
+            <span class="maintenance-panel-description">{{ panel.description }}</span>
+          </span>
+        </p-accordion-header>
+
+        <p-accordion-content>
+          @switch (panel.id) {
+            @case ('databases') {
+              <app-databases-list />
+            }
+            @case ('database-vendors') {
+              <app-database-vendors-list />
+            }
+            @case ('physical-servers') {
+              <app-physical-servers-list serverTypeCode="APPLICATION" />
+            }
+            @case ('database-servers') {
+              <app-physical-servers-list serverTypeCode="DATABASE" />
+            }
+            @case ('servers') {
+              <app-servers-list />
+            }
+            @case ('environments') {
+              <app-environments-list />
+            }
+          }
+        </p-accordion-content>
+      </p-accordion-panel>
+    }
+  </p-accordion>
+</app-section-container>

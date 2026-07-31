@@ -1,0 +1,141 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="46rem"
+  [ariaLabels]="actionAriaLabels"
+  [canEdit]="canEdit()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="application-provider-dialog-company-name"
+          class="w-full"
+          type="text"
+          maxlength="255"
+          formControlName="companyName"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.companyName)
+              ? 'application-provider-dialog-company-name-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.companyName)"
+          pInputText
+        />
+        <label for="application-provider-dialog-company-name">
+          {{ labels.companyName }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.companyName)) {
+        <p
+          id="application-provider-dialog-company-name-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{
+            form().controls.companyName.hasError('required') ||
+            form().controls.companyName.hasError('pattern')
+              ? requiredError
+              : maxLengthError
+          }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="application-provider-dialog-role"
+          formControlName="roleId"
+          ariaLabelledBy="application-provider-dialog-role-label"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="id"
+          [ariaFilterLabel]="labels.role"
+          [filter]="true"
+          [fluid]="true"
+          [options]="roleOptions()"
+          [showClear]="true"
+        />
+        <label
+          id="application-provider-dialog-role-label"
+          for="application-provider-dialog-role"
+        >
+          {{ labels.role }}
+        </label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <p-datepicker
+          inputId="application-provider-dialog-start-date"
+          formControlName="startDate"
+          ariaLabelledBy="application-provider-dialog-start-date-label"
+          appendTo="body"
+          iconDisplay="input"
+          [dateFormat]="dateFormat"
+          [fluid]="true"
+          [invalid]="isDateRangeInvalid()"
+          [placeholder]="datePlaceholder"
+          [pt]="datePassThrough()"
+          [showIcon]="true"
+        />
+        <label
+          id="application-provider-dialog-start-date-label"
+          for="application-provider-dialog-start-date"
+        >
+          {{ labels.startDate }}
+        </label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <p-datepicker
+          inputId="application-provider-dialog-expire-date"
+          formControlName="expireDate"
+          ariaLabelledBy="application-provider-dialog-expire-date-label"
+          appendTo="body"
+          iconDisplay="input"
+          [dateFormat]="dateFormat"
+          [fluid]="true"
+          [invalid]="isDateRangeInvalid()"
+          [placeholder]="datePlaceholder"
+          [pt]="datePassThrough()"
+          [showIcon]="true"
+        />
+        <label
+          id="application-provider-dialog-expire-date-label"
+          for="application-provider-dialog-expire-date"
+        >
+          {{ labels.expireDate }}
+        </label>
+      </p-floatlabel>
+    </div>
+
+    @if (isDateRangeInvalid()) {
+      <p
+        id="application-provider-dialog-date-range-error"
+        class="mb-0 mt-[-0.75rem] text-sm text-red-600 md:col-span-2"
+        role="alert"
+      >
+        {{ dateRangeError }}
+      </p>
+    }
+  </form>
+</app-crud-entity-dialog>

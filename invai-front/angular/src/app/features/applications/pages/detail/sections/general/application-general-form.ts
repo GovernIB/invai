@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { ApplicationFormFields } from '../../../../components';
 import { ApplicationDetailFormGroup } from '../../../../forms/application-form.factory';
-import { ApplicationOptionsService } from '../../../../services/application-options.service';
+import {
+  ApplicationCommissionOption,
+  ApplicationSelectOptions,
+} from '../../../../services/application-options.service';
 import {
   APPLICATION_GENERAL_LABELS,
+  APPLICATION_GENERAL_PREFIX_MAX_LENGTH_ERROR,
   APPLICATION_GENERAL_REQUIRED_ERROR,
   APPLICATION_GENERAL_SELECT_PLACEHOLDER,
 } from './application-general.i18n';
@@ -19,12 +22,15 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationGeneralForm {
-  private readonly optionsService = inject(ApplicationOptionsService);
-
   form = input.required<ApplicationDetailFormGroup>();
+  options = input.required<ApplicationSelectOptions>();
+  commissionSelected = output<ApplicationCommissionOption | null>();
 
   protected readonly labels = APPLICATION_GENERAL_LABELS;
   protected readonly requiredError = APPLICATION_GENERAL_REQUIRED_ERROR;
+  protected readonly prefixMaxLengthError = APPLICATION_GENERAL_PREFIX_MAX_LENGTH_ERROR;
   protected readonly selectPlaceholder = APPLICATION_GENERAL_SELECT_PLACEHOLDER;
-  protected readonly options = toSignal(this.optionsService.getOptions(), { initialValue: null });
+  protected selectCommission(commission: ApplicationCommissionOption | null): void {
+    this.commissionSelected.emit(commission);
+  }
 }

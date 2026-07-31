@@ -1,4 +1,40 @@
 app-applications-table {
+  display: block;
+
+  .invai-table-loading-container {
+    position: relative;
+  }
+
+  .invai-table-loading-shield {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    background: transparent;
+    cursor: progress;
+  }
+
+  .invai-table-refresh-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    overflow: hidden;
+    opacity: 0;
+    background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+    animation: invai-table-indicator-show 0s linear 150ms forwards;
+
+    &::after {
+      position: absolute;
+      inset: 0;
+      width: 38%;
+      content: '';
+      background: var(--p-primary-color);
+      transform: translateX(-100%);
+      animation: invai-table-indicator-move 1.15s ease-in-out 150ms infinite;
+    }
+  }
+
   .invai-scrollable-table {
     .p-datatable-table {
       min-width: max-content;
@@ -11,42 +47,6 @@ app-applications-table {
 
     .p-datatable-thead > tr > th {
       vertical-align: top;
-    }
-
-    .invai-table-actions-column {
-      position: sticky;
-      right: 0;
-      z-index: 2;
-      width: 9rem;
-      min-width: 9rem;
-      max-width: 9rem;
-      box-sizing: border-box;
-      padding-left: 1rem;
-      background: var(--p-datatable-body-cell-background, var(--p-content-background, #fff));
-      border-left: 1px solid
-        var(--p-datatable-body-cell-border-color, var(--p-content-border-color, #d9e2ef));
-    }
-
-    .p-datatable-thead > tr > .invai-table-actions-column {
-      background: var(--p-datatable-header-cell-background, var(--p-content-background, #fff));
-      z-index: 4;
-    }
-
-    .invai-table-actions {
-      align-items: center;
-      min-width: 0;
-      overflow: visible;
-      white-space: nowrap;
-
-      p-button {
-        flex: 0 0 auto;
-      }
-
-      .p-button {
-        width: 2rem;
-        height: 2rem;
-        padding: 0;
-      }
     }
   }
 
@@ -66,5 +66,33 @@ app-applications-table {
   .invai-table-header-label {
     min-width: 0;
     white-space: normal;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .invai-table-refresh-indicator::after {
+      width: 100%;
+      transform: none;
+      animation: none;
+    }
+
+    .invai-table-skeleton-row .p-skeleton::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes invai-table-indicator-show {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes invai-table-indicator-move {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(265%);
   }
 }

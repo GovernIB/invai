@@ -7,6 +7,7 @@ import { Select } from 'primeng/select';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
 import { APPLICATION_STATUS_OPTIONS } from '../../applications.constants';
+import { ApplicationInfrastructureFilterOptions } from '../../applications.model';
 import { ApplicationFiltersFormGroup } from '../../forms/application-form.factory';
 import { ApplicationSelectOptions } from '../../services/application-options.service';
 
@@ -20,6 +21,10 @@ export interface ApplicationFilterLabels {
   administrativeUnit: string;
   status: string;
   description: string;
+  responsible: string;
+  database: string;
+  server: string;
+  environment: string;
   incomplete: string;
 }
 
@@ -41,6 +46,7 @@ export class ApplicationFiltersForm {
   form = input.required<ApplicationFiltersFormGroup>();
   labels = input.required<ApplicationFilterLabels>();
   options = input<Partial<ApplicationSelectOptions> | null>(null);
+  infrastructureOptions = input<Partial<ApplicationInfrastructureFilterOptions> | null>(null);
 
   protected readonly statusOptions = APPLICATION_STATUS_OPTIONS;
 }

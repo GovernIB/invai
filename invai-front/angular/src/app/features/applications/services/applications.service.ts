@@ -1,9 +1,10 @@
 import { HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, LOCALE_ID, inject } from '@angular/core';
 import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
 import { cachedRequest } from '@shared/utils/service-cache.utils';
+import { localizedName } from '@shared/utils/localized-name.utils';
 import { Observable, map, tap } from 'rxjs';
 
 import {
@@ -11,11 +12,20 @@ import {
   ApplicationInput,
   ApplicationOutput,
   ApplicationPageParams,
+  ApplicationStatus,
+  ApplicationStatusCode,
 } from '../applications.model';
+
+const APPLICATION_STATUS_BY_CODE: Record<ApplicationStatusCode, ApplicationStatus> = {
+  [ApplicationStatusCode.ACTIVE]: ApplicationStatus.ACTIVE,
+  [ApplicationStatusCode.INACTIVE]: ApplicationStatus.INACTIVE,
+};
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationsService extends BaseApiService {
   protected override readonly ENTITY_URI = 'application';
+
+  private readonly locale = inject(LOCALE_ID);
 
   private readonly _applicationsCache = new Map<string, Observable<SpringPage<Application>>>();
   private readonly _applicationDetailsCache = new Map<string, Observable<ApplicationOutput>>();
@@ -66,23 +76,37 @@ export class ApplicationsService extends BaseApiService {
     return this.http.delete<void>(this.url(id)).pipe(tap(() => this.clearCache()));
   }
 
+  reactivate(id: number): Observable<ApplicationOutput> {
+    return this.http
+      .put<ApplicationOutput>(this.url('reactivate', id), {})
+      .pipe(tap(() => this.clearCache()));
+  }
+
   clearCache(): void {
     this._applicationsCache.clear();
     this._applicationDetailsCache.clear();
   }
 
   toApplication(response: ApplicationOutput): Application {
+    const status = response.status ? APPLICATION_STATUS_BY_CODE[response.status] : null;
+
     return {
       id: String(response.id),
       code: response.code ?? '',
       prefix: response.prefix ?? '',
       name: response.name ?? '',
-      category: response.category?.name ?? '',
-      informationSystem: response.systemType?.name ?? '',
-      scope: response.field?.name ?? '',
-      commission: response.csCommission?.name ?? '',
-      administrativeUnit: response.admUnit?.name ?? '',
-      status: response.status?.name ?? '',
+      category: response.category ? localizedName(response.category, this.locale) : '',
+      informationSystem: response.systemType
+        ? localizedName(response.systemType, this.locale)
+        : '',
+      scope: response.field ? localizedName(response.field, this.locale) : '',
+      commission: response.csCommission
+        ? localizedName(response.csCommission, this.locale)
+        : '',
+      administrativeUnit: response.admUnit
+        ? localizedName(response.admUnit, this.locale, response.admUnit.code)
+        : '',
+      status,
       description: response.description ?? '',
       creationDate: response.createdAt ?? '',
       modificationDate: response.updatedAt ?? '',
@@ -92,7 +116,9 @@ export class ApplicationsService extends BaseApiService {
       scopeId: response.field?.id,
       commissionId: response.csCommission?.id,
       administrativeUnitId: response.admUnit?.id,
-      statusId: response.status?.id,
+      statusId: status ?? undefined,
+      informationSystemDbId: response.appInformationSystemDbId,
+      appDevelopmentId: response.appDevelopmentId,
     };
   }
 

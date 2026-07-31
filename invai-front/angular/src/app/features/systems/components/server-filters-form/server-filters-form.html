@@ -1,0 +1,65 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="systems-filter-server"
+        styleClass="w-full"
+        formControlName="serverId"
+        ariaLabelledBy="systems-filter-server-label"
+        [ariaFilterLabel]="labels().server"
+        [filter]="true"
+        [options]="serverOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="id"
+      />
+      <label id="systems-filter-server-label" for="systems-filter-server">
+        {{ labels().server }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="systems-filter-instance"
+        class="w-full"
+        type="text"
+        formControlName="instance"
+        pInputText
+      />
+      <label for="systems-filter-instance">{{ labels().instance }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="systems-filter-version"
+        class="w-full"
+        type="text"
+        formControlName="version"
+        pInputText
+      />
+      <label for="systems-filter-version">{{ labels().version }}</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="systems-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="systems-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="systems-filter-status-label" for="systems-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

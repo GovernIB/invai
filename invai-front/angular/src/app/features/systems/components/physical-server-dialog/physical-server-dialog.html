@@ -1,0 +1,69 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="38rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div class="md:col-span-7">
+      <p-floatlabel class="w-full">
+        <input
+          id="physical-server-name"
+          class="w-full"
+          type="text"
+          formControlName="name"
+          maxlength="255"
+          [attr.aria-describedby]="isInvalid(form().controls.name) ? 'physical-server-name-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.name)"
+          pInputText
+        />
+        <label for="physical-server-name">{{ labels.name }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.name)) {
+        <p id="physical-server-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div class="md:col-span-5">
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="physical-server-environment"
+          styleClass="w-full"
+          formControlName="environment"
+          [ariaFilterLabel]="labels.environment"
+          [attr.aria-describedby]="isInvalid(form().controls.environment) ? 'physical-server-environment-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.environment)"
+          [filter]="true"
+          [options]="environmentOptions()"
+          appendTo="body"
+          dataKey="id"
+          optionLabel="label"
+        />
+        <label for="physical-server-environment">{{ labels.environment }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.environment)) {
+        <p id="physical-server-environment-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+  </form>
+</app-crud-entity-dialog>

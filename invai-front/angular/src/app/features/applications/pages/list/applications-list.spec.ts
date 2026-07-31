@@ -1,19 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CommissionType } from '@features/commissions/commissions.model';
 import { SpringPage } from '@models/page.model';
 import { MessageService } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
-import { Observable, Subject, of, throwError } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
-import { Application, ApplicationPageParams } from '../../applications.model';
-import { ApplicationTableAction } from '../../components';
-import { ApplicationFiltersFormGroup } from '../../forms/application-form.factory';
+import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
 import {
-  ApplicationOptionsService,
-  ApplicationSelectOptions,
-} from '../../services/application-options.service';
+  Application,
+  ApplicationInfrastructureFilterOptions,
+  ApplicationPageParams,
+  ApplicationStatus,
+} from '../../applications.model';
+import { ApplicationFiltersFormGroup } from '../../forms/application-form.factory';
+import { ApplicationSelectOptions } from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
 import { ApplicationsList } from './applications-list';
+import {
+  APPLICATIONS_LIST_RESOLVE_KEY,
+  ApplicationsListResolvedData,
+} from './applications-list.resolver';
 
 class ResizeObserverMock implements ResizeObserver {
   disconnect(): void {}
@@ -34,7 +41,7 @@ const APPLICATIONS: Application[] = [
     scope: 'Departamental',
     commission: 'Equip directiu',
     administrativeUnit: 'Direcció General',
-    status: 'Activo',
+    status: ApplicationStatus.ACTIVE,
     description: 'Aplicació interna',
     creationDate: '2026-01-01T10:00:00',
     modificationDate: '',
@@ -50,7 +57,7 @@ const APPLICATIONS: Application[] = [
     scope: 'Transversal',
     commission: 'Comissió tècnica',
     administrativeUnit: 'Servei TIC',
-    status: 'Activo',
+    status: ApplicationStatus.INACTIVE,
     description: 'Portal corporatiu',
     creationDate: '2026-02-01T10:00:00',
     modificationDate: '',
@@ -62,20 +69,30 @@ const FILTER_OPTIONS: ApplicationSelectOptions = {
   categories: [{ label: 'DRASSANA', value: 1 }],
   informationSystems: [{ label: 'Instrumental', value: 2 }],
   scopes: [{ label: 'Departamental', value: 3 }],
-  commissions: [{ label: 'Equip directiu', value: 4 }],
+  commissions: [
+    {
+      label: 'Equip directiu',
+      value: 4,
+      expedientNumber: 'EXP-4',
+      approvalDate: '2026-07-14',
+      commissionType: CommissionType.SUPERIOR,
+    },
+  ],
   administrativeUnits: [{ label: 'Direcció General', value: 5 }],
+};
+
+const INFRASTRUCTURE_FILTER_OPTIONS: ApplicationInfrastructureFilterOptions = {
+  servers: [{ label: 'app01.caib.es', value: 5 }],
+  databases: [{ label: 'INVAI', value: 8 }],
+  environments: [{ label: 'Producció', value: 3 }],
 };
 
 interface ApplicationsListAccess {
   filtersForm: ApplicationFiltersFormGroup;
   isSearchIndicatorLoading: () => boolean;
-  isWithdrawalDialogVisible: () => boolean;
   onFilterSearch: () => void;
   onPageChange: (event: TableLazyLoadEvent) => void;
   onQuickSearchChange: (value: string) => void;
-  onTableActions: (event: { action: ApplicationTableAction; params: Application }) => void;
-  onWithdrawalDialogConfirm: () => void;
-  selectedApplicationForWithdrawal: () => Application | null;
   tableFirst: () => number;
 }
 
@@ -84,7 +101,8 @@ describe('ApplicationsList', () => {
   let fixture: ComponentFixture<ApplicationsList>;
   let messageService: MessageService;
   let getPage: ReturnType<typeof vi.fn>;
-  let deleteApplication: ReturnType<typeof vi.fn>;
+  let navigate: ReturnType<typeof vi.fn>;
+  let activatedRoute: object;
   let pendingPages: Subject<SpringPage<Application>>[];
 
   beforeEach(async () => {
@@ -94,16 +112,22 @@ describe('ApplicationsList', () => {
       pendingPages.push(request);
       return request;
     });
-    deleteApplication = vi.fn(() => of(null));
+    navigate = vi.fn();
+    activatedRoute = {
+      snapshot: {
+        data: {
+          [APPLICATIONS_LIST_RESOLVE_KEY]: resolvedData(APPLICATIONS, 25),
+        },
+      },
+    };
 
     await TestBed.configureTestingModule({
       imports: [ApplicationsList],
       providers: [
         MessageService,
-        { provide: ApplicationsService, useValue: { getPage, delete: deleteApplication } },
-        { provide: ApplicationOptionsService, useValue: { getOptions: () => of(FILTER_OPTIONS) } },
-        { provide: ActivatedRoute, useValue: {} },
-        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: ApplicationsService, useValue: { getPage } },
+        { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: Router, useValue: { navigate } },
       ],
     }).compileComponents();
 
@@ -117,23 +141,174 @@ describe('ApplicationsList', () => {
     vi.useRealTimers();
   });
 
-  it('should request the first server page on initialization', () => {
+  it('should consume the resolved page without requesting it again', () => {
     expect(component).toBeTruthy();
-    expect(getPage).toHaveBeenCalledOnce();
-    expect(getPage).toHaveBeenCalledWith({ page: 0, size: 10 });
-    expect(component.isLoading()).toBe(true);
-    expect(fixture.nativeElement.querySelector('.section-actions-search__spinner')).toBeTruthy();
+    expect(getPage).not.toHaveBeenCalled();
+    expect(component.itemsList()).toEqual({ items: APPLICATIONS, total: 25 });
+    expect(component.isLoading()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.section-actions-search__spinner')).toBeFalsy();
+    expect(fixture.nativeElement.querySelectorAll('.invai-table-skeleton-row')).toHaveLength(0);
+    expect(fixture.nativeElement.querySelector('.p-datatable-mask')).toBeFalsy();
+    expect(
+      fixture.nativeElement
+        .querySelector('.invai-table-loading-container')
+        .getAttribute('aria-busy'),
+    ).toBe('false');
   });
 
   it('should expose the server page and total in the table', () => {
-    resolvePage(0, APPLICATIONS, 25);
-
     expect(component.itemsList()).toEqual({ items: APPLICATIONS, total: 25 });
     expect(component.isLoading()).toBe(false);
   });
 
+  it('should render localized application statuses instead of enum values', () => {
+    const statusColumn = APPLICATIONS_TABLE_COLUMNS.find(({ key }) => key === 'status')!;
+    component.selectedColumns.update((columns) => [...columns, statusColumn]);
+    fixture.detectChanges();
+
+    const tableText = fixture.nativeElement.querySelector('.p-datatable-tbody').textContent;
+    expect(tableText).toContain('Actiu');
+    expect(tableText).toContain('Inactiu');
+    expect(tableText).not.toContain('Activo');
+    expect(tableText).not.toContain('Inactivo');
+  });
+
+  it('should hide commission and status by default while keeping them selectable', () => {
+    const visibleKeys = component.sortedSelectedColumns().map(({ key }) => key);
+    const selectableKeys = component.selectableColumns().map(({ key }) => key);
+
+    expect(visibleKeys).not.toContain('commission');
+    expect(visibleKeys).not.toContain('status');
+    expect(selectableKeys).toContain('commission');
+    expect(selectableKeys).toContain('status');
+  });
+
+  it('should hide the infrastructure and responsible columns by default while keeping them selectable', () => {
+    const infrastructureKeys = ['environment', 'database', 'server', 'responsible'];
+    const visibleKeys = component.sortedSelectedColumns().map(({ key }) => key);
+    const selectableKeys = component.selectableColumns().map(({ key }) => key);
+
+    infrastructureKeys.forEach((key) => {
+      expect(visibleKeys).not.toContain(key);
+      expect(selectableKeys).toContain(key);
+    });
+  });
+
+  it('should render the infrastructure and responsible columns once selected', () => {
+    const infrastructureColumns = APPLICATIONS_TABLE_COLUMNS.filter(({ key }) =>
+      ['environment', 'database', 'server', 'responsible'].includes(key),
+    );
+    component.selectedColumns.update((columns) => [...columns, ...infrastructureColumns]);
+    fixture.detectChanges();
+
+    const headerText = fixture.nativeElement.querySelector('.p-datatable-thead').textContent;
+    expect(headerText).toContain('Entorn');
+    expect(headerText).toContain('Bases de dades');
+    expect(headerText).toContain('Servidor');
+    expect(headerText).toContain('Responsables');
+  });
+
+  it('should synchronize status only when its applied criterion changes or resets', () => {
+    const list = accessList();
+    const commissionColumn = APPLICATIONS_TABLE_COLUMNS.find(({ key }) => key === 'commission')!;
+    const statusColumn = APPLICATIONS_TABLE_COLUMNS.find(({ key }) => key === 'status')!;
+
+    component.selectedColumns.update((columns) => [...columns, commissionColumn]);
+    list.filtersForm.controls.status.setValue(null);
+    list.onFilterSearch();
+
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).toEqual(
+      expect.arrayContaining(['commission', 'status']),
+    );
+
+    component.selectedColumns.update((columns) =>
+      columns.filter(({ key }) => key !== 'status'),
+    );
+    list.filtersForm.controls.description.setValue('interna');
+    list.onFilterSearch();
+
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).not.toContain('status');
+
+    list.filtersForm.controls.status.setValue(ApplicationStatus.INACTIVE);
+    list.onFilterSearch();
+
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).toContain('commission');
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).not.toContain('status');
+
+    component.selectedColumns.update((columns) => [...columns, statusColumn]);
+    component.reset();
+
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).toContain('commission');
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).not.toContain('status');
+  });
+
+  it('should keep the applied all-statuses search while status edits are pending', () => {
+    const list = accessList();
+
+    list.filtersForm.controls.status.setValue(null);
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).not.toContain('status');
+
+    list.onFilterSearch();
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).toContain('status');
+    expect(getPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 0, size: 10, statusId: undefined }),
+    );
+
+    list.filtersForm.controls.status.setValue(ApplicationStatus.INACTIVE);
+    list.onPageChange({ first: 10, rows: 10 } as TableLazyLoadEvent);
+
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).toContain('status');
+    expect(getPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 1, size: 10, statusId: undefined }),
+    );
+
+    list.onFilterSearch();
+
+    expect(component.sortedSelectedColumns().map(({ key }) => key)).not.toContain('status');
+    expect(getPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        page: 0,
+        size: 10,
+        statusId: ApplicationStatus.INACTIVE,
+      }),
+    );
+  });
+
+  it('should keep the current rows and show a discreet progress indicator while refreshing', () => {
+    fixture.detectChanges();
+    const list = accessList();
+
+    list.onPageChange({ first: 10, rows: 10 } as TableLazyLoadEvent);
+    fixture.detectChanges();
+
+    const loadingContainer = fixture.nativeElement.querySelector(
+      '.invai-table-loading-container',
+    ) as HTMLElement;
+    expect(loadingContainer.textContent).toContain('Invai');
+    expect(loadingContainer.getAttribute('aria-busy')).toBe('true');
+    expect(loadingContainer.querySelector('.invai-table-loading-shield')).toBeTruthy();
+    expect(loadingContainer.querySelector('.invai-table-refresh-indicator')).toBeTruthy();
+    expect(loadingContainer.querySelector('.p-datatable-mask')).toBeFalsy();
+    expect(loadingContainer.querySelector('.invai-table-skeleton-row')).toBeFalsy();
+
+    resolvePage(0, [APPLICATIONS[1]], 1);
+    fixture.detectChanges();
+
+    expect(loadingContainer.textContent).not.toContain('Invai');
+    expect(loadingContainer.textContent).toContain('Portal');
+    expect(loadingContainer.getAttribute('aria-busy')).toBe('false');
+    expect(loadingContainer.querySelector('.invai-table-loading-shield')).toBeFalsy();
+  });
+
+  it('should replace the initial skeletons with the empty state after a successful empty load', () => {
+    recreateWithResolvedData(resolvedData([], 0));
+
+    expect(fixture.nativeElement.querySelector('.invai-table-skeleton-row')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('.invai-table-loading-shield')).toBeFalsy();
+    expect(fixture.nativeElement.textContent).toContain("No s'han trobat resultats");
+  });
+
   it('should map filters, pagination and nested sorting to API criteria', () => {
-    resolvePage(0, APPLICATIONS);
     const list = accessList();
     list.filtersForm.patchValue({
       prefix: ' INV ',
@@ -143,10 +318,11 @@ describe('ApplicationsList', () => {
       scope: 3,
       commission: 4,
       administrativeUnit: 5,
-      status: 2,
+      status: ApplicationStatus.INACTIVE,
       description: ' interna ',
     });
 
+    list.onFilterSearch();
     list.onPageChange({
       first: 40,
       rows: 20,
@@ -165,14 +341,13 @@ describe('ApplicationsList', () => {
       fieldId: 3,
       commissionId: 4,
       admUnitId: 5,
-      statusId: 2,
+      statusId: ApplicationStatus.INACTIVE,
       description: 'interna',
     });
     expect(list.tableFirst()).toBe(40);
   });
 
   it('should show loading immediately and debounce quick search for 400 ms', () => {
-    resolvePage(0, APPLICATIONS);
     fixture.detectChanges();
     vi.useFakeTimers();
     const list = accessList();
@@ -184,14 +359,19 @@ describe('ApplicationsList', () => {
     expect(list.isSearchIndicatorLoading()).toBe(true);
     expect(fixture.nativeElement.querySelector('.section-actions-search__spinner')).toBeTruthy();
     vi.advanceTimersByTime(399);
-    expect(getPage).toHaveBeenCalledOnce();
+    expect(getPage).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(1);
 
-    expect(getPage).toHaveBeenCalledTimes(2);
-    expect(getPage).toHaveBeenLastCalledWith({ page: 0, size: 10, quickSearch: 'i' });
+    expect(getPage).toHaveBeenCalledOnce();
+    expect(getPage).toHaveBeenLastCalledWith({
+      page: 0,
+      size: 10,
+      statusId: ApplicationStatus.ACTIVE,
+      quickSearch: 'i',
+    });
     expect(component.isLoading()).toBe(true);
-    resolvePage(1, [APPLICATIONS[0]], 1);
+    resolvePage(0, [APPLICATIONS[0]], 1);
     fixture.detectChanges();
     expect(component.isLoading()).toBe(false);
     expect(list.isSearchIndicatorLoading()).toBe(false);
@@ -199,7 +379,6 @@ describe('ApplicationsList', () => {
   });
 
   it('should cancel stale quick searches and ignore repeated trimmed values', () => {
-    resolvePage(0, APPLICATIONS);
     vi.useFakeTimers();
     const list = accessList();
 
@@ -208,21 +387,20 @@ describe('ApplicationsList', () => {
     list.onQuickSearchChange('invai');
     vi.advanceTimersByTime(400);
 
-    pendingPages[1].next(applicationPage([APPLICATIONS[1]], 1));
+    pendingPages[0].next(applicationPage([APPLICATIONS[1]], 1));
     expect(component.itemsList().items).toEqual(APPLICATIONS);
 
-    resolvePage(2, [APPLICATIONS[0]], 1);
+    resolvePage(1, [APPLICATIONS[0]], 1);
     expect(component.itemsList().items).toEqual([APPLICATIONS[0]]);
 
     list.onQuickSearchChange(' invai ');
     expect(list.isSearchIndicatorLoading()).toBe(true);
     vi.advanceTimersByTime(400);
-    expect(getPage).toHaveBeenCalledTimes(3);
+    expect(getPage).toHaveBeenCalledTimes(2);
     expect(list.isSearchIndicatorLoading()).toBe(false);
   });
 
   it('should clear the quick search from its remove button and reload the first page', () => {
-    resolvePage(0, APPLICATIONS);
     vi.useFakeTimers();
     const searchInput = fixture.nativeElement.querySelector(
       '.section-actions-search__input',
@@ -231,7 +409,7 @@ describe('ApplicationsList', () => {
     searchInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     vi.advanceTimersByTime(400);
-    resolvePage(1, [APPLICATIONS[0]], 1);
+    resolvePage(0, [APPLICATIONS[0]], 1);
     fixture.detectChanges();
 
     const clearButton = fixture.nativeElement.querySelector(
@@ -242,25 +420,81 @@ describe('ApplicationsList', () => {
     vi.advanceTimersByTime(400);
 
     expect(searchInput.value).toBe('');
-    expect(getPage).toHaveBeenLastCalledWith({ page: 0, size: 10 });
+    expect(getPage).toHaveBeenLastCalledWith({
+      page: 0,
+      size: 10,
+      statusId: ApplicationStatus.ACTIVE,
+    });
     expect(accessList().tableFirst()).toBe(0);
   });
 
   it('should count incomplete but omit it from the request and warn in the console', () => {
-    resolvePage(0, APPLICATIONS);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const list = accessList();
     list.filtersForm.patchValue({ incomplete: true });
 
     list.onFilterSearch();
 
-    expect(component.selectedFilters()).toBe(1);
+    expect(component.selectedFilters()).toBe(2);
     expect(warn).toHaveBeenCalledOnce();
-    expect(getPage).toHaveBeenLastCalledWith({ page: 0, size: 10 });
+    expect(getPage).toHaveBeenLastCalledWith({
+      page: 0,
+      size: 10,
+      statusId: ApplicationStatus.ACTIVE,
+    });
+  });
+
+  it('should warn when unsupported filters receive a value but not when cleared', () => {
+    vi.useFakeTimers();
+    const addSpy = vi.spyOn(messageService, 'add');
+    const form = accessList().filtersForm;
+
+    form.controls.responsible.setValue('Persona responsable');
+    vi.advanceTimersByTime(399);
+    expect(addSpy).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+    expect(addSpy).toHaveBeenLastCalledWith({
+      severity: 'warn',
+      summary: 'Atenció',
+      detail: "El filtre «Responsables» encara no està implementat i no s'aplicarà.",
+    });
+
+    form.controls.responsible.setValue('');
+    vi.advanceTimersByTime(400);
+    expect(addSpy).toHaveBeenCalledTimes(1);
+
+    form.controls.database.setValue(8);
+    expect(addSpy).toHaveBeenLastCalledWith({
+      severity: 'warn',
+      summary: 'Atenció',
+      detail: "El filtre «Bases de dades» encara no està implementat i no s'aplicarà.",
+    });
+  });
+
+  it('should count unsupported filters but omit them from the request', () => {
+    vi.useFakeTimers();
+    const list = accessList();
+    list.filtersForm.patchValue({
+      responsible: 'Persona responsable',
+      database: 8,
+      server: 5,
+      environment: 3,
+    });
+
+    list.onFilterSearch();
+
+    expect(component.selectedFilters()).toBe(5);
+    expect(getPage).toHaveBeenLastCalledWith({
+      page: 0,
+      size: 10,
+      statusId: ApplicationStatus.ACTIVE,
+    });
   });
 
   it('should clear the table and show an error when loading fails', () => {
     const addSpy = vi.spyOn(messageService, 'add');
+    accessList().onFilterSearch();
 
     pendingPages[0].error(new Error('Request failed'));
 
@@ -273,16 +507,44 @@ describe('ApplicationsList', () => {
     });
   });
 
+  it('should show the page error resolved by the route without making another request', () => {
+    const addSpy = vi.spyOn(messageService, 'add');
+
+    recreateWithResolvedData({
+      page: null,
+      options: FILTER_OPTIONS,
+      infrastructureOptions: INFRASTRUCTURE_FILTER_OPTIONS,
+      pageLoadFailed: true,
+      optionsLoadFailed: false,
+    });
+
+    expect(getPage).not.toHaveBeenCalled();
+    expect(component.itemsList()).toEqual({ items: [], total: 0 });
+    expect(addSpy).toHaveBeenCalledWith({
+      severity: 'error',
+      summary: 'Error',
+      detail: "No s'han pogut carregar les aplicacions.",
+    });
+  });
+
   it('should reset filters, their count and the paginator', () => {
-    resolvePage(0, APPLICATIONS);
     const list = accessList();
-    list.filtersForm.patchValue({ prefix: 'APP', category: 1, incomplete: true });
+    list.filtersForm.patchValue({
+      prefix: 'APP',
+      category: 1,
+      responsible: 'Persona responsable',
+      database: 8,
+      server: 5,
+      environment: 3,
+      incomplete: true,
+    });
+    list.onFilterSearch();
     list.onPageChange({ first: 20, rows: 10 } as TableLazyLoadEvent);
-    expect(component.selectedFilters()).toBe(3);
+    expect(component.selectedFilters()).toBe(8);
 
     component.reset();
 
-    expect(component.selectedFilters()).toBe(0);
+    expect(component.selectedFilters()).toBe(1);
     expect(list.tableFirst()).toBe(0);
     expect(list.filtersForm.getRawValue()).toEqual({
       prefix: null,
@@ -292,8 +554,12 @@ describe('ApplicationsList', () => {
       scope: null,
       commission: null,
       administrativeUnit: null,
-      status: null,
+      status: ApplicationStatus.ACTIVE,
       description: null,
+      responsible: null,
+      database: null,
+      server: null,
+      environment: null,
       incomplete: false,
     });
   });
@@ -305,50 +571,44 @@ describe('ApplicationsList', () => {
     );
   });
 
-  it('should open the withdrawal dialog when deleting an application', () => {
-    const list = accessList();
-    list.onTableActions({ action: ApplicationTableAction.Delete, params: APPLICATIONS[0] });
+  it('should not expose an actions column', () => {
+    fixture.detectChanges();
+    const firstRow = fixture.nativeElement.querySelector(
+      '.p-datatable-tbody > tr',
+    ) as HTMLTableRowElement;
 
-    expect(list.isWithdrawalDialogVisible()).toBe(true);
-    expect(list.selectedApplicationForWithdrawal()).toBe(APPLICATIONS[0]);
+    expect(fixture.nativeElement.querySelector('.invai-table-actions-column')).toBeFalsy();
+    expect(firstRow.querySelectorAll('td')).toHaveLength(
+      component.sortedSelectedColumns().length,
+    );
+    expect(firstRow.querySelector('button')).toBeFalsy();
+    expect(firstRow.querySelector('.pi-eye')).toBeFalsy();
   });
 
-  it('should delete and reload the first page after confirming withdrawal', () => {
-    resolvePage(0, APPLICATIONS);
-    const addSpy = vi.spyOn(messageService, 'add');
-    const list = accessList();
-    list.onTableActions({ action: ApplicationTableAction.Delete, params: APPLICATIONS[0] });
+  it('should navigate to the application detail on row double click', () => {
+    fixture.detectChanges();
+    const firstRow = fixture.nativeElement.querySelector(
+      '.p-datatable-tbody > tr',
+    ) as HTMLTableRowElement;
 
-    list.onWithdrawalDialogConfirm();
+    firstRow.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
 
-    expect(deleteApplication).toHaveBeenCalledWith(1);
-    expect(list.isWithdrawalDialogVisible()).toBe(false);
-    expect(list.selectedApplicationForWithdrawal()).toBeNull();
-    expect(getPage).toHaveBeenCalledTimes(2);
-    expect(getPage).toHaveBeenLastCalledWith({ page: 0, size: 10 });
-    expect(addSpy).toHaveBeenCalledWith({
-      severity: 'success',
-      summary: 'Aplicació donada de baixa',
-      detail: "L'aplicació s'ha donat de baixa correctament.",
-    });
+    expect(navigate).toHaveBeenCalledWith(['1'], { relativeTo: activatedRoute });
   });
 
-  it('should keep the withdrawal dialog open and show an error when delete fails', () => {
-    deleteApplication.mockReturnValueOnce(throwError(() => new Error('Request failed')));
-    const addSpy = vi.spyOn(messageService, 'add');
-    const list = accessList();
-    list.onTableActions({ action: ApplicationTableAction.Delete, params: APPLICATIONS[0] });
+  it('should navigate to the application detail with Enter on a focused row', () => {
+    fixture.detectChanges();
+    const firstRow = fixture.nativeElement.querySelector(
+      '.p-datatable-tbody > tr',
+    ) as HTMLTableRowElement;
 
-    list.onWithdrawalDialogConfirm();
+    expect(firstRow.tabIndex).toBe(0);
 
-    expect(list.isWithdrawalDialogVisible()).toBe(true);
-    expect(list.selectedApplicationForWithdrawal()).toBe(APPLICATIONS[0]);
-    expect(getPage).toHaveBeenCalledOnce();
-    expect(addSpy).toHaveBeenCalledWith({
-      severity: 'error',
-      summary: 'Error',
-      detail: "No s'ha pogut donar de baixa l'aplicació.",
-    });
+    firstRow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Space', bubbles: true }));
+    expect(navigate).not.toHaveBeenCalled();
+
+    firstRow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(navigate).toHaveBeenCalledWith(['1'], { relativeTo: activatedRoute });
   });
 
   function accessList(): ApplicationsListAccess {
@@ -359,7 +619,29 @@ describe('ApplicationsList', () => {
     pendingPages[index].next(applicationPage(content, total));
     pendingPages[index].complete();
   }
+
+  function recreateWithResolvedData(data: ApplicationsListResolvedData): void {
+    fixture.destroy();
+    (
+      activatedRoute as {
+        snapshot: { data: Record<string, ApplicationsListResolvedData> };
+      }
+    ).snapshot.data[APPLICATIONS_LIST_RESOLVE_KEY] = data;
+    fixture = TestBed.createComponent(ApplicationsList);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }
 });
+
+function resolvedData(content: Application[], totalElements: number): ApplicationsListResolvedData {
+  return {
+    page: applicationPage(content, totalElements),
+    options: FILTER_OPTIONS,
+    infrastructureOptions: INFRASTRUCTURE_FILTER_OPTIONS,
+    pageLoadFailed: false,
+    optionsLoadFailed: false,
+  };
+}
 
 function applicationPage(content: Application[], totalElements: number): SpringPage<Application> {
   return {

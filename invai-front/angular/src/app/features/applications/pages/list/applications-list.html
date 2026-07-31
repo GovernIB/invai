@@ -25,6 +25,7 @@
     >
       <app-application-filters-form
         [form]="filtersForm"
+        [infrastructureOptions]="infrastructureFilterOptions()"
         [labels]="filterLabels"
         [options]="filterOptions()"
       />
@@ -34,22 +35,10 @@
   <app-applications-table
     [columns]="sortedSelectedColumns()"
     [first]="tableFirst()"
+    [isInitialLoading]="isInitialTableLoading()"
     [isLoading]="isLoading()"
     [itemsList]="itemsList()"
     (onPageChange)="onPageChange($event)"
-    (onSelectAction)="onTableActions($event)"
-  />
-
-  <app-confirmation-dialog
-    [(visible)]="isWithdrawalDialogVisible"
-    [title]="withdrawalDialogTitle"
-    [message]="getWithdrawalDialogMessage()"
-    [cancelLabel]="withdrawalDialogCancelLabel"
-    [confirmLabel]="withdrawalDialogConfirmLabel"
-    [cancelAriaLabel]="withdrawalDialogCancelAriaLabel"
-    [confirmAriaLabel]="withdrawalDialogConfirmAriaLabel"
-    [confirmIcon]="withdrawalDialogConfirmIcon"
-    (cancel)="onWithdrawalDialogClose()"
-    (confirm)="onWithdrawalDialogConfirm()"
+    (onSelectAction)="onViewApplication($event.params)"
   />
 </app-section-container>

@@ -1,0 +1,18 @@
+.maintenances-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--p-content-border-color, #d1d5db);
+}
+
+.maintenances-tab {
+  padding: 0.75rem 0.25rem;
+  color: var(--p-text-muted-color, #4b5563);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.maintenances-tab--active {
+  color: var(--p-primary-color, #2563eb);
+  border-bottom-color: currentColor;
+}

@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.application-infrastructure-catalog-table {
+  .p-datatable-table {
+    min-width: max-content;
+  }
+
+  :is(th, td) {
+    white-space: nowrap;
+  }
+
+  .application-infrastructure-catalog-table__selection {
+    width: 3rem;
+    min-width: 3rem;
+    text-align: center;
+  }
+
+  .application-infrastructure-catalog-table__selectable {
+    cursor: pointer;
+  }
+
+  .application-infrastructure-catalog-table__selected > td {
+    background: var(--p-highlight-background);
+    color: var(--p-highlight-color);
+  }
+}

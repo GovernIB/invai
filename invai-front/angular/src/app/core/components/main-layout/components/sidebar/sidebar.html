@@ -1,28 +1,38 @@
 <aside
+  [attr.id]="isDrawerVariant() ? 'sidebar-navigation-drawer-content' : 'sidebar-navigation-inline'"
   [class]="asideClass()"
   class="transition-[width] duration-300 bg-white h-full shadow-[8px_0_12px_-8px_#0000001A]"
 >
   @if (isVisible()) {
-    <div
-      class="w-full flex"
-      [class.justify-content-center]="isCollapsed()"
-      [class.justify-content-end]="!isCollapsed()"
-    >
-      <p-button
-        styleClass="py-1 px-2 m-2"
-        [outlined]="true"
-        (onClick)="toggleCollapsed()"
-        severity="secondary"
-        [ariaLabel]="isCollapsed() ? sidebarCollapseOpenName : sidebarCollapseCloseName"
+    @if (!isDrawerVariant()) {
+      <div
+        class="w-full flex"
+        [class.justify-content-center]="isCollapsed()"
+        [class.justify-content-end]="!isCollapsed()"
       >
-        <app-svg-menu-collapsed />
-      </p-button>
-    </div>
+        <button
+          pButton
+          type="button"
+          class="py-1 px-2 m-2"
+          [outlined]="true"
+          (click)="toggleCollapsed()"
+          severity="secondary"
+          [attr.aria-controls]="
+            isTablet() ? 'sidebar-navigation-drawer' : 'sidebar-navigation-inline'
+          "
+          [attr.aria-expanded]="isToggleExpanded()"
+          [attr.aria-label]="isCollapsed() ? sidebarCollapseOpenName : sidebarCollapseCloseName"
+        >
+          <app-svg-menu-collapsed />
+        </button>
+      </div>
+    }
 
     <p-tieredMenu
       [styleClass]="tieredMenuClass()"
       [model]="menuItems()"
       [ariaLabel]="navigationAriaLabel"
+      [autoDisplay]="true"
     >
       <ng-template let-isParentMenu="hasSubmenu" let-menuItem pTemplate="menuItem">
         @if (isParentMenu) {
@@ -31,7 +41,13 @@
             pRipple
             [attr.aria-label]="menuItem.label"
             [attr.aria-haspopup]="true"
+            tabindex="0"
             [class.p-menuitem-active]="isFragmentActive(menuItem.fragment)"
+            [pTooltip]="menuItem.label"
+            [tooltipDisabled]="!isCollapsed()"
+            tooltipEvent="both"
+            tooltipPosition="right"
+            (focus)="onParentMenuFocus($event)"
           >
             <span class="p-tieredmenu-item-icon sidebar-menu-icon" [class]="menuItem.icon"></span>
             <span class="p-tieredmenu-item-label sidebar-menu-label">{{ menuItem.label }}</span>
@@ -45,6 +61,11 @@
             [routerLink]="menuItem.routerLink"
             [attr.aria-label]="menuItem.label"
             routerLinkActive="p-menuitem-active"
+            [pTooltip]="menuItem.label"
+            [tooltipDisabled]="!isCollapsed()"
+            tooltipEvent="both"
+            tooltipPosition="right"
+            (click)="onLeafMenuClick()"
           >
             <span class="p-tieredmenu-item-icon sidebar-menu-icon" [class]="menuItem.icon"></span>
             <span class="p-tieredmenu-item-label sidebar-menu-label">{{ menuItem.label }}</span>

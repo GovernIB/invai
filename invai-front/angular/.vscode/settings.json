@@ -1,0 +1,84 @@
+{
+  // === Editor ===
+  "editor.minimap.enabled": false,
+  "editor.wordWrap": "on",
+  "editor.wordWrapColumn": 80,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "always"
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "editor.linkedEditing": true,
+  "editor.fontLigatures": true,
+  "editor.fontFamily": "Cascadia Code, Menlo, Monaco, 'Courier New', monospace",
+  "terminal.integrated.suggest.enabled": true,
+  // === Files ===
+  "files.autoSave": "onFocusChange",
+  "files.exclude": {
+    "**/.angular": true,
+    "**/.vscode": true,
+    "**/.husky": true,
+    ".editorconfig": true,
+    "tsconfig.app.json": true,
+    ".prettierignore": true,
+    ".gitlab-ci.yml": false,
+    "scripts": true
+  },
+  "search.exclude": {
+    "**/*.cy.ts": true,
+    "**/*.spec.*": true,
+    "**/primeng": true,
+    "cypress": true
+  },
+  // === Git ===
+  "git.openRepositoryInParentFolders": "always",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.ignoreRebaseWarning": true,
+  "git.autofetch": "all",
+  "gitlens.currentLine.uncommittedChangesFormat": "✏️ ${author}: ${ago}",
+  "gitlens.codeLens.scopes": ["document", "containers", "blocks"],
+  "gitlens.views.scm.grouped.views": {
+    "stashes": false
+  },
+  "explorer.excludeGitIgnore": true,
+  // === Diff Editor ===
+  "diffEditor.ignoreTrimWhitespace": true,
+  "diffEditor.hideUnchangedRegions.enabled": true,
+  // === TypeScript & JavaScript ===
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // === Workbench ===
+  "workbench.startupEditor": "none",
+  "workbench.iconTheme": "material-icon-theme",
+  // === Prettier ===
+  "esbenp.singleQuote": true,
+  "esbenp.trailingComma": "all",
+  "esbenp.semi": true,
+  "esbenp.tabWidth": 2,
+  // === ESLint ===
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+  // === CoPilot ===
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Use conventional commit message format. English"
+    }
+  ],
+  "cucumberautocomplete.customParameters": ["cypress/e2e/step_definitions/**/*.ts"],
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

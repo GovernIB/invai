@@ -13,6 +13,20 @@ export function fnGetVisibleColumns(
   return allColumns.filter((column) => selectedKeys.has(column.key));
 }
 
+export function fnSetColumnVisibility(
+  allColumns: KeyLabel[],
+  selectedColumns: Partial<KeyLabel>[],
+  columnKey: string,
+  isVisible: boolean,
+): KeyLabel[] {
+  const selectedKeys = new Set(selectedColumns.map((column) => column.key));
+
+  if (isVisible) selectedKeys.add(columnKey);
+  else selectedKeys.delete(columnKey);
+
+  return allColumns.filter((column) => selectedKeys.has(column.key));
+}
+
 export function fnCountSelectedFilters(form: FormGroup): number {
   return Object.values(form.controls).filter((control) => {
     const value = control.value;

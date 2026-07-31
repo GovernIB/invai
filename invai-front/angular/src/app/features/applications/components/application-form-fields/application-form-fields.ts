@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { CommissionType } from '@features/commissions/commissions.model';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { Textarea } from 'primeng/textarea';
@@ -7,24 +8,34 @@ import { Textarea } from 'primeng/textarea';
 import {
   APPLICATION_ADMINISTRATIVE_UNIT_OPTIONS,
   APPLICATION_CATEGORY_OPTIONS,
-  APPLICATION_COMMISSION_OPTIONS,
+  APPLICATION_COMMISSION_TYPE_LABELS,
   APPLICATION_INFORMATION_SYSTEM_OPTIONS,
   APPLICATION_SCOPE_OPTIONS,
 } from '../../applications.constants';
 import {
+  APPLICATION_CODE_MAX_LENGTH,
+  APPLICATION_PREFIX_MAX_LENGTH,
   ApplicationCommonFormControls,
   ApplicationDetailFormControls,
 } from '../../forms/application-form.factory';
-import { ApplicationSelectOptions } from '../../services/application-options.service';
+import {
+  ApplicationCommissionOption,
+  ApplicationSelectOptions,
+} from '../../services/application-options.service';
 
 export interface ApplicationFormFieldLabels {
   application: string;
   category: string;
   informationSystem: string;
   scope: string;
-  commission: string;
+  commissionSectionTitle: string;
+  commissionName: string;
+  commissionExpedientNumber: string;
+  commissionApprovalDate: string;
+  commissionType: string;
   prefix: string;
   administrativeUnit: string;
+  conselleria: string;
   description: string;
   code?: string;
   creationDate?: string;
@@ -50,11 +61,17 @@ export class ApplicationFormFields {
   labels = input.required<ApplicationFormFieldLabels>();
   idPrefix = input.required<string>();
   requiredError = input.required<string>();
+  prefixMaxLengthError = input.required<string>();
   codeMinLengthError = input<string | null>(null);
+  codeMaxLengthError = input<string | null>(null);
   selectPlaceholder = input.required<string>();
   codeControl = input<FormControl<string> | null>(null);
   auditControls = input<ApplicationAuditFormControls | null>(null);
   options = input<Partial<ApplicationSelectOptions> | null>(null);
+  commissionSelected = output<ApplicationCommissionOption | null>();
+
+  protected readonly prefixMaxLength = APPLICATION_PREFIX_MAX_LENGTH;
+  protected readonly codeMaxLength = APPLICATION_CODE_MAX_LENGTH;
 
   protected get categoryOptions() {
     return this.options()?.categories ?? APPLICATION_CATEGORY_OPTIONS;
@@ -69,7 +86,7 @@ export class ApplicationFormFields {
   }
 
   protected get commissionOptions() {
-    return this.options()?.commissions ?? APPLICATION_COMMISSION_OPTIONS;
+    return this.options()?.commissions ?? [];
   }
 
   protected get administrativeUnitOptions() {
@@ -80,10 +97,30 @@ export class ApplicationFormFields {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected prefixError(control: AbstractControl<unknown>): string {
+    return control.hasError('maxlength') ? this.prefixMaxLengthError() : this.requiredError();
+  }
+
   protected codeError(control: AbstractControl<unknown>): string {
-    return control.hasError('minlength')
-      ? (this.codeMinLengthError() ?? this.requiredError())
-      : this.requiredError();
+    if (control.hasError('minlength')) {
+      return this.codeMinLengthError() ?? this.requiredError();
+    }
+
+    if (control.hasError('maxlength')) {
+      return this.codeMaxLengthError() ?? this.requiredError();
+    }
+
+    return this.requiredError();
+  }
+
+  protected selectCommission(commissionId: number | null): void {
+    const selected =
+      this.commissionOptions.find((option) => option.value === commissionId) ?? null;
+    this.commissionSelected.emit(selected);
+  }
+
+  protected commissionTypeLabel(type: CommissionType | null): string {
+    return type ? APPLICATION_COMMISSION_TYPE_LABELS[type] : '';
   }
 
   protected fieldId(controlName: string): string {

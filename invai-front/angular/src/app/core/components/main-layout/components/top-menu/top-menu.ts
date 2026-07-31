@@ -35,7 +35,7 @@ export class TopMenu {
     } else {
       this._sidebarService.setMenuItems(menuItem.items ?? []);
       this._sidebarService.setVisibility(true);
-      this._sidebarService.setCollapsed(false);
+      this._sidebarService.revealMenu();
     }
   }
 

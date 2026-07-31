@@ -1,0 +1,93 @@
+.application-development {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.application-development__field,
+.application-development__observations {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.application-development__field > label,
+.application-development__observations > label {
+  color: var(--p-text-muted-color);
+  font-size: 0.75rem;
+}
+
+.application-development__source-code {
+  display: flex;
+  width: 100%;
+  border-radius: var(--p-inputtext-border-radius);
+}
+
+.application-development__source-code:focus-within {
+  box-shadow: var(--p-inputtext-focus-ring-shadow);
+  outline: var(--p-inputtext-focus-ring-width) var(--p-inputtext-focus-ring-style)
+    var(--p-inputtext-focus-ring-color);
+  outline-offset: var(--p-inputtext-focus-ring-offset);
+}
+
+.application-development__source-code > input {
+  width: 100%;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.application-development__source-code:focus-within > input:enabled:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.application-development__external-link {
+  display: inline-flex;
+  min-width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--p-primary-contrast-color);
+  background: var(--p-primary-color);
+  border-radius: 0 var(--p-border-radius-md) var(--p-border-radius-md) 0;
+  text-decoration: none;
+}
+
+.application-development__external-link--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.application-development__resource {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.application-development__resource-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.application-development__resource-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.application-development__documentation {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.application-development__error {
+  margin: 0;
+  color: var(--p-red-600, #dc2626);
+  font-size: 0.75rem;
+}
+
+:host ::ng-deep .application-development__observations > p-editor {
+  width: 100%;
+}

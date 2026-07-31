@@ -1,5 +1,7 @@
 <div class="application-form-fields__grid">
-  <div class="application-form-fields__field">
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-4"
+  >
     <label [for]="fieldId('application')">{{ labels().application }}</label>
     <input
       [id]="fieldId('application')"
@@ -18,7 +20,9 @@
     }
   </div>
 
-  <div class="application-form-fields__field">
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-3"
+  >
     <label [id]="fieldId('category-label')" [for]="fieldId('category')">
       {{ labels().category }}
     </label>
@@ -26,6 +30,8 @@
       [inputId]="fieldId('category')"
       [formControl]="controls().category"
       [ariaLabelledBy]="fieldId('category-label')"
+      [ariaFilterLabel]="labels().category"
+      [filter]="true"
       [options]="categoryOptions"
       [placeholder]="selectPlaceholder()"
       [attr.aria-invalid]="isInvalid(controls().category)"
@@ -40,7 +46,9 @@
     }
   </div>
 
-  <div class="application-form-fields__field">
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-3"
+  >
     <label [id]="fieldId('information-system-label')" [for]="fieldId('information-system')">
       {{ labels().informationSystem }}
     </label>
@@ -48,6 +56,8 @@
       [inputId]="fieldId('information-system')"
       [formControl]="controls().informationSystem"
       [ariaLabelledBy]="fieldId('information-system-label')"
+      [ariaFilterLabel]="labels().informationSystem"
+      [filter]="true"
       [options]="informationSystemOptions"
       [placeholder]="selectPlaceholder()"
       [attr.aria-invalid]="isInvalid(controls().informationSystem)"
@@ -64,7 +74,9 @@
     }
   </div>
 
-  <div class="application-form-fields__field">
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-2"
+  >
     <label [id]="fieldId('scope-label')" [for]="fieldId('scope')">
       {{ labels().scope }}
     </label>
@@ -72,6 +84,8 @@
       [inputId]="fieldId('scope')"
       [formControl]="controls().scope"
       [ariaLabelledBy]="fieldId('scope-label')"
+      [ariaFilterLabel]="labels().scope"
+      [filter]="true"
       [options]="scopeOptions"
       [placeholder]="selectPlaceholder()"
       [attr.aria-invalid]="isInvalid(controls().scope)"
@@ -86,53 +100,37 @@
     }
   </div>
 
-  <div class="application-form-fields__field">
-    <label [id]="fieldId('commission-label')" [for]="fieldId('commission')">
-      {{ labels().commission }}
-    </label>
-    <p-select
-      [inputId]="fieldId('commission')"
-      [formControl]="controls().commission"
-      [ariaLabelledBy]="fieldId('commission-label')"
-      [options]="commissionOptions"
-      [placeholder]="selectPlaceholder()"
-      [attr.aria-invalid]="isInvalid(controls().commission)"
-      [attr.aria-describedby]="isInvalid(controls().commission) ? errorId('commission') : null"
-      optionLabel="label"
-      optionValue="value"
-    />
-    @if (isInvalid(controls().commission)) {
-      <small [id]="errorId('commission')" class="application-form-fields__error">
-        {{ requiredError() }}
-      </small>
-    }
-  </div>
-
-  <div class="application-form-fields__field">
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-2"
+  >
     <label [for]="fieldId('prefix')">{{ labels().prefix }}</label>
     <input
       [id]="fieldId('prefix')"
       type="text"
       pInputText
       [formControl]="controls().prefix"
+      [attr.maxlength]="prefixMaxLength"
       [attr.aria-invalid]="isInvalid(controls().prefix)"
       [attr.aria-describedby]="isInvalid(controls().prefix) ? errorId('prefix') : null"
     />
     @if (isInvalid(controls().prefix)) {
       <small [id]="errorId('prefix')" class="application-form-fields__error">
-        {{ requiredError() }}
+        {{ prefixError(controls().prefix) }}
       </small>
     }
   </div>
 
   @if (codeControl(); as code) {
-    <div class="application-form-fields__field">
+    <div
+      class="application-form-fields__field application-form-fields__field--desktop-2"
+    >
       <label [for]="fieldId('code')">{{ labels().code }}</label>
       <input
         [id]="fieldId('code')"
         type="text"
         pInputText
         [formControl]="code"
+        [attr.maxlength]="codeMaxLength"
         [attr.aria-invalid]="isInvalid(code)"
         [attr.aria-describedby]="isInvalid(code) ? errorId('code') : null"
       />
@@ -144,7 +142,9 @@
     </div>
   }
 
-  <div class="application-form-fields__field">
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-4"
+  >
     <label [id]="fieldId('administrative-unit-label')" [for]="fieldId('administrative-unit')">
       {{ labels().administrativeUnit }}
     </label>
@@ -152,6 +152,8 @@
       [inputId]="fieldId('administrative-unit')"
       [formControl]="controls().administrativeUnit"
       [ariaLabelledBy]="fieldId('administrative-unit-label')"
+      [ariaFilterLabel]="labels().administrativeUnit"
+      [filter]="true"
       [options]="administrativeUnitOptions"
       [placeholder]="selectPlaceholder()"
       [attr.aria-invalid]="isInvalid(controls().administrativeUnit)"
@@ -168,8 +170,102 @@
     }
   </div>
 
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-4"
+  >
+    <label [for]="fieldId('conselleria')">{{ labels().conselleria }}</label>
+    <input
+      [id]="fieldId('conselleria')"
+      type="text"
+      pInputText
+      [formControl]="controls().conselleria"
+      aria-readonly="true"
+    />
+  </div>
+
+  <fieldset class="application-form-fields__commission">
+    <legend>{{ labels().commissionSectionTitle }}</legend>
+
+    <div class="application-form-fields__commission-grid">
+      <div
+        class="application-form-fields__field application-form-fields__field--desktop-4"
+      >
+        <label [id]="fieldId('commission-label')" [for]="fieldId('commission')">
+          {{ labels().commissionName }}
+        </label>
+        <p-select
+          [inputId]="fieldId('commission')"
+          [formControl]="controls().commission"
+          [ariaLabelledBy]="fieldId('commission-label')"
+          [ariaFilterLabel]="labels().commissionName"
+          [filter]="true"
+          [options]="commissionOptions"
+          [placeholder]="selectPlaceholder()"
+          [attr.aria-invalid]="isInvalid(controls().commission)"
+          [attr.aria-describedby]="
+            isInvalid(controls().commission) ? errorId('commission') : null
+          "
+          optionLabel="label"
+          optionValue="value"
+          (onChange)="selectCommission($event.value)"
+        />
+        @if (isInvalid(controls().commission)) {
+          <small [id]="errorId('commission')" class="application-form-fields__error">
+            {{ requiredError() }}
+          </small>
+        }
+      </div>
+
+      <div
+        class="application-form-fields__field application-form-fields__field--desktop-3"
+      >
+        <label [for]="fieldId('commission-expedient-number')">
+          {{ labels().commissionExpedientNumber }}
+        </label>
+        <input
+          [id]="fieldId('commission-expedient-number')"
+          type="text"
+          pInputText
+          [formControl]="controls().commissionExpedientNumber"
+          aria-readonly="true"
+        />
+      </div>
+
+      <div
+        class="application-form-fields__field application-form-fields__field--desktop-3"
+      >
+        <label [for]="fieldId('commission-approval-date')">
+          {{ labels().commissionApprovalDate }}
+        </label>
+        <input
+          [id]="fieldId('commission-approval-date')"
+          type="date"
+          pInputText
+          [formControl]="controls().commissionApprovalDate"
+          aria-readonly="true"
+        />
+      </div>
+
+      <div
+        class="application-form-fields__field application-form-fields__field--desktop-2"
+      >
+        <label [for]="fieldId('commission-type')">{{ labels().commissionType }}</label>
+        <input
+          [id]="fieldId('commission-type')"
+          type="text"
+          pInputText
+          [value]="commissionTypeLabel(controls().commissionType.value)"
+          aria-readonly="true"
+          disabled
+        />
+      </div>
+    </div>
+  </fieldset>
+
   @if (auditControls(); as audit) {
-    <div class="application-form-fields__field">
+    <div
+      class="application-form-fields__field application-form-fields__field--desktop-4"
+    >
       <label [for]="fieldId('creation-date')">{{ labels().creationDate }}</label>
       <input
         [id]="fieldId('creation-date')"
@@ -179,7 +275,9 @@
       />
     </div>
 
-    <div class="application-form-fields__field">
+    <div
+      class="application-form-fields__field application-form-fields__field--desktop-4"
+    >
       <label [for]="fieldId('modification-date')">{{ labels().modificationDate }}</label>
       <input
         [id]="fieldId('modification-date')"
@@ -189,7 +287,9 @@
       />
     </div>
 
-    <div class="application-form-fields__field">
+    <div
+      class="application-form-fields__field application-form-fields__field--desktop-4"
+    >
       <label [for]="fieldId('withdrawal-date')">{{ labels().withdrawalDate }}</label>
       <input
         [id]="fieldId('withdrawal-date')"

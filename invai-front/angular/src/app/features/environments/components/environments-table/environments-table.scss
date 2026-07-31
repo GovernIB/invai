@@ -1,0 +1,80 @@
+app-environments-table {
+  display: block;
+
+  .invai-table-loading-container {
+    position: relative;
+  }
+
+  .invai-table-loading-shield {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    background: transparent;
+    cursor: progress;
+  }
+
+  .invai-table-refresh-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    overflow: hidden;
+    background: var(--p-primary-color);
+  }
+
+  .invai-scrollable-table .p-datatable-table {
+    min-width: max-content;
+  }
+
+  .invai-scrollable-table :is(th, td) {
+    white-space: nowrap;
+  }
+
+  .invai-scrollable-table {
+    .invai-table-actions-column {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      width: 3.5rem;
+      min-width: 3.5rem;
+      max-width: 3.5rem;
+      box-sizing: border-box;
+      text-align: center;
+      background: var(--p-datatable-body-cell-background, var(--p-content-background, #fff));
+      border-left: 1px solid
+        var(--p-datatable-body-cell-border-color, var(--p-content-border-color, #d9e2ef));
+    }
+
+    .p-datatable-thead > tr > .invai-table-actions-column {
+      z-index: 4;
+      background: var(--p-datatable-header-cell-background, var(--p-content-background, #fff));
+    }
+
+    .invai-table-actions-column .p-button {
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+    }
+  }
+
+  .invai-table-header-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .invai-table-header-label {
+    min-width: 0;
+    white-space: normal;
+  }
+}
+
+.maintenance-row-menu.p-menu {
+  min-width: 9rem;
+  padding: 0.5rem;
+  border-radius: var(--p-border-radius-md, 0.5rem);
+  box-shadow: 0 0.25rem 0.875rem rgb(15 23 42 / 14%);
+}

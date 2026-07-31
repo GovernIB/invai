@@ -1,8 +1,9 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
-import { cachedRequest, pageParamsCacheKey } from '@shared/utils/service-cache.utils';
+import { cachedRequest } from '@shared/utils/service-cache.utils';
 import { Observable, tap } from 'rxjs';
 
 import { Commission, CommissionInput, CommissionPageParams } from '../commissions.model';
@@ -14,11 +15,14 @@ export class CommissionsService extends BaseApiService {
   private readonly _commissionsCache = new Map<string, Observable<SpringPage<Commission>>>();
 
   getAll(params?: CommissionPageParams): Observable<SpringPage<Commission>> {
-    return cachedRequest(this._commissionsCache, pageParamsCacheKey(params), () =>
+    const requestFactory = () =>
       this.http.get<SpringPage<Commission>>(this.url(), {
-        params: toPageHttpParams(params),
-      }),
-    );
+        params: this.toHttpParams(params),
+      });
+
+    if (params?.quickSearch?.trim()) return requestFactory();
+
+    return cachedRequest(this._commissionsCache, this.pageCacheKey(params), requestFactory);
   }
 
   getById(id: number): Observable<Commission> {
@@ -39,5 +43,44 @@ export class CommissionsService extends BaseApiService {
 
   clearCache(): void {
     this._commissionsCache.clear();
+  }
+
+  private toHttpParams(params?: CommissionPageParams): HttpParams | undefined {
+    if (!params) return undefined;
+
+    let httpParams = toPageHttpParams(params) ?? new HttpParams();
+    const criteria: Record<string, string | number | undefined> = {
+      quickSearch: params.quickSearch?.trim() || undefined,
+      name: params.name,
+      nameEs: params.nameEs,
+      expedientNumber: params.expedientNumber,
+      approvalDateFrom: params.approvalDateFrom,
+      approvalDateTo: params.approvalDateTo,
+      commissionType: params.commissionType,
+      statusId: params.statusId,
+    };
+
+    Object.entries(criteria).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') httpParams = httpParams.set(key, String(value));
+    });
+
+    return httpParams.keys().length ? httpParams : undefined;
+  }
+
+  private pageCacheKey(params?: CommissionPageParams): string {
+    const sort = Array.isArray(params?.sort) ? params.sort.join('|') : (params?.sort ?? '');
+
+    return JSON.stringify({
+      page: params?.page ?? null,
+      size: params?.size ?? null,
+      sort,
+      name: params?.name ?? '',
+      nameEs: params?.nameEs ?? '',
+      expedientNumber: params?.expedientNumber ?? '',
+      approvalDateFrom: params?.approvalDateFrom ?? '',
+      approvalDateTo: params?.approvalDateTo ?? '',
+      commissionType: params?.commissionType ?? null,
+      statusId: params?.statusId ?? null,
+    });
   }
 }

@@ -1,0 +1,64 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="environments-filter-code"
+        class="w-full"
+        type="text"
+        formControlName="code"
+        pInputText
+      />
+      <label id="environments-filter-code-label" for="environments-filter-code">
+        {{ labels().code }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="environments-filter-name"
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+      />
+      <label id="environments-filter-name-label" for="environments-filter-name">
+        {{ labels().name }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="environments-filter-name-es"
+        class="w-full"
+        type="text"
+        formControlName="nameEs"
+        pInputText
+      />
+      <label id="environments-filter-name-es-label" for="environments-filter-name-es">
+        {{ labels().nameEs }}
+      </label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="environments-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="environments-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="environments-filter-status-label" for="environments-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>
