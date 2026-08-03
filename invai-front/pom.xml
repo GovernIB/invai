@@ -4,7 +4,7 @@
     <parent>
         <artifactId>invai</artifactId>
         <groupId>es.caib.invai</groupId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -12,16 +12,6 @@
     <packaging>war</packaging>
     <name>INVAI - FRONT</name>
     <description>Front de INVAI</description>
-
-    <properties>
-        <loginib-rest-api.version>2.5.0</loginib-rest-api.version>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.spec.javax.servlet</groupId>
-            <artifactId>jboss-servlet-api_4.0_spec</artifactId>
-        </dependency>
-    </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -64,6 +54,8 @@
                             <directory>${project.basedir}/dist/invai_front/browser</directory>
                         </resource>
                     </webResources>
+                    <packagingExcludes>angular/**, **/angular/**</packagingExcludes>
+                    <warSourceExcludes>angular/**, **/angular/**</warSourceExcludes>
                 </configuration>
             </plugin>
         </plugins>

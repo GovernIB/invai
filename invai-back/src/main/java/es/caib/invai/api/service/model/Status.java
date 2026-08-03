@@ -7,7 +7,7 @@ import lombok.Setter;
  * Rich domain dictionary object tracking structural entity metadata labels and descriptions
  * matching distinct lifecycle state records.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter

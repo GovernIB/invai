@@ -1,19 +1,20 @@
 package es.caib.invai.api.ejb;
 
-import es.caib.invai.api.interna.category.DTO.CategoryInputDTO;
-import es.caib.invai.api.interna.category.DTO.CategoryOutputDTO;
-import es.caib.invai.api.utils.SecurityUtils;
+import es.caib.invai.api.interna.maintenance.category.DTO.CategoryInputDTO;
+import es.caib.invai.api.interna.maintenance.category.DTO.CategoryOutputDTO;
 import es.caib.invai.api.service.mapper.CategoryMapper;
+import es.caib.invai.api.persistence.repository.category.CategoryCriteria;
 import es.caib.invai.api.persistence.repository.category.CategoryRepository;
-import es.caib.invai.api.persistence.repository.application.ApplicationRepository;
+import es.caib.invai.api.persistence.repository.application.core.ApplicationRepository;
 import es.caib.invai.api.service.facade.CategoryService;
 import es.caib.invai.api.service.model.Category;
 import es.caib.invai.api.exception.BusinessRuleException;
+import es.caib.invai.api.utils.Constants;
+import es.caib.invai.api.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +22,9 @@ import java.time.LocalDateTime;
 
 /**
  * Facade service implementation for administrative taxonomy Categories.
- * Supports basic CRUD mechanics and soft deletes.
+ * Handles structural length checks, status assignments, and filtering via standard pagination rules.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Service
 @Slf4j
@@ -40,110 +41,150 @@ public class CategoryServiceFacadeBean implements CategoryService {
     private ApplicationRepository applicationRepository;
 
     /**
-     * Resolves a Category object configuration based on its primary key.
+     * Retrieves an active category configuration by its unique database identifier.
+     * Evaluates logical deletion properties and structural lifecycle status flags.
      *
-     * @param id target primary identifier
-     * @return mapped element properties as {@link CategoryOutputDTO}
-     * @throws BusinessRuleException if target key entries are not present within records
+     * @param id the unique category metadata record identity pointer
+     * @return the mapped {@link CategoryOutputDTO} response presentation payload
+     * @throws BusinessRuleException if the identity does not match any active record or has been logically soft-deleted
      */
     @Override
     @Transactional(readOnly = true)
     public CategoryOutputDTO getById(Long id) {
-        log.info("Facade: Fetching category by id: {}", id);
+        log.info("Facade: Fetching category by ID: {}", id);
         Category category = categoryRepository.findById(id);
+
         if (category == null) {
-            throw new BusinessRuleException("exception.category.notfound");
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
         }
+
         return categoryMapper.toResponse(category);
     }
 
     /**
-     * Evaluates a paginated sequence collection across available instances.
+     * Gets a paginated distribution framework containing category records matching pagination rules.
      *
-     * @param pageable sorting configuration boundaries
-     * @return partitioned items mapping to response shapes
+     * @param filter   dynamic search criteria used to build the query specification
+     * @param pageable sorting parameters and tracking page metadata pagination constraints
+     * @return a structured page element populated with converted {@link CategoryOutputDTO} results
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<CategoryOutputDTO> getAll(Pageable pageable) {
-        log.info("Facade: Fetching paged categories");
-        return categoryRepository.findAll(pageable).map(categoryMapper::toResponse);
+    public Page<CategoryOutputDTO> getAll(CategoryCriteria filter, Pageable pageable) {
+        log.info("Facade: Fetching categories via pagination boundaries");
+        Page<Category> domainPage = categoryRepository.findAll(filter, pageable);
+        return domainPage.map(categoryMapper::toResponse);
     }
 
     /**
-     * Persists new category taxonomy instances after confirming label descriptor uniqueness rules.
+     * Validates structural constraints and registers a new category record within the core.
+     * Enforces domain text sanitization and unicity rules regarding the taxonomy name descriptor.
      *
-     * @param inputDTO parameters framing item details
-     * @return operational object snapshot data structures
-     * @throws BusinessRuleException if name metrics already map to active elements
+     * @param inputDTO data transfer container holding properties describing the target category record
+     * @return the resulting persistent instance transformed into an {@link CategoryOutputDTO} structure
+     * @throws BusinessRuleException if text formats fail physical bounds, or if the name descriptor
+     * conflicts with an already registered category taxonomy entry
      */
     @Override
     public CategoryOutputDTO create(CategoryInputDTO inputDTO) {
-        log.info("Facade: Creating category with name: {}", inputDTO.getName());
+        log.info("Facade: Creating new category record with name: {}", inputDTO.getName());
+
+        Utils.sanitize(inputDTO);
 
         if (categoryRepository.existsByNameAndDeletedAtIsNull(inputDTO.getName())) {
-            throw new BusinessRuleException("exception.category.duplicated");
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_DUPLICATED);
         }
 
         Category model = categoryMapper.toModelFromInput(inputDTO);
+
         Category savedModel = categoryRepository.create(model);
         return categoryMapper.toResponse(savedModel);
     }
 
     /**
-     * Alters properties on active configuration datasets.
+     * Mutates an existing active category entity property by replacing metrics with input payload details.
+     * Ensures updates do not overlap unique constraint parameters allocated to sibling records.
      *
-     * @param id       identity values index tracking structural items
-     * @param inputDTO modified context objects mapping payloads
-     * @return structural outputs reflecting new state properties
-     * @throws BusinessRuleException if the element is not found or name changes overwrite independent entries
+     * @param id       the unique database resource key indexing the record targeting modification
+     * @param inputDTO data update container outlining property changes intended for persistence merge operations
+     * @return the modified domain representation mapped down into an {@link CategoryOutputDTO}
+     * @throws BusinessRuleException if the resource key is non-existent, has been marked soft-deleted,
+     * or if input data maps identifier fields owned by another category
      */
     @Override
     public CategoryOutputDTO update(Long id, CategoryInputDTO inputDTO) {
-        log.info("Facade: Updating category ID: {}", id);
+        log.info("Facade: Updating category with ID: {}", id);
 
         Category existing = categoryRepository.findById(id);
         if (existing == null) {
-            throw new BusinessRuleException("exception.category.notfound");
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
         }
 
+        Utils.sanitize(inputDTO);
+
         if (categoryRepository.existsByNameAndIdNotAndDeletedAtIsNull(inputDTO.getName(), id)) {
-            throw new BusinessRuleException("exception.category.duplicated");
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_DUPLICATED);
         }
 
         categoryMapper.updateModelFromInput(inputDTO, existing);
-        Category updatedModel = categoryRepository.update(existing, id);
-        return categoryMapper.toResponse(updatedModel);
+        return categoryMapper.toResponse(categoryRepository.update(existing, id));
     }
 
     /**
-     * Finalizes execution pathways logic scopes routing parameter assets towards data deletion states.
-     * Validates domain constraints by checking cross-context dependencies against the application port.
+     * Executes a logical soft-delete transaction lifecycle phase over a category record.
+     * Shifts state configurations to inactive indicators and logs audit metrics profiling execution time and session user.
      *
-     * @param id row metadata index to update
-     * @throws BusinessRuleException if matching data criteria is absent or target configuration profile
-     * remains actively bound to active application assets
+     * @param id the target identifier mapping the category instance intended for deactivation
+     * @throws BusinessRuleException if matching category instance descriptions cannot be found, are already soft-deleted,
+     * or remain actively bound to active application assets
      */
     @Override
     public void delete(Long id) {
-        log.info("Facade: Executing logical delete for category ID: {}", id);
+        log.info("Facade: Logically deleting category with ID: {}", id);
         Category existing = categoryRepository.findById(id);
+
         if (existing == null) {
-            throw new BusinessRuleException("exception.category.notfound");
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
+        }
+
+        if (existing.getDeletedAt() != null) {
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_ACTIVE);
         }
 
         if (applicationRepository.existsByCategoryId(id)) {
-            throw new BusinessRuleException("{exception.category.delete.hasdependencies}");
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_DELETE_HAS_DEPENDENCIES);
         }
 
         existing.setDeletedAt(LocalDateTime.now());
-        existing.setDeletedBy("SYSTEM");
-
-        OidcUserInfo currentUser = (OidcUserInfo) SecurityUtils.getCurrentUser();
-        if (currentUser != null && currentUser.getClaims().get("preferred_username") != null) {
-            existing.setDeletedBy((String) currentUser.getClaims().get("preferred_username"));
-        }
+        existing.setDeletedBy(Utils.resolveCurrentUsername());
 
         categoryRepository.delete(existing);
+    }
+
+    /**
+     * Reactivates a logically soft-deleted category record back to active state.
+     *
+     * @param id the target identifier mapping the category instance intended for reactivation
+     * @return the reactivated domain representation mapped into an {@link CategoryOutputDTO}
+     * @throws BusinessRuleException if matching category cannot be found or is already active
+     */
+    @Override
+    public CategoryOutputDTO reactivate(Long id) {
+        log.info("Facade: Reactivating category with ID: {}", id);
+        Category existing = categoryRepository.findById(id);
+
+        if (existing == null) {
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
+        }
+
+        if (existing.getDeletedAt() == null) {
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_ACTIVE);
+        }
+
+        existing.setDeletedAt(null);
+        existing.setDeletedBy(null);
+
+        Category updatedModel = categoryRepository.update(existing, id);
+        return categoryMapper.toResponse(updatedModel);
     }
 }

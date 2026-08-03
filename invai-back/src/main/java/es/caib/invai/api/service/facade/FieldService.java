@@ -1,7 +1,8 @@
 package es.caib.invai.api.service.facade;
 
-import es.caib.invai.api.interna.field.DTO.FieldInputDTO;
-import es.caib.invai.api.interna.field.DTO.FieldOutputDTO;
+import es.caib.invai.api.interna.maintenance.field.DTO.FieldInputDTO;
+import es.caib.invai.api.interna.maintenance.field.DTO.FieldOutputDTO;
+import es.caib.invai.api.persistence.repository.field.FieldCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  * targeting Functional Area Fields ({@code Field}).
  * Acts as the primary application service boundary exposed to external API web controllers.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface FieldService {
 
@@ -26,10 +27,11 @@ public interface FieldService {
     /**
      * Extracts a paginated and sorted segment container enclosing all active functional fields.
      *
+     * @param filter   criteria DTO capturing dynamic search filters and full-text keyword parameters
      * @param pageable pagination threshold constraints and structural sorting rules
      * @return a page wrapper grouping matching outbound data DTO schemas
      */
-    Page<FieldOutputDTO> getAll(Pageable pageable);
+    Page<FieldOutputDTO> getAll(FieldCriteria filter, Pageable pageable);
 
     /**
      * Validates domain invariants and creates a new functional area field record in the system registry.
@@ -56,4 +58,13 @@ public interface FieldService {
      * @param id primary key reference index pinpointing the registry row targeted for deactivation
      */
     void delete(Long id);
+
+    /**
+     * Reactivates a logically soft-deleted functional area field back to active state.
+     *
+     * @param id the target identifier mapping the field instance intended for reactivation
+     * @return the reactivated domain representation mapped into an {@link FieldOutputDTO}
+     * @throws RuntimeException if the record is missing or already active
+     */
+    FieldOutputDTO reactivate(Long id);
 }

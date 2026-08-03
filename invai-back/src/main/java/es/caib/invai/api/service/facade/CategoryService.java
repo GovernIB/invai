@@ -1,7 +1,8 @@
 package es.caib.invai.api.service.facade;
 
-import es.caib.invai.api.interna.category.DTO.CategoryInputDTO;
-import es.caib.invai.api.interna.category.DTO.CategoryOutputDTO;
+import es.caib.invai.api.interna.maintenance.category.DTO.CategoryInputDTO;
+import es.caib.invai.api.interna.maintenance.category.DTO.CategoryOutputDTO;
+import es.caib.invai.api.persistence.repository.category.CategoryCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  * targeting Taxonomy Categories ({@code Category}).
  * Acts as the primary application service boundary exposed to external API web controllers.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface CategoryService {
 
@@ -26,10 +27,11 @@ public interface CategoryService {
     /**
      * Extracts a paginated and sorted segment container enclosing all active asset taxonomy categories.
      *
+     * @param filter   dynamic search criteria used to build the query specification
      * @param pageable pagination threshold constraints and structural sorting rules
      * @return a page wrapper grouping matching outbound data DTO schemas
      */
-    Page<CategoryOutputDTO> getAll(Pageable pageable);
+    Page<CategoryOutputDTO> getAll(CategoryCriteria filter, Pageable pageable);
 
     /**
      * Validates domain invariants and creates a new taxonomy category record in the system registry.
@@ -58,4 +60,13 @@ public interface CategoryService {
      * @param id primary key reference index pinpointing the registry row targeted for deactivation
      */
     void delete(Long id);
+
+    /**
+     * Reactivates a logically soft-deleted taxonomy category back to active state.
+     *
+     * @param id the target identifier mapping the category instance intended for reactivation
+     * @return the reactivated domain representation mapped into an {@link CategoryOutputDTO}
+     * @throws RuntimeException if the record is missing or already active
+     */
+    CategoryOutputDTO reactivate(Long id);
 }

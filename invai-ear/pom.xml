@@ -4,7 +4,7 @@
     <parent>
         <groupId>es.caib.invai</groupId>
         <artifactId>invai</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </parent>
 
     <artifactId>invai-ear</artifactId>
@@ -14,15 +14,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-8.0</artifactId>
-            <type>pom</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
+            <groupId>es.caib.invai</groupId>
+            <artifactId>invai-back-externa</artifactId>
+            <type>war</type>
         </dependency>
         <dependency>
             <groupId>es.caib.invai</groupId>
@@ -42,19 +36,25 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-ear-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <generateApplicationXml>true</generateApplicationXml>
                     <defaultLibBundleDir>lib</defaultLibBundleDir>
                     <includeLibInApplicationXml>false</includeLibInApplicationXml>
                     <outputFileNameMapping>@{artifactId}@-@{version}@.@{extension}@</outputFileNameMapping>
-                    <version>8</version>
+                    <version>10</version>
                     <modules>
+                        <webModule>
+                            <groupId>es.caib.invai</groupId>
+                            <artifactId>invai-back-externa</artifactId>
+                            <bundleFileName>invai-back-externa.war</bundleFileName>
+                            <contextRoot>/invaiapi/externa</contextRoot>
+                        </webModule>
                         <webModule>
                             <groupId>es.caib.invai</groupId>
                             <artifactId>invai-back</artifactId>
                             <bundleFileName>invai-back.war</bundleFileName>
-                            <contextRoot>/invaiapi</contextRoot>
+                            <contextRoot>/invaiapi/interna</contextRoot>
                         </webModule>
                         <webModule>
                             <groupId>es.caib.invai</groupId>

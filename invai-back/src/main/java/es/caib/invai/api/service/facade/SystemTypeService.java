@@ -1,7 +1,8 @@
 package es.caib.invai.api.service.facade;
 
-import es.caib.invai.api.interna.systemType.DTO.SystemTypeInputDTO;
-import es.caib.invai.api.interna.systemType.DTO.SystemTypeOutputDTO;
+import es.caib.invai.api.interna.maintenance.systemType.DTO.SystemTypeInputDTO;
+import es.caib.invai.api.interna.maintenance.systemType.DTO.SystemTypeOutputDTO;
+import es.caib.invai.api.persistence.repository.systemType.SystemTypeCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  * targeting System Infrastructure Classifications ({@code SystemType}).
  * Acts as the primary application service boundary exposed to external API web controllers.
  *
- * @since 1.0.0
+ * @since 1.0.2
  */
 public interface SystemTypeService {
 
@@ -26,10 +27,11 @@ public interface SystemTypeService {
     /**
      * Extracts a paginated and sorted segment container enclosing all active core system types.
      *
+     * @param filter   DTO containing dynamic search predicates used to build the query
      * @param pageable pagination threshold constraints and structural sorting rules
      * @return a page wrapper grouping matching outbound data DTO schemas
      */
-    Page<SystemTypeOutputDTO> getAll(Pageable pageable);
+    Page<SystemTypeOutputDTO> getAll(SystemTypeCriteria filter, Pageable pageable);
 
     /**
      * Validates domain invariants and creates a new system type configuration record in the system registry.
@@ -56,4 +58,13 @@ public interface SystemTypeService {
      * @param id primary key reference index pinpointing the registry row targeted for deactivation
      */
     void delete(Long id);
+
+    /**
+     * Reactivates a logically soft-deleted system type back to active state.
+     *
+     * @param id the target identifier mapping the system type instance intended for reactivation
+     * @return the reactivated domain representation mapped into an {@link SystemTypeOutputDTO}
+     * @throws RuntimeException if the record is missing or already active
+     */
+    SystemTypeOutputDTO reactivate(Long id);
 }

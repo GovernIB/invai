@@ -2,13 +2,13 @@ package es.caib.invai.api.persistence.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * JPA persistent entity representing classification taxonomy Categories for registered corporate software profiles.
  * Implements historical auditing field inheritances by extending {@link BaseEntity}.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Entity
 @Table(name = "INV_CATEGORY")

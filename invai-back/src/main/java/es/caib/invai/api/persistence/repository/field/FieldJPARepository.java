@@ -4,6 +4,7 @@ import es.caib.invai.api.persistence.model.FieldEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Repository;
  * Native Spring Data JPA repository layer interface providing CRUD operations, custom query methods,
  * and constraint validation checks targeting live {@link FieldEntity} functional area records.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Repository
-public interface FieldJPARepository extends JpaRepository<FieldEntity, Long> {
+public interface FieldJPARepository extends JpaRepository<FieldEntity, Long>, JpaSpecificationExecutor<FieldEntity> {
 
     /**
      * Obtains a paginated and sorted slice of all active functional area nodes that have not

@@ -3,7 +3,7 @@ package es.caib.invai.api.persistence.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * targeting the {@code INV_SYSTEM_TYPE} database table.
  * Records structural variations to catalog configurations for compliance tracking.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Entity
 @Table(name = "INV_SYSTEM_TYPE_AUD")

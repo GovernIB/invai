@@ -8,7 +8,7 @@ import java.util.Map;
  * Standard data transfer object representing structured error responses returned by the API.
  * Contains localized informational metrics intended to be parsed by Frontend user interfaces.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @AllArgsConstructor

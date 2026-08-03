@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
  * Native Spring Data JPA repository layer interface providing basic CRUD database operations
  * targeting historical {@link FieldAudEntity} snapshots.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Repository
 public interface FieldAudJPARepository extends JpaRepository<FieldAudEntity, Long> {

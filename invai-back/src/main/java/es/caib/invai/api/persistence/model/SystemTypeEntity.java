@@ -3,13 +3,13 @@ package es.caib.invai.api.persistence.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * JPA persistent entity representing technical architectural System Types (e.g., REST Microservices, Web Apps).
  * Extends {@link BaseEntity} to enable native tracking vectors, timestamps, and audit structures.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Entity
 @Table(name = "INV_SYSTEM_TYPE")

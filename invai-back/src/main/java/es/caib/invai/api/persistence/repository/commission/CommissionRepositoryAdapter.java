@@ -4,12 +4,13 @@ import es.caib.invai.api.service.model.Commission;
 import es.caib.invai.api.persistence.model.CommissionEntity;
 import es.caib.invai.api.persistence.model.CommissionAudEntity;
 import es.caib.invai.api.service.mapper.CommissionMapper;
-import es.caib.invai.api.utils.SecurityUtils;
+import es.caib.invai.api.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,10 +20,11 @@ import java.time.LocalDateTime;
  * <p>
  * Orchestrates technical structural operations, routing operations across active database layers
  * ({@link CommissionJPARepository} and {@link CommissionAudJPARepository}) while utilizing
- * mapping layers to enforce decoupling rules.
+ * mapping layers to enforce decoupling rules and documenting audit trail deltas.
  * </p>
  *
- * @since 1.0.0
+ * @author invai-team
+ * @since 1.0.1
  */
 @Repository
 @Slf4j
@@ -46,7 +48,6 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
     @Override
     public Commission findById(Long id) {
         return commissionJPARepository.findById(id)
-                .filter(f -> f.getDeletedAt() == null)
                 .map(commissionMapper::toModel)
                 .orElse(null);
     }
@@ -58,8 +59,16 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
      * @return a page containing the mapped domain objects
      */
     @Override
-    public Page<Commission> findAll(Pageable pageable) {
-        return commissionJPARepository.findAllActive(pageable).map(commissionMapper::toModel);
+    public Page<Commission> findAll(CommissionCriteria criteria, Pageable pageable) {
+        log.info("Repository: Fetching paged applications using isolated Specification component");
+        try {
+            Specification<CommissionEntity> spec = CommissionSpecification.filterByCriteria(criteria);
+
+            return commissionJPARepository.findAll(spec,pageable).map(commissionMapper::toModel);
+        } catch (DataAccessException e) {
+            log.error("Repository error: Paged application collection fetch exception applied under dynamic filters", e);
+            throw e;
+        }
     }
 
     /**
@@ -83,6 +92,29 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
     @Override
     public boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Long id) {
         return commissionJPARepository.existsByNameAndIdNotAndDeletedAtIsNull(name, id);
+    }
+
+    /**
+     * Evaluates active tracking metrics to check for unique expedient dossier tracking code collisions.
+     *
+     * @param expedientNumber unique tracking dossier string reference
+     * @return {@code true} if an active entity matching the tracker exists, {@code false} otherwise
+     */
+    @Override
+    public boolean existsByExpedientNumberAndDeletedAtIsNull(String expedientNumber) {
+        return commissionJPARepository.existsByExpedientNumberAndDeletedAtIsNull(expedientNumber);
+    }
+
+    /**
+     * Verifies if alternative active entities share a requested corporate dossier reference tracking code.
+     *
+     * @param expedientNumber unique tracking dossier string reference
+     * @param id              row entry identification key sequence to exclude from the lookup evaluations
+     * @return {@code true} if a duplicate collision is discovered outside the index domain, {@code false} otherwise
+     */
+    @Override
+    public boolean existsByExpedientNumberAndIdNotAndDeletedAtIsNull(String expedientNumber, Long id) {
+        return commissionJPARepository.existsByExpedientNumberAndIdNotAndDeletedAtIsNull(expedientNumber, id);
     }
 
     /**
@@ -144,10 +176,11 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
 
     /**
      * Compiles point-in-time snapshot mirror values from active commission entries,
-     * resolves identity user info claims tokens, and saves historic compliance tracks.
+     * serializes the updated schema refactoring fields, resolves identity user tokens,
+     * and saves historic compliance tracks.
      *
      * @param entity the currently tracked persistent data state row entity map representation
-     * @param action systemic string token descriptor identifying database mutation contexts (e.g., INSERT, UPDATE, DELETE)
+     * @param action systemic string token descriptor identifying database mutation contexts
      */
     private void saveAuditRecord(CommissionEntity entity, String action) {
         CommissionAudEntity aud = new CommissionAudEntity();
@@ -156,22 +189,21 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
         aud.setName(entity.getName());
         aud.setNameEs(entity.getNameEs());
 
-        aud.setCreatedAt(entity.getCreatedAt());
-        aud.setCreatedBy(entity.getCreatedBy());
-        aud.setUpdatedAt(entity.getUpdatedAt());
-        aud.setUpdatedBy(entity.getUpdatedBy());
+        aud.setExpedientNumber(entity.getExpedientNumber());
+        aud.setApprovalDate(entity.getApprovalDate());
+        aud.setCommissionType(entity.getCommissionType() != null ? entity.getCommissionType().name() : null);
+
+        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+       
+                    aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
+            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
 
         aud.setAudAction(action);
         aud.setAuditDate(LocalDateTime.now());
-
-        OidcUserInfo currentUser = (OidcUserInfo) SecurityUtils.getCurrentUser();
-        if (currentUser != null && currentUser.getClaims().get("preferred_username") != null) {
-            aud.setAuditUser((String) currentUser.getClaims().get("preferred_username"));
-        } else {
-            aud.setAuditUser("SYSTEM");
-        }
+        aud.setAuditUser(Utils.resolveCurrentUsername());
 
         commissionAudJPARepository.save(aud);
     }

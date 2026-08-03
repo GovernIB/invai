@@ -2,7 +2,7 @@ package es.caib.invai.api.persistence.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * Unlike standard operational entities, this tracking row encapsulates metadata regarding
  * the exact database operations and execution contexts triggering the modification.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter

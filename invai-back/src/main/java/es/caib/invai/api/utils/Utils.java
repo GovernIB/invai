@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
  * Global static utility catalog providing stateless operational routines for data sanitization
  * and core security context principal evaluation.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Slf4j
 @Component

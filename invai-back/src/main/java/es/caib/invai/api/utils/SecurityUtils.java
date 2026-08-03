@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
  * from localized ThreadLocal configuration stores.
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public final class SecurityUtils {
 

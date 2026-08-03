@@ -5,10 +5,12 @@ import es.caib.invai.api.persistence.model.AdmUnitEntity;
 import es.caib.invai.api.persistence.model.AdmUnitAudEntity;
 import es.caib.invai.api.service.mapper.AdmUnitMapper;
 import es.caib.invai.api.utils.SecurityUtils;
+import es.caib.invai.api.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +24,7 @@ import java.time.LocalDateTime;
  * mapping layers to enforce decoupling rules.
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Repository
 @Slf4j
@@ -46,20 +48,23 @@ public class AdmUnitRepositoryAdapter implements AdmUnitRepository {
     @Override
     public AdmUnit findById(Long id) {
         return admUnitJPARepository.findById(id)
-                .filter(f -> f.getDeletedAt() == null)
+                
                 .map(admUnitMapper::toModel)
                 .orElse(null);
     }
 
     /**
-     * Fetches all active administrative units from the database and maps them to domain models.
+     * Fetches all administrative units matching the given dynamic search criteria from the database
+     * and maps them to domain models.
      *
+     * @param filter   dynamic search criteria used to build the query predicates
      * @param pageable pagination and sorting parameters
      * @return a page containing the mapped domain objects
      */
     @Override
-    public Page<AdmUnit> findAll(Pageable pageable) {
-        return admUnitJPARepository.findAllActive(pageable).map(admUnitMapper::toModel);
+    public Page<AdmUnit> findAll(AdmUnitCriteria filter, Pageable pageable) {
+        Specification<AdmUnitEntity> spec = AdmUnitSpecification.filterByCriteria(filter);
+        return admUnitJPARepository.findAll(spec, pageable).map(admUnitMapper::toModel);
     }
 
     /**
@@ -179,22 +184,17 @@ public class AdmUnitRepositoryAdapter implements AdmUnitRepository {
         aud.setCode(entity.getCode());
         aud.setName(entity.getName());
 
-        aud.setCreatedAt(entity.getCreatedAt());
-        aud.setCreatedBy(entity.getCreatedBy());
-        aud.setUpdatedAt(entity.getUpdatedAt());
-        aud.setUpdatedBy(entity.getUpdatedBy());
+        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+       
+                    aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
+            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
 
         aud.setAudAction(action);
         aud.setAuditDate(LocalDateTime.now());
-
-        OidcUserInfo currentUser = (OidcUserInfo) SecurityUtils.getCurrentUser();
-        if (currentUser != null && currentUser.getClaims().get("preferred_username") != null) {
-            aud.setAuditUser((String) currentUser.getClaims().get("preferred_username"));
-        } else {
-            aud.setAuditUser("SYSTEM");
-        }
+        aud.setAuditUser(Utils.resolveCurrentUsername());
 
         admUnitAudJPARepository.save(aud);
     }

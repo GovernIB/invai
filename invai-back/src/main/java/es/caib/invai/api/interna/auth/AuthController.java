@@ -11,20 +11,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 
 /**
  * Internal REST controller handling session state and identity verification checks.
  * Exposes endpoints used by client applications to verify the current context profile authentication data.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @RestController
-@RequestMapping("interna/auth")
+@RequestMapping("auth")
 @Slf4j
 public class AuthController {
 

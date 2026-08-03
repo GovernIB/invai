@@ -24,7 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -38,22 +38,28 @@ import java.util.stream.Collectors;
  * Enables method security, OAuth2 / OIDC login integration via Soffid provider,
  * session management policies, cookies handling, and custom endpoint authorization rules.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    /** The JWK Set URI used to verify and decode JWT tokens from the Identity Provider. */
+    /**
+     * The JWK Set URI used to verify and decode JWT tokens from the Identity Provider.
+     */
     @Value("${spring.security.oauth2.client.provider.soffid.jwk-set-uri}")
     private String jwkSetUri;
 
-    /** Target frontend URL redirected to upon successful authentication. */
+    /**
+     * Target frontend URL redirected to upon successful authentication.
+     */
     @Value("${es.caib.invai.front.url.success:http://127.0.0.1:8080/invaifront/ca/aplicacions}")
     private String loginSuccessUrl;
 
-    /** Corporate Identity Provider (IdP) URL used to process global single logout actions. */
+    /**
+     * Corporate Identity Provider (IdP) URL used to process global single logout actions.
+     */
     @Value("${es.caib.invai.idp.logout.url:https://idp.caib.es/logout}")
     private String idpLogoutUrl;
 
@@ -61,8 +67,8 @@ public class SecurityConfig {
      * Configures HTTP security filters, routing permissions, session rules,
      * custom logout configurations, and fallback exception entries.
      *
-     * @param http the {@link HttpSecurity} builder
-     * @param jwtDecoder the JSON Web Token decoder bean
+     * @param http                    the {@link HttpSecurity} builder
+     * @param jwtDecoder              the JSON Web Token decoder bean
      * @param corsConfigurationSource the CORS policy configuration source
      * @return the built {@link SecurityFilterChain}
      * @throws Exception if an error occurs during chain assembly
@@ -78,12 +84,20 @@ public class SecurityConfig {
                 .requestCache(RequestCacheConfigurer::disable)
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers(new AntPathRequestMatcher("/externa/**")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/interna/auth/**")).authenticated()
-                                .requestMatchers(new AntPathRequestMatcher("/interna/**")).hasAnyRole("usuari-tipus-E")
+                                .requestMatchers("/login/oauth2/code/*").permitAll()
+                                .requestMatchers("/oauth2/**").permitAll()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/auth/**").authenticated()
+                                .requestMatchers("/**").hasAnyRole("INV_SUPER")
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> {
+                    oauth.authorizationEndpoint(authorization ->
+                            authorization.baseUri("/oauth2/authorization")
+                    );
+                    oauth.redirectionEndpoint(redirection ->
+                            redirection.baseUri("/login/oauth2/code/*")
+                    );
                     oauth.defaultSuccessUrl(this.loginSuccessUrl, false);
                     oauth.userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService(jwtDecoder)));
                 })
@@ -101,7 +115,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
-                                new AntPathRequestMatcher("/interna/**")
+                                PathPatternRequestMatcher.withDefaults().matcher("/**")
                         )
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/oauth2/authorization/soffid"),

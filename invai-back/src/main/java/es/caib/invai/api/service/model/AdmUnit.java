@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * Business domain representation of an Administrative Unit ({@code Unitat Administrativa}).
  * Contains core organizational metadata and regionalized nomenclature variants.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter
@@ -31,9 +31,10 @@ public class AdmUnit {
     /** Alternate corporate naming string mapped explicitly to Spanish. */
     private String nameEs;
 
-    /** Timestamp marking the instance's execution path logic deactivation point. */
+    private LocalDateTime createdAt;
+    private String createdBy;
+    private LocalDateTime updatedAt;
+    private String updatedBy;
     private LocalDateTime deletedAt;
-
-    /** User-land corporate audit tracker index pinpointing who triggered soft-deletion. */
     private String deletedBy;
 }

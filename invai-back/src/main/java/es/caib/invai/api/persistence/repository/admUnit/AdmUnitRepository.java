@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  * by working exclusively with domain-agnostic or plain business models ({@link AdmUnit}).
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface AdmUnitRepository {
 
@@ -27,10 +27,11 @@ public interface AdmUnitRepository {
     /**
      * Extracts a paginated sequence wrapper matrix across active domain administrative unit nodes.
      *
+     * @param filter   dynamic search criteria used to build the query predicates
      * @param pageable sorting configuration boundaries and limit arguments
      * @return a page structure containing mapped domain {@link AdmUnit} entities
      */
-    Page<AdmUnit> findAll(Pageable pageable);
+    Page<AdmUnit> findAll(AdmUnitCriteria filter, Pageable pageable);
 
     /**
      * Commits a clean domain entity specification record state parameters map to database systems.

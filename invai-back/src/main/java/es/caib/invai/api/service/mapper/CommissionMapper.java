@@ -1,7 +1,7 @@
 package es.caib.invai.api.service.mapper;
 
-import es.caib.invai.api.interna.commission.DTO.CommissionInputDTO;
-import es.caib.invai.api.interna.commission.DTO.CommissionOutputDTO;
+import es.caib.invai.api.interna.maintenance.commission.DTO.CommissionInputDTO;
+import es.caib.invai.api.interna.maintenance.commission.DTO.CommissionOutputDTO;
 import es.caib.invai.api.persistence.model.CommissionEntity;
 import es.caib.invai.api.service.model.Commission;
 import org.mapstruct.Mapper;
@@ -11,8 +11,12 @@ import org.mapstruct.MappingTarget;
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Working Commission database entities, business domain models, and API transfer schemas.
+ * <p>
+ * Compiles at runtime into optimized, direct getter/setter bytecode execution nodes, bypassing
+ * reflective overhead performance bottlenecks.
+ * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Mapper(componentModel = "spring")
 public interface CommissionMapper {
@@ -34,10 +38,10 @@ public interface CommissionMapper {
     CommissionEntity toEntity(Commission model);
 
     /**
-     * Converts a domain model configuration into an outbound presentation layer REST DTO.
+     * Converts a domain model configuration into an outbound presentation layer REST DTO payload.
      *
      * @param model the source domain layer data model
-     * @return the outbound presentation API data carrier DTO
+     * @return the outbound presentation API data carrier DTO ready for client-side serialization
      */
     CommissionOutputDTO toResponse(Commission model);
 
@@ -45,9 +49,13 @@ public interface CommissionMapper {
      * Constructs a pure domain business structure from incoming input payload parameter DTOs,
      * forcing logical deactivation timelines to safely bypass user-land overwrites.
      *
-     * @param inputDTO the inbound presentation payload containing parameters
+     * @param inputDTO the inbound presentation payload containing operational request criteria variables
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     Commission toModelFromInput(CommissionInputDTO inputDTO);
@@ -59,6 +67,10 @@ public interface CommissionMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     void updateModelFromInput(CommissionInputDTO inputDTO, @MappingTarget Commission model);
@@ -66,15 +78,16 @@ public interface CommissionMapper {
     /**
      * Convenience reference lookup utility initializing a detached shallow domain reference
      * using a target primary index key sequence.
+     * Useful for setting relationship linkages without querying the complete object structure.
      *
      * @param value primary tracking index key reference identity
-     * @return a stub domain model tracking the target index, or {@code null} if input is null
+     * @return a stub domain model tracking the target index, or {@code null} if the input parameter is null
      */
-    default Commission map(Long value) {
+    default CommissionOutputDTO map(Long value) {
         if (value == null) {
             return null;
         }
-        Commission commission = new Commission();
+        CommissionOutputDTO commission = new CommissionOutputDTO();
         commission.setId(value);
         return commission;
     }

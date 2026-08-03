@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * Domain business model tracking standard system architectural types, engine patterns,
  * or technology runtime tiers.
  *
- * @since 1.0.0
+ * @since 1.0.2
  */
 @Getter
 @Setter
@@ -23,9 +23,10 @@ public class SystemType {
     /** System category architecture alternate variant definition designator layout string matching Spanish. */
     private String nameEs;
 
-    /** Audit validation tracking clock metric indexing instance soft-deletion points. */
+    private LocalDateTime createdAt;
+    private String createdBy;
+    private LocalDateTime updatedAt;
+    private String updatedBy;
     private LocalDateTime deletedAt;
-
-    /** Corporate actor tracking key string documenting active system deletion authors. */
     private String deletedBy;
 }

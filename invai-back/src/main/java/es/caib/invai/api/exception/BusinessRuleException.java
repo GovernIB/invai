@@ -7,7 +7,7 @@ package es.caib.invai.api.exception;
  * allowing the global exception handler to localize the error response downstream.
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public class BusinessRuleException extends RuntimeException {
 

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * Primary Aggregate Root domain model tracking software assets registered
  * within the enterprise inventory system framework.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter

@@ -5,10 +5,12 @@ import es.caib.invai.api.persistence.model.FieldEntity;
 import es.caib.invai.api.persistence.model.FieldAudEntity;
 import es.caib.invai.api.service.mapper.FieldMapper;
 import es.caib.invai.api.utils.SecurityUtils;
+import es.caib.invai.api.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +24,7 @@ import java.time.LocalDateTime;
  * mapping layers to enforce decoupling rules.
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Repository
 @Slf4j
@@ -46,20 +48,23 @@ public class FieldRepositoryAdapter implements FieldRepository {
     @Override
     public Field findById(Long id) {
         return fieldJPARepository.findById(id)
-                .filter(f -> f.getDeletedAt() == null)
+                
                 .map(fieldMapper::toModel)
                 .orElse(null);
     }
 
     /**
-     * Fetches all active operational business fields from the database and maps them to domain models.
+     * Fetches all operational business fields from the database matching dynamic criteria filters
+     * and maps them to domain models.
      *
+     * @param filter   criteria DTO capturing dynamic search filters and full-text keyword parameters
      * @param pageable pagination and sorting parameters
      * @return a page containing the mapped domain objects
      */
     @Override
-    public Page<Field> findAll(Pageable pageable) {
-        return fieldJPARepository.findAllActive(pageable).map(fieldMapper::toModel);
+    public Page<Field> findAll(FieldCriteria filter, Pageable pageable) {
+        Specification<FieldEntity> spec = FieldSpecification.filterByCriteria(filter);
+        return fieldJPARepository.findAll(spec, pageable).map(fieldMapper::toModel);
     }
 
     /**
@@ -153,22 +158,17 @@ public class FieldRepositoryAdapter implements FieldRepository {
         aud.setName(entity.getName());
         aud.setNameEs(entity.getNameEs());
 
-        aud.setCreatedAt(entity.getCreatedAt());
-        aud.setCreatedBy(entity.getCreatedBy());
-        aud.setUpdatedAt(entity.getUpdatedAt());
-        aud.setUpdatedBy(entity.getUpdatedBy());
+        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+       
+                    aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
+            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
 
         aud.setAudAction(action);
         aud.setAuditDate(LocalDateTime.now());
-
-        OidcUserInfo currentUser = (OidcUserInfo) SecurityUtils.getCurrentUser();
-        if (currentUser != null && currentUser.getClaims().get("preferred_username") != null) {
-            aud.setAuditUser((String) currentUser.getClaims().get("preferred_username"));
-        } else {
-            aud.setAuditUser("SYSTEM");
-        }
+        aud.setAuditUser(Utils.resolveCurrentUsername());
 
         fieldAudJPARepository.save(aud);
     }

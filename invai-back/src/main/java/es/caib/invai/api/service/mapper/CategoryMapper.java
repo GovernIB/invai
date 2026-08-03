@@ -1,7 +1,7 @@
 package es.caib.invai.api.service.mapper;
 
-import es.caib.invai.api.interna.category.DTO.CategoryInputDTO;
-import es.caib.invai.api.interna.category.DTO.CategoryOutputDTO;
+import es.caib.invai.api.interna.maintenance.category.DTO.CategoryInputDTO;
+import es.caib.invai.api.interna.maintenance.category.DTO.CategoryOutputDTO;
 import es.caib.invai.api.persistence.model.CategoryEntity;
 import es.caib.invai.api.service.model.Category;
 import org.mapstruct.Mapper;
@@ -12,9 +12,9 @@ import org.mapstruct.MappingTarget;
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Taxonomy Category database entities, business domain models, and API transfer schemas.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
-@Mapper(componentModel = "spring", uses = {StatusMapper.class})
+@Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
     /**
@@ -48,6 +48,10 @@ public interface CategoryMapper {
      * @param inputDTO the inbound presentation payload containing parameters
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     Category toModelFromInput(CategoryInputDTO inputDTO);
@@ -59,6 +63,10 @@ public interface CategoryMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     void updateModelFromInput(CategoryInputDTO inputDTO, @MappingTarget Category model);
@@ -70,11 +78,11 @@ public interface CategoryMapper {
      * @param value primary tracking index key reference identity
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
-    default Category map(Long value) {
+    default CategoryOutputDTO map(Long value) {
         if (value == null) {
             return null;
         }
-        Category category = new Category();
+        CategoryOutputDTO category = new CategoryOutputDTO();
         category.setId(value);
         return category;
     }

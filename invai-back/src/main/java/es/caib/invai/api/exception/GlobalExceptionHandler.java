@@ -20,7 +20,7 @@ import java.util.Locale;
  * and maps them into an explicit HTTP 400 (Bad Request) payload structure.
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -80,8 +80,8 @@ public class GlobalExceptionHandler {
      * @param ex the intercepted persistence exception
      * @return structured response containing the actual raw database error string
      */
-    @ExceptionHandler(javax.persistence.PersistenceException.class)
-    public ResponseEntity<ValidationErrorResponse> handlePersistenceExceptions(javax.persistence.PersistenceException ex) {
+    @ExceptionHandler(jakarta.persistence.PersistenceException.class)
+    public ResponseEntity<ValidationErrorResponse> handlePersistenceExceptions(jakarta.persistence.PersistenceException ex) {
         String databaseErrorMessage = null;
 
         Throwable cause = ex.getCause();

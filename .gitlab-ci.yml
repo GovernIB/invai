@@ -1,17 +1,35 @@
 stages:
+  - build-base-image
   - build-ear-with-maven
   - build-docker-image
   - deploy-docker-image
-  # - build-jacoco-report
-  # - analyze
+  - build-jacoco-report
+  - analyze
   # - build-docker-image-pre
   # - deploy-docker-image-pre
   # - update-client-repo
 
+# Build & publish the JBoss EAP 8 / JDK 17 base image (from the Red Hat distribution zip).
+# Manual: rerun only when the EAP distribution or base.Dockerfile changes.
+# Requires the jboss-eap-8.1.0.zip to be present in invai-cicd/.
+build-base-image:
+  stage: build-base-image
+  tags:
+    - docker
+  script:
+    - docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD $CI_REGISTRY_BASE_URL
+    - docker build -f ${DEPENDENCY_PROJECT_NAME}-cicd/base.Dockerfile -t $CI_REGISTRY_BASE_URL/jboss-eap-8:latest ${DEPENDENCY_PROJECT_NAME}-cicd/
+    - docker push $CI_REGISTRY_BASE_URL/jboss-eap-8:latest
+    - docker rmi -f $CI_REGISTRY_BASE_URL/jboss-eap-8:latest
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: manual
+      allow_failure: true
+
 build-ear-with-maven:
   stage: build-ear-with-maven
   tags:
-    - maven-3.9
+    - maven-3.8.5-jdk-17
   script:
     - mvn clean install -PauthBasic -Pswagger-ui
   artifacts:
@@ -26,7 +44,7 @@ build-docker-image:
     - docker
   script:
     - docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD $CI_REGISTRY_BASE_URL
-    - docker pull $CI_REGISTRY_BASE_URL/jboss-eap-7-2:latest
+    - docker pull $CI_REGISTRY_BASE_URL/jboss-eap-8:latest
     - docker build -t $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME:$CI_REGISTRY_REPO_TAG -f ${DEPENDENCY_PROJECT_NAME}-cicd/Dockerfile .
     - docker push $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME:$CI_REGISTRY_REPO_TAG
     - docker rmi -f $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME:$CI_REGISTRY_REPO_TAG
@@ -46,66 +64,66 @@ deploy-docker-image:
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'    
 
-# ##############################
-# #  build-jacoco-report       #
-# #  Ejecuta tests y genera    #
-# #  el informe de cobertura   #
-# #  JaCoCo para SonarQube     #
-# ##############################
-# build-jacoco-report:
-#   stage: build-jacoco-report
-#   tags:
-#     - maven-3.9
-#   allow_failure: true
-#   script:
-#     - echo "START Test stage and generate JaCoCo Report for SonarQube"
-#     - mvn test jacoco:report
-#     - find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -name "jacoco.xml" -print0 | xargs -0 echo | tr ' ' ','
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH =~ /^sprint.*|^Sprint.*/'
-#     - if: '$CI_COMMIT_BRANCH == "develop"'
-#     - if: '$CI_COMMIT_BRANCH == "release"'
-#     - if: '$CI_COMMIT_BRANCH == "main"'
-#   artifacts:
-#     paths:
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-interna/target/site/jacoco/jacoco.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-externa/target/site/jacoco/jacoco.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-commons/target/site/jacoco/jacoco.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-ejb/target/site/jacoco/jacoco.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-persistence/target/site/jacoco/jacoco.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-service/target/site/jacoco/jacoco.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-rest/target/site/jacoco/jacoco.xml
-#       # Añadir los resultados de tests
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-interna/target/surefire-reports/TEST-*.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-externa/target/surefire-reports/TEST-*.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-commons/target/surefire-reports/TEST-*.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-ejb/target/surefire-reports/TEST-*.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-persistence/target/surefire-reports/TEST-*.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-service/target/surefire-reports/TEST-*.xml
-#       - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-rest/target/surefire-reports/TEST-*.xml
+##############################
+#  build-jacoco-report       #
+#  Ejecuta tests y genera    #
+#  el informe de cobertura   #
+#  JaCoCo para SonarQube     #
+##############################
+build-jacoco-report:
+  stage: build-jacoco-report
+  tags:
+    - maven-3.8.5-jdk-17
+  allow_failure: true
+  script:
+    - echo "START Test stage and generate JaCoCo Report for SonarQube"
+    - mvn test jacoco:report
+    - find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -name "jacoco.xml" -print0 | xargs -0 echo | tr ' ' ','
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^sprint.*|^Sprint.*/'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "release"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  artifacts:
+    paths:
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-interna/target/site/jacoco/jacoco.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-externa/target/site/jacoco/jacoco.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-commons/target/site/jacoco/jacoco.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-ejb/target/site/jacoco/jacoco.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-persistence/target/site/jacoco/jacoco.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-service/target/site/jacoco/jacoco.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-rest/target/site/jacoco/jacoco.xml
+      # Añadir los resultados de tests
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-interna/target/surefire-reports/TEST-*.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-api-externa/target/surefire-reports/TEST-*.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-commons/target/surefire-reports/TEST-*.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-ejb/target/surefire-reports/TEST-*.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-persistence/target/surefire-reports/TEST-*.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-service/target/surefire-reports/TEST-*.xml
+      - /builds/dependencia/${DEPENDENCY_PROJECT_NAME}/${DEPENDENCY_PROJECT_NAME}-rest/target/surefire-reports/TEST-*.xml
 
-# ##############################
-# #  analyze                   #
-# #  Analiza el código con     #
-# #  SonarQube usando los      #
-# #  informes de cobertura     #
-# ##############################
-# analyze:
-#   stage: analyze
-#   tags:
-#     - sonar
-#   script:
-#     - VERSION=`grep -E "<version>" pom.xml | awk 'NR==1' | cut -d">" -f2 | cut -d"<" -f1`
-#     - jacoco_paths=$(find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -name "jacoco.xml" -print0 | xargs -0 echo | tr ' ' ',')
-#     - test_report_paths=$(find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -path "*/target/surefire-reports/TEST-*.xml" | while IFS= read -r f; do dirname "$f"; done | sort -u | tr '\n' ',' | sed 's/,$//')
-#     - echo "$jacoco_paths"
-#     - echo "$test_report_paths"
-#     - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.projectKey=1583-001_${DEPENDENCY_PROJECT_NAME} -Dsonar.projectVersion=$VERSION -Dsonar.sources=. -Dsonar.java.binaries=. -Dsonar.coverage.jacoco.xmlReportPaths="$jacoco_paths" -Dsonar.junit.reportPaths="$test_report_paths"
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH =~ /^sprint.*|^Sprint.*/'
-#     - if: '$CI_COMMIT_BRANCH == "develop"'
-#     - if: '$CI_COMMIT_BRANCH == "release"'
-#     - if: '$CI_COMMIT_BRANCH == "main"'
+##############################
+#  analyze                   #
+#  Analiza el código con     #
+#  SonarQube usando los      #
+#  informes de cobertura     #
+##############################
+analyze:
+  stage: analyze
+  tags:
+    - sonar
+  script:
+    - VERSION=`grep -E "<version>" pom.xml | awk 'NR==1' | cut -d">" -f2 | cut -d"<" -f1`
+    - jacoco_paths=$(find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -name "jacoco.xml" -print0 | xargs -0 echo | tr ' ' ',')
+    - test_report_paths=$(find /builds/dependencia/${DEPENDENCY_PROJECT_NAME} -path "*/target/surefire-reports/TEST-*.xml" | while IFS= read -r f; do dirname "$f"; done | sort -u | tr '\n' ',' | sed 's/,$//')
+    - echo "$jacoco_paths"
+    - echo "$test_report_paths"
+    - sonar-scanner -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.projectKey=1583-001_${DEPENDENCY_PROJECT_NAME} -Dsonar.projectVersion=$VERSION -Dsonar.sources=. -Dsonar.java.binaries=. -Dsonar.coverage.jacoco.xmlReportPaths="$jacoco_paths" -Dsonar.junit.reportPaths="$test_report_paths"
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^sprint.*|^Sprint.*/'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "release"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 # ##############################
 # #  build-docker-image        #
@@ -125,7 +143,7 @@ deploy-docker-image:
 #     - docker
 #   script:
 #     - docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD $CI_REGISTRY_BASE_URL
-#     - docker pull $CI_REGISTRY_BASE_URL/jboss-eap-7-2:latest
+#     - docker pull $CI_REGISTRY_BASE_URL/jboss-eap-8:latest
 #     - docker build -t $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME_PRE:$CI_REGISTRY_REPO_TAG -f ${DEPENDENCY_PROJECT_NAME}-cicd/pre.Dockerfile .
 #     - docker push $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME_PRE:$CI_REGISTRY_REPO_TAG
 #     - docker rmi -f $CI_REGISTRY_BASE_URL/$CI_REGISTRY_REPO_NAME_PRE:$CI_REGISTRY_REPO_TAG

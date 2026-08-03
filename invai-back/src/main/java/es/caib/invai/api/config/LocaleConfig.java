@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -13,7 +13,7 @@ import java.util.Locale;
  * Internationalization (i18n) and localization configuration.
  * Configures strict supported locales to ensure proper resolution constraints.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Configuration
 public class LocaleConfig {

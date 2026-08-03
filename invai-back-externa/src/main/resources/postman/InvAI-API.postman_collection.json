@@ -1,0 +1,218 @@
+{
+  "info": {
+    "_postman_id": "b6f6a3b0-1a2e-4a2e-9a3d-invai0000001",
+    "name": "INVAI API",
+    "description": "Colección de verificación para todos los endpoints REST expuestos por invai-api.\n\n## Autenticación\nLa API usa Spring Security con login OAuth2/OIDC (proveedor Soffid) y sesión basada en cookie `JSESSIONID`:\n- Los endpoints bajo `/externa/**` son públicos.\n- Los endpoints bajo `/interna/auth/**` solo requieren estar autenticado.\n- El resto de endpoints bajo `/interna/**` requieren el rol `ROLE_usuari-tipus-E`.\n\nPostman no puede completar el flujo de login OIDC por redirección automáticamente. Para probar los endpoints `interna/**`:\n1. Inicia sesión en la aplicación desde el navegador (o usa el Postman Interceptor/Postman Web con \"Capture cookies\" habilitado para el dominio).\n2. Copia el VALOR de la cookie `JSESSIONID` resultante y pégalo en la variable de colección `sessionCookie` (Collection > Variables). Todas las peticiones de esta colección ya incluyen un header `Cookie: JSESSIONID={{sessionCookie}}`, por lo que no hace falta editarlas una a una.\n3. Ajusta la variable de colección `baseUrl` al host/puerto/contexto real de tu despliegue.\n\n## Variables\nAjusta los IDs de las variables de colección (`admUnitId`, `categoryId`, etc.) para que apunten a registros existentes en tu base de datos antes de ejecutar GET/PUT/DELETE/reactivate por ID.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/invaiapi",
+      "type": "string"
+    },
+    {
+      "key": "sessionCookie",
+      "value": "",
+      "type": "string",
+      "description": "Value of the JSESSIONID cookie obtained after logging in via the browser (OIDC/Soffid flow). Paste just the cookie VALUE here (not the JSESSIONID= prefix); it is injected as a Cookie header on every request by the collection-level pre-request script."
+    },
+    {
+      "key": "applicationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "appDatabaseId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "appSystemId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "admUnitId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "commissionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "databaseId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "environmentId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "fieldId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "systemId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "systemTypeId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "appInformationSystemDbId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "developmentId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "providerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "technologyId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "serverId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "databaseVendorId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "roleId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "layerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "technologyCatalogId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Public (externa)",
+      "item": [
+        {
+          "name": "Config - Get login URL",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/externa/config/url",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "externa",
+                "config",
+                "url"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "pm.test(\"Response contains the assembled login url\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.url).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.url).to.include(\"auth/login\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - Redirect to Soffid",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "JSESSIONID={{sessionCookie}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/externa/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "externa",
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Devuelve un HTTP 302 hacia /invaiapi/interna/oauth2/authorization/soffid. Se recomienda abrir en el navegador en lugar de Postman para completar el flujo OIDC."
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 302 (redirect to Soffid)\", function () {",
+                  "    pm.response.to.have.status(302);",
+                  "});",
+                  "pm.test(\"Location header points to the Soffid OAuth2 authorization endpoint\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Location\")).to.include(\"oauth2/authorization/soffid\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

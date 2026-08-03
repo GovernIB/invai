@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  * by working exclusively with domain-agnostic or plain business models ({@link Field}).
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface FieldRepository {
 
@@ -27,10 +27,11 @@ public interface FieldRepository {
     /**
      * Extracts a paginated sequence wrapper matrix across active functional area field nodes.
      *
+     * @param filter   criteria DTO capturing dynamic search filters and full-text keyword parameters
      * @param pageable sorting configuration boundaries and limit arguments
      * @return a page structure containing mapped domain {@link Field} entities
      */
-    Page<Field> findAll(Pageable pageable);
+    Page<Field> findAll(FieldCriteria filter, Pageable pageable);
 
     /**
      * Commits a clean functional area field specification record state parameters map to database systems.

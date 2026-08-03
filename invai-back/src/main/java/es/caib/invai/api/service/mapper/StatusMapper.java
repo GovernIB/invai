@@ -1,6 +1,6 @@
 package es.caib.invai.api.service.mapper;
 
-import es.caib.invai.api.persistence.model.StatusEntity;
+import es.caib.invai.api.persistence.model.catalog.LkupStatusEntity;
 import es.caib.invai.api.service.model.Status;
 import es.caib.invai.api.service.model.StatusEnum;
 import org.mapstruct.Mapper;
@@ -10,7 +10,7 @@ import org.mapstruct.Named;
  * MapStruct translation utility specializing in state conversions across lifecycle tracking entities,
  * business model wrappers, and standardized system state enumeration keys.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Mapper(componentModel = "spring")
 public interface StatusMapper {
@@ -21,7 +21,7 @@ public interface StatusMapper {
      * @param entity structural relational entity row model source
      * @return the matching business status wrapper model
      */
-    Status toModel(StatusEntity entity);
+    Status toModel(LkupStatusEntity entity);
 
     /**
      * Converts a business status layout container down into a relational schema entity structure.
@@ -29,7 +29,7 @@ public interface StatusMapper {
      * @param model business model status context target
      * @return the persistent entity representation mapping the target layout
      */
-    StatusEntity toEntity(Status model);
+    LkupStatusEntity toEntity(Status model);
 
     /**
      * Contextual lookup reference instantiation utility building a placeholder status domain unit
@@ -76,9 +76,9 @@ public interface StatusMapper {
      * @return a database ready persistence record containing the core identifier definitions
      */
     @Named("mapStatusEnumToStatusEntity")
-    default StatusEntity mapStatusEnumToStatusEntity(StatusEnum statusEnum) {
+    default LkupStatusEntity mapStatusEnumToStatusEntity(StatusEnum statusEnum) {
         if (statusEnum == null) return null;
-        StatusEntity entity = new StatusEntity();
+        LkupStatusEntity entity = new LkupStatusEntity();
         entity.setId(statusEnum.getId());
         return entity;
     }
@@ -87,14 +87,14 @@ public interface StatusMapper {
      * Evaluates database level persistent status definitions, matching their inner row entries against
      * structural system wide state enums.
      *
-     * @param statusEntity database persistence record detailing lifecycle fields maps
+     * @param lkupStatusEntity database persistence record detailing lifecycle fields maps
      * @return the matching target domain {@link StatusEnum} key, or {@code null} if mismatched or absent
      */
-    default StatusEnum mapStatusEntityToStatusEnum(StatusEntity statusEntity) {
-        if (statusEntity == null || statusEntity.getId() == null) return null;
+    default StatusEnum mapStatusEntityToStatusEnum(LkupStatusEntity lkupStatusEntity) {
+        if (lkupStatusEntity == null || lkupStatusEntity.getId() == null) return null;
 
         for (StatusEnum status : StatusEnum.values()) {
-            if (status.getId().equals(statusEntity.getId())) {
+            if (status.getId().equals(lkupStatusEntity.getId())) {
                 return status;
             }
         }

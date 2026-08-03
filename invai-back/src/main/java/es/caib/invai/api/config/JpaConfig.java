@@ -13,7 +13,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
  * Java Persistence API (JPA) and transaction management configuration.
  * Enables global transaction capability suitable for enterprise environments.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Configuration
 @EnableTransactionManagement

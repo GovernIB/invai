@@ -1,8 +1,8 @@
 package es.caib.invai.api.service.facade;
 
-import es.caib.invai.api.interna.application.DTO.ApplicationInputDTO;
-import es.caib.invai.api.interna.application.DTO.ApplicationOutputDTO;
-import es.caib.invai.api.persistence.repository.application.ApplicationCriteria;
+import es.caib.invai.api.interna.application.core.DTO.ApplicationInputDTO;
+import es.caib.invai.api.interna.application.core.DTO.ApplicationOutputDTO;
+import es.caib.invai.api.persistence.repository.application.core.ApplicationCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  * targeting Application components.
  * Acts as the primary application service boundary exposed to external API web controllers.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface ApplicationService {
 
@@ -60,4 +60,6 @@ public interface ApplicationService {
      * @param id The unique identifier of the application to deactivate.
      */
     void delete(Long id);
+
+    ApplicationOutputDTO reactivate(Long id);
 }

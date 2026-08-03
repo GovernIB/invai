@@ -1,7 +1,7 @@
 package es.caib.invai.api.service.mapper;
 
-import es.caib.invai.api.interna.systemType.DTO.SystemTypeInputDTO;
-import es.caib.invai.api.interna.systemType.DTO.SystemTypeOutputDTO;
+import es.caib.invai.api.interna.maintenance.systemType.DTO.SystemTypeInputDTO;
+import es.caib.invai.api.interna.maintenance.systemType.DTO.SystemTypeOutputDTO;
 import es.caib.invai.api.persistence.model.SystemTypeEntity;
 import es.caib.invai.api.service.model.SystemType;
 import org.mapstruct.Mapper;
@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * System Architecture Classification database entities, business domain models, and API transfer schemas.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Mapper(componentModel = "spring")
 public interface SystemTypeMapper {
@@ -48,6 +48,10 @@ public interface SystemTypeMapper {
      * @param inputDTO the inbound presentation payload containing parameters
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     SystemType toModelFromInput(SystemTypeInputDTO inputDTO);
@@ -59,6 +63,10 @@ public interface SystemTypeMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     void updateModelFromInput(SystemTypeInputDTO inputDTO, @MappingTarget SystemType model);
@@ -70,11 +78,11 @@ public interface SystemTypeMapper {
      * @param value primary tracking index key reference identity
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
-    default SystemType map(Long value) {
+    default SystemTypeOutputDTO map(Long value) {
         if (value == null) {
             return null;
         }
-        SystemType systemType = new SystemType();
+        SystemTypeOutputDTO systemType = new SystemTypeOutputDTO();
         systemType.setId(value);
         return systemType;
     }

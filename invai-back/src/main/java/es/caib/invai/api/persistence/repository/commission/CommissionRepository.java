@@ -12,7 +12,8 @@ import org.springframework.data.domain.Pageable;
  * by working exclusively with domain-agnostic or plain business models ({@link Commission}).
  * </p>
  *
- * @since 1.0.0
+ * @author invai-team
+ * @since 1.0.1
  */
 public interface CommissionRepository {
 
@@ -30,7 +31,7 @@ public interface CommissionRepository {
      * @param pageable sorting configuration boundaries and limit arguments
      * @return a page structure containing mapped domain {@link Commission} entities
      */
-    Page<Commission> findAll(Pageable pageable);
+    Page<Commission> findAll(CommissionCriteria criteria, Pageable pageable);
 
     /**
      * Commits a clean commission specification record state parameters map to database systems.
@@ -72,4 +73,22 @@ public interface CommissionRepository {
      * @return {@code true} if duplicates exist outside the index parameter, {@code false} otherwise
      */
     boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Long id);
+
+    /**
+     * Evaluates active tracking metrics to check for unique expedient dossier tracking code collisions.
+     * Aligns with physical indexes.
+     *
+     * @param expedientNumber unique tracking dossier string reference
+     * @return {@code true} if an active entity matching the tracker exists, {@code false} otherwise
+     */
+    boolean existsByExpedientNumberAndDeletedAtIsNull(String expedientNumber);
+
+    /**
+     * Verifies if alternative active entities share a requested corporate dossier reference tracking code.
+     *
+     * @param expedientNumber unique tracking dossier string reference
+     * @param id              row entry identification key sequence to exclude from the lookup evaluations
+     * @return {@code true} if a duplicate collision is discovered outside the index domain, {@code false} otherwise
+     */
+    boolean existsByExpedientNumberAndIdNotAndDeletedAtIsNull(String expedientNumber, Long id);
 }

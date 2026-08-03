@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
-             version="2.2">
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
+             version="3.1">
 
     <persistence-unit name="invaiDS" transaction-type="JTA">
         <jta-data-source>java:jboss/datasources/invaiDS</jta-data-source>
@@ -25,14 +25,61 @@
         <class>es.caib.invai.api.persistence.model.SystemTypeEntity</class>
         <class>es.caib.invai.api.persistence.model.SystemTypeAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.StatusEntity</class>
+        <class>es.caib.invai.api.persistence.model.catalog.LkupStatusEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.DatabaseEntity</class>
+        <class>es.caib.invai.api.persistence.model.DatabaseAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.SystemEntity</class>
+        <class>es.caib.invai.api.persistence.model.SystemAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.AppInformationSystemDbEntity</class>
+        <class>es.caib.invai.api.persistence.model.AppInformationSystemDbAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.AppDatabaseAudEntity</class>
+        <class>es.caib.invai.api.persistence.model.AppDatabaseEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.AppSystemAudEntity</class>
+        <class>es.caib.invai.api.persistence.model.AppSystemEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.EnvironmentEntity</class>
+        <class>es.caib.invai.api.persistence.model.EnvironmentAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.catalog.LkupModalityEntity</class>
+        <class>es.caib.invai.api.persistence.model.catalog.LkupStandardAdaptionEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.DevelopmentEntity</class>
+        <class>es.caib.invai.api.persistence.model.DevelopmentAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.AppProviderEntity</class>
+        <class>es.caib.invai.api.persistence.model.AppProviderAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.AppTechnologyEntity</class>
+        <class>es.caib.invai.api.persistence.model.AppTechnologyAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.DatabaseVendorEntity</class>
+        <class>es.caib.invai.api.persistence.model.DatabaseVendorAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.ServerEntity</class>
+        <class>es.caib.invai.api.persistence.model.ServerAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.catalog.LkupServerTypeEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.RoleEntity</class>
+        <class>es.caib.invai.api.persistence.model.RoleAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.LayerEntity</class>
+        <class>es.caib.invai.api.persistence.model.LayerAudEntity</class>
+
+        <class>es.caib.invai.api.persistence.model.TechnologyEntity</class>
+        <class>es.caib.invai.api.persistence.model.TechnologyAudEntity</class>
 
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <validation-mode>CALLBACK</validation-mode>
 
         <properties>
             <property name="wildfly.jpa.twophase" value="true"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.OracleDialect"/>
 
             <property name="wildfly.jpa.default-unit" value="true"/>
             <property name="hibernate.archive.autodetection" value="class"/>

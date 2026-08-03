@@ -1,12 +1,12 @@
 package es.caib.invai.front;
 
 import java.io.IOException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/handle404")
 public class ErrorRedirectServlet extends HttpServlet {
@@ -28,7 +28,7 @@ public class ErrorRedirectServlet extends HttpServlet {
 
     private void handleError(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String originalPath = (String) request.getAttribute("javax.servlet.error.request_uri");
+        String originalPath = (String) request.getAttribute("jakarta.servlet.error.request_uri");
         String locale = DEFAULT_LOCALE;
 
         for (String supportedLocale : SUPPORTED_LOCALES) {

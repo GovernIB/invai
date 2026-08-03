@@ -4,6 +4,7 @@ import es.caib.invai.api.persistence.model.CategoryEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Repository;
  * Native Spring Data JPA repository layer interface providing CRUD operations, custom query methods,
  * and constraint validation checks targeting live {@link CategoryEntity} taxonomy records.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Repository
-public interface CategoryJPARepository extends JpaRepository<CategoryEntity, Long> {
+public interface CategoryJPARepository extends JpaRepository<CategoryEntity, Long>, JpaSpecificationExecutor<CategoryEntity> {
 
     /**
      * Obtains a paginated and sorted slice of all active asset category taxonomy units that have not

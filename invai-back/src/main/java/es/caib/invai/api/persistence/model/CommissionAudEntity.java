@@ -2,7 +2,8 @@ package es.caib.invai.api.persistence.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.*;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -10,8 +11,13 @@ import java.time.LocalDateTime;
  * targeting the {@code INV_COMMISSION} database table.
  * Preserves point-in-time states alongside contextual execution logs for administrative
  * audit trails.
+ * <p>
+ * Enhanced to track the refactored tracking parameters including administrative expedients,
+ * formal decision timelines, and commission ranking configurations.
+ * </p>
  *
- * @since 1.0.0
+ * @author invai-team
+ * @since 1.0.1
  */
 @Getter
 @Setter
@@ -33,6 +39,15 @@ public class CommissionAudEntity {
 
     @Column(name = "NAME_ES", length = 100)
     private String nameEs;
+
+    @Column(name = "EXPEDIENT_NUMBER", length = 50)
+    private String expedientNumber;
+
+    @Column(name = "APPROVAL_DATE")
+    private LocalDate approvalDate;
+
+    @Column(name = "COMMISSION_TYPE", length = 20)
+    private String commissionType;
 
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;

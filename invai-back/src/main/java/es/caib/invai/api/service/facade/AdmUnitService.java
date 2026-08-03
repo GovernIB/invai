@@ -1,7 +1,8 @@
 package es.caib.invai.api.service.facade;
 
-import es.caib.invai.api.interna.admUnit.DTO.AdmUnitInputDTO;
-import es.caib.invai.api.interna.admUnit.DTO.AdmUnitOutputDTO;
+import es.caib.invai.api.interna.maintenance.admUnit.DTO.AdmUnitInputDTO;
+import es.caib.invai.api.interna.maintenance.admUnit.DTO.AdmUnitOutputDTO;
+import es.caib.invai.api.persistence.repository.admUnit.AdmUnitCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +11,7 @@ import org.springframework.data.domain.Pageable;
  * targeting Administrative Units ({@code AdmUnit}).
  * Acts as the primary application service boundary exposed to external API web controllers.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface AdmUnitService {
 
@@ -24,12 +25,14 @@ public interface AdmUnitService {
     AdmUnitOutputDTO getById(Long id);
 
     /**
-     * Extracts a paginated and sorted segment container enclosing all active administrative units.
+     * Extracts a paginated and sorted segment container enclosing all active administrative units
+     * matching the supplied dynamic search criteria.
      *
+     * @param filter   dynamic search criteria used to build the query predicates
      * @param pageable pagination threshold constraints and structural sorting rules
      * @return a page wrapper grouping matching outbound data DTO schemas
      */
-    Page<AdmUnitOutputDTO> getAll(Pageable pageable);
+    Page<AdmUnitOutputDTO> getAll(AdmUnitCriteria filter, Pageable pageable);
 
     /**
      * Validates domain invariants and creates a new administrative unit record in the system registry.
@@ -56,4 +59,13 @@ public interface AdmUnitService {
      * @param id primary key reference index pinpointing the registry row targeted for deactivation
      */
     void delete(Long id);
+
+    /**
+     * Reactivates a logically soft-deleted administrative unit back to active state.
+     *
+     * @param id the target identifier mapping the administrative unit instance intended for reactivation
+     * @return the reactivated domain representation mapped into an {@link AdmUnitOutputDTO}
+     * @throws RuntimeException if the record is missing or already active
+     */
+    AdmUnitOutputDTO reactivate(Long id);
 }

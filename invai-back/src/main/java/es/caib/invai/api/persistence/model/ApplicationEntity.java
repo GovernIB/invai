@@ -1,16 +1,16 @@
 package es.caib.invai.api.persistence.model;
 
+import es.caib.invai.api.persistence.model.catalog.LkupStatusEntity;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * JPA persistent entity representing an application definition profile asset context within the central repository registry.
  * Maps operational relationships onto metadata taxonomies, ownership nodes, and systemic lifecycle structures.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter
@@ -59,7 +59,7 @@ public class ApplicationEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "STATUS_ID")
-    private StatusEntity status;
+    private LkupStatusEntity status;
 
     @Lob
     @Column(name = "DESCRIPTION")
@@ -67,5 +67,4 @@ public class ApplicationEntity extends BaseEntity {
 
     @Column(name = "EXPIRATION_DATE")
     private LocalDateTime expirationDate;
-
 }

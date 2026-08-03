@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
  * fields extracted from the active security context's OIDC user principal token data.
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @MappedSuperclass
 @Getter

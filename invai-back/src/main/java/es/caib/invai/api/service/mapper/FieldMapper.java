@@ -1,7 +1,7 @@
 package es.caib.invai.api.service.mapper;
 
-import es.caib.invai.api.interna.field.DTO.FieldInputDTO;
-import es.caib.invai.api.interna.field.DTO.FieldOutputDTO;
+import es.caib.invai.api.interna.maintenance.field.DTO.FieldInputDTO;
+import es.caib.invai.api.interna.maintenance.field.DTO.FieldOutputDTO;
 import es.caib.invai.api.persistence.model.FieldEntity;
 import es.caib.invai.api.service.model.Field;
 import org.mapstruct.Mapper;
@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Functional Field Area database entities, business domain models, and API transfer schemas.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Mapper(componentModel = "spring")
 public interface FieldMapper {
@@ -48,6 +48,10 @@ public interface FieldMapper {
      * @param inputDTO the inbound presentation payload containing parameters
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     Field toModelFromInput(FieldInputDTO inputDTO);
@@ -59,6 +63,10 @@ public interface FieldMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     void updateModelFromInput(FieldInputDTO inputDTO, @MappingTarget Field model);
@@ -70,11 +78,11 @@ public interface FieldMapper {
      * @param value primary tracking index key reference identity
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
-    default Field map(Long value) {
+    default FieldOutputDTO map(Long value) {
         if (value == null) {
             return null;
         }
-        Field field = new Field();
+        FieldOutputDTO field = new FieldOutputDTO();
         field.setId(value);
         return field;
     }

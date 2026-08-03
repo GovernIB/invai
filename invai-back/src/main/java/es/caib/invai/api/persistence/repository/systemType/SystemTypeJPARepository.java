@@ -4,6 +4,7 @@ import es.caib.invai.api.persistence.model.SystemTypeEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Repository;
  * Native Spring Data JPA repository layer interface providing CRUD operations, custom query methods,
  * and constraint validation checks targeting live {@link SystemTypeEntity} structural classification records.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Repository
-public interface SystemTypeJPARepository extends JpaRepository<SystemTypeEntity, Long> {
+public interface SystemTypeJPARepository extends JpaRepository<SystemTypeEntity, Long>, JpaSpecificationExecutor<SystemTypeEntity> {
 
     /**
      * Obtains a paginated and sorted slice of all active architecture system types that have not

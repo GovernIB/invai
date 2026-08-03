@@ -3,13 +3,13 @@ package es.caib.invai.api.persistence.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
  * JPA persistent entity representing operational business Fields or structural areas of expertise.
  * Inherits standard record validation workflows and automatic interceptor hooks from {@link BaseEntity}.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter

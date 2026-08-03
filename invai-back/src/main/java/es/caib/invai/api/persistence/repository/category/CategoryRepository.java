@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  * by working exclusively with domain-agnostic or plain business models ({@link Category}).
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 public interface CategoryRepository {
 
@@ -27,10 +27,11 @@ public interface CategoryRepository {
     /**
      * Extracts a paginated sequence wrapper matrix across active classification category nodes.
      *
+     * @param filter   dynamic search criteria used to build the query specification
      * @param pageable sorting configuration boundaries and limit arguments
      * @return a page structure containing mapped domain {@link Category} entities
      */
-    Page<Category> findAll(Pageable pageable);
+    Page<Category> findAll(CategoryCriteria filter, Pageable pageable);
 
     /**
      * Commits a clean taxonomy category specification record state parameters map to database systems.

@@ -8,5 +8,40 @@
     </deployment>
 
     <sub-deployment name="invai-back.war">
+        <exclude-subsystems>
+            <subsystem name="jsf"/>
+            <subsystem name="jaxrs"/>
+        </exclude-subsystems>
+        <exclusions>
+            <module name="org.slf4j"/>
+            <module name="org.slf4j.impl"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+            <module name="org.apache.commons.lang3"/>
+        </exclusions>
+        <!-- Jackson is scoped "provided" in invai-back/pom.xml (not bundled) so this deployment shares
+             the exact same Jackson classes as org.hibernate's own optional Jackson import, avoiding the
+             classloader split described there. services="import" is required so this deployment's own
+             Spring MVC Jackson auto-configuration (Jdk8Module/JavaTimeModule registration) can see
+             these modules' META-INF/services entries too, not just their classes. -->
+        <dependencies>
+            <module name="com.fasterxml.jackson.core.jackson-core" services="import"/>
+            <module name="com.fasterxml.jackson.core.jackson-annotations" services="import"/>
+            <module name="com.fasterxml.jackson.core.jackson-databind" services="import"/>
+            <module name="com.fasterxml.jackson.datatype.jackson-datatype-jdk8" services="import"/>
+            <module name="com.fasterxml.jackson.datatype.jackson-datatype-jsr310" services="import"/>
+        </dependencies>
+    </sub-deployment>
+
+    <sub-deployment name="invai-back-externa.war">
+        <exclude-subsystems>
+            <subsystem name="jsf"/>
+            <subsystem name="jaxrs"/>
+        </exclude-subsystems>
+        <exclusions>
+            <module name="org.slf4j"/>
+            <module name="org.slf4j.impl"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+            <module name="org.apache.commons.lang3"/>
+        </exclusions>
     </sub-deployment>
 </jboss-deployment-structure>

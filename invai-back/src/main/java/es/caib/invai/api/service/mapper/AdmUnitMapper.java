@@ -1,7 +1,7 @@
 package es.caib.invai.api.service.mapper;
 
-import es.caib.invai.api.interna.admUnit.DTO.AdmUnitInputDTO;
-import es.caib.invai.api.interna.admUnit.DTO.AdmUnitOutputDTO;
+import es.caib.invai.api.interna.maintenance.admUnit.DTO.AdmUnitInputDTO;
+import es.caib.invai.api.interna.maintenance.admUnit.DTO.AdmUnitOutputDTO;
 import es.caib.invai.api.persistence.model.AdmUnitEntity;
 import es.caib.invai.api.service.model.AdmUnit;
 import org.mapstruct.Mapper;
@@ -12,7 +12,7 @@ import org.mapstruct.MappingTarget;
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Administrative Unit database entities, business domain models, and API transfer schemas.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Mapper(componentModel = "spring")
 public interface AdmUnitMapper {
@@ -48,6 +48,10 @@ public interface AdmUnitMapper {
      * @param inputDTO the inbound presentation payload containing parameters
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     AdmUnit toModelFromInput(AdmUnitInputDTO inputDTO);
@@ -59,6 +63,10 @@ public interface AdmUnitMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     void updateModelFromInput(AdmUnitInputDTO inputDTO, @MappingTarget AdmUnit model);
@@ -70,11 +78,11 @@ public interface AdmUnitMapper {
      * @param value primary tracking index key reference identity
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
-    default AdmUnit map(Long value) {
+    default AdmUnitOutputDTO map(Long value) {
         if (value == null) {
             return null;
         }
-        AdmUnit admUnit = new AdmUnit();
+        AdmUnitOutputDTO admUnit = new AdmUnitOutputDTO();
         admUnit.setId(value);
         return admUnit;
     }

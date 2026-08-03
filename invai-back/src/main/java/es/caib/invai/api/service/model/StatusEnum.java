@@ -6,7 +6,7 @@ import lombok.Getter;
  * Type-safe domain enumeration defining core structural runtime lifecycle constraints
  * allowed across system catalog records.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 public enum StatusEnum {

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * Domain entity model configuring taxonomic catalog classifications
  * applied across business application assets.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter
@@ -23,9 +23,10 @@ public class Category {
     /** Secondary descriptive classification title label string matching Spanish locales. */
     private String nameEs;
 
-    /** Traceability timestamp pointing to operational lifecycle soft-deactivation events. */
+    private LocalDateTime createdAt;
+    private String createdBy;
+    private LocalDateTime updatedAt;
+    private String updatedBy;
     private LocalDateTime deletedAt;
-
-    /** Audit security string identifying the operator responsible for record soft-deletion. */
     private String deletedBy;
 }

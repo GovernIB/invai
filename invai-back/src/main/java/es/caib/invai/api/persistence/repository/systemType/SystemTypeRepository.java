@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  * by working exclusively with domain-agnostic or plain business models ({@link SystemType}).
  * </p>
  *
- * @since 1.0.0
+ * @since 1.0.2
  */
 public interface SystemTypeRepository {
 
@@ -27,10 +27,11 @@ public interface SystemTypeRepository {
     /**
      * Extracts a paginated sequence wrapper matrix across active infrastructure system type nodes.
      *
+     * @param filter   DTO containing dynamic search predicates used to build the query
      * @param pageable sorting configuration boundaries and limit arguments
      * @return a page structure containing mapped domain {@link SystemType} entities
      */
-    Page<SystemType> findAll(Pageable pageable);
+    Page<SystemType> findAll(SystemTypeCriteria filter, Pageable pageable);
 
     /**
      * Commits a clean architecture system type specification record state parameters map to database systems.

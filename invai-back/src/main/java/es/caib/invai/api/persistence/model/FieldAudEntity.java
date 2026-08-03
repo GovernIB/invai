@@ -2,7 +2,7 @@ package es.caib.invai.api.persistence.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * targeting the {@code INV_FIELD} database table.
  * Retains mirrors of all base entity properties alongside flat execution metadata profiles.
  *
- * @since 1.0.0
+ * @since 1.0.1
  */
 @Getter
 @Setter
