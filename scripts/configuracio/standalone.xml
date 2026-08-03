@@ -497,7 +497,7 @@
                 <http-listener name="default" socket-binding="http" max-post-size="50331648" redirect-socket="https" enable-http2="true"/>
                 <https-listener name="https" socket-binding="https" max-post-size="50331648" ssl-context="applicationSSC" enable-http2="true"/>
                 <host name="default-host" alias="localhost">
-                    <filter-ref name="root-redirect"/>
+                    <location name="/" handler="welcome-content"/>
                     <http-invoker http-authentication-factory="application-http-authentication"/>
                 </host>
             </server>
@@ -505,9 +505,9 @@
                 <jsp-config/>
                 <websockets/>
             </servlet-container>
-            <filters>
-                <expression-filter name="root-redirect" expression="path('/') -&gt; redirect('/invaifront/ca/aplicacions')"/>
-            </filters>
+            <handlers>
+                <file name="welcome-content" path="${jboss.home.dir}/welcome-content"/>
+            </handlers>
             <application-security-domains>
                 <application-security-domain name="other" security-domain="ApplicationDomain"/>
             </application-security-domains>
