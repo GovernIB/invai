@@ -1,0 +1,1 @@
+var l={BASE:"documentaci\xF3",APPLICATION:{NEW:"nova",EDIT:"editar",DETAIL:"detall"}};export{l as a};/**i18n:22e098ff1cbf4220c99e0cb12af57cfa6bdd822e90f8e9443f8715589c7ae7f3*/

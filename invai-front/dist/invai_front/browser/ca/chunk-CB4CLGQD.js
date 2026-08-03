@@ -1,0 +1,2 @@
+import{a as l}from"./chunk-NWMBUDBW.js";import{W as o,i as t,n as a,x as e}from"./chunk-TI44TR7P.js";var d="applicationDetail",u=p=>{let i=Number(p.paramMap.get("id"));return!Number.isInteger(i)||i<=0?t({application:null,loadFailed:!0}):o(l).getById(i).pipe(a(r=>({application:r,loadFailed:!1})),e(()=>t({application:null,loadFailed:!0})))};export{d as a,u as b};
+/**i18n:22e098ff1cbf4220c99e0cb12af57cfa6bdd822e90f8e9443f8715589c7ae7f3*/

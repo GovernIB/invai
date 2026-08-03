@@ -1,0 +1,1 @@
+var l={BASE:"aplicaciones",APPLICATION:{NEW:"nueva",EDIT:"editar",DETAIL:"detalle"}},o={BASE:"Aplicaciones"};export{l as a,o as b};/**i18n:22e098ff1cbf4220c99e0cb12af57cfa6bdd822e90f8e9443f8715589c7ae7f3*/
