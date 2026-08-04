@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.layer;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.layer.DTO.LayerInputDTO;
 import es.caib.invai.api.interna.maintenance.layer.DTO.LayerOutputDTO;
 import es.caib.invai.api.persistence.repository.layer.LayerCriteria;
@@ -21,6 +22,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.2
  */
+@Tag(name = "Capes", description = "Manteniment del catàleg de capes tecnològiques.")
 @RestController
 @Slf4j
 @RequestMapping("layer")

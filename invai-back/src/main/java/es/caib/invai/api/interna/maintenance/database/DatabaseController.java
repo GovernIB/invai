@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.database;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.persistence.repository.database.DatabaseCriteria;
 import es.caib.invai.api.service.facade.DatabaseService;
 import es.caib.invai.api.interna.maintenance.database.DTO.DatabaseInputDTO;
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.2
  */
+@Tag(name = "Bases de dades", description = "Manteniment del catàleg de bases de dades.")
 @RestController
 @Slf4j
 @RequestMapping("database")

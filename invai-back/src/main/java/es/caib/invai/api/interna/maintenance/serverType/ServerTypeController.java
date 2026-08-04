@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.serverType;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.serverType.DTO.ServerTypeOutputDTO;
 import es.caib.invai.api.service.facade.ServerTypeService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.List;
  *
  * @since 1.0.2
  */
+@Tag(name = "Tipus de servidor", description = "Manteniment del catàleg de tipus de servidor.")
 @RestController
 @Slf4j
 @RequestMapping("server-type")

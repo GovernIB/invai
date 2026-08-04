@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.databaseVendor;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.databaseVendor.DTO.DatabaseVendorInputDTO;
 import es.caib.invai.api.interna.maintenance.databaseVendor.DTO.DatabaseVendorOutputDTO;
 import es.caib.invai.api.persistence.repository.databaseVendor.DatabaseVendorCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.2
  */
+@Tag(name = "Fabricants de base de dades", description = "Manteniment del catàleg de fabricants de bases de dades.")
 @RestController
 @Slf4j
 @RequestMapping("database-vendor")

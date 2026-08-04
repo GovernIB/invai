@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.application.development.provider;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.application.development.provider.DTO.AppProviderInputDTO;
 import es.caib.invai.api.interna.application.development.provider.DTO.AppProviderOutputDTO;
 import es.caib.invai.api.persistence.repository.application.development.provider.AppProviderCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  */
 @Slf4j
 @Validated
+@Tag(name = "Proveïdors d'aplicació", description = "Servei de gestió dels proveïdors associats als desenvolupaments de les aplicacions.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/development/provider")

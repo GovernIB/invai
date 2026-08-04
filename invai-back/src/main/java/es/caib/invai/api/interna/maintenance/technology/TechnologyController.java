@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.technology;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.technology.DTO.TechnologyInputDTO;
 import es.caib.invai.api.interna.maintenance.technology.DTO.TechnologyOutputDTO;
 import es.caib.invai.api.persistence.repository.technology.TechnologyCriteria;
@@ -21,6 +22,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.2
  */
+@Tag(name = "Tecnologies", description = "Manteniment del catàleg de tecnologies.")
 @RestController
 @Slf4j
 @RequestMapping("technology")

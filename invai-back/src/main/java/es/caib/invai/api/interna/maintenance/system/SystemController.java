@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.system;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.system.DTO.SystemInputDTO;
 import es.caib.invai.api.interna.maintenance.system.DTO.SystemOutputDTO;
 import es.caib.invai.api.persistence.repository.system.SystemCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.1
  */
+@Tag(name = "Sistemes", description = "Manteniment del catàleg de sistemes.")
 @RestController
 @Slf4j
 @RequestMapping("system")

@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.application.system_database.database;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.application.system_database.database.DTO.AppDatabaseInputDTO;
 import es.caib.invai.api.interna.application.system_database.database.DTO.AppDatabaseOutputDTO;
 import es.caib.invai.api.persistence.repository.application.system_database.database.AppDatabaseCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  */
 @Slf4j
 @Validated
+@Tag(name = "Bases de dades d'aplicació", description = "Servei de gestió de les bases de dades associades a les aplicacions.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/database")

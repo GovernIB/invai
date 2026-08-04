@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.role;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.role.DTO.RoleInputDTO;
 import es.caib.invai.api.interna.maintenance.role.DTO.RoleOutputDTO;
 import es.caib.invai.api.persistence.repository.role.RoleCriteria;
@@ -21,6 +22,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.2
  */
+@Tag(name = "Rols", description = "Manteniment del catàleg de rols.")
 @RestController
 @Slf4j
 @RequestMapping("role")

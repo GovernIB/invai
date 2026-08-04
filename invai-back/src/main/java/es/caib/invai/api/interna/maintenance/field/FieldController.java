@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.field;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.field.DTO.FieldInputDTO;
 import es.caib.invai.api.interna.maintenance.field.DTO.FieldOutputDTO;
 import es.caib.invai.api.persistence.repository.field.FieldCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.1
  */
+@Tag(name = "Camps", description = "Manteniment del catàleg de camps.")
 @RestController
 @Slf4j
 @RequestMapping("field")

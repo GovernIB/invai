@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.auth;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,7 @@ import java.io.IOException;
  *
  * @since 1.0.1
  */
+@Tag(name = "Inici de sessió", description = "Servei d'entrada per iniciar el flux d'autenticació OAuth2/OIDC amb el proveïdor Soffid.")
 @RestController
 @RequestMapping("api/auth")
 public class LoginController {
