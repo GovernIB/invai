@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.commission;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.commission.DTO.CommissionInputDTO;
 import es.caib.invai.api.interna.maintenance.commission.DTO.CommissionOutputDTO;
 import es.caib.invai.api.persistence.repository.commission.CommissionCriteria;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * @since 1.0.1
  */
+@Tag(name = "Comissions", description = "Manteniment del catàleg de comissions.")
 @RestController
 @RequestMapping("commission")
 @PreAuthorize("hasRole('ROLE_INV_SUPER')")

@@ -1,5 +1,8 @@
 package es.caib.invai.api;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +33,14 @@ import org.springframework.context.annotation.PropertySource;
 		HibernateJpaAutoConfiguration.class
 })
 @PropertySource("file:${es.caib.invai.system.properties}")
+@OpenAPIDefinition(
+		info = @Info(
+				title = "INVAI – API EXTERNA",
+				description = "Servei de gestió de l'inventari d'aplicacions informàtiques de les Illes Balears (INVAI).",
+				version = "1.0.2"
+		),
+		servers = @Server(url = "/invaiapi/externa")
+)
 public class InvaiBackExternaApplication extends SpringBootServletInitializer {
 
 	/** Internal structural logging engine reference used to emit infrastructure operational metrics. */

@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.admUnit;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.admUnit.DTO.AdmUnitInputDTO;
 import es.caib.invai.api.interna.maintenance.admUnit.DTO.AdmUnitOutputDTO;
 import es.caib.invai.api.persistence.repository.admUnit.AdmUnitCriteria;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * @since 1.0.1
  */
+@Tag(name = "Unitats administratives", description = "Manteniment del catàleg d'unitats administratives.")
 @RestController
 @RequestMapping("adm-unit")
 @PreAuthorize("hasRole('ROLE_INV_SUPER')")

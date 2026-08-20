@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.systemType;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.systemType.DTO.SystemTypeInputDTO;
 import es.caib.invai.api.interna.maintenance.systemType.DTO.SystemTypeOutputDTO;
 import es.caib.invai.api.persistence.repository.systemType.SystemTypeCriteria;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * @since 1.0.2
  */
+@Tag(name = "Tipus de sistema", description = "Manteniment del catàleg de tipus de sistema.")
 @RestController
 @RequestMapping("system-type")
 @PreAuthorize("hasRole('ROLE_INV_SUPER')")

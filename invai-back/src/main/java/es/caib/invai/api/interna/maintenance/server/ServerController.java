@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.server;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.server.DTO.ServerInputDTO;
 import es.caib.invai.api.interna.maintenance.server.DTO.ServerOutputDTO;
 import es.caib.invai.api.persistence.repository.server.ServerCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.2
  */
+@Tag(name = "Servidors", description = "Manteniment del catàleg de servidors.")
 @RestController
 @Slf4j
 @RequestMapping("server")

@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.environment;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.environment.DTO.EnvironmentInputDTO;
 import es.caib.invai.api.interna.maintenance.environment.DTO.EnvironmentOutputDTO;
 import es.caib.invai.api.persistence.repository.environment.EnvironmentCriteria;
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.1
  */
+@Tag(name = "Entorns", description = "Manteniment del catàleg d'entorns.")
 @RestController
 @Slf4j
 @RequestMapping("environment")

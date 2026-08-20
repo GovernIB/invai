@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.application.core;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.exception.BusinessRuleException;
 import es.caib.invai.api.service.facade.ApplicationService;
 import es.caib.invai.api.interna.application.core.DTO.ApplicationInputDTO;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.1
  */
+@Tag(name = "Aplicacions", description = "Servei de gestió de les aplicacions informàtiques de l'inventari.")
 @RestController
 @Slf4j
 @RequestMapping("application")

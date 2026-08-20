@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.application.development.technology;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.application.development.technology.DTO.AppTechnologyInputDTO;
 import es.caib.invai.api.interna.application.development.technology.DTO.AppTechnologyOutputDTO;
 import es.caib.invai.api.persistence.repository.application.development.technology.AppTechnologyCriteria;
@@ -25,6 +26,7 @@ import jakarta.validation.Valid;
  */
 @Slf4j
 @Validated
+@Tag(name = "Tecnologies d'aplicació", description = "Servei de gestió de les tecnologies associades als desenvolupaments de les aplicacions.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/development/technology")

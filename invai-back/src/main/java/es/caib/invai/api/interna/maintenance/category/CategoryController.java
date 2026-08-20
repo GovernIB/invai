@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.maintenance.category;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.maintenance.category.DTO.CategoryInputDTO;
 import es.caib.invai.api.interna.maintenance.category.DTO.CategoryOutputDTO;
 import es.caib.invai.api.persistence.repository.category.CategoryCriteria;
@@ -26,6 +27,7 @@ import jakarta.validation.Valid;
  *
  * @since 1.0.1
  */
+@Tag(name = "Categories", description = "Manteniment del catàleg de categories.")
 @RestController
 @Slf4j
 @RequestMapping("category")

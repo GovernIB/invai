@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.auth;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.api.interna.auth.DTO.UserAuthDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import java.security.Principal;
  *
  * @since 1.0.1
  */
+@Tag(name = "Autenticació", description = "Servei relacionat amb l'autenticació de l'usuari.")
 @RestController
 @RequestMapping("auth")
 @Slf4j

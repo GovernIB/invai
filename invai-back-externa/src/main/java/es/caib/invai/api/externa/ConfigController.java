@@ -1,5 +1,6 @@
 package es.caib.invai.api.externa;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import static es.caib.invai.api.utils.Constants.KEY_HOST;
  *
  * @since 1.0.1
  */
+@Tag(name = "Configuració", description = "Servei públic de configuració, exposa la URL d'inici de sessió cap a l'API interna.")
 @RestController
 @Slf4j
 @RequestMapping("config")
