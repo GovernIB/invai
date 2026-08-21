@@ -4,7 +4,7 @@
          version="6.0">
 
     <session-config>
-        <session-timeout>1</session-timeout>
+        <session-timeout>720</session-timeout>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 

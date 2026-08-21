@@ -1,0 +1,36 @@
+package es.caib.invai.back.persistence.repository.application.development.technology;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * Filter criteria DTO encapsulating query search parameters for dynamically constructing
+ * JPA Specifications and filtering {@code TechnologyEntity} records.
+ *
+ * @since 1.0.2
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AppTechnologyCriteria {
+
+    /**
+     * Filter by state/status identifier (e.g., 1L for active records with deletedAt IS NULL).
+     */
+    private Long statusId;
+
+    /**
+     * Exact matching filter for the associated development module identifier.
+     */
+    private Long appDevelopmentId;
+
+    /**
+     * Free-text global search query pattern across numeric IDs and technology names.
+     */
+    private String search;
+}

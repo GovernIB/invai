@@ -7,72 +7,94 @@
     <persistence-unit name="invaiDS" transaction-type="JTA">
         <jta-data-source>java:jboss/datasources/invaiDS</jta-data-source>
 
-        <class>es.caib.invai.api.persistence.model.ApplicationEntity</class>
-        <class>es.caib.invai.api.persistence.model.ApplicationAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.core.ApplicationEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.core.ApplicationAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.AdmUnitEntity</class>
-        <class>es.caib.invai.api.persistence.model.AdmUnitAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.CategoryEntity</class>
-        <class>es.caib.invai.api.persistence.model.CategoryAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.category.CategoryAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.FieldEntity</class>
-        <class>es.caib.invai.api.persistence.model.FieldAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.field.FieldEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.field.FieldAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.CommissionEntity</class>
-        <class>es.caib.invai.api.persistence.model.CommissionAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.commission.CommissionEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.commission.CommissionAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.SystemTypeEntity</class>
-        <class>es.caib.invai.api.persistence.model.SystemTypeAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.systemType.SystemTypeEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.general.systemType.SystemTypeAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.catalog.LkupStatusEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.DatabaseEntity</class>
-        <class>es.caib.invai.api.persistence.model.DatabaseAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.database.DatabaseEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.database.DatabaseAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.SystemEntity</class>
-        <class>es.caib.invai.api.persistence.model.SystemAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.system.SystemEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.system.SystemAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.AppInformationSystemDbEntity</class>
-        <class>es.caib.invai.api.persistence.model.AppInformationSystemDbAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.system_database.core.AppInformationSystemDbEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.system_database.core.AppInformationSystemDbAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.AppDatabaseAudEntity</class>
-        <class>es.caib.invai.api.persistence.model.AppDatabaseEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.system_database.database.AppDatabaseAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.system_database.database.AppDatabaseEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.AppSystemAudEntity</class>
-        <class>es.caib.invai.api.persistence.model.AppSystemEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.system_database.system.AppSystemAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.system_database.system.AppSystemEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.EnvironmentEntity</class>
-        <class>es.caib.invai.api.persistence.model.EnvironmentAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.environment.EnvironmentEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.environment.EnvironmentAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.catalog.LkupModalityEntity</class>
-        <class>es.caib.invai.api.persistence.model.catalog.LkupStandardAdaptionEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.modality.LkupModalityEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.standardAdaption.LkupStandardAdaptionEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.DevelopmentEntity</class>
-        <class>es.caib.invai.api.persistence.model.DevelopmentAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.AppProviderEntity</class>
-        <class>es.caib.invai.api.persistence.model.AppProviderAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.development.provider.AppProviderEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.development.provider.AppProviderAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.AppTechnologyEntity</class>
-        <class>es.caib.invai.api.persistence.model.AppTechnologyAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.development.technology.AppTechnologyEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.development.technology.AppTechnologyAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.DatabaseVendorEntity</class>
-        <class>es.caib.invai.api.persistence.model.DatabaseVendorAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.databaseVendor.DatabaseVendorEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.databaseVendor.DatabaseVendorAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.ServerEntity</class>
-        <class>es.caib.invai.api.persistence.model.ServerAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.server.ServerEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.server.ServerAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.catalog.LkupServerTypeEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.systems.serverType.LkupServerTypeEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.RoleEntity</class>
-        <class>es.caib.invai.api.persistence.model.RoleAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.role.RoleEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.role.RoleAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.LayerEntity</class>
-        <class>es.caib.invai.api.persistence.model.LayerAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.layer.LayerEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.layer.LayerAudEntity</class>
 
-        <class>es.caib.invai.api.persistence.model.TechnologyEntity</class>
-        <class>es.caib.invai.api.persistence.model.TechnologyAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.technology.TechnologyEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.technology.TechnologyAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.responsible.company.CompanyEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.responsible.company.CompanyAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.responsible.authorizationType.AuthorizationTypeEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.responsible.authorizationType.AuthorizationTypeAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.catalog.responsibleType.LkupResponsibleTypeEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.type.AppAuthorizedTypeLinkEntity</class>
 
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <validation-mode>CALLBACK</validation-mode>
