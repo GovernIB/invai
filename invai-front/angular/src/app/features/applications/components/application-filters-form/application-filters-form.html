@@ -170,17 +170,32 @@
 
   <div>
     <p-floatlabel class="w-full">
-      <input
-        id="applications-filter-responsible"
-        class="w-full"
-        type="text"
+      <p-autocomplete
+        inputId="applications-filter-responsible"
+        styleClass="w-full"
+        inputStyleClass="w-full"
         formControlName="responsible"
-        pInputText
+        ariaLabelledBy="applications-filter-responsible-label"
+        [delay]="0"
+        [emptyMessage]="labels().responsibleEmpty"
+        [forceSelection]="true"
+        [minLength]="1"
+        [showClear]="true"
+        [suggestions]="responsibleOptions()"
+        optionLabel="label"
+        (completeMethod)="onResponsibleSearch($event)"
+        (onClear)="onResponsibleClear()"
       />
       <label id="applications-filter-responsible-label" for="applications-filter-responsible">
         {{ labels().responsible }}
       </label>
     </p-floatlabel>
+    @if (responsibleLoading()) {
+      <small class="mt-1 flex items-center gap-2 text-color-secondary" role="status">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <span>{{ labels().responsibleLoading }}</span>
+      </small>
+    }
   </div>
 
   <div>

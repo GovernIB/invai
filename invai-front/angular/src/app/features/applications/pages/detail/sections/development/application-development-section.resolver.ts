@@ -11,12 +11,17 @@ import { catchError, forkJoin, map, of } from 'rxjs';
 
 import {
   ApplicationDevelopmentOutput,
+  DevelopmentLookupOutput,
+  DevelopmentModality,
+  DevelopmentStandardAdaption,
   ApplicationProviderOutput,
   ApplicationTechnologyOutput,
 } from '../../../../applications.model';
 import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
 import { ApplicationProvidersService } from '../../../../services/application-providers.service';
 import { ApplicationTechnologiesService } from '../../../../services/application-technologies.service';
+import { DevelopmentModalityCatalogService } from '../../../../services/development-modality-catalog.service';
+import { DevelopmentStandardAdaptionCatalogService } from '../../../../services/development-standard-adaption-catalog.service';
 import {
   APPLICATION_DETAIL_RESOLVE_KEY,
   ApplicationDetailResolvedData,
@@ -39,6 +44,10 @@ export interface ApplicationDevelopmentResolvedData {
   roleOptionsLoadFailed: boolean;
   technologyOptions: TechnologyCatalogOption[];
   technologyOptionsLoadFailed: boolean;
+  modalityOptions: DevelopmentLookupOutput<DevelopmentModality>[];
+  modalityOptionsLoadFailed: boolean;
+  standardAdaptionOptions: DevelopmentLookupOutput<DevelopmentStandardAdaption>[];
+  standardAdaptionOptionsLoadFailed: boolean;
 }
 
 const INITIAL_PAGE_PARAMS = {
@@ -56,9 +65,8 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
     return of(emptyResolvedData());
   }
 
-  const detailData = route.parent?.data[
-    APPLICATION_DETAIL_RESOLVE_KEY
-  ] as ApplicationDetailResolvedData | undefined;
+  const detailData = route.parent?.data[APPLICATION_DETAIL_RESOLVE_KEY] as
+    ApplicationDetailResolvedData | undefined;
   const appDevelopmentId = positiveId(detailData?.application?.appDevelopmentId);
   const developmentService = inject(ApplicationDevelopmentService);
   const providersService = inject(ApplicationProvidersService);
@@ -73,21 +81,17 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
   const providersResult =
     appDevelopmentId == null
       ? of({ page: null, failed: false })
-      : providersService
-          .getPage({ appDevelopmentId, ...INITIAL_PAGE_PARAMS })
-          .pipe(
-            map((page) => ({ page, failed: false })),
-            catchError(() => of({ page: null, failed: true })),
-          );
+      : providersService.getPage({ appDevelopmentId, ...INITIAL_PAGE_PARAMS }).pipe(
+          map((page) => ({ page, failed: false })),
+          catchError(() => of({ page: null, failed: true })),
+        );
   const technologiesResult =
     appDevelopmentId == null
       ? of({ page: null, failed: false })
-      : technologiesService
-          .getPage({ appDevelopmentId, ...INITIAL_PAGE_PARAMS })
-          .pipe(
-            map((page) => ({ page, failed: false })),
-            catchError(() => of({ page: null, failed: true })),
-          );
+      : technologiesService.getPage({ appDevelopmentId, ...INITIAL_PAGE_PARAMS }).pipe(
+          map((page) => ({ page, failed: false })),
+          catchError(() => of({ page: null, failed: true })),
+        );
 
   return forkJoin({
     developmentResult,
@@ -111,6 +115,18 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
         map((options) => ({ options, failed: false })),
         catchError(() => of({ options: [], failed: true })),
       ),
+    modalityOptionsResult: inject(DevelopmentModalityCatalogService)
+      .getAll()
+      .pipe(
+        map((options) => ({ options, failed: false })),
+        catchError(() => of({ options: [], failed: true })),
+      ),
+    standardAdaptionOptionsResult: inject(DevelopmentStandardAdaptionCatalogService)
+      .getAll()
+      .pipe(
+        map((options) => ({ options, failed: false })),
+        catchError(() => of({ options: [], failed: true })),
+      ),
   }).pipe(
     map(
       ({
@@ -120,6 +136,8 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
         environmentOptionsResult,
         roleOptionsResult,
         technologyOptionsResult,
+        modalityOptionsResult,
+        standardAdaptionOptionsResult,
       }) => ({
         applicationId,
         appDevelopmentId,
@@ -135,6 +153,10 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
         roleOptionsLoadFailed: roleOptionsResult.failed,
         technologyOptions: technologyOptionsResult.options,
         technologyOptionsLoadFailed: technologyOptionsResult.failed,
+        modalityOptions: modalityOptionsResult.options,
+        modalityOptionsLoadFailed: modalityOptionsResult.failed,
+        standardAdaptionOptions: standardAdaptionOptionsResult.options,
+        standardAdaptionOptionsLoadFailed: standardAdaptionOptionsResult.failed,
       }),
     ),
   );
@@ -156,6 +178,10 @@ function emptyResolvedData(): ApplicationDevelopmentResolvedData {
     roleOptionsLoadFailed: true,
     technologyOptions: [],
     technologyOptionsLoadFailed: true,
+    modalityOptions: [],
+    modalityOptionsLoadFailed: true,
+    standardAdaptionOptions: [],
+    standardAdaptionOptionsLoadFailed: true,
   };
 }
 

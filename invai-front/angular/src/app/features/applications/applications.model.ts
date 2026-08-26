@@ -4,12 +4,16 @@ import { Commission } from '@features/commissions/commissions.model';
 import { Field } from '@features/fields/fields.model';
 import { Layer } from '@features/layers/layers.model';
 import { Role } from '@features/roles/roles.model';
-import {
-  DatabaseRecord,
-  InfrastructureSystem,
-} from '@features/systems/systems.model';
+import { DatabaseRecord, InfrastructureSystem } from '@features/systems/systems.model';
 import { SystemType } from '@features/system-types/system-types.model';
 import { Technology } from '@features/technologies/technologies.model';
+import {
+  ResponsibleAuthorization,
+  ResponsiblePerson,
+  ResponsiblePersonOption,
+  ResponsibleType,
+} from '@features/maintenances/responsibles/responsibles.model';
+import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { PageParams } from '@models/page.model';
 
 export interface Application {
@@ -39,6 +43,7 @@ export interface Application {
   statusId?: ApplicationStatus;
   informationSystemDbId?: number | null;
   appDevelopmentId?: number | null;
+  appResponsibleAuthorizedId: number | null;
 }
 
 export enum ApplicationStatus {
@@ -72,6 +77,7 @@ export interface ApplicationOutput {
   loadDate: string | null;
   appInformationSystemDbId: number | null;
   appDevelopmentId: number | null;
+  appResponsibleAuthorizedId: number | null;
 }
 
 export interface ApplicationInput {
@@ -83,7 +89,7 @@ export interface ApplicationInput {
   fieldId: number;
   admUnitId: number;
   commissionId: number;
-  description?: string | null;
+  description: string;
   statusId: ApplicationStatus;
 }
 
@@ -98,6 +104,10 @@ export interface ApplicationPageParams extends PageParams {
   statusId?: ApplicationStatus;
   description?: string;
   quickSearch?: string;
+  responsibleId?: number;
+  databaseId?: number;
+  serverId?: number;
+  environmentId?: number;
 }
 
 export interface ApplicationFilters {
@@ -110,7 +120,7 @@ export interface ApplicationFilters {
   administrativeUnit: number | null;
   status: ApplicationStatus | null;
   description: string | null;
-  responsible: string | null;
+  responsible: ResponsiblePersonOption | null;
   database: number | null;
   server: number | null;
   environment: number | null;
@@ -233,8 +243,7 @@ export interface ApplicationDatabaseCatalogRow {
 }
 
 export type ApplicationInfrastructureCatalogRow =
-  | ApplicationSystemCatalogRow
-  | ApplicationDatabaseCatalogRow;
+  ApplicationSystemCatalogRow | ApplicationDatabaseCatalogRow;
 
 export interface ApplicationSystemDatabaseOutput {
   id: number;
@@ -245,7 +254,7 @@ export interface ApplicationSystemDatabaseOutput {
 
 export interface ApplicationSystemDatabaseInput {
   applicationId: number;
-  observation: string | null;
+  observation: string;
 }
 
 export interface ApplicationSystemRelationOutput {
@@ -298,7 +307,7 @@ export interface ApplicationDevelopmentOutput {
   code: string;
   standardAdaption: DevelopmentLookupOutput<DevelopmentStandardAdaption>;
   revisionDate: string;
-  observation: string;
+  observation: string | null;
   deletedAt: string | null;
 }
 
@@ -348,4 +357,70 @@ export interface ApplicationTechnologyInput {
 
 export interface ApplicationDevelopmentResourcePageParams extends PageParams {
   appDevelopmentId: number;
+}
+
+interface ApplicationResponsibleOutputBase {
+  appResponsibleAuthorizedId: number;
+  responsibleType: ResponsibleType;
+  jobTitle: string | null;
+  observation: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationAssignedResponsibleOutput extends ApplicationResponsibleOutputBase {
+  id: number;
+  person: ResponsiblePerson;
+}
+
+export interface ApplicationResponsiblePlaceholderOutput extends ApplicationResponsibleOutputBase {
+  id: null;
+  person: null;
+}
+
+export type ApplicationResponsibleOutput =
+  ApplicationAssignedResponsibleOutput | ApplicationResponsiblePlaceholderOutput;
+
+export interface ApplicationResponsibleInput {
+  appResponsibleAuthorizedId: number;
+  personId: number;
+  responsibleTypeId: number;
+  jobTitle: string | null;
+  observation: string | null;
+  personalCaib: boolean;
+}
+
+export interface ApplicationAuthorizedOutput {
+  id: number;
+  appResponsibleAuthorizedId: number;
+  person: ResponsiblePerson;
+  authorizationTypes: ResponsibleAuthorization[];
+  observation: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationAuthorizedInput {
+  appResponsibleAuthorizedId: number;
+  personId: number;
+  authorizationTypeIds: number[];
+  observation: string | null;
+  personalCaib: boolean;
+}
+
+export interface ApplicationAssignmentDeactivateInput {
+  observation: string | null;
+}
+
+export interface ApplicationResponsiblePageParams extends PageParams {
+  appResponsibleAuthorizedId: number;
+  statusId?: SoftDeleteStatus;
+  personId?: number;
+  responsibleTypeId?: number;
+  search?: string;
+}
+
+export interface ApplicationAuthorizedPageParams extends PageParams {
+  appResponsibleAuthorizedId: number;
+  statusId?: SoftDeleteStatus;
+  personId?: number;
+  search?: string;
 }

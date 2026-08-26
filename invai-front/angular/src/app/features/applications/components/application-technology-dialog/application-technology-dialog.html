@@ -8,6 +8,7 @@
   [isSaving]="isSaving()"
   [mode]="mode()"
   [title]="title()"
+  viewPrimaryAction="edit"
   (cancelEdit)="cancelEdit.emit()"
   (closed)="closed.emit()"
   (deactivate)="deactivate.emit()"
@@ -22,28 +23,39 @@
   >
     <div>
       <p-floatlabel class="w-full">
-        <p-select
-          inputId="application-technology-dialog-technology"
-          formControlName="technologyId"
-          ariaLabelledBy="application-technology-dialog-technology-label"
-          appendTo="body"
-          optionLabel="label"
-          optionValue="id"
-          [ariaFilterLabel]="labels.technology"
-          [attr.aria-describedby]="
-            isInvalid(form().controls.technologyId)
-              ? 'application-technology-dialog-technology-error'
-              : null
-          "
-          [attr.aria-invalid]="isInvalid(form().controls.technologyId)"
-          [filter]="true"
-          [fluid]="true"
-          [options]="technologyOptions()"
-          (onChange)="onTechnologyChange($event.value)"
-        />
+        @if (mode() === 'view') {
+          <input
+            class="application-technology-dialog__readonly-control w-full"
+            type="text"
+            readonly
+            [id]="technologyControlId"
+            [value]="technologyLabel()"
+            pInputText
+          />
+        } @else {
+          <p-select
+            formControlName="technologyId"
+            ariaLabelledBy="application-technology-dialog-technology-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [ariaFilterLabel]="labels.technology"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.technologyId)
+                ? 'application-technology-dialog-technology-error'
+                : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.technologyId)"
+            [filter]="true"
+            [fluid]="true"
+            [inputId]="technologyControlId"
+            [options]="technologyOptions()"
+            (onChange)="onTechnologyChange($event.value)"
+          />
+        }
         <label
           id="application-technology-dialog-technology-label"
-          for="application-technology-dialog-technology"
+          [for]="technologyControlId"
         >
           {{ labels.technology }}
         </label>
@@ -63,9 +75,8 @@
       <p-floatlabel class="w-full">
         <input
           id="application-technology-dialog-layer"
-          class="w-full"
+          class="application-technology-dialog__readonly-control w-full"
           type="text"
-          aria-readonly="true"
           readonly
           [value]="layerLabel()"
           pInputText
@@ -88,6 +99,8 @@
               : null
           "
           [attr.aria-invalid]="isInvalid(form().controls.version)"
+          [class.application-technology-dialog__readonly-control]="mode() === 'view'"
+          [readOnly]="mode() === 'view'"
           pInputText
         />
         <label for="application-technology-dialog-version">{{ labels.version }}</label>
@@ -122,6 +135,8 @@
               : null
           "
           [attr.aria-invalid]="isInvalid(form().controls.architecture)"
+          [class.application-technology-dialog__readonly-control]="mode() === 'view'"
+          [readOnly]="mode() === 'view'"
           pInputText
         />
         <label for="application-technology-dialog-architecture">

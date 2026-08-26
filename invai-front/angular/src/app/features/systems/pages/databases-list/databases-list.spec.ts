@@ -129,7 +129,7 @@ describe('DatabasesList', () => {
     harness().hostForm.setValue({
       server: SERVER_OPTION,
       service: ' INVAI ',
-      port: 5432,
+      port: 6432,
       databaseType: VENDOR_OPTION,
       description: ' ',
     });
@@ -139,7 +139,7 @@ describe('DatabasesList', () => {
     expect(create).toHaveBeenCalledWith({
       serverId: SERVER.id,
       service: 'INVAI',
-      port: 5432,
+      port: 6432,
       databaseTypeId: VENDOR.id,
       description: null,
     });

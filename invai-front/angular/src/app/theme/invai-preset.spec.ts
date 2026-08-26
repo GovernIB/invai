@@ -1,6 +1,16 @@
 import { InvaiPreset } from './invai-preset';
 
 describe('InvaiPreset', () => {
+  it('keeps odd table rows white and even rows lighter than hover', () => {
+    const lightRowTokens = InvaiPreset.components?.datatable?.colorScheme?.light?.row;
+
+    expect(lightRowTokens).toEqual({
+      background: '#f9fafb',
+      stripedBackground: '#ffffff',
+      hoverBackground: '#f3f4f6',
+    });
+  });
+
   it('defines the branded success and danger button states', () => {
     const lightButtonTokens = InvaiPreset.components?.button?.colorScheme?.light;
 

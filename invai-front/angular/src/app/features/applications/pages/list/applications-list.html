@@ -28,6 +28,9 @@
         [infrastructureOptions]="infrastructureFilterOptions()"
         [labels]="filterLabels"
         [options]="filterOptions()"
+        [responsibleLoading]="isResponsibleSearchLoading()"
+        [responsibleOptions]="responsibleOptions()"
+        (responsibleSearch)="onResponsibleSearch($event)"
       />
     </app-search-filters>
   }

@@ -16,6 +16,7 @@
     [paginator]="true"
     [paginatorStyleClass]="PAGINATOR_STYLE_CLASS"
     [rowHover]="true"
+    [stripedRows]="true"
     [rows]="PAGINATOR_ROWS"
     [rowsPerPageOptions]="ROWS_PER_PAGE_OPTIONS"
     [scrollable]="true"
@@ -24,74 +25,77 @@
     [value]="value()"
     (onLazyLoad)="onPage($event)"
   >
-  <ng-template let-columns pTemplate="header">
-    <tr>
-      @for (column of columns; track column.key) {
-        @if (column.sortBy) {
-          <th
-            [pSortableColumn]="column.sortBy"
-            [style.min-width]="column.minWidth"
-            [style.width]="column.width"
-          >
-            <div class="invai-table-header-content">
+    <ng-template let-columns pTemplate="header">
+      <tr>
+        @for (column of columns; track column.key) {
+          @if (column.sortBy) {
+            <th
+              [pSortableColumn]="column.sortBy"
+              [style.min-width]="column.minWidth"
+              [style.width]="column.width"
+            >
+              <div class="invai-table-header-content">
+                <span class="invai-table-header-label">{{ column.label }}</span>
+                <p-sortIcon [field]="column.sortBy" />
+              </div>
+            </th>
+          } @else {
+            <th [style.min-width]="column.minWidth" [style.width]="column.width">
               <span class="invai-table-header-label">{{ column.label }}</span>
-              <p-sortIcon [field]="column.sortBy" />
-            </div>
-          </th>
-        } @else {
-          <th [style.min-width]="column.minWidth" [style.width]="column.width">
-            <span class="invai-table-header-label">{{ column.label }}</span>
+            </th>
+          }
+        }
+        @if (showActions()) {
+          <th class="invai-table-actions-column" pFrozenColumn alignFrozen="right">
+            <span class="sr-only">{{ actionsHeader }}</span>
           </th>
         }
-      }
-      @if (!isReadOnly()) {
-        <th class="invai-table-actions-column" pFrozenColumn alignFrozen="right">
-          <span class="sr-only">{{ actionsHeader }}</span>
-        </th>
-      }
-    </tr>
-  </ng-template>
+      </tr>
+    </ng-template>
 
-  <ng-template let-columns="columns" let-rowData pTemplate="body">
-    <tr
-      class="invai-table-consultable-row"
-      tabindex="0"
-      (dblclick)="onRowActivate($event, ApplicationInfrastructureTableAction.View, rowData)"
-      (keydown.enter)="onRowActivate($event, ApplicationInfrastructureTableAction.View, rowData)"
-    >
-      @for (column of columns; track column.key) {
-        <td [style.min-width]="column.minWidth" [style.width]="column.width">
-          <span>{{ rowData[column.key] }}</span>
-        </td>
-      }
-      @if (!isReadOnly()) {
-        <td class="invai-table-actions-column" pFrozenColumn alignFrozen="right">
-          <p-button
-            [text]="true"
-            severity="secondary"
-            [icon]="PrimeIcons.ELLIPSIS_H"
-            [ariaLabel]="actionsAriaLabel"
-            (onClick)="openActionsMenu($event, rowData, rowMenu)"
-          />
-        </td>
-      }
-    </tr>
-  </ng-template>
+    <ng-template let-columns="columns" let-rowData pTemplate="body">
+      <tr
+        class="invai-table-consultable-row"
+        tabindex="0"
+        (dblclick)="onRowActivate($event, ApplicationInfrastructureTableAction.View, rowData)"
+        (keydown.enter)="onRowActivate($event, ApplicationInfrastructureTableAction.View, rowData)"
+      >
+        @for (column of columns; track column.key) {
+          <td [style.min-width]="column.minWidth" [style.width]="column.width">
+            <span>{{ rowData[column.key] }}</span>
+          </td>
+        }
+        @if (showActions()) {
+          <td class="invai-table-actions-column" pFrozenColumn alignFrozen="right">
+            <p-button
+              [text]="true"
+              severity="secondary"
+              [icon]="PrimeIcons.ELLIPSIS_H"
+              [ariaLabel]="actionsAriaLabel"
+              [disabled]="isReadOnly()"
+              (onClick)="openActionsMenu($event, rowData)"
+            />
+          </td>
+        }
+      </tr>
+    </ng-template>
 
-  <ng-template pTemplate="emptymessage">
-    <tr>
-      <td [attr.colspan]="columns().length + (isReadOnly() ? 0 : 1)">
-        {{ RESULTS_NOT_FOUND }}
-      </td>
-    </tr>
-  </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="columns().length + (showActions() ? 1 : 0)">
+          {{ RESULTS_NOT_FOUND }}
+        </td>
+      </tr>
+    </ng-template>
   </p-table>
 </div>
 
-<p-menu
-  #rowMenu
-  [model]="rowActions()"
-  [popup]="true"
-  appendTo="body"
-  styleClass="application-infrastructure-row-menu"
-/>
+@if (showActions()) {
+  <p-menu
+    #rowMenu
+    [model]="rowActions()"
+    [popup]="true"
+    appendTo="body"
+    styleClass="application-infrastructure-row-menu"
+  />
+}

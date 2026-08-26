@@ -9,6 +9,7 @@
       [filtersButtonAriaLabel]="filtersButtonAriaLabel()"
       [filtersSelected]="filtersSelected()"
       [hideExportButton]="true"
+      [hideAddButton]="!showActions()"
       [hideQuickSearch]="true"
       [(isFiltersCollapsed)]="isFiltersCollapsed"
       (onAdd)="onAdd()"
@@ -32,6 +33,7 @@
     [itemsList]="itemsList()"
     [isLoading]="isLoading()"
     [isReadOnly]="isReadOnly()"
+    [showActions]="showActions()"
     (onPageChange)="onPageChange($event)"
     (onSelectAction)="onTableAction($event)"
   />

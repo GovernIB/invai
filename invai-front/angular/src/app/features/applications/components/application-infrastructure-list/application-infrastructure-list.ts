@@ -38,6 +38,7 @@ export class ApplicationInfrastructureList implements OnChanges, OnInit {
   appliedStatus = input.required<ApplicationInfrastructureStatus | null>();
   isLoading = input(false);
   isReadOnly = input(false);
+  showActions = input(true);
   first = input(0);
   filtersSelected = input(0);
   filtersButtonAriaLabel = input($localize`Mostra o oculta els filtres`);

@@ -96,13 +96,9 @@ export class ApplicationsService extends BaseApiService {
       prefix: response.prefix ?? '',
       name: response.name ?? '',
       category: response.category ? localizedName(response.category, this.locale) : '',
-      informationSystem: response.systemType
-        ? localizedName(response.systemType, this.locale)
-        : '',
+      informationSystem: response.systemType ? localizedName(response.systemType, this.locale) : '',
       scope: response.field ? localizedName(response.field, this.locale) : '',
-      commission: response.csCommission
-        ? localizedName(response.csCommission, this.locale)
-        : '',
+      commission: response.csCommission ? localizedName(response.csCommission, this.locale) : '',
       administrativeUnit: response.admUnit
         ? localizedName(response.admUnit, this.locale, response.admUnit.code)
         : '',
@@ -119,6 +115,7 @@ export class ApplicationsService extends BaseApiService {
       statusId: status ?? undefined,
       informationSystemDbId: response.appInformationSystemDbId,
       appDevelopmentId: response.appDevelopmentId,
+      appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
     };
   }
 
@@ -138,6 +135,10 @@ export class ApplicationsService extends BaseApiService {
       statusId: params.statusId,
       description: params.description,
       quickSearch: params.quickSearch?.trim() || undefined,
+      responsibleId: params.responsibleId,
+      databaseId: params.databaseId,
+      serverId: params.serverId,
+      environmentId: params.environmentId,
     };
 
     Object.entries(criteria).forEach(([key, value]) => {
@@ -165,6 +166,10 @@ export class ApplicationsService extends BaseApiService {
       admUnitId: params?.admUnitId ?? null,
       statusId: params?.statusId ?? null,
       description: params?.description ?? '',
+      responsibleId: params?.responsibleId ?? null,
+      databaseId: params?.databaseId ?? null,
+      serverId: params?.serverId ?? null,
+      environmentId: params?.environmentId ?? null,
     });
   }
 }

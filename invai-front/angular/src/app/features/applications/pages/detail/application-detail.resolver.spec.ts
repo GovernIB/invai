@@ -32,6 +32,7 @@ const APPLICATION: ApplicationOutput = {
   loadDate: null,
   appInformationSystemDbId: null,
   appDevelopmentId: null,
+  appResponsibleAuthorizedId: null,
 };
 
 describe('applicationDetailResolver', () => {

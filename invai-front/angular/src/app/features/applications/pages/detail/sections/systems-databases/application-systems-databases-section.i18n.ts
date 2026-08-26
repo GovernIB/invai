@@ -63,8 +63,6 @@ export const APPLICATION_SYSTEMS_DATABASES_SYSTEM_DATABASE_REQUIRED =
 export const APPLICATION_SYSTEMS_DATABASES_RELATION_ERROR = $localize`Error`;
 export const APPLICATION_SYSTEMS_DATABASES_SERVER_CREATE_SUCCESS =
   $localize`El servidor s'ha afegit correctament a l'aplicació.`;
-export const APPLICATION_SYSTEMS_DATABASES_SERVER_UPDATE_SUCCESS =
-  $localize`El servidor de l'aplicació s'ha actualitzat correctament.`;
 export const APPLICATION_SYSTEMS_DATABASES_SERVER_DELETE_SUCCESS =
   $localize`El servidor s'ha donat de baixa de l'aplicació.`;
 export const APPLICATION_SYSTEMS_DATABASES_SERVER_SAVE_ERROR =
@@ -73,8 +71,6 @@ export const APPLICATION_SYSTEMS_DATABASES_SERVER_DELETE_ERROR =
   $localize`No s'ha pogut donar de baixa el servidor de l'aplicació.`;
 export const APPLICATION_SYSTEMS_DATABASES_DATABASE_CREATE_SUCCESS =
   $localize`La base de dades s'ha afegit correctament a l'aplicació.`;
-export const APPLICATION_SYSTEMS_DATABASES_DATABASE_UPDATE_SUCCESS =
-  $localize`La base de dades de l'aplicació s'ha actualitzat correctament.`;
 export const APPLICATION_SYSTEMS_DATABASES_DATABASE_DELETE_SUCCESS =
   $localize`La base de dades s'ha donat de baixa de l'aplicació.`;
 export const APPLICATION_SYSTEMS_DATABASES_DATABASE_SAVE_ERROR =

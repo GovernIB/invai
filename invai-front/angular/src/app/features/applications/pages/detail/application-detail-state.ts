@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Commission } from '@features/commissions/commissions.model';
 import { PaginatedList } from '@models/table.model';
+import { normalizeQuillHtml } from '@shared/utils/rich-text.utils';
 import { Observable, map, of, tap } from 'rxjs';
 
 import {
@@ -367,7 +368,7 @@ export class ApplicationDetailState {
     const observations = this.systemsDatabasesForm.getRawValue().observations;
     const payload = {
       applicationId,
-      observation: observations || null,
+      observation: normalizeQuillHtml(observations),
     };
     const request =
       informationSystemDbId == null
@@ -576,7 +577,7 @@ export class ApplicationDetailState {
       fieldId: value.scope as number,
       admUnitId: value.administrativeUnit as number,
       commissionId: value.commission as number,
-      description: value.description || null,
+      description: normalizeQuillHtml(value.description),
       statusId: current.statusId ?? current.status ?? APPLICATION_STATUS_ACTIVE_ID,
     };
   }
@@ -590,7 +591,7 @@ export class ApplicationDetailState {
       code: value.code.trim(),
       standardAdaptionId: value.standardAdaption!,
       revisionDate: formatLocalDateTime(value.revisionDate) as string,
-      observation: value.observation,
+      observation: normalizeQuillHtml(value.observation),
     };
   }
 

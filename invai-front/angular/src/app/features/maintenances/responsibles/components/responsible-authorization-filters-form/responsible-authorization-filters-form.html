@@ -1,0 +1,44 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="responsible-authorization-filter-name"
+        class="w-full"
+        formControlName="name"
+        pInputText
+      />
+      <label for="responsible-authorization-filter-name">{{ labels().name }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="responsible-authorization-filter-name-es"
+        class="w-full"
+        formControlName="nameEs"
+        pInputText
+      />
+      <label for="responsible-authorization-filter-name-es">{{ labels().nameEs }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="responsible-authorization-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="responsible-authorization-filter-status-label"
+        optionLabel="label"
+        optionValue="value"
+        [options]="statusOptions"
+        [showClear]="true"
+      />
+      <label
+        id="responsible-authorization-filter-status-label"
+        for="responsible-authorization-filter-status"
+      >
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

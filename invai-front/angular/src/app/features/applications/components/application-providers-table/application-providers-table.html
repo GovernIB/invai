@@ -16,6 +16,7 @@
     [paginator]="true"
     [paginatorStyleClass]="PAGINATOR_STYLE_CLASS"
     [rowHover]="true"
+    [stripedRows]="true"
     [rows]="PAGINATOR_ROWS"
     [rowsPerPageOptions]="ROWS_PER_PAGE_OPTIONS"
     [scrollable]="true"
@@ -34,7 +35,7 @@
             </div>
           </th>
         }
-        @if (!isReadOnly()) {
+        @if (showActions()) {
           <th class="invai-table-actions-column">
             <span class="sr-only">{{ actionsHeader }}</span>
           </th>
@@ -66,14 +67,15 @@
             }
           </td>
         }
-        @if (!isReadOnly()) {
+        @if (showActions()) {
           <td class="invai-table-actions-column">
             <p-button
               severity="secondary"
               [ariaLabel]="actionsAriaLabel"
+              [disabled]="isReadOnly()"
               [icon]="icons.ELLIPSIS_H"
               [text]="true"
-              (onClick)="openActionsMenu($event, rowData, rowMenu)"
+              (onClick)="openActionsMenu($event, rowData)"
             />
           </td>
         }
@@ -81,7 +83,7 @@
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td [attr.colspan]="columns().length + (isReadOnly() ? 0 : 1)">
+        <td [attr.colspan]="columns().length + (showActions() ? 1 : 0)">
           {{ RESULTS_NOT_FOUND }}
         </td>
       </tr>
@@ -89,10 +91,12 @@
   </p-table>
 </div>
 
-<p-menu
-  #rowMenu
-  [model]="rowActions()"
-  [popup]="true"
-  appendTo="body"
-  styleClass="application-development-row-menu"
-/>
+@if (showActions()) {
+  <p-menu
+    #rowMenu
+    [model]="rowActions()"
+    [popup]="true"
+    appendTo="body"
+    styleClass="application-development-row-menu"
+  />
+}

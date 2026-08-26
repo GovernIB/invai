@@ -35,6 +35,10 @@ import {
   TECHNOLOGIES_LIST_RESOLVE_KEY,
   technologiesListResolver,
 } from '@features/technologies/pages/list/technologies-list.resolver';
+import {
+  RESPONSIBLES_MAINTENANCE_RESOLVE_KEY,
+  responsiblesMaintenanceResolver,
+} from './pages/responsibles-maintenance/responsibles-maintenance.resolver';
 
 export const MAINTENANCES_ROUTES: Routes = [
   {
@@ -71,6 +75,9 @@ export const MAINTENANCES_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: MAINTENANCES_ROUTES_LABELS.RESPONSIBLES,
+        },
+        resolve: {
+          [RESPONSIBLES_MAINTENANCE_RESOLVE_KEY]: responsiblesMaintenanceResolver,
         },
       },
       {
@@ -119,10 +126,9 @@ function legacyMaintenanceRoute(path: string, sectionPath: string, panelId: stri
   return {
     path,
     redirectTo: () =>
-      inject(Router).createUrlTree(
-        ['/', MAINTENANCES_ROUTES_LOC.BASE, sectionPath],
-        { fragment: panelId },
-      ),
+      inject(Router).createUrlTree(['/', MAINTENANCES_ROUTES_LOC.BASE, sectionPath], {
+        fragment: panelId,
+      }),
   };
 }
 
@@ -130,9 +136,6 @@ function legacyEnvironmentRoute(path: string) {
   return {
     path,
     redirectTo: () =>
-      inject(Router).createUrlTree(
-        ['/', SYSTEMS_ROUTES_LOC.BASE],
-        { fragment: 'environments' },
-      ),
+      inject(Router).createUrlTree(['/', SYSTEMS_ROUTES_LOC.BASE], { fragment: 'environments' }),
   };
 }

@@ -7,6 +7,7 @@ import {
   input,
   LOCALE_ID,
   signal,
+  viewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { TableComponentBase } from '@shared/classes/table-component-base';
@@ -44,19 +45,19 @@ export enum ApplicationProviderTableAction {
 export class ApplicationProvidersTable extends TableComponentBase<ApplicationProviderOutput> {
   first = input(0);
   isReadOnly = input(false);
+  showActions = input(true);
 
   private readonly locale = inject(LOCALE_ID);
   private readonly selectedRow = signal<ApplicationProviderOutput | null>(null);
+  private readonly rowMenu = viewChild<Menu>('rowMenu');
 
   protected readonly icons = PrimeIcons;
   protected readonly ApplicationProviderTableAction = ApplicationProviderTableAction;
-  protected readonly actionsAriaLabel =
-    APPLICATION_PROVIDERS_TABLE_ACTIONS_ARIA_LABEL;
+  protected readonly actionsAriaLabel = APPLICATION_PROVIDERS_TABLE_ACTIONS_ARIA_LABEL;
   protected readonly actionsHeader = APPLICATION_PROVIDERS_TABLE_ACTIONS_HEADER;
   protected readonly emptyValue = APPLICATION_PROVIDERS_TABLE_EMPTY_VALUE;
   protected readonly rowActions = computed<MenuItem[]>(() => {
-    const isMutationDisabled =
-      this.isReadOnly() || Boolean(this.selectedRow()?.deletedAt);
+    const isMutationDisabled = this.isReadOnly() || Boolean(this.selectedRow()?.deletedAt);
     return [
       {
         label: APPLICATION_PROVIDERS_TABLE_VIEW_LABEL,
@@ -91,10 +92,10 @@ export class ApplicationProvidersTable extends TableComponentBase<ApplicationPro
   protected openActionsMenu(
     event: Event,
     row: ApplicationProviderOutput,
-    menu: Menu,
+    menu = this.rowMenu(),
   ): void {
     this.selectedRow.set(row);
-    menu.toggle(event);
+    menu?.toggle(event);
   }
 
   private emitRowAction(action: ApplicationProviderTableAction): void {

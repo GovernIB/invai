@@ -8,8 +8,4 @@ export const MAINTENANCE_PANEL_DESCRIPTIONS = {
   technologies: $localize`Gestiona el catàleg de tecnologies i la capa associada a cadascuna.`,
 };
 
-export const RESPONSIBLES_MAINTENANCE_EMPTY_MESSAGE =
-  $localize`Encara no hi ha manteniments disponibles per a aquesta secció.`;
-
-export const DEVELOPMENT_LAYER_OPTIONS_LOAD_ERROR =
-  $localize`No s'han pogut carregar les capes disponibles per a les tecnologies.`;
+export const DEVELOPMENT_LAYER_OPTIONS_LOAD_ERROR = $localize`No s'han pogut carregar les capes disponibles per a les tecnologies.`;

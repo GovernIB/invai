@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { Editor } from 'primeng/editor';
+import { By } from '@angular/platform-browser';
 
 import { ApplicationStatus } from '../../../../applications.model';
 import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
@@ -79,6 +81,23 @@ describe('ApplicationGeneralSection', () => {
     fixture.detectChanges();
 
     expect(findWithdrawalButton()).toBeUndefined();
+  });
+
+  it('keeps the rich description editor rendered and toggles its read-only mode', () => {
+    detailState.form.controls.description.setValue(
+      '<p>Application <strong>description</strong></p>',
+    );
+    fixture.detectChanges();
+
+    const readOnlyEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+    expect(readOnlyEditor.readonly).toBe(true);
+
+    detailState.startEditing('general');
+    fixture.detectChanges();
+
+    const editableEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+    expect(editableEditor).toBe(readOnlyEditor);
+    expect(editableEditor.readonly).toBe(false);
   });
 
   it('renders section editing actions and lifecycle controls after the form while editing', () => {

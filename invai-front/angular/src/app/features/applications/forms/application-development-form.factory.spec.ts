@@ -26,25 +26,44 @@ describe('application development forms', () => {
     expect(form.invalid).toBe(true);
   });
 
-  it('rejects invalid source URLs and visually empty rich text', () => {
+  it('rejects invalid source URLs', () => {
     const form = createApplicationDevelopmentForm(formBuilder);
 
     form.controls.code.setValue('git.caib.es/invai');
-    form.controls.observation.setValue('<p><br></p><p>&nbsp;</p>');
 
     expect(form.controls.code.hasError('pattern')).toBe(true);
-    expect(form.controls.observation.hasError('required')).toBe(true);
 
     form.controls.code.setValue('https://git.caib.es/invai');
-    form.controls.observation.setValue('<p>Aplicació corporativa</p>');
 
     expect(form.controls.code.valid).toBe(true);
-    expect(form.controls.observation.valid).toBe(true);
   });
 
-  it('allows optional provider dates but rejects an inverted range', () => {
+  it('allows visually empty optional development observations', () => {
+    const form = createApplicationDevelopmentForm(formBuilder);
+
+    form.setValue({
+      environment: 3,
+      modality: 1,
+      code: 'https://git.caib.es/invai',
+      standardAdaption: 1,
+      revisionDate: new Date(2026, 4, 2),
+      observation: '<p><br></p><p>&nbsp;</p>',
+    });
+
+    expect(form.controls.observation.valid).toBe(true);
+    expect(form.valid).toBe(true);
+  });
+
+  it('requires a provider company and role while allowing optional dates', () => {
     const form = createApplicationProviderForm(formBuilder);
+
+    expect(form.invalid).toBe(true);
+
     form.controls.companyName.setValue('Plexus SL');
+
+    expect(form.controls.roleId.hasError('required')).toBe(true);
+
+    form.controls.roleId.setValue(3);
 
     expect(form.valid).toBe(true);
 

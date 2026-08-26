@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { DatabasesService } from '@features/systems/services/databases.service';
 import { SystemsService } from '@features/systems/services/systems.service';
+import { InfrastructureStatus } from '@features/systems/systems.model';
 import { SpringPage } from '@models/page.model';
 import { KeyLabel } from '@models/table.model';
 import { By } from '@angular/platform-browser';
@@ -123,6 +124,9 @@ interface SectionAccess {
   selectedServerFilters: () => number;
   onDocumentation: () => void;
   openSystemCreateDialog: () => void;
+  openDatabaseCreateDialog: () => void;
+  onSystemCatalogPageChange: (event: TableLazyLoadEvent) => void;
+  onDatabaseCatalogPageChange: (event: TableLazyLoadEvent) => void;
   onSystemTableAction: (event: {
     action: ApplicationInfrastructureTableAction;
     params: ApplicationServer;
@@ -133,16 +137,14 @@ interface SectionAccess {
   }) => void;
   submitSystemRelation: () => void;
   submitDatabaseRelation: () => void;
-  startSystemEdit: () => void;
-  startDatabaseEdit: () => void;
-  deleteSelectedDatabase: () => void;
+  save: () => void;
   confirmDelete: () => void;
   systemRelationForm: ApplicationSystemRelationFormGroup;
   databaseRelationForm: ApplicationDatabaseRelationFormGroup;
   systemDialogVisible: () => boolean;
   databaseDialogVisible: () => boolean;
-  systemDialogMode: () => 'create' | 'view' | 'edit';
-  databaseDialogMode: () => 'create' | 'view' | 'edit';
+  systemDialogMode: () => 'create' | 'view';
+  databaseDialogMode: () => 'create' | 'view';
   deleteDialogVisible: () => boolean;
 }
 
@@ -161,11 +163,14 @@ describe('ApplicationSystemsDatabasesSection', () => {
   let getSystemsPage: ReturnType<typeof vi.fn>;
   let getDatabasesPage: ReturnType<typeof vi.fn>;
   let createSystemRelation: ReturnType<typeof vi.fn>;
-  let updateSystemRelation: ReturnType<typeof vi.fn>;
   let deleteSystemRelation: ReturnType<typeof vi.fn>;
   let createDatabaseRelation: ReturnType<typeof vi.fn>;
-  let updateDatabaseRelation: ReturnType<typeof vi.fn>;
   let deleteDatabaseRelation: ReturnType<typeof vi.fn>;
+  let getSystemsCatalog: ReturnType<typeof vi.fn>;
+  let getDatabasesCatalog: ReturnType<typeof vi.fn>;
+  let clearSystemsCache: ReturnType<typeof vi.fn>;
+  let clearDatabasesCache: ReturnType<typeof vi.fn>;
+  let createSystemDatabase: ReturnType<typeof vi.fn>;
   let systemsRequests: Subject<SpringPage<ApplicationServer>>[];
   let databasesRequests: Subject<SpringPage<ApplicationDatabase>>[];
   let routeData: Record<string, ApplicationSystemsDatabasesResolvedData>;
@@ -181,20 +186,28 @@ describe('ApplicationSystemsDatabasesSection', () => {
       },
     );
     getDatabasesPage = vi.fn(
-      (
-        _params: ApplicationDatabasesPageParams,
-      ): Observable<SpringPage<ApplicationDatabase>> => {
+      (_params: ApplicationDatabasesPageParams): Observable<SpringPage<ApplicationDatabase>> => {
         const request = new Subject<SpringPage<ApplicationDatabase>>();
         databasesRequests.push(request);
         return request;
       },
     );
     createSystemRelation = vi.fn(() => of({}));
-    updateSystemRelation = vi.fn(() => of({}));
     deleteSystemRelation = vi.fn(() => of(undefined));
     createDatabaseRelation = vi.fn(() => of({}));
-    updateDatabaseRelation = vi.fn(() => of({}));
     deleteDatabaseRelation = vi.fn(() => of(undefined));
+    getSystemsCatalog = vi.fn(() => of(page([])));
+    getDatabasesCatalog = vi.fn(() => of(page([])));
+    clearSystemsCache = vi.fn();
+    clearDatabasesCache = vi.fn();
+    createSystemDatabase = vi.fn(() =>
+      of({
+        id: 71,
+        application: { id: 7 },
+        observation: '<p>Noves observacions</p>',
+        deletedAt: null,
+      }),
+    );
     routeData = {
       [APPLICATION_SYSTEMS_DATABASES_RESOLVE_KEY]: resolvedData(),
     };
@@ -214,17 +227,22 @@ describe('ApplicationSystemsDatabasesSection', () => {
         },
         {
           provide: ApplicationSystemDatabaseService,
-          useValue: { update: vi.fn() },
+          useValue: { create: createSystemDatabase, update: vi.fn() },
         },
-        { provide: SystemsService, useValue: { getAll: vi.fn() } },
-        { provide: DatabasesService, useValue: { getAll: vi.fn() } },
+        {
+          provide: SystemsService,
+          useValue: { getAll: getSystemsCatalog, clearCache: clearSystemsCache },
+        },
+        {
+          provide: DatabasesService,
+          useValue: { getAll: getDatabasesCatalog, clearCache: clearDatabasesCache },
+        },
         { provide: ActivatedRoute, useValue: { snapshot: { data: routeData } } },
         {
           provide: ApplicationSystemsService,
           useValue: {
             getPage: getSystemsPage,
             create: createSystemRelation,
-            update: updateSystemRelation,
             delete: deleteSystemRelation,
           },
         },
@@ -233,7 +251,6 @@ describe('ApplicationSystemsDatabasesSection', () => {
           useValue: {
             getPage: getDatabasesPage,
             create: createDatabaseRelation,
-            update: updateDatabaseRelation,
             delete: deleteDatabaseRelation,
           },
         },
@@ -268,9 +285,7 @@ describe('ApplicationSystemsDatabasesSection', () => {
       '.application-detail-section-layout__title',
     ) as HTMLHeadingElement;
 
-    expect(title.textContent?.trim()).toBe(
-      'Infraestructura de sistemes i bases de dades',
-    );
+    expect(title.textContent?.trim()).toBe('Infraestructura de sistemes i bases de dades');
     expect(title.id).toBe('application-systems-databases-section-title');
   });
 
@@ -279,6 +294,8 @@ describe('ApplicationSystemsDatabasesSection', () => {
     let lists = fixture.debugElement.queryAll(By.directive(ApplicationInfrastructureList));
 
     expect(lists.every((list) => list.componentInstance.isReadOnly())).toBe(true);
+    expect(lists.every((list) => !list.componentInstance.showActions())).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(0);
     section.openSystemCreateDialog();
     expect(section.systemDialogVisible()).toBe(false);
 
@@ -287,6 +304,37 @@ describe('ApplicationSystemsDatabasesSection', () => {
     lists = fixture.debugElement.queryAll(By.directive(ApplicationInfrastructureList));
 
     expect(lists.every((list) => !list.componentInstance.isReadOnly())).toBe(true);
+    expect(lists.every((list) => list.componentInstance.showActions())).toBe(true);
+    expect(
+      fixture.nativeElement.querySelectorAll('.invai-table-actions-column').length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('keeps relation mutations unavailable until the grouping exists', () => {
+    recreateWithResolvedData({
+      ...resolvedData(),
+      informationSystemDbId: null,
+      systemCatalogPage: null,
+      databaseCatalogPage: null,
+      systemDatabase: null,
+    });
+    const section = accessSection();
+    detailState.startEditing('systems-databases');
+    fixture.detectChanges();
+
+    const lists = fixture.debugElement.queryAll(By.directive(ApplicationInfrastructureList));
+    expect(lists.every((list) => list.componentInstance.isReadOnly())).toBe(true);
+    expect(lists.every((list) => list.componentInstance.showActions())).toBe(true);
+    const actionButtons = fixture.nativeElement.querySelectorAll(
+      '.invai-table-actions-column button',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(actionButtons.length).toBeGreaterThan(0);
+    expect([...actionButtons].every((button) => button.disabled)).toBe(true);
+
+    section.openSystemCreateDialog();
+    section.openDatabaseCreateDialog();
+    expect(section.systemDialogVisible()).toBe(false);
+    expect(section.databaseDialogVisible()).toBe(false);
   });
 
   it('opens relation rows in view mode even outside the section edit session', () => {
@@ -299,11 +347,11 @@ describe('ApplicationSystemsDatabasesSection', () => {
 
     expect(section.databaseDialogVisible()).toBe(true);
     expect(section.databaseDialogMode()).toBe('view');
-    expect(section.databaseRelationForm.disabled).toBe(true);
+    expect(section.databaseRelationForm.enabled).toBe(true);
     expect(section.databaseRelationForm.controls.database.value).toBe(DATABASE.catalogItem);
   });
 
-  it('edits and saves existing relations from view dialogs outside the section edit session', () => {
+  it('keeps existing relations immutable in their view dialogs', () => {
     const section = accessSection();
     detailState.informationSystemDbId.set(70);
 
@@ -313,21 +361,10 @@ describe('ApplicationSystemsDatabasesSection', () => {
     });
     fixture.detectChanges();
 
-    const systemDialog = fixture.debugElement.query(
-      By.directive(ApplicationSystemRelationDialog),
-    ).componentInstance as ApplicationSystemRelationDialog;
-    expect(systemDialog.canEdit()).toBe(true);
-    expect(systemDialog.canDeactivate()).toBe(false);
-
-    section.startSystemEdit();
-    expect(section.systemDialogMode()).toBe('edit');
+    expect(section.systemDialogMode()).toBe('view');
     expect(section.systemRelationForm.enabled).toBe(true);
-
     section.submitSystemRelation();
-    expect(updateSystemRelation).toHaveBeenCalledWith(10, {
-      informationSystemDbId: 70,
-      systemId: 5,
-    });
+    expect(createSystemRelation).not.toHaveBeenCalled();
 
     section.onDatabaseTableAction({
       action: ApplicationInfrastructureTableAction.View,
@@ -335,24 +372,13 @@ describe('ApplicationSystemsDatabasesSection', () => {
     });
     fixture.detectChanges();
 
-    const databaseDialog = fixture.debugElement.query(
-      By.directive(ApplicationDatabaseRelationDialog),
-    ).componentInstance as ApplicationDatabaseRelationDialog;
-    expect(databaseDialog.canEdit()).toBe(true);
-    expect(databaseDialog.canDeactivate()).toBe(false);
-
-    section.startDatabaseEdit();
-    expect(section.databaseDialogMode()).toBe('edit');
+    expect(section.databaseDialogMode()).toBe('view');
     expect(section.databaseRelationForm.enabled).toBe(true);
-
     section.submitDatabaseRelation();
-    expect(updateDatabaseRelation).toHaveBeenCalledWith(20, {
-      informationSystemDbId: 70,
-      databaseId: 8,
-    });
+    expect(createDatabaseRelation).not.toHaveBeenCalled();
   });
 
-  it('keeps relation dialogs read-only for an inactive application', () => {
+  it('keeps relation mutations unavailable for an inactive application', () => {
     const section = accessSection();
     detailState.application.set({
       id: '7',
@@ -365,15 +391,9 @@ describe('ApplicationSystemsDatabasesSection', () => {
     });
     fixture.detectChanges();
 
-    const systemDialog = fixture.debugElement.query(
-      By.directive(ApplicationSystemRelationDialog),
-    ).componentInstance as ApplicationSystemRelationDialog;
-    expect(systemDialog.canEdit()).toBe(false);
     expect(fixture.debugElement.query(By.directive(Editor)).componentInstance.readonly).toBe(true);
-
-    section.startSystemEdit();
     expect(section.systemDialogMode()).toBe('view');
-    expect(section.systemRelationForm.disabled).toBe(true);
+    expect(section.systemRelationForm.enabled).toBe(true);
 
     section.onDatabaseTableAction({
       action: ApplicationInfrastructureTableAction.View,
@@ -381,19 +401,13 @@ describe('ApplicationSystemsDatabasesSection', () => {
     });
     fixture.detectChanges();
 
-    const databaseDialog = fixture.debugElement.query(
-      By.directive(ApplicationDatabaseRelationDialog),
-    ).componentInstance as ApplicationDatabaseRelationDialog;
-    expect(databaseDialog.canEdit()).toBe(false);
-
-    section.startDatabaseEdit();
     expect(section.databaseDialogMode()).toBe('view');
-    expect(section.databaseRelationForm.disabled).toBe(true);
+    expect(section.databaseRelationForm.enabled).toBe(true);
 
     section.submitSystemRelation();
     section.submitDatabaseRelation();
-    expect(updateSystemRelation).not.toHaveBeenCalled();
-    expect(updateDatabaseRelation).not.toHaveBeenCalled();
+    expect(createSystemRelation).not.toHaveBeenCalled();
+    expect(createDatabaseRelation).not.toHaveBeenCalled();
   });
 
   it('keeps relation dialog selection labels accessible without repeating the visible title', () => {
@@ -419,7 +433,94 @@ describe('ApplicationSystemsDatabasesSection', () => {
     }
   });
 
-  it('creates a system relation with informationSystemDbId and refreshes only servers', () => {
+  it('keeps the grouping id in system and database catalog pagination', () => {
+    const section = accessSection();
+
+    section.onSystemCatalogPageChange({
+      first: 20,
+      rows: 10,
+      sortField: 'server.name',
+      sortOrder: 1,
+    });
+    section.onDatabaseCatalogPageChange({
+      first: 10,
+      rows: 10,
+      sortField: 'service',
+      sortOrder: -1,
+    });
+
+    expect(getSystemsCatalog).toHaveBeenCalledWith({
+      statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: 70,
+      page: 2,
+      size: 10,
+      sort: 'server.name,asc',
+    });
+    expect(getDatabasesCatalog).toHaveBeenCalledWith({
+      statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: 70,
+      page: 1,
+      size: 10,
+      sort: 'service,desc',
+    });
+  });
+
+  it('retries failed assignable catalogs with the current grouping id', () => {
+    recreateWithResolvedData({
+      ...resolvedData(),
+      systemCatalogLoadFailed: true,
+      databaseCatalogLoadFailed: true,
+    });
+    const section = accessSection();
+    detailState.startEditing('systems-databases');
+
+    section.openSystemCreateDialog();
+    section.openDatabaseCreateDialog();
+
+    const expectedParams = {
+      statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: 70,
+      page: 0,
+      size: 10,
+      sort: undefined,
+    };
+    expect(getSystemsCatalog).toHaveBeenCalledWith(expectedParams);
+    expect(getDatabasesCatalog).toHaveBeenCalledWith(expectedParams);
+  });
+
+  it('loads filtered catalogs after saving a section that creates its grouping', () => {
+    recreateWithResolvedData({
+      ...resolvedData(),
+      informationSystemDbId: null,
+      systemCatalogPage: null,
+      databaseCatalogPage: null,
+      systemDatabase: null,
+    });
+    const section = accessSection();
+    detailState.startEditing('systems-databases');
+    detailState.systemsDatabasesForm.controls.observations.setValue('<p>Noves observacions</p>');
+    detailState.systemsDatabasesForm.controls.observations.markAsDirty();
+
+    section.save();
+
+    expect(createSystemDatabase).toHaveBeenCalledWith({
+      applicationId: 7,
+      observation: '<p>Noves observacions</p>',
+    });
+    const expectedParams = {
+      statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: 71,
+      page: 0,
+      size: 10,
+      sort: undefined,
+    };
+    expect(clearSystemsCache).toHaveBeenCalledOnce();
+    expect(clearDatabasesCache).toHaveBeenCalledOnce();
+    expect(getSystemsCatalog).toHaveBeenCalledWith(expectedParams);
+    expect(getDatabasesCatalog).toHaveBeenCalledWith(expectedParams);
+  });
+
+  it('creates a system relation and refreshes only its relation list and assignable catalog', () => {
     const section = accessSection();
     detailState.informationSystemDbId.set(70);
     detailState.startEditing('systems-databases');
@@ -441,19 +542,26 @@ describe('ApplicationSystemsDatabasesSection', () => {
       sort: undefined,
     });
     expect(getDatabasesPage).not.toHaveBeenCalled();
+    expect(clearSystemsCache).toHaveBeenCalledOnce();
+    expect(getSystemsCatalog).toHaveBeenCalledWith({
+      statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: 70,
+      page: 0,
+      size: 10,
+      sort: undefined,
+    });
+    expect(clearDatabasesCache).not.toHaveBeenCalled();
+    expect(getDatabasesCatalog).not.toHaveBeenCalled();
   });
 
-  it('offers deletion from an edit dialog and refreshes only databases', () => {
+  it('deletes from the row menu and refreshes only its relation list and assignable catalog', () => {
     const section = accessSection();
     detailState.startEditing('systems-databases');
 
     section.onDatabaseTableAction({
-      action: ApplicationInfrastructureTableAction.Edit,
+      action: ApplicationInfrastructureTableAction.Delete,
       params: DATABASE,
     });
-    expect(section.databaseDialogMode()).toBe('edit');
-
-    section.deleteSelectedDatabase();
     expect(section.deleteDialogVisible()).toBe(true);
 
     section.confirmDelete();
@@ -468,6 +576,16 @@ describe('ApplicationSystemsDatabasesSection', () => {
       sort: undefined,
     });
     expect(getSystemsPage).not.toHaveBeenCalled();
+    expect(clearDatabasesCache).toHaveBeenCalledOnce();
+    expect(getDatabasesCatalog).toHaveBeenCalledWith({
+      statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: 70,
+      page: 0,
+      size: 10,
+      sort: undefined,
+    });
+    expect(clearSystemsCache).not.toHaveBeenCalled();
+    expect(getSystemsCatalog).not.toHaveBeenCalled();
   });
 
   it('requests later server pages with the active application criteria and nested sorting', () => {
@@ -572,9 +690,8 @@ describe('ApplicationSystemsDatabasesSection', () => {
 
   it('omits server status for all and preserves manual columns while editing and paging', () => {
     const section = accessSection();
-    const serverList = fixture.debugElement.queryAll(
-      By.directive(ApplicationInfrastructureList),
-    )[0].componentInstance as unknown as InfrastructureListAccess;
+    const serverList = fixture.debugElement.queryAll(By.directive(ApplicationInfrastructureList))[0]
+      .componentInstance as unknown as InfrastructureListAccess;
 
     section.serverFiltersForm.patchValue({ status: null });
     fixture.detectChanges();
@@ -593,9 +710,7 @@ describe('ApplicationSystemsDatabasesSection', () => {
     expect(section.selectedServerFilters()).toBe(0);
     expect(serverList.visibleColumns().map(({ key }) => key)).toContain('status');
 
-    serverList.selectedColumns.update((columns) =>
-      columns.filter(({ key }) => key !== 'status'),
-    );
+    serverList.selectedColumns.update((columns) => columns.filter(({ key }) => key !== 'status'));
     section.serverFiltersForm.patchValue({
       status: ApplicationInfrastructureStatus.INACTIVE,
     });
@@ -696,14 +811,14 @@ describe('ApplicationSystemsDatabasesSection', () => {
     expect(addSpy).toHaveBeenCalledWith({
       severity: 'warn',
       summary: 'Atenció',
-      detail: 'El filtre «Instància» encara no està suportat pel servidor i no s\'aplicarà.',
+      detail: "El filtre «Instància» encara no està suportat pel servidor i no s'aplicarà.",
     });
 
     section.onServerFilterSearch();
     expect(addSpy).toHaveBeenLastCalledWith({
       severity: 'warn',
       summary: 'Atenció',
-      detail: 'Alguns filtres encara no estan suportats pel servidor i no s\'aplicaran.',
+      detail: "Alguns filtres encara no estan suportats pel servidor i no s'aplicaran.",
     });
     expect(getSystemsPage).toHaveBeenLastCalledWith({
       informationSystemDbId: 70,

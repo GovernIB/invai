@@ -1,6 +1,7 @@
 import { Injectable, LOCALE_ID, inject } from '@angular/core';
 import { EnvironmentsService } from '@features/environments/services/environments.service';
 import { DatabasesService } from '@features/systems/services/databases.service';
+import { ServerCatalogService } from '@features/systems/services/server-catalog.service';
 import { SystemsService } from '@features/systems/services/systems.service';
 import {
   DatabaseRecord,
@@ -8,7 +9,7 @@ import {
 } from '@features/systems/systems.model';
 import { SpringPage } from '@models/page.model';
 import { localizedName } from '@shared/utils/localized-name.utils';
-import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
+import { EMPTY, Observable, expand, forkJoin, map, reduce } from 'rxjs';
 
 import { SelectOption } from '../applications.model';
 
@@ -18,6 +19,7 @@ const CATALOG_PAGE_SIZE = 100;
 export class ApplicationInfrastructureFilterOptionsService {
   private readonly locale = inject(LOCALE_ID);
   private readonly systemsService = inject(SystemsService);
+  private readonly serverCatalogService = inject(ServerCatalogService);
   private readonly databasesService = inject(DatabasesService);
   private readonly environmentsService = inject(EnvironmentsService);
 
@@ -32,6 +34,21 @@ export class ApplicationInfrastructureFilterOptionsService {
       map((systems) =>
         this.sortOptions(this.toSystemOptions(systems)),
       ),
+    );
+  }
+
+  getPhysicalServerOptions(): Observable<SelectOption<number>[]> {
+    return forkJoin([
+      this.serverCatalogService.getActiveOptions('APPLICATION'),
+      this.serverCatalogService.getActiveOptions('DATABASE'),
+    ]).pipe(
+      map(([applicationServers, databaseServers]) => {
+        const optionsById = new Map<number, SelectOption<number>>();
+        [...applicationServers, ...databaseServers].forEach((server) => {
+          optionsById.set(server.id, { label: server.label, value: server.id });
+        });
+        return this.sortOptions([...optionsById.values()]);
+      }),
     );
   }
 

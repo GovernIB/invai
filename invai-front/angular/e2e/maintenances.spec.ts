@@ -1,9 +1,25 @@
-import { expect, test } from '@playwright/test';
-import type { APIResponse, Locator, Page, Response, TestInfo } from '@playwright/test';
+import { expect, test } from './support/auth.fixture';
+import type { Locator, Page, TestInfo } from '@playwright/test';
+
+import { CleanupRegistry } from './support/cleanup-registry';
+import { uniqueToken } from './support/data';
+import {
+  apiUrl,
+  expectApiJsonResponse,
+  expectJsonResponse,
+  expectSuccessfulResponse,
+  waitForApiResponse as waitForMaintenanceResponse,
+} from './support/http';
+import {
+  ensurePhysicalServer,
+  type InfrastructureSystemRecord,
+  registerSoftDeleteCleanup,
+  SYSTEMS_API,
+} from './support/systems';
+import { selectOption, selectRowAction } from './support/ui';
 
 const ACTIVE_STATUS_ID = 1;
 const INACTIVE_STATUS_ID = 2;
-const ROW_ACTIONS_BUTTON = 'Obrir les accions del registre';
 const INACTIVE_ROW_ACTIONS_BUTTON = 'Obrir les accions del registre inactiu';
 const VIEW_ACTION = 'Consulta';
 const EDIT_ACTION = 'Edita';
@@ -13,6 +29,7 @@ type MaintenanceInput = Record<string, string>;
 
 interface MaintenanceResponse {
   id: number;
+  deletedAt?: string | null;
   [key: string]: unknown;
 }
 
@@ -25,6 +42,21 @@ interface MaintenancePageResponse {
 interface MaintenanceTestData {
   initial: MaintenanceInput;
   updated: MaintenanceInput;
+}
+
+interface RoleTransferRequest {
+  items: { id: number; type: 'RESPONSIBLE' | 'AUTHORIZED' }[];
+  toPersonId: number | null;
+  revoke: boolean;
+}
+
+interface RoleAssignmentResponse {
+  id: number;
+  type: 'RESPONSIBLE' | 'AUTHORIZED';
+  applicationId: number;
+  applicationName: string;
+  responsibleType: { id: number; name: string; nameEs: string } | null;
+  authorizationTypes: Array<{ id: number; name: string; nameEs: string }> | null;
 }
 
 interface QuickSearchConfig {
@@ -48,7 +80,7 @@ interface MaintenanceScenario {
   uniqueField: string;
   quickSearch?: QuickSearchConfig;
   initialStatusId?: number;
-  deleteMode?: 'environment-inactive' | 'api-inactive';
+  deleteMode?: 'environment-inactive' | 'api-inactive' | 'soft-delete-marker';
   createData: (token: string) => MaintenanceTestData;
   fillDialog: (page: Page, input: MaintenanceInput) => Promise<void>;
   dialogValues: (input: MaintenanceInput) => Record<string, string>;
@@ -65,11 +97,12 @@ const SCENARIOS: MaintenanceScenario[] = [
     addDialogTitle: 'Afegir categoria',
     addSubmitButton: 'Afegeix la categoria',
     viewDialogTitle: 'Consultar categoria',
-    closeViewButton: 'Tanca la consulta de la categoria',
+    closeViewButton: 'Tanca el formulari de la categoria',
     editDialogTitle: 'Editar categoria',
     saveButton: 'Desa els canvis de la categoria',
     confirmDeleteButton: "Confirma l'eliminació de la categoria",
     inputPrefix: 'category-dialog',
+    deleteMode: 'soft-delete-marker',
     quickSearch: {
       ariaLabel: 'Cerca ràpida de categories',
       queryParam: 'quickSearch',
@@ -85,11 +118,12 @@ const SCENARIOS: MaintenanceScenario[] = [
     addDialogTitle: "Afegir sistema d'informació",
     addSubmitButton: "Afegeix el sistema d'informació",
     viewDialogTitle: "Consultar sistema d'informació",
-    closeViewButton: "Tanca la consulta del sistema d'informació",
+    closeViewButton: "Tanca el formulari del sistema d'informació",
     editDialogTitle: "Editar sistema d'informació",
     saveButton: "Desa els canvis del sistema d'informació",
     confirmDeleteButton: "Confirma l'eliminació del sistema d'informació",
     inputPrefix: 'system-type-dialog',
+    deleteMode: 'soft-delete-marker',
   }),
   {
     key: 'environment',
@@ -100,7 +134,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     addDialogTitle: 'Afegir entorn',
     addSubmitButton: "Afegeix l'entorn",
     viewDialogTitle: 'Consultar entorn',
-    closeViewButton: "Tanca la consulta de l'entorn",
+    closeViewButton: "Tanca el formulari de l'entorn",
     editDialogTitle: 'Editar entorn',
     saveButton: "Desa els canvis de l'entorn",
     confirmDeleteButton: "Confirma l'eliminació de l'entorn",
@@ -144,11 +178,12 @@ const SCENARIOS: MaintenanceScenario[] = [
     addDialogTitle: 'Afegir àmbit',
     addSubmitButton: "Afegeix l'àmbit",
     viewDialogTitle: 'Consultar àmbit',
-    closeViewButton: "Tanca la consulta de l'àmbit",
+    closeViewButton: "Tanca el formulari de l'àmbit",
     editDialogTitle: 'Editar àmbit',
     saveButton: "Desa els canvis de l'àmbit",
     confirmDeleteButton: "Confirma l'eliminació de l'àmbit",
     inputPrefix: 'field-dialog',
+    deleteMode: 'soft-delete-marker',
   }),
   {
     key: 'commission',
@@ -159,7 +194,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     addDialogTitle: 'Afegir comissió informàtica',
     addSubmitButton: 'Afegeix la comissió informàtica',
     viewDialogTitle: 'Consultar comissió informàtica',
-    closeViewButton: 'Tanca la consulta de la comissió informàtica',
+    closeViewButton: 'Tanca el formulari de la comissió informàtica',
     editDialogTitle: 'Editar comissió informàtica',
     saveButton: 'Desa els canvis de la comissió informàtica',
     confirmDeleteButton: "Confirma l'eliminació de la comissió informàtica",
@@ -200,7 +235,7 @@ test.describe('maintenance section navigation', () => {
     await page.goto('/manteniments/general');
 
     const tabs = page.locator('.maintenances-tabs');
-    await expect(tabs.getByRole('link')).toHaveText(['General', 'Responsables']);
+    await expect(tabs.getByRole('link')).toHaveText(['General', 'Responsables', 'Desenvolupament']);
 
     const categories = page.getByRole('button', { name: /^Categories/ });
     const systemTypes = page.getByRole('button', { name: /^Sistemes d'informació/ });
@@ -217,9 +252,118 @@ test.describe('maintenance section navigation', () => {
     await expect(categories).toHaveAttribute('aria-expanded', 'false');
 
     await tabs.getByRole('link', { name: 'Responsables' }).click();
+    await expect(page).toHaveURL(/\/manteniments\/responsables$/);
+
+    const companies = page.getByRole('button', { name: /^Empreses/ });
+    const people = page.getByRole('button', { name: /^Persones/ });
+    const authorizations = page.getByRole('button', { name: /^Autoritzacions/ });
+    const roleTransfer = page.getByRole('button', {
+      name: /^Transferència i revocació de rols/,
+    });
+    await expect(page.locator('.maintenance-panel-title')).toHaveText([
+      'Transferència i revocació de rols',
+      'Empreses',
+      'Persones',
+      'Autoritzacions',
+    ]);
+    await expect(companies).toHaveAttribute('aria-expanded', 'false');
+    await expect(people).toHaveAttribute('aria-expanded', 'false');
+    await expect(authorizations).toHaveAttribute('aria-expanded', 'false');
+    await expect(roleTransfer).toHaveAttribute('aria-expanded', 'false');
+
+    await companies.click();
+    await expect(page).toHaveURL(/\/manteniments\/responsables#companies$/);
+    await expect(companies).toHaveAttribute('aria-expanded', 'true');
+    const companiesPanel = page.locator('p-accordion-panel').filter({ has: companies });
+    await expect(companiesPanel.locator('.p-datatable-table-container')).toBeVisible();
+
+    await people.click();
+    await expect(page).toHaveURL(/\/manteniments\/responsables#people$/);
+    await expect(people).toHaveAttribute('aria-expanded', 'true');
+    await expect(companies).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('prepares and confirms a controlled role transfer without mutating test data', async ({
+    page,
+  }) => {
+    let postedBatch: RoleTransferRequest | null = null;
+    const people = [
+      {
+        id: 901,
+        firstName: 'E2E Persona',
+        lastName: 'origen',
+        email: 'origen@example.org',
+        personalCaib: false,
+        company: null,
+        deletedAt: null,
+      },
+      {
+        id: 902,
+        firstName: 'E2E Persona',
+        lastName: 'destí',
+        email: 'desti@example.org',
+        personalCaib: false,
+        company: null,
+        deletedAt: null,
+      },
+    ];
+
+    await page.route('**/invaiapi/interna/person*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: people, totalElements: people.length }),
+      }),
+    );
+    await page.route('**/invaiapi/interna/role-transfer**', async (route) => {
+      if (route.request().method() === 'POST') {
+        postedBatch = route.request().postDataJSON() as RoleTransferRequest;
+        await route.fulfill({ status: 204 });
+        return;
+      }
+      const assignments: RoleAssignmentResponse[] = route.request().url().endsWith('/901')
+        ? [
+            {
+              id: 7001,
+              type: 'RESPONSIBLE',
+              applicationId: 8001,
+              applicationName: 'E2E Aplicació',
+              responsibleType: {
+                id: 8002,
+                name: 'Responsable de servei',
+                nameEs: 'Responsable de servicio',
+              },
+              authorizationTypes: null,
+            },
+          ]
+        : [];
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(assignments),
+      });
+    });
+
+    await page.goto('/manteniments/responsables#role-transfer');
+    await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
+    await selectOption(page, 'role-transfer-source', 'E2E Persona origen');
+    await expect(page.getByRole('heading', { name: 'E2E Aplicació' })).toBeVisible();
+    await page.getByRole('checkbox', { name: /Responsable de servei/ }).check();
+    await page.getByRole('button', { name: 'Mou els rols seleccionats al lot' }).click();
+    await selectOption(page, 'role-transfer-destination', 'E2E Persona destí');
+    await page.getByRole('button', { name: 'Transfereix els rols preparats' }).click();
+    await page.getByRole('button', { name: "Confirma l'acció" }).click();
+
+    await expect
+      .poll(() => postedBatch)
+      .toEqual({
+        items: [{ id: 7001, type: 'RESPONSIBLE' }],
+        toPersonId: 902,
+        revoke: false,
+      });
     await expect(
-      page.getByRole('region', { name: 'Responsables' }),
-    ).toContainText('Encara no hi ha manteniments disponibles per a aquesta secció.');
+      page.locator('.role-transfer-status').getByText("Els rols s'han transferit correctament."),
+    ).toBeVisible();
   });
 
   test('keeps wide maintenance tables inside the expanded panel', async ({ page }) => {
@@ -327,88 +471,183 @@ test.describe('systems maintenance navigation', () => {
     );
   });
 
-  test('manages a flattened local application host and blocks hosts in use', async ({ page }) => {
-    test.setTimeout(120_000);
-    const serverName = `e2e-local-${Date.now()}.caib.es`;
-    await page.goto('/sistemes');
+  test('manages a flattened application server through the CRUD dialog', async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(180_000);
+    const cleanup = new CleanupRegistry(testInfo);
+    const token = uniqueToken(testInfo);
+    const instanceName = `E2E_TOMCAT_${token}`;
+    const updatedInstanceName = `${instanceName}_UPDATED`;
+    const cleanupTarget: {
+      id?: number;
+      matches: (item: InfrastructureSystemRecord) => boolean;
+    } = {
+      matches: (item) => item.instance === instanceName || item.instance === updatedInstanceName,
+    };
 
-    const servers = page.getByRole('button', { name: /^Servidors d'aplicacions/ });
-    await servers.click();
-    const panel = page.locator('p-accordion-panel').filter({ has: servers });
+    try {
+      await page.goto('/sistemes');
+      await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
+      const physicalServer = await ensurePhysicalServer(page, cleanup, token, 'APPLICATION');
+      const environmentLabel =
+        physicalServer.environment.name ??
+        physicalServer.environment.code ??
+        `#${physicalServer.environment.id}`;
+      const serverOptionLabel = `${physicalServer.name} · ${environmentLabel}`;
 
-    await expect(panel.getByRole('tab')).toHaveCount(0);
-    await panel.getByRole('button', { name: "Afegir host d'aplicació" }).click();
-    await expect(page.getByRole('heading', { name: "Afegir host d'aplicació" })).toBeVisible();
-    const serverInput = page.locator('#application-host-server');
-    const serverAutocomplete = page.locator('p-autocomplete').filter({ has: serverInput });
-    await expect(serverInput).not.toBeFocused();
-    await serverInput.focus();
-    const focusStyles = await serverAutocomplete.evaluate((root) => {
-      const input = root.querySelector<HTMLElement>('.p-autocomplete-input');
-      const dropdown = root.querySelector<HTMLElement>('.p-autocomplete-dropdown');
-      if (!input || !dropdown) throw new Error('Incomplete server autocomplete');
+      registerSoftDeleteCleanup<InfrastructureSystemRecord>({
+        page,
+        cleanup,
+        label: `application server ${token}`,
+        pathname: SYSTEMS_API.systems,
+        target: cleanupTarget,
+        findParams: { statusId: ACTIVE_STATUS_ID, instance: token },
+      });
 
-      return {
-        rootBoxShadow: getComputedStyle(root).boxShadow,
-        inputBoxShadow: getComputedStyle(input).boxShadow,
-        inputBorderColor: getComputedStyle(input).borderTopColor,
-        dropdownBorderColor: getComputedStyle(dropdown).borderTopColor,
-      };
-    });
-    expect(focusStyles.rootBoxShadow).not.toBe('none');
-    expect(focusStyles.inputBoxShadow).toBe('none');
-    expect(focusStyles.dropdownBorderColor).toBe(focusStyles.inputBorderColor);
-    await serverInput.fill(serverName);
-    await page.waitForTimeout(500);
-    await expect(page.locator('.p-autocomplete-empty-message')).toHaveCount(0);
-    await page.locator('#application-host-environment').click();
-    const environmentOption = page.getByRole('option').first();
-    const environmentLabel = (await environmentOption.textContent())?.trim() ?? '';
-    await environmentOption.click();
-    await page.locator('#application-host-instance').fill('e2e_tomcat');
-    await page.locator('#application-host-port').fill('8090');
-    await page.locator('#application-host-version').fill('11');
-    await page.getByRole('button', { name: 'Afegeix', exact: true }).click();
+      await page.reload();
+      await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
+      const servers = page.getByRole('button', { name: /^Servidors d'aplicacions/ });
+      await servers.click();
+      const panel = page.locator('p-accordion-panel').filter({ has: servers });
 
-    await expect(page.getByText('Canvi desat només en local').last()).toBeVisible();
-    let row = panel.getByRole('row').filter({ hasText: serverName });
-    await expect(row).toBeVisible();
-    await expect(row).toContainText(environmentLabel);
+      await expect(panel.getByRole('tab')).toHaveCount(0);
+      await panel.getByRole('button', { name: "Afegir servidor d'aplicacions" }).click();
+      await expect(
+        page.getByRole('heading', { name: "Afegir servidor d'aplicacions" }),
+      ).toBeVisible();
+      await selectOption(page, 'application-host-server', serverOptionLabel);
+      await page.locator('#application-host-instance').fill(instanceName);
+      await page.locator('#application-host-port').fill('8090');
+      await page.locator('#application-host-version').fill('11');
 
-    await selectRowAction(page, row, VIEW_ACTION);
-    await expect(
-      page.getByRole('heading', { name: "Consultar host d'aplicació" }),
-    ).toBeVisible();
-    await expect(page.locator('#application-host-server')).toBeDisabled();
-    await page.getByRole('button', { name: 'Tanca', exact: true }).click();
+      const createPromise = waitForMaintenanceResponse(page, 'POST', SYSTEMS_API.systems);
+      await page
+        .getByRole('button', { name: "Afegeix el servidor d'aplicacions", exact: true })
+        .click();
+      const createResponse = await createPromise;
+      expect(createResponse.request().postDataJSON()).toEqual({
+        name: physicalServer.name,
+        serverId: physicalServer.id,
+        instance: instanceName,
+        port: 8090,
+        version: '11',
+        description: null,
+      });
+      const created = await expectJsonResponse<InfrastructureSystemRecord>(createResponse);
+      cleanupTarget.id = created.id;
+      expect(created).toMatchObject({
+        id: expect.any(Number),
+        server: { id: physicalServer.id },
+        instance: instanceName,
+        port: 8090,
+        version: '11',
+        deletedAt: null,
+      });
 
-    row = panel.getByRole('row').filter({ hasText: serverName });
-    await selectRowAction(page, row, EDIT_ACTION);
-    await expect(page.getByRole('heading', { name: "Editar host d'aplicació" })).toBeVisible();
-    await page.locator('#application-host-instance').fill('e2e_tomcat_updated');
-    await page.getByRole('button', { name: 'Desa', exact: true }).click();
-    await expect(panel.getByRole('row').filter({ hasText: 'e2e_tomcat_updated' })).toBeVisible();
+      await expect(
+        page.getByText("El servidor d'aplicacions s'ha afegit correctament.").last(),
+      ).toBeVisible();
+      let row = panel.getByRole('row').filter({ hasText: instanceName });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText(physicalServer.name);
+      await expect(row).toContainText(environmentLabel);
 
-    row = panel.getByRole('row').filter({ hasText: serverName });
-    await selectRowAction(page, row, DELETE_ACTION);
-    await page.getByRole('button', { name: "Confirma l'acció" }).click();
+      await selectRowAction(page, row, VIEW_ACTION);
+      await expect(
+        page.getByRole('heading', { name: "Consultar servidor d'aplicacions" }),
+      ).toBeVisible();
+      await expect(page.locator('#application-host-server')).toBeDisabled();
+      await page
+        .getByRole('button', {
+          name: "Tanca el formulari del servidor d'aplicacions",
+          exact: true,
+        })
+        .click();
 
-    await expect(row).toHaveCount(0);
-    await expect(page.getByText('Canvi desat només en local').last()).toBeVisible();
+      row = panel.getByRole('row').filter({ hasText: instanceName });
+      await selectRowAction(page, row, EDIT_ACTION);
+      await expect(
+        page.getByRole('heading', { name: "Editar servidor d'aplicacions" }),
+      ).toBeVisible();
+      await page.locator('#application-host-instance').fill(updatedInstanceName);
+      const updatePromise = waitForMaintenanceResponse(
+        page,
+        'PUT',
+        `${SYSTEMS_API.systems}/${cleanupTarget.id}`,
+      );
+      await page
+        .getByRole('button', {
+          name: "Desa els canvis del servidor d'aplicacions",
+          exact: true,
+        })
+        .click();
+      const updateResponse = await updatePromise;
+      expect(updateResponse.request().postDataJSON()).toEqual({
+        name: physicalServer.name,
+        serverId: physicalServer.id,
+        instance: updatedInstanceName,
+        port: 8090,
+        version: '11',
+        description: null,
+      });
+      await expectJsonResponse<InfrastructureSystemRecord>(updateResponse);
+      await expect(panel.getByRole('row').filter({ hasText: updatedInstanceName })).toBeVisible();
 
-    const usedRow = panel.getByRole('row').filter({ hasText: 'exapp01.caib.es' });
-    await selectRowAction(page, usedRow, DELETE_ACTION);
-    await expect(page.getByText("No es pot donar de baixa l'host")).toBeVisible();
-    await expect(page.getByRole('button', { name: "Confirma l'acció" })).toHaveCount(0);
+      row = panel.getByRole('row').filter({ hasText: updatedInstanceName });
+      await selectRowAction(page, row, DELETE_ACTION);
+      const deletePromise = waitForMaintenanceResponse(
+        page,
+        'DELETE',
+        `${SYSTEMS_API.systems}/${cleanupTarget.id}`,
+      );
+      await page.getByRole('button', { name: "Confirma l'acció" }).click();
+      await expectSuccessfulResponse(await deletePromise);
 
-    await panel.getByRole('button', { name: 'Mostra o amaga els filtres' }).click();
-    await selectOption(page, 'servers-filter-status', 'Inactiu');
-    await panel.getByRole('button', { name: 'Cerca', exact: true }).click();
-    row = panel.getByRole('row').filter({ hasText: serverName });
-    await expect(row).toBeVisible();
-    await row.getByRole('button', { name: INACTIVE_ROW_ACTIONS_BUTTON }).click();
-    await page.getByRole('menuitem', { name: 'Restaura' }).click();
-    await expect(row).toHaveCount(0);
+      await expect(row).toHaveCount(0);
+      await expect(
+        page.getByText("El servidor d'aplicacions s'ha donat de baixa correctament.").last(),
+      ).toBeVisible();
+
+      await panel.getByRole('button', { name: 'Mostra o amaga els filtres' }).click();
+      await page.locator('#systems-filter-instance').fill(updatedInstanceName);
+      await selectOption(page, 'systems-filter-status', 'Inactiu');
+      const inactivePromise = waitForMaintenanceResponse(
+        page,
+        'GET',
+        SYSTEMS_API.systems,
+        (url) =>
+          url.searchParams.get('statusId') === String(INACTIVE_STATUS_ID) &&
+          url.searchParams.get('instance') === updatedInstanceName,
+      );
+      await panel.getByRole('button', { name: 'Cerca' }).click();
+      await expectSuccessfulResponse(await inactivePromise);
+      row = panel.getByRole('row').filter({ hasText: updatedInstanceName });
+      await expect(row).toBeVisible();
+
+      const restorePromise = waitForMaintenanceResponse(
+        page,
+        'PUT',
+        `${SYSTEMS_API.systems}/reactivate/${cleanupTarget.id}`,
+      );
+      const activeRefreshPromise = waitForMaintenanceResponse(
+        page,
+        'GET',
+        SYSTEMS_API.systems,
+        (url) => url.searchParams.get('statusId') === String(ACTIVE_STATUS_ID),
+      );
+      await selectRowAction(page, row, 'Restaura', INACTIVE_ROW_ACTIONS_BUTTON);
+      const restoreResponse = await restorePromise;
+      expect(restoreResponse.request().postDataJSON()).toBeNull();
+      expect(await expectJsonResponse<InfrastructureSystemRecord>(restoreResponse)).toMatchObject({
+        id: cleanupTarget.id,
+        deletedAt: null,
+      });
+      await expectSuccessfulResponse(await activeRefreshPromise);
+      await expect(panel.getByRole('row').filter({ hasText: updatedInstanceName })).toBeVisible();
+    } finally {
+      await cleanup.runAll();
+    }
   });
 });
 
@@ -420,6 +659,7 @@ test.describe('maintenance API lifecycles through the UI', () => {
       const token = uniqueToken(testInfo);
       const data = scenario.createData(token);
       const lookupValue = data.initial[scenario.uniqueField];
+      const updatedLookupValue = data.updated[scenario.uniqueField];
 
       let createdId: number | undefined;
       let creationAttempted = false;
@@ -427,11 +667,8 @@ test.describe('maintenance API lifecycles through the UI', () => {
 
       try {
         await test.step('GET loads the initial maintenance page', async () => {
-          const responsePromise = waitForMaintenanceResponse(
-            page,
-            'GET',
-            scenario.apiPath,
-            (url) => matchesInitialList(url, scenario),
+          const responsePromise = waitForMaintenanceResponse(page, 'GET', scenario.apiPath, (url) =>
+            matchesInitialList(url, scenario),
           );
 
           await page.goto(scenario.route);
@@ -449,16 +686,9 @@ test.describe('maintenance API lifecycles through the UI', () => {
           await expect(page.getByRole('heading', { name: scenario.addDialogTitle })).toBeVisible();
           await scenario.fillDialog(page, data.initial);
 
-          const responsePromise = waitForMaintenanceResponse(
-            page,
-            'POST',
-            scenario.apiPath,
-          );
-          const refreshPromise = waitForMaintenanceResponse(
-            page,
-            'GET',
-            scenario.apiPath,
-            (url) => matchesInitialList(url, scenario),
+          const responsePromise = waitForMaintenanceResponse(page, 'POST', scenario.apiPath);
+          const refreshPromise = waitForMaintenanceResponse(page, 'GET', scenario.apiPath, (url) =>
+            matchesInitialList(url, scenario),
           );
           creationAttempted = true;
           await page.getByRole('button', { name: scenario.addSubmitButton }).click();
@@ -505,11 +735,8 @@ test.describe('maintenance API lifecycles through the UI', () => {
             'PUT',
             `${scenario.apiPath}/${createdId}`,
           );
-          const refreshPromise = waitForMaintenanceResponse(
-            page,
-            'GET',
-            scenario.apiPath,
-            (url) => matchesInitialList(url, scenario),
+          const refreshPromise = waitForMaintenanceResponse(page, 'GET', scenario.apiPath, (url) =>
+            matchesInitialList(url, scenario),
           );
           await page.getByRole('button', { name: scenario.saveButton }).click();
 
@@ -519,12 +746,17 @@ test.describe('maintenance API lifecycles through the UI', () => {
           expect(updated).toMatchObject({ id: createdId, ...data.updated });
           await expectSuccessfulResponse(await refreshPromise);
 
-          const updatedRow = await findMaintenanceRow(page, scenario, lookupValue, createdId!);
+          const updatedRow = await findMaintenanceRow(
+            page,
+            scenario,
+            updatedLookupValue,
+            createdId!,
+          );
           await expect(updatedRow).toContainText(data.updated.name ?? lookupValue);
         });
 
         await test.step('DELETE removes or deactivates the maintenance record', async () => {
-          const row = await findMaintenanceRow(page, scenario, lookupValue, createdId!);
+          const row = await findMaintenanceRow(page, scenario, updatedLookupValue, createdId!);
           await selectRowAction(page, row, DELETE_ACTION);
 
           const deleteResponsePromise = waitForMaintenanceResponse(
@@ -532,11 +764,8 @@ test.describe('maintenance API lifecycles through the UI', () => {
             'DELETE',
             `${scenario.apiPath}/${createdId}`,
           );
-          const refreshPromise = waitForMaintenanceResponse(
-            page,
-            'GET',
-            scenario.apiPath,
-            (url) => matchesInitialList(url, scenario),
+          const refreshPromise = waitForMaintenanceResponse(page, 'GET', scenario.apiPath, (url) =>
+            matchesInitialList(url, scenario),
           );
           await page.getByRole('button', { name: scenario.confirmDeleteButton }).click();
 
@@ -548,6 +777,8 @@ test.describe('maintenance API lifecycles through the UI', () => {
             await expectInactiveEnvironment(page, scenario, data.updated, createdId!);
           } else if (scenario.deleteMode === 'api-inactive') {
             await expectInactiveEntity(page, scenario, data.updated, createdId!);
+          } else if (scenario.deleteMode === 'soft-delete-marker') {
+            await expectSoftDeletedEntity(page, scenario, data.updated, createdId!);
           } else {
             const persisted = await findEntityById(page, scenario, createdId!);
             expect(persisted).toBeUndefined();
@@ -633,35 +864,49 @@ async function findMaintenanceRow(
   id: number,
 ): Promise<Locator> {
   if (scenario.quickSearch) {
-    const currentRow = maintenanceRow(page, uniqueValue);
+    const currentRow = maintenanceRow(page, scenario, uniqueValue);
     if ((await currentRow.count()) > 0) {
       await expect(currentRow).toBeVisible();
       return currentRow;
     }
 
+    const quickSearch = page.getByLabel(scenario.quickSearch.ariaLabel);
+    if ((await quickSearch.inputValue()).trim() === uniqueValue) {
+      return findMaintenanceRowAcrossPages(page, scenario, uniqueValue);
+    }
     const responsePromise = waitForMaintenanceResponse(
       page,
       'GET',
       scenario.apiPath,
       (url) => url.searchParams.get(scenario.quickSearch!.queryParam) === uniqueValue,
     );
-    await page.getByLabel(scenario.quickSearch.ariaLabel).fill(uniqueValue);
+    await quickSearch.fill(uniqueValue);
     const body = await expectJsonResponse<MaintenancePageResponse>(await responsePromise);
-    expect(body.content).toContainEqual(expect.objectContaining({ id }));
+    if (body.content.some((item) => item.id === id)) {
+      const row = maintenanceRow(page, scenario, uniqueValue);
+      await expect(row).toBeVisible();
+      return row;
+    }
 
-    const row = maintenanceRow(page, uniqueValue);
-    await expect(row).toBeVisible();
-    return row;
+    return findMaintenanceRowAcrossPages(page, scenario, uniqueValue);
   }
 
+  return findMaintenanceRowAcrossPages(page, scenario, uniqueValue);
+}
+
+async function findMaintenanceRowAcrossPages(
+  page: Page,
+  scenario: MaintenanceScenario,
+  uniqueValue: string,
+): Promise<Locator> {
   for (let pageIndex = 0; pageIndex < 100; pageIndex += 1) {
-    const row = maintenanceRow(page, uniqueValue);
+    const row = maintenanceRow(page, scenario, uniqueValue);
     if ((await row.count()) > 0) {
       await expect(row).toBeVisible();
       return row;
     }
 
-    const nextButton = page.locator('button.p-paginator-next');
+    const nextButton = maintenanceRegion(page, scenario).locator('button.p-paginator-next');
     if ((await nextButton.count()) === 0 || (await nextButton.isDisabled())) break;
 
     const responsePromise = waitForMaintenanceResponse(page, 'GET', scenario.apiPath);
@@ -670,11 +915,6 @@ async function findMaintenanceRow(
   }
 
   throw new Error(`Could not find ${scenario.key} row containing ${uniqueValue}`);
-}
-
-async function selectRowAction(page: Page, row: Locator, action: string): Promise<void> {
-  await row.getByRole('button', { name: ROW_ACTIONS_BUTTON }).click();
-  await page.getByRole('menuitem', { name: action, exact: true }).click();
 }
 
 async function expectInactiveEnvironment(
@@ -699,11 +939,9 @@ async function expectInactiveEnvironment(
 
   const body = await expectJsonResponse<MaintenancePageResponse>(await responsePromise);
   expect(body.content).toContainEqual(expect.objectContaining({ id, code: input.code }));
-  const row = maintenanceRow(page, input.code);
+  const row = maintenanceRow(page, scenario, input.code);
   await expect(row).toBeVisible();
-  await expect(
-    row.getByRole('button', { name: INACTIVE_ROW_ACTIONS_BUTTON }),
-  ).toBeVisible();
+  await expect(row.getByRole('button', { name: INACTIVE_ROW_ACTIONS_BUTTON })).toBeVisible();
 }
 
 async function expectInactiveEntity(
@@ -719,6 +957,17 @@ async function expectInactiveEntity(
   expect(inactive).toMatchObject({ id, ...input });
 }
 
+async function expectSoftDeletedEntity(
+  page: Page,
+  scenario: MaintenanceScenario,
+  input: MaintenanceInput,
+  id: number,
+): Promise<void> {
+  const deleted = await findEntityById(page, scenario, id);
+  expect(deleted).toMatchObject({ id, ...input });
+  expect(deleted?.deletedAt).toEqual(expect.any(String));
+}
+
 async function findEntityById(
   page: Page,
   scenario: MaintenanceScenario,
@@ -732,7 +981,10 @@ async function scanEntities(
   page: Page,
   scenario: MaintenanceScenario,
   predicate: (entity: MaintenanceResponse) => boolean,
-  statusId = scenario.deleteMode ? ACTIVE_STATUS_ID : undefined,
+  statusId = scenario.deleteMode === 'environment-inactive' ||
+  scenario.deleteMode === 'api-inactive'
+    ? ACTIVE_STATUS_ID
+    : undefined,
 ): Promise<MaintenanceResponse | undefined> {
   for (let pageIndex = 0; pageIndex < 100; pageIndex += 1) {
     const response = await page.request.get(apiUrl(page, scenario.apiPath), {
@@ -777,13 +1029,8 @@ async function cleanupMaintenanceRecord({
 
   const id =
     createdId ??
-    (
-      await scanEntities(
-        page,
-        scenario,
-        (entity) => entity[scenario.uniqueField] === uniqueValue,
-      )
-    )?.id;
+    (await scanEntities(page, scenario, (entity) => entity[scenario.uniqueField] === uniqueValue))
+      ?.id;
   if (!id) return;
 
   const response = await page.request.delete(apiUrl(page, `${scenario.apiPath}/${id}`));
@@ -794,30 +1041,8 @@ async function cleanupMaintenanceRecord({
     contentType: response.headers()['content-type'] ?? 'text/plain',
   });
   expect
-    .soft(
-      response.ok(),
-      `Cleanup DELETE ${scenario.apiPath}/${id} returned ${response.status()}`,
-    )
+    .soft(response.ok(), `Cleanup DELETE ${scenario.apiPath}/${id} returned ${response.status()}`)
     .toBeTruthy();
-}
-
-function waitForMaintenanceResponse(
-  page: Page,
-  method: string,
-  pathname: string,
-  matchesUrl: (url: URL) => boolean = () => true,
-): Promise<Response> {
-  return page.waitForResponse(
-    (response) => {
-      const url = new URL(response.url());
-      return (
-        response.request().method() === method &&
-        url.pathname === pathname &&
-        matchesUrl(url)
-      );
-    },
-    { timeout: 30_000 },
-  );
 }
 
 function matchesInitialList(url: URL, scenario: MaintenanceScenario): boolean {
@@ -832,54 +1057,15 @@ function matchesInitialList(url: URL, scenario: MaintenanceScenario): boolean {
   );
 }
 
-async function expectJsonResponse<T>(response: Response): Promise<T> {
-  const body = await response.text();
-  expect(
-    response.ok(),
-    `${response.request().method()} ${response.url()} returned ${response.status()}: ${body}`,
-  ).toBeTruthy();
-
-  return JSON.parse(body) as T;
+function maintenanceRegion(page: Page, scenario: MaintenanceScenario): Locator {
+  return page.getByRole('region', { name: scenario.title, exact: true });
 }
 
-async function expectSuccessfulResponse(response: Response): Promise<void> {
-  const body = await response.text();
-  expect(
-    response.ok(),
-    `${response.request().method()} ${response.url()} returned ${response.status()}: ${body}`,
-  ).toBeTruthy();
-}
-
-async function expectApiJsonResponse<T>(response: APIResponse, request: string): Promise<T> {
-  const body = await response.text();
-  expect(
-    response.ok(),
-    `${request} returned ${response.status()}: ${body}`,
-  ).toBeTruthy();
-
-  return JSON.parse(body) as T;
-}
-
-async function selectOption(page: Page, inputId: string, optionName: string): Promise<void> {
-  await page.locator(`#${inputId}`).click();
-  const option = page.getByRole('option', { name: optionName, exact: true });
-  await expect(option).toBeVisible();
-  await option.click();
-}
-
-function maintenanceRow(page: Page, text: string): Locator {
-  return page.getByRole('row').filter({ hasText: text }).first();
+function maintenanceRow(page: Page, scenario: MaintenanceScenario, text: string): Locator {
+  return maintenanceRegion(page, scenario).getByRole('row').filter({ hasText: text }).first();
 }
 
 function displayDate(date: string): string {
   const [year, month, day] = date.split('-');
   return `${day}/${month}/${year}`;
-}
-
-function uniqueToken(testInfo: TestInfo): string {
-  return `${Date.now().toString(36)}${testInfo.workerIndex}`.slice(-8).toUpperCase();
-}
-
-function apiUrl(page: Page, pathname: string): string {
-  return new URL(pathname, page.url()).toString();
 }

@@ -1,25 +1,28 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SearchFiltersComponent } from '@components/search-filters/search-filters.component';
 import { SectionActionsComponent } from '@components/section-actions/section-actions.component';
 import { SectionContainerComponent } from '@components/section-container/section-container.component';
+import { ResponsiblePersonOption } from '@features/maintenances/responsibles/responsibles.model';
+import { toResponsiblePersonOption } from '@features/maintenances/responsibles/responsibles.utils';
+import { ResponsiblePeopleService } from '@features/maintenances/responsibles/services/responsible-people.service';
+import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { SearchComponentBase } from '@shared/classes/search-component-base';
 import { TableLazyLoadEvent } from 'primeng/table';
 import {
   catchError,
+  debounce,
   debounceTime,
   distinctUntilChanged,
   EMPTY,
-  filter,
   finalize,
   map,
-  merge,
-  Observable,
+  of,
   Subject,
   switchMap,
   tap,
+  timer,
 } from 'rxjs';
 
 import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
@@ -51,35 +54,26 @@ import {
   APPLICATIONS_FILTER_INFORMATION_SYSTEM,
   APPLICATIONS_FILTER_PREFIX,
   APPLICATIONS_FILTER_RESPONSIBLE,
+  APPLICATIONS_FILTER_RESPONSIBLE_EMPTY,
+  APPLICATIONS_FILTER_RESPONSIBLE_LOADING,
   APPLICATIONS_FILTER_SCOPE,
   APPLICATIONS_FILTER_SERVER,
   APPLICATIONS_FILTER_STATUS,
   APPLICATIONS_LOAD_ERROR_DETAIL,
   APPLICATIONS_LOAD_ERROR_SUMMARY,
   APPLICATIONS_QUICK_SEARCH_ARIA_LABEL,
+  APPLICATIONS_RESPONSIBLE_SEARCH_ERROR_DETAIL,
   APPLICATIONS_TITLE,
-  APPLICATIONS_UNSUPPORTED_FILTER_WARNING,
-  APPLICATIONS_UNSUPPORTED_FILTER_WARNING_TITLE,
 } from './applications-list.i18n';
 
 interface ApplicationSearchRequest {
   params: ApplicationPageParams;
 }
 
-interface UnsupportedFilterChange {
-  label: string;
-  value: unknown;
-}
-
-interface UnsupportedFilterEntry {
-  control: AbstractControl;
-  label: string;
-  debounceMs?: number;
-}
-
 const DEFAULT_PAGE_SIZE = 10;
 const QUICK_SEARCH_DEBOUNCE_MS = 400;
 const RESPONSIBLE_FILTER_DEBOUNCE_MS = 400;
+const RESPONSIBLE_FILTER_PAGE_SIZE = 20;
 const INCOMPLETE_FILTER_WARNING =
   "El filtre d'aplicacions incompletes encara no està suportat pel backend i s'omet de la petició.";
 
@@ -121,6 +115,8 @@ export class ApplicationsList
     status: APPLICATIONS_FILTER_STATUS,
     description: APPLICATIONS_FILTER_DESCRIPTION,
     responsible: APPLICATIONS_FILTER_RESPONSIBLE,
+    responsibleEmpty: APPLICATIONS_FILTER_RESPONSIBLE_EMPTY,
+    responsibleLoading: APPLICATIONS_FILTER_RESPONSIBLE_LOADING,
     database: APPLICATIONS_FILTER_DATABASE,
     server: APPLICATIONS_FILTER_SERVER,
     environment: APPLICATIONS_FILTER_ENVIRONMENT,
@@ -143,19 +139,24 @@ export class ApplicationsList
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly applicationsService = inject(ApplicationsService);
+  private readonly responsiblePeopleService = inject(ResponsiblePeopleService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly quickSearchChanges = new Subject<string>();
+  private readonly responsibleSearchChanges = new Subject<string>();
   private readonly searchRequests = new Subject<ApplicationSearchRequest>();
+  private responsibleSearchTerm = '';
 
   protected override filtersForm = createApplicationFiltersForm(this.fb);
   protected readonly filterOptions = signal<ApplicationSelectOptions | null>(null);
   protected readonly infrastructureFilterOptions =
     signal<ApplicationInfrastructureFilterOptions | null>(null);
+  protected readonly responsibleOptions = signal<ResponsiblePersonOption[]>([]);
+  protected readonly isResponsibleSearchLoading = signal(false);
 
   override ngOnInit(): void {
     this.observeSearchRequests();
     this.observeQuickSearch();
-    this.observeUnsupportedFilters();
+    this.observeResponsibleSearch();
     super.ngOnInit();
   }
 
@@ -211,6 +212,20 @@ export class ApplicationsList
     this.applyFiltersAndSearch();
   }
 
+  protected onResponsibleSearch(value: string): void {
+    const query = value.trim();
+    if (query === this.responsibleSearchTerm) return;
+
+    this.responsibleSearchTerm = query;
+    if (!query) {
+      this.responsibleOptions.set([]);
+      this.isResponsibleSearchLoading.set(false);
+    } else {
+      this.isResponsibleSearchLoading.set(true);
+    }
+    this.responsibleSearchChanges.next(query);
+  }
+
   protected onPageChange(event: TableLazyLoadEvent): void {
     this.tableFirst.set(event.first ?? 0);
     this.onSearch(event);
@@ -218,6 +233,10 @@ export class ApplicationsList
 
   override reset(): void {
     this.tableFirst.set(0);
+    this.responsibleSearchTerm = '';
+    this.responsibleOptions.set([]);
+    this.isResponsibleSearchLoading.set(false);
+    this.responsibleSearchChanges.next('');
     super.reset();
   }
 
@@ -281,55 +300,39 @@ export class ApplicationsList
       });
   }
 
-  private observeUnsupportedFilters(): void {
-    const entries: UnsupportedFilterEntry[] = [
-      {
-        control: this.filtersForm.controls.responsible,
-        label: this.filterLabels.responsible,
-        debounceMs: RESPONSIBLE_FILTER_DEBOUNCE_MS,
-      },
-      {
-        control: this.filtersForm.controls.database,
-        label: this.filterLabels.database,
-      },
-      {
-        control: this.filtersForm.controls.server,
-        label: this.filterLabels.server,
-      },
-      {
-        control: this.filtersForm.controls.environment,
-        label: this.filterLabels.environment,
-      },
-    ];
-    const changes: Observable<UnsupportedFilterChange>[] = entries.map(
-      ({ control, label, debounceMs }) => {
-        const change$ = control.valueChanges.pipe(
-          distinctUntilChanged(),
-          map((value) => ({ label, value })),
-        );
-
-        return debounceMs ? change$.pipe(debounceTime(debounceMs)) : change$;
-      },
-    );
-
-    merge(...changes)
+  private observeResponsibleSearch(): void {
+    this.responsibleSearchChanges
       .pipe(
-        filter(({ value }) => this.hasValue(value)),
+        debounce((query) => timer(query ? RESPONSIBLE_FILTER_DEBOUNCE_MS : 0)),
+        distinctUntilChanged(),
+        switchMap((query) => {
+          if (!query) return of([] as ResponsiblePersonOption[]);
+
+          this.isResponsibleSearchLoading.set(true);
+          return this.responsiblePeopleService
+            .getPage({
+              page: 0,
+              size: RESPONSIBLE_FILTER_PAGE_SIZE,
+              sort: ['firstName,asc', 'lastName,asc'],
+              statusId: SoftDeleteStatus.ACTIVE,
+              search: query,
+            })
+            .pipe(
+              map((page) => page.content.map(toResponsiblePersonOption)),
+              catchError(() => {
+                this.messageService.add({
+                  severity: 'error',
+                  summary: APPLICATIONS_LOAD_ERROR_SUMMARY,
+                  detail: APPLICATIONS_RESPONSIBLE_SEARCH_ERROR_DETAIL,
+                });
+                return of([] as ResponsiblePersonOption[]);
+              }),
+              finalize(() => this.isResponsibleSearchLoading.set(false)),
+            );
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(({ label }) => {
-        this.messageService.add({
-          severity: 'warn',
-          summary: APPLICATIONS_UNSUPPORTED_FILTER_WARNING_TITLE,
-          detail: APPLICATIONS_UNSUPPORTED_FILTER_WARNING(label),
-        });
-      });
-  }
-
-  private hasValue(value: unknown): boolean {
-    return typeof value === 'string'
-      ? value.trim().length > 0
-      : value !== null && value !== undefined;
+      .subscribe((options) => this.responsibleOptions.set(options));
   }
 
   private toPageParams(
@@ -361,6 +364,10 @@ export class ApplicationsList
       statusId: filters.status ?? undefined,
       description: filters.description || undefined,
       quickSearch: quickSearch || undefined,
+      responsibleId: filters.responsible?.id,
+      databaseId: filters.database ?? undefined,
+      serverId: filters.server ?? undefined,
+      environmentId: filters.environment ?? undefined,
     };
   }
 }

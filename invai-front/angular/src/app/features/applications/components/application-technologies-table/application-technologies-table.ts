@@ -4,6 +4,7 @@ import {
   computed,
   input,
   signal,
+  viewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { TableComponentBase } from '@shared/classes/table-component-base';
@@ -39,19 +40,17 @@ export enum ApplicationTechnologyTableAction {
 export class ApplicationTechnologiesTable extends TableComponentBase<ApplicationTechnologyOutput> {
   first = input(0);
   isReadOnly = input(false);
+  showActions = input(true);
 
   private readonly selectedRow = signal<ApplicationTechnologyOutput | null>(null);
+  private readonly rowMenu = viewChild<Menu>('rowMenu');
 
   protected readonly icons = PrimeIcons;
-  protected readonly ApplicationTechnologyTableAction =
-    ApplicationTechnologyTableAction;
-  protected readonly actionsAriaLabel =
-    APPLICATION_TECHNOLOGIES_TABLE_ACTIONS_ARIA_LABEL;
-  protected readonly actionsHeader =
-    APPLICATION_TECHNOLOGIES_TABLE_ACTIONS_HEADER;
+  protected readonly ApplicationTechnologyTableAction = ApplicationTechnologyTableAction;
+  protected readonly actionsAriaLabel = APPLICATION_TECHNOLOGIES_TABLE_ACTIONS_ARIA_LABEL;
+  protected readonly actionsHeader = APPLICATION_TECHNOLOGIES_TABLE_ACTIONS_HEADER;
   protected readonly rowActions = computed<MenuItem[]>(() => {
-    const isMutationDisabled =
-      this.isReadOnly() || Boolean(this.selectedRow()?.deletedAt);
+    const isMutationDisabled = this.isReadOnly() || Boolean(this.selectedRow()?.deletedAt);
     return [
       {
         label: APPLICATION_TECHNOLOGIES_TABLE_VIEW_LABEL,
@@ -76,10 +75,10 @@ export class ApplicationTechnologiesTable extends TableComponentBase<Application
   protected openActionsMenu(
     event: Event,
     row: ApplicationTechnologyOutput,
-    menu: Menu,
+    menu = this.rowMenu(),
   ): void {
     this.selectedRow.set(row);
-    menu.toggle(event);
+    menu?.toggle(event);
   }
 
   private emitRowAction(action: ApplicationTechnologyTableAction): void {

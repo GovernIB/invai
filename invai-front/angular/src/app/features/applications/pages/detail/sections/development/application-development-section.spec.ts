@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { Editor } from 'primeng/editor';
 import { Select } from 'primeng/select';
 import { of, throwError } from 'rxjs';
 
@@ -216,9 +217,7 @@ describe('ApplicationDevelopmentSection', () => {
     harness().providerDialogVisible.set(false);
     harness().technologyDialogVisible.set(true);
     fixture.detectChanges();
-    const technology = selectById(
-      'application-technology-dialog-technology',
-    );
+    const technology = selectById('application-technology-dialog-technology');
     expect(technology.filter).toBe(true);
     expect(technology.ariaFilterLabel).toBeTruthy();
   });
@@ -239,8 +238,7 @@ describe('ApplicationDevelopmentSection', () => {
         '.application-detail-section-layout__header button',
       ),
     ].find((button: Element) => button.textContent?.includes('Desar')) as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
     saveButton?.click();
 
     expect(state.save).toHaveBeenCalledWith('development');
@@ -249,9 +247,7 @@ describe('ApplicationDevelopmentSection', () => {
   it('shows a localized fallback when development save returns an unstructured error', () => {
     const messageService = TestBed.inject(MessageService);
     const addSpy = vi.spyOn(messageService, 'add');
-    state.save.mockReturnValueOnce(
-      throwError(() => new Error('NoSuchMessageException')),
-    );
+    state.save.mockReturnValueOnce(throwError(() => new Error('NoSuchMessageException')));
 
     harness().save();
 
@@ -262,33 +258,41 @@ describe('ApplicationDevelopmentSection', () => {
     });
   });
 
-  it('renders square primary add buttons disabled outside edit mode', () => {
+  it('only renders resource actions while editing and disables them when unavailable', () => {
     expect(fixture.nativeElement.textContent).toContain('Plexus SL');
     expect(fixture.nativeElement.textContent).toContain('Angular');
-    const providerButton = addButton('Afegeix un proveïdor');
-    const technologyButton = addButton('Afegeix una tecnologia');
-
-    expect(providerButton.disabled).toBe(true);
-    expect(technologyButton.disabled).toBe(true);
-    expect(providerButton.classList).not.toContain('p-button-secondary');
-    expect(technologyButton.classList).not.toContain('p-button-secondary');
-    expect(providerButton.classList).toContain('h-[48px]');
-    expect(providerButton.classList).toContain('w-[48px]');
+    expect(findAddButton('Afegeix un proveïdor')).toBeNull();
+    expect(findAddButton('Afegeix una tecnologia')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(0);
 
     state.editing.set(true);
     fixture.detectChanges();
 
-    expect(addButton('Afegeix un proveïdor').disabled).toBe(false);
-    expect(addButton('Afegeix una tecnologia').disabled).toBe(false);
+    const providerButton = addButton('Afegeix un proveïdor');
+    const technologyButton = addButton('Afegeix una tecnologia');
+    expect(providerButton.disabled).toBe(false);
+    expect(technologyButton.disabled).toBe(false);
+    expect(providerButton.classList).not.toContain('p-button-secondary');
+    expect(technologyButton.classList).not.toContain('p-button-secondary');
+    expect(providerButton.classList).toContain('invai-table-toolbar-button');
+    expect(technologyButton.classList).toContain('invai-table-toolbar-button');
+    expect(
+      fixture.nativeElement.querySelectorAll('.invai-table-actions-column').length,
+    ).toBeGreaterThan(0);
 
     state.development.set(null);
     fixture.detectChanges();
 
     expect(addButton('Afegeix un proveïdor').disabled).toBe(true);
     expect(addButton('Afegeix una tecnologia').disabled).toBe(true);
+    const rowActionButtons = fixture.nativeElement.querySelectorAll(
+      '.invai-table-actions-column button',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(rowActionButtons.length).toBeGreaterThan(0);
+    expect([...rowActionButtons].every((button) => button.disabled)).toBe(true);
   });
 
-  it('opens provider consultation with row double click outside edit mode', () => {
+  it('offers provider editing from consultation and promotes Development edit mode', () => {
     const row = fixture.nativeElement.querySelector(
       'app-application-providers-table .invai-table-consultable-row',
     ) as HTMLTableRowElement;
@@ -299,6 +303,7 @@ describe('ApplicationDevelopmentSection', () => {
     const component = harness();
     expect(component.providerDialogVisible()).toBe(true);
     expect(component.providerDialogMode()).toBe('view');
+    expect(component.providerDialogCanEdit()).toBe(true);
     expect(component.providerForm.disabled).toBe(true);
     expect(component.providerForm.getRawValue()).toEqual({
       companyName: 'Plexus SL',
@@ -306,15 +311,22 @@ describe('ApplicationDevelopmentSection', () => {
       startDate: new Date(2026, 4, 2),
       expireDate: null,
     });
+
+    component.startProviderEdit();
+
+    expect(state.startEditing).toHaveBeenCalledWith('development');
+    expect(state.editing()).toBe(true);
+    expect(component.providerDialogMode()).toBe('edit');
+    expect(component.providerForm.enabled).toBe(true);
   });
 
-  it('restores the provider snapshot on cancel and updates from edit mode', () => {
+  it('opens providers directly in edit while Development is editing', () => {
     state.editing.set(true);
     fixture.detectChanges();
     const component = harness();
 
     component.onProviderTableAction({
-      action: ApplicationProviderTableAction.Edit,
+      action: ApplicationProviderTableAction.View,
       params: PROVIDER,
     });
     expect(component.providerDialogMode()).toBe('edit');
@@ -346,6 +358,60 @@ describe('ApplicationDevelopmentSection', () => {
     });
   });
 
+  it('offers technology editing from consultation and promotes Development edit mode', () => {
+    const component = harness();
+
+    component.onTechnologyTableAction({
+      action: ApplicationTechnologyTableAction.View,
+      params: TECHNOLOGY,
+    });
+    expect(component.technologyDialogMode()).toBe('view');
+    expect(component.technologyDialogCanEdit()).toBe(true);
+
+    component.startTechnologyEdit();
+
+    expect(state.startEditing).toHaveBeenCalledWith('development');
+    expect(state.editing()).toBe(true);
+    expect(component.technologyDialogMode()).toBe('edit');
+  });
+
+  it('opens technologies directly in edit and restores their snapshot on cancel', () => {
+    state.editing.set(true);
+    fixture.detectChanges();
+    const component = harness();
+
+    component.onTechnologyTableAction({
+      action: ApplicationTechnologyTableAction.View,
+      params: TECHNOLOGY,
+    });
+    expect(component.technologyDialogMode()).toBe('edit');
+    expect(component.technologyForm.enabled).toBe(true);
+    expect(component.technologyForm.controls.technologyId.enabled).toBe(true);
+    expect(component.technologyForm.value).toEqual({
+      layerId: 1,
+      technologyId: 2,
+      version: '21',
+      architecture: 'Monolítica',
+    });
+
+    component.technologyForm.patchValue({
+      technologyId: null,
+      version: 'Changed',
+      architecture: 'Changed',
+    });
+
+    component.cancelTechnologyEdit();
+    expect(component.technologyDialogMode()).toBe('view');
+    expect(component.technologyForm.enabled).toBe(true);
+    expect(component.technologyForm.controls.technologyId.enabled).toBe(true);
+    expect(component.technologyForm.value).toEqual({
+      layerId: 1,
+      technologyId: 2,
+      version: '21',
+      architecture: 'Monolítica',
+    });
+  });
+
   it('deactivates a technology after confirmation and refreshes only its table', () => {
     state.editing.set(true);
     fixture.detectChanges();
@@ -370,7 +436,7 @@ describe('ApplicationDevelopmentSection', () => {
     expect(getProvidersPage).not.toHaveBeenCalled();
   });
 
-  it('creates a provider with an optional maintenance role and refreshes its table', () => {
+  it('creates a provider with its required maintenance role and refreshes its table', () => {
     state.editing.set(true);
     fixture.detectChanges();
     addButton('Afegeix un proveïdor').click();
@@ -378,7 +444,7 @@ describe('ApplicationDevelopmentSection', () => {
     const component = harness();
     component.providerForm.setValue({
       companyName: '  Plexus SL  ',
-      roleId: null,
+      roleId: 3,
       startDate: new Date(2026, 4, 2),
       expireDate: null,
     });
@@ -387,7 +453,7 @@ describe('ApplicationDevelopmentSection', () => {
     expect(createProvider).toHaveBeenCalledWith({
       appDevelopmentId: 9,
       companyName: 'Plexus SL',
-      roleId: null,
+      roleId: 3,
       startDate: '2026-05-02T00:00:00',
       expireDate: null,
     });
@@ -411,9 +477,8 @@ describe('ApplicationDevelopmentSection', () => {
       version: ' 21 ',
       architecture: ' Monolítica ',
     });
-    const dialog = fixture.debugElement.query(
-      By.directive(ApplicationTechnologyDialog),
-    ).componentInstance as unknown as {
+    const dialog = fixture.debugElement.query(By.directive(ApplicationTechnologyDialog))
+      .componentInstance as unknown as {
       onTechnologyChange(technologyId: number | null): void;
     };
     component.technologyForm.controls.technologyId.setValue(2);
@@ -456,7 +521,19 @@ describe('ApplicationDevelopmentSection', () => {
     component.submitProvider();
     expect(createProvider).not.toHaveBeenCalled();
     expect(component.providerForm.controls.companyName.touched).toBe(true);
+    expect(component.providerForm.controls.roleId.touched).toBe(true);
     expect(component.providerDialogVisible()).toBe(true);
+    fixture.detectChanges();
+
+    const role = fixture.nativeElement.querySelector(
+      '#application-provider-dialog-role',
+    ) as HTMLElement;
+    expect(role.getAttribute('aria-invalid')).toBe('true');
+    expect(role.getAttribute('aria-describedby')).toBe('application-provider-dialog-role-error');
+    expect(fixture.nativeElement.querySelector('.p-select.p-invalid')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('#application-provider-dialog-role-error'),
+    ).not.toBeNull();
 
     component.providerForm.setValue({
       companyName: 'Plexus SL',
@@ -468,9 +545,7 @@ describe('ApplicationDevelopmentSection', () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector(
-        '#application-provider-dialog-date-range-error',
-      ),
+      fixture.nativeElement.querySelector('#application-provider-dialog-date-range-error'),
     ).not.toBeNull();
     expect(
       (
@@ -480,10 +555,9 @@ describe('ApplicationDevelopmentSection', () => {
       ).getAttribute('aria-describedby'),
     ).toBe('application-provider-dialog-date-range-error');
 
-    createProvider.mockReturnValueOnce(
-      throwError(() => new Error('Unavailable')),
-    );
+    createProvider.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
     component.providerForm.patchValue({
+      roleId: 3,
       startDate: null,
       expireDate: null,
     });
@@ -513,9 +587,53 @@ describe('ApplicationDevelopmentSection', () => {
       '#application-development-code',
     ) as HTMLInputElement;
     expect(input.getAttribute('aria-invalid')).toBe('true');
-    expect(input.getAttribute('aria-describedby')).toBe(
-      'application-development-code-error',
-    );
+    expect(input.getAttribute('aria-describedby')).toBe('application-development-code-error');
+  });
+
+  it('identifies Development observations as optional without required-error semantics', () => {
+    state.developmentForm.enable({ emitEvent: false });
+    state.developmentForm.controls.observation.setValue('<p><br></p><p>&nbsp;</p>');
+    state.developmentForm.controls.observation.markAsTouched();
+    fixture.detectChanges();
+
+    const label = fixture.nativeElement.querySelector(
+      'label[for="application-development-observation"]',
+    ) as HTMLLabelElement;
+    const editor = fixture.nativeElement.querySelector(
+      '#application-development-observation',
+    ) as HTMLElement;
+
+    expect(label.textContent).toContain('Observacions (Opcional)');
+    expect(editor.getAttribute('aria-invalid')).toBeNull();
+    expect(editor.getAttribute('aria-describedby')).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('#application-development-observation-error'),
+    ).toBeNull();
+  });
+
+  it('keeps Development observations read-only outside edit mode', async () => {
+    const editor = fixture.debugElement.query(By.directive(Editor));
+    const content = () =>
+      fixture.nativeElement.querySelector(
+        '.application-development__observations .ql-editor',
+      ) as HTMLElement | null;
+
+    await vi.waitFor(() => expect(content()).not.toBeNull());
+
+    expect(editor.componentInstance.readonly).toBe(true);
+    expect(content()?.getAttribute('contenteditable')).toBe('false');
+
+    state.editing.set(true);
+    fixture.detectChanges();
+
+    expect(editor.componentInstance.readonly).toBe(false);
+    expect(content()?.getAttribute('contenteditable')).toBe('true');
+
+    state.editing.set(false);
+    fixture.detectChanges();
+
+    expect(editor.componentInstance.readonly).toBe(true);
+    expect(content()?.getAttribute('contenteditable')).toBe('false');
   });
 
   it('disables source navigation when the URL is not configured', () => {
@@ -524,9 +642,7 @@ describe('ApplicationDevelopmentSection', () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector(
-        'a.application-development__external-link',
-      ),
+      fixture.nativeElement.querySelector('a.application-development__external-link'),
     ).toBeNull();
 
     const disabledSourceLink = fixture.nativeElement.querySelector(
@@ -537,9 +653,15 @@ describe('ApplicationDevelopmentSection', () => {
   });
 
   function addButton(ariaLabel: string): HTMLButtonElement {
+    const result = findAddButton(ariaLabel);
+    expect(result).not.toBeNull();
+    return result!;
+  }
+
+  function findAddButton(ariaLabel: string): HTMLButtonElement | null {
     return fixture.nativeElement.querySelector(
       `button[aria-label="${ariaLabel}"]`,
-    ) as HTMLButtonElement;
+    ) as HTMLButtonElement | null;
   }
 
   function selectById(inputId: string): Select {
@@ -560,6 +682,9 @@ interface ApplicationDevelopmentSectionHarness {
   providerDialogVisible: WritableSignal<boolean>;
   technologyDialogVisible: WritableSignal<boolean>;
   providerDialogMode: WritableSignal<'create' | 'view' | 'edit'>;
+  technologyDialogMode: WritableSignal<'create' | 'view' | 'edit'>;
+  providerDialogCanEdit: () => boolean;
+  technologyDialogCanEdit: () => boolean;
   technologyDeleteDialogVisible: WritableSignal<boolean>;
   save(): void;
   onProviderTableAction(event: {
@@ -572,6 +697,8 @@ interface ApplicationDevelopmentSectionHarness {
   }): void;
   startProviderEdit(): void;
   cancelProviderEdit(): void;
+  startTechnologyEdit(): void;
+  cancelTechnologyEdit(): void;
   confirmTechnologyDelete(): void;
   submitProvider(): void;
   submitTechnology(): void;
@@ -618,15 +745,12 @@ function createState() {
         technologies.set(technologyPage);
       },
     ),
-    setProviderPage: vi.fn(
-      (providerPage: { items: ApplicationProviderOutput[]; total: number }) =>
-        providers.set(providerPage),
+    setProviderPage: vi.fn((providerPage: { items: ApplicationProviderOutput[]; total: number }) =>
+      providers.set(providerPage),
     ),
     setTechnologyPage: vi.fn(
-      (technologyPage: {
-        items: ApplicationTechnologyOutput[];
-        total: number;
-      }) => technologies.set(technologyPage),
+      (technologyPage: { items: ApplicationTechnologyOutput[]; total: number }) =>
+        technologies.set(technologyPage),
     ),
   };
 }
@@ -655,6 +779,12 @@ function resolvedData(): Record<string, ApplicationDevelopmentResolvedData> {
         },
       ],
       technologyOptionsLoadFailed: false,
+      modalityOptions: [{ id: DevelopmentModality.INTERNAL, name: 'Intern', nameEs: 'Interno' }],
+      modalityOptionsLoadFailed: false,
+      standardAdaptionOptions: [
+        { id: DevelopmentStandardAdaption.CONFORMING, name: 'Conforme', nameEs: 'Conforme' },
+      ],
+      standardAdaptionOptionsLoadFailed: false,
     },
   };
 }

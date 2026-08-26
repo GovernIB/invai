@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.application-responsible__tables {
+  display: grid;
+  min-width: 0;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.application-responsible__divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--p-content-border-color, #d1d5db);
+}
+
+.application-responsible__panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.application-responsible__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.application-responsible__panel-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.application-responsible__panel-actions {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+}
+
+:host ::ng-deep .application-responsible__add-complete {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 1565px) {
+  .application-responsible__tables {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .application-responsible__divider {
+    display: none;
+  }
+}

@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SearchFilterGridDirective } from '@components/search-filters/search-filter-grid.directive';
+import { ResponsiblePersonOption } from '@features/maintenances/responsibles/responsibles.model';
+import { AutoComplete } from 'primeng/autocomplete';
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -26,12 +28,15 @@ export interface ApplicationFilterLabels {
   server: string;
   environment: string;
   incomplete: string;
+  responsibleEmpty: string;
+  responsibleLoading: string;
 }
 
 @Component({
   selector: 'app-application-filters-form',
   standalone: true,
   imports: [
+    AutoComplete,
     FloatLabel,
     InputText,
     ReactiveFormsModule,
@@ -47,6 +52,17 @@ export class ApplicationFiltersForm {
   labels = input.required<ApplicationFilterLabels>();
   options = input<Partial<ApplicationSelectOptions> | null>(null);
   infrastructureOptions = input<Partial<ApplicationInfrastructureFilterOptions> | null>(null);
+  responsibleOptions = input<ResponsiblePersonOption[]>([]);
+  responsibleLoading = input(false);
+  responsibleSearch = output<string>();
 
   protected readonly statusOptions = APPLICATION_STATUS_OPTIONS;
+
+  protected onResponsibleSearch(event: { query: string }): void {
+    this.responsibleSearch.emit(event.query);
+  }
+
+  protected onResponsibleClear(): void {
+    this.responsibleSearch.emit('');
+  }
 }

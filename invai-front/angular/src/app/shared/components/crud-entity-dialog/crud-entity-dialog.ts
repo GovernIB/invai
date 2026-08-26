@@ -1,6 +1,9 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
+  inject,
   input,
   model,
   output,
@@ -22,6 +25,7 @@ import {
 } from './crud-entity-dialog.i18n';
 
 export type CrudEntityDialogMode = 'create' | 'view' | 'edit';
+export type CrudEntityDialogViewPrimaryAction = 'accept' | 'edit';
 
 export interface CrudEntityDialogAriaLabels {
   accept: string;
@@ -41,7 +45,10 @@ export interface CrudEntityDialogAriaLabels {
   templateUrl: './crud-entity-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CrudEntityDialog {
+export class CrudEntityDialog implements OnDestroy {
+  private readonly document = inject(DOCUMENT);
+  private readonly focusReturnTarget = this.captureFocusReturnTarget();
+
   visible = model(false);
   title = input.required<string>();
   mode = input.required<CrudEntityDialogMode>();
@@ -54,6 +61,8 @@ export class CrudEntityDialog {
   canRestore = input(false);
   canEdit = input(true);
   canDeactivate = input(true);
+  showDeactivate = input(true);
+  viewPrimaryAction = input<CrudEntityDialogViewPrimaryAction>('accept');
 
   edit = output<void>();
   cancelEdit = output<void>();
@@ -79,6 +88,23 @@ export class CrudEntityDialog {
       onkeydown: (event: KeyboardEvent) => this.onDialogKeydown(event),
     },
   };
+
+  ngOnDestroy(): void {
+    const target = this.focusReturnTarget;
+    if (!target) return;
+
+    queueMicrotask(() => {
+      if (
+        !target.isConnected ||
+        target.matches(':disabled') ||
+        target.getAttribute('aria-disabled') === 'true'
+      ) {
+        return;
+      }
+
+      target.focus();
+    });
+  }
 
   protected isBusy(): boolean {
     return this.isLoading() || this.isSaving() || this.isDeleting();
@@ -122,7 +148,12 @@ export class CrudEntityDialog {
   }
 
   protected onDeactivate(): void {
-    if (!this.isBusy() && this.canDeactivate() && this.mode() === 'edit') {
+    if (
+      !this.isBusy() &&
+      this.showDeactivate() &&
+      this.canDeactivate() &&
+      this.mode() === 'edit'
+    ) {
       this.deactivate.emit();
     }
   }
@@ -157,5 +188,13 @@ export class CrudEntityDialog {
     event.preventDefault();
     event.stopPropagation();
     this.requestClose();
+  }
+
+  private captureFocusReturnTarget(): HTMLElement | null {
+    const activeElement = this.document.activeElement;
+    return activeElement instanceof HTMLElement &&
+      activeElement !== this.document.body
+      ? activeElement
+      : null;
   }
 }

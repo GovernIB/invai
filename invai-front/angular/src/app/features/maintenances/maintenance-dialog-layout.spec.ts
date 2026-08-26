@@ -52,7 +52,7 @@ describe('maintenance dialog form layouts', () => {
         serverOptions: [],
         databaseTypeOptions: [],
       },
-      [6, 6, 4, 8, 12],
+      [6, 6, 8, 4, 12],
     );
   });
 

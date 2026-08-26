@@ -46,6 +46,7 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   loadDate: null,
   appInformationSystemDbId: 70,
   appDevelopmentId: 90,
+  appResponsibleAuthorizedId: 91,
 };
 
 const SYSTEM_DATABASE_OUTPUT: ApplicationSystemDatabaseOutput = {
@@ -116,9 +117,7 @@ describe('ApplicationDetailState', () => {
         observation: payload.observation,
       }),
     );
-    reactivate = vi.fn(() =>
-      of({ ...APPLICATION_OUTPUT, status: ApplicationStatusCode.ACTIVE }),
-    );
+    reactivate = vi.fn(() => of({ ...APPLICATION_OUTPUT, status: ApplicationStatusCode.ACTIVE }));
     deleteApplication = vi.fn(() => of(undefined));
 
     TestBed.configureTestingModule({
@@ -178,9 +177,7 @@ describe('ApplicationDetailState', () => {
     expect(state.form.controls.application.value).toBe('Invai');
     expect(state.form.disabled).toBe(true);
     expect(state.isEditing('general')).toBe(false);
-    expect(state.developmentForm.controls.code.value).toBe(
-      'https://git.caib.es/draft',
-    );
+    expect(state.developmentForm.controls.code.value).toBe('https://git.caib.es/draft');
     expect(state.developmentForm.enabled).toBe(true);
     expect(state.isEditing('development')).toBe(true);
   });
@@ -192,7 +189,7 @@ describe('ApplicationDetailState', () => {
     state.form.patchValue({
       application: 'Invai updated',
       prefix: 'INV',
-      description: 'Updated',
+      description: '<p>Updated <strong>description</strong></p>',
     });
     state.form.markAsDirty();
     state.systemsDatabasesForm.controls.observations.setValue('<p>Local</p>');
@@ -213,13 +210,27 @@ describe('ApplicationDetailState', () => {
       fieldId: 3,
       admUnitId: 5,
       commissionId: 4,
-      description: 'Updated',
+      description: '<p>Updated <strong>description</strong></p>',
       statusId: ApplicationStatus.ACTIVE,
     });
     expect(state.application()?.name).toBe('Invai updated');
     expect(state.isEditing('general')).toBe(false);
     expect(state.isEditing('systems-databases')).toBe(true);
     expect(state.systemsDatabasesForm.dirty).toBe(true);
+  });
+
+  it('saves visually empty General descriptions as an empty string', async () => {
+    initializeAll();
+    state.startEditing('general');
+    state.form.controls.description.setValue('<p><br></p><p>&nbsp;</p>');
+    state.form.controls.description.markAsDirty();
+
+    await firstValueFrom(state.save('general'));
+
+    expect(updateApplication).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ description: '' }),
+    );
   });
 
   it('marks an invalid General form and does not call the endpoint', async () => {
@@ -245,9 +256,7 @@ describe('ApplicationDetailState', () => {
     state.systemsDatabasesForm.controls.observations.setValue('<p>Local</p>');
     state.systemsDatabasesForm.markAsDirty();
 
-    await expect(
-      firstValueFrom(state.save('systems-databases')),
-    ).resolves.toEqual({
+    await expect(firstValueFrom(state.save('systems-databases'))).resolves.toEqual({
       status: 'saved',
       section: 'systems-databases',
     });
@@ -259,10 +268,23 @@ describe('ApplicationDetailState', () => {
     expect(createSystemDatabase).not.toHaveBeenCalled();
     expect(state.systemsDatabasesForm.disabled).toBe(true);
     expect(state.systemsDatabasesForm.pristine).toBe(true);
-    expect(state.systemsDatabasesForm.controls.observations.value).toBe(
-      '<p>Local</p>',
-    );
+    expect(state.systemsDatabasesForm.controls.observations.value).toBe('<p>Local</p>');
     expect(updateApplication).not.toHaveBeenCalled();
+  });
+
+  it('saves visually empty Systems and Databases observations as an empty string', async () => {
+    state.initialize(APPLICATION_OUTPUT);
+    state.initializeSystemsDatabases(SYSTEM_DATABASE_OUTPUT);
+    state.startEditing('systems-databases');
+    state.systemsDatabasesForm.controls.observations.setValue('<p><br></p><p>&nbsp;</p>');
+    state.systemsDatabasesForm.controls.observations.markAsDirty();
+
+    await firstValueFrom(state.save('systems-databases'));
+
+    expect(updateSystemDatabase).toHaveBeenCalledWith(70, {
+      applicationId: 1,
+      observation: '',
+    });
   });
 
   it('creates Systems and Databases observations when no aggregate exists', async () => {
@@ -272,9 +294,7 @@ describe('ApplicationDetailState', () => {
     state.systemsDatabasesForm.controls.observations.setValue('<p>Inicials</p>');
     state.systemsDatabasesForm.markAsDirty();
 
-    await expect(
-      firstValueFrom(state.save('systems-databases')),
-    ).resolves.toEqual({
+    await expect(firstValueFrom(state.save('systems-databases'))).resolves.toEqual({
       status: 'saved',
       section: 'systems-databases',
     });
@@ -286,9 +306,7 @@ describe('ApplicationDetailState', () => {
     expect(updateSystemDatabase).not.toHaveBeenCalled();
     expect(state.informationSystemDbId()).toBe(71);
     expect(state.systemDatabase()?.id).toBe(71);
-    expect(state.systemsDatabasesForm.controls.observations.value).toBe(
-      '<p>Inicials</p>',
-    );
+    expect(state.systemsDatabasesForm.controls.observations.value).toBe('<p>Inicials</p>');
     expect(state.systemsDatabasesForm.disabled).toBe(true);
     expect(state.systemsDatabasesForm.pristine).toBe(true);
   });
@@ -308,9 +326,7 @@ describe('ApplicationDetailState', () => {
   it('updates Development with one request and no application request', async () => {
     initializeAll();
     state.startEditing('development');
-    state.developmentForm.controls.code.setValue(
-      'https://git.caib.es/invai-front',
-    );
+    state.developmentForm.controls.code.setValue('https://git.caib.es/invai-front');
     state.developmentForm.controls.code.markAsDirty();
 
     await expect(firstValueFrom(state.save('development'))).resolves.toEqual({
@@ -331,6 +347,35 @@ describe('ApplicationDetailState', () => {
     expect(createDevelopment).not.toHaveBeenCalled();
     expect(updateApplication).not.toHaveBeenCalled();
     expect(state.developmentForm.disabled).toBe(true);
+  });
+
+  it('saves visually empty Development observations as an empty string', async () => {
+    initializeAll();
+    state.startEditing('development');
+    state.developmentForm.controls.observation.setValue('<p><br></p><p>&nbsp;</p>');
+    state.developmentForm.controls.observation.markAsDirty();
+
+    await expect(firstValueFrom(state.save('development'))).resolves.toEqual({
+      status: 'saved',
+      section: 'development',
+    });
+
+    expect(updateDevelopment).toHaveBeenCalledWith(9, {
+      applicationId: 1,
+      environmentId: 3,
+      modalityId: DevelopmentModality.INTERNAL,
+      code: 'https://git.caib.es/invai',
+      standardAdaptionId: DevelopmentStandardAdaption.CONFORMING,
+      revisionDate: '2026-05-02T00:00:00',
+      observation: '',
+    });
+  });
+
+  it('loads nullable Development observations as an empty editor value', () => {
+    state.initialize(APPLICATION_OUTPUT);
+    state.initializeDevelopment(1, { ...DEVELOPMENT_OUTPUT, observation: null });
+
+    expect(state.developmentForm.controls.observation.value).toBe('');
   });
 
   it('creates Development when no active record exists', async () => {
@@ -429,5 +474,6 @@ function toApplication(response: ApplicationOutput): Application {
     statusId: status ?? undefined,
     informationSystemDbId: response.appInformationSystemDbId,
     appDevelopmentId: response.appDevelopmentId,
+    appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
   };
 }

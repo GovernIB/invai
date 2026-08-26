@@ -1,0 +1,327 @@
+<section class="role-transfer" [attr.aria-label]="copy.title">
+  <form class="role-transfer-form" [formGroup]="form" novalidate>
+    <div class="role-transfer-intro">
+      <p id="role-transfer-instructions" class="m-0 text-sm text-color-secondary">
+        {{ copy.intro }}
+      </p>
+      <p-button
+        type="button"
+        [ariaLabel]="actionAriaLabel()"
+        [disabled]="!canApply()"
+        [label]="actionLabel()"
+        [loading]="submitting()"
+        [severity]="form.controls.revoke.value ? 'danger' : 'primary'"
+        (onClick)="openApplyConfirmation()"
+      />
+    </div>
+
+    <div class="role-transfer-person-grid" aria-describedby="role-transfer-instructions">
+      <div class="role-transfer-field">
+        <label id="role-transfer-source-label" for="role-transfer-source">
+          {{ copy.sourcePerson }}
+        </label>
+        <p-select
+          inputId="role-transfer-source"
+          styleClass="w-full"
+          formControlName="sourcePersonId"
+          [ariaFilterLabel]="copy.sourceFilterAriaLabel"
+          ariaLabelledBy="role-transfer-source-label"
+          [filter]="true"
+          [loading]="sourceCatalogLoading()"
+          [options]="sourceOptions()"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="id"
+        />
+        @if (sourceCatalogLoadFailed()) {
+          <div class="role-transfer-error" role="alert">
+            <span>{{ copy.loadPeopleError }}</span>
+            <p-button
+              type="button"
+              [label]="copy.retry"
+              [text]="true"
+              (onClick)="retrySourceCatalog()"
+            />
+          </div>
+        } @else if (!sourceCatalogLoading() && sourceOptions().length === 0) {
+          <p class="m-0 text-sm text-color-secondary" role="status">{{ copy.noPeople }}</p>
+        }
+      </div>
+
+      <div class="role-transfer-field">
+        <label id="role-transfer-destination-label" for="role-transfer-destination">
+          {{ copy.destinationPerson }}
+        </label>
+        <p-select
+          inputId="role-transfer-destination"
+          styleClass="w-full"
+          formControlName="destinationPersonId"
+          [ariaFilterLabel]="copy.destinationFilterAriaLabel"
+          ariaLabelledBy="role-transfer-destination-label"
+          [filter]="true"
+          [options]="destinationOptions()"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="id"
+        />
+        @if (destinationOptionsLoadFailed()) {
+          <div class="role-transfer-error" role="alert">
+            <span>{{ copy.loadPeopleError }}</span>
+            <p-button
+              type="button"
+              [label]="copy.retry"
+              [text]="true"
+              (onClick)="retrySourceLoad()"
+            />
+          </div>
+        }
+        @if (destinationRolesLoadFailed()) {
+          <div class="role-transfer-error" role="alert">
+            <span>{{ copy.loadDestinationError }}</span>
+            <p-button
+              type="button"
+              [label]="copy.retry"
+              [text]="true"
+              (onClick)="retryDestinationLoad()"
+            />
+          </div>
+        }
+      </div>
+
+      <div class="role-transfer-toggle">
+        <span id="role-transfer-revoke-label">{{ copy.revokeRoles }}</span>
+        <p-toggleswitch
+          inputId="role-transfer-revoke"
+          ariaLabelledBy="role-transfer-revoke-label"
+          formControlName="revoke"
+        />
+      </div>
+    </div>
+  </form>
+
+  <div class="role-transfer-pick-area">
+    <section
+      class="role-transfer-list"
+      aria-labelledby="role-transfer-source-list-title"
+      [attr.aria-busy]="sourceRolesLoading()"
+    >
+      @if (sourceRolesLoading()) {
+        <div class="role-transfer-loading-shield" aria-hidden="true">
+          <span class="role-transfer-loading-indicator"></span>
+        </div>
+      }
+      <header class="role-transfer-list-header">
+        <h3 id="role-transfer-source-list-title">{{ copy.assignedRoles }}</h3>
+        <span aria-hidden="true">{{ sourceAssignments().length }}</span>
+      </header>
+
+      <div class="role-transfer-list-content">
+        @if (!form.controls.sourcePersonId.value) {
+          <p class="role-transfer-empty" role="status">{{ copy.selectSource }}</p>
+        } @else if (sourceRolesLoadFailed()) {
+          <div class="role-transfer-error role-transfer-error--block" role="alert">
+            <span>{{ copy.loadAssignmentsError }}</span>
+            <p-button
+              type="button"
+              [label]="copy.retry"
+              [text]="true"
+              (onClick)="retrySourceLoad()"
+            />
+          </div>
+        } @else if (!sourceRolesLoading() && sourceAssignments().length === 0) {
+          <p class="role-transfer-empty" role="status">{{ copy.noAssignments }}</p>
+        } @else {
+          @for (group of sourceGroups(); track group.applicationId) {
+            <article class="role-transfer-application">
+              <header class="role-transfer-application-header">
+                <h4>{{ group.applicationName }}</h4>
+                <p-button
+                  type="button"
+                  [ariaLabel]="groupActionLabel(group, true)"
+                  [disabled]="sourceRolesLoading() || submitting()"
+                  [icon]="PrimeIcons.ANGLE_RIGHT"
+                  [rounded]="true"
+                  [text]="true"
+                  (onClick)="moveGroup(group, true)"
+                />
+              </header>
+              @for (subgroup of group.subgroups; track subgroup.type) {
+                <section class="role-transfer-subgroup">
+                  <header class="role-transfer-subgroup-header">
+                    <h5>{{ subgroup.label }}</h5>
+                    <p-button
+                      type="button"
+                      [ariaLabel]="subgroupActionLabel(subgroup, group.applicationName, true)"
+                      [disabled]="sourceRolesLoading() || submitting()"
+                      [icon]="PrimeIcons.ANGLE_RIGHT"
+                      [rounded]="true"
+                      [text]="true"
+                      (onClick)="moveSubgroup(subgroup, true)"
+                    />
+                  </header>
+                  <ul class="role-transfer-options">
+                    @for (assignment of subgroup.items; track assignmentKey(assignment)) {
+                      <li>
+                        <label
+                          class="role-transfer-option"
+                          [class.role-transfer-option--selected]="isSelected(assignment, true)"
+                        >
+                          <input
+                            type="checkbox"
+                            [checked]="isSelected(assignment, true)"
+                            [disabled]="sourceRolesLoading() || submitting()"
+                            (change)="
+                              toggleAssignment(assignment, true, $any($event.target).checked)
+                            "
+                          />
+                          <span>
+                            <strong>{{ assignmentTitle(assignment) }}</strong>
+                            @if (assignmentDetail(assignment)) {
+                              <small>{{ assignmentDetail(assignment) }}</small>
+                            }
+                          </span>
+                        </label>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+            </article>
+          }
+        }
+      </div>
+    </section>
+
+    <div class="role-transfer-move-actions" role="group" [attr.aria-label]="copy.assignedRoles">
+      <p-button
+        type="button"
+        [ariaLabel]="copy.moveSelected"
+        [disabled]="!hasMovableSelection(true) || submitting()"
+        [icon]="PrimeIcons.ANGLE_RIGHT"
+        (onClick)="moveSelected(true)"
+      />
+      <p-button
+        data-role-transfer-focus="after-prepared"
+        type="button"
+        [ariaLabel]="copy.moveAll"
+        [disabled]="!hasMovableAssignments(true) || submitting()"
+        [icon]="PrimeIcons.ANGLE_DOUBLE_RIGHT"
+        (onClick)="moveAll(true)"
+      />
+      <p-button
+        type="button"
+        [ariaLabel]="copy.returnSelected"
+        [disabled]="!hasMovableSelection(false) || submitting()"
+        [icon]="PrimeIcons.ANGLE_LEFT"
+        severity="secondary"
+        (onClick)="moveSelected(false)"
+      />
+      <p-button
+        data-role-transfer-focus="after-source"
+        type="button"
+        [ariaLabel]="copy.returnAll"
+        [disabled]="!hasMovableAssignments(false) || submitting()"
+        [icon]="PrimeIcons.ANGLE_DOUBLE_LEFT"
+        severity="secondary"
+        (onClick)="moveAll(false)"
+      />
+    </div>
+
+    <section
+      class="role-transfer-list"
+      aria-labelledby="role-transfer-prepared-list-title"
+      [attr.aria-busy]="destinationRolesLoading()"
+    >
+      @if (destinationRolesLoading()) {
+        <div class="role-transfer-loading-shield" aria-hidden="true">
+          <span class="role-transfer-loading-indicator"></span>
+        </div>
+      }
+      <header class="role-transfer-list-header">
+        <h3 id="role-transfer-prepared-list-title">{{ preparedTitle() }}</h3>
+        <span aria-hidden="true">{{ preparedAssignments().length }}</span>
+      </header>
+
+      <div class="role-transfer-list-content">
+        @if (preparedAssignments().length === 0) {
+          <p class="role-transfer-empty" role="status">{{ copy.noPreparedAssignments }}</p>
+        } @else {
+          @for (group of preparedGroups(); track group.applicationId) {
+            <article class="role-transfer-application">
+              <header class="role-transfer-application-header">
+                <h4>{{ group.applicationName }}</h4>
+                <p-button
+                  type="button"
+                  [ariaLabel]="groupActionLabel(group, false)"
+                  [disabled]="destinationRolesLoading() || submitting()"
+                  [icon]="PrimeIcons.ANGLE_LEFT"
+                  [rounded]="true"
+                  [text]="true"
+                  severity="secondary"
+                  (onClick)="moveGroup(group, false)"
+                />
+              </header>
+              @for (subgroup of group.subgroups; track subgroup.type) {
+                <section class="role-transfer-subgroup">
+                  <header class="role-transfer-subgroup-header">
+                    <h5>{{ subgroup.label }}</h5>
+                    <p-button
+                      type="button"
+                      [ariaLabel]="subgroupActionLabel(subgroup, group.applicationName, false)"
+                      [disabled]="destinationRolesLoading() || submitting()"
+                      [icon]="PrimeIcons.ANGLE_LEFT"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      (onClick)="moveSubgroup(subgroup, false)"
+                    />
+                  </header>
+                  <ul class="role-transfer-options">
+                    @for (assignment of subgroup.items; track assignmentKey(assignment)) {
+                      <li>
+                        <label
+                          class="role-transfer-option"
+                          [class.role-transfer-option--selected]="isSelected(assignment, false)"
+                        >
+                          <input
+                            type="checkbox"
+                            [checked]="isSelected(assignment, false)"
+                            [disabled]="destinationRolesLoading() || submitting()"
+                            (change)="
+                              toggleAssignment(assignment, false, $any($event.target).checked)
+                            "
+                          />
+                          <span>
+                            <strong>{{ assignmentTitle(assignment) }}</strong>
+                            @if (assignmentDetail(assignment)) {
+                              <small>{{ assignmentDetail(assignment) }}</small>
+                            }
+                          </span>
+                        </label>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+            </article>
+          }
+        }
+      </div>
+    </section>
+  </div>
+
+  <p class="role-transfer-status" aria-live="polite" role="status">{{ statusMessage() }}</p>
+
+  <app-confirmation-dialog
+    [(visible)]="confirmationVisible"
+    [closeOnConfirm]="false"
+    [confirmLabel]="confirmationLabel()"
+    [confirmOutlined]="false"
+    [message]="confirmationMessage()"
+    [pending]="submitting()"
+    [severity]="confirmationSeverity()"
+    [title]="confirmationTitle()"
+    (cancel)="cancelConfirmation()"
+    (confirm)="confirmAction()"
+  />
+</section>

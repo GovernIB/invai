@@ -66,6 +66,31 @@
       }
     </div>
 
+    <div class="md:col-span-8">
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="database-host-type"
+          styleClass="w-full"
+          formControlName="databaseType"
+          [ariaFilterLabel]="labels.databaseType"
+          [attr.aria-describedby]="isInvalid(form().controls.databaseType) ? 'database-host-type-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.databaseType)"
+          [filter]="true"
+          [options]="databaseTypeOptions()"
+          appendTo="body"
+          dataKey="id"
+          optionLabel="name"
+          (onChange)="onDatabaseTypeChange($event.value)"
+        />
+        <label for="database-host-type">{{ labels.databaseType }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.databaseType)) {
+        <p id="database-host-type-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
     <div class="md:col-span-4">
       <p-floatlabel class="w-full">
         <p-inputnumber
@@ -84,30 +109,6 @@
       @if (isInvalid(form().controls.port)) {
         <p id="database-host-port-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ portError }}
-        </p>
-      }
-    </div>
-
-    <div class="md:col-span-8">
-      <p-floatlabel class="w-full">
-        <p-select
-          inputId="database-host-type"
-          styleClass="w-full"
-          formControlName="databaseType"
-          [ariaFilterLabel]="labels.databaseType"
-          [attr.aria-describedby]="isInvalid(form().controls.databaseType) ? 'database-host-type-error' : null"
-          [attr.aria-invalid]="isInvalid(form().controls.databaseType)"
-          [filter]="true"
-          [options]="databaseTypeOptions()"
-          appendTo="body"
-          dataKey="id"
-          optionLabel="name"
-        />
-        <label for="database-host-type">{{ labels.databaseType }}</label>
-      </p-floatlabel>
-      @if (isInvalid(form().controls.databaseType)) {
-        <p id="database-host-type-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
-          {{ requiredError }}
         </p>
       }
     </div>

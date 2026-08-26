@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommissionType } from '@features/commissions/commissions.model';
+import { ResponsiblePerson } from '@features/maintenances/responsibles/responsibles.model';
+import { ResponsiblePeopleService } from '@features/maintenances/responsibles/services/responsible-people.service';
 import { SpringPage } from '@models/page.model';
+import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { MessageService } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { Observable, Subject } from 'rxjs';
@@ -46,6 +49,7 @@ const APPLICATIONS: Application[] = [
     creationDate: '2026-01-01T10:00:00',
     modificationDate: '',
     withdrawalDate: '',
+    appResponsibleAuthorizedId: null,
   },
   {
     id: '2',
@@ -62,6 +66,7 @@ const APPLICATIONS: Application[] = [
     creationDate: '2026-02-01T10:00:00',
     modificationDate: '',
     withdrawalDate: '',
+    appResponsibleAuthorizedId: null,
   },
 ];
 
@@ -87,12 +92,25 @@ const INFRASTRUCTURE_FILTER_OPTIONS: ApplicationInfrastructureFilterOptions = {
   environments: [{ label: 'Producció', value: 3 }],
 };
 
+const RESPONSIBLE_PERSON: ResponsiblePerson = {
+  id: 11,
+  company: null,
+  firstName: 'Maria',
+  lastName: 'Tur',
+  email: 'maria.tur@example.org',
+  personalCaib: true,
+  deletedAt: null,
+};
+
 interface ApplicationsListAccess {
   filtersForm: ApplicationFiltersFormGroup;
   isSearchIndicatorLoading: () => boolean;
   onFilterSearch: () => void;
   onPageChange: (event: TableLazyLoadEvent) => void;
   onQuickSearchChange: (value: string) => void;
+  onResponsibleSearch: (value: string) => void;
+  responsibleOptions: () => { id: number; label: string }[];
+  isResponsibleSearchLoading: () => boolean;
   tableFirst: () => number;
 }
 
@@ -104,15 +122,23 @@ describe('ApplicationsList', () => {
   let navigate: ReturnType<typeof vi.fn>;
   let activatedRoute: object;
   let pendingPages: Subject<SpringPage<Application>>[];
+  let getPeoplePage: ReturnType<typeof vi.fn>;
+  let pendingPeoplePages: Subject<SpringPage<ResponsiblePerson>>[];
 
   beforeEach(async () => {
     pendingPages = [];
+    pendingPeoplePages = [];
     getPage = vi.fn((_params?: ApplicationPageParams): Observable<SpringPage<Application>> => {
       const request = new Subject<SpringPage<Application>>();
       pendingPages.push(request);
       return request;
     });
     navigate = vi.fn();
+    getPeoplePage = vi.fn(() => {
+      const request = new Subject<SpringPage<ResponsiblePerson>>();
+      pendingPeoplePages.push(request);
+      return request;
+    });
     activatedRoute = {
       snapshot: {
         data: {
@@ -126,6 +152,7 @@ describe('ApplicationsList', () => {
       providers: [
         MessageService,
         { provide: ApplicationsService, useValue: { getPage } },
+        { provide: ResponsiblePeopleService, useValue: { getPage: getPeoplePage } },
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: Router, useValue: { navigate } },
       ],
@@ -221,9 +248,7 @@ describe('ApplicationsList', () => {
       expect.arrayContaining(['commission', 'status']),
     );
 
-    component.selectedColumns.update((columns) =>
-      columns.filter(({ key }) => key !== 'status'),
-    );
+    component.selectedColumns.update((columns) => columns.filter(({ key }) => key !== 'status'));
     list.filtersForm.controls.description.setValue('interna');
     list.onFilterSearch();
 
@@ -320,6 +345,10 @@ describe('ApplicationsList', () => {
       administrativeUnit: 5,
       status: ApplicationStatus.INACTIVE,
       description: ' interna ',
+      responsible: { id: 11, label: 'Maria Tur' },
+      database: 8,
+      server: 5,
+      environment: 3,
     });
 
     list.onFilterSearch();
@@ -343,6 +372,10 @@ describe('ApplicationsList', () => {
       admUnitId: 5,
       statusId: ApplicationStatus.INACTIVE,
       description: 'interna',
+      responsibleId: 11,
+      databaseId: 8,
+      serverId: 5,
+      environmentId: 3,
     });
     expect(list.tableFirst()).toBe(40);
   });
@@ -444,39 +477,57 @@ describe('ApplicationsList', () => {
     });
   });
 
-  it('should warn when unsupported filters receive a value but not when cleared', () => {
+  it('should debounce remote responsible searches and map active people to options', () => {
     vi.useFakeTimers();
-    const addSpy = vi.spyOn(messageService, 'add');
-    const form = accessList().filtersForm;
+    const list = accessList();
 
-    form.controls.responsible.setValue('Persona responsable');
+    list.onResponsibleSearch(' Maria ');
+    expect(list.isResponsibleSearchLoading()).toBe(true);
     vi.advanceTimersByTime(399);
-    expect(addSpy).not.toHaveBeenCalled();
+    expect(getPeoplePage).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(1);
-    expect(addSpy).toHaveBeenLastCalledWith({
-      severity: 'warn',
-      summary: 'Atenció',
-      detail: "El filtre «Responsables» encara no està implementat i no s'aplicarà.",
+    expect(getPeoplePage).toHaveBeenCalledWith({
+      page: 0,
+      size: 20,
+      sort: ['firstName,asc', 'lastName,asc'],
+      statusId: SoftDeleteStatus.ACTIVE,
+      search: 'Maria',
     });
 
-    form.controls.responsible.setValue('');
-    vi.advanceTimersByTime(400);
-    expect(addSpy).toHaveBeenCalledTimes(1);
+    pendingPeoplePages[0].next(applicationPage([RESPONSIBLE_PERSON], 1));
+    pendingPeoplePages[0].complete();
 
-    form.controls.database.setValue(8);
+    expect(list.responsibleOptions()).toEqual([{ id: 11, label: 'Maria Tur' }]);
+    expect(list.isResponsibleSearchLoading()).toBe(false);
+  });
+
+  it('should cancel stale responsible searches and report the latest search error', () => {
+    vi.useFakeTimers();
+    const list = accessList();
+    const addSpy = vi.spyOn(messageService, 'add');
+
+    list.onResponsibleSearch('Maria');
+    vi.advanceTimersByTime(400);
+    list.onResponsibleSearch('Martina');
+    vi.advanceTimersByTime(400);
+
+    pendingPeoplePages[0].next(applicationPage([RESPONSIBLE_PERSON], 1));
+    expect(list.responsibleOptions()).toEqual([]);
+
+    pendingPeoplePages[1].error(new Error('Search failed'));
+    expect(list.isResponsibleSearchLoading()).toBe(false);
     expect(addSpy).toHaveBeenLastCalledWith({
-      severity: 'warn',
-      summary: 'Atenció',
-      detail: "El filtre «Bases de dades» encara no està implementat i no s'aplicarà.",
+      severity: 'error',
+      summary: 'Error',
+      detail: "No s'han pogut cercar les persones responsables.",
     });
   });
 
-  it('should count unsupported filters but omit them from the request', () => {
-    vi.useFakeTimers();
+  it('should send the connected responsible and infrastructure filters', () => {
     const list = accessList();
     list.filtersForm.patchValue({
-      responsible: 'Persona responsable',
+      responsible: { id: 11, label: 'Maria Tur' },
       database: 8,
       server: 5,
       environment: 3,
@@ -489,6 +540,10 @@ describe('ApplicationsList', () => {
       page: 0,
       size: 10,
       statusId: ApplicationStatus.ACTIVE,
+      responsibleId: 11,
+      databaseId: 8,
+      serverId: 5,
+      environmentId: 3,
     });
   });
 
@@ -532,7 +587,7 @@ describe('ApplicationsList', () => {
     list.filtersForm.patchValue({
       prefix: 'APP',
       category: 1,
-      responsible: 'Persona responsable',
+      responsible: { id: 11, label: 'Maria Tur' },
       database: 8,
       server: 5,
       environment: 3,
@@ -578,9 +633,7 @@ describe('ApplicationsList', () => {
     ) as HTMLTableRowElement;
 
     expect(fixture.nativeElement.querySelector('.invai-table-actions-column')).toBeFalsy();
-    expect(firstRow.querySelectorAll('td')).toHaveLength(
-      component.sortedSelectedColumns().length,
-    );
+    expect(firstRow.querySelectorAll('td')).toHaveLength(component.sortedSelectedColumns().length);
     expect(firstRow.querySelector('button')).toBeFalsy();
     expect(firstRow.querySelector('.pi-eye')).toBeFalsy();
   });
@@ -643,7 +696,7 @@ function resolvedData(content: Application[], totalElements: number): Applicatio
   };
 }
 
-function applicationPage(content: Application[], totalElements: number): SpringPage<Application> {
+function applicationPage<TItem>(content: TItem[], totalElements: number): SpringPage<TItem> {
   return {
     content,
     empty: content.length === 0,

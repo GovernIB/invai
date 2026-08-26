@@ -36,6 +36,7 @@ const APPLICATION: Application = {
   creationDate: '2026-01-01T10:00:00',
   modificationDate: '',
   withdrawalDate: '',
+  appResponsibleAuthorizedId: null,
 };
 
 const OPTIONS: ApplicationSelectOptions = {
@@ -55,14 +56,14 @@ const INFRASTRUCTURE_OPTIONS: ApplicationInfrastructureFilterOptions = {
 describe('applicationsListResolver', () => {
   let getPage: ReturnType<typeof vi.fn>;
   let getOptions: ReturnType<typeof vi.fn>;
-  let getServerOptions: ReturnType<typeof vi.fn>;
+  let getPhysicalServerOptions: ReturnType<typeof vi.fn>;
   let getDatabaseOptions: ReturnType<typeof vi.fn>;
   let getEnvironmentOptions: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     getPage = vi.fn(() => of(page([APPLICATION])));
     getOptions = vi.fn(() => of(OPTIONS));
-    getServerOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.servers));
+    getPhysicalServerOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.servers));
     getDatabaseOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.databases));
     getEnvironmentOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.environments));
 
@@ -72,7 +73,7 @@ describe('applicationsListResolver', () => {
         { provide: ApplicationOptionsService, useValue: { getOptions } },
         {
           provide: ApplicationInfrastructureFilterOptionsService,
-          useValue: { getServerOptions, getDatabaseOptions, getEnvironmentOptions },
+          useValue: { getPhysicalServerOptions, getDatabaseOptions, getEnvironmentOptions },
         },
       ],
     });
@@ -87,7 +88,7 @@ describe('applicationsListResolver', () => {
       statusId: ApplicationStatus.ACTIVE,
     });
     expect(getOptions).toHaveBeenCalledOnce();
-    expect(getServerOptions).toHaveBeenCalledOnce();
+    expect(getPhysicalServerOptions).toHaveBeenCalledOnce();
     expect(getDatabaseOptions).toHaveBeenCalledOnce();
     expect(getEnvironmentOptions).toHaveBeenCalledOnce();
     expect(result).toEqual({

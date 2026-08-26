@@ -1,109 +1,140 @@
-app-roles-table,
-app-layers-table,
-app-technologies-table,
-app-application-providers-table,
-app-application-technologies-table,
-app-application-infrastructure-table,
-app-application-infrastructure-catalog-table {
+:is(
+  app-roles-table,
+  app-layers-table,
+  app-technologies-table,
+  app-application-providers-table,
+  app-application-technologies-table,
+  app-application-infrastructure-table,
+  app-application-infrastructure-catalog-table,
+  app-application-responsibles-table,
+  app-application-authorized-table
+) {
   display: block;
+}
 
-  .invai-table-loading-container {
-    position: relative;
-  }
+.invai-table-loading-container {
+  position: relative;
+}
 
-  .invai-table-loading-shield {
+.invai-table-loading-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: transparent;
+  cursor: progress;
+}
+
+.invai-table-refresh-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  opacity: 0;
+  background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+  animation: invai-table-indicator-show 0s linear 150ms forwards;
+
+  &::after {
     position: absolute;
     inset: 0;
-    z-index: 6;
-    background: transparent;
-    cursor: progress;
+    width: 38%;
+    content: '';
+    background: var(--p-primary-color);
+    transform: translateX(-100%);
+    animation: invai-table-indicator-move 1.15s ease-in-out 150ms infinite;
+  }
+}
+
+.invai-scrollable-table .p-datatable-table {
+  min-width: max-content;
+}
+
+.invai-scrollable-table :is(th, td) {
+  white-space: nowrap;
+}
+
+.invai-scrollable-table {
+  .invai-table-actions-column {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    width: 3.5rem;
+    min-width: 3.5rem;
+    max-width: 3.5rem;
+    box-sizing: border-box;
+    text-align: center;
+    background: inherit;
+    border-left: 1px solid
+      var(--p-datatable-body-cell-border-color, var(--p-content-border-color, #d9e2ef));
   }
 
-  .invai-table-refresh-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .p-datatable-thead > tr > .invai-table-actions-column {
+    z-index: 4;
+    background: var(--p-datatable-header-cell-background, var(--p-content-background, #fff));
+  }
+
+  .invai-table-actions-column .p-button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+  }
+
+  .application-responsible-incomplete-cell {
+    cursor: help;
+  }
+
+  .application-responsible-incomplete-cell:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: -2px;
+  }
+}
+
+.invai-table-header-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.invai-table-header-label {
+  min-width: 0;
+  white-space: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invai-table-refresh-indicator::after {
     width: 100%;
-    height: 3px;
-    overflow: hidden;
-    opacity: 0;
-    background: color-mix(in srgb, var(--p-primary-color) 18%, transparent);
-    animation: invai-table-indicator-show 0s linear 150ms forwards;
-
-    &::after {
-      position: absolute;
-      inset: 0;
-      width: 38%;
-      content: '';
-      background: var(--p-primary-color);
-      transform: translateX(-100%);
-      animation: invai-table-indicator-move 1.15s ease-in-out 150ms infinite;
-    }
-  }
-
-  .invai-scrollable-table .p-datatable-table {
-    min-width: max-content;
-  }
-
-  .invai-scrollable-table :is(th, td) {
-    white-space: nowrap;
-  }
-
-  .invai-scrollable-table {
-    .invai-table-actions-column {
-      position: sticky;
-      right: 0;
-      z-index: 2;
-      width: 3.5rem;
-      min-width: 3.5rem;
-      max-width: 3.5rem;
-      box-sizing: border-box;
-      text-align: center;
-      background: var(--p-datatable-body-cell-background, var(--p-content-background, #fff));
-      border-left: 1px solid
-        var(--p-datatable-body-cell-border-color, var(--p-content-border-color, #d9e2ef));
-    }
-
-    .p-datatable-thead > tr > .invai-table-actions-column {
-      z-index: 4;
-      background: var(--p-datatable-header-cell-background, var(--p-content-background, #fff));
-    }
-
-    .invai-table-actions-column .p-button {
-      width: 2rem;
-      height: 2rem;
-      padding: 0;
-    }
-  }
-
-  .invai-table-header-content {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .invai-table-header-label {
-    min-width: 0;
-    white-space: normal;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .invai-table-refresh-indicator::after {
-      width: 100%;
-      transform: none;
-      animation: none;
-    }
+    transform: none;
+    animation: none;
   }
 }
 
 .maintenance-row-menu.p-menu,
-.application-development-row-menu.p-menu {
+.application-development-row-menu.p-menu,
+.application-responsible-row-menu.p-menu {
   min-width: 9rem;
   padding: 0.5rem;
   border-radius: var(--p-border-radius-md, 0.5rem);
   box-shadow: 0 0.25rem 0.875rem rgb(15 23 42 / 14%);
+}
+
+.application-responsible-row-menu.p-menu {
+  .p-menu-list {
+    gap: 0.125rem;
+  }
+
+  .p-menu-item-link {
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--p-border-radius-sm, 0.375rem);
+  }
+
+  .p-menu-item-icon {
+    width: 1rem;
+    margin: 0;
+  }
 }
 
 @keyframes invai-table-indicator-show {

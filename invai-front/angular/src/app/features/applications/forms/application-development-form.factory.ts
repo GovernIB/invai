@@ -8,15 +8,11 @@ import {
   Validators,
 } from '@angular/forms';
 
-import {
-  DevelopmentModality,
-  DevelopmentStandardAdaption,
-} from '../applications.model';
+import { DevelopmentModality, DevelopmentStandardAdaption } from '../applications.model';
 
 export const APPLICATION_DEVELOPMENT_CODE_MAX_LENGTH = 1000;
 export const APPLICATION_DEVELOPMENT_TEXT_MAX_LENGTH = 255;
 export const APPLICATION_DEVELOPMENT_DATE_RANGE_ERROR = 'dateRange';
-export const APPLICATION_DEVELOPMENT_RICH_TEXT_REQUIRED_ERROR = 'required';
 
 export interface ApplicationDevelopmentFormControls {
   environment: FormControl<number | null>;
@@ -67,7 +63,7 @@ export function createApplicationDevelopmentForm(
       Validators.required,
     ),
     revisionDate: formBuilder.control<Date | null>(null, Validators.required),
-    observation: formBuilder.nonNullable.control('', richTextRequiredValidator()),
+    observation: formBuilder.nonNullable.control(''),
   });
 }
 
@@ -77,7 +73,7 @@ export function createApplicationProviderForm(
   return formBuilder.group(
     {
       companyName: formBuilder.nonNullable.control('', REQUIRED_TEXT_VALIDATORS),
-      roleId: formBuilder.control<number | null>(null),
+      roleId: formBuilder.control<number | null>(null, Validators.required),
       startDate: formBuilder.control<Date | null>(null),
       expireDate: formBuilder.control<Date | null>(null),
     },
@@ -94,17 +90,6 @@ export function createApplicationTechnologyForm(
     version: formBuilder.nonNullable.control('', REQUIRED_TEXT_VALIDATORS),
     architecture: formBuilder.nonNullable.control('', REQUIRED_TEXT_VALIDATORS),
   });
-}
-
-export function richTextRequiredValidator(): ValidatorFn {
-  return (control: AbstractControl<string>): ValidationErrors | null => {
-    const visibleText = control.value
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;|&#160;/gi, ' ')
-      .trim();
-
-    return visibleText ? null : { [APPLICATION_DEVELOPMENT_RICH_TEXT_REQUIRED_ERROR]: true };
-  };
 }
 
 export function dateRangeValidator(startKey: string, endKey: string): ValidatorFn {

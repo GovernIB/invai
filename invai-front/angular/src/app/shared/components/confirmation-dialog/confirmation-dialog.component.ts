@@ -23,16 +23,22 @@ export class ConfirmationDialogComponent {
   message = input.required<string>();
   cancelLabel = input(CONFIRMATION_DIALOG_CANCEL_LABEL);
   confirmLabel = input(CONFIRMATION_DIALOG_CONFIRM_LABEL);
+  auxiliaryLabel = input<string | null>(null);
+  auxiliaryAriaLabel = input<string | null>(null);
   cancelAriaLabel = input(CONFIRMATION_DIALOG_CANCEL_ARIA_LABEL);
   confirmAriaLabel = input(CONFIRMATION_DIALOG_CONFIRM_ARIA_LABEL);
   confirmIcon = input(PrimeIcons.CHECK);
   confirmOutlined = input(true);
+  width = input('24rem');
   cancelOnHide = input(true);
+  closeOnConfirm = input(true);
+  pending = input(false);
   severity = input<
     'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast'
   >('danger');
 
   confirm = output<void>();
+  auxiliary = output<void>();
   cancel = output<void>();
   dismissed = output<void>();
 
@@ -40,14 +46,27 @@ export class ConfirmationDialogComponent {
   private _closingFromAction = false;
 
   protected onCancel(): void {
+    if (this.pending()) return;
     this._closingFromAction = true;
     this.cancel.emit();
     this.visible.set(false);
   }
 
   protected onConfirm(): void {
+    if (this.pending()) return;
+    if (!this.closeOnConfirm()) {
+      this.confirm.emit();
+      return;
+    }
     this._closingFromAction = true;
     this.confirm.emit();
+    this.visible.set(false);
+  }
+
+  protected onAuxiliary(): void {
+    if (this.pending() || !this.auxiliaryLabel()) return;
+    this._closingFromAction = true;
+    this.auxiliary.emit();
     this.visible.set(false);
   }
 

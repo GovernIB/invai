@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from './support/auth.fixture';
 
 test('loads the authenticated app shell', async ({ page }) => {
   await page.goto('/');

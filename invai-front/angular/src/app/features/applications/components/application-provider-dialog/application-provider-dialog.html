@@ -8,6 +8,7 @@
   [isSaving]="isSaving()"
   [mode]="mode()"
   [title]="title()"
+  viewPrimaryAction="edit"
   (cancelEdit)="cancelEdit.emit()"
   (closed)="closed.emit()"
   (deactivate)="deactivate.emit()"
@@ -68,16 +69,25 @@
           [ariaFilterLabel]="labels.role"
           [filter]="true"
           [fluid]="true"
+          [invalid]="isInvalid(form().controls.roleId)"
           [options]="roleOptions()"
+          [pt]="rolePassThrough()"
+          [required]="true"
           [showClear]="true"
         />
-        <label
-          id="application-provider-dialog-role-label"
-          for="application-provider-dialog-role"
-        >
+        <label id="application-provider-dialog-role-label" for="application-provider-dialog-role">
           {{ labels.role }}
         </label>
       </p-floatlabel>
+      @if (isInvalid(form().controls.roleId)) {
+        <p
+          id="application-provider-dialog-role-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
     </div>
 
     <div>

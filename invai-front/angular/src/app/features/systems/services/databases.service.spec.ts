@@ -71,6 +71,7 @@ describe('DatabasesService', () => {
       databaseTypeId: 2,
       statusId: 1,
       search: 'prod',
+      unassignedToInformationSystemDbId: 70,
     };
     service.getAll(params).subscribe();
     service.getAll(params).subscribe();
@@ -79,7 +80,34 @@ describe('DatabasesService', () => {
     expect(requests[0].request.params.get('serverId')).toBe('4');
     expect(requests[0].request.params.get('service')).toBe('INVAI');
     expect(requests[0].request.params.get('databaseTypeId')).toBe('2');
+    expect(requests[0].request.params.get('unassignedToInformationSystemDbId')).toBe('70');
     requests.forEach((request) => request.flush(page([DATABASE])));
+  });
+
+  it('separates assignable catalog cache entries by grouping id and omits an absent id', () => {
+    const params = { page: 0, size: 10, statusId: 1 as const };
+
+    service.getAll({ ...params, unassignedToInformationSystemDbId: 70 }).subscribe();
+    http
+      .expectOne(
+        (candidate) =>
+          candidate.params.get('unassignedToInformationSystemDbId') === '70',
+      )
+      .flush(page([DATABASE]));
+
+    service.getAll({ ...params, unassignedToInformationSystemDbId: 71 }).subscribe();
+    http
+      .expectOne(
+        (candidate) =>
+          candidate.params.get('unassignedToInformationSystemDbId') === '71',
+      )
+      .flush(page([]));
+
+    service.getAll(params).subscribe();
+    const request = http.expectOne(
+      (candidate) => !candidate.params.has('unassignedToInformationSystemDbId'),
+    );
+    request.flush(page([DATABASE]));
   });
 
   it('shares cached reads and invalidates after create and reactivate', () => {

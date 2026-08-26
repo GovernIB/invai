@@ -1,0 +1,83 @@
+<section class="flex flex-column gap-4" [attr.aria-label]="copy.title">
+  <app-section-actions
+    class="flex justify-content-end"
+    [(isFiltersCollapsed)]="isFiltersCollapsed"
+    [(quickSearchValue)]="quickSearchTerm"
+    [(selectedColumns)]="selectedColumns"
+    [addButtonAriaLabel]="copy.addAriaLabel"
+    [availableColumns]="selectableColumns()"
+    [columnsButtonAriaLabel]="copy.columnsButtonAriaLabel"
+    [columnsInputId]="copy.columnsInputId"
+    [disableAddButton]="disableAdd()"
+    [filtersButtonAriaLabel]="copy.filtersButtonAriaLabel"
+    [filtersSelected]="selectedFilters()"
+    [hideExportButton]="true"
+    [isSearchLoading]="isSearchIndicatorLoading()"
+    [quickSearchAriaLabel]="copy.quickSearchAriaLabel"
+    [quickSearchPlaceholder]="copy.quickSearchPlaceholder"
+    (onAdd)="openCreateDialog()"
+    (onQuickSearchChange)="onQuickSearchChange($event)"
+  />
+  @if (disableAdd()) {
+    <p class="m-0 text-sm text-color-secondary" role="status">{{ copy.noActiveCompanies }}</p>
+  }
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <app-responsible-person-filters-form
+        [companyOptions]="allCompanyOptions()"
+        [form]="filtersForm"
+        [labels]="filterLabels"
+      />
+    </app-search-filters>
+  }
+  <app-responsible-people-table
+    [columns]="sortedSelectedColumns()"
+    [first]="tableFirst()"
+    [isInitialLoading]="isInitialTableLoading()"
+    [isLoading]="isLoading() || isAssignmentsCheckPending()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+  @if (isDialogVisible()) {
+    <app-responsible-person-dialog
+      [(visible)]="isDialogVisible"
+      [canMutate]="canMutateSelected()"
+      [canRestore]="selectedEntityCanRestore() && canMutateSelected()"
+      [companyName]="selectedCompanyName()"
+      [companyOptions]="activeCompanyOptions()"
+      [form]="entityForm"
+      [isDeleting]="isDeleting() || isAssignmentsCheckPending()"
+      [isSaving]="isSaving()"
+      [mode]="dialogMode()"
+      (cancelEdit)="cancelEntityEdit()"
+      (closed)="closeEntityDialog()"
+      (deactivate)="deactivateSelectedEntity()"
+      (edit)="startEntityEdit()"
+      (restore)="restoreSelectedEntity()"
+      (submitForm)="submitEntity()"
+    />
+  }
+  @if (isAssignmentsCheckPending()) {
+    <p class="sr-only" role="status">{{ copy.checkingAssignments }}</p>
+  }
+  @if (isDeleteDialogVisible()) {
+    <app-confirmation-dialog
+      [(visible)]="isDeleteDialogVisible"
+      [auxiliaryAriaLabel]="pendingPersonHasAssignments() ? transferAriaLabel() : null"
+      [auxiliaryLabel]="pendingPersonHasAssignments() ? copy.transfer : null"
+      [message]="deleteMessage()"
+      [title]="copy.deactivateTitle"
+      width="32rem"
+      (auxiliary)="transferPendingPerson()"
+      (cancel)="closeDeleteDialog()"
+      (confirm)="confirmDelete()"
+    />
+  }
+</section>

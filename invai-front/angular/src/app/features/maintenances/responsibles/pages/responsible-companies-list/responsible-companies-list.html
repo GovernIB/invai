@@ -1,0 +1,71 @@
+<section class="flex flex-column gap-4" [attr.aria-label]="copy.title">
+  <app-section-actions
+    class="flex justify-content-end"
+    [(isFiltersCollapsed)]="isFiltersCollapsed"
+    [(quickSearchValue)]="quickSearchTerm"
+    [(selectedColumns)]="selectedColumns"
+    [addButtonAriaLabel]="copy.addAriaLabel"
+    [availableColumns]="selectableColumns()"
+    [columnsButtonAriaLabel]="copy.columnsButtonAriaLabel"
+    [columnsInputId]="copy.columnsInputId"
+    [filtersButtonAriaLabel]="copy.filtersButtonAriaLabel"
+    [filtersSelected]="selectedFilters()"
+    [hideExportButton]="true"
+    [isSearchLoading]="isSearchIndicatorLoading()"
+    [quickSearchAriaLabel]="copy.quickSearchAriaLabel"
+    [quickSearchPlaceholder]="copy.quickSearchPlaceholder"
+    (onAdd)="openCreateDialog()"
+    (onQuickSearchChange)="onQuickSearchChange($event)"
+  />
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <app-responsible-name-filters-form
+        idPrefix="responsible-companies-filter"
+        [form]="filtersForm"
+        [labels]="filterLabels"
+      />
+    </app-search-filters>
+  }
+  <app-responsible-companies-table
+    [columns]="sortedSelectedColumns()"
+    [first]="tableFirst()"
+    [isInitialLoading]="isInitialTableLoading()"
+    [isLoading]="isLoading()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+  @if (isDialogVisible()) {
+    <app-responsible-name-dialog
+      idPrefix="responsible-company-dialog"
+      [(visible)]="isDialogVisible"
+      [canRestore]="selectedEntityCanRestore()"
+      [copy]="copy"
+      [form]="entityForm"
+      [isDeleting]="isDeleting()"
+      [isSaving]="isSaving()"
+      [mode]="dialogMode()"
+      (cancelEdit)="cancelEntityEdit()"
+      (closed)="closeEntityDialog()"
+      (deactivate)="deactivateSelectedEntity()"
+      (edit)="startEntityEdit()"
+      (restore)="restoreSelectedEntity()"
+      (submitForm)="submitEntity()"
+    />
+  }
+  @if (isDeleteDialogVisible()) {
+    <app-confirmation-dialog
+      [(visible)]="isDeleteDialogVisible"
+      [message]="deleteDialogMessage()"
+      [title]="copy.deactivateTitle"
+      (cancel)="closeDeleteDialog()"
+      (confirm)="confirmDelete()"
+    />
+  }
+</section>

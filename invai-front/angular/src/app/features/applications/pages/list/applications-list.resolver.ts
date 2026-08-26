@@ -46,7 +46,7 @@ export const applicationsListResolver: ResolveFn<ApplicationsListResolvedData> =
     ),
     optionsResult: resolveApplicationOptions(applicationOptionsService),
     serverOptions: infrastructureOptionsService
-      .getServerOptions()
+      .getPhysicalServerOptions()
       .pipe(catchError(() => of([]))),
     databaseOptions: infrastructureOptionsService
       .getDatabaseOptions()

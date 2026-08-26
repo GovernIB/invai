@@ -1,7 +1,3 @@
-app-section-actions .p-button.p-button-outlined {
-  border-color: var(--primary-color);
-}
-
 app-section-actions {
   display: block;
   max-width: 100%;
@@ -114,17 +110,22 @@ app-section-actions {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .section-actions-search__spinner {
+    animation: none;
+  }
+}
+
 .custom-multiselect-button {
   display: inline-flex;
-  flex: 0 0 48px;
 
   .p-multiselect {
     border-color: var(--primary-color);
     height: 100%;
-    max-width: 48px !important;
-    min-width: 48px !important;
+    max-width: var(--invai-table-toolbar-control-size) !important;
+    min-width: var(--invai-table-toolbar-control-size) !important;
     overflow: hidden;
-    width: 48px !important;
+    width: var(--invai-table-toolbar-control-size) !important;
   }
 
   .p-multiselect-trigger {
@@ -159,7 +160,7 @@ app-section-actions {
     z-index: 1002 !important;
     min-width: 240px !important;
     transform-origin: center top !important;
-    top: 44px !important;
+    top: calc(var(--invai-table-toolbar-control-size) - 0.25rem) !important;
     left: -192px !important;
     margin-top: calc(var(--p-anchor-gutter)) !important;
   }

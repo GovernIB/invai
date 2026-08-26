@@ -27,6 +27,8 @@ export class DatabasesService extends BaseApiService {
       databaseTypeId: params?.databaseTypeId,
       statusId: params?.statusId,
       search: params?.search?.trim(),
+      unassignedToInformationSystemDbId:
+        params?.unassignedToInformationSystemDbId,
     };
     const requestFactory = () =>
       this.http.get<SpringPage<DatabaseRecord>>(this.url(), {

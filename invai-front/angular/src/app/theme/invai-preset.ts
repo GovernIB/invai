@@ -44,6 +44,17 @@ export const InvaiPreset = definePreset(Lara, {
     },
   },
   components: {
+    datatable: {
+      colorScheme: {
+        light: {
+          row: {
+            background: '#f9fafb',
+            stripedBackground: '#ffffff',
+            hoverBackground: '#f3f4f6',
+          },
+        },
+      },
+    },
     button: {
       colorScheme: {
         light: {

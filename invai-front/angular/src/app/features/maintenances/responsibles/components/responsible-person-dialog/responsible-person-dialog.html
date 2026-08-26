@@ -1,0 +1,158 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="46rem"
+  [ariaLabels]="copy.actions"
+  [canRestore]="canRestore()"
+  [canEdit]="canMutate()"
+  [canDeactivate]="canMutate()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div>
+      @if (mode() === 'view') {
+        <div class="flex flex-column gap-1">
+          <span [id]="companyLabelId" class="text-sm text-color-secondary">{{ copy.company }}</span>
+          <p class="m-0 min-h-6" [attr.aria-labelledby]="companyLabelId">
+            {{ companyName() }}
+          </p>
+        </div>
+      } @else {
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="responsible-person-dialog-company"
+            styleClass="w-full"
+            formControlName="companyId"
+            [ariaLabelledBy]="companyLabelId"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [ariaFilterLabel]="copy.companyDialogAriaLabel"
+            [filter]="true"
+            [invalid]="isInvalid(form().controls.companyId)"
+            [options]="companyOptions()"
+            [pt]="companySelectPassThrough()"
+          />
+          <label [id]="companyLabelId" for="responsible-person-dialog-company">{{
+            copy.company
+          }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.companyId)) {
+          <p
+            id="responsible-person-dialog-company-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="responsible-person-dialog-first-name"
+          class="w-full"
+          type="text"
+          maxlength="150"
+          formControlName="firstName"
+          pInputText
+          [attr.aria-describedby]="
+            isInvalid(form().controls.firstName)
+              ? 'responsible-person-dialog-first-name-error'
+              : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.firstName)"
+          [readOnly]="mode() === 'view'"
+        />
+        <label for="responsible-person-dialog-first-name">{{ copy.firstName }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.firstName)) {
+        <p
+          id="responsible-person-dialog-first-name-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ form().controls.firstName.hasError('maxlength') ? nameMaxLengthError : requiredError }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="responsible-person-dialog-last-name"
+          class="w-full"
+          type="text"
+          maxlength="150"
+          formControlName="lastName"
+          pInputText
+          [attr.aria-describedby]="
+            isInvalid(form().controls.lastName) ? 'responsible-person-dialog-last-name-error' : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.lastName)"
+          [readOnly]="mode() === 'view'"
+        />
+        <label for="responsible-person-dialog-last-name">{{ copy.lastName }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.lastName)) {
+        <p
+          id="responsible-person-dialog-last-name-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ form().controls.lastName.hasError('maxlength') ? nameMaxLengthError : requiredError }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="responsible-person-dialog-email"
+          class="w-full"
+          type="email"
+          maxlength="150"
+          formControlName="email"
+          pInputText
+          [attr.aria-describedby]="
+            isInvalid(form().controls.email) ? 'responsible-person-dialog-email-error' : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.email)"
+          [readOnly]="mode() === 'view'"
+        />
+        <label for="responsible-person-dialog-email">{{ copy.email }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.email)) {
+        <p
+          id="responsible-person-dialog-email-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{
+            form().controls.email.hasError('required')
+              ? requiredError
+              : form().controls.email.hasError('maxlength')
+                ? copy.emailMaxLength
+                : copy.emailError
+          }}
+        </p>
+      }
+    </div>
+  </form>
+</app-crud-entity-dialog>

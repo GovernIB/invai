@@ -23,6 +23,7 @@ import {
 })
 export class ApplicationGeneralForm {
   form = input.required<ApplicationDetailFormGroup>();
+  isReadOnly = input.required<boolean>();
   options = input.required<ApplicationSelectOptions>();
   commissionSelected = output<ApplicationCommissionOption | null>();
 

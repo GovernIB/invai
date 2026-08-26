@@ -29,6 +29,7 @@
           type="text"
           formControlName="name"
           maxlength="100"
+          [readOnly]="mode() === 'view'"
           [attr.aria-describedby]="isInvalid(form().controls.name) ? 'database-vendor-name-error' : null"
           [attr.aria-invalid]="isInvalid(form().controls.name)"
           pInputText
@@ -44,17 +45,29 @@
 
     <div class="md:col-span-4">
       <p-floatlabel class="w-full">
-        <p-inputnumber
-          inputId="database-vendor-port"
-          styleClass="w-full"
-          inputStyleClass="w-full"
-          formControlName="defaultPort"
-          [attr.aria-describedby]="isInvalid(form().controls.defaultPort) ? 'database-vendor-port-error' : null"
-          [attr.aria-invalid]="isInvalid(form().controls.defaultPort)"
-          [max]="65535"
-          [min]="1"
-          [useGrouping]="false"
-        />
+        @if (mode() === 'view') {
+          <input
+            class="w-full"
+            type="text"
+            inputmode="numeric"
+            [attr.id]="'database-vendor-port'"
+            [value]="form().controls.defaultPort.value ?? ''"
+            readonly
+            pInputText
+          />
+        } @else {
+          <p-inputnumber
+            inputId="database-vendor-port"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            formControlName="defaultPort"
+            [attr.aria-describedby]="isInvalid(form().controls.defaultPort) ? 'database-vendor-port-error' : null"
+            [attr.aria-invalid]="isInvalid(form().controls.defaultPort)"
+            [max]="65535"
+            [min]="1"
+            [useGrouping]="false"
+          />
+        }
         <label for="database-vendor-port">{{ labels.defaultPort }}</label>
       </p-floatlabel>
       @if (isInvalid(form().controls.defaultPort)) {

@@ -65,9 +65,7 @@ describe('ApplicationProvidersTable', () => {
     ) as HTMLTableRowElement;
 
     row.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-    row.dispatchEvent(
-      new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }),
-    );
+    row.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
     const actionsButton = row.querySelector('button') as HTMLButtonElement;
     actionsButton.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
 
@@ -75,6 +73,33 @@ describe('ApplicationProvidersTable', () => {
       { action: ApplicationProviderTableAction.View, params: PROVIDER },
       { action: ApplicationProviderTableAction.View, params: PROVIDER },
     ]);
+  });
+
+  it('hides actions outside edit mode and keeps row consultation available', () => {
+    const emitted: ActionParams<ApplicationProviderOutput>[] = [];
+    component.onSelectAction.subscribe((event) => emitted.push(event));
+    fixture.componentRef.setInput('isReadOnly', true);
+    fixture.componentRef.setInput('showActions', false);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.invai-table-actions-column')).toBeNull();
+    expect(fixture.nativeElement.querySelector('p-menu')).toBeNull();
+    const row = fixture.nativeElement.querySelector(
+      '.invai-table-consultable-row',
+    ) as HTMLTableRowElement;
+    row.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+
+    expect(emitted).toEqual([{ action: ApplicationProviderTableAction.View, params: PROVIDER }]);
+  });
+
+  it('keeps visible edit-mode actions disabled when mutations are unavailable', () => {
+    fixture.componentRef.setInput('isReadOnly', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(2);
+    expect(
+      (fixture.nativeElement.querySelector('tbody button') as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 
   it('emits contextual view, edit and delete actions for the selected row', () => {

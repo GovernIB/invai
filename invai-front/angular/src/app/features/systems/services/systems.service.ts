@@ -29,6 +29,8 @@ export class SystemsService extends BaseApiService {
       instance: params?.instance?.trim(),
       version: params?.version?.trim(),
       statusId: params?.statusId,
+      unassignedToInformationSystemDbId:
+        params?.unassignedToInformationSystemDbId,
     };
 
     return cachedRequest(

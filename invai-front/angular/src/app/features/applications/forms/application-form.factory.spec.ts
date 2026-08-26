@@ -109,7 +109,7 @@ describe('application form factories', () => {
     });
 
     form.controls.status.setValue(null);
-    form.controls.responsible.setValue('Persona responsable');
+    form.controls.responsible.setValue({ id: 7, label: 'Persona responsable' });
     form.controls.database.setValue(8);
     form.controls.server.setValue(5);
     form.controls.environment.setValue(3);

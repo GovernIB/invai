@@ -98,6 +98,7 @@ describe('applicationSystemsDatabasesResolver', () => {
       statusId: InfrastructureStatus.ACTIVE,
       page: 0,
       size: 10,
+      unassignedToInformationSystemDbId: 70,
     };
 
     expect(getSystemsPage).toHaveBeenCalledWith(relationParams);
@@ -157,20 +158,22 @@ describe('applicationSystemsDatabasesResolver', () => {
     expect(result.systemDatabaseLoadFailed).toBe(false);
   });
 
-  it('omits aggregate relation requests when the parent detail has no child id', async () => {
+  it('omits relation and assignable catalog requests when the parent detail has no child id', async () => {
     const result = await resolveSection('7', null);
 
     expect(getSystemsPage).not.toHaveBeenCalled();
     expect(getDatabasesPage).not.toHaveBeenCalled();
     expect(getSystemDatabase).not.toHaveBeenCalled();
-    expect(getSystemsCatalog).toHaveBeenCalledOnce();
-    expect(getDatabasesCatalog).toHaveBeenCalledOnce();
+    expect(getSystemsCatalog).not.toHaveBeenCalled();
+    expect(getDatabasesCatalog).not.toHaveBeenCalled();
     expect(result).toEqual(
       expect.objectContaining({
         applicationId: 7,
         informationSystemDbId: null,
         serversPage: null,
         databasesPage: null,
+        systemCatalogPage: null,
+        databaseCatalogPage: null,
         systemDatabase: null,
         serversLoadFailed: false,
         databasesLoadFailed: false,

@@ -1,0 +1,171 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [showDeactivate]="false"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-form-surface-subtle invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div class="flex items-center gap-3 md:col-span-2">
+      <span id="application-authorized-dialog-caib-label" class="text-sm text-color-secondary">
+        {{ copy.personalCaib }}
+      </span>
+      <p-toggleswitch
+        inputId="application-authorized-dialog-caib"
+        ariaLabelledBy="application-authorized-dialog-caib-label"
+        formControlName="personalCaib"
+        [pt]="personalCaibPassThrough()"
+      />
+    </div>
+    @if (mode() === 'create') {
+      <p
+        id="application-authorized-dialog-caib-unavailable"
+        class="m-0 text-sm text-color-secondary md:col-span-2"
+      >
+        {{ copy.caibCreationUnavailable }}
+      </p>
+    }
+
+    @if (!form().controls.personalCaib.value) {
+      <div>
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="application-authorized-dialog-company"
+            styleClass="w-full"
+            formControlName="companyId"
+            [ariaLabelledBy]="companyLabelId"
+            [ariaFilterLabel]="copy.companyFilterAriaLabel"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [filter]="true"
+            [invalid]="isInvalid(form().controls.companyId)"
+            [options]="companyOptions()"
+            [pt]="companySelectPassThrough()"
+          />
+          <label [id]="companyLabelId" for="application-authorized-dialog-company">
+            {{ copy.company }}
+          </label>
+        </p-floatlabel>
+        @if (mode() === 'create' && companyOptionsLoadFailed()) {
+          <p
+            id="application-authorized-dialog-company-load-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ copy.companyOptionsLoadError }}
+          </p>
+        }
+        @if (isInvalid(form().controls.companyId)) {
+          <p
+            id="application-authorized-dialog-company-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    }
+
+    <div>
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="application-authorized-dialog-person"
+          styleClass="w-full"
+          formControlName="personId"
+          [ariaLabelledBy]="personLabelId"
+          [ariaFilterLabel]="copy.personFilterAriaLabel"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="id"
+          [filter]="true"
+          [invalid]="isInvalid(form().controls.personId)"
+          [options]="personOptions()"
+          [pt]="personSelectPassThrough()"
+        />
+        <label [id]="personLabelId" for="application-authorized-dialog-person">
+          {{ copy.person }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.personId)) {
+        <p
+          id="application-authorized-dialog-person-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="application-authorized-dialog-email"
+          class="w-full"
+          type="email"
+          formControlName="email"
+          pInputText
+        />
+        <label for="application-authorized-dialog-email">{{ copy.email }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="mb-2 block" for="application-authorized-dialog-observation">
+        {{ copy.observation }}
+      </label>
+      <textarea
+        id="application-authorized-dialog-observation"
+        class="w-full"
+        rows="3"
+        formControlName="observation"
+        pTextarea
+      ></textarea>
+    </div>
+
+    <div class="md:col-span-2">
+      <p-floatlabel class="w-full">
+        <p-multiselect
+          inputId="application-authorized-dialog-authorization"
+          styleClass="w-full"
+          formControlName="authorizationTypeIds"
+          [ariaLabelledBy]="authorizationLabelId"
+          [ariaFilterLabel]="copy.authorizationFilterAriaLabel"
+          appendTo="body"
+          display="chip"
+          optionLabel="label"
+          optionValue="id"
+          [filter]="true"
+          [invalid]="isInvalid(form().controls.authorizationTypeIds)"
+          [options]="authorizationTypeOptions()"
+          [pt]="authorizationPassThrough()"
+        />
+        <label [id]="authorizationLabelId" for="application-authorized-dialog-authorization">
+          {{ copy.authorization }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.authorizationTypeIds)) {
+        <p
+          id="application-authorized-dialog-authorization-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+  </form>
+</app-crud-entity-dialog>

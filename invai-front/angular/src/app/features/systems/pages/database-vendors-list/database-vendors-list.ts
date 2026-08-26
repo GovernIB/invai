@@ -404,7 +404,6 @@ export class DatabaseVendorsList implements OnInit {
       name: record.name ?? '',
       defaultPort: record.defaultPort,
     });
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
     this.dialogMode.set(mode);
   }
 

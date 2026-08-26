@@ -1,12 +1,13 @@
 <p-dialog
   [(visible)]="visible"
-  [closable]="true"
-  [closeOnEscape]="true"
-  [dismissableMask]="true"
+  [closable]="!pending()"
+  [closeOnEscape]="!pending()"
+  [dismissableMask]="!pending()"
   [draggable]="false"
+  [focusOnShow]="true"
   [modal]="true"
   [resizable]="false"
-  [style]="{ width: '24rem', maxWidth: 'calc(100vw - 2rem)' }"
+  [style]="{ width: width(), maxWidth: 'calc(100vw - 2rem)' }"
   (onHide)="onHide()"
 >
   <ng-template #header>
@@ -14,27 +15,51 @@
   </ng-template>
 
   <div class="flex items-start gap-3 text-sm leading-5 text-color-secondary">
-    <i class="mt-1 text-color-secondary" [class]="PrimeIcons.EXCLAMATION_TRIANGLE" aria-hidden="true"></i>
+    <i
+      class="mt-1 text-color-secondary"
+      [class]="PrimeIcons.EXCLAMATION_TRIANGLE"
+      aria-hidden="true"
+    ></i>
     <p class="m-0 whitespace-pre-line">{{ message() }}</p>
   </div>
 
+  <ng-content />
+
   <ng-template #footer>
-    <div class="flex justify-end gap-2">
-      <p-button
-        [ariaLabel]="cancelAriaLabel()"
-        [label]="cancelLabel()"
-        [text]="true"
-        severity="secondary"
-        (onClick)="onCancel()"
-      />
-      <p-button
-        [ariaLabel]="confirmAriaLabel()"
-        [icon]="confirmIcon()"
-        [label]="confirmLabel()"
-        [outlined]="confirmOutlined()"
-        [severity]="severity()"
-        (onClick)="onConfirm()"
-      />
+    <div class="flex w-full flex-wrap items-center justify-between gap-2">
+      <div>
+        @if (auxiliaryLabel()) {
+          <p-button
+            type="button"
+            severity="secondary"
+            [ariaLabel]="auxiliaryAriaLabel() || auxiliaryLabel()!"
+            [disabled]="pending()"
+            [label]="auxiliaryLabel()!"
+            [outlined]="true"
+            (onClick)="onAuxiliary()"
+          />
+        }
+      </div>
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <p-button
+          [ariaLabel]="cancelAriaLabel()"
+          [disabled]="pending()"
+          [label]="cancelLabel()"
+          [text]="true"
+          severity="secondary"
+          (onClick)="onCancel()"
+        />
+        <p-button
+          [ariaLabel]="confirmAriaLabel()"
+          [disabled]="pending()"
+          [icon]="confirmIcon()"
+          [label]="confirmLabel()"
+          [loading]="pending()"
+          [outlined]="confirmOutlined()"
+          [severity]="severity()"
+          (onClick)="onConfirm()"
+        />
+      </div>
     </div>
   </ng-template>
 </p-dialog>

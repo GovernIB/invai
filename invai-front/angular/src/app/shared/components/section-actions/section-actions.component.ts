@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   model,
   output,
@@ -14,6 +15,7 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TooltipModule } from 'primeng/tooltip';
+import { ButtonPassThrough } from 'primeng/types/button';
 import {
   SECTION_ACTIONS_ADD_ARIA_LABEL,
   SECTION_ACTIONS_CLEAR_QUICK_SEARCH_ARIA_LABEL,
@@ -49,6 +51,7 @@ export class SectionActionsComponent {
   columnsFilterPlaceholder = input(SECTION_ACTIONS_COLUMNS_FILTER_PLACEHOLDER);
   filtersButtonAriaLabel = input(SECTION_ACTIONS_FILTERS_ARIA_LABEL);
   columnsButtonAriaLabel = input(SECTION_ACTIONS_COLUMNS_ARIA_LABEL);
+  columnsInputId = input('section-actions-columns');
   exportButtonAriaLabel = input(SECTION_ACTIONS_EXPORT_ARIA_LABEL);
   addButtonAriaLabel = input(SECTION_ACTIONS_ADD_ARIA_LABEL);
   availableColumns = input<Partial<TableColumn>[]>();
@@ -60,6 +63,9 @@ export class SectionActionsComponent {
   onQuickSearchChange = output<string>();
 
   protected readonly PrimeIcons = PrimeIcons;
+  protected readonly filtersButtonPassThrough = computed<ButtonPassThrough>(() => ({
+    root: { 'aria-expanded': String(!this.isFiltersCollapsed()) },
+  }));
 
   onSearchInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;

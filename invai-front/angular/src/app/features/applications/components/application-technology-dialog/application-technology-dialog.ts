@@ -36,6 +36,7 @@ import {
     Select,
   ],
   templateUrl: './application-technology-dialog.html',
+  styleUrl: './application-technology-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationTechnologyDialog {
@@ -63,6 +64,8 @@ export class ApplicationTechnologyDialog {
     APPLICATION_TECHNOLOGY_DIALOG_MAX_LENGTH_ERROR;
   protected readonly actionAriaLabels =
     APPLICATION_TECHNOLOGY_DIALOG_ARIA_LABELS;
+  protected readonly technologyControlId =
+    'application-technology-dialog-technology';
   protected readonly hasUnsavedChanges = () =>
     this.mode() === 'edit' && this.form().dirty;
 
@@ -84,6 +87,16 @@ export class ApplicationTechnologyDialog {
     return (
       this.technologyOptions().find((option) => option.id === technologyId)
         ?.layerLabel ?? ''
+    );
+  }
+
+  protected technologyLabel(): string {
+    const technologyId = this.form().controls.technologyId.value;
+    if (technologyId === null) return '';
+
+    return (
+      this.technologyOptions().find((option) => option.id === technologyId)
+        ?.label ?? `#${technologyId}`
     );
   }
 

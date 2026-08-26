@@ -1,0 +1,86 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="46rem"
+  [ariaLabels]="copy.actions"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="submitForm.emit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    [formGroup]="form()"
+    novalidate
+  >
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="responsible-authorization-dialog-name"
+          class="w-full"
+          maxlength="150"
+          formControlName="name"
+          pInputText
+          [readOnly]="mode() === 'view'"
+          [attr.aria-invalid]="isInvalid(form().controls.name)"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.name) ? 'responsible-authorization-dialog-name-error' : null
+          "
+        />
+        <label for="responsible-authorization-dialog-name">{{ copy.name }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.name)) {
+        <p
+          id="responsible-authorization-dialog-name-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{
+            form().controls.name.hasError('maxlength')
+              ? commonCopy.nameMaxLength
+              : commonCopy.required
+          }}
+        </p>
+      }
+    </div>
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="responsible-authorization-dialog-name-es"
+          class="w-full"
+          maxlength="100"
+          formControlName="nameEs"
+          pInputText
+          [readOnly]="mode() === 'view'"
+          [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.nameEs)
+              ? 'responsible-authorization-dialog-name-es-error'
+              : null
+          "
+        />
+        <label for="responsible-authorization-dialog-name-es">{{ copy.nameEs }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.nameEs)) {
+        <p
+          id="responsible-authorization-dialog-name-es-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{
+            form().controls.nameEs.hasError('maxlength')
+              ? copy.nameEsMaxLength
+              : commonCopy.required
+          }}
+        </p>
+      }
+    </div>
+  </form>
+</app-crud-entity-dialog>

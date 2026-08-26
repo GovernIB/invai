@@ -1,7 +1,4 @@
-<div
-  class="section-actions"
-  [class.section-actions--without-search]="hideQuickSearch()"
->
+<div class="section-actions" [class.section-actions--without-search]="hideQuickSearch()">
   @if (!hideQuickSearch()) {
     <div class="section-actions__search relative flex w-[400px] max-w-full items-center">
       <span
@@ -15,7 +12,7 @@
         }
       </span>
       <input
-        class="section-actions-search__input h-[48px] w-full pr-12 pl-11"
+        class="section-actions-search__input invai-table-toolbar-control w-full pr-12 pl-11"
         type="text"
         [attr.aria-label]="quickSearchAriaLabel()"
         [attr.aria-busy]="isSearchLoading()"
@@ -40,29 +37,33 @@
 
   <div class="section-actions__buttons">
     @if (!hideCollapseButton()) {
-      <p-button
-        badgeStyleClass="bg-primary text-secondary"
-        [badgeDisabled]="!filtersSelected()"
-        [icon]="PrimeIcons.FILTER"
-        [outlined]="true"
-        [ariaLabel]="filtersButtonAriaLabel()"
-        [attr.aria-expanded]="!isFiltersCollapsed()"
-        [value]="filtersSelected() ?? 0"
-        styleClass="h-[48px] w-[48px]"
-        (onClick)="onToggleFilters()"
-        pBadge
+      <span
+        class="inline-flex"
         pTooltip="Filtres"
         tooltipPosition="top"
         i18n-pTooltip
-      />
+      >
+        <p-button
+          badgeStyleClass="bg-primary text-secondary"
+          [badgeDisabled]="!filtersSelected()"
+          [icon]="PrimeIcons.FILTER"
+          [outlined]="true"
+          [ariaLabel]="filtersButtonAriaLabel()"
+          [pt]="filtersButtonPassThrough()"
+          [value]="filtersSelected() ?? 0"
+          styleClass="invai-table-toolbar-button"
+          (onClick)="onToggleFilters()"
+          pBadge
+        />
+      </span>
     }
     @if (!hideColumnsButton()) {
       <p-multiSelect
-        class="custom-multiselect-button h-[48px] w-[48px] min-w-[48px] max-w-[48px] flex-none border-primary font-semibold text-primary"
+        class="custom-multiselect-button invai-table-toolbar-square-control border-primary font-semibold text-primary"
         [(ngModel)]="selectedColumns"
         [displaySelectedLabel]="false"
         [ariaLabel]="columnsButtonAriaLabel()"
-        inputId="section-actions-columns"
+        [inputId]="columnsInputId()"
         [options]="availableColumns()"
         appendTo="self"
         [filter]="true"
@@ -88,7 +89,7 @@
         [loading]="isExportLoading()"
         [outlined]="true"
         [ariaLabel]="exportButtonAriaLabel()"
-        styleClass="h-[48px] w-[48px]"
+        styleClass="invai-table-toolbar-button"
         (onClick)="onExportExcel()"
         pTooltip="Exporta excel (.xls)"
         tooltipPosition="top"
@@ -100,7 +101,7 @@
         [disabled]="disableAddButton()"
         [icon]="PrimeIcons.PLUS"
         [ariaLabel]="addButtonAriaLabel()"
-        styleClass="h-[48px] w-[48px]"
+        styleClass="invai-table-toolbar-button"
         (onClick)="onAddItem()"
         pTooltip="Afegeix"
         tooltipPosition="top"

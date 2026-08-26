@@ -78,19 +78,40 @@ describe('CrudEntityDialog', () => {
     expect(deactivate).toHaveBeenCalledOnce();
   });
 
-  it('keeps view available while preventing edit when the parent context is read-only', () => {
+  it('keeps view available while hiding edit when the parent context is read-only', () => {
     const fixture = createFixture('view');
     const edit = vi.fn();
     fixture.componentInstance.edit.subscribe(edit);
     fixture.componentRef.setInput('canEdit', false);
     fixture.detectChanges();
 
-    const editButton = buttonByLabel(fixture, 'Editar');
-    expect(editButton.disabled).toBe(true);
-
-    editButton.onClick.emit(new MouseEvent('click'));
+    expect(buttonLabels(fixture)).toEqual(['Acceptar']);
     expect(edit).not.toHaveBeenCalled();
     expect(buttonByLabel(fixture, 'Acceptar').disabled).toBe(false);
+  });
+
+  it('uses edit as the only view action when configured as primary', () => {
+    const fixture = createFixture('view');
+    const edit = vi.fn();
+    fixture.componentInstance.edit.subscribe(edit);
+    fixture.componentRef.setInput('viewPrimaryAction', 'edit');
+    fixture.detectChanges();
+
+    expect(buttonLabels(fixture)).toEqual(['Editar']);
+
+    const editButton = buttonByLabel(fixture, 'Editar');
+    expect(editButton.icon).toBe('pi pi-pencil');
+    editButton.onClick.emit(new MouseEvent('click'));
+    expect(edit).toHaveBeenCalledOnce();
+  });
+
+  it('falls back to accept when primary edit is not available', () => {
+    const fixture = createFixture('view');
+    fixture.componentRef.setInput('viewPrimaryAction', 'edit');
+    fixture.componentRef.setInput('canEdit', false);
+    fixture.detectChanges();
+
+    expect(buttonLabels(fixture)).toEqual(['Acceptar']);
   });
 
   it('keeps save available while preventing deactivation outside its allowed context', () => {
@@ -106,6 +127,14 @@ describe('CrudEntityDialog', () => {
 
     deactivateButton.onClick.emit(new MouseEvent('click'));
     expect(deactivate).not.toHaveBeenCalled();
+  });
+
+  it('can hide the deactivation action for edit-only resources', () => {
+    const fixture = createFixture('edit');
+    fixture.componentRef.setInput('showDeactivate', false);
+    fixture.detectChanges();
+
+    expect(buttonLabels(fixture)).toEqual(['Cancel·lar', 'Desar']);
   });
 
   it('guards X, Escape and mask requests while edits are dirty', () => {
@@ -156,6 +185,33 @@ describe('CrudEntityDialog', () => {
     expect(dialog.closable).toBe(false);
     expect(dialog.closeOnEscape).toBe(false);
     expect(dialog.dismissableMask).toBe(false);
+    expect(dialog.focusOnShow).toBe(true);
+  });
+
+  it('restores focus to the connected element that opened the dialog', async () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    const fixture = createFixture('view');
+
+    fixture.destroy();
+    await Promise.resolve();
+
+    expect(document.activeElement).toBe(trigger);
+    trigger.remove();
+  });
+
+  it('does not focus an opener that is no longer connected', async () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    const fixture = createFixture('view');
+    trigger.remove();
+
+    fixture.destroy();
+    await Promise.resolve();
+
+    expect(document.activeElement).not.toBe(trigger);
   });
 });
 

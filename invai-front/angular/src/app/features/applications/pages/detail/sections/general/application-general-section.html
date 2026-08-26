@@ -16,6 +16,7 @@
 
   <app-application-general-form
     [form]="detailState.form"
+    [isReadOnly]="!detailState.isEditing('general')"
     [options]="options"
     (commissionSelected)="detailState.selectCommission($event)"
   />

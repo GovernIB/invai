@@ -112,11 +112,33 @@ export const applicationSystemsDatabasesResolver: ResolveFn<
           map((record) => ({ record, failed: false })),
           catchError(() => of({ record: null, failed: true })),
         );
-  const activeCatalogParams = {
-    statusId: InfrastructureStatus.ACTIVE,
-    page: INITIAL_PAGE,
-    size: INITIAL_PAGE_SIZE,
-  } as const;
+  const activeCatalogParams =
+    informationSystemDbId == null
+      ? null
+      : {
+          statusId: InfrastructureStatus.ACTIVE,
+          page: INITIAL_PAGE,
+          size: INITIAL_PAGE_SIZE,
+          unassignedToInformationSystemDbId: informationSystemDbId,
+        } as const;
+  const systemCatalogResult =
+    activeCatalogParams == null
+      ? of({ page: null, failed: false })
+      : inject(SystemsService)
+          .getAll(activeCatalogParams)
+          .pipe(
+            map((page) => ({ page, failed: false })),
+            catchError(() => of({ page: null, failed: true })),
+          );
+  const databaseCatalogResult =
+    activeCatalogParams == null
+      ? of({ page: null, failed: false })
+      : inject(DatabasesService)
+          .getAll(activeCatalogParams)
+          .pipe(
+            map((page) => ({ page, failed: false })),
+            catchError(() => of({ page: null, failed: true })),
+          );
 
   return forkJoin({
     serversResult,
@@ -133,18 +155,8 @@ export const applicationSystemsDatabasesResolver: ResolveFn<
       map((options) => ({ options, failed: false })),
       catchError(() => of({ options: [], failed: true })),
     ),
-    systemCatalogResult: inject(SystemsService)
-      .getAll(activeCatalogParams)
-      .pipe(
-        map((page) => ({ page, failed: false })),
-        catchError(() => of({ page: null, failed: true })),
-      ),
-    databaseCatalogResult: inject(DatabasesService)
-      .getAll(activeCatalogParams)
-      .pipe(
-        map((page) => ({ page, failed: false })),
-        catchError(() => of({ page: null, failed: true })),
-      ),
+    systemCatalogResult,
+    databaseCatalogResult,
     systemDatabaseResult,
   }).pipe(
     map(({

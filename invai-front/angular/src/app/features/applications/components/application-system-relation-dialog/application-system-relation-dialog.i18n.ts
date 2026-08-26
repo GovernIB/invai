@@ -1,12 +1,11 @@
 import { CrudEntityDialogMode } from '@components/crud-entity-dialog/crud-entity-dialog';
 
 export const APPLICATION_SYSTEM_RELATION_DIALOG_TITLES: Record<
-  CrudEntityDialogMode,
+  Exclude<CrudEntityDialogMode, 'edit'>,
   string
 > = {
   create: $localize`Afegir servidor a l'aplicació`,
   view: $localize`Consultar servidor de l'aplicació`,
-  edit: $localize`Editar servidor de l'aplicació`,
 };
 
 export const APPLICATION_SYSTEM_RELATION_DIALOG_REQUIRED =

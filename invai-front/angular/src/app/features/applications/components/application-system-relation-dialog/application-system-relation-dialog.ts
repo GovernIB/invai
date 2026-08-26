@@ -36,20 +36,15 @@ import {
 })
 export class ApplicationSystemRelationDialog {
   visible = model(false);
-  mode = input.required<CrudEntityDialogMode>();
+  mode = input.required<Exclude<CrudEntityDialogMode, 'edit'>>();
   form = input.required<ApplicationSystemRelationFormGroup>();
   catalog = input.required<PaginatedList<ApplicationSystemCatalogRow>>();
   first = input(0);
   isLoading = input(false);
   isSaving = input(false);
-  canEdit = input(false);
-  canDeactivate = input(true);
 
   submitForm = output<void>();
   closed = output<void>();
-  edit = output<void>();
-  cancelEdit = output<void>();
-  deactivate = output<void>();
   pageChange = output<TableLazyLoadEvent>();
 
   protected readonly columns = APPLICATION_SYSTEM_CATALOG_COLUMNS;
@@ -67,8 +62,6 @@ export class ApplicationSystemRelationDialog {
       ? { items: [selection], total: 1 }
       : this.catalog();
   });
-  protected readonly hasUnsavedChanges = () =>
-    this.mode() === 'edit' && this.form().dirty;
   protected readonly isInvalid = computed(() => {
     const control = this.form().controls.system;
     return control.invalid && (control.dirty || control.touched);

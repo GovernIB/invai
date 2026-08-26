@@ -27,6 +27,7 @@ const EXPECTED_APPLICATION: Application = {
   informationSystem: 'Instrumental',
   informationSystemDbId: 70,
   appDevelopmentId: 90,
+  appResponsibleAuthorizedId: 91,
   scope: 'Departamental',
   commission: 'Equip directiu',
   administrativeUnit: 'Direcció General',
@@ -90,6 +91,7 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   loadDate: null,
   appInformationSystemDbId: 70,
   appDevelopmentId: 90,
+  appResponsibleAuthorizedId: 91,
 };
 
 const OTHER_APPLICATION_OUTPUT: ApplicationOutput = {
@@ -229,6 +231,26 @@ describe('ApplicationsService', () => {
     expect(inactiveResult).toHaveBeenCalledOnce();
   });
 
+  it('keeps cached application pages separated by responsible and infrastructure ids', () => {
+    service.getPage({ page: 0, size: 10, responsibleId: 11, serverId: 5 }).subscribe();
+    service.getPage({ page: 0, size: 10, responsibleId: 12, serverId: 7 }).subscribe();
+
+    const requests = httpTesting.match(
+      (request) => request.method === 'GET' && request.url === APPLICATION_URL,
+    );
+    expect(requests).toHaveLength(2);
+    expect(
+      requests.map((request) => ({
+        responsibleId: request.request.params.get('responsibleId'),
+        serverId: request.request.params.get('serverId'),
+      })),
+    ).toEqual([
+      { responsibleId: '11', serverId: '5' },
+      { responsibleId: '12', serverId: '7' },
+    ]);
+    requests.forEach(flushApplications);
+  });
+
   it('does not cache quick searches', () => {
     service.getPage({ page: 0, size: 10, quickSearch: ' inv ' }).subscribe();
     service.getPage({ page: 0, size: 10, quickSearch: ' inv ' }).subscribe();
@@ -307,6 +329,10 @@ describe('ApplicationsService', () => {
         statusId: ApplicationStatus.ACTIVE,
         description: 'interna',
         quickSearch: 'inv',
+        responsibleId: 11,
+        databaseId: 8,
+        serverId: 5,
+        environmentId: 3,
       })
       .subscribe(result);
 
@@ -326,7 +352,11 @@ describe('ApplicationsService', () => {
         req.params.get('admUnitId') === '4' &&
         req.params.get('statusId') === '1' &&
         req.params.get('description') === 'interna' &&
-        req.params.get('quickSearch') === 'inv',
+        req.params.get('quickSearch') === 'inv' &&
+        req.params.get('responsibleId') === '11' &&
+        req.params.get('databaseId') === '8' &&
+        req.params.get('serverId') === '5' &&
+        req.params.get('environmentId') === '3',
     );
 
     request.flush(page([APPLICATION_OUTPUT]));

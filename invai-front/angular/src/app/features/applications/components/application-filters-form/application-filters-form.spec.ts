@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { CommissionType } from '@features/commissions/commissions.model';
+import { AutoComplete } from 'primeng/autocomplete';
 import { Select } from 'primeng/select';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 
@@ -25,6 +26,8 @@ const LABELS: ApplicationFilterLabels = {
   server: 'Servidor',
   environment: 'Entorn',
   incomplete: 'Incomplets',
+  responsibleEmpty: "No s'han trobat persones actives",
+  responsibleLoading: 'Cercant persones responsables…',
 };
 
 const OPTIONS: ApplicationSelectOptions = {
@@ -66,6 +69,15 @@ describe('ApplicationFiltersForm', () => {
     expect(fixture.nativeElement.querySelector('#applications-filter-prefix')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('#applications-filter-description')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('#applications-filter-responsible')).toBeTruthy();
+
+    const responsible = fixture.debugElement.query(By.directive(AutoComplete))
+      .componentInstance as AutoComplete;
+    expect(responsible.inputId).toBe('applications-filter-responsible');
+    expect(responsible.ariaLabelledBy).toBe('applications-filter-responsible-label');
+    expect(responsible.forceSelection).toBe(true);
+    expect(responsible.optionLabel).toBe('label');
+    expect(responsible.minLength).toBe(1);
+    expect(responsible.showClear).toBe(true);
 
     const toggleDebug = fixture.debugElement.query(By.directive(ToggleSwitch));
     const toggle = toggleDebug.componentInstance as ToggleSwitch;

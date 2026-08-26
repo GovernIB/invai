@@ -41,7 +41,7 @@ app-commissions-table {
       max-width: 3.5rem;
       box-sizing: border-box;
       text-align: center;
-      background: var(--p-datatable-body-cell-background, var(--p-content-background, #fff));
+      background: inherit;
       border-left: 1px solid
         var(--p-datatable-body-cell-border-color, var(--p-content-border-color, #d9e2ef));
     }

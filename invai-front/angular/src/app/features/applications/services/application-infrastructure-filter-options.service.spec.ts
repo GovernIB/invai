@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { EnvironmentsService } from '@features/environments/services/environments.service';
 import { Environment } from '@features/environments/environments.model';
 import { DatabasesService } from '@features/systems/services/databases.service';
+import { ServerCatalogService } from '@features/systems/services/server-catalog.service';
 import { SystemsService } from '@features/systems/services/systems.service';
 import {
   DatabaseRecord,
@@ -19,6 +20,7 @@ describe('ApplicationInfrastructureFilterOptionsService', () => {
   let getSystems: ReturnType<typeof vi.fn>;
   let getDatabases: ReturnType<typeof vi.fn>;
   let getEnvironments: ReturnType<typeof vi.fn>;
+  let getActiveServerOptions: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     getSystems = vi.fn(({ page: pageNumber }: { page: number }) =>
@@ -44,6 +46,19 @@ describe('ApplicationInfrastructureFilterOptionsService', () => {
         ]),
       ),
     );
+    getActiveServerOptions = vi.fn((type: string) =>
+      of(
+        type === 'APPLICATION'
+          ? [
+              { id: 5, name: 'app01', environment: {}, label: 'app01 · Producción' },
+              { id: 9, name: 'shared', environment: {}, label: 'shared · Producción' },
+            ]
+          : [
+              { id: 7, name: 'db01', environment: {}, label: 'db01 · Producción' },
+              { id: 9, name: 'shared', environment: {}, label: 'shared · Producción' },
+            ],
+      ),
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -51,6 +66,7 @@ describe('ApplicationInfrastructureFilterOptionsService', () => {
         { provide: SystemsService, useValue: { getAll: getSystems } },
         { provide: DatabasesService, useValue: { getAll: getDatabases } },
         { provide: EnvironmentsService, useValue: { getAll: getEnvironments } },
+        { provide: ServerCatalogService, useValue: { getActiveOptions: getActiveServerOptions } },
       ],
     });
     service = TestBed.inject(ApplicationInfrastructureFilterOptionsService);
@@ -82,6 +98,16 @@ describe('ApplicationInfrastructureFilterOptionsService', () => {
       { label: 'INVAI — db01.caib.es', value: 7 },
       { label: 'INVAI — db02.caib.es', value: 8 },
     ]);
+  });
+
+  it('combines active physical servers from both types and deduplicates their ids', async () => {
+    await expect(firstValueFrom(service.getPhysicalServerOptions())).resolves.toEqual([
+      { label: 'app01 · Producción', value: 5 },
+      { label: 'db01 · Producción', value: 7 },
+      { label: 'shared · Producción', value: 9 },
+    ]);
+    expect(getActiveServerOptions).toHaveBeenNthCalledWith(1, 'APPLICATION');
+    expect(getActiveServerOptions).toHaveBeenNthCalledWith(2, 'DATABASE');
   });
 });
 

@@ -9,15 +9,15 @@ export const APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT = $localize`Ut. Administrat
 export const APPLICATIONS_FILTER_STATUS = $localize`Estat`;
 export const APPLICATIONS_FILTER_DESCRIPTION = $localize`Descripció`;
 export const APPLICATIONS_FILTER_RESPONSIBLE = $localize`Responsables`;
+export const APPLICATIONS_FILTER_RESPONSIBLE_EMPTY = $localize`No s'han trobat persones actives`;
+export const APPLICATIONS_FILTER_RESPONSIBLE_LOADING = $localize`Cercant persones responsables…`;
 export const APPLICATIONS_FILTER_DATABASE = $localize`Bases de dades`;
 export const APPLICATIONS_FILTER_SERVER = $localize`Servidor`;
 export const APPLICATIONS_FILTER_ENVIRONMENT = $localize`Entorn`;
 export const APPLICATIONS_FILTER_INCOMPLETE = $localize`Incomplets`;
-export const APPLICATIONS_UNSUPPORTED_FILTER_WARNING_TITLE = $localize`Atenció`;
-export const APPLICATIONS_UNSUPPORTED_FILTER_WARNING = (label: string) =>
-  $localize`El filtre «${label}» encara no està implementat i no s'aplicarà.`;
 export const APPLICATIONS_LOAD_ERROR_SUMMARY = $localize`Error`;
 export const APPLICATIONS_LOAD_ERROR_DETAIL = $localize`No s'han pogut carregar les aplicacions.`;
+export const APPLICATIONS_RESPONSIBLE_SEARCH_ERROR_DETAIL = $localize`No s'han pogut cercar les persones responsables.`;
 export const APPLICATIONS_QUICK_SEARCH_ARIA_LABEL = $localize`Cerca ràpida d'aplicacions`;
 export const APPLICATIONS_EXPORT_ARIA_LABEL = $localize`Exporta aplicacions a Excel`;
 export const APPLICATIONS_ADD_ARIA_LABEL = $localize`Afegeix una aplicació`;

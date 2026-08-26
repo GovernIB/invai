@@ -63,14 +63,10 @@ describe('ApplicationInfrastructureTable', () => {
     fixture.detectChanges();
   });
 
-  it('emits view, edit and delete from the contextual menu for the selected row', () => {
+  it('emits view and delete from the contextual menu for the selected row', () => {
     const emittedActions: ActionParams<ApplicationInfrastructureResource>[] = [];
     const table = component as unknown as {
-      openActionsMenu: (
-        event: Event,
-        row: ApplicationInfrastructureResource,
-        menu: Menu,
-      ) => void;
+      openActionsMenu: (event: Event, row: ApplicationInfrastructureResource, menu: Menu) => void;
       rowActions: () => MenuItem[];
     };
     const menu = { toggle: vi.fn() } as unknown as Menu;
@@ -87,28 +83,34 @@ describe('ApplicationInfrastructureTable', () => {
         params: SERVER,
       },
       {
-        action: ApplicationInfrastructureTableAction.Edit,
-        params: SERVER,
-      },
-      {
         action: ApplicationInfrastructureTableAction.Delete,
         params: SERVER,
       },
     ]);
   });
 
-  it('only renders the actions column while the section is editable', () => {
+  it('uses action visibility independently from temporary mutation availability', () => {
     expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(2);
 
     fixture.componentRef.setInput('isReadOnly', true);
     fixture.detectChanges();
 
+    expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(2);
+    expect(
+      (fixture.nativeElement.querySelector('tbody button') as HTMLButtonElement).disabled,
+    ).toBe(true);
+
+    fixture.componentRef.setInput('showActions', false);
+    fixture.detectChanges();
+
     expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(0);
+    expect(fixture.nativeElement.querySelector('p-menu')).toBeNull();
   });
 
   it('keeps row view activation available while the actions column is hidden', () => {
     const emittedActions: ActionParams<ApplicationInfrastructureResource>[] = [];
     fixture.componentRef.setInput('isReadOnly', true);
+    fixture.componentRef.setInput('showActions', false);
     fixture.detectChanges();
 
     component.onSelectAction.subscribe((action) => emittedActions.push(action));
@@ -134,7 +136,7 @@ describe('ApplicationInfrastructureTable', () => {
     ) as HTMLTableCellElement;
     expect(emptyCell.colSpan).toBe(APPLICATION_SERVERS_TABLE_COLUMNS.length + 1);
 
-    fixture.componentRef.setInput('isReadOnly', true);
+    fixture.componentRef.setInput('showActions', false);
     fixture.detectChanges();
 
     emptyCell = fixture.nativeElement.querySelector(
@@ -143,10 +145,11 @@ describe('ApplicationInfrastructureTable', () => {
     expect(emptyCell.colSpan).toBe(APPLICATION_SERVERS_TABLE_COLUMNS.length);
   });
 
-  it('forwards the controlled first row to the paginated table', () => {
+  it('forwards the controlled first row and enables striped rows', () => {
     const primeTable = fixture.debugElement.query(By.css('p-table'));
 
     expect(primeTable.componentInstance.first).toBe(20);
+    expect(primeTable.componentInstance.stripedRows).toBe(true);
   });
 
   it('shows a progress bar over the preserved rows without a dark table mask', () => {

@@ -34,6 +34,52 @@ describe('SectionActionsComponent', () => {
     expect(fixture.nativeElement.querySelector('.section-actions__buttons')).toBeTruthy();
   });
 
+  it('should apply the shared table toolbar sizing contract', () => {
+    const searchInput = fixture.nativeElement.querySelector(
+      '.section-actions-search__input',
+    ) as HTMLInputElement;
+    const columnsControl = fixture.nativeElement.querySelector(
+      '.custom-multiselect-button',
+    ) as HTMLElement;
+    const toolbarButtons = Array.from(
+      fixture.nativeElement.querySelectorAll('.section-actions__buttons button'),
+    ) as HTMLButtonElement[];
+
+    expect(searchInput.classList).toContain('invai-table-toolbar-control');
+    expect(columnsControl.classList).toContain('invai-table-toolbar-square-control');
+    expect(toolbarButtons).toHaveLength(3);
+    expect(
+      toolbarButtons.every((button) =>
+        button.classList.contains('invai-table-toolbar-button'),
+      ),
+    ).toBe(true);
+    expect(toolbarButtons[0].classList).toContain('p-button-outlined');
+    expect(toolbarButtons[1].classList).toContain('p-button-outlined');
+    expect(toolbarButtons[2].classList).not.toContain('p-button-outlined');
+  });
+
+  it('should put the expanded state on the native filters button', () => {
+    fixture.componentRef.setInput('isFiltersCollapsed', true);
+    fixture.detectChanges();
+    const filtersButton = fixture.nativeElement.querySelector(
+      '.section-actions__buttons button',
+    ) as HTMLButtonElement;
+    expect(filtersButton.getAttribute('aria-expanded')).toBe('false');
+
+    fixture.componentRef.setInput('isFiltersCollapsed', false);
+    fixture.detectChanges();
+    expect(filtersButton.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('should accept a unique input id for the column selector', () => {
+    fixture.componentRef.setInput('columnsInputId', 'responsible-companies-columns');
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('#responsible-companies-columns'),
+    ).not.toBeNull();
+  });
+
   it('should keep the search icon centered inside an accessible loading spinner', () => {
     const input = () => fixture.nativeElement.querySelector('input[type="text"]') as HTMLElement;
     const magnifier = fixture.nativeElement.querySelector('.section-actions-search__magnifier');

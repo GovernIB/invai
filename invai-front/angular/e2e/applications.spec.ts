@@ -1,5 +1,15 @@
-import { expect, test } from '@playwright/test';
-import type { Page, Response, TestInfo } from '@playwright/test';
+import { expect, test } from './support/auth.fixture';
+import type { Page, TestInfo } from '@playwright/test';
+
+import { uniqueToken } from './support/data';
+import { findAvailableApplicationPrefix } from './support/application-prefix';
+import {
+  apiUrl,
+  expectJsonResponse,
+  expectSuccessfulResponse,
+  waitForApiResponse as waitForApplicationResponse,
+} from './support/http';
+import { selectOption } from './support/ui';
 
 const APPLICATION_API_PATH = '/invaiapi/interna/application';
 const ACTIVE_STATUS_ID = 1;
@@ -27,16 +37,16 @@ interface ApplicationInput {
   fieldId: number;
   admUnitId: number;
   commissionId: number;
-  description: string | null;
+  description: string;
   statusId: number;
 }
 
 test('covers the applications API lifecycle through the UI', async ({ page }, testInfo) => {
   test.setTimeout(120_000);
 
-  const token = `${Date.now().toString(36)}${testInfo.workerIndex}`.slice(-7).toUpperCase();
+  const token = uniqueToken(testInfo, 7);
   const code = `E2E${token}`;
-  const prefix = token.slice(-3);
+  let prefix = '';
   const initialName = `E2E Playwright ${code}`;
   const updatedName = `${initialName} updated`;
   const initialDescription = `Created by Playwright run ${token}`;
@@ -68,6 +78,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
     });
 
     await test.step('POST creates an active application', async () => {
+      prefix = await findAvailableApplicationPrefix(page, token);
       await page.getByRole('button', { name: 'Afegeix una aplicació' }).click();
       await expect(page.getByRole('heading', { name: 'Afegir aplicació' })).toBeVisible();
 
@@ -96,17 +107,17 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
         name: initialName,
         prefix,
         code,
-        description: initialDescription,
         statusId: ACTIVE_STATUS_ID,
       });
+      expect(richTextVisible(requestBody.description)).toBe(initialDescription);
       expectPositiveReferenceIds(requestBody);
       expect(created).toMatchObject({
         id: expect.any(Number),
         code,
         name: initialName,
-        description: initialDescription,
         status: 'ACTIVE',
       });
+      expect(richTextVisible(created.description)).toBe(initialDescription);
 
       await expect(page).toHaveURL(/\/aplicacions$/);
     });
@@ -142,9 +153,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       const detail = await expectJsonResponse<ApplicationResponse>(detailResponse);
       expect(detail).toMatchObject({ id: createdId, code, name: initialName, status: 'ACTIVE' });
 
-      await page
-        .getByRole('button', { name: "Editar Dades generals de l'aplicació" })
-        .click();
+      await page.getByRole('button', { name: "Editar Dades generals de l'aplicació" }).click();
       await page.locator('#detail-application-application').fill(updatedName);
       await page.locator('#detail-application-description').fill(updatedDescription);
 
@@ -167,25 +176,23 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
         name: updatedName,
         prefix,
         code,
-        description: updatedDescription,
         statusId: ACTIVE_STATUS_ID,
       });
+      expect(richTextVisible(requestBody.description)).toBe(updatedDescription);
       expectPositiveReferenceIds(requestBody);
       expect(updated).toMatchObject({
         id: createdId,
         code,
         name: updatedName,
-        description: updatedDescription,
         status: 'ACTIVE',
       });
+      expect(richTextVisible(updated.description)).toBe(updatedDescription);
       await expect(page.locator('#detail-application-application')).toHaveValue(updatedName);
       await expect(page.locator('#detail-application-application')).toBeDisabled();
     });
 
     await test.step('DELETE withdraws the application', async () => {
-      await page
-        .getByRole('button', { name: "Editar Dades generals de l'aplicació" })
-        .click();
+      await page.getByRole('button', { name: "Editar Dades generals de l'aplicació" }).click();
       await page.getByRole('button', { name: "Donar de baixa l'aplicació" }).click();
 
       const deleteResponsePromise = waitForApplicationResponse(
@@ -206,8 +213,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       isActive = false;
 
       const activeListResponse = await activeListResponsePromise;
-      const activePage =
-        await expectJsonResponse<ApplicationPageResponse>(activeListResponse);
+      const activePage = await expectJsonResponse<ApplicationPageResponse>(activeListResponse);
       expect(activePage.content).not.toContainEqual(expect.objectContaining({ id: createdId }));
       await expect(page).toHaveURL(/\/aplicacions$/);
     });
@@ -228,8 +234,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       await page.getByLabel("Cerca ràpida d'aplicacions").fill(code);
 
       const inactiveListResponse = await inactiveListResponsePromise;
-      const inactivePage =
-        await expectJsonResponse<ApplicationPageResponse>(inactiveListResponse);
+      const inactivePage = await expectJsonResponse<ApplicationPageResponse>(inactiveListResponse);
       expect(inactivePage.content).toContainEqual(
         expect.objectContaining({ id: createdId, code, status: 'INACTIVE' }),
       );
@@ -282,43 +287,6 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
   }
 });
 
-function waitForApplicationResponse(
-  page: Page,
-  method: string,
-  pathname: string,
-  matchesUrl: (url: URL) => boolean = () => true,
-): Promise<Response> {
-  return page.waitForResponse(
-    (response) => {
-      const url = new URL(response.url());
-      return (
-        response.request().method() === method &&
-        url.pathname === pathname &&
-        matchesUrl(url)
-      );
-    },
-    { timeout: 30_000 },
-  );
-}
-
-async function expectJsonResponse<T>(response: Response): Promise<T> {
-  const body = await response.text();
-  expect(
-    response.ok(),
-    `${response.request().method()} ${response.url()} returned ${response.status()}: ${body}`,
-  ).toBeTruthy();
-
-  return JSON.parse(body) as T;
-}
-
-async function expectSuccessfulResponse(response: Response): Promise<void> {
-  const body = await response.text();
-  expect(
-    response.ok(),
-    `${response.request().method()} ${response.url()} returned ${response.status()}: ${body}`,
-  ).toBeTruthy();
-}
-
 function expectPositiveReferenceIds(input: ApplicationInput): void {
   for (const id of [
     input.categoryId,
@@ -332,19 +300,15 @@ function expectPositiveReferenceIds(input: ApplicationInput): void {
   }
 }
 
-async function selectOption(page: Page, inputId: string, optionName?: string): Promise<void> {
-  await page.locator(`#${inputId}`).click();
-
-  const option = optionName
-    ? page.getByRole('option', { name: optionName, exact: true })
-    : page.getByRole('option').first();
-
-  await expect(option, `No options are available for #${inputId}`).toBeVisible();
-  await option.click();
-}
-
 function applicationRow(page: Page, code: string) {
   return page.getByRole('row').filter({ hasText: code });
+}
+
+function richTextVisible(value: string | null): string {
+  return (value ?? '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .trim();
 }
 
 async function cleanupActiveApplication({
@@ -396,8 +360,4 @@ async function findActiveApplicationId(page: Page, code: string): Promise<number
 
   const body = (await response.json()) as ApplicationPageResponse;
   return body.content.find((application) => application.code === code)?.id;
-}
-
-function apiUrl(page: Page, pathname: string): string {
-  return new URL(pathname, page.url()).toString();
 }

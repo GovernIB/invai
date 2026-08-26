@@ -74,6 +74,7 @@ describe('SystemsService', () => {
         instance: ' jboss ',
         version: '7',
         statusId: 1,
+        unassignedToInformationSystemDbId: 70,
       })
       .subscribe();
     const request = http.expectOne((candidate) => candidate.url === URL);
@@ -82,11 +83,38 @@ describe('SystemsService', () => {
     expect(request.request.params.get('instance')).toBe('jboss');
     expect(request.request.params.get('version')).toBe('7');
     expect(request.request.params.get('statusId')).toBe('1');
+    expect(request.request.params.get('unassignedToInformationSystemDbId')).toBe('70');
     request.flush(page([SYSTEM]));
 
     service.getAll({ page: 1, size: 25, serverId: 4 }).subscribe();
     http.expectOne((candidate) => candidate.params.get('serverId') === '4')
       .flush(page([]));
+  });
+
+  it('separates assignable catalog cache entries by grouping id and omits an absent id', () => {
+    const params = { page: 0, size: 10, statusId: 1 as const };
+
+    service.getAll({ ...params, unassignedToInformationSystemDbId: 70 }).subscribe();
+    http
+      .expectOne(
+        (candidate) =>
+          candidate.params.get('unassignedToInformationSystemDbId') === '70',
+      )
+      .flush(page([SYSTEM]));
+
+    service.getAll({ ...params, unassignedToInformationSystemDbId: 71 }).subscribe();
+    http
+      .expectOne(
+        (candidate) =>
+          candidate.params.get('unassignedToInformationSystemDbId') === '71',
+      )
+      .flush(page([]));
+
+    service.getAll(params).subscribe();
+    const request = http.expectOne(
+      (candidate) => !candidate.params.has('unassignedToInformationSystemDbId'),
+    );
+    request.flush(page([SYSTEM]));
   });
 
   it('shares, reuses and retries cached reads', () => {

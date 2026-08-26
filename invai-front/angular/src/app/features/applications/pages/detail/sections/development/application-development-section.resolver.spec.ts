@@ -1,9 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  ActivatedRouteSnapshot,
-  convertToParamMap,
-  RouterStateSnapshot,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, convertToParamMap, RouterStateSnapshot } from '@angular/router';
 import { EnvironmentCatalogService } from '@features/environments/services/environment-catalog.service';
 import { RoleCatalogService } from '@features/roles/services/role-catalog.service';
 import { TechnologyCatalogService } from '@features/technologies/services/technology-catalog.service';
@@ -20,6 +16,8 @@ import {
 import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
 import { ApplicationProvidersService } from '../../../../services/application-providers.service';
 import { ApplicationTechnologiesService } from '../../../../services/application-technologies.service';
+import { DevelopmentModalityCatalogService } from '../../../../services/development-modality-catalog.service';
+import { DevelopmentStandardAdaptionCatalogService } from '../../../../services/development-standard-adaption-catalog.service';
 import { APPLICATION_DETAIL_RESOLVE_KEY } from '../../application-detail.resolver';
 import {
   APPLICATION_DEVELOPMENT_RESOLVE_KEY,
@@ -50,17 +48,15 @@ describe('applicationDevelopmentResolver', () => {
   let getEnvironmentOptions: ReturnType<typeof vi.fn>;
   let getRoleOptions: ReturnType<typeof vi.fn>;
   let getTechnologyOptions: ReturnType<typeof vi.fn>;
+  let getModalityOptions: ReturnType<typeof vi.fn>;
+  let getStandardAdaptionOptions: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     getDevelopment = vi.fn(() => of(DEVELOPMENT));
     getProvidersPage = vi.fn(() => of(page([])));
     getTechnologiesPage = vi.fn(() => of(page([])));
-    getEnvironmentOptions = vi.fn(() =>
-      of([{ id: 3, code: 'PRO', label: 'Producció' }]),
-    );
-    getRoleOptions = vi.fn(() =>
-      of([{ id: 4, label: 'Desenvolupament' }]),
-    );
+    getEnvironmentOptions = vi.fn(() => of([{ id: 3, code: 'PRO', label: 'Producció' }]));
+    getRoleOptions = vi.fn(() => of([{ id: 4, label: 'Desenvolupament' }]));
     getTechnologyOptions = vi.fn(() =>
       of([
         {
@@ -68,6 +64,18 @@ describe('applicationDevelopmentResolver', () => {
           label: 'Angular',
           layerId: 1,
           layerLabel: 'Frontend',
+        },
+      ]),
+    );
+    getModalityOptions = vi.fn(() =>
+      of([{ id: DevelopmentModality.INTERNAL, name: 'Intern', nameEs: 'Interno' }]),
+    );
+    getStandardAdaptionOptions = vi.fn(() =>
+      of([
+        {
+          id: DevelopmentStandardAdaption.CONFORMING,
+          name: 'Conforme',
+          nameEs: 'Conforme',
         },
       ]),
     );
@@ -93,6 +101,14 @@ describe('applicationDevelopmentResolver', () => {
         {
           provide: TechnologyCatalogService,
           useValue: { getActiveOptions: getTechnologyOptions },
+        },
+        {
+          provide: DevelopmentModalityCatalogService,
+          useValue: { getAll: getModalityOptions },
+        },
+        {
+          provide: DevelopmentStandardAdaptionCatalogService,
+          useValue: { getAll: getStandardAdaptionOptions },
         },
       ],
     });
@@ -132,15 +148,23 @@ describe('applicationDevelopmentResolver', () => {
         },
       ],
       technologyOptionsLoadFailed: false,
+      modalityOptions: [{ id: DevelopmentModality.INTERNAL, name: 'Intern', nameEs: 'Interno' }],
+      modalityOptionsLoadFailed: false,
+      standardAdaptionOptions: [
+        {
+          id: DevelopmentStandardAdaption.CONFORMING,
+          name: 'Conforme',
+          nameEs: 'Conforme',
+        },
+      ],
+      standardAdaptionOptionsLoadFailed: false,
     });
   });
 
   it('degrades failed resources independently', async () => {
     getDevelopment.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
     getProvidersPage.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
-    getRoleOptions.mockReturnValueOnce(
-      throwError(() => new Error('Unavailable')),
-    );
+    getRoleOptions.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
 
     const result = await resolve('7');
 
@@ -172,6 +196,8 @@ describe('applicationDevelopmentResolver', () => {
     expect(getEnvironmentOptions).toHaveBeenCalledOnce();
     expect(getRoleOptions).toHaveBeenCalledOnce();
     expect(getTechnologyOptions).toHaveBeenCalledOnce();
+    expect(getModalityOptions).toHaveBeenCalledOnce();
+    expect(getStandardAdaptionOptions).toHaveBeenCalledOnce();
     expect(result).toEqual(
       expect.objectContaining({
         applicationId: 7,
@@ -195,6 +221,8 @@ describe('applicationDevelopmentResolver', () => {
     expect(getEnvironmentOptions).not.toHaveBeenCalled();
     expect(getRoleOptions).not.toHaveBeenCalled();
     expect(getTechnologyOptions).not.toHaveBeenCalled();
+    expect(getModalityOptions).not.toHaveBeenCalled();
+    expect(getStandardAdaptionOptions).not.toHaveBeenCalled();
     expect(result.applicationId).toBeNull();
     expect(result.appDevelopmentId).toBeNull();
     expect(result.developmentLoadFailed).toBe(true);

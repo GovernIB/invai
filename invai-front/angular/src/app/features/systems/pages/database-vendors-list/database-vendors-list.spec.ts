@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 
 import { InfrastructureTableAction } from '../../components/infrastructure-table/infrastructure-table';
 import { DatabaseVendorsService } from '../../services/database-vendors.service';
-import { DatabaseVendor } from '../../systems.model';
+import { DatabaseVendor, InfrastructureDialogMode } from '../../systems.model';
 import { DatabaseVendorsList } from './database-vendors-list';
 
 const VENDOR: DatabaseVendor = {
@@ -17,12 +17,15 @@ const VENDOR: DatabaseVendor = {
 };
 
 interface Harness {
+  cancelEntityEdit(): void;
+  dialogMode(): InfrastructureDialogMode;
   entityForm: FormGroup;
   openCreateDialog(): void;
   onTableAction(event: {
     action: InfrastructureTableAction;
     params: Record<string, unknown>;
   }): void;
+  startEntityEdit(): void;
   submitEntity(): void;
 }
 
@@ -89,6 +92,29 @@ describe('DatabaseVendorsList', () => {
     });
 
     expect(reactivate).toHaveBeenCalledWith(VENDOR.id);
+  });
+
+  it('restores the stable vendor snapshot when edit is cancelled', () => {
+    const component = harness();
+    component.onTableAction({
+      action: InfrastructureTableAction.View,
+      params: { id: VENDOR.id, deletedAt: null },
+    });
+    component.startEntityEdit();
+    component.entityForm.setValue({ name: 'Edited vendor', defaultPort: 15499 });
+    component.entityForm.markAsDirty();
+    component.entityForm.markAllAsTouched();
+
+    component.cancelEntityEdit();
+
+    expect(component.dialogMode()).toBe('view');
+    expect(component.entityForm.getRawValue()).toEqual({
+      name: VENDOR.name,
+      defaultPort: VENDOR.defaultPort,
+    });
+    expect(component.entityForm.enabled).toBe(true);
+    expect(component.entityForm.pristine).toBe(true);
+    expect(component.entityForm.untouched).toBe(true);
   });
 
   function harness(): Harness {

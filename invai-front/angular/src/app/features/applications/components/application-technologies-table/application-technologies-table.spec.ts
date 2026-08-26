@@ -59,6 +59,7 @@ describe('ApplicationTechnologiesTable', () => {
     const emitted: ActionParams<ApplicationTechnologyOutput>[] = [];
     component.onSelectAction.subscribe((event) => emitted.push(event));
     fixture.componentRef.setInput('isReadOnly', true);
+    fixture.componentRef.setInput('showActions', false);
     fixture.detectChanges();
 
     const row = fixture.nativeElement.querySelector(
@@ -70,6 +71,17 @@ describe('ApplicationTechnologiesTable', () => {
       { action: ApplicationTechnologyTableAction.View, params: TECHNOLOGY },
     ]);
     expect(fixture.nativeElement.querySelector('.invai-table-actions-column')).toBeFalsy();
+    expect(fixture.nativeElement.querySelector('p-menu')).toBeNull();
+  });
+
+  it('keeps visible edit-mode actions disabled when mutations are unavailable', () => {
+    fixture.componentRef.setInput('isReadOnly', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(2);
+    expect(
+      (fixture.nativeElement.querySelector('tbody button') as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 
   it('shows the progress indicator without replacing existing rows', () => {

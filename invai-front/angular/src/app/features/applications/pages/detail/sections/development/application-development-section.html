@@ -57,10 +57,7 @@
       </div>
 
       <div class="application-development__field">
-        <label
-          id="application-development-modality-label"
-          for="application-development-modality"
-        >
+        <label id="application-development-modality-label" for="application-development-modality">
           {{ labels.modality }}
         </label>
         <p-select
@@ -144,10 +141,7 @@
       </div>
 
       <div class="application-development__field">
-        <label
-          id="application-development-standard-label"
-          for="application-development-standard"
-        >
+        <label id="application-development-standard-label" for="application-development-standard">
           {{ labels.standardAdaption }}
         </label>
         <p-select
@@ -162,9 +156,7 @@
               ? 'application-development-standard-error'
               : null
           "
-          [attr.aria-invalid]="
-            isInvalid(detailState.developmentForm.controls.standardAdaption)
-          "
+          [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.standardAdaption)"
           [fluid]="true"
           [options]="standardAdaptionOptions()"
         />
@@ -219,16 +211,18 @@
     <section class="application-development__resource">
       <div class="application-development__resource-header">
         <h3>{{ providerTitle }}</h3>
-        <p-button
-          type="button"
-          tooltipPosition="top"
-          [ariaLabel]="addProviderAriaLabel"
-          [disabled]="!canManageResources()"
-          [icon]="icons.PLUS"
-          [pTooltip]="addProviderAriaLabel"
-          styleClass="h-[48px] w-[48px]"
-          (onClick)="openProviderDialog()"
-        />
+        @if (showResourceActions()) {
+          <p-button
+            type="button"
+            tooltipPosition="top"
+            [ariaLabel]="addProviderAriaLabel"
+            [disabled]="!canManageResources()"
+            [icon]="icons.PLUS"
+            [pTooltip]="addProviderAriaLabel"
+            styleClass="invai-table-toolbar-button"
+            (onClick)="openProviderDialog()"
+          />
+        }
       </div>
 
       <app-application-providers-table
@@ -236,6 +230,7 @@
         [first]="providerFirst()"
         [isLoading]="isProvidersLoading()"
         [isReadOnly]="!canManageResources()"
+        [showActions]="showResourceActions()"
         [itemsList]="providers()"
         (onPageChange)="onProvidersPageChange($event)"
         (onSelectAction)="onProviderTableAction($event)"
@@ -245,16 +240,18 @@
     <section class="application-development__resource">
       <div class="application-development__resource-header">
         <h3>{{ technologyTitle }}</h3>
-        <p-button
-          type="button"
-          tooltipPosition="top"
-          [ariaLabel]="addTechnologyAriaLabel"
-          [disabled]="!canManageResources()"
-          [icon]="icons.PLUS"
-          [pTooltip]="addTechnologyAriaLabel"
-          styleClass="h-[48px] w-[48px]"
-          (onClick)="openTechnologyDialog()"
-        />
+        @if (showResourceActions()) {
+          <p-button
+            type="button"
+            tooltipPosition="top"
+            [ariaLabel]="addTechnologyAriaLabel"
+            [disabled]="!canManageResources()"
+            [icon]="icons.PLUS"
+            [pTooltip]="addTechnologyAriaLabel"
+            styleClass="invai-table-toolbar-button"
+            (onClick)="openTechnologyDialog()"
+          />
+        }
       </div>
 
       <app-application-technologies-table
@@ -262,6 +259,7 @@
         [first]="technologyFirst()"
         [isLoading]="isTechnologiesLoading()"
         [isReadOnly]="!canManageResources()"
+        [showActions]="showResourceActions()"
         [itemsList]="technologies()"
         (onPageChange)="onTechnologiesPageChange($event)"
         (onSelectAction)="onTechnologyTableAction($event)"
@@ -290,23 +288,9 @@
         id="application-development-observation"
         [formControl]="detailState.developmentForm.controls.observation"
         [attr.aria-labelledby]="'application-development-observation-label'"
-        [attr.aria-describedby]="
-          isInvalid(detailState.developmentForm.controls.observation)
-            ? 'application-development-observation-error'
-            : null
-        "
-        [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.observation)"
+        [readonly]="!detailState.isEditing('development')"
         [style]="{ height: '10rem' }"
       />
-      @if (isInvalid(detailState.developmentForm.controls.observation)) {
-        <p
-          id="application-development-observation-error"
-          class="application-development__error"
-          role="alert"
-        >
-          {{ requiredError }}
-        </p>
-      }
     </div>
   </section>
 </app-application-detail-section-layout>

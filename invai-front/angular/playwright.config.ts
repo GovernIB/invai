@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   workers: 1,
-  reporter: 'html',
+  reporter: [['line'], ['html', { open: 'never' }]],
   webServer: {
     command: 'npm run local',
     url: baseURL,

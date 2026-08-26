@@ -38,12 +38,16 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   loadDate: null,
   appInformationSystemDbId: 70,
   appDevelopmentId: 90,
+  appResponsibleAuthorizedId: 91,
 };
 
 describe('ApplicationDetail', () => {
   let fixture: ComponentFixture<ApplicationDetail>;
   let component: ApplicationDetail;
-  let breadcrumbs: { setCustomBreadcrumbs: ReturnType<typeof vi.fn>; clear: ReturnType<typeof vi.fn> };
+  let breadcrumbs: {
+    setCustomBreadcrumbs: ReturnType<typeof vi.fn>;
+    clear: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     breadcrumbs = {
@@ -104,9 +108,7 @@ describe('ApplicationDetail', () => {
       'Sistemes i BD',
       'Desenvolupament',
     ]);
-    expect(
-      fixture.nativeElement.querySelector('.application-detail-toolbar'),
-    ).toBeNull();
+    expect(fixture.nativeElement.querySelector('.application-detail-toolbar')).toBeNull();
   });
 
   it('initializes the application and breadcrumbs', () => {
@@ -192,5 +194,6 @@ function toApplication(response: ApplicationOutput): Application {
     scopeId: response.field?.id,
     administrativeUnitId: response.admUnit?.id,
     statusId: ApplicationStatus.ACTIVE,
+    appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
   };
 }

@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { CommissionType } from '@features/commissions/commissions.model';
+import { Editor } from 'primeng/editor';
 import { Select } from 'primeng/select';
+import type { EditorInitEvent } from 'primeng/types/editor';
 
 import {
   createApplicationCreateForm,
@@ -113,10 +115,77 @@ describe('ApplicationFormFields', () => {
     expectDesktopSpan(fixture, 'commission-approval-date', 3);
     expectDesktopSpan(fixture, 'commission-type', 2);
 
-    const descriptionField = fixture.nativeElement
-      .querySelector('#test-application-description')
-      .closest('.application-form-fields__field') as HTMLElement;
+    const descriptionField = fixture.debugElement.query(By.directive(Editor)).nativeElement.closest(
+      '.application-form-fields__field',
+    ) as HTMLElement;
     expect(descriptionField.classList.contains('application-form-fields__field--full')).toBe(true);
+  });
+
+  it('renders a full-width rich text editor and labels the Quill content element', () => {
+    const form = createApplicationCreateForm(formBuilder);
+    fixture.componentRef.setInput('controls', form.controls);
+    fixture.detectChanges();
+
+    const editor = fixture.debugElement.query(By.directive(Editor));
+    const root = document.createElement('div');
+    const component = fixture.componentInstance as unknown as {
+      descriptionEditorPassThrough: {
+        toolbar: Record<string, string>;
+      };
+      initializeDescriptionEditor: (event: EditorInitEvent) => void;
+    };
+
+    component.initializeDescriptionEditor({ editor: { root } });
+
+    expect(editor).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('textarea')).toBeNull();
+    expect(component.descriptionEditorPassThrough.toolbar).toEqual({
+      role: 'toolbar',
+      'aria-label': 'Description',
+    });
+    expect(root.id).toBe('test-application-description');
+    expect(root.getAttribute('role')).toBe('textbox');
+    expect(root.getAttribute('aria-multiline')).toBe('true');
+    expect(root.getAttribute('aria-labelledby')).toBe('test-application-description-label');
+  });
+
+  it('keeps the rich text editor rendered while the description is read-only', () => {
+    const form = createApplicationDetailForm(formBuilder);
+    form.controls.description.setValue('<p>Legacy <strong>description</strong></p>');
+    form.disable();
+    fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('auditControls', form.controls);
+    fixture.componentRef.setInput('descriptionReadOnly', true);
+
+    fixture.detectChanges();
+
+    const editor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+
+    expect(editor).toBeTruthy();
+    expect(editor.readonly).toBe(true);
+    expect(form.controls.description.value).toBe(
+      '<p>Legacy <strong>description</strong></p>',
+    );
+  });
+
+  it('makes the existing rich text editor editable when the detail control is enabled', () => {
+    const form = createApplicationDetailForm(formBuilder);
+    form.disable();
+    fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('auditControls', form.controls);
+    fixture.componentRef.setInput('descriptionReadOnly', true);
+    fixture.detectChanges();
+
+    const readOnlyEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+    expect(readOnlyEditor.readonly).toBe(true);
+
+    form.controls.description.enable();
+    fixture.componentRef.setInput('descriptionReadOnly', false);
+    fixture.detectChanges();
+
+    const editableEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+    expect(editableEditor).toBe(readOnlyEditor);
+    expect(editableEditor.readonly).toBe(false);
   });
 
   it('renders an accessible minimum-length error for a short application code', () => {

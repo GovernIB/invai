@@ -1,5 +1,6 @@
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CommissionType } from '@features/commissions/commissions.model';
+import { ResponsiblePersonOption } from '@features/maintenances/responsibles/responsibles.model';
 
 import { APPLICATION_CONSELLERIA_MOCK_VALUE } from '../applications.constants';
 import { ApplicationStatus } from '../applications.model';
@@ -43,7 +44,7 @@ export interface ApplicationFiltersFormControls {
   administrativeUnit: FormControl<number | null>;
   status: FormControl<ApplicationStatus | null>;
   description: FormControl<string | null>;
-  responsible: FormControl<string | null>;
+  responsible: FormControl<ResponsiblePersonOption | null>;
   database: FormControl<number | null>;
   server: FormControl<number | null>;
   environment: FormControl<number | null>;
@@ -114,7 +115,7 @@ export function createApplicationFiltersForm(formBuilder: FormBuilder): Applicat
       initialValueIsDefault: true,
     }),
     description: formBuilder.control<string | null>(null),
-    responsible: formBuilder.control<string | null>(null),
+    responsible: formBuilder.control<ResponsiblePersonOption | null>(null),
     database: formBuilder.control<number | null>(null),
     server: formBuilder.control<number | null>(null),
     environment: formBuilder.control<number | null>(null),

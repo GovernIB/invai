@@ -1,4 +1,47 @@
-<section class="responsibles-maintenance-empty" [attr.aria-label]="sectionLabel">
-  <i [class]="emptyIcon" aria-hidden="true"></i>
-  <p>{{ emptyMessage }}</p>
-</section>
+<p-accordion [value]="activePanel()" (valueChange)="onPanelChange($event)">
+  @for (panel of panels; track panel.id) {
+    <p-accordion-panel [value]="panel.id">
+      <p-accordion-header>
+        <span class="maintenance-panel-header">
+          <span class="maintenance-panel-title">{{ panel.title }}</span>
+          <span class="maintenance-panel-description">{{ panel.description }}</span>
+        </span>
+      </p-accordion-header>
+      <p-accordion-content>
+        @switch (panel.id) {
+          @case ('companies') {
+            <app-responsible-companies-list
+              [initialLoadFailed]="resolved.companiesLoadFailed"
+              [initialPage]="resolved.companiesPage"
+            />
+          }
+          @case ('people') {
+            <app-responsible-people-list
+              [initialActiveCompanyOptions]="resolved.activeCompanyOptions"
+              [initialAllCompanyOptions]="resolved.allCompanyOptions"
+              [initialCompanyOptionsLoadFailed]="
+                resolved.activeCompanyOptionsLoadFailed || resolved.allCompanyOptionsLoadFailed
+              "
+              [initialLoadFailed]="resolved.peopleLoadFailed"
+              [initialPage]="resolved.peoplePage"
+              (transferRequested)="onTransferRequested($event)"
+            />
+          }
+          @case ('authorizations') {
+            <app-responsible-authorizations-list
+              [initialLoadFailed]="resolved.authorizationsLoadFailed"
+              [initialPage]="resolved.authorizationsPage"
+            />
+          }
+          @case ('role-transfer') {
+            <app-role-transfer
+              [initialPeople]="resolved.transferPeoplePage?.content ?? []"
+              [initialPeopleLoadFailed]="resolved.transferPeopleLoadFailed"
+              [sourceRequest]="transferSourceRequest()"
+            />
+          }
+        }
+      </p-accordion-content>
+    </p-accordion-panel>
+  }
+</p-accordion>

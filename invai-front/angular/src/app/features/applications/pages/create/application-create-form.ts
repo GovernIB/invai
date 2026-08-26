@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
+import { normalizeQuillHtml } from '@shared/utils/rich-text.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { finalize } from 'rxjs';
@@ -125,7 +126,7 @@ export class ApplicationCreateForm {
       fieldId: value.scope as number,
       admUnitId: value.administrativeUnit as number,
       commissionId: value.commission as number,
-      description: value.description || null,
+      description: normalizeQuillHtml(value.description),
       statusId: APPLICATION_STATUS_ACTIVE_ID,
     };
   }

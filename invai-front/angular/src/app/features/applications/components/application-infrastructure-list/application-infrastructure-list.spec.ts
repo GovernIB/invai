@@ -89,9 +89,7 @@ describe('ApplicationInfrastructureList', () => {
     };
 
     expect(list.visibleColumns()).toEqual(columns.slice(0, 2));
-    expect(list.selectableColumns()).toContainEqual(
-      expect.objectContaining({ key: 'status' }),
-    );
+    expect(list.selectableColumns()).toContainEqual(expect.objectContaining({ key: 'status' }));
     expect(list.itemsList()).toEqual(ITEMS_LIST);
   });
 
@@ -125,17 +123,12 @@ describe('ApplicationInfrastructureList', () => {
     fixture.detectChanges();
     expect(list.visibleColumns().map(({ key }) => key)).toContain('status');
 
-    list.selectedColumns.update((selected) =>
-      selected.filter(({ key }) => key !== 'status'),
-    );
+    list.selectedColumns.update((selected) => selected.filter(({ key }) => key !== 'status'));
     fixture.componentRef.setInput('appliedStatus', null);
     fixture.detectChanges();
     expect(list.visibleColumns().map(({ key }) => key)).not.toContain('status');
 
-    fixture.componentRef.setInput(
-      'appliedStatus',
-      ApplicationInfrastructureStatus.INACTIVE,
-    );
+    fixture.componentRef.setInput('appliedStatus', ApplicationInfrastructureStatus.INACTIVE);
     fixture.detectChanges();
     expect(list.visibleColumns().map(({ key }) => key)).not.toContain('status');
   });
@@ -164,6 +157,27 @@ describe('ApplicationInfrastructureList', () => {
     expect(resets).toHaveBeenCalledOnce();
   });
 
+  it('hides mutation controls outside edit mode and keeps them disabled when unavailable', () => {
+    let actions = fixture.debugElement.query(By.directive(SectionActionsComponent));
+    let table = fixture.debugElement.query(By.directive(ApplicationInfrastructureTable));
+    expect(actions.componentInstance.hideAddButton()).toBe(false);
+    expect(table.componentInstance.showActions()).toBe(true);
+
+    fixture.componentRef.setInput('isReadOnly', true);
+    fixture.detectChanges();
+    actions = fixture.debugElement.query(By.directive(SectionActionsComponent));
+    expect(actions.componentInstance.hideAddButton()).toBe(false);
+    expect(actions.componentInstance.disableAddButton()).toBe(true);
+
+    fixture.componentRef.setInput('showActions', false);
+    fixture.detectChanges();
+    actions = fixture.debugElement.query(By.directive(SectionActionsComponent));
+    table = fixture.debugElement.query(By.directive(ApplicationInfrastructureTable));
+    expect(actions.componentInstance.hideAddButton()).toBe(true);
+    expect(table.componentInstance.showActions()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.invai-table-actions-column')).toBeNull();
+  });
+
   it('emits semantic add and row actions without mutating data', () => {
     const addRequested = vi.fn();
     const rowAction = vi.fn();
@@ -177,7 +191,7 @@ describe('ApplicationInfrastructureList', () => {
 
     list.onAdd();
     const action = {
-      action: ApplicationInfrastructureTableAction.Edit,
+      action: ApplicationInfrastructureTableAction.Delete,
       params: SERVER,
     };
     list.onTableAction(action);

@@ -51,6 +51,25 @@ describe('ApplicationInfrastructureCatalogTable', () => {
     expect(selected).toEqual([ROW, ROW]);
   });
 
+  it('renders view mode as static data without a disabled selection control', () => {
+    const selectionChange = vi.fn();
+    component.selectionChange.subscribe(selectionChange);
+    fixture.componentRef.setInput('isReadOnly', true);
+    fixture.componentRef.setInput('selection', ROW);
+    fixture.detectChanges();
+
+    const row = fixture.nativeElement.querySelector(
+      '.p-datatable-tbody > tr',
+    ) as HTMLTableRowElement;
+    row.click();
+    row.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+
+    expect(row.tabIndex).toBe(-1);
+    expect(fixture.nativeElement.querySelector('input[type="radio"]')).toBeNull();
+    expect(selectionChange).not.toHaveBeenCalled();
+    expect(row.textContent).toContain('app01.caib.es');
+  });
+
   it('uses the shared progress indicator without the PrimeNG loading mask', () => {
     fixture.componentRef.setInput('isLoading', true);
     fixture.detectChanges();

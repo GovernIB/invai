@@ -93,6 +93,14 @@ export class DatabaseMaintenanceDialog {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected onDatabaseTypeChange(
+    databaseType: DatabaseVendorCatalogOption | null,
+  ): void {
+    const portControl = this.form().controls.port;
+    portControl.setValue(databaseType?.defaultPort ?? null);
+    portControl.markAsDirty();
+  }
+
   protected onSubmit(): void {
     if (this.mode() !== 'view' && !this.isSaving()) this.submitForm.emit();
   }

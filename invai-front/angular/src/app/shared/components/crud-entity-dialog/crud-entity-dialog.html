@@ -3,7 +3,7 @@
   [closeOnEscape]="false"
   [dismissableMask]="false"
   [draggable]="false"
-  [focusOnShow]="false"
+  [focusOnShow]="true"
   [modal]="true"
   [pt]="dialogPassThrough"
   [resizable]="false"
@@ -42,16 +42,16 @@
             [outlined]="true"
             (onClick)="onRestore()"
           />
-        } @else if (mode() === 'view') {
+        } @else if (mode() === 'view' && canEdit() && viewPrimaryAction() === 'accept') {
           <p-button
             type="button"
             [ariaLabel]="ariaLabels().edit"
-            [disabled]="isBusy() || !canEdit()"
+            [disabled]="isBusy()"
             [icon]="icons.PENCIL"
             [label]="labels.edit"
             (onClick)="onEdit()"
           />
-        } @else if (mode() === 'edit') {
+        } @else if (mode() === 'edit' && showDeactivate()) {
           <p-button
             type="button"
             severity="danger"
@@ -68,13 +68,24 @@
 
       <div class="flex items-center justify-end gap-2">
         @if (mode() === 'view') {
-          <p-button
-            type="button"
-            [ariaLabel]="ariaLabels().accept"
-            [disabled]="isBusy()"
-            [label]="labels.accept"
-            (onClick)="requestClose()"
-          />
+          @if (viewPrimaryAction() === 'edit' && canEdit() && !canRestore()) {
+            <p-button
+              type="button"
+              [ariaLabel]="ariaLabels().edit"
+              [disabled]="isBusy()"
+              [icon]="icons.PENCIL"
+              [label]="labels.edit"
+              (onClick)="onEdit()"
+            />
+          } @else {
+            <p-button
+              type="button"
+              [ariaLabel]="ariaLabels().accept"
+              [disabled]="isBusy()"
+              [label]="labels.accept"
+              (onClick)="requestClose()"
+            />
+          }
         } @else {
           <p-button
             type="button"

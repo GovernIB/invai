@@ -4,6 +4,7 @@ import {
   computed,
   input,
   signal,
+  viewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { TableComponentBase } from '@shared/classes/table-component-base';
@@ -17,13 +18,11 @@ import {
   APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_ARIA_LABEL,
   APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_HEADER,
   APPLICATION_INFRASTRUCTURE_TABLE_DELETE_LABEL,
-  APPLICATION_INFRASTRUCTURE_TABLE_EDIT_LABEL,
   APPLICATION_INFRASTRUCTURE_TABLE_VIEW_LABEL,
 } from './application-infrastructure-table.i18n';
 
 export enum ApplicationInfrastructureTableAction {
   View = 1,
-  Edit,
   Delete,
 }
 
@@ -42,11 +41,12 @@ export enum ApplicationInfrastructureTableAction {
 export class ApplicationInfrastructureTable extends TableComponentBase<ApplicationInfrastructureResource> {
   first = input(0);
   isReadOnly = input(false);
+  showActions = input(true);
   private readonly selectedRow = signal<ApplicationInfrastructureResource | null>(null);
+  private readonly rowMenu = viewChild<Menu>('rowMenu');
 
   protected readonly PrimeIcons = PrimeIcons;
-  protected readonly ApplicationInfrastructureTableAction =
-    ApplicationInfrastructureTableAction;
+  protected readonly ApplicationInfrastructureTableAction = ApplicationInfrastructureTableAction;
   protected readonly actionsHeader = APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_HEADER;
   protected readonly actionsAriaLabel = APPLICATION_INFRASTRUCTURE_TABLE_ACTIONS_ARIA_LABEL;
   protected readonly rowActions = computed<MenuItem[]>(() => {
@@ -56,12 +56,6 @@ export class ApplicationInfrastructureTable extends TableComponentBase<Applicati
         label: APPLICATION_INFRASTRUCTURE_TABLE_VIEW_LABEL,
         icon: PrimeIcons.EYE,
         command: () => this.emitRowAction(ApplicationInfrastructureTableAction.View),
-      },
-      {
-        label: APPLICATION_INFRASTRUCTURE_TABLE_EDIT_LABEL,
-        icon: PrimeIcons.PENCIL,
-        disabled: isMutationDisabled,
-        command: () => this.emitRowAction(ApplicationInfrastructureTableAction.Edit),
       },
       {
         label: APPLICATION_INFRASTRUCTURE_TABLE_DELETE_LABEL,
@@ -75,10 +69,10 @@ export class ApplicationInfrastructureTable extends TableComponentBase<Applicati
   protected openActionsMenu(
     event: Event,
     row: ApplicationInfrastructureResource,
-    menu: Menu,
+    menu = this.rowMenu(),
   ): void {
     this.selectedRow.set(row);
-    menu.toggle(event);
+    menu?.toggle(event);
   }
 
   private emitRowAction(action: ApplicationInfrastructureTableAction): void {

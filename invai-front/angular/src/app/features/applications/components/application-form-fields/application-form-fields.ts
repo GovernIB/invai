@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommissionType } from '@features/commissions/commissions.model';
+import { Editor } from 'primeng/editor';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { Textarea } from 'primeng/textarea';
+import type { EditorInitEvent, EditorPassThrough } from 'primeng/types/editor';
 
 import {
   APPLICATION_ADMINISTRATIVE_UNIT_OPTIONS,
@@ -51,7 +52,7 @@ export type ApplicationAuditFormControls = Pick<
 @Component({
   selector: 'app-application-form-fields',
   standalone: true,
-  imports: [InputText, ReactiveFormsModule, Select, Textarea],
+  imports: [Editor, InputText, ReactiveFormsModule, Select],
   templateUrl: './application-form-fields.html',
   styleUrl: './application-form-fields.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +66,7 @@ export class ApplicationFormFields {
   codeMinLengthError = input<string | null>(null);
   codeMaxLengthError = input<string | null>(null);
   selectPlaceholder = input.required<string>();
+  descriptionReadOnly = input(false);
   codeControl = input<FormControl<string> | null>(null);
   auditControls = input<ApplicationAuditFormControls | null>(null);
   options = input<Partial<ApplicationSelectOptions> | null>(null);
@@ -72,6 +74,15 @@ export class ApplicationFormFields {
 
   protected readonly prefixMaxLength = APPLICATION_PREFIX_MAX_LENGTH;
   protected readonly codeMaxLength = APPLICATION_CODE_MAX_LENGTH;
+
+  protected get descriptionEditorPassThrough(): EditorPassThrough {
+    return {
+      toolbar: {
+        role: 'toolbar',
+        'aria-label': this.labels().description,
+      },
+    };
+  }
 
   protected get categoryOptions() {
     return this.options()?.categories ?? APPLICATION_CATEGORY_OPTIONS;
@@ -121,6 +132,16 @@ export class ApplicationFormFields {
 
   protected commissionTypeLabel(type: CommissionType | null): string {
     return type ? APPLICATION_COMMISSION_TYPE_LABELS[type] : '';
+  }
+
+  protected initializeDescriptionEditor({ editor }: EditorInitEvent): void {
+    const root = editor?.root as HTMLElement | undefined;
+    if (!root) return;
+
+    root.id = this.fieldId('description');
+    root.setAttribute('role', 'textbox');
+    root.setAttribute('aria-multiline', 'true');
+    root.setAttribute('aria-labelledby', this.fieldId('description-label'));
   }
 
   protected fieldId(controlName: string): string {

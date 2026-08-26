@@ -1,0 +1,30 @@
+:root {
+  --invai-table-toolbar-control-size: 40px;
+}
+
+.invai-table-toolbar-control {
+  box-sizing: border-box;
+  height: var(--invai-table-toolbar-control-size);
+}
+
+.invai-table-toolbar-square-control {
+  box-sizing: border-box;
+  flex: 0 0 var(--invai-table-toolbar-control-size);
+  width: var(--invai-table-toolbar-control-size);
+  min-width: var(--invai-table-toolbar-control-size);
+  max-width: var(--invai-table-toolbar-control-size);
+  height: var(--invai-table-toolbar-control-size);
+}
+
+.p-button.invai-table-toolbar-button {
+  box-sizing: border-box;
+  width: var(--invai-table-toolbar-control-size);
+  min-width: var(--invai-table-toolbar-control-size);
+  height: var(--invai-table-toolbar-control-size);
+  padding: 0;
+}
+
+.p-button.p-button-outlined.invai-table-toolbar-button {
+  border-color: var(--p-primary-color, var(--primary-color));
+  color: var(--p-primary-color, var(--primary-color));
+}

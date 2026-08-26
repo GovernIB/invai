@@ -1,0 +1,75 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="responsible-people-filter-company"
+        styleClass="w-full"
+        formControlName="companyId"
+        ariaLabelledBy="responsible-people-filter-company-label"
+        appendTo="body"
+        optionLabel="label"
+        optionValue="id"
+        [ariaFilterLabel]="labels().companyFilterAriaLabel"
+        [filter]="true"
+        [options]="companyOptions()"
+        [showClear]="true"
+      />
+      <label id="responsible-people-filter-company-label" for="responsible-people-filter-company">
+        {{ labels().company }}
+      </label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="responsible-people-filter-first-name"
+        class="w-full"
+        type="text"
+        formControlName="firstName"
+        pInputText
+      />
+      <label for="responsible-people-filter-first-name">{{ labels().firstName }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="responsible-people-filter-last-name"
+        class="w-full"
+        type="text"
+        formControlName="lastName"
+        pInputText
+      />
+      <label for="responsible-people-filter-last-name">{{ labels().lastName }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        id="responsible-people-filter-email"
+        class="w-full"
+        type="email"
+        formControlName="email"
+        pInputText
+      />
+      <label for="responsible-people-filter-email">{{ labels().email }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="responsible-people-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="responsible-people-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="responsible-people-filter-status-label" for="responsible-people-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

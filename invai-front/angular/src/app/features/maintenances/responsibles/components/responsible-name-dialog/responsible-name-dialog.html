@@ -1,0 +1,48 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="32rem"
+  [ariaLabels]="copy().actions"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          class="w-full"
+          type="text"
+          maxlength="100"
+          formControlName="name"
+          pInputText
+          [attr.aria-describedby]="
+            isInvalid(form().controls.name) ? idPrefix() + '-name-error' : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.name)"
+          [id]="idPrefix() + '-name'"
+          [readOnly]="mode() === 'view'"
+        />
+        <label [for]="idPrefix() + '-name'">{{ copy().name }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.name)) {
+        <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="idPrefix() + '-name-error'">
+          {{ form().controls.name.hasError('maxlength') ? nameMaxLengthError : requiredError }}
+        </p>
+      }
+    </div>
+  </form>
+</app-crud-entity-dialog>

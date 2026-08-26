@@ -1,10 +1,13 @@
 import { PrimeIcons } from 'primeng/api';
 
-import {
-  MAINTENANCES_ROUTES_LABELS,
-  MAINTENANCES_ROUTES_LOC,
-} from './maintenances.routes.i18n';
+import { MAINTENANCES_ROUTES_LABELS, MAINTENANCES_ROUTES_LOC } from './maintenances.routes.i18n';
 import { MAINTENANCE_PANEL_DESCRIPTIONS } from './maintenances.i18n';
+import {
+  RESPONSIBLE_AUTHORIZATION_COPY,
+  RESPONSIBLE_COMPANY_COPY,
+  RESPONSIBLE_PERSON_COPY,
+  ROLE_TRANSFER_COPY,
+} from './responsibles/responsibles.i18n';
 
 export interface MaintenanceTab {
   id: string;
@@ -59,6 +62,29 @@ export const DEVELOPMENT_MAINTENANCE_PANELS: MaintenancePanel[] = [
     id: 'technologies',
     title: MAINTENANCES_ROUTES_LABELS.TECHNOLOGIES,
     description: MAINTENANCE_PANEL_DESCRIPTIONS.technologies,
+  },
+];
+
+export const RESPONSIBLES_MAINTENANCE_PANELS: MaintenancePanel[] = [
+  {
+    id: 'role-transfer',
+    title: ROLE_TRANSFER_COPY.title,
+    description: ROLE_TRANSFER_COPY.description,
+  },
+  {
+    id: 'companies',
+    title: RESPONSIBLE_COMPANY_COPY.title,
+    description: RESPONSIBLE_COMPANY_COPY.description,
+  },
+  {
+    id: 'people',
+    title: RESPONSIBLE_PERSON_COPY.title,
+    description: RESPONSIBLE_PERSON_COPY.description,
+  },
+  {
+    id: 'authorizations',
+    title: RESPONSIBLE_AUTHORIZATION_COPY.title,
+    description: RESPONSIBLE_AUTHORIZATION_COPY.description,
   },
 ];
 

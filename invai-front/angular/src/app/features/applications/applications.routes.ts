@@ -20,6 +20,10 @@ import {
   APPLICATION_DEVELOPMENT_RESOLVE_KEY,
   applicationDevelopmentResolver,
 } from './pages/detail/sections/development/application-development-section.resolver';
+import {
+  APPLICATION_RESPONSIBLE_RESOLVE_KEY,
+  applicationResponsibleResolver,
+} from './pages/detail/sections/responsible/application-responsible-section.resolver';
 
 export const APPLICATIONS_ROUTES: Routes = [
   {
@@ -74,6 +78,9 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`Responsable`,
+        },
+        resolve: {
+          [APPLICATION_RESPONSIBLE_RESOLVE_KEY]: applicationResponsibleResolver,
         },
       },
       {

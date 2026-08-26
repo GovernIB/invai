@@ -16,6 +16,7 @@
     [paginator]="!isReadOnly()"
     [paginatorStyleClass]="paginatorStyleClass"
     [rowHover]="!isReadOnly()"
+    [stripedRows]="true"
     [rows]="paginatorRows"
     [rowsPerPageOptions]="rowsPerPageOptions"
     [scrollable]="true"
@@ -26,9 +27,11 @@
   >
   <ng-template let-columns pTemplate="header">
     <tr>
-      <th class="application-infrastructure-catalog-table__selection">
-        <span class="sr-only">{{ selectAriaLabel }}</span>
-      </th>
+      @if (!isReadOnly()) {
+        <th class="application-infrastructure-catalog-table__selection">
+          <span class="sr-only">{{ selectAriaLabel }}</span>
+        </th>
+      }
       @for (column of columns; track column.key) {
         <th
           [pSortableColumn]="isReadOnly() ? undefined : column.sortBy"
@@ -54,15 +57,16 @@
       (click)="select(rowData)"
       (keydown.enter)="select(rowData)"
     >
-      <td class="application-infrastructure-catalog-table__selection">
-        <input
-          type="radio"
-          [attr.aria-label]="selectAriaLabel"
-          [checked]="selection()?.id === rowData.id"
-          [disabled]="isReadOnly()"
-          (click)="$event.stopPropagation(); select(rowData)"
-        />
-      </td>
+      @if (!isReadOnly()) {
+        <td class="application-infrastructure-catalog-table__selection">
+          <input
+            type="radio"
+            [attr.aria-label]="selectAriaLabel"
+            [checked]="selection()?.id === rowData.id"
+            (click)="$event.stopPropagation(); select(rowData)"
+          />
+        </td>
+      }
       @for (column of columns; track column.key) {
         <td [style.min-width]="column.minWidth" [style.width]="column.width">
           {{ rowData[column.key] }}
@@ -73,7 +77,9 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td [attr.colspan]="columns().length + 1">{{ resultsNotFound }}</td>
+      <td [attr.colspan]="columns().length + (isReadOnly() ? 0 : 1)">
+        {{ resultsNotFound }}
+      </td>
     </tr>
   </ng-template>
   </p-table>

@@ -12,7 +12,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
-import { CrudEntityDialogMode } from '@components/crud-entity-dialog/crud-entity-dialog';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
 import { DatabasesService } from '@features/systems/services/databases.service';
 import { SystemsService } from '@features/systems/services/systems.service';
@@ -95,7 +94,6 @@ import {
   APPLICATION_SYSTEMS_DATABASES_DATABASE_DELETE_SUCCESS,
   APPLICATION_SYSTEMS_DATABASES_DATABASE_DELETE_TITLE,
   APPLICATION_SYSTEMS_DATABASES_DATABASE_SAVE_ERROR,
-  APPLICATION_SYSTEMS_DATABASES_DATABASE_UPDATE_SUCCESS,
   APPLICATION_SYSTEMS_DATABASES_DATABASE_NAME,
   APPLICATION_SYSTEMS_DATABASES_DATABASE_OPTIONS_LOAD_ERROR,
   APPLICATION_SYSTEMS_DATABASES_DATABASES_FILTERS_ARIA_LABEL,
@@ -120,7 +118,6 @@ import {
   APPLICATION_SYSTEMS_DATABASES_SERVER_DELETE_SUCCESS,
   APPLICATION_SYSTEMS_DATABASES_SERVER_DELETE_TITLE,
   APPLICATION_SYSTEMS_DATABASES_SERVER_SAVE_ERROR,
-  APPLICATION_SYSTEMS_DATABASES_SERVER_UPDATE_SUCCESS,
   APPLICATION_SYSTEMS_DATABASES_SERVER_FILTER_LABELS,
   APPLICATION_SYSTEMS_DATABASES_SERVER_NAME,
   APPLICATION_SYSTEMS_DATABASES_SERVER_OPTIONS_LOAD_ERROR,
@@ -145,6 +142,7 @@ interface UnsupportedFilterChange {
 }
 
 type InfrastructureRelationKind = 'system' | 'database';
+type InfrastructureRelationDialogMode = 'create' | 'view';
 
 interface PendingRelationDelete {
   kind: InfrastructureRelationKind;
@@ -207,14 +205,12 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected readonly detailState = inject(ApplicationDetailState);
   protected readonly sectionTitle = APPLICATION_SYSTEMS_DATABASES_SECTION_TITLE;
   protected readonly isSaving = signal(false);
-  protected readonly systemRelationForm =
-    createApplicationSystemRelationForm(this.formBuilder);
-  protected readonly databaseRelationForm =
-    createApplicationDatabaseRelationForm(this.formBuilder);
+  protected readonly systemRelationForm = createApplicationSystemRelationForm(this.formBuilder);
+  protected readonly databaseRelationForm = createApplicationDatabaseRelationForm(this.formBuilder);
   protected readonly systemDialogVisible = signal(false);
   protected readonly databaseDialogVisible = signal(false);
-  protected readonly systemDialogMode = signal<CrudEntityDialogMode>('create');
-  protected readonly databaseDialogMode = signal<CrudEntityDialogMode>('create');
+  protected readonly systemDialogMode = signal<InfrastructureRelationDialogMode>('create');
+  protected readonly databaseDialogMode = signal<InfrastructureRelationDialogMode>('create');
   protected readonly systemCatalog = signal<PaginatedList<ApplicationSystemCatalogRow>>({
     items: [],
     total: 0,
@@ -233,6 +229,16 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected readonly isDatabaseRelationSaving = signal(false);
   protected readonly deleteDialogVisible = signal(false);
   protected readonly isDeletingRelation = signal(false);
+  protected readonly canMutateInfrastructureRelations = computed(
+    () =>
+      this.detailState.isEditing('systems-databases') &&
+      this.detailState.canEdit() &&
+      this.detailState.informationSystemDbId() != null &&
+      !this.isDeletingRelation(),
+  );
+  protected readonly showInfrastructureActions = computed(
+    () => this.detailState.canEdit() && this.detailState.isEditing('systems-databases'),
+  );
   protected readonly pendingDelete = signal<PendingRelationDelete | null>(null);
   protected readonly deleteTitle = computed(() =>
     this.pendingDelete()?.kind === 'database'
@@ -340,10 +346,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     const relation = event.params as ApplicationServer;
     switch (event.action) {
       case ApplicationInfrastructureTableAction.View:
-        this.prepareSystemDialog(relation, 'view');
-        break;
-      case ApplicationInfrastructureTableAction.Edit:
-        if (this.canMutateRelation(relation)) this.prepareSystemDialog(relation, 'edit');
+        this.prepareSystemDialog(relation);
         break;
       case ApplicationInfrastructureTableAction.Delete:
         if (this.canMutateRelation(relation)) {
@@ -359,10 +362,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     const relation = event.params as ApplicationDatabase;
     switch (event.action) {
       case ApplicationInfrastructureTableAction.View:
-        this.prepareDatabaseDialog(relation, 'view');
-        break;
-      case ApplicationInfrastructureTableAction.Edit:
-        if (this.canMutateRelation(relation)) this.prepareDatabaseDialog(relation, 'edit');
+        this.prepareDatabaseDialog(relation);
         break;
       case ApplicationInfrastructureTableAction.Delete:
         if (this.canMutateRelation(relation)) {
@@ -370,37 +370,6 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
         }
         break;
     }
-  }
-
-  protected startSystemEdit(): void {
-    if (!this.selectedSystemRelation || !this.canEditRelation(this.selectedSystemRelation)) {
-      return;
-    }
-    this.systemRelationForm.enable({ emitEvent: false });
-    this.systemDialogMode.set('edit');
-    if (this.systemCatalogLoadFailed()) this.loadSystemCatalog();
-  }
-
-  protected startDatabaseEdit(): void {
-    if (
-      !this.selectedDatabaseRelation ||
-      !this.canEditRelation(this.selectedDatabaseRelation)
-    ) {
-      return;
-    }
-    this.databaseRelationForm.enable({ emitEvent: false });
-    this.databaseDialogMode.set('edit');
-    if (this.databaseCatalogLoadFailed()) this.loadDatabaseCatalog();
-  }
-
-  protected cancelSystemEdit(): void {
-    if (!this.selectedSystemRelation || this.isSystemRelationSaving()) return;
-    this.prepareSystemDialog(this.selectedSystemRelation, 'view');
-  }
-
-  protected cancelDatabaseEdit(): void {
-    if (!this.selectedDatabaseRelation || this.isDatabaseRelationSaving()) return;
-    this.prepareDatabaseDialog(this.selectedDatabaseRelation, 'view');
   }
 
   protected closeSystemDialog(): void {
@@ -418,14 +387,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected submitSystemRelation(): void {
     if (this.isSystemRelationSaving() || this.isDeletingRelation()) return;
     const mode = this.systemDialogMode();
-    if (
-      mode === 'view' ||
-      (mode === 'create' && !this.canMutateRelations()) ||
-      (mode === 'edit' &&
-        (!this.selectedSystemRelation || !this.canEditRelation(this.selectedSystemRelation)))
-    ) {
-      return;
-    }
+    if (mode === 'view' || !this.canMutateRelations()) return;
     if (this.systemRelationForm.invalid) {
       this.systemRelationForm.markAllAsTouched();
       return;
@@ -441,27 +403,20 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
       informationSystemDbId,
       systemId: this.systemRelationForm.getRawValue().system!.id,
     };
-    const request =
-      mode === 'create'
-        ? this.applicationSystemsService.create(payload)
-        : this.applicationSystemsService.update(this.selectedSystemRelation!.id, payload);
-
     this.isSystemRelationSaving.set(true);
-    request
+    this.applicationSystemsService
+      .create(payload)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isSystemRelationSaving.set(false)),
       )
       .subscribe({
         next: () => {
-          this.showSuccess(
-            mode === 'create'
-              ? APPLICATION_SYSTEMS_DATABASES_SERVER_CREATE_SUCCESS
-              : APPLICATION_SYSTEMS_DATABASES_SERVER_UPDATE_SUCCESS,
-          );
+          this.showSuccess(APPLICATION_SYSTEMS_DATABASES_SERVER_CREATE_SUCCESS);
           this.systemDialogVisible.set(false);
           this.selectedSystemRelation = null;
           this.refreshServersAfterMutation();
+          this.refreshSystemCatalogAfterMutation();
         },
         error: (error: unknown) =>
           this.handleMutationError(error, APPLICATION_SYSTEMS_DATABASES_SERVER_SAVE_ERROR),
@@ -471,14 +426,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected submitDatabaseRelation(): void {
     if (this.isDatabaseRelationSaving() || this.isDeletingRelation()) return;
     const mode = this.databaseDialogMode();
-    if (
-      mode === 'view' ||
-      (mode === 'create' && !this.canMutateRelations()) ||
-      (mode === 'edit' &&
-        (!this.selectedDatabaseRelation || !this.canEditRelation(this.selectedDatabaseRelation)))
-    ) {
-      return;
-    }
+    if (mode === 'view' || !this.canMutateRelations()) return;
     if (this.databaseRelationForm.invalid) {
       this.databaseRelationForm.markAllAsTouched();
       return;
@@ -494,46 +442,24 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
       informationSystemDbId,
       databaseId: this.databaseRelationForm.getRawValue().database!.id,
     };
-    const request =
-      mode === 'create'
-        ? this.applicationDatabasesService.create(payload)
-        : this.applicationDatabasesService.update(
-            this.selectedDatabaseRelation!.id,
-            payload,
-          );
-
     this.isDatabaseRelationSaving.set(true);
-    request
+    this.applicationDatabasesService
+      .create(payload)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isDatabaseRelationSaving.set(false)),
       )
       .subscribe({
         next: () => {
-          this.showSuccess(
-            mode === 'create'
-              ? APPLICATION_SYSTEMS_DATABASES_DATABASE_CREATE_SUCCESS
-              : APPLICATION_SYSTEMS_DATABASES_DATABASE_UPDATE_SUCCESS,
-          );
+          this.showSuccess(APPLICATION_SYSTEMS_DATABASES_DATABASE_CREATE_SUCCESS);
           this.databaseDialogVisible.set(false);
           this.selectedDatabaseRelation = null;
           this.refreshDatabasesAfterMutation();
+          this.refreshDatabaseCatalogAfterMutation();
         },
         error: (error: unknown) =>
           this.handleMutationError(error, APPLICATION_SYSTEMS_DATABASES_DATABASE_SAVE_ERROR),
       });
-  }
-
-  protected deleteSelectedSystem(): void {
-    if (this.selectedSystemRelation) {
-      this.openDeleteDialog({ kind: 'system', id: this.selectedSystemRelation.id });
-    }
-  }
-
-  protected deleteSelectedDatabase(): void {
-    if (this.selectedDatabaseRelation) {
-      this.openDeleteDialog({ kind: 'database', id: this.selectedDatabaseRelation.id });
-    }
   }
 
   protected onSystemCatalogPageChange(event: TableLazyLoadEvent): void {
@@ -577,11 +503,13 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
             this.selectedSystemRelation = null;
             this.showSuccess(APPLICATION_SYSTEMS_DATABASES_SERVER_DELETE_SUCCESS);
             this.refreshServersAfterMutation();
+            this.refreshSystemCatalogAfterMutation();
           } else {
             this.databaseDialogVisible.set(false);
             this.selectedDatabaseRelation = null;
             this.showSuccess(APPLICATION_SYSTEMS_DATABASES_DATABASE_DELETE_SUCCESS);
             this.refreshDatabasesAfterMutation();
+            this.refreshDatabaseCatalogAfterMutation();
           }
         },
         error: (error: unknown) => {
@@ -673,6 +601,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected save(): void {
     if (this.isSaving()) return;
 
+    const hadInformationSystemDbId = this.detailState.informationSystemDbId() != null;
     this.isSaving.set(true);
     this.detailState
       .save('systems-databases')
@@ -685,6 +614,10 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
             return;
           }
           if (result.status !== 'saved') return;
+          if (!hadInformationSystemDbId && this.detailState.informationSystemDbId() != null) {
+            this.refreshSystemCatalogAfterMutation();
+            this.refreshDatabaseCatalogAfterMutation();
+          }
           this.messageService.add({
             severity: 'success',
             summary: APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE,
@@ -703,52 +636,19 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
       });
   }
 
-  protected canEditSelectedSystemRelation(): boolean {
-    return (
-      this.selectedSystemRelation != null && this.canEditRelation(this.selectedSystemRelation)
-    );
-  }
-
-  protected canEditSelectedDatabaseRelation(): boolean {
-    return (
-      this.selectedDatabaseRelation != null && this.canEditRelation(this.selectedDatabaseRelation)
-    );
-  }
-
-  protected canMutateSelectedSystemRelation(): boolean {
-    return (
-      this.selectedSystemRelation != null && this.canMutateRelation(this.selectedSystemRelation)
-    );
-  }
-
-  protected canMutateSelectedDatabaseRelation(): boolean {
-    return (
-      this.selectedDatabaseRelation != null &&
-      this.canMutateRelation(this.selectedDatabaseRelation)
-    );
-  }
-
-  private prepareSystemDialog(
-    relation: ApplicationServer,
-    mode: Exclude<CrudEntityDialogMode, 'create'>,
-  ): void {
+  private prepareSystemDialog(relation: ApplicationServer): void {
     this.selectedSystemRelation = relation;
     this.systemRelationForm.enable({ emitEvent: false });
     this.systemRelationForm.reset({ system: relation.catalogItem });
-    if (mode === 'view') this.systemRelationForm.disable({ emitEvent: false });
-    this.systemDialogMode.set(mode);
+    this.systemDialogMode.set('view');
     this.systemDialogVisible.set(true);
   }
 
-  private prepareDatabaseDialog(
-    relation: ApplicationDatabase,
-    mode: Exclude<CrudEntityDialogMode, 'create'>,
-  ): void {
+  private prepareDatabaseDialog(relation: ApplicationDatabase): void {
     this.selectedDatabaseRelation = relation;
     this.databaseRelationForm.enable({ emitEvent: false });
     this.databaseRelationForm.reset({ database: relation.catalogItem });
-    if (mode === 'view') this.databaseRelationForm.disable({ emitEvent: false });
-    this.databaseDialogMode.set(mode);
+    this.databaseDialogMode.set('view');
     this.databaseDialogVisible.set(true);
   }
 
@@ -759,9 +659,12 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   }
 
   private loadSystemCatalog(): void {
+    const params = this.toCatalogPageParams(this.systemCatalogTableState);
+    if (!params) return;
+
     this.isSystemCatalogLoading.set(true);
     this.systemsService
-      .getAll(this.toCatalogPageParams(this.systemCatalogTableState))
+      .getAll(params)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isSystemCatalogLoading.set(false)),
@@ -770,9 +673,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
         next: (page) => {
           this.systemCatalogLoadFailed.set(false);
           this.systemCatalog.set({
-            items: page.content.map((system) =>
-              toApplicationSystemCatalogRow(system, this.locale),
-            ),
+            items: page.content.map((system) => toApplicationSystemCatalogRow(system, this.locale)),
             total: page.totalElements,
           });
         },
@@ -784,9 +685,12 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   }
 
   private loadDatabaseCatalog(): void {
+    const params = this.toCatalogPageParams(this.databaseCatalogTableState);
+    if (!params) return;
+
     this.isDatabaseCatalogLoading.set(true);
     this.databasesService
-      .getAll(this.toCatalogPageParams(this.databaseCatalogTableState))
+      .getAll(params)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.isDatabaseCatalogLoading.set(false)),
@@ -809,9 +713,13 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   }
 
   private toCatalogPageParams(event: TableLazyLoadEvent) {
+    const informationSystemDbId = this.detailState.informationSystemDbId();
+    if (informationSystemDbId == null) return null;
+
     return {
       ...this.toCommonPageParams(event),
       statusId: InfrastructureStatus.ACTIVE,
+      unassignedToInformationSystemDbId: informationSystemDbId,
     };
   }
 
@@ -829,22 +737,26 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     if (params) this.databasePageRequests.next(params);
   }
 
+  private refreshSystemCatalogAfterMutation(): void {
+    this.systemsService.clearCache();
+    this.systemCatalogTableState = { ...this.systemCatalogTableState, first: 0 };
+    this.systemCatalogFirst.set(0);
+    this.loadSystemCatalog();
+  }
+
+  private refreshDatabaseCatalogAfterMutation(): void {
+    this.databasesService.clearCache();
+    this.databaseCatalogTableState = { ...this.databaseCatalogTableState, first: 0 };
+    this.databaseCatalogFirst.set(0);
+    this.loadDatabaseCatalog();
+  }
+
   private canMutateRelations(): boolean {
-    return (
-      this.detailState.isEditing('systems-databases') &&
-      this.detailState.canEdit() &&
-      !this.isDeletingRelation()
-    );
+    return this.canMutateInfrastructureRelations();
   }
 
-  private canMutateRelation(
-    relation: ApplicationServer | ApplicationDatabase,
-  ): boolean {
+  private canMutateRelation(relation: ApplicationServer | ApplicationDatabase): boolean {
     return this.canMutateRelations() && !relation.deletedAt;
-  }
-
-  private canEditRelation(relation: ApplicationServer | ApplicationDatabase): boolean {
-    return this.detailState.canEdit() && !relation.deletedAt && !this.isDeletingRelation();
   }
 
   private handleMutationError(error: unknown, detail: string): void {
@@ -974,7 +886,9 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   private observeFilterCounts(): void {
     this.serverFiltersForm.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.selectedServerFilters.set(fnCountSelectedFilters(this.serverFiltersForm)));
+      .subscribe(() =>
+        this.selectedServerFilters.set(fnCountSelectedFilters(this.serverFiltersForm)),
+      );
     this.databaseFiltersForm.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() =>
@@ -988,7 +902,10 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
         control: this.serverFiltersForm.controls.environment,
         label: this.serverFilterLabels.environment,
       },
-      { control: this.serverFiltersForm.controls.instance, label: this.serverFilterLabels.instance },
+      {
+        control: this.serverFiltersForm.controls.instance,
+        label: this.serverFilterLabels.instance,
+      },
       { control: this.serverFiltersForm.controls.port, label: this.serverFilterLabels.port },
       { control: this.serverFiltersForm.controls.version, label: this.serverFilterLabels.version },
       {
@@ -999,7 +916,10 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
         control: this.databaseFiltersForm.controls.environment,
         label: this.databaseFilterLabels.environment,
       },
-      { control: this.databaseFiltersForm.controls.server, label: this.databaseFilterLabels.server },
+      {
+        control: this.databaseFiltersForm.controls.server,
+        label: this.databaseFilterLabels.server,
+      },
       {
         control: this.databaseFiltersForm.controls.version,
         label: this.databaseFilterLabels.version,
@@ -1052,7 +972,8 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     };
     const status = this.appliedServerStatus();
     if (status != null) params.statusId = status;
-    if (this.appliedServerFilters.server != null) params.systemId = this.appliedServerFilters.server;
+    if (this.appliedServerFilters.server != null)
+      params.systemId = this.appliedServerFilters.server;
     return params;
   }
 
@@ -1102,7 +1023,9 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   }
 
   private hasValue(value: unknown): boolean {
-    return typeof value === 'string' ? value.trim().length > 0 : value !== null && value !== undefined;
+    return typeof value === 'string'
+      ? value.trim().length > 0
+      : value !== null && value !== undefined;
   }
 
   private showUnsupportedSearchWarning(): void {

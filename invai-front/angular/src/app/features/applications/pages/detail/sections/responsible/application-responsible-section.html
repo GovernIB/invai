@@ -14,5 +14,195 @@
     />
   }
 
-  <app-application-responsible-form />
+  @if (!available()) {
+    <p class="m-0 text-color-secondary" role="status">{{ copy.unavailable }}</p>
+  } @else {
+    <div class="application-responsible__tables">
+      <section
+        class="application-responsible__panel"
+        aria-labelledby="application-responsibles-title"
+      >
+        <div class="application-responsible__panel-header">
+          <h4 id="application-responsibles-title">{{ copy.responsiblesTitle }}</h4>
+          <div class="application-responsible__panel-actions">
+            <p-button
+              [ariaLabel]="copy.copyResponsibles"
+              [disabled]="responsibles().items.length === 0 || copying() !== null"
+              [icon]="icons.COPY"
+              [loading]="copying() === 'responsible'"
+              [outlined]="true"
+              styleClass="invai-table-toolbar-button"
+              (onClick)="copyResponsibles()"
+            />
+            @if (canUseRowActions()) {
+              <p-button
+                [ariaLabel]="copy.addResponsible"
+                [disabled]="
+                  !canAttemptResponsibleAdd() || assignableVacantResponsibleTypes().length === 0
+                "
+                [icon]="icons.PLUS"
+                [outlined]="true"
+                [pt]="responsibleAddButtonPassThrough()"
+                styleClass="invai-table-toolbar-button"
+                (onClick)="openResponsibleDialog()"
+              />
+            }
+          </div>
+        </div>
+
+        @if (canUseRowActions() && responsibleAddBlockedByCaib()) {
+          <p
+            id="application-responsible-caib-unavailable"
+            class="mb-3 mt-0 text-sm text-color-secondary"
+            role="status"
+          >
+            {{ copy.caibOnlyResponsibilitiesUnavailable }}
+          </p>
+        }
+
+        <app-application-responsibles-table
+          [columns]="responsibleColumns"
+          [first]="responsibleFirst()"
+          [isEditing]="canUseRowActions()"
+          [isLoading]="responsiblesLoading()"
+          [itemsList]="responsibles()"
+          (onPageChange)="onResponsiblePage($event)"
+          (onSelectAction)="onResponsibleTableAction($event)"
+        />
+      </section>
+
+      <div class="application-responsible__divider" aria-hidden="true"></div>
+
+      <section
+        class="application-responsible__panel"
+        aria-labelledby="application-authorized-title"
+      >
+        <div class="application-responsible__panel-header">
+          <h4 id="application-authorized-title">{{ copy.authorizedTitle }}</h4>
+          <div class="application-responsible__panel-actions">
+            <p-button
+              [ariaLabel]="copy.copyAuthorized"
+              [disabled]="authorized().items.length === 0 || copying() !== null"
+              [icon]="icons.COPY"
+              [loading]="copying() === 'authorized'"
+              [outlined]="true"
+              styleClass="invai-table-toolbar-button"
+              (onClick)="copyAuthorized()"
+            />
+            @if (canUseRowActions()) {
+              <p-button
+                [ariaLabel]="copy.addAuthorized"
+                [disabled]="!canOpenAuthorizedDialog()"
+                [icon]="icons.PLUS"
+                [outlined]="true"
+                styleClass="invai-table-toolbar-button"
+                (onClick)="openAuthorizedDialog()"
+              />
+            }
+          </div>
+        </div>
+
+        <app-application-authorized-table
+          [columns]="authorizedColumns"
+          [first]="authorizedFirst()"
+          [isEditing]="canUseRowActions()"
+          [isLoading]="authorizedLoading()"
+          [itemsList]="authorized()"
+          (onPageChange)="onAuthorizedPage($event)"
+          (onSelectAction)="onAuthorizedTableAction($event)"
+        />
+      </section>
+    </div>
+
+    @if (responsibleDialogVisible()) {
+      <app-application-responsible-dialog
+        [(visible)]="responsibleDialogVisible"
+        [companyOptions]="responsibleDialogCompanyOptions()"
+        [companyOptionsLoadFailed]="companyOptionsLoadFailed()"
+        [form]="responsibleForm"
+        [isSaving]="responsibleDialogSaving()"
+        [mode]="responsibleDialogMode()"
+        [people]="responsibleSelectablePeople()"
+        [responsibleTypeOptions]="responsibleTypeOptions()"
+        (cancelEdit)="closeResponsibleDialog()"
+        (closed)="closeResponsibleDialog()"
+        (submitForm)="submitResponsible()"
+      />
+    }
+
+    @if (authorizedDialogVisible()) {
+      <app-application-authorized-dialog
+        [(visible)]="authorizedDialogVisible"
+        [authorizationTypeOptions]="authorizationTypeOptions()"
+        [companyOptions]="authorizedDialogCompanyOptions()"
+        [companyOptionsLoadFailed]="companyOptionsLoadFailed()"
+        [form]="authorizedForm"
+        [isSaving]="authorizedDialogSaving()"
+        [mode]="authorizedDialogMode()"
+        [people]="authorizedSelectablePeople()"
+        (cancelEdit)="closeAuthorizedDialog()"
+        (closed)="closeAuthorizedDialog()"
+        (submitForm)="submitAuthorized()"
+      />
+    }
+
+    @if (deactivateDialogVisible()) {
+      <app-confirmation-dialog
+        [(visible)]="deactivateDialogVisible"
+        [cancelAriaLabel]="copy.deactivateCancelAriaLabel"
+        [cancelLabel]="copy.deactivateCancel"
+        [cancelOnHide]="false"
+        [closeOnConfirm]="false"
+        [confirmAriaLabel]="deactivateConfirmAriaLabel()"
+        [confirmLabel]="copy.deactivateConfirm"
+        [confirmOutlined]="false"
+        [message]="deactivateMessage()"
+        [pending]="deactivatePending()"
+        severity="primary"
+        [title]="copy.deactivateTitle"
+        width="32rem"
+        (cancel)="closeDeactivateDialog()"
+        (confirm)="confirmDeactivate()"
+        (dismissed)="closeDeactivateDialog()"
+      >
+        <form
+          class="mb-2 mt-6 flex flex-col gap-2"
+          [attr.aria-busy]="deactivatePending()"
+          [formGroup]="deactivateForm"
+        >
+          <label for="application-assignment-deactivate-observation">
+            {{ copy.deactivateObservation }}
+          </label>
+          <textarea
+            id="application-assignment-deactivate-observation"
+            class="w-full"
+            [attr.aria-describedby]="
+              deactivateForm.controls.observation.invalid &&
+              deactivateForm.controls.observation.touched
+                ? 'application-assignment-deactivate-observation-error'
+                : null
+            "
+            [attr.aria-invalid]="
+              deactivateForm.controls.observation.invalid &&
+              deactivateForm.controls.observation.touched
+            "
+            formControlName="observation"
+            pTextarea
+            rows="4"
+          ></textarea>
+          @if (
+            deactivateForm.controls.observation.invalid &&
+            deactivateForm.controls.observation.touched
+          ) {
+            <p
+              id="application-assignment-deactivate-observation-error"
+              class="mb-0 mt-1 text-sm text-red-600"
+            >
+              {{ copy.deactivateObservationRequired }}
+            </p>
+          }
+        </form>
+      </app-confirmation-dialog>
+    }
+  }
 </app-application-detail-section-layout>

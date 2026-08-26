@@ -1,0 +1,184 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [showDeactivate]="false"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-form-surface-subtle invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    <div class="flex items-center gap-3 md:col-span-2">
+      <span id="application-responsible-dialog-caib-label" class="text-sm text-color-secondary">
+        {{ copy.personalCaib }}
+      </span>
+      <p-toggleswitch
+        inputId="application-responsible-dialog-caib"
+        ariaLabelledBy="application-responsible-dialog-caib-label"
+        formControlName="personalCaib"
+        [pt]="personalCaibPassThrough()"
+      />
+    </div>
+    @if (mode() === 'create') {
+      <p
+        id="application-responsible-dialog-caib-unavailable"
+        class="m-0 text-sm text-color-secondary md:col-span-2"
+      >
+        {{ copy.caibCreationUnavailable }}
+      </p>
+    }
+
+    <div>
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="application-responsible-dialog-type"
+          styleClass="w-full"
+          formControlName="responsibleTypeId"
+          [ariaLabelledBy]="typeLabelId"
+          [ariaFilterLabel]="copy.typeFilterAriaLabel"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="id"
+          optionDisabled="disabled"
+          [filter]="true"
+          [invalid]="isInvalid(form().controls.responsibleTypeId)"
+          [options]="responsibleTypeOptions()"
+          [pt]="typeSelectPassThrough()"
+        />
+        <label [id]="typeLabelId" for="application-responsible-dialog-type">
+          {{ copy.responsibilityType }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.responsibleTypeId)) {
+        <p
+          id="application-responsible-dialog-type-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    @if (form().controls.personalCaib.value) {
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="application-responsible-dialog-cargo"
+            class="w-full"
+            type="text"
+            formControlName="cargo"
+            pInputText
+          />
+          <label for="application-responsible-dialog-cargo">{{ copy.cargo }}</label>
+        </p-floatlabel>
+      </div>
+    } @else {
+      <div>
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="application-responsible-dialog-company"
+            styleClass="w-full"
+            formControlName="companyId"
+            [ariaLabelledBy]="companyLabelId"
+            [ariaFilterLabel]="copy.companyFilterAriaLabel"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [filter]="true"
+            [invalid]="isInvalid(form().controls.companyId)"
+            [options]="companyOptions()"
+            [pt]="companySelectPassThrough()"
+          />
+          <label [id]="companyLabelId" for="application-responsible-dialog-company">
+            {{ copy.company }}
+          </label>
+        </p-floatlabel>
+        @if (mode() === 'create' && companyOptionsLoadFailed()) {
+          <p
+            id="application-responsible-dialog-company-load-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ copy.companyOptionsLoadError }}
+          </p>
+        }
+        @if (isInvalid(form().controls.companyId)) {
+          <p
+            id="application-responsible-dialog-company-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    }
+
+    <div>
+      <p-floatlabel class="w-full">
+        <p-select
+          inputId="application-responsible-dialog-person"
+          styleClass="w-full"
+          formControlName="personId"
+          [ariaLabelledBy]="personLabelId"
+          [ariaFilterLabel]="copy.personFilterAriaLabel"
+          appendTo="body"
+          optionLabel="label"
+          optionValue="id"
+          [filter]="true"
+          [invalid]="isInvalid(form().controls.personId)"
+          [options]="personOptions()"
+          [pt]="personSelectPassThrough()"
+        />
+        <label [id]="personLabelId" for="application-responsible-dialog-person">
+          {{ copy.person }}
+        </label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.personId)) {
+        <p
+          id="application-responsible-dialog-person-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ requiredError }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <p-floatlabel class="w-full">
+        <input
+          id="application-responsible-dialog-email"
+          class="w-full"
+          type="email"
+          formControlName="email"
+          pInputText
+        />
+        <label for="application-responsible-dialog-email">{{ copy.email }}</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="mb-2 block" for="application-responsible-dialog-observation">
+        {{ copy.observation }}
+      </label>
+      <textarea
+        id="application-responsible-dialog-observation"
+        class="w-full"
+        rows="3"
+        formControlName="observation"
+        pTextarea
+      ></textarea>
+    </div>
+  </form>
+</app-crud-entity-dialog>

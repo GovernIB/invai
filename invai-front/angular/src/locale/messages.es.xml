@@ -18,6 +18,94 @@
           <context context-type="linenumber">2</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="3436797699546700933" datatype="html">
+        <source>Autoritzats</source>
+        <target>Autorizados</target>
+      </trans-unit>
+      <trans-unit id="7427334881102364823" datatype="html">
+        <source>Autoritzat</source>
+        <target>Autorizado</target>
+      </trans-unit>
+      <trans-unit id="8615392836348832415" datatype="html">
+        <source>No s&apos;han pogut carregar els tipus de responsable.</source>
+        <target>No se han podido cargar los tipos de responsable.</target>
+      </trans-unit>
+      <trans-unit id="5128486660347141973" datatype="html">
+        <source>No s&apos;han pogut carregar les empreses actives.</source>
+        <target>No se han podido cargar las empresas activas.</target>
+      </trans-unit>
+      <trans-unit id="1206353329194885041" datatype="html">
+        <source>No s&apos;han pogut carregar les persones actives.</source>
+        <target>No se han podido cargar las personas activas.</target>
+      </trans-unit>
+      <trans-unit id="5143376521288224761" datatype="html">
+        <source>El responsable s&apos;ha afegit correctament.</source>
+        <target>El responsable se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="2477234886222197716" datatype="html">
+        <source>No s&apos;ha pogut afegir el responsable.</source>
+        <target>No se ha podido añadir el responsable.</target>
+      </trans-unit>
+      <trans-unit id="1519749379363919621" datatype="html">
+        <source>Càrrec</source>
+        <target>Cargo</target>
+      </trans-unit>
+      <trans-unit id="1890300073702152532" datatype="html">
+        <source>E-mail</source>
+        <target>Correo electrónico</target>
+      </trans-unit>
+      <trans-unit id="7487054145135493038" datatype="html">
+        <source>Observacions (Opcional)</source>
+        <target>Observaciones (Opcional)</target>
+      </trans-unit>
+      <trans-unit id="applicationAssignmentDeactivateObservationLabel" datatype="html">
+        <source>Observacions</source>
+        <target>Observaciones</target>
+      </trans-unit>
+      <trans-unit id="applicationAssignmentDeactivateObservationRequired" datatype="html">
+        <source>Les observacions són obligatòries.</source>
+        <target>Las observaciones son obligatorias.</target>
+      </trans-unit>
+      <trans-unit id="6799530139699220805" datatype="html">
+        <source>Filtra tipus de responsable</source>
+        <target>Filtra tipos de responsable</target>
+      </trans-unit>
+      <trans-unit id="6022882526775234260" datatype="html">
+        <source>Filtra empreses disponibles</source>
+        <target>Filtra empresas disponibles</target>
+      </trans-unit>
+      <trans-unit id="8747881251814191813" datatype="html">
+        <source>Filtra persones disponibles</source>
+        <target>Filtra personas disponibles</target>
+      </trans-unit>
+      <trans-unit id="8285008426911877548" datatype="html">
+        <source>Accepta la consulta del responsable</source>
+        <target>Acepta la consulta del responsable</target>
+      </trans-unit>
+      <trans-unit id="2178713384276266261" datatype="html">
+        <source>Afegeix el responsable</source>
+        <target>Añade el responsable</target>
+      </trans-unit>
+      <trans-unit id="7225688416938384255" datatype="html">
+        <source>Cancel·la l&apos;alta del responsable</source>
+        <target>Cancelar el alta del responsable</target>
+      </trans-unit>
+      <trans-unit id="1646190683831643913" datatype="html">
+        <source>Tanca el diàleg d&apos;afegir responsable</source>
+        <target>Cierra el diálogo de añadir responsable</target>
+      </trans-unit>
+      <trans-unit id="984738855460631859" datatype="html">
+        <source>Dona de baixa el responsable</source>
+        <target>Da de baja el responsable</target>
+      </trans-unit>
+      <trans-unit id="3492689913277061182" datatype="html">
+        <source>Restaura el responsable</source>
+        <target>Restaura el responsable</target>
+      </trans-unit>
+      <trans-unit id="5943251400313210332" datatype="html">
+        <source>Desa el responsable</source>
+        <target>Guarda el responsable</target>
+      </trans-unit>
       <trans-unit id="applicationSystemsDatabasesSectionTitle" datatype="html">
         <source>Infraestructura de sistemes i bases de dades</source>
         <target>Infraestructura de sistemas y bases de datos</target>
@@ -1874,6 +1962,22 @@
           <context context-type="linenumber">7</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="4700467232389602501" datatype="html">
+        <source>No s&apos;han trobat persones actives</source>
+        <target>No se han encontrado personas activas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="43959495813283611" datatype="html">
+        <source>Cercant persones responsables…</source>
+        <target>Buscando personas responsables…</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="3932422567516820409" datatype="html">
         <source>Descripció</source>
         <target>Descripción</target>
@@ -1896,6 +2000,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
           <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8746204021217887253" datatype="html">
+        <source>No s&apos;han pogut cercar les persones responsables.</source>
+        <target>No se han podido buscar las personas responsables.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/list/applications-list.i18n.ts</context>
+          <context context-type="linenumber">20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3299542573380947817" datatype="html">
@@ -5249,6 +5361,230 @@
         <source>Confirma l&apos;eliminació de la tecnologia</source>
         <target>Confirma la eliminación de la tecnología</target>
       </trans-unit>
+      <trans-unit id="6902606735057063350" datatype="html"><source>Correcte</source><target>Correcto</target></trans-unit>
+      <trans-unit id="1456727077432700741" datatype="html"><source>Empresa</source><target>Empresa</target></trans-unit>
+      <trans-unit id="3926607342166670745" datatype="html"><source>Persona</source><target>Persona</target></trans-unit>
+      <trans-unit id="2575306951429598971" datatype="html"><source>Correu electrònic</source><target>Correo electrónico</target></trans-unit>
+      <trans-unit id="9048083143892111947" datatype="html"><source>Telèfon</source><target>Teléfono</target></trans-unit>
+      <trans-unit id="8360516569462986951" datatype="html"><source>Autorització</source><target>Autorización</target></trans-unit>
+      <trans-unit id="6894914499087971644" datatype="html"><source>Signar peticions</source><target>Firmar peticiones</target></trans-unit>
+      <trans-unit id="2471304436345174596" datatype="html"><source>Accés als logs</source><target>Acceso a los logs</target></trans-unit>
+      <trans-unit id="4849169726236356004" datatype="html"><source>Desplegament d&apos;aplicacions</source><target>Despliegue de aplicaciones</target></trans-unit>
+      <trans-unit id="5028118274487598383" datatype="html"><source>Accions del registre</source><target>Acciones del registro</target></trans-unit>
+      <trans-unit id="3111719151831259047" datatype="html"><source>El nom no pot superar els 100 caràcters.</source><target>El nombre no puede superar los 100 caracteres.</target></trans-unit>
+      <trans-unit id="2360928785955031793" datatype="html"><source>No s&apos;han pogut carregar les dades</source><target>No se han podido cargar los datos</target></trans-unit>
+      <trans-unit id="8228869498510478750" datatype="html"><source>No s&apos;ha pogut donar de baixa el registre.</source><target>No se ha podido dar de baja el registro.</target></trans-unit>
+      <trans-unit id="3540517215974608390" datatype="html"><source>No s&apos;ha pogut restaurar el registre.</source><target>No se ha podido restaurar el registro.</target></trans-unit>
+      <trans-unit id="3922341603493596843" datatype="html"><source>Empreses</source><target>Empresas</target></trans-unit>
+      <trans-unit id="2154913703372772193" datatype="html"><source>Gestiona les empreses responsables de les aplicacions per empresa.</source><target>Gestiona las empresas responsables de las aplicaciones por empresa.</target></trans-unit>
+      <trans-unit id="4612805601324796739" datatype="html"><source>Cerca empreses</source><target>Buscar empresas</target></trans-unit>
+      <trans-unit id="8652628038525442071" datatype="html"><source>Cerca ràpida d&apos;empreses</source><target>Búsqueda rápida de empresas</target></trans-unit>
+      <trans-unit id="3797244914652950876" datatype="html"><source>Afegeix una empresa</source><target>Añadir una empresa</target></trans-unit>
+      <trans-unit id="421286135259339404" datatype="html"><source>Mostra o oculta els filtres d&apos;empreses</source><target>Muestra u oculta los filtros de empresas</target></trans-unit>
+      <trans-unit id="1379736997922509216" datatype="html"><source>Selecciona les columnes d&apos;empreses</source><target>Selecciona las columnas de empresas</target></trans-unit>
+      <trans-unit id="1868791518965493598" datatype="html"><source>Consulta l&apos;empresa</source><target>Consultar la empresa</target></trans-unit>
+      <trans-unit id="3802810454448662482" datatype="html"><source>Edita l&apos;empresa</source><target>Editar la empresa</target></trans-unit>
+      <trans-unit id="7412102289594170249" datatype="html"><source>Accepta la consulta de l&apos;empresa</source><target>Acepta la consulta de la empresa</target></trans-unit>
+      <trans-unit id="8206042307777432961" datatype="html"><source>Afegeix l&apos;empresa</source><target>Añade la empresa</target></trans-unit>
+      <trans-unit id="5262125854969469941" datatype="html"><source>Cancel·la els canvis de l&apos;empresa</source><target>Cancela los cambios de la empresa</target></trans-unit>
+      <trans-unit id="8627075646510330650" datatype="html"><source>Tanca el diàleg de l&apos;empresa</source><target>Cierra el diálogo de la empresa</target></trans-unit>
+      <trans-unit id="1374569388313535441" datatype="html"><source>Dona de baixa l&apos;empresa</source><target>Da de baja la empresa</target></trans-unit>
+      <trans-unit id="7829193606317148514" datatype="html"><source>Restaura l&apos;empresa</source><target>Restaura la empresa</target></trans-unit>
+      <trans-unit id="3120044300369721396" datatype="html"><source>Desa l&apos;empresa</source><target>Guarda la empresa</target></trans-unit>
+      <trans-unit id="responsibleCompanyDeactivateCascadeMessage" datatype="html"><source>Vols donar de baixa l&apos;empresa «<x id="PH" equiv-text="name"/>»? Si l&apos;operació es completa, també es donaran de baixa les seves persones i les assignacions que tenguin a aplicacions.</source><target>¿Quieres dar de baja la empresa «<x id="PH" equiv-text="name"/>»? Si la operación se completa, también se darán de baja sus personas y las asignaciones que tengan en aplicaciones.</target></trans-unit>
+      <trans-unit id="8199515416355904221" datatype="html"><source>No s&apos;han pogut carregar les empreses.</source><target>No se han podido cargar las empresas.</target></trans-unit>
+      <trans-unit id="8223485833036963368" datatype="html"><source>No s&apos;ha pogut carregar l&apos;empresa.</source><target>No se ha podido cargar la empresa.</target></trans-unit>
+      <trans-unit id="3957421359857617229" datatype="html"><source>L&apos;empresa s&apos;ha afegit correctament.</source><target>La empresa se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="5800047601101114407" datatype="html"><source>L&apos;empresa s&apos;ha actualitzat correctament.</source><target>La empresa se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="6689428004675165755" datatype="html"><source>L&apos;empresa s&apos;ha donat de baixa correctament.</source><target>La empresa se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="719339456242814068" datatype="html"><source>L&apos;empresa s&apos;ha restaurat correctament.</source><target>La empresa se ha restaurado correctamente.</target></trans-unit>
+      <trans-unit id="8664369639130489188" datatype="html"><source>Persones</source><target>Personas</target></trans-unit>
+      <trans-unit id="8444069075180238396" datatype="html"><source>Gestiona les persones responsables de les aplicacions per empresa.</source><target>Gestiona las personas responsables de las aplicaciones por empresa.</target></trans-unit>
+      <trans-unit id="7378262360724290449" datatype="html"><source>Cerca persones</source><target>Buscar personas</target></trans-unit>
+      <trans-unit id="6746949165791107983" datatype="html"><source>Cerca ràpida de persones</source><target>Búsqueda rápida de personas</target></trans-unit>
+      <trans-unit id="617465300033200984" datatype="html"><source>Afegeix una persona</source><target>Añadir una persona</target></trans-unit>
+      <trans-unit id="3484178104380289189" datatype="html"><source>Mostra o oculta els filtres de persones</source><target>Muestra u oculta los filtros de personas</target></trans-unit>
+      <trans-unit id="2942584976170776977" datatype="html"><source>Selecciona les columnes de persones</source><target>Selecciona las columnas de personas</target></trans-unit>
+      <trans-unit id="5471450321464908824" datatype="html"><source>Filtra empreses per nom</source><target>Filtra empresas por nombre</target></trans-unit>
+      <trans-unit id="5353581369919773086" datatype="html"><source>Filtra empreses disponibles per nom</source><target>Filtra empresas disponibles por nombre</target></trans-unit>
+      <trans-unit id="5355354908089400191" datatype="html"><source>Consulta la persona</source><target>Consultar la persona</target></trans-unit>
+      <trans-unit id="1157403270575838452" datatype="html"><source>Edita la persona</source><target>Editar la persona</target></trans-unit>
+      <trans-unit id="2677486623739482181" datatype="html"><source>Accepta la consulta de la persona</source><target>Acepta la consulta de la persona</target></trans-unit>
+      <trans-unit id="7053072670010808365" datatype="html"><source>Afegeix la persona</source><target>Añade la persona</target></trans-unit>
+      <trans-unit id="4453650037448040338" datatype="html"><source>Cancel·la els canvis de la persona</source><target>Cancela los cambios de la persona</target></trans-unit>
+      <trans-unit id="1509374499417139053" datatype="html"><source>Tanca el diàleg de la persona</source><target>Cierra el diálogo de la persona</target></trans-unit>
+      <trans-unit id="3395099794339136130" datatype="html"><source>Dona de baixa la persona</source><target>Da de baja la persona</target></trans-unit>
+      <trans-unit id="6150719321732308062" datatype="html"><source>Restaura la persona</source><target>Restaura la persona</target></trans-unit>
+      <trans-unit id="5681204963948572549" datatype="html"><source>Desa la persona</source><target>Guarda la persona</target></trans-unit>
+      <trans-unit id="912884086195995271" datatype="html"><source>Introdueix una adreça de correu electrònic vàlida.</source><target>Introduce una dirección de correo electrónico válida.</target></trans-unit>
+      <trans-unit id="2793156547542676511" datatype="html"><source>El correu electrònic no pot superar els 254 caràcters.</source><target>El correo electrónico no puede superar los 254 caracteres.</target></trans-unit>
+      <trans-unit id="5405565882931515199" datatype="html"><source>Introdueix un telèfon vàlid de 7 a 20 caràcters.</source><target>Introduce un teléfono válido de 7 a 20 caracteres.</target></trans-unit>
+      <trans-unit id="4496032387806936033" datatype="html"><source>Cal restaurar o afegir una empresa activa abans d&apos;afegir persones.</source><target>Es necesario restaurar o añadir una empresa activa antes de añadir personas.</target></trans-unit>
+      <trans-unit id="4767052950450837575" datatype="html"><source>Vols donar de baixa la persona «<x id="PH" equiv-text="name"/>»?</source><target>¿Quieres dar de baja la persona «<x id="PH" equiv-text="name"/>»?</target></trans-unit>
+      <trans-unit id="7694728564474790008" datatype="html"><source>La persona «<x id="PH" equiv-text="name"/>» té responsabilitats o autoritzacions assignades a una o més aplicacions. Si continues amb la baixa, quedaran sense una persona assignada. Pots transferir-les abans de continuar.</source><target>La persona «<x id="PH" equiv-text="name"/>» tiene responsabilidades o autorizaciones asignadas a una o varias aplicaciones. Si continúas con la baja, quedarán sin una persona asignada. Puedes transferirlas antes de continuar.</target></trans-unit>
+      <trans-unit id="2725021276881571336" datatype="html"><source>Comprovant les responsabilitats i autoritzacions de la persona.</source><target>Comprobando las responsabilidades y autorizaciones de la persona.</target></trans-unit>
+      <trans-unit id="1474722882849787463" datatype="html"><source>No s&apos;han pogut comprovar les responsabilitats i autoritzacions de la persona. La baixa no s&apos;ha iniciat.</source><target>No se han podido comprobar las responsabilidades y autorizaciones de la persona. La baja no se ha iniciado.</target></trans-unit>
+      <trans-unit id="5051047847552568474" datatype="html"><source>Transfereix les responsabilitats i autoritzacions de «<x id="PH" equiv-text="name"/>»</source><target>Transfiere las responsabilidades y autorizaciones de «<x id="PH" equiv-text="name"/>»</target></trans-unit>
+      <trans-unit id="345155905045310961" datatype="html"><source>No es pot restaurar la persona perquè la seva empresa està inactiva.</source><target>No se puede restaurar la persona porque su empresa está inactiva.</target></trans-unit>
+      <trans-unit id="3660556600216264808" datatype="html"><source>No s&apos;han pogut carregar les persones.</source><target>No se han podido cargar las personas.</target></trans-unit>
+      <trans-unit id="792752851659515268" datatype="html"><source>No s&apos;ha pogut carregar la persona.</source><target>No se ha podido cargar la persona.</target></trans-unit>
+      <trans-unit id="5589533649047613299" datatype="html"><source>La persona s&apos;ha afegit correctament.</source><target>La persona se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="7989028814336383297" datatype="html"><source>La persona s&apos;ha actualitzat correctament.</source><target>La persona se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="1953412148447792779" datatype="html"><source>La persona s&apos;ha donat de baixa correctament.</source><target>La persona se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="9004899914030471542" datatype="html"><source>La persona s&apos;ha restaurat correctament.</source><target>La persona se ha restaurado correctamente.</target></trans-unit>
+      <trans-unit id="6043142783042032341" datatype="html"><source>Autoritzacions</source><target>Autorizaciones</target></trans-unit>
+      <trans-unit id="6093500905938266777" datatype="html"><source>Gestiona les autoritzacions disponibles per a les aplicacions.</source><target>Gestiona las autorizaciones disponibles para las aplicaciones.</target></trans-unit>
+      <trans-unit id="6159597630536665712" datatype="html"><source>Cerca autoritzacions</source><target>Buscar autorizaciones</target></trans-unit>
+      <trans-unit id="6798029895223498046" datatype="html"><source>Cerca ràpida d&apos;autoritzacions</source><target>Búsqueda rápida de autorizaciones</target></trans-unit>
+      <trans-unit id="6298410930321977280" datatype="html"><source>Afegeix una autorització</source><target>Añadir una autorización</target></trans-unit>
+      <trans-unit id="915884811108672366" datatype="html"><source>Mostra o oculta els filtres d&apos;autoritzacions</source><target>Muestra u oculta los filtros de autorizaciones</target></trans-unit>
+      <trans-unit id="6524920983871776732" datatype="html"><source>Selecciona les columnes d&apos;autoritzacions</source><target>Selecciona las columnas de autorizaciones</target></trans-unit>
+      <trans-unit id="6934707969267603664" datatype="html"><source>Consulta l&apos;autorització</source><target>Consultar la autorización</target></trans-unit>
+      <trans-unit id="8493332952677239627" datatype="html"><source>Edita l&apos;autorització</source><target>Editar la autorización</target></trans-unit>
+      <trans-unit id="5512864402405119592" datatype="html"><source>Accepta la consulta de l&apos;autorització</source><target>Acepta la consulta de la autorización</target></trans-unit>
+      <trans-unit id="5645332768354098187" datatype="html"><source>Afegeix l&apos;autorització</source><target>Añade la autorización</target></trans-unit>
+      <trans-unit id="8023842897683591144" datatype="html"><source>Cancel·la els canvis de l&apos;autorització</source><target>Cancela los cambios de la autorización</target></trans-unit>
+      <trans-unit id="4466925372861645920" datatype="html"><source>Tanca el diàleg de l&apos;autorització</source><target>Cierra el diálogo de la autorización</target></trans-unit>
+      <trans-unit id="4887438115792114235" datatype="html"><source>Dona de baixa l&apos;autorització</source><target>Da de baja la autorización</target></trans-unit>
+      <trans-unit id="2664820062432918132" datatype="html"><source>Restaura l&apos;autorització</source><target>Restaura la autorización</target></trans-unit>
+      <trans-unit id="8651754150591037498" datatype="html"><source>Desa l&apos;autorització</source><target>Guarda la autorización</target></trans-unit>
+      <trans-unit id="5020212929308770125" datatype="html"><source>Vols donar de baixa l&apos;autorització «<x id="PH" equiv-text="name"/>»?</source><target>¿Quieres dar de baja la autorización «<x id="PH" equiv-text="name"/>»?</target></trans-unit>
+      <trans-unit id="3337890631729433744" datatype="html"><source>No s&apos;han pogut carregar les autoritzacions.</source><target>No se han podido cargar las autorizaciones.</target></trans-unit>
+      <trans-unit id="4211838905592877319" datatype="html"><source>No s&apos;ha pogut carregar l&apos;autorització.</source><target>No se ha podido cargar la autorización.</target></trans-unit>
+      <trans-unit id="9204404144218463004" datatype="html"><source>L&apos;autorització s&apos;ha afegit correctament.</source><target>La autorización se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="8190239530345031883" datatype="html"><source>L&apos;autorització s&apos;ha actualitzat correctament.</source><target>La autorización se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="6283418661672019965" datatype="html"><source>L&apos;autorització s&apos;ha donat de baixa correctament.</source><target>La autorización se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="3324182354566209765" datatype="html"><source>L&apos;autorització s&apos;ha restaurat correctament.</source><target>La autorización se ha restaurado correctamente.</target></trans-unit>
+      <trans-unit id="1143347445059403625" datatype="html"><source>No s&apos;ha pogut carregar el catàleg de modalitats. El valor actual es manté visible.</source><target>No se ha podido cargar el catálogo de modalidades. El valor actual se mantiene visible.</target></trans-unit>
+      <trans-unit id="7932405447062808339" datatype="html"><source>No s&apos;ha pogut carregar el catàleg d&apos;adequació a estàndards. El valor actual es manté visible.</source><target>No se ha podido cargar el catálogo de adecuación a estándares. El valor actual se mantiene visible.</target></trans-unit>
+      <trans-unit id="2065413077054418845" datatype="html"><source>Autorització (català)</source><target>Autorización (catalán)</target></trans-unit>
+      <trans-unit id="7041531858366341342" datatype="html"><source>Autorització (castellà)</source><target>Autorización (castellano)</target></trans-unit>
+      <trans-unit id="5855501516267521817" datatype="html"><source>Personal CAIB</source><target>Personal CAIB</target></trans-unit>
+      <trans-unit id="applicationAssignmentCaibCreationUnavailable" datatype="html"><source>Les noves assignacions de personal CAIB no estan disponibles temporalment. Pots continuar assignant persones externes.</source><target>Las nuevas asignaciones de personal CAIB no están disponibles temporalmente. Puedes continuar asignando personas externas.</target></trans-unit>
+      <trans-unit id="applicationCaibOnlyResponsibilitiesUnavailable" datatype="html"><source>Les responsabilitats pendents requereixen personal CAIB i no es poden assignar temporalment.</source><target>Las responsabilidades pendientes requieren personal CAIB y no se pueden asignar temporalmente.</target></trans-unit>
+      <trans-unit id="1252861758097906471" datatype="html"><source>El nom no pot superar els 150 caràcters.</source><target>El nombre no puede superar los 150 caracteres.</target></trans-unit>
+      <trans-unit id="3152892636097000192" datatype="html"><source>No tens permisos per fer aquesta operació.</source><target>No tienes permisos para realizar esta operación.</target></trans-unit>
+      <trans-unit id="3224421314360027754" datatype="html"><source>No es pot restaurar perquè ja existeix un registre actiu amb les mateixes dades.</source><target>No se puede restaurar porque ya existe un registro activo con los mismos datos.</target></trans-unit>
+      <trans-unit id="2030261042698484545" datatype="html"><source>El manteniment de personal CAIB no està disponible en aquesta versió.</source><target>El mantenimiento de personal CAIB no está disponible en esta versión.</target></trans-unit>
+      <trans-unit id="93913271597235686" datatype="html"><source>Nom en català</source><target>Nombre en catalán</target></trans-unit>
+      <trans-unit id="4687268975031207564" datatype="html"><source>El nom en castellà no pot superar els 100 caràcters.</source><target>El nombre en castellano no puede superar los 100 caracteres.</target></trans-unit>
+      <trans-unit id="5603799788128307140" datatype="html"><source>Aquesta secció no està disponible per a l&apos;aplicació actual.</source><target>Esta sección no está disponible para la aplicación actual.</target></trans-unit>
+      <trans-unit id="6383716143812009634" datatype="html"><source>Persones autoritzades</source><target>Personas autorizadas</target></trans-unit>
+      <trans-unit id="8863090322590038686" datatype="html"><source>Tipus de responsable</source><target>Tipo de responsable</target></trans-unit>
+      <trans-unit id="5086891905565404867" datatype="html"><source>Tipus d&apos;autorització</source><target>Tipo de autorización</target></trans-unit>
+      <trans-unit id="2792244912284055684" datatype="html"><source>Observació de baixa</source><target>Observación de baja</target></trans-unit>
+      <trans-unit id="6754150526009536179" datatype="html"><source>L&apos;observació és opcional.</source><target>La observación es opcional.</target></trans-unit>
+      <trans-unit id="8724533241028151889" datatype="html"><source>Cerca responsables</source><target>Buscar responsables</target></trans-unit>
+      <trans-unit id="547913126976320301" datatype="html"><source>Cerca persones autoritzades</source><target>Buscar personas autorizadas</target></trans-unit>
+      <trans-unit id="3619639793612707551" datatype="html"><source>Afegeix un responsable</source><target>Añade un responsable</target></trans-unit>
+      <trans-unit id="2290051364348375911" datatype="html"><source>Afegeix una persona autoritzada</source><target>Añade una persona autorizada</target></trans-unit>
+      <trans-unit id="670592641834779354" datatype="html"><source>Edita el responsable</source><target>Edita el responsable</target></trans-unit>
+      <trans-unit id="1610883761943085981" datatype="html"><source>Consulta el responsable</source><target>Consulta el responsable</target></trans-unit>
+      <trans-unit id="1210794048048806943" datatype="html"><source>Edita la persona autoritzada</source><target>Edita la persona autorizada</target></trans-unit>
+      <trans-unit id="1035644909011521728" datatype="html"><source>Consulta la persona autoritzada</source><target>Consulta la persona autorizada</target></trans-unit>
+      <trans-unit id="983200013213651587" datatype="html"><source>Dona de baixa l&apos;assignació</source><target>Da de baja la asignación</target></trans-unit>
+      <trans-unit id="3687947787223092695" datatype="html"><source>Accions de l&apos;assignació</source><target>Acciones de la asignación</target></trans-unit>
+      <trans-unit id="1730860118985777737" datatype="html"><source>Accepta</source><target>Acepta</target></trans-unit>
+      <trans-unit id="8485561088183719726" datatype="html"><source>No s&apos;han pogut carregar els responsables.</source><target>No se han podido cargar los responsables.</target></trans-unit>
+      <trans-unit id="2126497349762096861" datatype="html"><source>No s&apos;han pogut carregar les persones autoritzades.</source><target>No se han podido cargar las personas autorizadas.</target></trans-unit>
+      <trans-unit id="517948970513534862" datatype="html"><source>No s&apos;ha pogut carregar el catàleg de persones.</source><target>No se ha podido cargar el catálogo de personas.</target></trans-unit>
+      <trans-unit id="2014499974656637125" datatype="html"><source>No s&apos;ha pogut carregar el catàleg de tipus de responsable.</source><target>No se ha podido cargar el catálogo de tipos de responsable.</target></trans-unit>
+      <trans-unit id="4081297317211677547" datatype="html"><source>No s&apos;ha pogut carregar el catàleg de tipus d&apos;autorització.</source><target>No se ha podido cargar el catálogo de tipos de autorización.</target></trans-unit>
+      <trans-unit id="5795253585064701490" datatype="html"><source>No s&apos;ha pogut completar l&apos;operació.</source><target>No se ha podido completar la operación.</target></trans-unit>
+      <trans-unit id="6957687257542367039" datatype="html"><source>L&apos;assignació s&apos;ha afegit correctament.</source><target>La asignación se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="3701564312500955495" datatype="html"><source>L&apos;assignació s&apos;ha actualitzat correctament.</source><target>La asignación se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="5489339322147679411" datatype="html"><source>L&apos;assignació s&apos;ha donat de baixa correctament.</source><target>La asignación se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="5570417433531988793" datatype="html"><source>L&apos;assignació s&apos;ha restaurat correctament.</source><target>La asignación se ha restaurado correctamente.</target></trans-unit>
+      <trans-unit id="4334458092982164707" datatype="html"><source>Responsabilitat</source><target>Responsabilidad</target></trans-unit>
+      <trans-unit id="1939357974308936418" datatype="html"><source>Càrrec / Empresa</source><target>Cargo / Empresa</target></trans-unit>
+      <trans-unit id="1900388221358300582" datatype="html"><source>Càrrec CAIB</source><target>Cargo CAIB</target></trans-unit>
+      <trans-unit id="8437536198168032925" datatype="html"><source>Copia la taula de responsables</source><target>Copia la tabla de responsables</target></trans-unit>
+      <trans-unit id="3684823199434532996" datatype="html"><source>Copia la taula de persones autoritzades</source><target>Copia la tabla de personas autorizadas</target></trans-unit>
+      <trans-unit id="3451444612339106839" datatype="html"><source>Funcionalitat no disponible</source><target>Funcionalidad no disponible</target></trans-unit>
+      <trans-unit id="635084890293708667" datatype="html"><source>Aquesta acció s&apos;implementarà en una versió posterior.</source><target>Esta acción se implementará en una versión posterior.</target></trans-unit>
+      <trans-unit id="2795156731282156019" datatype="html"><source>Taula copiada</source><target>Tabla copiada</target></trans-unit>
+      <trans-unit id="7221761934660784698" datatype="html"><source>La pàgina visible s&apos;ha copiat al porta-retalls.</source><target>La página visible se ha copiado al portapapeles.</target></trans-unit>
+      <trans-unit id="2564600695553020897" datatype="html"><source>No s&apos;ha pogut copiar la taula</source><target>No se ha podido copiar la tabla</target></trans-unit>
+      <trans-unit id="5780447643121976792" datatype="html"><source>Torna-ho a provar o revisa els permisos del navegador.</source><target>Vuelve a intentarlo o revisa los permisos del navegador.</target></trans-unit>
+      <trans-unit id="5210946321272430579" datatype="html"><source>Accions de <x id="personName" equiv-text="row.person.name"/></source><target>Acciones de <x id="personName" equiv-text="row.person.name"/></target></trans-unit>
+      <trans-unit id="388544620060851465" datatype="html"><source>Accions de <x id="itemName" equiv-text="label"/></source><target>Acciones de <x id="itemName" equiv-text="label"/></target></trans-unit>
+      <trans-unit id="5744849088281652108" datatype="html"><source>Incomplet</source><target>Incompleto</target></trans-unit>
+      <trans-unit id="6063353229006508723" datatype="html"><source>No s&apos;han pogut carregar els tipus d&apos;autorització.</source><target>No se han podido cargar los tipos de autorización.</target></trans-unit>
+      <trans-unit id="7951035674686780058" datatype="html"><source>El responsable s&apos;ha actualitzat correctament.</source><target>El responsable se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="4039838175192511804" datatype="html"><source>No s&apos;ha pogut actualitzar el responsable.</source><target>No se ha podido actualizar el responsable.</target></trans-unit>
+      <trans-unit id="4079356422381990536" datatype="html"><source>La persona autoritzada s&apos;ha afegit correctament.</source><target>La persona autorizada se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="9178305416010614024" datatype="html"><source>La persona autoritzada s&apos;ha actualitzat correctament.</source><target>La persona autorizada se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="3423926501530150797" datatype="html"><source>No s&apos;ha pogut afegir la persona autoritzada.</source><target>No se ha podido añadir la persona autorizada.</target></trans-unit>
+      <trans-unit id="2731334482216363698" datatype="html"><source>No s&apos;ha pogut actualitzar la persona autoritzada.</source><target>No se ha podido actualizar la persona autorizada.</target></trans-unit>
+      <trans-unit id="4187411163244585728" datatype="html"><source>Filtra tipus d&apos;autorització</source><target>Filtra tipos de autorización</target></trans-unit>
+      <trans-unit id="2725942142173965438" datatype="html"><source>Totes les responsabilitats estan assignades</source><target>Todas las responsabilidades están asignadas</target></trans-unit>
+      <trans-unit id="applicationAllResponsibilitiesAssignedDetail" datatype="html"><source>Dona de baixa l&apos;assignació actual i crea&apos;n una de nova si vols substituir la persona responsable.</source><target>Da de baja la asignación actual y crea una nueva si quieres sustituir a la persona responsable.</target></trans-unit>
+      <trans-unit id="3780532370075144584" datatype="html"><source>Camps no desats</source><target>Campos no guardados</target></trans-unit>
+      <trans-unit id="9195329232852450016" datatype="html"><source>El càrrec i les observacions no s&apos;han desat perquè l&apos;API actual no admet aquests camps.</source><target>El cargo y las observaciones no se han guardado porque la API actual no admite estos campos.</target></trans-unit>
+      <trans-unit id="4822694041087292712" datatype="html"><source>La responsabilitat, el càrrec i les observacions no s&apos;han desat perquè l&apos;API actual no admet aquests camps.</source><target>La responsabilidad, el cargo y las observaciones no se han guardado porque la API actual no admite estos campos.</target></trans-unit>
+      <trans-unit id="7461912240881189097" datatype="html"><source>Accepta la consulta de la persona autoritzada</source><target>Acepta la consulta de la persona autorizada</target></trans-unit>
+      <trans-unit id="3829059655563199242" datatype="html"><source>Afegeix la persona autoritzada</source><target>Añade la persona autorizada</target></trans-unit>
+      <trans-unit id="8708930637604809205" datatype="html"><source>Cancel·la els canvis de la persona autoritzada</source><target>Cancela los cambios de la persona autorizada</target></trans-unit>
+      <trans-unit id="1510287215275717556" datatype="html"><source>Tanca el diàleg de la persona autoritzada</source><target>Cierra el diálogo de la persona autorizada</target></trans-unit>
+      <trans-unit id="7921447143245796290" datatype="html"><source>Dona de baixa la persona autoritzada</source><target>Da de baja la persona autorizada</target></trans-unit>
+      <trans-unit id="7786044761087396167" datatype="html"><source>Restaura la persona autoritzada</source><target>Restaura la persona autorizada</target></trans-unit>
+      <trans-unit id="7690425192007586223" datatype="html"><source>Desa la persona autoritzada</source><target>Guarda la persona autorizada</target></trans-unit>
+      <trans-unit id="9113425022857981879" datatype="html"><source>El responsable s&apos;ha donat de baixa correctament.</source><target>El responsable se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="2023079106760577611" datatype="html"><source>La persona autoritzada s&apos;ha donat de baixa correctament.</source><target>La persona autorizada se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="6234958811010092509" datatype="html"><source>No s&apos;ha pogut donar de baixa el responsable.</source><target>No se ha podido dar de baja el responsable.</target></trans-unit>
+      <trans-unit id="6174342724723159147" datatype="html"><source>No s&apos;ha pogut donar de baixa la persona autoritzada.</source><target>No se ha podido dar de baja la persona autorizada.</target></trans-unit>
+      <trans-unit id="6577383181144206860" datatype="html"><source>Donar de baixa aquest registre?</source><target>¿Dar de baja este registro?</target></trans-unit>
+      <trans-unit id="5935641509170053843" datatype="html"><source><x id="personName" equiv-text="person"/> deixarà d&apos;estar activa en la responsabilitat de <x id="responsibilityName" equiv-text="responsibility"/>.</source><target><x id="personName" equiv-text="person"/> dejará de estar activa en la responsabilidad de <x id="responsibilityName" equiv-text="responsibility"/>.</target></trans-unit>
+      <trans-unit id="309914027234823727" datatype="html"><source><x id="personName" equiv-text="person"/> deixarà d&apos;estar autoritzada per a <x id="authorizationNames" equiv-text="authorizations"/>.</source><target><x id="personName" equiv-text="person"/> dejará de estar autorizada para <x id="authorizationNames" equiv-text="authorizations"/>.</target></trans-unit>
+      <trans-unit id="805743476321616305" datatype="html"><source>Cancel·la la baixa del registre</source><target>Cancela la baja del registro</target></trans-unit>
+      <trans-unit id="7836173388173106489" datatype="html"><source>Transferència i revocació de rols</source><target>Transferencia y revocación de roles</target></trans-unit>
+      <trans-unit id="5578932338733885060" datatype="html"><source>Transfereix o revoca les responsabilitats i autoritzacions assignades a una persona.</source><target>Transfiere o revoca las responsabilidades y autorizaciones asignadas a una persona.</target></trans-unit>
+      <trans-unit id="8593763205269916852" datatype="html"><source>Selecciona una persona d&apos;origen i prepara les assignacions que vols processar.</source><target>Selecciona una persona de origen y prepara las asignaciones que quieres procesar.</target></trans-unit>
+      <trans-unit id="6352296477082940659" datatype="html"><source>Persona d&apos;origen</source><target>Persona de origen</target></trans-unit>
+      <trans-unit id="2810835506495222622" datatype="html"><source>Persona de destinació</source><target>Persona de destino</target></trans-unit>
+      <trans-unit id="6028882144160671548" datatype="html"><source>Filtra les persones d&apos;origen per nom</source><target>Filtra las personas de origen por nombre</target></trans-unit>
+      <trans-unit id="2382216246593813097" datatype="html"><source>Filtra les persones de destinació per nom</source><target>Filtra las personas de destino por nombre</target></trans-unit>
+      <trans-unit id="4172965025082358960" datatype="html"><source>Revoca els rols</source><target>Revoca los roles</target></trans-unit>
+      <trans-unit id="1503294807326591152" datatype="html"><source>Rols assignats</source><target>Roles asignados</target></trans-unit>
+      <trans-unit id="6142216524026432534" datatype="html"><source>Rols per transferir</source><target>Roles para transferir</target></trans-unit>
+      <trans-unit id="6465597844301839033" datatype="html"><source>Rols per revocar</source><target>Roles para revocar</target></trans-unit>
+      <trans-unit id="3521634229108772350" datatype="html"><source>Responsabilitats</source><target>Responsabilidades</target></trans-unit>
+      <trans-unit id="4106799231994761562" datatype="html"><source>Responsabilitat sense tipus</source><target>Responsabilidad sin tipo</target></trans-unit>
+      <trans-unit id="2365825926511578659" datatype="html"><source>Sense autoritzacions detallades</source><target>Sin autorizaciones detalladas</target></trans-unit>
+      <trans-unit id="5649514286918765588" datatype="html"><source>No hi ha persones actives disponibles.</source><target>No hay personas activas disponibles.</target></trans-unit>
+      <trans-unit id="8892420828208818129" datatype="html"><source>Aquesta persona no té rols assignats.</source><target>Esta persona no tiene roles asignados.</target></trans-unit>
+      <trans-unit id="6866528548375921941" datatype="html"><source>Encara no has preparat cap rol.</source><target>Aún no has preparado ningún rol.</target></trans-unit>
+      <trans-unit id="8472048657277892220" datatype="html"><source>Selecciona una persona d&apos;origen per carregar-ne els rols.</source><target>Selecciona una persona de origen para cargar sus roles.</target></trans-unit>
+      <trans-unit id="4324623295517505794" datatype="html"><source>Transfereix</source><target>Transfiere</target></trans-unit>
+      <trans-unit id="4477797287362647232" datatype="html"><source>Revoca</source><target>Revoca</target></trans-unit>
+      <trans-unit id="5189093800878787719" datatype="html"><source>Transfereix els rols preparats</source><target>Transfiere los roles preparados</target></trans-unit>
+      <trans-unit id="6485884864180180633" datatype="html"><source>Revoca els rols preparats</source><target>Revoca los roles preparados</target></trans-unit>
+      <trans-unit id="328574491256870009" datatype="html"><source>Mou els rols seleccionats al lot</source><target>Mueve los roles seleccionados al lote</target></trans-unit>
+      <trans-unit id="6285523494427353415" datatype="html"><source>Mou tots els rols al lot</source><target>Mueve todos los roles al lote</target></trans-unit>
+      <trans-unit id="2095400624387460338" datatype="html"><source>Retorna els rols seleccionats a l&apos;origen</source><target>Devuelve los roles seleccionados al origen</target></trans-unit>
+      <trans-unit id="9045395765204149170" datatype="html"><source>Retorna tots els rols a l&apos;origen</source><target>Devuelve todos los roles al origen</target></trans-unit>
+      <trans-unit id="6617660944958325011" datatype="html"><source>Torna-ho a provar</source><target>Vuelve a intentarlo</target></trans-unit>
+      <trans-unit id="5416281757607698235" datatype="html"><source>No s&apos;han pogut carregar els rols de la persona.</source><target>No se han podido cargar los roles de la persona.</target></trans-unit>
+      <trans-unit id="781581303223072520" datatype="html"><source>No s&apos;han pogut comprovar els rols de la persona de destinació.</source><target>No se han podido comprobar los roles de la persona de destino.</target></trans-unit>
+      <trans-unit id="6645555412919628150" datatype="html"><source>No s&apos;ha pogut processar el lot de rols.</source><target>No se ha podido procesar el lote de roles.</target></trans-unit>
+      <trans-unit id="6911225718075076412" datatype="html"><source>Els rols s&apos;han transferit correctament.</source><target>Los roles se han transferido correctamente.</target></trans-unit>
+      <trans-unit id="4638118638310029860" datatype="html"><source>Els rols s&apos;han revocat correctament.</source><target>Los roles se han revocado correctamente.</target></trans-unit>
+      <trans-unit id="7459917681569541505" datatype="html"><source>Confirma la transferència</source><target>Confirma la transferencia</target></trans-unit>
+      <trans-unit id="2616321472627722355" datatype="html"><source>Confirma la revocació</source><target>Confirma la revocación</target></trans-unit>
+      <trans-unit id="5573371473277078765" datatype="html"><source>Descarta el lot preparat</source><target>Descarta el lote preparado</target></trans-unit>
+      <trans-unit id="8568918028070214439" datatype="html"><source>Descarta el lot</source><target>Descarta el lote</target></trans-unit>
+      <trans-unit id="3004871337639430958" datatype="html"><source>Vols transferir <x id="PH" equiv-text="count"/> assignacions de «<x id="PH_1" equiv-text="source"/>» a «<x id="PH_2" equiv-text="destination"/>»?</source><target>¿Quieres transferir <x id="PH" equiv-text="count"/> asignaciones de «<x id="PH_1" equiv-text="source"/>» a «<x id="PH_2" equiv-text="destination"/>»?</target></trans-unit>
+      <trans-unit id="3502176433705258782" datatype="html"><source>Vols revocar <x id="PH" equiv-text="count"/> assignacions de «<x id="PH_1" equiv-text="source"/>»?</source><target>¿Quieres revocar <x id="PH" equiv-text="count"/> asignaciones de «<x id="PH_1" equiv-text="source"/>»?</target></trans-unit>
+      <trans-unit id="3560248416188684793" datatype="html"><source>Si canvies a «<x id="PH" equiv-text="source"/>», es descartaran els rols que has preparat.</source><target>Si cambias a «<x id="PH" equiv-text="source"/>», se descartarán los roles que has preparado.</target></trans-unit>
+      <trans-unit id="2328986803857741546" datatype="html"><source>Mou tots els rols de l&apos;aplicació <x id="PH" equiv-text="application"/> al lot</source><target>Mueve todos los roles de la aplicación <x id="PH" equiv-text="application"/> al lote</target></trans-unit>
+      <trans-unit id="5670408763203488380" datatype="html"><source>Retorna tots els rols de l&apos;aplicació <x id="PH" equiv-text="application"/> a l&apos;origen</source><target>Devuelve todos los roles de la aplicación <x id="PH" equiv-text="application"/> al origen</target></trans-unit>
+      <trans-unit id="140998354915816119" datatype="html"><source>Mou totes les <x id="PH" equiv-text="subgroup"/> de l&apos;aplicació <x id="PH_1" equiv-text="application"/> al lot</source><target>Mueve todas las <x id="PH" equiv-text="subgroup"/> de la aplicación <x id="PH_1" equiv-text="application"/> al lote</target></trans-unit>
+      <trans-unit id="6246097461870829090" datatype="html"><source>Retorna totes les <x id="PH" equiv-text="subgroup"/> de l&apos;aplicació <x id="PH_1" equiv-text="application"/> a l&apos;origen</source><target>Devuelve todas las <x id="PH" equiv-text="subgroup"/> de la aplicación <x id="PH_1" equiv-text="application"/> al origen</target></trans-unit>
+      <trans-unit id="2291449657734423185" datatype="html"><source>Si elimines la persona d&apos;origen, es descartaran els rols que has preparat.</source><target>Si eliminas la persona de origen, se descartarán los roles que has preparado.</target></trans-unit>
+      <trans-unit id="8458865635518769355" datatype="html"><source>El lot conté <x id="PH" equiv-text="count"/> assignacions.</source><target>El lote contiene <x id="PH" equiv-text="count"/> asignaciones.</target></trans-unit>
+      <trans-unit id="382224285571054578" datatype="html"><source>Sí</source><target>Sí</target></trans-unit>
+      <trans-unit id="3542042671420335679" datatype="html"><source>No</source><target>No</target></trans-unit>
+      <trans-unit id="6204011655852970980" datatype="html"><source>Llinatges</source><target>Apellidos</target></trans-unit>
     </body>
   </file>
 </xliff>

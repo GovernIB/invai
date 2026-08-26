@@ -4,8 +4,6 @@ import {
   Application,
   ApplicationInfrastructureStatus,
   ApplicationStatus,
-  DevelopmentModality,
-  DevelopmentStandardAdaption,
   SelectOption,
 } from './applications.model';
 
@@ -189,50 +187,17 @@ export const APPLICATION_INFRASTRUCTURE_STATUS_LABELS: Record<
   [ApplicationInfrastructureStatus.INACTIVE]: $localize`Inactiu`,
 };
 
-export const APPLICATION_INFRASTRUCTURE_STATUS_OPTIONS: SelectOption<ApplicationInfrastructureStatus>[] = [
-  {
-    label: APPLICATION_INFRASTRUCTURE_STATUS_LABELS[ApplicationInfrastructureStatus.ACTIVE],
-    value: ApplicationInfrastructureStatus.ACTIVE,
-  },
-  {
-    label: APPLICATION_INFRASTRUCTURE_STATUS_LABELS[ApplicationInfrastructureStatus.INACTIVE],
-    value: ApplicationInfrastructureStatus.INACTIVE,
-  },
-];
-
-export const APPLICATION_DEVELOPMENT_MODALITY_LABELS: Record<DevelopmentModality, string> = {
-  [DevelopmentModality.INTERNAL]: $localize`Desenvolupament intern`,
-  [DevelopmentModality.EXTERNAL]: $localize`Desenvolupament extern`,
-  [DevelopmentModality.MIXED]: $localize`Desenvolupament mixt`,
-};
-
-export const APPLICATION_DEVELOPMENT_MODALITY_OPTIONS: SelectOption<DevelopmentModality>[] = [
-  DevelopmentModality.INTERNAL,
-  DevelopmentModality.EXTERNAL,
-  DevelopmentModality.MIXED,
-].map((value) => ({
-  value,
-  label: APPLICATION_DEVELOPMENT_MODALITY_LABELS[value],
-}));
-
-export const APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_LABELS: Record<
-  DevelopmentStandardAdaption,
-  string
-> = {
-  [DevelopmentStandardAdaption.CONFORMING]: $localize`Conforme`,
-  [DevelopmentStandardAdaption.PARTIALLY_CONFORMING]: $localize`Parcialment conforme`,
-  [DevelopmentStandardAdaption.NON_CONFORMING]: $localize`No conforme`,
-};
-
-export const APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_OPTIONS: SelectOption<DevelopmentStandardAdaption>[] =
+export const APPLICATION_INFRASTRUCTURE_STATUS_OPTIONS: SelectOption<ApplicationInfrastructureStatus>[] =
   [
-    DevelopmentStandardAdaption.CONFORMING,
-    DevelopmentStandardAdaption.PARTIALLY_CONFORMING,
-    DevelopmentStandardAdaption.NON_CONFORMING,
-  ].map((value) => ({
-    value,
-    label: APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_LABELS[value],
-  }));
+    {
+      label: APPLICATION_INFRASTRUCTURE_STATUS_LABELS[ApplicationInfrastructureStatus.ACTIVE],
+      value: ApplicationInfrastructureStatus.ACTIVE,
+    },
+    {
+      label: APPLICATION_INFRASTRUCTURE_STATUS_LABELS[ApplicationInfrastructureStatus.INACTIVE],
+      value: ApplicationInfrastructureStatus.INACTIVE,
+    },
+  ];
 
 export const APPLICATIONS_SEED_DATA: Application[] = [
   {
@@ -250,6 +215,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     creationDate: '19/03/2024',
     modificationDate: '19/03/2025',
     withdrawalDate: '19/03/2026',
+    appResponsibleAuthorizedId: null,
   },
   {
     id: '2',
@@ -266,6 +232,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     creationDate: '19/03/2024',
     modificationDate: '19/03/2025',
     withdrawalDate: '',
+    appResponsibleAuthorizedId: null,
   },
   {
     id: '3',
@@ -282,6 +249,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     creationDate: '19/03/2024',
     modificationDate: '19/03/2025',
     withdrawalDate: '',
+    appResponsibleAuthorizedId: null,
   },
 ];
 
@@ -302,5 +270,4 @@ export const APPLICATION_ADMINISTRATIVE_UNIT_OPTIONS: SelectOption[] = [
   { label: $localize`Direcció General`, value: 'Direcció General' },
 ];
 
-export const APPLICATION_CONSELLERIA_MOCK_VALUE =
-  $localize`Conselleria d'Educació, Universitats i Ocupació`;
+export const APPLICATION_CONSELLERIA_MOCK_VALUE = $localize`Conselleria d'Educació, Universitats i Ocupació`;

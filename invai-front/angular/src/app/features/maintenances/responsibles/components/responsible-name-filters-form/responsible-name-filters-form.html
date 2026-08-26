@@ -1,0 +1,31 @@
+<form appSearchFilterGrid [formGroup]="form()">
+  <div>
+    <p-floatlabel class="w-full">
+      <input
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+        [id]="idPrefix() + '-name'"
+      />
+      <label [for]="idPrefix() + '-name'">{{ labels().name }}</label>
+    </p-floatlabel>
+  </div>
+  <div>
+    <p-floatlabel class="w-full">
+      <p-select
+        styleClass="w-full"
+        formControlName="status"
+        [ariaLabelledBy]="idPrefix() + '-status-label'"
+        [inputId]="idPrefix() + '-status'"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label [for]="idPrefix() + '-status'" [id]="idPrefix() + '-status-label'">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

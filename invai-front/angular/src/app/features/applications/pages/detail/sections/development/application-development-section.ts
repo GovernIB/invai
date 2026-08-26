@@ -40,11 +40,8 @@ import {
   ApplicationTechnologyTableAction,
 } from '../../../../components';
 import {
-  APPLICATION_DEVELOPMENT_MODALITY_OPTIONS,
-  APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_OPTIONS,
-} from '../../../../applications.constants';
-import {
   ApplicationDevelopmentResourcePageParams,
+  DevelopmentLookupOutput,
   ApplicationProviderInput,
   ApplicationProviderOutput,
   ApplicationTechnologyInput,
@@ -85,6 +82,7 @@ import {
   APPLICATION_DEVELOPMENT_ERROR_TITLE,
   APPLICATION_DEVELOPMENT_LABELS,
   APPLICATION_DEVELOPMENT_LOAD_ERROR,
+  APPLICATION_DEVELOPMENT_MODALITIES_LOAD_ERROR,
   APPLICATION_DEVELOPMENT_PENDING_TITLE,
   APPLICATION_DEVELOPMENT_PROVIDER_COLUMNS,
   APPLICATION_DEVELOPMENT_PROVIDER_CREATE_ERROR,
@@ -117,6 +115,7 @@ import {
   APPLICATION_DEVELOPMENT_TECHNOLOGY_UPDATE_ERROR,
   APPLICATION_DEVELOPMENT_TECHNOLOGY_UPDATE_SUCCESS,
   APPLICATION_DEVELOPMENT_TECHNOLOGY_OPTIONS_LOAD_ERROR,
+  APPLICATION_DEVELOPMENT_STANDARD_ADAPTIONS_LOAD_ERROR,
   APPLICATION_DEVELOPMENT_URL_ERROR,
 } from './application-development-section.i18n';
 import {
@@ -163,27 +162,21 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected readonly labels = APPLICATION_DEVELOPMENT_LABELS;
   protected readonly providerTitle = APPLICATION_DEVELOPMENT_PROVIDER_TITLE;
   protected readonly technologyTitle = APPLICATION_DEVELOPMENT_TECHNOLOGY_TITLE;
-  protected readonly addProviderAriaLabel =
-    APPLICATION_DEVELOPMENT_ADD_PROVIDER_ARIA_LABEL;
-  protected readonly addTechnologyAriaLabel =
-    APPLICATION_DEVELOPMENT_ADD_TECHNOLOGY_ARIA_LABEL;
+  protected readonly addProviderAriaLabel = APPLICATION_DEVELOPMENT_ADD_PROVIDER_ARIA_LABEL;
+  protected readonly addTechnologyAriaLabel = APPLICATION_DEVELOPMENT_ADD_TECHNOLOGY_ARIA_LABEL;
   protected readonly providerColumns = APPLICATION_DEVELOPMENT_PROVIDER_COLUMNS;
   protected readonly technologyColumns = APPLICATION_DEVELOPMENT_TECHNOLOGY_COLUMNS;
   protected readonly documentationLabel = APPLICATION_DEVELOPMENT_DOCUMENTATION_LABEL;
-  protected readonly documentationAriaLabel =
-    APPLICATION_DEVELOPMENT_DOCUMENTATION_ARIA_LABEL;
+  protected readonly documentationAriaLabel = APPLICATION_DEVELOPMENT_DOCUMENTATION_ARIA_LABEL;
   protected readonly sourceCodeAriaLabel = APPLICATION_DEVELOPMENT_SOURCE_CODE_ARIA_LABEL;
   protected readonly requiredError = APPLICATION_DEVELOPMENT_REQUIRED_ERROR;
   protected readonly urlError = APPLICATION_DEVELOPMENT_URL_ERROR;
-  protected readonly codeMaxLengthError =
-    APPLICATION_DEVELOPMENT_CODE_MAX_LENGTH_ERROR;
+  protected readonly codeMaxLengthError = APPLICATION_DEVELOPMENT_CODE_MAX_LENGTH_ERROR;
   protected readonly dateFormat = APPLICATION_DEVELOPMENT_DATE_FORMAT;
   protected readonly datePlaceholder = APPLICATION_DEVELOPMENT_DATE_PLACEHOLDER;
   protected readonly icons = PrimeIcons;
-  protected readonly deleteDialogCancelLabel =
-    APPLICATION_DEVELOPMENT_DELETE_DIALOG_CANCEL_LABEL;
-  protected readonly deleteDialogConfirmLabel =
-    APPLICATION_DEVELOPMENT_DELETE_DIALOG_CONFIRM_LABEL;
+  protected readonly deleteDialogCancelLabel = APPLICATION_DEVELOPMENT_DELETE_DIALOG_CANCEL_LABEL;
+  protected readonly deleteDialogConfirmLabel = APPLICATION_DEVELOPMENT_DELETE_DIALOG_CONFIRM_LABEL;
   protected readonly providerDeleteDialogTitle =
     APPLICATION_DEVELOPMENT_PROVIDER_DELETE_DIALOG_TITLE;
   protected readonly providerDeleteDialogCancelAriaLabel =
@@ -202,21 +195,15 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected readonly roleOptions = signal<RoleCatalogOption[]>([]);
   protected readonly technologyOptions = signal<TechnologyCatalogOption[]>([]);
   protected readonly providerForm = createApplicationProviderForm(this.formBuilder);
-  protected readonly technologyForm =
-    createApplicationTechnologyForm(this.formBuilder);
+  protected readonly technologyForm = createApplicationTechnologyForm(this.formBuilder);
   protected readonly providerDialogVisible = signal(false);
   protected readonly technologyDialogVisible = signal(false);
   protected readonly providerDialogMode = signal<CrudEntityDialogMode>('create');
-  protected readonly technologyDialogMode =
-    signal<CrudEntityDialogMode>('create');
-  protected readonly selectedProvider =
-    signal<ApplicationProviderOutput | null>(null);
-  protected readonly selectedTechnology =
-    signal<ApplicationTechnologyOutput | null>(null);
-  protected readonly pendingProviderDelete =
-    signal<ApplicationProviderOutput | null>(null);
-  protected readonly pendingTechnologyDelete =
-    signal<ApplicationTechnologyOutput | null>(null);
+  protected readonly technologyDialogMode = signal<CrudEntityDialogMode>('create');
+  protected readonly selectedProvider = signal<ApplicationProviderOutput | null>(null);
+  protected readonly selectedTechnology = signal<ApplicationTechnologyOutput | null>(null);
+  protected readonly pendingProviderDelete = signal<ApplicationProviderOutput | null>(null);
+  protected readonly pendingTechnologyDelete = signal<ApplicationTechnologyOutput | null>(null);
   protected readonly providerDeleteDialogVisible = signal(false);
   protected readonly technologyDeleteDialogVisible = signal(false);
   protected readonly providerFirst = signal(0);
@@ -228,11 +215,10 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected readonly isTechnologySaving = signal(false);
   protected readonly isProviderDeleting = signal(false);
   protected readonly isTechnologyDeleting = signal(false);
-  protected readonly canManageResources = computed(() => {
+  protected readonly canEditResources = computed(() => {
     const appDevelopmentId = Number(this.detailState.development()?.id);
     return (
       this.detailState.canEdit() &&
-      this.detailState.isEditing('development') &&
       Number.isInteger(appDevelopmentId) &&
       appDevelopmentId > 0 &&
       !this.isSaving() &&
@@ -242,11 +228,17 @@ export class ApplicationDevelopmentSection implements OnInit {
       !this.isTechnologyDeleting()
     );
   });
+  protected readonly canManageResources = computed(
+    () => this.canEditResources() && this.detailState.isEditing('development'),
+  );
+  protected readonly showResourceActions = computed(
+    () => this.detailState.canEdit() && this.detailState.isEditing('development'),
+  );
   protected readonly providerDialogCanEdit = computed(
-    () => this.canManageResources() && !this.selectedProvider()?.deletedAt,
+    () => this.canEditResources() && !this.selectedProvider()?.deletedAt,
   );
   protected readonly technologyDialogCanEdit = computed(
-    () => this.canManageResources() && !this.selectedTechnology()?.deletedAt,
+    () => this.canEditResources() && !this.selectedTechnology()?.deletedAt,
   );
   protected readonly providerDeleteDialogMessage = computed(() =>
     APPLICATION_DEVELOPMENT_PROVIDER_DELETE_DIALOG_MESSAGE(
@@ -264,15 +256,27 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected readonly displayedTechnologyOptions = computed(() =>
     this.withSelectedTechnology(this.technologyOptions()),
   );
+  private readonly modalityCatalog = signal<DevelopmentLookupOutput<DevelopmentModality>[]>([]);
+  private readonly standardAdaptionCatalog = signal<
+    DevelopmentLookupOutput<DevelopmentStandardAdaption>[]
+  >([]);
+  protected readonly modalityOptionsLoadFailed = signal(false);
+  protected readonly standardAdaptionOptionsLoadFailed = signal(false);
   protected readonly modalityOptions = computed(() =>
     this.withCurrentLookupOption(
-      APPLICATION_DEVELOPMENT_MODALITY_OPTIONS,
+      this.modalityCatalog().map((item) => ({
+        value: item.id,
+        label: localizedName(item, this.locale),
+      })),
       this.detailState.development()?.modality,
     ),
   );
   protected readonly standardAdaptionOptions = computed(() =>
     this.withCurrentLookupOption(
-      APPLICATION_DEVELOPMENT_STANDARD_ADAPTION_OPTIONS,
+      this.standardAdaptionCatalog().map((item) => ({
+        value: item.id,
+        label: localizedName(item, this.locale),
+      })),
       this.detailState.development()?.standardAdaption,
     ),
   );
@@ -284,10 +288,7 @@ export class ApplicationDevelopmentSection implements OnInit {
     const resolvedData = this.route.snapshot.data[
       APPLICATION_DEVELOPMENT_RESOLVE_KEY
     ] as ApplicationDevelopmentResolvedData;
-    this.detailState.initializeDevelopment(
-      resolvedData.applicationId,
-      resolvedData.development,
-    );
+    this.detailState.initializeDevelopment(resolvedData.applicationId, resolvedData.development);
     this.detailState.initializeDevelopmentResources(
       {
         items: resolvedData.providersPage?.content ?? [],
@@ -301,6 +302,11 @@ export class ApplicationDevelopmentSection implements OnInit {
     this.environmentOptions.set(resolvedData.environmentOptions);
     this.roleOptions.set(resolvedData.roleOptions);
     this.technologyOptions.set(resolvedData.technologyOptions);
+    this.modalityCatalog.set(resolvedData.modalityOptions);
+    this.standardAdaptionCatalog.set(resolvedData.standardAdaptionOptions);
+    this.modalityOptionsLoadFailed.set(resolvedData.modalityOptionsLoadFailed);
+    this.standardAdaptionOptionsLoadFailed.set(resolvedData.standardAdaptionOptionsLoadFailed);
+    this.enforceUnavailableCatalogControls();
 
     if (resolvedData.developmentLoadFailed) {
       this.showError(APPLICATION_DEVELOPMENT_LOAD_ERROR);
@@ -320,10 +326,26 @@ export class ApplicationDevelopmentSection implements OnInit {
     if (resolvedData.technologyOptionsLoadFailed) {
       this.showError(APPLICATION_DEVELOPMENT_TECHNOLOGY_OPTIONS_LOAD_ERROR);
     }
+    if (resolvedData.modalityOptionsLoadFailed) {
+      this.showError(APPLICATION_DEVELOPMENT_MODALITIES_LOAD_ERROR);
+    }
+    if (resolvedData.standardAdaptionOptionsLoadFailed) {
+      this.showError(APPLICATION_DEVELOPMENT_STANDARD_ADAPTIONS_LOAD_ERROR);
+    }
   }
 
   protected startEditing(): void {
     this.detailState.startEditing('development');
+    this.enforceUnavailableCatalogControls();
+  }
+
+  private enforceUnavailableCatalogControls(): void {
+    if (this.modalityOptionsLoadFailed()) {
+      this.detailState.developmentForm.controls.modality.disable({ emitEvent: false });
+    }
+    if (this.standardAdaptionOptionsLoadFailed()) {
+      this.detailState.developmentForm.controls.standardAdaption.disable({ emitEvent: false });
+    }
   }
 
   protected cancelEditing(): void {
@@ -361,11 +383,7 @@ export class ApplicationDevelopmentSection implements OnInit {
       });
   }
 
-  protected isInvalid(control: {
-    invalid: boolean;
-    dirty: boolean;
-    touched: boolean;
-  }): boolean {
+  protected isInvalid(control: { invalid: boolean; dirty: boolean; touched: boolean }): boolean {
     return control.invalid && (control.dirty || control.touched);
   }
 
@@ -375,10 +393,7 @@ export class ApplicationDevelopmentSection implements OnInit {
     return validationErrors === null ? control.value.trim() : null;
   }
 
-  protected datePassThrough(
-    errorId: string,
-    invalid: boolean,
-  ): DatePickerPassThrough {
+  protected datePassThrough(errorId: string, invalid: boolean): DatePickerPassThrough {
     return {
       pcInputText: {
         root: {
@@ -409,12 +424,13 @@ export class ApplicationDevelopmentSection implements OnInit {
     this.loadTechnologies();
   }
 
-  protected onProviderTableAction(
-    event: ActionParams<ApplicationProviderOutput>,
-  ): void {
+  protected onProviderTableAction(event: ActionParams<ApplicationProviderOutput>): void {
     switch (event.action) {
       case ApplicationProviderTableAction.View:
-        this.openExistingProvider(event.params, 'view');
+        this.openExistingProvider(
+          event.params,
+          this.canManageResources() && !event.params.deletedAt ? 'edit' : 'view',
+        );
         break;
       case ApplicationProviderTableAction.Edit:
         if (this.canManageResources()) {
@@ -427,12 +443,13 @@ export class ApplicationDevelopmentSection implements OnInit {
     }
   }
 
-  protected onTechnologyTableAction(
-    event: ActionParams<ApplicationTechnologyOutput>,
-  ): void {
+  protected onTechnologyTableAction(event: ActionParams<ApplicationTechnologyOutput>): void {
     switch (event.action) {
       case ApplicationTechnologyTableAction.View:
-        this.openExistingTechnology(event.params, 'view');
+        this.openExistingTechnology(
+          event.params,
+          this.canManageResources() && !event.params.deletedAt ? 'edit' : 'view',
+        );
         break;
       case ApplicationTechnologyTableAction.Edit:
         if (this.canManageResources()) {
@@ -465,7 +482,7 @@ export class ApplicationDevelopmentSection implements OnInit {
       this.providerDialogMode() !== 'view' ||
       !provider ||
       provider.deletedAt ||
-      !this.canManageResources()
+      !this.ensureDevelopmentEditing()
     ) {
       return;
     }
@@ -475,11 +492,7 @@ export class ApplicationDevelopmentSection implements OnInit {
 
   protected cancelProviderEdit(): void {
     const provider = this.selectedProvider();
-    if (
-      this.providerDialogMode() !== 'edit' ||
-      !provider ||
-      this.isProviderSaving()
-    ) {
+    if (this.providerDialogMode() !== 'edit' || !provider || this.isProviderSaving()) {
       return;
     }
     this.prepareProviderForm(provider, 'view');
@@ -532,10 +545,7 @@ export class ApplicationDevelopmentSection implements OnInit {
         },
         error: (error: unknown) => {
           this.pendingProviderDelete.set(null);
-          this.handleMutationError(
-            error,
-            APPLICATION_DEVELOPMENT_PROVIDER_DELETE_ERROR,
-          );
+          this.handleMutationError(error, APPLICATION_DEVELOPMENT_PROVIDER_DELETE_ERROR);
         },
       });
   }
@@ -600,7 +610,7 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected openTechnologyDialog(): void {
     if (!this.canManageResources()) return;
     this.selectedTechnology.set(null);
-    this.prepareTechnologyForm(null, 'create');
+    this.prepareTechnologyForm(null);
     this.technologyDialogMode.set('create');
     this.technologyDialogVisible.set(true);
   }
@@ -617,24 +627,19 @@ export class ApplicationDevelopmentSection implements OnInit {
       this.technologyDialogMode() !== 'view' ||
       !technology ||
       technology.deletedAt ||
-      !this.canManageResources()
+      !this.ensureDevelopmentEditing()
     ) {
       return;
     }
-    this.technologyForm.enable({ emitEvent: false });
     this.technologyDialogMode.set('edit');
   }
 
   protected cancelTechnologyEdit(): void {
     const technology = this.selectedTechnology();
-    if (
-      this.technologyDialogMode() !== 'edit' ||
-      !technology ||
-      this.isTechnologySaving()
-    ) {
+    if (this.technologyDialogMode() !== 'edit' || !technology || this.isTechnologySaving()) {
       return;
     }
-    this.prepareTechnologyForm(technology, 'view');
+    this.prepareTechnologyForm(technology);
     this.technologyDialogMode.set('view');
   }
 
@@ -660,11 +665,7 @@ export class ApplicationDevelopmentSection implements OnInit {
 
   protected confirmTechnologyDelete(): void {
     const technology = this.pendingTechnologyDelete();
-    if (
-      !technology ||
-      !this.canManageResources() ||
-      this.isTechnologyDeleting()
-    ) {
+    if (!technology || !this.canManageResources() || this.isTechnologyDeleting()) {
       return;
     }
 
@@ -688,10 +689,7 @@ export class ApplicationDevelopmentSection implements OnInit {
         },
         error: (error: unknown) => {
           this.pendingTechnologyDelete.set(null);
-          this.handleMutationError(
-            error,
-            APPLICATION_DEVELOPMENT_TECHNOLOGY_DELETE_ERROR,
-          );
+          this.handleMutationError(error, APPLICATION_DEVELOPMENT_TECHNOLOGY_DELETE_ERROR);
         },
       });
   }
@@ -757,10 +755,7 @@ export class ApplicationDevelopmentSection implements OnInit {
     provider: ApplicationProviderOutput,
     mode: Exclude<CrudEntityDialogMode, 'create'>,
   ): void {
-    if (
-      mode === 'edit' &&
-      (provider.deletedAt || !this.canManageResources())
-    ) {
+    if (mode === 'edit' && (provider.deletedAt || !this.canManageResources())) {
       return;
     }
     this.selectedProvider.set(provider);
@@ -769,18 +764,25 @@ export class ApplicationDevelopmentSection implements OnInit {
     this.providerDialogVisible.set(true);
   }
 
+  private ensureDevelopmentEditing(): boolean {
+    if (!this.canEditResources()) return false;
+
+    if (!this.detailState.isEditing('development')) {
+      this.detailState.startEditing('development');
+    }
+
+    return this.canManageResources();
+  }
+
   private openExistingTechnology(
     technology: ApplicationTechnologyOutput,
     mode: Exclude<CrudEntityDialogMode, 'create'>,
   ): void {
-    if (
-      mode === 'edit' &&
-      (technology.deletedAt || !this.canManageResources())
-    ) {
+    if (mode === 'edit' && (technology.deletedAt || !this.canManageResources())) {
       return;
     }
     this.selectedTechnology.set(technology);
-    this.prepareTechnologyForm(technology, mode);
+    this.prepareTechnologyForm(technology);
     this.technologyDialogMode.set(mode);
     this.technologyDialogVisible.set(true);
   }
@@ -802,11 +804,7 @@ export class ApplicationDevelopmentSection implements OnInit {
     if (mode === 'view') this.providerForm.disable({ emitEvent: false });
   }
 
-  private prepareTechnologyForm(
-    technology: ApplicationTechnologyOutput | null,
-    mode: CrudEntityDialogMode,
-  ): void {
-    this.technologyForm.enable({ emitEvent: false });
+  private prepareTechnologyForm(technology: ApplicationTechnologyOutput | null): void {
     this.technologyForm.reset(
       {
         layerId: technology?.layer?.id ?? null,
@@ -816,7 +814,6 @@ export class ApplicationDevelopmentSection implements OnInit {
       },
       { emitEvent: false },
     );
-    if (mode === 'view') this.technologyForm.disable({ emitEvent: false });
   }
 
   private loadProviders(): void {
@@ -879,19 +876,14 @@ export class ApplicationDevelopmentSection implements OnInit {
     this.loadTechnologies();
   }
 
-  private toPageParams(
-    event: TableLazyLoadEvent,
-  ): ApplicationDevelopmentResourcePageParams | null {
+  private toPageParams(event: TableLazyLoadEvent): ApplicationDevelopmentResourcePageParams | null {
     const appDevelopmentId = Number(this.detailState.development()?.id);
     if (!Number.isInteger(appDevelopmentId) || appDevelopmentId <= 0) return null;
 
     const first = event.first ?? 0;
     const size = event.rows ?? PAGINATOR_ROWS;
-    const sortField = Array.isArray(event.sortField)
-      ? event.sortField[0]
-      : event.sortField;
-    const direction =
-      event.sortOrder === -1 ? 'desc' : event.sortOrder === 1 ? 'asc' : null;
+    const sortField = Array.isArray(event.sortField) ? event.sortField[0] : event.sortField;
+    const direction = event.sortOrder === -1 ? 'desc' : event.sortOrder === 1 ? 'asc' : null;
 
     return {
       appDevelopmentId,
@@ -901,9 +893,7 @@ export class ApplicationDevelopmentSection implements OnInit {
     };
   }
 
-  private withCurrentEnvironment(
-    options: EnvironmentCatalogOption[],
-  ): EnvironmentCatalogOption[] {
+  private withCurrentEnvironment(options: EnvironmentCatalogOption[]): EnvironmentCatalogOption[] {
     const current = this.detailState.development()?.environment;
     if (!current || options.some((option) => option.id === current.id)) return options;
 
@@ -917,13 +907,9 @@ export class ApplicationDevelopmentSection implements OnInit {
     ];
   }
 
-  private withCurrentLookupOption<
-    TId extends DevelopmentModality | DevelopmentStandardAdaption,
-  >(
+  private withCurrentLookupOption<TId extends DevelopmentModality | DevelopmentStandardAdaption>(
     options: SelectOption<TId>[],
-    current:
-      | { id: TId; name: string | null; nameEs: string | null }
-      | undefined,
+    current: { id: TId; name: string | null; nameEs: string | null } | undefined,
   ): SelectOption<TId>[] {
     if (!current || options.some((option) => option.value === current.id)) {
       return options;
@@ -946,9 +932,7 @@ export class ApplicationDevelopmentSection implements OnInit {
     });
   }
 
-  private withSelectedRole(
-    options: RoleCatalogOption[],
-  ): RoleCatalogOption[] {
+  private withSelectedRole(options: RoleCatalogOption[]): RoleCatalogOption[] {
     const current = this.selectedProvider()?.role;
     if (!current || options.some((option) => option.id === current.id)) {
       return options;
@@ -958,25 +942,15 @@ export class ApplicationDevelopmentSection implements OnInit {
       ...options,
       {
         id: current.id,
-        label: localizedName(
-          current,
-          this.locale,
-          current.name?.trim() || `#${current.id}`,
-        ),
+        label: localizedName(current, this.locale, current.name?.trim() || `#${current.id}`),
       },
     ];
   }
 
-  private withSelectedTechnology(
-    options: TechnologyCatalogOption[],
-  ): TechnologyCatalogOption[] {
+  private withSelectedTechnology(options: TechnologyCatalogOption[]): TechnologyCatalogOption[] {
     const current = this.selectedTechnology();
     const technology = current?.technology;
-    if (
-      !current ||
-      !technology ||
-      options.some((option) => option.id === technology.id)
-    ) {
+    if (!current || !technology || options.some((option) => option.id === technology.id)) {
       return options;
     }
 

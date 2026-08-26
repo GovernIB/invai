@@ -117,6 +117,7 @@ export interface SystemPageParams extends InfrastructurePageParams {
   serverId?: number;
   instance?: string;
   version?: string;
+  unassignedToInformationSystemDbId?: number;
 }
 
 export interface DatabasePageParams extends InfrastructurePageParams {
@@ -124,6 +125,7 @@ export interface DatabasePageParams extends InfrastructurePageParams {
   service?: string;
   databaseTypeId?: number;
   search?: string;
+  unassignedToInformationSystemDbId?: number;
 }
 
 export interface DatabaseVendorPageParams extends InfrastructurePageParams {

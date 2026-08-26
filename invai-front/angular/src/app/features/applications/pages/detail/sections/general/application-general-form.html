@@ -3,6 +3,7 @@
     idPrefix="detail-application"
     [controls]="form().controls"
     [auditControls]="form().controls"
+    [descriptionReadOnly]="isReadOnly()"
     [labels]="labels"
     [options]="options()"
     [prefixMaxLengthError]="prefixMaxLengthError"

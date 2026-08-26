@@ -300,13 +300,20 @@
     </div>
   }
 
-  <div class="application-form-fields__field application-form-fields__field--full">
-    <label [for]="fieldId('description')">{{ labels().description }}</label>
-    <textarea
-      [id]="fieldId('description')"
-      rows="4"
-      pTextarea
+  <div
+    class="application-form-fields__field application-form-fields__field--full"
+    role="group"
+    [attr.aria-labelledby]="fieldId('description-label')"
+  >
+    <label [id]="fieldId('description-label')" [for]="fieldId('description')">
+      {{ labels().description }}
+    </label>
+    <p-editor
       [formControl]="controls().description"
-    ></textarea>
+      [pt]="descriptionEditorPassThrough"
+      [readonly]="descriptionReadOnly()"
+      [style]="{ height: '10rem' }"
+      (onInit)="initializeDescriptionEditor($event)"
+    />
   </div>
 </div>
