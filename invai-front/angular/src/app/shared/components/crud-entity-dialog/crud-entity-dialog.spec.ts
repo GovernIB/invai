@@ -25,6 +25,19 @@ describe('CrudEntityDialog', () => {
     await TestBed.configureTestingModule({ imports: [CrudEntityDialog] }).compileComponents();
   });
 
+  it('distinguishes save from add without changing their submission output', () => {
+    const fixture = createFixture('create');
+    const submit = vi.fn();
+    fixture.componentInstance.submitForm.subscribe(submit);
+    expect(buttonByLabel(fixture, 'Afegir').icon).toBe('pi pi-plus');
+    buttonByLabel(fixture, 'Afegir').onClick.emit(new MouseEvent('click'));
+    fixture.componentRef.setInput('mode', 'edit');
+    fixture.detectChanges();
+    expect(buttonByLabel(fixture, 'Desar').icon).toBe('pi pi-save');
+    buttonByLabel(fixture, 'Desar').onClick.emit(new MouseEvent('click'));
+    expect(submit).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     { mode: 'view' as const, canRestore: false, labels: ['Editar', 'Acceptar'] },
     { mode: 'view' as const, canRestore: true, labels: ['Restaurar', 'Acceptar'] },
@@ -40,7 +53,7 @@ describe('CrudEntityDialog', () => {
     expect(buttonLabels(fixture)).toEqual(labels);
 
     if (mode === 'view') {
-      expect(buttonByLabel(fixture, 'Acceptar').icon).toBeUndefined();
+      expect(buttonByLabel(fixture, 'Acceptar').icon).toBe('pi pi-check');
     }
   });
 

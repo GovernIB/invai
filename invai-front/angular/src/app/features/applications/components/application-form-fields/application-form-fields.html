@@ -8,6 +8,8 @@
       type="text"
       pInputText
       [formControl]="controls().application"
+      [readOnly]="isReadOnly()"
+      [class.invai-form-readonly-control]="isReadOnly()"
       [attr.aria-invalid]="isInvalid(controls().application)"
       [attr.aria-describedby]="
         isInvalid(controls().application) ? errorId('application') : null
@@ -26,6 +28,11 @@
     <label [id]="fieldId('category-label')" [for]="fieldId('category')">
       {{ labels().category }}
     </label>
+    @if (isReadOnly()) {
+      <p class="invai-form-static-value" [attr.aria-labelledby]="fieldId('category-label')">
+        {{ optionLabel(categoryOptions, controls().category.value) }}
+      </p>
+    } @else {
     <p-select
       [inputId]="fieldId('category')"
       [formControl]="controls().category"
@@ -39,6 +46,7 @@
       optionLabel="label"
       optionValue="value"
     />
+    }
     @if (isInvalid(controls().category)) {
       <small [id]="errorId('category')" class="application-form-fields__error">
         {{ requiredError() }}
@@ -52,6 +60,11 @@
     <label [id]="fieldId('information-system-label')" [for]="fieldId('information-system')">
       {{ labels().informationSystem }}
     </label>
+    @if (isReadOnly()) {
+      <p class="invai-form-static-value" [attr.aria-labelledby]="fieldId('information-system-label')">
+        {{ optionLabel(informationSystemOptions, controls().informationSystem.value) }}
+      </p>
+    } @else {
     <p-select
       [inputId]="fieldId('information-system')"
       [formControl]="controls().informationSystem"
@@ -67,6 +80,7 @@
       optionLabel="label"
       optionValue="value"
     />
+    }
     @if (isInvalid(controls().informationSystem)) {
       <small [id]="errorId('information-system')" class="application-form-fields__error">
         {{ requiredError() }}
@@ -80,6 +94,11 @@
     <label [id]="fieldId('scope-label')" [for]="fieldId('scope')">
       {{ labels().scope }}
     </label>
+    @if (isReadOnly()) {
+      <p class="invai-form-static-value" [attr.aria-labelledby]="fieldId('scope-label')">
+        {{ optionLabel(scopeOptions, controls().scope.value) }}
+      </p>
+    } @else {
     <p-select
       [inputId]="fieldId('scope')"
       [formControl]="controls().scope"
@@ -93,6 +112,7 @@
       optionLabel="label"
       optionValue="value"
     />
+    }
     @if (isInvalid(controls().scope)) {
       <small [id]="errorId('scope')" class="application-form-fields__error">
         {{ requiredError() }}
@@ -109,6 +129,8 @@
       type="text"
       pInputText
       [formControl]="controls().prefix"
+      [readOnly]="isReadOnly()"
+      [class.invai-form-readonly-control]="isReadOnly()"
       [attr.maxlength]="prefixMaxLength"
       [attr.aria-invalid]="isInvalid(controls().prefix)"
       [attr.aria-describedby]="isInvalid(controls().prefix) ? errorId('prefix') : null"
@@ -130,6 +152,8 @@
         type="text"
         pInputText
         [formControl]="code"
+        [readOnly]="isReadOnly()"
+        [class.invai-form-readonly-control]="isReadOnly()"
         [attr.maxlength]="codeMaxLength"
         [attr.aria-invalid]="isInvalid(code)"
         [attr.aria-describedby]="isInvalid(code) ? errorId('code') : null"
@@ -144,43 +168,107 @@
 
   <div
     class="application-form-fields__field application-form-fields__field--desktop-4"
+    [attr.aria-busy]="departmentsLoading()"
+  >
+    <label [id]="fieldId('conselleria-label')" [for]="fieldId('conselleria')">
+      {{ labels().conselleria }}
+    </label>
+    @if (isReadOnly()) {
+      <p class="invai-form-static-value" [attr.aria-labelledby]="fieldId('conselleria-label')">
+        {{ optionLabel(conselleriaOptions, controls().conselleria.value) }}
+      </p>
+    } @else {
+      <p-select
+        [inputId]="fieldId('conselleria')"
+        [formControl]="controls().conselleria"
+        [ariaLabelledBy]="fieldId('conselleria-label')"
+        [ariaFilterLabel]="labels().conselleria"
+        [filter]="true"
+        [loading]="departmentsLoading()"
+        [options]="conselleriaOptions"
+        [placeholder]="selectPlaceholder()"
+        [attr.aria-invalid]="isInvalid(controls().conselleria)"
+        [attr.aria-describedby]="conselleriaDescribedBy()"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="selectConselleria($event.value)"
+      />
+    }
+    @if (isInvalid(controls().conselleria)) {
+      <small [id]="errorId('conselleria')" class="application-form-fields__error">
+        {{ requiredError() }}
+      </small>
+    }
+    @if (departmentsLoading()) {
+      <small [id]="fieldId('conselleria-status')" class="text-color-secondary" role="status">
+        {{ labels().departmentsLoading }}
+      </small>
+    } @else if (departmentsLoadFailed()) {
+      <small [id]="fieldId('conselleria-status')" class="text-color-secondary" role="alert">
+        {{ labels().departmentsLoadError }}
+      </small>
+      @if (!isReadOnly()) {
+        <p-button
+          type="button"
+          size="small"
+          [label]="labels().retry"
+          [text]="true"
+          (onClick)="retryDepartments()"
+        />
+      }
+    }
+  </div>
+
+  <div
+    class="application-form-fields__field application-form-fields__field--desktop-4"
+    [attr.aria-busy]="administrativeUnitsLoading()"
   >
     <label [id]="fieldId('administrative-unit-label')" [for]="fieldId('administrative-unit')">
       {{ labels().administrativeUnit }}
     </label>
+    @if (isReadOnly()) {
+      <p class="invai-form-static-value" [attr.aria-labelledby]="fieldId('administrative-unit-label')">
+        {{ optionLabel(administrativeUnitOptions, controls().administrativeUnit.value) }}
+      </p>
+    } @else {
     <p-select
       [inputId]="fieldId('administrative-unit')"
       [formControl]="controls().administrativeUnit"
       [ariaLabelledBy]="fieldId('administrative-unit-label')"
       [ariaFilterLabel]="labels().administrativeUnit"
       [filter]="true"
+      [loading]="administrativeUnitsLoading()"
       [options]="administrativeUnitOptions"
       [placeholder]="selectPlaceholder()"
       [attr.aria-invalid]="isInvalid(controls().administrativeUnit)"
-      [attr.aria-describedby]="
-        isInvalid(controls().administrativeUnit) ? errorId('administrative-unit') : null
-      "
+      [attr.aria-describedby]="administrativeUnitDescribedBy()"
       optionLabel="label"
       optionValue="value"
     />
+    }
     @if (isInvalid(controls().administrativeUnit)) {
       <small [id]="errorId('administrative-unit')" class="application-form-fields__error">
         {{ requiredError() }}
       </small>
     }
-  </div>
-
-  <div
-    class="application-form-fields__field application-form-fields__field--desktop-4"
-  >
-    <label [for]="fieldId('conselleria')">{{ labels().conselleria }}</label>
-    <input
-      [id]="fieldId('conselleria')"
-      type="text"
-      pInputText
-      [formControl]="controls().conselleria"
-      aria-readonly="true"
-    />
+    @if (administrativeUnitStatus(); as status) {
+      <small
+        [id]="fieldId('administrative-unit-status')"
+        class="text-color-secondary"
+        [attr.role]="administrativeUnitsLoadFailed() ? 'alert' : 'status'"
+      >
+        {{ status }}
+      </small>
+    }
+    @if (administrativeUnitsLoadFailed() && !isReadOnly()) {
+      <p-button
+        type="button"
+        size="small"
+        [label]="labels().retry"
+        [text]="true"
+        (onClick)="retryAdministrativeUnits()"
+      />
+    }
   </div>
 
   <fieldset class="application-form-fields__commission">
@@ -193,6 +281,11 @@
         <label [id]="fieldId('commission-label')" [for]="fieldId('commission')">
           {{ labels().commissionName }}
         </label>
+        @if (isReadOnly()) {
+          <p class="invai-form-static-value" [attr.aria-labelledby]="fieldId('commission-label')">
+            {{ optionLabel(commissionOptions, controls().commission.value) }}
+          </p>
+        } @else {
         <p-select
           [inputId]="fieldId('commission')"
           [formControl]="controls().commission"
@@ -209,6 +302,7 @@
           optionValue="value"
           (onChange)="selectCommission($event.value)"
         />
+        }
         @if (isInvalid(controls().commission)) {
           <small [id]="errorId('commission')" class="application-form-fields__error">
             {{ requiredError() }}
@@ -227,7 +321,8 @@
           type="text"
           pInputText
           [formControl]="controls().commissionExpedientNumber"
-          aria-readonly="true"
+          [readOnly]="isReadOnly()"
+          [class.invai-form-readonly-control]="isReadOnly()"
         />
       </div>
 
@@ -242,7 +337,8 @@
           type="date"
           pInputText
           [formControl]="controls().commissionApprovalDate"
-          aria-readonly="true"
+          [readOnly]="isReadOnly()"
+          [class.invai-form-readonly-control]="isReadOnly()"
         />
       </div>
 
@@ -255,8 +351,9 @@
           type="text"
           pInputText
           [value]="commissionTypeLabel(controls().commissionType.value)"
-          aria-readonly="true"
-          disabled
+          [readOnly]="isReadOnly()"
+          [disabled]="!isReadOnly()"
+          [class.invai-form-readonly-control]="isReadOnly()"
         />
       </div>
     </div>
@@ -272,6 +369,8 @@
         type="text"
         pInputText
         [formControl]="audit.creationDate"
+        [readOnly]="isReadOnly()"
+        [class.invai-form-readonly-control]="isReadOnly()"
       />
     </div>
 
@@ -284,6 +383,8 @@
         type="text"
         pInputText
         [formControl]="audit.modificationDate"
+        [readOnly]="isReadOnly()"
+        [class.invai-form-readonly-control]="isReadOnly()"
       />
     </div>
 
@@ -296,6 +397,8 @@
         type="text"
         pInputText
         [formControl]="audit.withdrawalDate"
+        [readOnly]="isReadOnly()"
+        [class.invai-form-readonly-control]="isReadOnly()"
       />
     </div>
   }
@@ -308,12 +411,19 @@
     <label [id]="fieldId('description-label')" [for]="fieldId('description')">
       {{ labels().description }}
     </label>
-    <p-editor
-      [formControl]="controls().description"
-      [pt]="descriptionEditorPassThrough"
-      [readonly]="descriptionReadOnly()"
-      [style]="{ height: '10rem' }"
-      (onInit)="initializeDescriptionEditor($event)"
-    />
+    @if (isReadOnly()) {
+      <div
+        class="invai-form-static-value invai-form-static-value--rich"
+        [attr.aria-labelledby]="fieldId('description-label')"
+        [innerHTML]="controls().description.value || '-'"
+      ></div>
+    } @else {
+      <p-editor
+        [formControl]="controls().description"
+        [pt]="descriptionEditorPassThrough"
+        [style]="{ height: '10rem' }"
+        (onInit)="initializeDescriptionEditor($event)"
+      />
+    }
   </div>
 </div>

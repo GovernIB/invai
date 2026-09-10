@@ -16,12 +16,12 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
   >
-    <div>
+    <div class="md:col-span-8">
       <p-floatlabel class="w-full">
         <input
           id="application-provider-dialog-company-name"
@@ -35,6 +35,8 @@
               : null
           "
           [attr.aria-invalid]="isInvalid(form().controls.companyName)"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
           pInputText
         />
         <label for="application-provider-dialog-company-name">
@@ -57,7 +59,17 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-4">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="application-provider-dialog-role-view-label" class="invai-dialog-static-field__label">
+            {{ labels.role }}
+          </span>
+          <p class="invai-form-static-value" aria-labelledby="application-provider-dialog-role-view-label">
+            {{ roleLabel() }}
+          </p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-select
           inputId="application-provider-dialog-role"
@@ -79,6 +91,7 @@
           {{ labels.role }}
         </label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.roleId)) {
         <p
           id="application-provider-dialog-role-error"
@@ -90,7 +103,17 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-4">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="application-provider-dialog-start-date-view-label" class="invai-dialog-static-field__label">
+            {{ labels.startDate }}
+          </span>
+          <p class="invai-form-static-value" aria-labelledby="application-provider-dialog-start-date-view-label">
+            {{ dateLabel(form().controls.startDate.value) }}
+          </p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-datepicker
           inputId="application-provider-dialog-start-date"
@@ -112,9 +135,20 @@
           {{ labels.startDate }}
         </label>
       </p-floatlabel>
+      }
     </div>
 
-    <div>
+    <div class="md:col-span-4">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="application-provider-dialog-expire-date-view-label" class="invai-dialog-static-field__label">
+            {{ labels.expireDate }}
+          </span>
+          <p class="invai-form-static-value" aria-labelledby="application-provider-dialog-expire-date-view-label">
+            {{ dateLabel(form().controls.expireDate.value) }}
+          </p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-datepicker
           inputId="application-provider-dialog-expire-date"
@@ -136,6 +170,7 @@
           {{ labels.expireDate }}
         </label>
       </p-floatlabel>
+      }
     </div>
 
     @if (isDateRangeInvalid()) {

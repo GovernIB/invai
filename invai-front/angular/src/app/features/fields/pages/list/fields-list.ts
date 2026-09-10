@@ -409,7 +409,6 @@ export class FieldsList extends SearchComponentBase<Field, FieldFilters> impleme
       nameEs: field?.nameEs ?? '',
     });
 
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private resetAfterMutation(): void {

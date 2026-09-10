@@ -16,12 +16,18 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
   >
     <div class="md:col-span-6">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="database-host-server-label" class="invai-dialog-static-field__label">{{ labels.server }}</span>
+          <p class="invai-form-static-value" aria-labelledby="database-host-server-label">{{ serverLabel() }}</p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-select
           inputId="database-host-server"
@@ -38,6 +44,7 @@
         />
         <label for="database-host-server">{{ labels.server }}</label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.server)) {
         <p id="database-host-server-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ requiredError }}
@@ -55,6 +62,8 @@
           maxlength="255"
           [attr.aria-describedby]="isInvalid(form().controls.service) ? 'database-host-service-error' : null"
           [attr.aria-invalid]="isInvalid(form().controls.service)"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
           pInputText
         />
         <label for="database-host-service">{{ labels.service }}</label>
@@ -67,6 +76,12 @@
     </div>
 
     <div class="md:col-span-8">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="database-host-type-label" class="invai-dialog-static-field__label">{{ labels.databaseType }}</span>
+          <p class="invai-form-static-value" aria-labelledby="database-host-type-label">{{ databaseTypeLabel() }}</p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-select
           inputId="database-host-type"
@@ -84,6 +99,7 @@
         />
         <label for="database-host-type">{{ labels.databaseType }}</label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.databaseType)) {
         <p id="database-host-type-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ requiredError }}
@@ -92,6 +108,12 @@
     </div>
 
     <div class="md:col-span-4">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="database-host-port-label" class="invai-dialog-static-field__label">{{ labels.port }}</span>
+          <p class="invai-form-static-value" aria-labelledby="database-host-port-label">{{ form().controls.port.value ?? '-' }}</p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-inputnumber
           inputId="database-host-port"
@@ -106,6 +128,7 @@
         />
         <label for="database-host-port">{{ labels.port }}</label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.port)) {
         <p id="database-host-port-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ portError }}
@@ -122,6 +145,8 @@
         class="w-full"
         rows="4"
         formControlName="description"
+        [readOnly]="mode() === 'view'"
+        [class.invai-form-readonly-control]="mode() === 'view'"
         pTextarea
       ></textarea>
     </div>

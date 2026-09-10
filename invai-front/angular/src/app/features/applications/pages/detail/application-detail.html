@@ -1,23 +1,45 @@
-<header class="application-detail-header">
-  <h2>{{ pageHeader() }}</h2>
-</header>
-
-<app-section-container>
-  <nav class="application-detail-tabs" [attr.aria-label]="sectionsAriaLabel">
-    @for (tab of tabs; track tab.route) {
+<app-section-container [header]="pageHeader()">
+  <nav #sectionTabs class="application-detail-tabs" [attr.aria-label]="sectionsAriaLabel">
+    @for (tab of tabs(); track tab.route) {
       <a
         class="application-detail-tab"
         [routerLink]="tab.route"
+        [pTooltip]="tab.incompleteMessage"
+        ariaCurrentWhenActive="page"
         routerLinkActive="application-detail-tab--active"
       >
-        {{ tab.label }}
+        <span>{{ tab.label }}</span>
+        @if (tab.incompleteMessage) {
+          <i
+            class="pi pi-exclamation-circle"
+            [class.text-orange-500]="tab.warning"
+            [class.text-red-500]="!tab.warning"
+            aria-hidden="true"
+          ></i>
+          <span class="sr-only">{{ tab.incompleteMessage }}</span>
+        }
       </a>
     }
   </nav>
 
+  @if (detailState.completenessRefreshFailed()) {
+    <div
+      class="flex flex-wrap items-center gap-3 py-3"
+      [attr.aria-busy]="detailState.completenessRefreshing()"
+    >
+      <p role="status" class="m-0">{{ completenessRefreshError }}</p>
+      <p-button
+        [label]="completenessRetry"
+        [disabled]="detailState.completenessRefreshing()"
+        (onClick)="retryCompleteness()"
+      />
+    </div>
+  }
+
   <router-outlet />
 
   <p-dialog
+    styleClass="invai-dialog"
     [closable]="true"
     [closeOnEscape]="true"
     [dismissableMask]="true"
@@ -29,7 +51,7 @@
     (onHide)="closeUnsavedChangesDialog()"
   >
     <ng-template #header>
-      <h2 class="m-0 text-base font-semibold text-color">
+      <h2 class="m-0 text-base font-semibold">
         {{ unsavedChangesTitle }}
       </h2>
     </ng-template>
@@ -43,6 +65,7 @@
         <p-button
           [ariaLabel]="unsavedChangesCloseAriaLabel"
           [label]="unsavedChangesCloseLabel"
+          icon="pi pi-times"
           (onClick)="closeUnsavedChangesDialog()"
         />
       </div>

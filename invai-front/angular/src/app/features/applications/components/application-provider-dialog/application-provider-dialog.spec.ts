@@ -25,8 +25,6 @@ describe('ApplicationProviderDialog', () => {
       startDate: new Date(2026, 4, 2),
       expireDate: null,
     });
-    form.disable({ emitEvent: false });
-
     fixture = TestBed.createComponent(ApplicationProviderDialog);
     fixture.componentRef.setInput('visible', true);
     fixture.componentRef.setInput('form', form);
@@ -43,5 +41,17 @@ describe('ApplicationProviderDialog', () => {
       .componentInstance as CrudEntityDialog;
 
     expect(dialog.viewPrimaryAction()).toBe('edit');
+  });
+
+  it('renders view data without disabled form widgets', () => {
+    const company = fixture.nativeElement.querySelector(
+      '#application-provider-dialog-company-name',
+    ) as HTMLInputElement;
+
+    expect(company.readOnly).toBe(true);
+    expect(company.disabled).toBe(false);
+    expect(fixture.nativeElement.querySelector('p-select')).toBeNull();
+    expect(fixture.nativeElement.querySelector('p-datepicker')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Desenvolupament');
   });
 });

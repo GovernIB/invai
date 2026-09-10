@@ -114,6 +114,7 @@ export interface ServerPageParams extends InfrastructurePageParams {
 }
 
 export interface SystemPageParams extends InfrastructurePageParams {
+  search?: string;
   serverId?: number;
   instance?: string;
   version?: string;

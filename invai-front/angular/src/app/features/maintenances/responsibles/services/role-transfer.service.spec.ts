@@ -67,12 +67,14 @@ describe('RoleTransferService', () => {
     request.flush(expected);
   });
 
-  it('posts the exact batch and announces assignment changes only after success', () => {
-    const changed = vi.fn();
-    changes.assignments.subscribe(changed);
+  it('posts the exact batch and announces person and assignment changes only after success', () => {
+    const assignmentsChanged = vi.fn();
+    const peopleChanged = vi.fn();
+    changes.assignments.subscribe(assignmentsChanged);
+    changes.people.subscribe(peopleChanged);
     const input: RoleTransferInput = {
       items: [{ id: 4, type: RoleAssignmentType.AUTHORIZED }],
-      toPersonId: null,
+      toPersonEmailAddress: null,
       revoke: true,
     };
 
@@ -80,8 +82,10 @@ describe('RoleTransferService', () => {
     const request = http.expectOne('/invaiapi/interna/role-transfer');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(input);
-    expect(changed).not.toHaveBeenCalled();
+    expect(assignmentsChanged).not.toHaveBeenCalled();
+    expect(peopleChanged).not.toHaveBeenCalled();
     request.flush(null, { status: 204, statusText: 'No Content' });
-    expect(changed).toHaveBeenCalledOnce();
+    expect(assignmentsChanged).toHaveBeenCalledOnce();
+    expect(peopleChanged).toHaveBeenCalledOnce();
   });
 });

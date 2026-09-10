@@ -197,6 +197,8 @@ describe('ApplicationDevelopmentSection', () => {
   }
 
   it('filters maintenance catalogs but not local development options', () => {
+    state.editing.set(true);
+    fixture.detectChanges();
     const environment = selectById('application-development-environment');
     const modality = selectById('application-development-modality');
     const standard = selectById('application-development-standard');
@@ -304,7 +306,7 @@ describe('ApplicationDevelopmentSection', () => {
     expect(component.providerDialogVisible()).toBe(true);
     expect(component.providerDialogMode()).toBe('view');
     expect(component.providerDialogCanEdit()).toBe(true);
-    expect(component.providerForm.disabled).toBe(true);
+    expect(component.providerForm.enabled).toBe(true);
     expect(component.providerForm.getRawValue()).toEqual({
       companyName: 'Plexus SL',
       roleId: 3,
@@ -335,7 +337,7 @@ describe('ApplicationDevelopmentSection', () => {
     component.providerForm.controls.companyName.setValue('Changed');
     component.cancelProviderEdit();
     expect(component.providerDialogMode()).toBe('view');
-    expect(component.providerForm.disabled).toBe(true);
+    expect(component.providerForm.enabled).toBe(true);
     expect(component.providerForm.controls.companyName.value).toBe('Plexus SL');
 
     component.startProviderEdit();
@@ -591,6 +593,7 @@ describe('ApplicationDevelopmentSection', () => {
   });
 
   it('identifies Development observations as optional without required-error semantics', () => {
+    state.editing.set(true);
     state.developmentForm.enable({ emitEvent: false });
     state.developmentForm.controls.observation.setValue('<p><br></p><p>&nbsp;</p>');
     state.developmentForm.controls.observation.markAsTouched();
@@ -611,29 +614,26 @@ describe('ApplicationDevelopmentSection', () => {
     ).toBeNull();
   });
 
-  it('keeps Development observations read-only outside edit mode', async () => {
-    const editor = fixture.debugElement.query(By.directive(Editor));
-    const content = () =>
+  it('renders Development observations statically outside edit mode', () => {
+    const staticValue = () =>
       fixture.nativeElement.querySelector(
-        '.application-development__observations .ql-editor',
+        '.application-development__observations .invai-form-static-value',
       ) as HTMLElement | null;
 
-    await vi.waitFor(() => expect(content()).not.toBeNull());
-
-    expect(editor.componentInstance.readonly).toBe(true);
-    expect(content()?.getAttribute('contenteditable')).toBe('false');
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
+    expect(staticValue()?.textContent).toContain('Observació');
 
     state.editing.set(true);
     fixture.detectChanges();
 
-    expect(editor.componentInstance.readonly).toBe(false);
-    expect(content()?.getAttribute('contenteditable')).toBe('true');
+    expect(fixture.debugElement.query(By.directive(Editor))).not.toBeNull();
+    expect(staticValue()).toBeNull();
 
     state.editing.set(false);
     fixture.detectChanges();
 
-    expect(editor.componentInstance.readonly).toBe(true);
-    expect(content()?.getAttribute('contenteditable')).toBe('false');
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
+    expect(staticValue()?.textContent).toContain('Observació');
   });
 
   it('disables source navigation when the URL is not configured', () => {
@@ -714,7 +714,6 @@ function createState() {
     revisionDate: new Date(2026, 4, 2),
     observation: '<p>Observació</p>',
   });
-  form.disable({ emitEvent: false });
   const development = signal<ApplicationDevelopmentOutput | null>(DEVELOPMENT);
   const providers = signal({ items: [PROVIDER], total: 1 });
   const technologies = signal({ items: [TECHNOLOGY], total: 1 });

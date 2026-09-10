@@ -1,0 +1,46 @@
+<div [attr.aria-busy]="loading() || null">
+  <span [id]="instructionId()" class="sr-only">
+    {{ copy.soffidInstruction }}
+  </span>
+  <span [id]="statusId()" class="sr-only" role="status">
+    {{ statusMessage() }}
+  </span>
+  <span [id]="searchErrorId()" class="sr-only" role="alert">
+    {{ searchErrorMessage() }}
+  </span>
+  <span [id]="errorId()" class="sr-only" role="alert">
+    {{ validationErrorMessage() }}
+  </span>
+
+  <p-floatlabel class="w-full">
+    <p-autoComplete
+      class="w-full"
+      inputStyleClass="w-full"
+      optionLabel="label"
+      appendTo="body"
+      [ariaLabelledBy]="labelId()"
+      [delay]="300"
+      [emptyMessage]="copy.soffidEmpty"
+      [forceSelection]="false"
+      [formControl]="control()"
+      [inputId]="inputId()"
+      [invalid]="invalid()"
+      [minQueryLength]="3"
+      [placeholder]="copy.soffidPlaceholder"
+      [pt]="passThrough()"
+      [showClear]="true"
+      [showEmptyMessage]="true"
+      [suggestions]="options()"
+      (completeMethod)="onSearch($event)"
+      (onSelect)="onPersonSelected($event)"
+    >
+      <ng-template #item let-person>
+        <div class="flex flex-col">
+          <span>{{ person.firstName }} {{ person.lastName }}</span>
+          <span class="text-sm text-color-secondary">{{ person.email }}</span>
+        </div>
+      </ng-template>
+    </p-autoComplete>
+    <label [id]="labelId()" [for]="inputId()">{{ copy.soffidPerson }}</label>
+  </p-floatlabel>
+</div>

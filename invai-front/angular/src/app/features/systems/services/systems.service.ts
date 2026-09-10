@@ -9,38 +9,32 @@ import {
   InfrastructureSystemInput,
   SystemPageParams,
 } from '../systems.model';
-import {
-  infrastructureCacheKey,
-  toInfrastructureHttpParams,
-} from './infrastructure-http.utils';
+import { infrastructureCacheKey, toInfrastructureHttpParams } from './infrastructure-http.utils';
 
 @Injectable({ providedIn: 'root' })
 export class SystemsService extends BaseApiService {
   protected override readonly ENTITY_URI = 'system';
 
-  private readonly pagesCache = new Map<
-    string,
-    Observable<SpringPage<InfrastructureSystem>>
-  >();
+  private readonly pagesCache = new Map<string, Observable<SpringPage<InfrastructureSystem>>>();
 
   getAll(params?: SystemPageParams): Observable<SpringPage<InfrastructureSystem>> {
     const criteria = {
       serverId: params?.serverId,
       instance: params?.instance?.trim(),
       version: params?.version?.trim(),
+      search: params?.search?.trim(),
       statusId: params?.statusId,
-      unassignedToInformationSystemDbId:
-        params?.unassignedToInformationSystemDbId,
+      unassignedToInformationSystemDbId: params?.unassignedToInformationSystemDbId,
     };
 
-    return cachedRequest(
-      this.pagesCache,
-      infrastructureCacheKey(params, criteria),
-      () =>
-        this.http.get<SpringPage<InfrastructureSystem>>(this.url(), {
-          params: toInfrastructureHttpParams(params, criteria),
-        }),
-    );
+    const requestFactory = () =>
+      this.http.get<SpringPage<InfrastructureSystem>>(this.url(), {
+        params: toInfrastructureHttpParams(params, criteria),
+      });
+
+    if (criteria.search) return requestFactory();
+
+    return cachedRequest(this.pagesCache, infrastructureCacheKey(params, criteria), requestFactory);
   }
 
   getById(id: number): Observable<InfrastructureSystem> {
@@ -53,10 +47,7 @@ export class SystemsService extends BaseApiService {
       .pipe(tap(() => this.clearCache()));
   }
 
-  update(
-    id: number,
-    payload: InfrastructureSystemInput,
-  ): Observable<InfrastructureSystem> {
+  update(id: number, payload: InfrastructureSystemInput): Observable<InfrastructureSystem> {
     return this.http
       .put<InfrastructureSystem>(this.url(id), payload)
       .pipe(tap(() => this.clearCache()));

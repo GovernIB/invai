@@ -467,7 +467,6 @@ export class CommissionsList
       commissionType: commission?.commissionType ?? null,
     });
 
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private resetAfterMutation(): void {

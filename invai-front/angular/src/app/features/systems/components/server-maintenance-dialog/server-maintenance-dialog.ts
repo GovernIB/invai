@@ -91,6 +91,10 @@ export class ServerMaintenanceDialog {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected serverLabel(): string {
+    return this.form().controls.server.value?.label ?? '-';
+  }
+
   protected onSubmit(): void {
     if (this.mode() !== 'view' && !this.isSaving()) this.submitForm.emit();
   }

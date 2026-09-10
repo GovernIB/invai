@@ -15,7 +15,17 @@ import { ConfirmationDialogComponent } from '@components/confirmation-dialog/con
 import { isStructuredBadRequest } from '@core/models/api-error.model';
 import { DatabasesService } from '@features/systems/services/databases.service';
 import { SystemsService } from '@features/systems/services/systems.service';
-import { InfrastructureStatus } from '@features/systems/systems.model';
+import {
+  InfrastructureStatus,
+  SystemPageParams,
+  DatabasePageParams,
+  ServerCatalogOption,
+  DatabaseVendorCatalogOption,
+} from '@features/systems/systems.model';
+import { createServerFiltersForm } from '@features/systems/forms/server-filters-form.factory';
+import { createDatabaseFiltersForm } from '@features/systems/forms/database-filters-form.factory';
+import { ServerCatalogService } from '@features/systems/services/server-catalog.service';
+import { DatabaseVendorCatalogService } from '@features/systems/services/database-vendor-catalog.service';
 import { ActionParams, PaginatedList } from '@models/table.model';
 import { fnCountSelectedFilters } from '@shared/utils/table.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
@@ -24,6 +34,8 @@ import { Editor } from 'primeng/editor';
 import { TableLazyLoadEvent } from 'primeng/table';
 import {
   EMPTY,
+  forkJoin,
+  timer,
   Observable,
   Subject,
   catchError,
@@ -179,6 +191,29 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   private readonly applicationDatabasesService = inject(ApplicationDatabasesService);
   private readonly systemsService = inject(SystemsService);
   private readonly databasesService = inject(DatabasesService);
+  private readonly serverCatalogService = inject(ServerCatalogService);
+  private readonly vendorCatalogService = inject(DatabaseVendorCatalogService);
+  protected readonly systemCatalogFiltersForm = createServerFiltersForm(this.formBuilder);
+  protected readonly databaseCatalogFiltersForm = createDatabaseFiltersForm(this.formBuilder);
+  protected readonly systemCatalogQuickSearch = signal('');
+  protected readonly databaseCatalogQuickSearch = signal('');
+  protected readonly systemCatalogFilterCount = signal(0);
+  protected readonly databaseCatalogFilterCount = signal(0);
+  protected readonly systemCatalogServerOptions = signal<ServerCatalogOption[]>([]);
+  protected readonly databaseCatalogServerOptions = signal<ServerCatalogOption[]>([]);
+  protected readonly databaseCatalogTypeOptions = signal<DatabaseVendorCatalogOption[]>([]);
+  private appliedSystemCatalogFilters = this.systemCatalogFiltersForm.getRawValue();
+  private appliedDatabaseCatalogFilters = this.databaseCatalogFiltersForm.getRawValue();
+  private appliedSystemCatalogSearch = '';
+  private appliedDatabaseCatalogSearch = '';
+  private readonly systemCatalogRequests = new Subject<SystemPageParams | null>();
+  private readonly databaseCatalogRequests = new Subject<DatabasePageParams | null>();
+  private readonly systemCatalogSearchChanges = new Subject<string | null>();
+  private readonly databaseCatalogSearchChanges = new Subject<string | null>();
+  private systemCatalogOptionsLoaded = false;
+  private databaseCatalogOptionsLoaded = false;
+  private systemCatalogOptionsLoading = false;
+  private databaseCatalogOptionsLoading = false;
   private readonly serverPageRequests = new Subject<ApplicationSystemsPageParams>();
   private readonly databasePageRequests = new Subject<ApplicationDatabasesPageParams>();
   private serverTableState: TableLazyLoadEvent = { first: 0, rows: DEFAULT_PAGE_SIZE };
@@ -299,6 +334,9 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected readonly environmentOptions = signal<SelectOption<number>[]>([]);
 
   ngOnInit(): void {
+    this.observeCatalogSearch();
+    this.observeSystemCatalogRequests();
+    this.observeDatabaseCatalogRequests();
     this.observeServerPageRequests();
     this.observeDatabasePageRequests();
     this.observeFilterCounts();
@@ -327,7 +365,8 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     this.systemRelationForm.reset();
     this.systemDialogMode.set('create');
     this.systemDialogVisible.set(true);
-    if (this.systemCatalogLoadFailed()) this.loadSystemCatalog();
+    this.resetCatalogSearch('system', true);
+    this.loadSystemCatalogOptions();
   }
 
   protected openDatabaseCreateDialog(): void {
@@ -337,7 +376,8 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     this.databaseRelationForm.reset();
     this.databaseDialogMode.set('create');
     this.databaseDialogVisible.set(true);
-    if (this.databaseCatalogLoadFailed()) this.loadDatabaseCatalog();
+    this.resetCatalogSearch('database', true);
+    this.loadDatabaseCatalogOptions();
   }
 
   protected onSystemTableAction(
@@ -375,12 +415,16 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected closeSystemDialog(): void {
     if (this.isSystemRelationSaving() || this.isDeletingRelation()) return;
     this.systemDialogVisible.set(false);
+    this.systemCatalogSearchChanges.next(null);
+    this.systemCatalogRequests.next(null);
     this.selectedSystemRelation = null;
   }
 
   protected closeDatabaseDialog(): void {
     if (this.isDatabaseRelationSaving() || this.isDeletingRelation()) return;
     this.databaseDialogVisible.set(false);
+    this.databaseCatalogSearchChanges.next(null);
+    this.databaseCatalogRequests.next(null);
     this.selectedDatabaseRelation = null;
   }
 
@@ -417,6 +461,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
           this.selectedSystemRelation = null;
           this.refreshServersAfterMutation();
           this.refreshSystemCatalogAfterMutation();
+          this.detailState.refreshCompletenessAfterMutation();
         },
         error: (error: unknown) =>
           this.handleMutationError(error, APPLICATION_SYSTEMS_DATABASES_SERVER_SAVE_ERROR),
@@ -456,6 +501,7 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
           this.selectedDatabaseRelation = null;
           this.refreshDatabasesAfterMutation();
           this.refreshDatabaseCatalogAfterMutation();
+          this.detailState.refreshCompletenessAfterMutation();
         },
         error: (error: unknown) =>
           this.handleMutationError(error, APPLICATION_SYSTEMS_DATABASES_DATABASE_SAVE_ERROR),
@@ -504,12 +550,14 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
             this.showSuccess(APPLICATION_SYSTEMS_DATABASES_SERVER_DELETE_SUCCESS);
             this.refreshServersAfterMutation();
             this.refreshSystemCatalogAfterMutation();
+            this.detailState.refreshCompletenessAfterMutation();
           } else {
             this.databaseDialogVisible.set(false);
             this.selectedDatabaseRelation = null;
             this.showSuccess(APPLICATION_SYSTEMS_DATABASES_DATABASE_DELETE_SUCCESS);
             this.refreshDatabasesAfterMutation();
             this.refreshDatabaseCatalogAfterMutation();
+            this.detailState.refreshCompletenessAfterMutation();
           }
         },
         error: (error: unknown) => {
@@ -661,54 +709,206 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   private loadSystemCatalog(): void {
     const params = this.toCatalogPageParams(this.systemCatalogTableState);
     if (!params) return;
+    const filters = this.appliedSystemCatalogFilters;
+    this.systemCatalogRequests.next({
+      ...params,
+      serverId: filters.serverId ?? undefined,
+      instance: filters.instance?.trim() || undefined,
+      version: filters.version?.trim() || undefined,
+      search: this.appliedSystemCatalogSearch || undefined,
+    });
+  }
 
-    this.isSystemCatalogLoading.set(true);
-    this.systemsService
-      .getAll(params)
+  private observeSystemCatalogRequests(): void {
+    this.systemCatalogRequests
       .pipe(
+        switchMap((params) => {
+          if (!params) return EMPTY;
+          this.isSystemCatalogLoading.set(true);
+          return this.systemsService.getAll(params).pipe(
+            catchError(() => {
+              this.systemCatalogLoadFailed.set(true);
+              this.showLoadError(APPLICATION_SYSTEMS_DATABASES_SERVER_CATALOG_LOAD_ERROR);
+              return EMPTY;
+            }),
+            finalize(() => this.isSystemCatalogLoading.set(false)),
+          );
+        }),
         takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isSystemCatalogLoading.set(false)),
       )
-      .subscribe({
-        next: (page) => {
-          this.systemCatalogLoadFailed.set(false);
-          this.systemCatalog.set({
-            items: page.content.map((system) => toApplicationSystemCatalogRow(system, this.locale)),
-            total: page.totalElements,
-          });
-        },
-        error: () => {
-          this.systemCatalogLoadFailed.set(true);
-          this.showLoadError(APPLICATION_SYSTEMS_DATABASES_SERVER_CATALOG_LOAD_ERROR);
-        },
+      .subscribe((page) => {
+        this.systemCatalogLoadFailed.set(false);
+        this.systemCatalog.set({
+          items: page.content.map((record) => toApplicationSystemCatalogRow(record, this.locale)),
+          total: page.totalElements,
+        });
       });
   }
 
   private loadDatabaseCatalog(): void {
     const params = this.toCatalogPageParams(this.databaseCatalogTableState);
     if (!params) return;
+    const filters = this.appliedDatabaseCatalogFilters;
+    this.databaseCatalogRequests.next({
+      ...params,
+      serverId: filters.serverId ?? undefined,
+      service: filters.service?.trim() || undefined,
+      databaseTypeId: filters.databaseTypeId ?? undefined,
+      search: this.appliedDatabaseCatalogSearch || undefined,
+    });
+  }
 
-    this.isDatabaseCatalogLoading.set(true);
-    this.databasesService
-      .getAll(params)
+  private observeDatabaseCatalogRequests(): void {
+    this.databaseCatalogRequests
+      .pipe(
+        switchMap((params) => {
+          if (!params) return EMPTY;
+          this.isDatabaseCatalogLoading.set(true);
+          return this.databasesService.getAll(params).pipe(
+            catchError(() => {
+              this.databaseCatalogLoadFailed.set(true);
+              this.showLoadError(APPLICATION_SYSTEMS_DATABASES_DATABASE_CATALOG_LOAD_ERROR);
+              return EMPTY;
+            }),
+            finalize(() => this.isDatabaseCatalogLoading.set(false)),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((page) => {
+        this.databaseCatalogLoadFailed.set(false);
+        this.databaseCatalog.set({
+          items: page.content.map((record) => toApplicationDatabaseCatalogRow(record, this.locale)),
+          total: page.totalElements,
+        });
+      });
+  }
+
+  protected onCatalogQuickSearch(kind: InfrastructureRelationKind, value: string): void {
+    if (kind === 'system') {
+      this.systemCatalogQuickSearch.set(value);
+      this.systemCatalogSearchChanges.next(value.trim());
+    } else {
+      this.databaseCatalogQuickSearch.set(value);
+      this.databaseCatalogSearchChanges.next(value.trim());
+    }
+  }
+
+  protected applyCatalogFilters(kind: InfrastructureRelationKind): void {
+    if (kind === 'system') {
+      this.systemCatalogSearchChanges.next(null);
+      this.appliedSystemCatalogSearch = this.systemCatalogQuickSearch().trim();
+      this.appliedSystemCatalogFilters = this.systemCatalogFiltersForm.getRawValue();
+    } else {
+      this.databaseCatalogSearchChanges.next(null);
+      this.appliedDatabaseCatalogSearch = this.databaseCatalogQuickSearch().trim();
+      this.appliedDatabaseCatalogFilters = this.databaseCatalogFiltersForm.getRawValue();
+    }
+    this.refreshCatalogSearch(kind);
+  }
+
+  protected resetCatalogSearch(kind: InfrastructureRelationKind, opening = false): void {
+    if (kind === 'system') {
+      this.systemCatalogFiltersForm.reset();
+      this.systemCatalogQuickSearch.set('');
+      if (opening) this.systemCatalogTableState = { first: 0, rows: DEFAULT_PAGE_SIZE };
+    } else {
+      this.databaseCatalogFiltersForm.reset();
+      this.databaseCatalogQuickSearch.set('');
+      if (opening) this.databaseCatalogTableState = { first: 0, rows: DEFAULT_PAGE_SIZE };
+    }
+    this.applyCatalogFilters(kind);
+  }
+
+  private refreshCatalogSearch(kind: InfrastructureRelationKind): void {
+    if (kind === 'system') {
+      this.systemRelationForm.reset();
+      this.systemCatalogTableState = { ...this.systemCatalogTableState, first: 0 };
+      this.systemCatalogFirst.set(0);
+      this.loadSystemCatalog();
+    } else {
+      this.databaseRelationForm.reset();
+      this.databaseCatalogTableState = { ...this.databaseCatalogTableState, first: 0 };
+      this.databaseCatalogFirst.set(0);
+      this.loadDatabaseCatalog();
+    }
+  }
+
+  private observeCatalogSearch(): void {
+    this.systemCatalogSearchChanges
+      .pipe(
+        switchMap((value) => (value === null ? EMPTY : timer(400).pipe(map(() => value)))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((value) => {
+        if (value === this.appliedSystemCatalogSearch) return;
+        this.appliedSystemCatalogSearch = value;
+        this.refreshCatalogSearch('system');
+      });
+    this.databaseCatalogSearchChanges
+      .pipe(
+        switchMap((value) => (value === null ? EMPTY : timer(400).pipe(map(() => value)))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((value) => {
+        if (value === this.appliedDatabaseCatalogSearch) return;
+        this.appliedDatabaseCatalogSearch = value;
+        this.refreshCatalogSearch('database');
+      });
+    this.systemCatalogFiltersForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const { serverId, instance, version } = this.systemCatalogFiltersForm.getRawValue();
+        this.systemCatalogFilterCount.set(
+          [serverId, instance, version].filter((value) => this.hasValue(value)).length,
+        );
+      });
+    this.databaseCatalogFiltersForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const { serverId, service, databaseTypeId } = this.databaseCatalogFiltersForm.getRawValue();
+        this.databaseCatalogFilterCount.set(
+          [serverId, service, databaseTypeId].filter((value) => this.hasValue(value)).length,
+        );
+      });
+  }
+
+  private loadSystemCatalogOptions(): void {
+    if (this.systemCatalogOptionsLoaded || this.systemCatalogOptionsLoading) return;
+    this.systemCatalogOptionsLoading = true;
+    this.serverCatalogService
+      .getActiveOptions('APPLICATION')
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isDatabaseCatalogLoading.set(false)),
+        finalize(() => (this.systemCatalogOptionsLoading = false)),
       )
       .subscribe({
-        next: (page) => {
-          this.databaseCatalogLoadFailed.set(false);
-          this.databaseCatalog.set({
-            items: page.content.map((database) =>
-              toApplicationDatabaseCatalogRow(database, this.locale),
-            ),
-            total: page.totalElements,
-          });
+        next: (options) => {
+          this.systemCatalogServerOptions.set(options);
+          this.systemCatalogOptionsLoaded = true;
         },
-        error: () => {
-          this.databaseCatalogLoadFailed.set(true);
-          this.showLoadError(APPLICATION_SYSTEMS_DATABASES_DATABASE_CATALOG_LOAD_ERROR);
+        error: () => this.showLoadError(APPLICATION_SYSTEMS_DATABASES_SERVER_OPTIONS_LOAD_ERROR),
+      });
+  }
+
+  private loadDatabaseCatalogOptions(): void {
+    if (this.databaseCatalogOptionsLoaded || this.databaseCatalogOptionsLoading) return;
+    this.databaseCatalogOptionsLoading = true;
+    forkJoin({
+      servers: this.serverCatalogService.getActiveOptions('DATABASE'),
+      types: this.vendorCatalogService.getActiveOptions(),
+    })
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => (this.databaseCatalogOptionsLoading = false)),
+      )
+      .subscribe({
+        next: ({ servers, types }) => {
+          this.databaseCatalogServerOptions.set(servers);
+          this.databaseCatalogTypeOptions.set(types);
+          this.databaseCatalogOptionsLoaded = true;
         },
+        error: () => this.showLoadError(APPLICATION_SYSTEMS_DATABASES_DATABASE_OPTIONS_LOAD_ERROR),
       });
   }
 

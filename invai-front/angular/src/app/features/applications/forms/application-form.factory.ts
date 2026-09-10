@@ -2,7 +2,6 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { CommissionType } from '@features/commissions/commissions.model';
 import { ResponsiblePersonOption } from '@features/maintenances/responsibles/responsibles.model';
 
-import { APPLICATION_CONSELLERIA_MOCK_VALUE } from '../applications.constants';
 import { ApplicationStatus } from '../applications.model';
 
 export const APPLICATION_CODE_MIN_LENGTH = 4;
@@ -19,8 +18,8 @@ export interface ApplicationCommonFormControls {
   commissionApprovalDate: FormControl<string>;
   commissionType: FormControl<CommissionType | null>;
   prefix: FormControl<string>;
-  administrativeUnit: FormControl<number | null>;
-  conselleria: FormControl<string>;
+  conselleria: FormControl<string | null>;
+  administrativeUnit: FormControl<string | null>;
   description: FormControl<string>;
 }
 
@@ -41,9 +40,9 @@ export interface ApplicationFiltersFormControls {
   informationSystem: FormControl<number | null>;
   scope: FormControl<number | null>;
   commission: FormControl<number | null>;
-  administrativeUnit: FormControl<number | null>;
+  conselleria: FormControl<string | null>;
+  administrativeUnit: FormControl<string | null>;
   status: FormControl<ApplicationStatus | null>;
-  description: FormControl<string | null>;
   responsible: FormControl<ResponsiblePersonOption | null>;
   database: FormControl<number | null>;
   server: FormControl<number | null>;
@@ -71,8 +70,8 @@ export interface ApplicationDetailFormValue {
   commissionApprovalDate: string;
   commissionType: CommissionType | null;
   prefix: string;
-  administrativeUnit: number | null;
-  conselleria: string;
+  conselleria: string | null;
+  administrativeUnit: string | null;
   description: string;
   creationDate: string;
   modificationDate: string;
@@ -110,11 +109,11 @@ export function createApplicationFiltersForm(formBuilder: FormBuilder): Applicat
     informationSystem: formBuilder.control<number | null>(null),
     scope: formBuilder.control<number | null>(null),
     commission: formBuilder.control<number | null>(null),
-    administrativeUnit: formBuilder.control<number | null>(null),
+    conselleria: formBuilder.control<string | null>(null),
+    administrativeUnit: formBuilder.control<string | null>({ value: null, disabled: true }),
     status: formBuilder.control<ApplicationStatus | null>(ApplicationStatus.ACTIVE, {
       initialValueIsDefault: true,
     }),
-    description: formBuilder.control<string | null>(null),
     responsible: formBuilder.control<ResponsiblePersonOption | null>(null),
     database: formBuilder.control<number | null>(null),
     server: formBuilder.control<number | null>(null),
@@ -148,11 +147,11 @@ function createCommonControls(formBuilder: FormBuilder): ApplicationCommonFormCo
       Validators.required,
       Validators.maxLength(APPLICATION_PREFIX_MAX_LENGTH),
     ]),
-    administrativeUnit: formBuilder.control<number | null>(null, Validators.required),
-    conselleria: formBuilder.nonNullable.control({
-      value: APPLICATION_CONSELLERIA_MOCK_VALUE,
-      disabled: true,
-    }),
+    conselleria: formBuilder.control<string | null>(null, Validators.required),
+    administrativeUnit: formBuilder.control<string | null>(
+      { value: null, disabled: true },
+      Validators.required,
+    ),
     description: formBuilder.nonNullable.control(''),
   };
 }

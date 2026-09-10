@@ -93,6 +93,14 @@ export class DatabaseMaintenanceDialog {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected serverLabel(): string {
+    return this.form().controls.server.value?.label ?? '-';
+  }
+
+  protected databaseTypeLabel(): string {
+    return this.form().controls.databaseType.value?.name ?? '-';
+  }
+
   protected onDatabaseTypeChange(
     databaseType: DatabaseVendorCatalogOption | null,
   ): void {

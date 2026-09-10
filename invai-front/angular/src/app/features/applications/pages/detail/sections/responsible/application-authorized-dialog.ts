@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  model,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
   CrudEntityDialog,
@@ -26,9 +19,11 @@ import { ApplicationAuthorizedFormGroup } from '../../../../forms/application-au
 import {
   ResponsibleCompanyOption,
   ResponsiblePerson,
+  SoffidPersonOption,
 } from '../../../../../maintenances/responsibles/responsibles.model';
 import { toResponsiblePersonOption } from '../../../../../maintenances/responsibles/responsibles.utils';
 import { ApplicationResponsibleSelectOption } from './application-responsible-dialog';
+import { ApplicationSoffidPersonField } from './application-soffid-person-field';
 import { APPLICATION_RESPONSIBLE_COPY } from './application-responsible-section.i18n';
 
 @Component({
@@ -36,6 +31,7 @@ import { APPLICATION_RESPONSIBLE_COPY } from './application-responsible-section.
   standalone: true,
   imports: [
     CrudEntityDialog,
+    ApplicationSoffidPersonField,
     FloatLabel,
     InputText,
     MultiSelect,
@@ -56,10 +52,16 @@ export class ApplicationAuthorizedDialog {
   companyOptionsLoadFailed = input(false);
   people = input.required<ResponsiblePerson[]>();
   isSaving = input(false);
+  soffidOptions = input.required<SoffidPersonOption[]>();
+  soffidLoading = input(false);
+  soffidSearched = input(false);
+  soffidSearchError = input(false);
+  soffidTotal = input(0);
 
   submitForm = output<void>();
   closed = output<void>();
   cancelEdit = output<void>();
+  soffidSearch = output<string>();
 
   protected readonly copy = APPLICATION_RESPONSIBLE_COPY;
   protected readonly title = computed(() =>
@@ -74,12 +76,7 @@ export class ApplicationAuthorizedDialog {
   protected readonly authorizationLabelId = 'application-authorized-dialog-authorization-label';
   protected readonly hasUnsavedChanges = () => this.mode() === 'edit' && this.form().dirty;
   protected readonly personOptions = computed(() => this.people().map(toResponsiblePersonOption));
-  protected readonly personalCaibPassThrough = computed<ToggleSwitchPassThrough>(() => ({
-    input: {
-      'aria-describedby':
-        this.mode() === 'create' ? 'application-authorized-dialog-caib-unavailable' : undefined,
-    },
-  }));
+  protected readonly personalCaibPassThrough = computed<ToggleSwitchPassThrough>(() => ({}));
 
   protected readonly companySelectPassThrough = computed<SelectPassThrough>(() =>
     this.selectPassThrough(this.form().controls.companyId, 'company'),

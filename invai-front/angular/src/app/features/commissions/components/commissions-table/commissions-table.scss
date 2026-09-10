@@ -24,11 +24,11 @@ app-commissions-table {
   }
 
   .invai-scrollable-table .p-datatable-table {
-    min-width: max-content;
+    min-width: 100%;
   }
 
   .invai-scrollable-table :is(th, td) {
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .invai-scrollable-table {

@@ -1,11 +1,11 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input id="layers-filter-name" class="w-full" type="text" formControlName="name" pInputText />
       <label for="layers-filter-name">{{ labels().name }}</label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--compact">
     <p-floatlabel class="w-full">
       <p-select
         inputId="layers-filter-status"

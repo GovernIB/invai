@@ -37,6 +37,8 @@
             formControlName="name"
             [attr.aria-describedby]="isInvalid(form().controls.name) ? 'category-dialog-name-error' : null"
             [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="category-dialog-name">{{ labels.name }}</label>
@@ -62,6 +64,8 @@
             formControlName="nameEs"
             [attr.aria-describedby]="isInvalid(form().controls.nameEs) ? 'category-dialog-name-es-error' : null"
             [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="category-dialog-name-es">{{ labels.nameEs }}</label>

@@ -1,4 +1,5 @@
 <p-dialog
+  styleClass="invai-dialog"
   [visible]="visible()"
   [header]="error()?.error ?? ''"
   [closable]="true"
@@ -22,6 +23,7 @@
       <p-button
         [ariaLabel]="closeAriaLabel"
         [label]="closeLabel"
+        icon="pi pi-times"
         severity="secondary"
         [outlined]="true"
         (onClick)="close()"

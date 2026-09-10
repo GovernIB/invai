@@ -4,28 +4,31 @@ import Lara from '@primeuix/themes/lara';
 /**
  * Brand preset built on top of PrimeNG's Lara theme.
  *
- * The design values (primary blue ramp, contrast/highlight colors) are taken
- * from the legacy SCSS configuration under `src/app/theme` so the new
- * token-based theming engine renders the same brand identity.
+ * Keep the #004B99 brand ramp in sync with the legacy CSS tokens in
+ * `_design-tokens.scss` so PrimeNG and utility classes share the same colors.
  */
 export const InvaiPreset = definePreset(Lara, {
   semantic: {
     primary: {
-      50: '#f3f8ff',
-      100: '#ccdefb',
-      200: '#99bdf7',
-      300: '#669cf3',
-      400: '#337bef',
-      500: '#005aeb',
-      600: '#0048bc',
-      700: '#00368d',
-      800: '#00245e',
-      900: '#00122f',
-      950: '#000918',
+      50: '#f2f6fa',
+      100: '#ccdbeb',
+      200: '#99b7d6',
+      300: '#6693c2',
+      400: '#336fad',
+      500: '#004b99',
+      600: '#003c7a',
+      700: '#002d5c',
+      800: '#001e3d',
+      900: '#000f1f',
+      950: '#00080f',
     },
     colorScheme: {
       light: {
+        surface: {
+          300: '#d1d5db',
+        },
         formField: {
+          borderColor: '{surface.300}',
           disabledBackground: '{surface.100}',
         },
         primary: {
@@ -35,8 +38,8 @@ export const InvaiPreset = definePreset(Lara, {
           activeColor: '{primary.800}',
         },
         highlight: {
-          background: '#eff6ff',
-          focusBackground: '#eff6ff',
+          background: '{primary.50}',
+          focusBackground: '{primary.50}',
           color: '{primary.800}',
           focusColor: '{primary.800}',
         },
@@ -44,6 +47,11 @@ export const InvaiPreset = definePreset(Lara, {
     },
   },
   components: {
+    dialog: {
+      header: { padding: '6px 24px' },
+      content: { padding: '24px' },
+      footer: { padding: '12px 24px' },
+    },
     datatable: {
       colorScheme: {
         light: {

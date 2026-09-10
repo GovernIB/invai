@@ -1,15 +1,10 @@
 import { PageParams } from '@models/page.model';
 
 export interface AdministrativeUnit {
-  id: number;
-  code: string | null;
-  name: string | null;
-  nameEs?: string | null;
-}
-
-export interface AdministrativeUnitInput {
   code: string;
   name: string;
+  parentCode: string | null;
+  level: number | null;
 }
 
 export type AdministrativeUnitPageParams = PageParams;

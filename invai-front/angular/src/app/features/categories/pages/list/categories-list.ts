@@ -431,7 +431,6 @@ export class CategoriesList
       nameEs: category?.nameEs ?? '',
     });
 
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private resetAfterMutation(): void {

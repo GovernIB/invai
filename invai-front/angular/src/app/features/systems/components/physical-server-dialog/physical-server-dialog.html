@@ -16,7 +16,7 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
@@ -31,6 +31,8 @@
           maxlength="255"
           [attr.aria-describedby]="isInvalid(form().controls.name) ? 'physical-server-name-error' : null"
           [attr.aria-invalid]="isInvalid(form().controls.name)"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
           pInputText
         />
         <label for="physical-server-name">{{ labels.name }}</label>
@@ -43,6 +45,12 @@
     </div>
 
     <div class="md:col-span-5">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="physical-server-environment-label" class="invai-dialog-static-field__label">{{ labels.environment }}</span>
+          <p class="invai-form-static-value" aria-labelledby="physical-server-environment-label">{{ environmentLabel() }}</p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-select
           inputId="physical-server-environment"
@@ -59,6 +67,7 @@
         />
         <label for="physical-server-environment">{{ labels.environment }}</label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.environment)) {
         <p id="physical-server-environment-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ requiredError }}

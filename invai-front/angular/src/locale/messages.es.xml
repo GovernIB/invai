@@ -3863,6 +3863,23 @@
       <trans-unit id="1834015837739186286" datatype="html"><source>Producció</source><target>Producción</target></trans-unit>
       <trans-unit id="5887204469177324813" datatype="html"><source>Preproducció</source><target>Preproducción</target></trans-unit>
       <trans-unit id="7524135478800869410" datatype="html"><source>Desenvolupament</source><target>Desarrollo</target></trans-unit>
+      <trans-unit id="1664966462345295209" datatype="html"><source>Accessibilitat</source><target>Accesibilidad</target></trans-unit>
+      <trans-unit id="applicationAccessibilitySectionTitle" datatype="html"><source>Accessibilitat</source><target>Accesibilidad</target></trans-unit>
+      <trans-unit id="2689742116898112965" datatype="html"><source>Segment de classificació</source><target>Segmento de clasificación</target></trans-unit>
+      <trans-unit id="5298872170371069057" datatype="html"><source>Situació de compliment</source><target>Situación de cumplimiento</target></trans-unit>
+      <trans-unit id="5204165599609501248" datatype="html"><source>Caducitat del darrer informe</source><target>Caducidad del último informe</target></trans-unit>
+      <trans-unit id="1214391395625560140" datatype="html"><source>Aplicació mòbil</source><target>Aplicación móvil</target></trans-unit>
+      <trans-unit id="2263386529690464366" datatype="html"><source>Nom aplicació mòbil</source><target>Nombre de la aplicación móvil</target></trans-unit>
+      <trans-unit id="4980702613845247130" datatype="html"><source>URL pública</source><target>URL pública</target></trans-unit>
+      <trans-unit id="2894449667142712609" datatype="html"><source>Contingut no accessible</source><target>Contenido no accesible</target></trans-unit>
+      <trans-unit id="6686213659646842702" datatype="html"><source>Segment I. Portals principals de cada administració pública</source><target>Segmento I. Portales principales de cada administración pública</target></trans-unit>
+      <trans-unit id="8074900441221801875" datatype="html"><source>Segment II. Portals web d&apos;organismes i entitats dependents</source><target>Segmento II. Portales web de organismos y entidades dependientes</target></trans-unit>
+      <trans-unit id="3893949672050501468" datatype="html"><source>Segment III. Aplicacions mòbils</source><target>Segmento III. Aplicaciones móviles</target></trans-unit>
+      <trans-unit id="8278426756778493760" datatype="html"><source>No informat</source><target>No informado</target></trans-unit>
+      <trans-unit id="17208997821889679" datatype="html"><source>Disponible quan l&apos;aplicació mòbil està marcada com a «Sí».</source><target>Disponible cuando la aplicación móvil está marcada como «Sí».</target></trans-unit>
+      <trans-unit id="8392661266971547104" datatype="html"><source>Obrir la URL pública de l&apos;aplicació</source><target>Abrir la URL pública de la aplicación</target></trans-unit>
+      <trans-unit id="17688209011302652" datatype="html"><source>Obrir la documentació d&apos;accessibilitat</source><target>Abrir la documentación de accesibilidad</target></trans-unit>
+      <trans-unit id="1364526631734271652" datatype="html"><source>La documentació d&apos;accessibilitat encara no està implementada.</source><target>La documentación de accesibilidad todavía no está implementada.</target></trans-unit>
       <trans-unit id="5767605497215177376" datatype="html"><source>Desenvolupament intern</source><target>Desarrollo interno</target></trans-unit>
       <trans-unit id="6840064780385463176" datatype="html"><source>Desenvolupament extern</source><target>Desarrollo externo</target></trans-unit>
       <trans-unit id="6764049647115901987" datatype="html"><source>Desenvolupament mixt</source><target>Desarrollo mixto</target></trans-unit>
@@ -5460,8 +5477,16 @@
       <trans-unit id="2065413077054418845" datatype="html"><source>Autorització (català)</source><target>Autorización (catalán)</target></trans-unit>
       <trans-unit id="7041531858366341342" datatype="html"><source>Autorització (castellà)</source><target>Autorización (castellano)</target></trans-unit>
       <trans-unit id="5855501516267521817" datatype="html"><source>Personal CAIB</source><target>Personal CAIB</target></trans-unit>
-      <trans-unit id="applicationAssignmentCaibCreationUnavailable" datatype="html"><source>Les noves assignacions de personal CAIB no estan disponibles temporalment. Pots continuar assignant persones externes.</source><target>Las nuevas asignaciones de personal CAIB no están disponibles temporalmente. Puedes continuar asignando personas externas.</target></trans-unit>
-      <trans-unit id="applicationCaibOnlyResponsibilitiesUnavailable" datatype="html"><source>Les responsabilitats pendents requereixen personal CAIB i no es poden assignar temporalment.</source><target>Las responsabilidades pendientes requieren personal CAIB y no se pueden asignar temporalmente.</target></trans-unit>
+      <trans-unit id="applicationAssignmentCaibRequiredByResponsibility" datatype="html"><source>Aquesta responsabilitat requereix personal CAIB.</source><target>Esta responsabilidad requiere personal CAIB.</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidPerson" datatype="html"><source>Persona CAIB</source><target>Persona CAIB</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidPlaceholder" datatype="html"><source>Cerca per nom i llinatges</source><target>Buscar por nombre y apellidos</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidInstruction" datatype="html"><source>Escriu almenys 3 caràcters i selecciona una persona de Soffid.</source><target>Escribe al menos 3 caracteres y selecciona una persona de Soffid.</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidSearching" datatype="html"><source>Cercant persones a Soffid…</source><target>Buscando personas en Soffid…</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidEmpty" datatype="html"><source>No s&apos;han trobat persones a Soffid.</source><target>No se han encontrado personas en Soffid.</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidSearchError" datatype="html"><source>No s&apos;ha pogut consultar Soffid. Torna-ho a provar.</source><target>No se ha podido consultar Soffid. Inténtalo de nuevo.</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidRefine" datatype="html"><source>S&apos;han trobat <x id="resultCount" equiv-text="total"/> resultats. Refina la cerca per veure la persona correcta.</source><target>Se han encontrado <x id="resultCount" equiv-text="total"/> resultados. Refina la búsqueda para ver la persona correcta.</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidRequired" datatype="html"><source>Selecciona una persona CAIB de Soffid.</source><target>Selecciona una persona CAIB de Soffid.</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidInvalidSelection" datatype="html"><source>Selecciona una persona completa de la llista de Soffid.</source><target>Selecciona una persona completa de la lista de Soffid.</target></trans-unit>
       <trans-unit id="1252861758097906471" datatype="html"><source>El nom no pot superar els 150 caràcters.</source><target>El nombre no puede superar los 150 caracteres.</target></trans-unit>
       <trans-unit id="3152892636097000192" datatype="html"><source>No tens permisos per fer aquesta operació.</source><target>No tienes permisos para realizar esta operación.</target></trans-unit>
       <trans-unit id="3224421314360027754" datatype="html"><source>No es pot restaurar perquè ja existeix un registre actiu amb les mateixes dades.</source><target>No se puede restaurar porque ya existe un registro activo con los mismos datos.</target></trans-unit>
@@ -5542,8 +5567,6 @@
       <trans-unit id="8593763205269916852" datatype="html"><source>Selecciona una persona d&apos;origen i prepara les assignacions que vols processar.</source><target>Selecciona una persona de origen y prepara las asignaciones que quieres procesar.</target></trans-unit>
       <trans-unit id="6352296477082940659" datatype="html"><source>Persona d&apos;origen</source><target>Persona de origen</target></trans-unit>
       <trans-unit id="2810835506495222622" datatype="html"><source>Persona de destinació</source><target>Persona de destino</target></trans-unit>
-      <trans-unit id="6028882144160671548" datatype="html"><source>Filtra les persones d&apos;origen per nom</source><target>Filtra las personas de origen por nombre</target></trans-unit>
-      <trans-unit id="2382216246593813097" datatype="html"><source>Filtra les persones de destinació per nom</source><target>Filtra las personas de destino por nombre</target></trans-unit>
       <trans-unit id="4172965025082358960" datatype="html"><source>Revoca els rols</source><target>Revoca los roles</target></trans-unit>
       <trans-unit id="1503294807326591152" datatype="html"><source>Rols assignats</source><target>Roles asignados</target></trans-unit>
       <trans-unit id="6142216524026432534" datatype="html"><source>Rols per transferir</source><target>Roles para transferir</target></trans-unit>
@@ -5585,6 +5608,704 @@
       <trans-unit id="382224285571054578" datatype="html"><source>Sí</source><target>Sí</target></trans-unit>
       <trans-unit id="3542042671420335679" datatype="html"><source>No</source><target>No</target></trans-unit>
       <trans-unit id="6204011655852970980" datatype="html"><source>Llinatges</source><target>Apellidos</target></trans-unit>
+      <trans-unit id="maintenanceSecurityRoute" datatype="html"><source>seguretat</source><target>seguridad</target></trans-unit>
+      <trans-unit id="maintenanceSecurityLabel" datatype="html"><source>Seguretat</source><target>Seguridad</target></trans-unit>
+      <trans-unit id="securityNameColumn" datatype="html"><source>Nom</source><target>Nombre</target></trans-unit>
+      <trans-unit id="securityNameEsColumn" datatype="html"><source>Nom en castellà</source><target>Nombre en castellano</target></trans-unit>
+      <trans-unit id="securityStatusColumn" datatype="html"><source>Estat</source><target>Estado</target></trans-unit>
+      <trans-unit id="securityEnsRequirementSingular" datatype="html"><source>requisit ENS</source><target>requisito ENS</target></trans-unit>
+      <trans-unit id="securityEnsRequirementPlural" datatype="html"><source>requisits ENS</source><target>requisitos ENS</target></trans-unit>
+      <trans-unit id="securityEnsRequirementTitle" datatype="html"><source>Requisits ENS</source><target>Requisitos ENS</target></trans-unit>
+      <trans-unit id="securityEnsRequirementDescription" datatype="html"><source>Gestiona els requisits de l&apos;Esquema Nacional de Seguretat.</source><target>Gestiona los requisitos del Esquema Nacional de Seguridad.</target></trans-unit>
+      <trans-unit id="securityIdentityProviderSingular" datatype="html"><source>proveïdor d&apos;identitat</source><target>proveedor de identidad</target></trans-unit>
+      <trans-unit id="securityIdentityProviderPlural" datatype="html"><source>proveïdors d&apos;identitat</source><target>proveedores de identidad</target></trans-unit>
+      <trans-unit id="securityIdentityProviderTitle" datatype="html"><source>Proveïdors d&apos;identitat</source><target>Proveedores de identidad</target></trans-unit>
+      <trans-unit id="securityIdentityProviderDescription" datatype="html"><source>Gestiona els proveïdors d&apos;identitat disponibles.</source><target>Gestiona los proveedores de identidad disponibles.</target></trans-unit>
+      <trans-unit id="securityPersonalDataProcessingSingular" datatype="html"><source>tractament de dades personals</source><target>tratamiento de datos personales</target></trans-unit>
+      <trans-unit id="securityPersonalDataProcessingPlural" datatype="html"><source>tractaments de dades personals</source><target>tratamientos de datos personales</target></trans-unit>
+      <trans-unit id="securityPersonalDataProcessingTitle" datatype="html"><source>Tractaments de dades personals</source><target>Tratamientos de datos personales</target></trans-unit>
+      <trans-unit id="securityPersonalDataProcessingDescription" datatype="html"><source>Gestiona les categories de tractament de dades personals.</source><target>Gestiona las categorías de tratamiento de datos personales.</target></trans-unit>
+      <trans-unit id="securityMeasureTypeSingular" datatype="html"><source>tipus de mesura de seguretat</source><target>tipo de medida de seguridad</target></trans-unit>
+      <trans-unit id="securityMeasureTypePlural" datatype="html"><source>tipus de mesura de seguretat</source><target>tipos de medida de seguridad</target></trans-unit>
+      <trans-unit id="securityMeasureTypeTitle" datatype="html"><source>Tipus de mesura de seguretat</source><target>Tipos de medida de seguridad</target></trans-unit>
+      <trans-unit id="securityMeasureTypeDescription" datatype="html"><source>Gestiona els tipus de mesures de seguretat.</source><target>Gestiona los tipos de medidas de seguridad.</target></trans-unit>
+      <trans-unit id="securityWebContextSingular" datatype="html"><source>context web</source><target>contexto web</target></trans-unit>
+      <trans-unit id="securityWebContextPlural" datatype="html"><source>contexts web</source><target>contextos web</target></trans-unit>
+      <trans-unit id="securityWebContextTitle" datatype="html"><source>Contexts web</source><target>Contextos web</target></trans-unit>
+      <trans-unit id="securityWebContextDescription" datatype="html"><source>Gestiona els contexts web de seguretat.</source><target>Gestiona los contextos web de seguridad.</target></trans-unit>
+      <trans-unit id="securityFilterName" datatype="html"><source>Nom</source><target>Nombre</target></trans-unit>
+      <trans-unit id="securityFilterNameEs" datatype="html"><source>Nom en castellà</source><target>Nombre en castellano</target></trans-unit>
+      <trans-unit id="securityFilterStatus" datatype="html"><source>Estat</source><target>Estado</target></trans-unit>
+      <trans-unit id="securityQuickSearchPlaceholder" datatype="html"><source>Cerca per nom</source><target>Buscar por nombre</target></trans-unit>
+      <trans-unit id="securityQuickSearchAria" datatype="html"><source>Cerca ràpida de <x id="resource" equiv-text="plural"/></source><target>Búsqueda rápida de <x id="resource" equiv-text="plural"/></target></trans-unit>
+      <trans-unit id="securityAddAria" datatype="html"><source>Afegeix un <x id="resource" equiv-text="singular"/></source><target>Añade un <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityFiltersButtonAria" datatype="html"><source>Mostra o amaga els filtres de <x id="resource" equiv-text="plural"/></source><target>Muestra u oculta los filtros de <x id="resource" equiv-text="plural"/></target></trans-unit>
+      <trans-unit id="securityColumnsButtonAria" datatype="html"><source>Selecciona les columnes de <x id="resource" equiv-text="plural"/></source><target>Selecciona las columnas de <x id="resource" equiv-text="plural"/></target></trans-unit>
+      <trans-unit id="securityLoadErrorSummary" datatype="html"><source>Error</source><target>Error</target></trans-unit>
+      <trans-unit id="securityListLoadError" datatype="html"><source>Error en carregar: <x id="resource" equiv-text="plural"/></source><target>Error al cargar: <x id="resource" equiv-text="plural"/></target></trans-unit>
+      <trans-unit id="securityEntityLoadError" datatype="html"><source>No s&apos;ha pogut carregar el registre.</source><target>No se ha podido cargar el registro.</target></trans-unit>
+      <trans-unit id="securityCreated" datatype="html"><source>El registre s&apos;ha afegit correctament.</source><target>El registro se ha añadido correctamente.</target></trans-unit>
+      <trans-unit id="securityUpdated" datatype="html"><source>El registre s&apos;ha actualitzat correctament.</source><target>El registro se ha actualizado correctamente.</target></trans-unit>
+      <trans-unit id="securityDeactivated" datatype="html"><source>El registre s&apos;ha donat de baixa correctament.</source><target>El registro se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="securityRestored" datatype="html"><source>El registre s&apos;ha restaurat correctament.</source><target>El registro se ha restaurado correctamente.</target></trans-unit>
+      <trans-unit id="securitySaveError" datatype="html"><source>No s&apos;ha pogut desar el registre.</source><target>No se ha podido guardar el registro.</target></trans-unit>
+      <trans-unit id="securityDeactivateError" datatype="html"><source>No s&apos;ha pogut donar de baixa el registre.</source><target>No se ha podido dar de baja el registro.</target></trans-unit>
+      <trans-unit id="securityRestoreError" datatype="html"><source>No s&apos;ha pogut restaurar el registre.</source><target>No se ha podido restaurar el registro.</target></trans-unit>
+      <trans-unit id="securityForbidden" datatype="html"><source>No tens permisos per fer aquesta operació.</source><target>No tienes permisos para realizar esta operación.</target></trans-unit>
+      <trans-unit id="securityDeactivateDialogTitle" datatype="html"><source>Donar de baixa el registre?</source><target>¿Dar de baja el registro?</target></trans-unit>
+      <trans-unit id="securityDeactivateDialogMessage" datatype="html"><source>Estàs a punt de donar de baixa «<x id="resourceName" equiv-text="name"/>».</source><target>Estás a punto de dar de baja «<x id="resourceName" equiv-text="name"/>».</target></trans-unit>
+      <trans-unit id="securityDeactivateDialogCancel" datatype="html"><source>Cancel·lar</source><target>Cancelar</target></trans-unit>
+      <trans-unit id="securityDeactivateDialogConfirm" datatype="html"><source>Donar de baixa</source><target>Dar de baja</target></trans-unit>
+      <trans-unit id="securityDeactivateDialogCancelAria" datatype="html"><source>Cancel·la la baixa del registre</source><target>Cancela la baja del registro</target></trans-unit>
+      <trans-unit id="securityDeactivateDialogConfirmAria" datatype="html"><source>Confirma la baixa del registre</source><target>Confirma la baja del registro</target></trans-unit>
+      <trans-unit id="securityDialogCreateTitle" datatype="html"><source>Afegir <x id="resource" equiv-text="singular"/></source><target>Añadir <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogViewTitle" datatype="html"><source>Consultar <x id="resource" equiv-text="singular"/></source><target>Consultar <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogEditTitle" datatype="html"><source>Editar <x id="resource" equiv-text="singular"/></source><target>Editar <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogAcceptAria" datatype="html"><source>Accepta la consulta del <x id="resource" equiv-text="singular"/></source><target>Acepta la consulta del <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogAddAria" datatype="html"><source>Afegeix el <x id="resource" equiv-text="singular"/></source><target>Añade el <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogCancelAria" datatype="html"><source>Cancel·la els canvis del <x id="resource" equiv-text="singular"/></source><target>Cancela los cambios del <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogCloseAria" datatype="html"><source>Tanca el formulari del <x id="resource" equiv-text="singular"/></source><target>Cierra el formulario del <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogDeactivateAria" datatype="html"><source>Dona de baixa el <x id="resource" equiv-text="singular"/></source><target>Da de baja el <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogEditAria" datatype="html"><source>Edita el <x id="resource" equiv-text="singular"/></source><target>Edita el <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogRestoreAria" datatype="html"><source>Restaura el <x id="resource" equiv-text="singular"/></source><target>Restaura el <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogSaveAria" datatype="html"><source>Desa els canvis del <x id="resource" equiv-text="singular"/></source><target>Guarda los cambios del <x id="resource" equiv-text="singular"/></target></trans-unit>
+      <trans-unit id="securityDialogLoading" datatype="html"><source>Carregant el registre</source><target>Cargando el registro</target></trans-unit>
+      <trans-unit id="securityRequiredError" datatype="html"><source>Camp obligatori</source><target>Campo obligatorio</target></trans-unit>
+      <trans-unit id="securityNameMaxLengthError" datatype="html"><source>El nom ha de tenir com a màxim 150 caràcters</source><target>El nombre debe tener como máximo 150 caracteres</target></trans-unit>
+      <trans-unit id="securityNameEsMaxLengthError" datatype="html"><source>El nom en castellà ha de tenir com a màxim 100 caràcters</source><target>El nombre en castellano debe tener como máximo 100 caracteres</target></trans-unit>
+      <trans-unit id="securityTableActionsAria" datatype="html"><source>Obrir les accions del registre</source><target>Abrir las acciones del registro</target></trans-unit>
+      <trans-unit id="securityTableView" datatype="html"><source>Consulta</source><target>Consultar</target></trans-unit>
+      <trans-unit id="securityTableEdit" datatype="html"><source>Edita</source><target>Editar</target></trans-unit>
+      <trans-unit id="securityTableDeactivate" datatype="html"><source>Dona de baixa</source><target>Dar de baja</target></trans-unit>
+      <trans-unit id="1014655482924089993" datatype="html"><source>La secció Responsables està incompleta: falten tipus de responsable per assignar.</source><target>La sección Responsables está incompleta: faltan tipos de responsable por asignar.</target></trans-unit>
+      <trans-unit id="2974880318276193180" datatype="html"><source>La secció Responsables està incompleta: no hi ha cap persona autoritzada.</source><target>La sección Responsables está incompleta: no hay ninguna persona autorizada.</target></trans-unit>
+      <trans-unit id="4114614594175155778" datatype="html"><source>La secció Responsables està incompleta: falten tipus de responsable per assignar i no hi ha cap persona autoritzada.</source><target>La sección Responsables está incompleta: faltan tipos de responsable por asignar y no hay ninguna persona autorizada.</target></trans-unit>
+      <trans-unit id="932998213248679461" datatype="html"><source>La secció Desenvolupament està incompleta: falten camps obligatoris.</source><target>La sección Desarrollo está incompleta: faltan campos obligatorios.</target></trans-unit>
+      <trans-unit id="820957690603143924" datatype="html"><source>Cerca per nom o correu electrònic</source><target>Busca por nombre o correo electrónico</target></trans-unit>
+      <trans-unit id="8689677269384613927" datatype="html"><source>Escriu almenys tres caràcters per cercar o obre el desplegable per veure els primers resultats. Selecciona una persona amb rols disponibles a InvAI.</source><target>Escribe al menos tres caracteres para buscar o abre el desplegable para ver los primeros resultados. Selecciona una persona con roles disponibles en InvAI.</target></trans-unit>
+      <trans-unit id="262770241679134412" datatype="html"><source>Cercant persones externes i personal CAIB.</source><target>Buscando personas externas y personal CAIB.</target></trans-unit>
+      <trans-unit id="4063958828131613005" datatype="html"><source>No s&apos;han pogut cercar les persones d&apos;origen. Torna-ho a provar.</source><target>No se han podido buscar las personas de origen. Vuelve a intentarlo.</target></trans-unit>
+      <trans-unit id="1655948371490308453" datatype="html"><source>Selecciona una persona d&apos;origen.</source><target>Selecciona una persona de origen.</target></trans-unit>
+      <trans-unit id="1722905421668897734" datatype="html"><source>Encara no té un registre local a InvAI i no es pot seleccionar com a origen.</source><target>Todavía no tiene un registro local en InvAI y no se puede seleccionar como origen.</target></trans-unit>
+      <trans-unit id="8511203646852134187" datatype="html"><source>Escriu almenys tres caràcters per cercar o obre el desplegable per veure els primers resultats. Selecciona una persona de la llista.</source><target>Escribe al menos tres caracteres para buscar o abre el desplegable para ver los primeros resultados. Selecciona una persona de la lista.</target></trans-unit>
+      <trans-unit id="1652585967488433016" datatype="html"><source>Cercant persones a la base de dades i a Soffid.</source><target>Buscando personas en la base de datos y en Soffid.</target></trans-unit>
+      <trans-unit id="6402116180620118659" datatype="html"><source>No s&apos;han trobat persones amb aquesta cerca.</source><target>No se han encontrado personas con esta búsqueda.</target></trans-unit>
+      <trans-unit id="9081240407235184629" datatype="html"><source>No s&apos;han pogut cercar les persones de destinació. Torna-ho a provar.</source><target>No se han podido buscar las personas de destino. Vuelve a intentarlo.</target></trans-unit>
+      <trans-unit id="4755974843650452799" datatype="html"><source>Selecciona una persona de destinació.</source><target>Selecciona una persona de destino.</target></trans-unit>
+      <trans-unit id="3356735789920816858" datatype="html"><source>Selecciona una persona de la llista de resultats.</source><target>Selecciona una persona de la lista de resultados.</target></trans-unit>
+      <trans-unit id="2941976105685674420" datatype="html"><source>Soffid</source><target>Soffid</target></trans-unit>
+      <trans-unit id="3732591480887292170" datatype="html"><source>Seguretat</source><target>Seguridad</target></trans-unit>
+      <trans-unit id="3811301492387234931" datatype="html"><source>La secció Seguretat està incompleta: falta informar alguna dimensió ENS.</source><target>La sección Seguridad está incompleta: falta informar alguna dimensión ENS.</target></trans-unit>
+      <trans-unit id="8066566182607954881" datatype="html"><source>La secció Seguretat conté més d&apos;una classificació ENS. Cal corregir les dades al servidor.</source><target>La sección Seguridad contiene más de una clasificación ENS. Es necesario corregir los datos en el servidor.</target></trans-unit>
+      <trans-unit id="8628946511752053131" datatype="html"><source>No s&apos;ha pogut comprovar si la secció Seguretat està completa.</source><target>No se ha podido comprobar si la sección Seguridad está completa.</target></trans-unit>
+      <trans-unit id="3598983136801766919" datatype="html"><source>Rols de l&apos;aplicació</source><target>Roles de la aplicación</target></trans-unit>
+      <trans-unit id="6982750207583776936" datatype="html"><source>Contextos web</source><target>Contextos web</target></trans-unit>
+      <trans-unit id="3980140649627047016" datatype="html"><source>Esquema Nacional de Seguretat</source><target>Esquema Nacional de Seguridad</target></trans-unit>
+      <trans-unit id="3217841096909855628" datatype="html"><source>Dimensions ENS</source><target>Dimensiones ENS</target></trans-unit>
+      <trans-unit id="7793395504471196300" datatype="html"><source>Riscos de seguretat</source><target>Riesgos de seguridad</target></trans-unit>
+      <trans-unit id="5966691695788714555" datatype="html"><source>Mesures de seguretat aplicades</source><target>Medidas de seguridad aplicadas</target></trans-unit>
+      <trans-unit id="2205747184739405336" datatype="html"><source>Obre la documentació de seguretat</source><target>Abre la documentación de seguridad</target></trans-unit>
+      <trans-unit id="6980269229426123094" datatype="html"><source>La documentació de seguretat encara no està disponible.</source><target>La documentación de seguridad todavía no está disponible.</target></trans-unit>
+      <trans-unit id="1898341320667416931" datatype="html"><source>La consulta de rols és temporal i de només lectura fins que estigui disponible el provider de Soffid.</source><target>La consulta de roles es temporal y de solo lectura hasta que esté disponible el proveedor de Soffid.</target></trans-unit>
+      <trans-unit id="4301709945526444829" datatype="html"><source>Dades ENS inconsistents</source><target>Datos ENS inconsistentes</target></trans-unit>
+      <trans-unit id="2385164672809398996" datatype="html"><source>S&apos;ha trobat més d&apos;una classificació ENS activa. L&apos;edició d&apos;aquest formulari està bloquejada fins que backend corregeixi les dades.</source><target>Se ha encontrado más de una clasificación ENS activa. La edición de este formulario está bloqueada hasta que backend corrija los datos.</target></trans-unit>
+      <trans-unit id="857095664239220651" datatype="html"><source>Desa primer les dades generals de Seguretat per poder gestionar aquesta taula.</source><target>Guarda primero los datos generales de Seguridad para poder gestionar esta tabla.</target></trans-unit>
+      <trans-unit id="4944165866569545260" datatype="html"><source>No s&apos;han pogut carregar totes les dades de Seguretat.</source><target>No se han podido cargar todos los datos de Seguridad.</target></trans-unit>
+      <trans-unit id="2413177294791011072" datatype="html"><source>No s&apos;han pogut desar els canvis de Seguretat.</source><target>No se han podido guardar los cambios de Seguridad.</target></trans-unit>
+      <trans-unit id="8686790429898011871" datatype="html"><source>El registre s&apos;ha desat correctament.</source><target>El registro se ha guardado correctamente.</target></trans-unit>
+      <trans-unit id="9185011117160200658" datatype="html"><source>No s&apos;ha pogut desar el registre.</source><target>No se ha podido guardar el registro.</target></trans-unit>
+      <trans-unit id="836157254956302542" datatype="html"><source>El registre s&apos;ha donat de baixa correctament.</source><target>El registro se ha dado de baja correctamente.</target></trans-unit>
+      <trans-unit id="primengDateFormat" datatype="html"><source>dd/mm/yy</source><target>dd/mm/yy</target></trans-unit>
+      <trans-unit id="3831354846717962047" datatype="html"><source>Grau d&apos;adequació a l&apos;ENS</source><target>Grado de adecuación al ENS</target></trans-unit>
+      <trans-unit id="484339060153763796" datatype="html"><source>Proveïdor d&apos;identitat</source><target>Proveedor de identidad</target></trans-unit>
+      <trans-unit id="6891818206469917616" datatype="html"><source>Subjecció a l&apos;ENS</source><target>Sujeción al ENS</target></trans-unit>
+      <trans-unit id="5467404963605201029" datatype="html"><source>Tractament de dades personals</source><target>Tratamiento de datos personales</target></trans-unit>
+      <trans-unit id="1146048579187613203" datatype="html"><source>Confidencialitat</source><target>Confidencialidad</target></trans-unit>
+      <trans-unit id="3483249499247460586" datatype="html"><source>Integritat</source><target>Integridad</target></trans-unit>
+      <trans-unit id="3290685826226303926" datatype="html"><source>Traçabilitat</source><target>Trazabilidad</target></trans-unit>
+      <trans-unit id="694670909796892889" datatype="html"><source>Disponibilitat</source><target>Disponibilidad</target></trans-unit>
+      <trans-unit id="1372923291072894001" datatype="html"><source>Autenticitat</source><target>Autenticidad</target></trans-unit>
+      <trans-unit id="4797133848929340610" datatype="html"><source>Context web</source><target>Contexto web</target></trans-unit>
+      <trans-unit id="5259024220831936763" datatype="html"><source>Nivell</source><target>Nivel</target></trans-unit>
+      <trans-unit id="8112916724917454323" datatype="html"><source>Requisit ENS</source><target>Requisito ENS</target></trans-unit>
+      <trans-unit id="8040881171107393560" datatype="html"><source>ID</source><target>ID</target></trans-unit>
+      <trans-unit id="177109408113564676" datatype="html"><source>Observació</source><target>Observación</target></trans-unit>
+      <trans-unit id="4675006808633750581" datatype="html"><source>Obre les accions del registre</source><target>Abre las acciones del registro</target></trans-unit>
+      <trans-unit id="1076714711845967776" datatype="html"><source>Afegeix un context web</source><target>Añade un contexto web</target></trans-unit>
+      <trans-unit id="1470838253714979651" datatype="html"><source>Afegeix un risc de seguretat</source><target>Añade un riesgo de seguridad</target></trans-unit>
+      <trans-unit id="7365127104415595533" datatype="html"><source>Afegeix una mesura de seguretat</source><target>Añade una medida de seguridad</target></trans-unit>
+      <trans-unit id="7854483454965060126" datatype="html"><source>Consulta el context web</source><target>Consulta el contexto web</target></trans-unit>
+      <trans-unit id="3073995719094539127" datatype="html"><source>Edita el context web</source><target>Edita el contexto web</target></trans-unit>
+      <trans-unit id="4326874531193306109" datatype="html"><source>Consulta el risc de seguretat</source><target>Consulta el riesgo de seguridad</target></trans-unit>
+      <trans-unit id="7001288979116218548" datatype="html"><source>Edita el risc de seguretat</source><target>Edita el riesgo de seguridad</target></trans-unit>
+      <trans-unit id="1044815667498025193" datatype="html"><source>Consulta la mesura de seguretat</source><target>Consulta la medida de seguridad</target></trans-unit>
+      <trans-unit id="8625339995303618272" datatype="html"><source>Edita la mesura de seguretat</source><target>Edita la medida de seguridad</target></trans-unit>
+      <trans-unit id="4392153921456988415" datatype="html"><source>Accepta i tanca el diàleg</source><target>Acepta y cierra el diálogo</target></trans-unit>
+      <trans-unit id="3394422800893568287" datatype="html"><source>Afegeix el registre</source><target>Añade el registro</target></trans-unit>
+      <trans-unit id="1329365372724718309" datatype="html"><source>Cancel·la els canvis</source><target>Cancela los cambios</target></trans-unit>
+      <trans-unit id="5535618401902092888" datatype="html"><source>Tanca el diàleg</source><target>Cierra el diálogo</target></trans-unit>
+      <trans-unit id="8738124214789046295" datatype="html"><source>Dona de baixa el registre</source><target>Da de baja el registro</target></trans-unit>
+      <trans-unit id="8090742339411892499" datatype="html"><source>Edita el registre</source><target>Edita el registro</target></trans-unit>
+      <trans-unit id="5741107173395143494" datatype="html"><source>Restaura el registre</source><target>Restaura el registro</target></trans-unit>
+      <trans-unit id="7649000192895073874" datatype="html"><source>Desa el registre</source><target>Guarda el registro</target></trans-unit>
+      <trans-unit id="5390560813082754121" datatype="html"><source>Dona de baixa el registre?</source><target>¿Dar de baja el registro?</target></trans-unit>
+      <trans-unit id="3070345739603580228" datatype="html"><source>El registre deixarà d&apos;aparèixer a la taula de registres actius.</source><target>El registro dejará de aparecer en la tabla de registros activos.</target></trans-unit>
+      <trans-unit id="1703160223732736076" datatype="html"><source>Confirma la baixa del registre</source><target>Confirma la baja del registro</target></trans-unit>
+      <trans-unit id="5417396314870135122" datatype="html"><source>Sistema</source><target>Sistema</target></trans-unit>
+      <trans-unit id="1825037824377395039" datatype="html"><source>Carregant Conselleries…</source><target>Cargando consellerias…</target></trans-unit>
+      <trans-unit id="7070658508398500768" datatype="html"><source>No s&apos;han pogut carregar les Conselleries.</source><target>No se han podido cargar las consellerias.</target></trans-unit>
+      <trans-unit id="3919056765865076357" datatype="html"><source>Carregant unitats administratives…</source><target>Cargando unidades administrativas…</target></trans-unit>
+      <trans-unit id="1294682768014529686" datatype="html"><source>No s&apos;han pogut carregar les unitats administratives.</source><target>No se han podido cargar las unidades administrativas.</target></trans-unit>
+      <trans-unit id="410417889340196031" datatype="html"><source>Aquesta Conselleria no té unitats administratives disponibles.</source><target>Esta conselleria no tiene unidades administrativas disponibles.</target></trans-unit>
+      <trans-unit id="1985989632946359747" datatype="html"><source>Selecciona primer una Conselleria.</source><target>Selecciona primero una conselleria.</target></trans-unit>
+      <trans-unit id="3073472655995129549" datatype="html"><source>La secció Sistemes i BD està incompleta: no hi ha cap sistema actiu.</source><target>La sección Sistemas y BD está incompleta: no hay ningún sistema activo.</target></trans-unit>
+      <trans-unit id="4409696561386421026" datatype="html"><source>La secció Sistemes i BD està incompleta: no hi ha cap base de dades activa.</source><target>La sección Sistemas y BD está incompleta: no hay ninguna base de datos activa.</target></trans-unit>
+      <trans-unit id="2961947489882666250" datatype="html"><source>La secció Sistemes i BD està incompleta: no hi ha cap sistema ni cap base de dades actius.</source><target>La sección Sistemas y BD está incompleta: no hay ningún sistema ni ninguna base de datos activos.</target></trans-unit>
+      <trans-unit id="7198793416448773337" datatype="html"><source>La secció Accessibilitat està incompleta: falten camps obligatoris.</source><target>La sección Accesibilidad está incompleta: faltan campos obligatorios.</target></trans-unit>
+      <trans-unit id="8840521559621392146" datatype="html"><source>La secció Seguretat està incompleta: falta almenys un context web, una classificació ENS o un risc actiu.</source><target>La sección Seguridad está incompleta: falta al menos un contexto web, una clasificación ENS o un riesgo activo.</target></trans-unit>
+      <trans-unit id="applicationAccessibilityCatalogFailed" datatype="html">
+        <source>No s&apos;han pogut carregar els catàlegs d&apos;accessibilitat. Torna-ho a provar.</source>
+        <target>No se han podido cargar los catálogos de accesibilidad. Vuelve a intentarlo.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/accessibility/application-accessibility-section.i18n.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityCatalogForbidden" datatype="html">
+        <source>El teu perfil no té permisos per consultar els catàlegs d&apos;accessibilitat.</source>
+        <target>Tu perfil no tiene permisos para consultar los catálogos de accesibilidad.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/accessibility/application-accessibility-section.i18n.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityCatalogEmpty" datatype="html">
+        <source>No hi ha registres actius disponibles.</source>
+        <target>No hay registros activos disponibles.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/accessibility/application-accessibility-section.i18n.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityCatalogRetry" datatype="html">
+        <source>Torna a carregar els catàlegs</source>
+        <target>Volver a cargar los catálogos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/accessibility/application-accessibility-section.i18n.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityCatalogFilter" datatype="html">
+        <source>Cerca al catàleg</source>
+        <target>Buscar en el catálogo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/accessibility/application-accessibility-section.i18n.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityCatalogUnavailable" datatype="html">
+        <source>Registre no disponible (ID <x id="id" equiv-text="id"/>)</source>
+        <target>Registro no disponible (ID <x id="id" equiv-text="id"/>)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/accessibility/application-accessibility-section.i18n.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityNameColumn" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.constants.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityNameEsColumn" datatype="html">
+        <source>Nom en castellà</source>
+        <target>Nombre en castellano</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.constants.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityStatusColumn" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.constants.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityIdColumn" datatype="html">
+        <source>ID</source>
+        <target>ID</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.constants.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityClassificationSegmentSingular" datatype="html">
+        <source>segment de classificació</source>
+        <target>segmento de clasificación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityClassificationSegmentPlural" datatype="html">
+        <source>segments de classificació</source>
+        <target>segmentos de clasificación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityClassificationSegmentTitle" datatype="html">
+        <source>Segments de classificació</source>
+        <target>Segmentos de clasificación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityClassificationSegmentDescription" datatype="html">
+        <source>Gestiona els segments de classificació d&apos;accessibilitat.</source>
+        <target>Gestiona los segmentos de clasificación de accesibilidad.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityComplianceSituationSingular" datatype="html">
+        <source>situació de compliment</source>
+        <target>situación de cumplimiento</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityComplianceSituationPlural" datatype="html">
+        <source>situacions de compliment</source>
+        <target>situaciones de cumplimiento</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityComplianceSituationTitle" datatype="html">
+        <source>Situacions de compliment</source>
+        <target>Situaciones de cumplimiento</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityComplianceSituationDescription" datatype="html">
+        <source>Gestiona les situacions de compliment d&apos;accessibilitat.</source>
+        <target>Gestiona las situaciones de cumplimiento de accesibilidad.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityFilterName" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityFilterNameEs" datatype="html">
+        <source>Nom en castellà</source>
+        <target>Nombre en castellano</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityFilterStatus" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityQuickSearchPlaceholder" datatype="html">
+        <source>Cerca per nom</source>
+        <target>Buscar por nombre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityQuickSearchAria" datatype="html">
+        <source>Cerca ràpida de <x id="resource" equiv-text="plural"/></source>
+        <target>Búsqueda rápida de <x id="resource" equiv-text="plural"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityAddAria" datatype="html">
+        <source>Afegeix: <x id="resource" equiv-text="singular"/></source>
+        <target>Añade: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityFiltersButtonAria" datatype="html">
+        <source>Mostra o amaga els filtres de <x id="resource" equiv-text="plural"/></source>
+        <target>Muestra u oculta los filtros de <x id="resource" equiv-text="plural"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityColumnsButtonAria" datatype="html">
+        <source>Selecciona les columnes de <x id="resource" equiv-text="plural"/></source>
+        <target>Selecciona las columnas de <x id="resource" equiv-text="plural"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityLoadErrorSummary" datatype="html">
+        <source>Error</source>
+        <target>Error</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityListLoadError" datatype="html">
+        <source>Error en carregar: <x id="resource" equiv-text="plural"/></source>
+        <target>Error al cargar: <x id="resource" equiv-text="plural"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityEntityLoadError" datatype="html">
+        <source>No s&apos;ha pogut carregar el registre.</source>
+        <target>No se ha podido cargar el registro.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityCreated" datatype="html">
+        <source>El registre s&apos;ha afegit correctament.</source>
+        <target>El registro se ha añadido correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityUpdated" datatype="html">
+        <source>El registre s&apos;ha actualitzat correctament.</source>
+        <target>El registro se ha actualizado correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivated" datatype="html">
+        <source>El registre s&apos;ha donat de baixa correctament.</source>
+        <target>El registro se ha dado de baja correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityRestored" datatype="html">
+        <source>El registre s&apos;ha restaurat correctament.</source>
+        <target>El registro se ha restaurado correctamente.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilitySaveError" datatype="html">
+        <source>No s&apos;ha pogut desar el registre.</source>
+        <target>No se ha podido guardar el registro.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateError" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el registre.</source>
+        <target>No se ha podido dar de baja el registro.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityRestoreError" datatype="html">
+        <source>No s&apos;ha pogut restaurar el registre.</source>
+        <target>No se ha podido restaurar el registro.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityForbidden" datatype="html">
+        <source>No tens permisos per fer aquesta operació.</source>
+        <target>No tienes permisos para realizar esta operación.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateDialogTitle" datatype="html">
+        <source>Donar de baixa el registre?</source>
+        <target>¿Dar de baja el registro?</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateDialogMessage" datatype="html">
+        <source>Estàs a punt de donar de baixa «<x id="resourceName" equiv-text="name"/>».</source>
+        <target>Estás a punto de dar de baja «<x id="resourceName" equiv-text="name"/>».</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateDialogCancel" datatype="html">
+        <source>Cancel·lar</source>
+        <target>Cancelar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateDialogConfirm" datatype="html">
+        <source>Donar de baixa</source>
+        <target>Dar de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateDialogCancelAria" datatype="html">
+        <source>Cancel·la la baixa del registre</source>
+        <target>Cancela la baja del registro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDeactivateDialogConfirmAria" datatype="html">
+        <source>Confirma la baixa del registre</source>
+        <target>Confirma la baja del registro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogCreateTitle" datatype="html">
+        <source>Afegir <x id="resource" equiv-text="singular"/></source>
+        <target>Añadir <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogViewTitle" datatype="html">
+        <source>Consultar <x id="resource" equiv-text="singular"/></source>
+        <target>Consultar <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogEditTitle" datatype="html">
+        <source>Editar <x id="resource" equiv-text="singular"/></source>
+        <target>Editar <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogAcceptAria" datatype="html">
+        <source>Accepta la consulta: <x id="resource" equiv-text="singular"/></source>
+        <target>Acepta la consulta: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogAddAria" datatype="html">
+        <source>Afegeix: <x id="resource" equiv-text="singular"/></source>
+        <target>Añade: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogCancelAria" datatype="html">
+        <source>Cancel·la els canvis: <x id="resource" equiv-text="singular"/></source>
+        <target>Cancela los cambios: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogCloseAria" datatype="html">
+        <source>Tanca el formulari: <x id="resource" equiv-text="singular"/></source>
+        <target>Cierra el formulario: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogDeactivateAria" datatype="html">
+        <source>Dona de baixa: <x id="resource" equiv-text="singular"/></source>
+        <target>Da de baja: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogEditAria" datatype="html">
+        <source>Edita: <x id="resource" equiv-text="singular"/></source>
+        <target>Edita: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogRestoreAria" datatype="html">
+        <source>Restaura: <x id="resource" equiv-text="singular"/></source>
+        <target>Restaura: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogSaveAria" datatype="html">
+        <source>Desa els canvis: <x id="resource" equiv-text="singular"/></source>
+        <target>Guarda los cambios: <x id="resource" equiv-text="singular"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityDialogLoading" datatype="html">
+        <source>Carregant el registre</source>
+        <target>Cargando el registro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityRequiredError" datatype="html">
+        <source>Camp obligatori</source>
+        <target>Campo obligatorio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityNameMaxLengthError" datatype="html">
+        <source>El nom ha de tenir com a màxim 150 caràcters</source>
+        <target>El nombre debe tener como máximo 150 caracteres</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityNameEsMaxLengthError" datatype="html">
+        <source>El nom en castellà ha de tenir com a màxim 100 caràcters</source>
+        <target>El nombre en castellano debe tener como máximo 100 caracteres</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityTableActionsAria" datatype="html">
+        <source>Obrir les accions del registre</source>
+        <target>Abrir las acciones del registro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityTableView" datatype="html">
+        <source>Consulta</source>
+        <target>Consultar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityTableEdit" datatype="html">
+        <source>Edita</source>
+        <target>Editar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="accessibilityTableDeactivate" datatype="html">
+        <source>Dona de baixa</source>
+        <target>Dar de baja</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/accessibility/accessibility.i18n.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="maintenanceAccessibilityRoute" datatype="html">
+        <source>accessibilitat</source>
+        <target>accesibilidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/maintenances.routes.i18n.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="maintenanceAccessibilityLabel" datatype="html">
+        <source>Accessibilitat</source>
+        <target>Accesibilidad</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/maintenances.routes.i18n.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityLoadFailed" datatype="html">
+        <source>No s'han pogut carregar les dades d'accessibilitat. Torna-ho a provar.</source>
+        <target>No se han podido cargar los datos de accesibilidad. Vuelve a intentarlo.</target>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityUnavailable" datatype="html">
+        <source>No es pot identificar el registre d'accessibilitat d'aquesta aplicació. Torna a carregar les dades.</source>
+        <target>No se puede identificar el registro de accesibilidad de esta aplicación. Vuelve a cargar los datos.</target>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityForbidden" datatype="html">
+        <source>El teu perfil no té permisos per fer aquesta operació d'accessibilitat.</source>
+        <target>Tu perfil no tiene permisos para realizar esta operación de accesibilidad.</target>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityDeleted" datatype="html">
+        <source>El registre d'accessibilitat està donat de baixa i no es pot modificar.</source>
+        <target>El registro de accesibilidad está dado de baja y no se puede modificar.</target>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityRetry" datatype="html">
+        <source>Torna a carregar l'accessibilitat</source>
+        <target>Volver a cargar la accesibilidad</target>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityClearBlocked" datatype="html">
+        <source>No es pot deixar en blanc una classificació o situació de compliment ja desada. Pots seleccionar un altre valor.</source>
+        <target>No se puede dejar en blanco una clasificación o situación de cumplimiento ya guardada. Puedes seleccionar otro valor.</target>
+      </trans-unit>
+      <trans-unit id="applicationAccessibilityMaxLength" datatype="html">
+        <source>El valor no pot superar els 255 caràcters.</source>
+        <target>El valor no puede superar los 255 caracteres.</target>
+      </trans-unit>
+      <trans-unit id="applicationCompletenessRefreshError" datatype="html"><source>No s'han pogut actualitzar els indicadors de dades incompletes. Es mantenen els últims valors rebuts del servidor.</source><target>No se han podido actualizar los indicadores de datos incompletos. Se mantienen los últimos valores recibidos del servidor.</target></trans-unit>
+      <trans-unit id="applicationCompletenessRetry" datatype="html"><source>Torna a carregar els indicadors</source><target>Vuelve a cargar los indicadores</target></trans-unit>
+      <trans-unit id="applicationsFilterResponsible" datatype="html"><source>Responsable</source><target>Responsable</target></trans-unit>
     </body>
   </file>
 </xliff>

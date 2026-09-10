@@ -1,0 +1,356 @@
+<app-application-detail-section-layout
+  titleId="application-accessibility-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('accessibility')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
+  @if (accessibilityProblem(); as problem) {
+    <div [attr.aria-busy]="accessibilityLoading()">
+      <p>{{ problem }}</p>
+      <p-button
+        [label]="messages.retry"
+        [ariaLabel]="messages.retry"
+        [icon]="icons.REFRESH"
+        [loading]="accessibilityLoading()"
+        (onClick)="retryAccessibility()"
+      />
+    </div>
+  }
+
+  @if (classificationFailed() || complianceFailed()) {
+    <p>{{ catalogFailed }}</p>
+    <p-button
+      [label]="catalogRetry"
+      [ariaLabel]="catalogRetry"
+      [icon]="icons.REFRESH"
+      [loading]="catalogsLoading()"
+      (onClick)="retryCatalogs()"
+    />
+  }
+
+  <form class="application-accessibility" [formGroup]="detailState.accessibilityForm" novalidate>
+    <div
+      class="application-accessibility__fields invai-grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
+    >
+      <div class="application-accessibility__field xl:col-span-4">
+        <span
+          class="application-accessibility__label"
+          id="application-accessibility-classification-label"
+        >
+          {{ labels.classificationSegment }}
+        </span>
+        @if (detailState.isEditing('accessibility') && !classificationFailed()) {
+          <p-select
+            inputId="application-accessibility-classification"
+            formControlName="classificationSegment"
+            (onClear)="syncCatalogSelection('classificationSegment')"
+            ariaLabelledBy="application-accessibility-classification-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [fluid]="true"
+            [options]="classificationOptions()"
+            [filter]="true"
+            [ariaFilterLabel]="catalogFilter"
+            [showClear]="true"
+            [emptyMessage]="catalogEmpty"
+            [emptyFilterMessage]="catalogEmpty"
+            [resetFilterOnHide]="true"
+            optionDisabled="disabled"
+          />
+        } @else {
+          <p
+            id="application-accessibility-classification-value"
+            class="application-accessibility__static-value invai-form-static-value"
+            aria-labelledby="application-accessibility-classification-label"
+          >
+            {{
+              optionLabel(
+                classificationOptions(),
+                detailState.accessibilityForm.controls.classificationSegment.value
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="application-accessibility__field xl:col-span-5">
+        <span
+          class="application-accessibility__label"
+          id="application-accessibility-compliance-label"
+        >
+          {{ labels.complianceStatus }}
+        </span>
+        @if (detailState.isEditing('accessibility') && !complianceFailed()) {
+          <p-select
+            inputId="application-accessibility-compliance"
+            formControlName="complianceStatus"
+            (onClear)="syncCatalogSelection('complianceStatus')"
+            ariaLabelledBy="application-accessibility-compliance-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [fluid]="true"
+            [options]="complianceOptions()"
+            [filter]="true"
+            [ariaFilterLabel]="catalogFilter"
+            [showClear]="true"
+            [emptyMessage]="catalogEmpty"
+            [emptyFilterMessage]="catalogEmpty"
+            [resetFilterOnHide]="true"
+            optionDisabled="disabled"
+          />
+        } @else {
+          <p
+            id="application-accessibility-compliance-value"
+            class="application-accessibility__static-value invai-form-static-value"
+            aria-labelledby="application-accessibility-compliance-label"
+          >
+            {{
+              optionLabel(
+                complianceOptions(),
+                detailState.accessibilityForm.controls.complianceStatus.value
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="application-accessibility__field xl:col-span-3">
+        <span
+          class="application-accessibility__label"
+          id="application-accessibility-publication-date-label"
+        >
+          {{ labels.reportExpirationDate }}
+        </span>
+        @if (detailState.isEditing('accessibility')) {
+          <p-datepicker
+            inputId="application-accessibility-publication-date"
+            formControlName="reportExpirationDate"
+            ariaLabelledBy="application-accessibility-publication-date-label"
+            appendTo="body"
+            iconDisplay="input"
+            [dateFormat]="dateFormat"
+            [fluid]="true"
+            [placeholder]="datePlaceholder"
+            [showIcon]="true"
+          />
+        } @else {
+          <p
+            id="application-accessibility-publication-date-value"
+            class="application-accessibility__static-value invai-form-static-value"
+            aria-labelledby="application-accessibility-publication-date-label"
+          >
+            {{ formattedDate(detailState.accessibilityForm.controls.reportExpirationDate.value) }}
+          </p>
+        }
+      </div>
+
+      <div class="application-accessibility__field xl:col-span-3">
+        <span class="application-accessibility__label" id="application-accessibility-mobile-label">
+          {{ labels.mobileApplication }}
+        </span>
+        @if (detailState.isEditing('accessibility')) {
+          <p-select
+            inputId="application-accessibility-mobile"
+            formControlName="mobileApplication"
+            ariaLabelledBy="application-accessibility-mobile-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [fluid]="true"
+            [options]="mobileOptions"
+          />
+        } @else {
+          <p
+            id="application-accessibility-mobile-value"
+            class="application-accessibility__static-value invai-form-static-value"
+            aria-labelledby="application-accessibility-mobile-label"
+          >
+            {{
+              optionLabel(
+                mobileOptions,
+                detailState.accessibilityForm.controls.mobileApplication.value
+              )
+            }}
+          </p>
+        }
+      </div>
+
+      <div class="application-accessibility__field xl:col-span-9">
+        <span
+          class="application-accessibility__label"
+          id="application-accessibility-mobile-name-label"
+        >
+          {{ labels.mobileApplicationName }}
+        </span>
+        @if (detailState.isEditing('accessibility')) {
+          <input
+            pInputText
+            id="application-accessibility-mobile-name"
+            formControlName="mobileApplicationName"
+            maxlength="255"
+            class="w-full"
+            aria-labelledby="application-accessibility-mobile-name-label"
+            [attr.aria-invalid]="
+              isInvalid(detailState.accessibilityForm.controls.mobileApplicationName)
+            "
+            [attr.aria-describedby]="
+              isInvalid(detailState.accessibilityForm.controls.mobileApplicationName)
+                ? 'application-accessibility-mobile-name-error'
+                : detailState.accessibilityForm.controls.mobileApplicationName.disabled
+                  ? 'application-accessibility-mobile-name-help'
+                  : null
+            "
+          />
+          @if (isInvalid(detailState.accessibilityForm.controls.mobileApplicationName)) {
+            <p
+              id="application-accessibility-mobile-name-error"
+              class="application-accessibility__error"
+              role="alert"
+            >
+              {{ messages.maxLength }}
+            </p>
+          }
+          @if (detailState.accessibilityForm.controls.mobileApplicationName.disabled) {
+            <p
+              id="application-accessibility-mobile-name-help"
+              class="application-accessibility__help"
+            >
+              {{ mobileNameUnavailable }}
+            </p>
+          }
+        } @else {
+          <p
+            id="application-accessibility-mobile-name-value"
+            class="application-accessibility__static-value invai-form-static-value"
+            aria-labelledby="application-accessibility-mobile-name-label"
+          >
+            @if (detailState.accessibilityForm.controls.mobileApplicationName.value; as value) {
+              {{ value }}
+            } @else {
+              {{ noValue }}
+            }
+          </p>
+        }
+      </div>
+
+      <div class="application-accessibility__field md:col-span-2 xl:col-span-12">
+        <label for="application-accessibility-public-url">{{ labels.publicUrl }}</label>
+        <div class="application-accessibility__public-url">
+          <input
+            id="application-accessibility-public-url"
+            type="url"
+            maxlength="255"
+            formControlName="publicUrl"
+            [attr.aria-describedby]="
+              isInvalid(detailState.accessibilityForm.controls.publicUrl)
+                ? 'application-accessibility-public-url-error'
+                : null
+            "
+            [attr.aria-invalid]="isInvalid(detailState.accessibilityForm.controls.publicUrl)"
+            [readOnly]="!detailState.isEditing('accessibility')"
+            [class.invai-form-readonly-control]="!detailState.isEditing('accessibility')"
+            pInputText
+          />
+          @if (publicUrl(); as url) {
+            <a
+              class="application-accessibility__external-link"
+              [attr.aria-label]="publicUrlAriaLabel"
+              [href]="url"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i [class]="icons.EXTERNAL_LINK" aria-hidden="true"></i>
+            </a>
+          } @else {
+            <span
+              class="application-accessibility__external-link application-accessibility__external-link--disabled"
+              aria-hidden="true"
+            >
+              <i [class]="icons.EXTERNAL_LINK" aria-hidden="true"></i>
+            </span>
+          }
+        </div>
+        @if (isInvalid(detailState.accessibilityForm.controls.publicUrl)) {
+          <p
+            id="application-accessibility-public-url-error"
+            class="application-accessibility__error"
+            role="alert"
+          >
+            {{
+              detailState.accessibilityForm.controls.publicUrl.hasError('maxlength')
+                ? messages.maxLength
+                : urlError
+            }}
+          </p>
+        }
+      </div>
+    </div>
+
+    <section
+      class="application-accessibility__rich-text"
+      aria-labelledby="application-accessibility-inaccessible-content-label"
+    >
+      <h4 id="application-accessibility-inaccessible-content-label">
+        {{ labels.inaccessibleContent }}
+      </h4>
+      @if (detailState.isEditing('accessibility')) {
+        <p-editor
+          [formControl]="detailState.accessibilityForm.controls.inaccessibleContent"
+          [style]="{ height: '10rem' }"
+          (onInit)="labelEditor($event, 'application-accessibility-inaccessible-content-label')"
+        />
+      } @else {
+        <div
+          class="application-accessibility__rich-text-value invai-form-static-value invai-form-static-value--rich"
+          aria-labelledby="application-accessibility-inaccessible-content-label"
+          [innerHTML]="
+            richTextValue(detailState.accessibilityForm.controls.inaccessibleContent.value)
+          "
+        ></div>
+      }
+    </section>
+
+    <div class="application-accessibility__documentation">
+      <p-button
+        type="button"
+        [ariaLabel]="documentationAriaLabel"
+        [icon]="icons.EXTERNAL_LINK"
+        [label]="documentationLabel"
+        [outlined]="true"
+        (onClick)="onDocumentation()"
+      />
+    </div>
+
+    <section
+      class="application-accessibility__rich-text"
+      aria-labelledby="application-accessibility-observations-label"
+    >
+      <h4 id="application-accessibility-observations-label">{{ labels.observations }}</h4>
+      @if (detailState.isEditing('accessibility')) {
+        <p-editor
+          [formControl]="detailState.accessibilityForm.controls.observations"
+          [style]="{ height: '10rem' }"
+          (onInit)="labelEditor($event, 'application-accessibility-observations-label')"
+        />
+      } @else {
+        <div
+          class="application-accessibility__rich-text-value invai-form-static-value invai-form-static-value--rich"
+          aria-labelledby="application-accessibility-observations-label"
+          [innerHTML]="richTextValue(detailState.accessibilityForm.controls.observations.value)"
+        ></div>
+      }
+    </section>
+  </form>
+</app-application-detail-section-layout>

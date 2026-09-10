@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  model,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
   CrudEntityDialog,
@@ -24,8 +17,10 @@ import { ApplicationResponsibleFormGroup } from '../../../../forms/application-r
 import {
   ResponsibleCompanyOption,
   ResponsiblePerson,
+  SoffidPersonOption,
 } from '../../../../../maintenances/responsibles/responsibles.model';
 import { toResponsiblePersonOption } from '../../../../../maintenances/responsibles/responsibles.utils';
+import { ApplicationSoffidPersonField } from './application-soffid-person-field';
 import { APPLICATION_RESPONSIBLE_COPY } from './application-responsible-section.i18n';
 
 export interface ApplicationResponsibleSelectOption {
@@ -39,6 +34,7 @@ export interface ApplicationResponsibleSelectOption {
   standalone: true,
   imports: [
     CrudEntityDialog,
+    ApplicationSoffidPersonField,
     FloatLabel,
     InputText,
     ReactiveFormsModule,
@@ -58,10 +54,17 @@ export class ApplicationResponsibleDialog {
   companyOptionsLoadFailed = input(false);
   people = input.required<ResponsiblePerson[]>();
   isSaving = input(false);
+  personalCaibLocked = input(false);
+  soffidOptions = input.required<SoffidPersonOption[]>();
+  soffidLoading = input(false);
+  soffidSearched = input(false);
+  soffidSearchError = input(false);
+  soffidTotal = input(0);
 
   submitForm = output<void>();
   closed = output<void>();
   cancelEdit = output<void>();
+  soffidSearch = output<string>();
 
   protected readonly copy = APPLICATION_RESPONSIBLE_COPY;
   protected readonly title = computed(() =>
@@ -78,8 +81,9 @@ export class ApplicationResponsibleDialog {
   protected readonly personOptions = computed(() => this.people().map(toResponsiblePersonOption));
   protected readonly personalCaibPassThrough = computed<ToggleSwitchPassThrough>(() => ({
     input: {
-      'aria-describedby':
-        this.mode() === 'create' ? 'application-responsible-dialog-caib-unavailable' : undefined,
+      'aria-describedby': this.personalCaibLocked()
+        ? 'application-responsible-dialog-caib-required'
+        : undefined,
     },
   }));
 

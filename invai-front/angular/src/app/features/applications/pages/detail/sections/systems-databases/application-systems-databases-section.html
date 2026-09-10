@@ -86,12 +86,19 @@
         [attr.aria-labelledby]="observationsLabelId"
       >
         <label [id]="observationsLabelId" [for]="observationsId">{{ observationsLabel }}</label>
-        <p-editor
-          [id]="observationsId"
-          [formControl]="detailState.systemsDatabasesForm.controls.observations"
-          [readonly]="!detailState.isEditing('systems-databases')"
-          [style]="{ height: '10rem' }"
-        />
+        @if (detailState.isEditing('systems-databases')) {
+          <p-editor
+            [id]="observationsId"
+            [formControl]="detailState.systemsDatabasesForm.controls.observations"
+            [style]="{ height: '10rem' }"
+          />
+        } @else {
+          <div
+            class="invai-form-static-value invai-form-static-value--rich"
+            [attr.aria-labelledby]="observationsLabelId"
+            [innerHTML]="detailState.systemsDatabasesForm.controls.observations.value || '-'"
+          ></div>
+        }
       </div>
     </div>
   </div>
@@ -101,6 +108,13 @@
   <app-application-system-relation-dialog
     [(visible)]="systemDialogVisible"
     [catalog]="systemCatalog()"
+    [filtersForm]="systemCatalogFiltersForm"
+    [quickSearch]="systemCatalogQuickSearch()"
+    [filtersSelected]="systemCatalogFilterCount()"
+    [serverOptions]="systemCatalogServerOptions()"
+    (quickSearchChange)="onCatalogQuickSearch('system', $event)"
+    (filterSearch)="applyCatalogFilters('system')"
+    (filterReset)="resetCatalogSearch('system')"
     [first]="systemCatalogFirst()"
     [form]="systemRelationForm"
     [isLoading]="isSystemCatalogLoading()"
@@ -116,6 +130,14 @@
   <app-application-database-relation-dialog
     [(visible)]="databaseDialogVisible"
     [catalog]="databaseCatalog()"
+    [filtersForm]="databaseCatalogFiltersForm"
+    [quickSearch]="databaseCatalogQuickSearch()"
+    [filtersSelected]="databaseCatalogFilterCount()"
+    [serverOptions]="databaseCatalogServerOptions()"
+    [databaseTypeOptions]="databaseCatalogTypeOptions()"
+    (quickSearchChange)="onCatalogQuickSearch('database', $event)"
+    (filterSearch)="applyCatalogFilters('database')"
+    (filterReset)="resetCatalogSearch('database')"
     [first]="databaseCatalogFirst()"
     [form]="databaseRelationForm"
     [isLoading]="isDatabaseCatalogLoading()"
@@ -129,6 +151,7 @@
 
 @if (deleteDialogVisible()) {
   <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
     [(visible)]="deleteDialogVisible"
     [cancelLabel]="deleteCancel"
     [confirmLabel]="deleteConfirm"

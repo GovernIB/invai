@@ -37,16 +37,16 @@ app-applications-table {
 
   .invai-scrollable-table {
     .p-datatable-table {
-      min-width: max-content;
+      min-width: 100%;
     }
 
     .p-datatable-thead > tr > th,
     .p-datatable-tbody > tr > td {
-      white-space: nowrap;
+      white-space: normal;
     }
 
     .p-datatable-thead > tr > th {
-      vertical-align: top;
+      vertical-align: middle;
     }
   }
 

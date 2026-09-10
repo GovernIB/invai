@@ -22,24 +22,30 @@ export const APPLICATION_DEVELOPMENT_SOURCE_CODE_ARIA_LABEL = $localize`Obrir el
 export const APPLICATION_DEVELOPMENT_PROVIDER_COLUMNS: KeyLabel[] = [
   {
     key: 'companyName',
+    width: '40%',
+    wrap: true,
+    maxWidth: '24rem',
     label: $localize`Raó social`,
     sortBy: 'companyName',
     minWidth: '12rem',
   },
   {
     key: 'role',
+    width: '30%',
     label: $localize`Rol`,
     sortBy: 'role.name',
     minWidth: '10rem',
   },
   {
     key: 'startDate',
+    width: '15%',
     label: $localize`Data inici`,
     sortBy: 'startDate',
     minWidth: '9rem',
   },
   {
     key: 'expireDate',
+    width: '15%',
     label: $localize`Data fi`,
     sortBy: 'expireDate',
     minWidth: '9rem',
@@ -49,24 +55,30 @@ export const APPLICATION_DEVELOPMENT_PROVIDER_COLUMNS: KeyLabel[] = [
 export const APPLICATION_DEVELOPMENT_TECHNOLOGY_COLUMNS: KeyLabel[] = [
   {
     key: 'layer',
+    width: '20%',
     label: $localize`Capa`,
     sortBy: 'layer.name',
     minWidth: '10rem',
   },
   {
     key: 'technology',
+    width: '40%',
+    wrap: true,
+    maxWidth: '24rem',
     label: $localize`Tecnologia`,
     sortBy: 'technology.name',
     minWidth: '12rem',
   },
   {
     key: 'version',
+    width: '20%',
     label: $localize`Versió`,
     sortBy: 'version',
     minWidth: '9rem',
   },
   {
     key: 'architecture',
+    width: '20%',
     label: $localize`Arquitectura`,
     sortBy: 'architecture',
     minWidth: '11rem',

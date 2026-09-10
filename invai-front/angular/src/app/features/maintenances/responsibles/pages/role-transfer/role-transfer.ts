@@ -14,27 +14,38 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
-import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+import { isStructuredBadRequest } from '@core/models/api-error.model';
 import { localizedName } from '@shared/utils/localized-name.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { Select } from 'primeng/select';
 import { ToggleSwitch } from 'primeng/toggleswitch';
-import { Observable, Subject, catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, Subject, catchError, map, of, switchMap } from 'rxjs';
 
-import { createRoleTransferForm } from '../../forms/responsible-forms.factory';
+import {
+  createRoleTransferForm,
+  selectedRoleTransferPersonValidator,
+} from '../../forms/responsible-forms.factory';
+import { ROLE_TRANSFER_PERSON_SEARCH_PARAMS } from '../../responsibles.constants';
 import { RESPONSIBLE_COMMON_COPY, ROLE_TRANSFER_COPY } from '../../responsibles.i18n';
 import {
   ResponsiblePerson,
-  ResponsiblePersonOption,
+  ResponsiblePersonCombinedSearchOutput,
   RoleAssignmentOutput,
   RoleAssignmentType,
+  RoleTransferDestinationOption,
   RoleTransferInput,
+  RoleTransferPersonControlValue,
+  RoleTransferPersonOption,
   RoleTransferSourceRequest,
+  SoffidPersonCandidate,
 } from '../../responsibles.model';
-import { toResponsiblePersonOption } from '../../responsibles.utils';
+import {
+  toRoleTransferDestinationOption,
+  toRoleTransferSourceOption,
+} from '../../responsibles.utils';
 import { ResponsiblePeopleService } from '../../services/responsible-people.service';
 import { RoleTransferService } from '../../services/role-transfer.service';
+import { RoleTransferPersonField } from './role-transfer-person-field';
 
 interface AssignmentSubgroup {
   type: RoleAssignmentType;
@@ -56,41 +67,43 @@ interface LoadResult<T> {
 
 type ConfirmationKind = 'apply' | 'discard-source' | null;
 
-const PERSON_OPTIONS_PARAMS = {
-  page: 0,
-  size: 1000,
-  sort: ['firstName,asc', 'lastName,asc'] as string[],
-  statusId: SoftDeleteStatus.ACTIVE,
-} as const;
-
 @Component({
   selector: 'app-role-transfer',
   standalone: true,
-  imports: [Button, ConfirmationDialogComponent, ReactiveFormsModule, Select, ToggleSwitch],
+  imports: [
+    Button,
+    ConfirmationDialogComponent,
+    ReactiveFormsModule,
+    RoleTransferPersonField,
+    ToggleSwitch,
+  ],
   templateUrl: './role-transfer.html',
   styleUrl: './role-transfer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RoleTransfer implements OnInit {
-  initialPeople = input<ResponsiblePerson[]>([]);
-  initialPeopleLoadFailed = input(false);
+  initialPeopleSearch = input<ResponsiblePersonCombinedSearchOutput | null>(null);
+  initialPeopleSearchFailed = input(false);
   sourceRequest = input<RoleTransferSourceRequest | null>(null);
 
   protected readonly copy = ROLE_TRANSFER_COPY;
   protected readonly PrimeIcons = PrimeIcons;
   protected readonly RoleAssignmentType = RoleAssignmentType;
   protected readonly form = createRoleTransferForm(inject(FormBuilder));
-  protected readonly sourceOptions = signal<ResponsiblePersonOption[]>([]);
-  protected readonly destinationOptions = signal<ResponsiblePersonOption[]>([]);
+  protected readonly sourceOptions = signal<RoleTransferPersonOption[]>([]);
+  protected readonly destinationOptions = signal<RoleTransferDestinationOption[]>([]);
   protected readonly sourceAssignments = signal<RoleAssignmentOutput[]>([]);
   protected readonly preparedAssignments = signal<RoleAssignmentOutput[]>([]);
   protected readonly sourceSelection = signal<Set<string>>(new Set());
   protected readonly preparedSelection = signal<Set<string>>(new Set());
-  protected readonly sourceCatalogLoading = signal(false);
-  protected readonly sourceCatalogLoadFailed = signal(false);
+  protected readonly sourceSearchLoading = signal(false);
+  protected readonly sourceSearchFailed = signal(false);
+  protected readonly sourceSearched = signal(false);
   protected readonly sourceRolesLoading = signal(false);
   protected readonly sourceRolesLoadFailed = signal(false);
-  protected readonly destinationOptionsLoadFailed = signal(false);
+  protected readonly destinationSearchLoading = signal(false);
+  protected readonly destinationSearchFailed = signal(false);
+  protected readonly destinationSearched = signal(false);
   protected readonly destinationRolesLoading = signal(false);
   protected readonly destinationRolesLoadFailed = signal(false);
   protected readonly destinationRolesReady = signal(false);
@@ -104,13 +117,19 @@ export class RoleTransfer implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly locale = inject(LOCALE_ID);
-  private readonly sourceRequests = new Subject<number>();
+  private readonly sourceRequests = new Subject<number | null>();
+  private readonly sourceSearchRequests = new Subject<string>();
+  private readonly destinationSearchRequests = new Subject<string>();
   private readonly destinationRequests = new Subject<number | null>();
-  private readonly committedSourceId = signal<number | null>(null);
-  private readonly destinationId = signal<number | null>(null);
+  protected readonly committedSourceId = signal<number | null>(null);
+  private readonly sourceSearchQuery = signal('');
+  private readonly destinationSearchQuery = signal('');
+  private readonly selectedSource = signal<RoleTransferPersonOption | null>(null);
+  private readonly selectedDestination = signal<RoleTransferDestinationOption | null>(null);
+  private destinationSearchResult: ResponsiblePersonCombinedSearchOutput | null = null;
   private readonly revokeMode = signal(false);
   private readonly forbiddenAuthorizationApplications = signal<Set<number>>(new Set());
-  private readonly pendingSourceId = signal<number | null>(null);
+  private readonly pendingSource = signal<RoleTransferPersonOption | null>(null);
   private readonly confirmationKind = signal<ConfirmationKind>(null);
   private initialized = false;
   private handledSourceRequestId: number | null = null;
@@ -129,10 +148,13 @@ export class RoleTransfer implements OnInit {
     this.revokeMode() ? this.copy.revokeAriaLabel : this.copy.transferAriaLabel,
   );
   protected readonly canApply = computed(() => {
+    const destination = this.selectedDestination();
+    const source = this.selectedSource();
     const destinationIsReady =
       this.revokeMode() ||
-      (!!this.destinationId() &&
-        this.destinationId() !== this.committedSourceId() &&
+      (!!destination &&
+        destination.id !== this.committedSourceId() &&
+        this.normalizeEmail(destination.email) !== this.normalizeEmail(source?.email ?? '') &&
         this.destinationRolesReady() &&
         !this.destinationRolesLoading());
     return (
@@ -149,15 +171,19 @@ export class RoleTransfer implements OnInit {
   });
   protected readonly confirmationMessage = computed(() => {
     if (this.confirmationKind() === 'discard-source') {
-      return this.pendingSourceId() === null
+      return this.pendingSource() === null
         ? this.copy.discardClearMessage
-        : this.copy.discardConfirmMessage(this.personName(this.pendingSourceId()));
+        : this.copy.discardConfirmMessage(this.pendingSource()?.label ?? '');
     }
     const count = this.preparedAssignments().length;
-    const source = this.personName(this.committedSourceId());
+    const source = this.selectedSource()?.label ?? '';
     return this.revokeMode()
       ? this.copy.revokeConfirmMessage(count, source)
-      : this.copy.transferConfirmMessage(count, source, this.personName(this.destinationId()));
+      : this.copy.transferConfirmMessage(
+          count,
+          source,
+          this.selectedDestination()?.label ?? '',
+        );
   });
   protected readonly confirmationLabel = computed(() => {
     if (this.confirmationKind() === 'discard-source') return this.copy.confirmDiscard;
@@ -166,6 +192,10 @@ export class RoleTransfer implements OnInit {
   protected readonly confirmationSeverity = computed(() =>
     this.confirmationKind() === 'discard-source' || this.revokeMode() ? 'danger' : 'primary',
   );
+  protected readonly confirmationIcon = computed(() => {
+    if (this.confirmationKind() === 'discard-source') return PrimeIcons.TIMES;
+    return this.revokeMode() ? PrimeIcons.TRASH : PrimeIcons.ARROW_RIGHT;
+  });
 
   constructor() {
     effect(() => {
@@ -173,12 +203,12 @@ export class RoleTransfer implements OnInit {
       if (this.initialized) this.applySourceRequest(request);
     });
 
-    this.form.controls.sourcePersonId.valueChanges
+    this.form.controls.sourcePerson.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((personId) => this.onSourceControlChange(personId));
-    this.form.controls.destinationPersonId.valueChanges
+      .subscribe((person) => this.onSourceControlChange(person));
+    this.form.controls.destinationPerson.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((personId) => this.onDestinationControlChange(personId));
+      .subscribe((person) => this.onDestinationControlChange(person));
     this.form.controls.revoke.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((revoke) => this.onRevokeChange(revoke));
@@ -186,31 +216,56 @@ export class RoleTransfer implements OnInit {
     this.sourceRequests
       .pipe(
         switchMap((personId) => {
+          if (personId === null) {
+            return of({
+              personId,
+              assignments: { value: [], failed: false } as LoadResult<RoleAssignmentOutput[]>,
+            });
+          }
           this.sourceRolesLoading.set(true);
           this.sourceRolesLoadFailed.set(false);
-          this.destinationOptionsLoadFailed.set(false);
-          this.form.controls.destinationPersonId.disable({ emitEvent: false });
-          return forkJoin({
-            assignments: loadResult(this.roleTransferService.getAssignments(personId)),
-            destinations: loadResult(
-              this.peopleService.getPage({ ...PERSON_OPTIONS_PARAMS, excludeId: personId }),
-            ),
-          }).pipe(map((result) => ({ personId, ...result })));
+          this.form.controls.destinationPerson.disable({ emitEvent: false });
+          return loadResult(this.roleTransferService.getAssignments(personId)).pipe(
+            map((assignments) => ({ personId, assignments })),
+          );
         }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(({ personId, assignments, destinations }) => {
+      .subscribe(({ personId, assignments }) => {
         if (personId !== this.committedSourceId()) return;
         this.sourceRolesLoading.set(false);
         this.sourceRolesLoadFailed.set(assignments.failed);
-        this.destinationOptionsLoadFailed.set(destinations.failed);
         this.sourceAssignments.set(assignments.value ?? []);
-        this.destinationOptions.set(
-          (destinations.value?.content ?? [])
-            .filter(({ id }) => id !== personId)
-            .map(toResponsiblePersonOption),
-        );
         this.updateDestinationAvailability();
+      });
+
+    this.sourceSearchRequests
+      .pipe(
+        switchMap((query) => this.searchPeople(query, 'source')),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ result }) => {
+        if (result === null) return;
+        this.sourceSearchLoading.set(false);
+        this.sourceSearchFailed.set(result.failed);
+        this.sourceSearched.set(true);
+        if (!result.value) return;
+        this.setSourceOptions(result.value.database.content);
+      });
+
+    this.destinationSearchRequests
+      .pipe(
+        switchMap((query) => this.searchPeople(query, 'destination')),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ result }) => {
+        if (result === null) return;
+        this.destinationSearchLoading.set(false);
+        this.destinationSearchFailed.set(result.failed);
+        this.destinationSearched.set(true);
+        if (!result.value) return;
+        this.destinationSearchResult = result.value;
+        this.refreshDestinationOptions();
       });
 
     this.destinationRequests
@@ -232,7 +287,7 @@ export class RoleTransfer implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(({ personId, result }) => {
-        if (personId !== this.destinationId()) return;
+        if (personId !== (this.selectedDestination()?.id ?? null)) return;
         this.destinationRolesLoading.set(false);
         this.destinationRolesLoadFailed.set(result.failed);
         this.destinationRolesReady.set(personId !== null && !result.failed);
@@ -248,29 +303,23 @@ export class RoleTransfer implements OnInit {
   }
 
   ngOnInit(): void {
-    this.sourceOptions.set(this.initialPeople().map(toResponsiblePersonOption));
-    this.sourceCatalogLoadFailed.set(this.initialPeopleLoadFailed());
+    const initialPeopleSearch = this.initialPeopleSearch();
+    const initialPeopleSearchFailed = this.initialPeopleSearchFailed();
+    this.sourceSearchFailed.set(initialPeopleSearchFailed);
+    this.destinationSearchFailed.set(initialPeopleSearchFailed);
+    this.sourceSearched.set(initialPeopleSearch !== null);
+    this.destinationSearched.set(initialPeopleSearch !== null);
+    if (initialPeopleSearch) {
+      this.setSourceOptions(initialPeopleSearch.database.content);
+      this.destinationSearchResult = initialPeopleSearch;
+      this.refreshDestinationOptions();
+    }
     this.initialized = true;
     this.applySourceRequest(this.sourceRequest());
   }
 
   protected retrySourceCatalog(): void {
-    if (this.sourceCatalogLoading()) return;
-    this.sourceCatalogLoading.set(true);
-    this.sourceCatalogLoadFailed.set(false);
-    this.peopleService
-      .getPage(PERSON_OPTIONS_PARAMS)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (page) => {
-          this.sourceOptions.set(page.content.map(toResponsiblePersonOption));
-          this.sourceCatalogLoading.set(false);
-        },
-        error: () => {
-          this.sourceCatalogLoadFailed.set(true);
-          this.sourceCatalogLoading.set(false);
-        },
-      });
+    this.requestPeopleSearch(this.sourceSearchQuery(), 'source', true);
   }
 
   protected retrySourceLoad(): void {
@@ -279,7 +328,16 @@ export class RoleTransfer implements OnInit {
   }
 
   protected retryDestinationLoad(): void {
-    if (this.destinationId()) this.destinationRequests.next(this.destinationId());
+    const personId = this.selectedDestination()?.id;
+    if (personId) this.destinationRequests.next(personId);
+  }
+
+  protected searchDestinations(query: string): void {
+    this.requestPeopleSearch(query, 'destination');
+  }
+
+  protected searchSources(query: string): void {
+    this.requestPeopleSearch(query, 'source');
   }
 
   protected toggleAssignment(
@@ -382,12 +440,12 @@ export class RoleTransfer implements OnInit {
 
   protected confirmAction(): void {
     if (this.confirmationKind() === 'discard-source') {
-      const personId = this.pendingSourceId();
+      const person = this.pendingSource();
       this.confirmationVisible.set(false);
       this.confirmationKind.set(null);
-      this.pendingSourceId.set(null);
-      this.form.controls.sourcePersonId.setValue(personId, { emitEvent: false });
-      this.loadSource(personId);
+      this.pendingSource.set(null);
+      this.form.controls.sourcePerson.setValue(person, { emitEvent: false });
+      this.loadSource(person);
       return;
     }
     this.applyPreparedAssignments();
@@ -396,25 +454,26 @@ export class RoleTransfer implements OnInit {
   protected cancelConfirmation(): void {
     this.confirmationVisible.set(false);
     this.confirmationKind.set(null);
-    this.pendingSourceId.set(null);
+    this.pendingSource.set(null);
   }
 
-  private onSourceControlChange(personId: number | null): void {
-    if (personId === this.committedSourceId()) return;
+  private onSourceControlChange(value: RoleTransferPersonControlValue): void {
+    const person = value && typeof value !== 'string' && value.id !== null ? value : null;
+    if ((person?.id ?? null) === this.committedSourceId()) return;
     if (this.preparedAssignments().length > 0) {
-      this.pendingSourceId.set(personId);
-      this.form.controls.sourcePersonId.setValue(this.committedSourceId(), { emitEvent: false });
+      this.pendingSource.set(person);
+      this.form.controls.sourcePerson.setValue(this.selectedSource(), { emitEvent: false });
       this.confirmationKind.set('discard-source');
       this.confirmationVisible.set(true);
       return;
     }
-    this.loadSource(personId);
+    this.loadSource(person);
   }
 
   private applySourceRequest(request: RoleTransferSourceRequest | null): void {
     if (!request || request.requestId === this.handledSourceRequestId) return;
     this.handledSourceRequestId = request.requestId;
-    const option = toResponsiblePersonOption(request.person);
+    const option = toRoleTransferSourceOption(request.person, 'database');
     this.sourceOptions.update((current) => {
       const withoutRequested = current.filter(({ id }) => id !== option.id);
       return [...withoutRequested, option].sort((left, right) =>
@@ -423,19 +482,21 @@ export class RoleTransfer implements OnInit {
     });
     this.confirmationVisible.set(false);
     this.confirmationKind.set(null);
-    this.pendingSourceId.set(null);
+    this.pendingSource.set(null);
     this.statusMessage.set('');
     this.form.controls.revoke.setValue(false, { emitEvent: false });
     this.revokeMode.set(false);
-    this.form.controls.destinationPersonId.setValidators(Validators.required);
-    this.form.controls.sourcePersonId.setValue(request.person.id, { emitEvent: false });
-    this.loadSource(request.person.id);
+    this.setDestinationValidators();
+    this.form.controls.sourcePerson.setValue(option, { emitEvent: false });
+    this.loadSource(option);
     queueMicrotask(() =>
       this.host.nativeElement.querySelector<HTMLElement>('#role-transfer-source')?.focus(),
     );
   }
 
-  private loadSource(personId: number | null): void {
+  private loadSource(person: RoleTransferPersonOption | null): void {
+    const personId = person?.id ?? null;
+    this.selectedSource.set(person);
     this.committedSourceId.set(personId);
     this.sourceAssignments.set([]);
     this.preparedAssignments.set([]);
@@ -443,46 +504,59 @@ export class RoleTransfer implements OnInit {
     this.preparedSelection.set(new Set());
     this.sourceRolesLoadFailed.set(false);
     this.resetDestination();
-    if (personId !== null) this.sourceRequests.next(personId);
+    this.sourceRequests.next(personId);
   }
 
-  private onDestinationControlChange(personId: number | null): void {
-    this.destinationId.set(personId);
+  private onDestinationControlChange(value: RoleTransferPersonControlValue): void {
+    const destination = value && typeof value !== 'string' ? value : null;
+    this.selectedDestination.set(destination);
     this.forbiddenAuthorizationApplications.set(new Set());
     this.destinationRolesLoadFailed.set(false);
     this.destinationRolesReady.set(false);
-    this.destinationRequests.next(personId);
+    if (!destination) {
+      this.destinationRequests.next(null);
+      return;
+    }
+    if (destination.id === null) {
+      this.destinationRequests.next(null);
+      this.destinationRolesLoading.set(false);
+      this.destinationRolesReady.set(true);
+      return;
+    }
+    this.destinationRequests.next(destination.id);
   }
 
   private onRevokeChange(revoke: boolean): void {
     this.revokeMode.set(revoke);
-    const control = this.form.controls.destinationPersonId;
+    const control = this.form.controls.destinationPerson;
     if (revoke) {
       control.clearValidators();
       control.setValue(null, { emitEvent: false });
       control.disable({ emitEvent: false });
-      this.destinationId.set(null);
+      this.selectedDestination.set(null);
       this.destinationRequests.next(null);
       this.forbiddenAuthorizationApplications.set(new Set());
       this.destinationRolesReady.set(false);
     } else {
-      control.setValidators(Validators.required);
+      this.setDestinationValidators();
       this.updateDestinationAvailability();
     }
     control.updateValueAndValidity({ emitEvent: false });
   }
 
   private resetDestination(): void {
-    this.form.controls.destinationPersonId.setValue(null, { emitEvent: false });
-    this.destinationId.set(null);
-    this.destinationOptions.set([]);
-    this.destinationOptionsLoadFailed.set(false);
+    this.form.controls.destinationPerson.setValue(null, { emitEvent: false });
+    this.selectedDestination.set(null);
+    this.refreshDestinationOptions();
+    this.destinationSearchLoading.set(false);
+    this.destinationSearchFailed.set(false);
+    this.destinationSearched.set(this.destinationSearchResult !== null);
     this.destinationRolesLoading.set(false);
     this.destinationRolesLoadFailed.set(false);
     this.destinationRolesReady.set(false);
     this.forbiddenAuthorizationApplications.set(new Set());
     this.destinationRequests.next(null);
-    this.form.controls.destinationPersonId.disable({ emitEvent: false });
+    this.form.controls.destinationPerson.disable({ emitEvent: false });
   }
 
   private moveAssignments(items: RoleAssignmentOutput[], fromSource: boolean): boolean {
@@ -550,7 +624,9 @@ export class RoleTransfer implements OnInit {
     if (!this.canApply() || this.submitting()) return;
     const input: RoleTransferInput = {
       items: this.preparedAssignments().map(({ id, type }) => ({ id, type })),
-      toPersonId: this.revokeMode() ? null : this.destinationId(),
+      toPersonEmailAddress: this.revokeMode()
+        ? null
+        : (this.selectedDestination()?.email.trim() ?? null),
       revoke: this.revokeMode(),
     };
     this.submitting.set(true);
@@ -573,25 +649,27 @@ export class RoleTransfer implements OnInit {
             detail: success,
           });
         },
-        error: () => {
+        error: (error) => {
           this.submitting.set(false);
           this.confirmationVisible.set(false);
           this.confirmationKind.set(null);
+          if (isStructuredBadRequest(error)) return;
           this.showError(this.copy.applyError);
         },
       });
   }
 
   private resetAfterSuccess(): void {
-    const destinationControl = this.form.controls.destinationPersonId;
+    const destinationControl = this.form.controls.destinationPerson;
     this.form.enable({ emitEvent: false });
-    destinationControl.setValidators(Validators.required);
+    this.setDestinationValidators();
     this.form.reset(
-      { sourcePersonId: null, destinationPersonId: null, revoke: false },
+      { sourcePerson: null, destinationPerson: null, revoke: false },
       { emitEvent: false },
     );
     this.committedSourceId.set(null);
-    this.destinationId.set(null);
+    this.selectedSource.set(null);
+    this.selectedDestination.set(null);
     this.revokeMode.set(false);
     this.sourceAssignments.set([]);
     this.preparedAssignments.set([]);
@@ -604,17 +682,16 @@ export class RoleTransfer implements OnInit {
   }
 
   private restoreFormAvailability(): void {
-    this.form.controls.sourcePersonId.enable({ emitEvent: false });
+    this.form.controls.sourcePerson.enable({ emitEvent: false });
     this.form.controls.revoke.enable({ emitEvent: false });
     this.updateDestinationAvailability();
   }
 
   private updateDestinationAvailability(): void {
-    const control = this.form.controls.destinationPersonId;
+    const control = this.form.controls.destinationPerson;
     const available =
       !this.revokeMode() &&
       this.committedSourceId() !== null &&
-      !this.destinationOptionsLoadFailed() &&
       !this.submitting();
     if (available) control.enable({ emitEvent: false });
     else control.disable({ emitEvent: false });
@@ -670,12 +747,149 @@ export class RoleTransfer implements OnInit {
     return [...new Map(assignments.map((item) => [this.assignmentKey(item), item])).values()];
   }
 
-  private personName(personId: number | null): string {
-    if (personId === null) return '';
-    return (
-      [...this.sourceOptions(), ...this.destinationOptions()].find(({ id }) => id === personId)
-        ?.label ?? String(personId)
+  private searchPeople(query: string, kind: 'source' | 'destination') {
+    const search = query.trim();
+    const loading = kind === 'source' ? this.sourceSearchLoading : this.destinationSearchLoading;
+    const failed = kind === 'source' ? this.sourceSearchFailed : this.destinationSearchFailed;
+    const searched = kind === 'source' ? this.sourceSearched : this.destinationSearched;
+    failed.set(false);
+    if (search.length > 0 && search.length < 3) {
+      loading.set(false);
+      searched.set(false);
+      return of({ result: null as LoadResult<never> | null });
+    }
+
+    loading.set(true);
+    searched.set(false);
+    return loadResult(
+      this.peopleService.searchCombined({
+        ...ROLE_TRANSFER_PERSON_SEARCH_PARAMS,
+        search: search || undefined,
+      }),
+    ).pipe(map((result) => ({ result })));
+  }
+
+  private setSourceOptions(database: ResponsiblePerson[]): void {
+    const selected = this.selectedSource();
+    this.sourceOptions.set(
+      this.withSelectedOption(
+        database
+          .map((person) => toRoleTransferSourceOption(person, 'database'))
+          .filter((person) => this.normalizeEmail(person.email).length > 0),
+        selected,
+      ).sort((left, right) => left.label.localeCompare(right.label, this.locale)),
     );
+  }
+
+  private setDestinationOptions(
+    database: ResponsiblePerson[],
+    soffid: SoffidPersonCandidate[],
+  ): void {
+    const source = this.selectedSource();
+    const sourceEmail = this.normalizeEmail(source?.email ?? '');
+    const selectedDestination = this.personOption(
+      this.form.controls.destinationPerson.getRawValue(),
+    );
+    this.destinationOptions.set(
+      this.withSelectedOption(
+        this.mergePersonOptions(database, soffid, 'destination').filter(
+          (person) => person.id !== source?.id && this.normalizeEmail(person.email) !== sourceEmail,
+        ),
+        selectedDestination,
+      ).sort((left, right) => left.label.localeCompare(right.label, this.locale)),
+    );
+  }
+
+  private refreshDestinationOptions(): void {
+    const result = this.destinationSearchResult;
+    if (!result) {
+      this.destinationOptions.set([]);
+      return;
+    }
+    this.setDestinationOptions(result.database.content, result.soffid.content);
+  }
+
+  private requestPeopleSearch(
+    query: string,
+    kind: 'source' | 'destination',
+    force = false,
+  ): void {
+    const search = query.trim();
+    const currentQuery =
+      kind === 'source' ? this.sourceSearchQuery : this.destinationSearchQuery;
+    const loading = kind === 'source' ? this.sourceSearchLoading : this.destinationSearchLoading;
+    const failed = kind === 'source' ? this.sourceSearchFailed : this.destinationSearchFailed;
+    const searched = kind === 'source' ? this.sourceSearched : this.destinationSearched;
+    if (
+      !force &&
+      search === currentQuery() &&
+      (loading() || (searched() && !failed()))
+    ) {
+      return;
+    }
+
+    currentQuery.set(search);
+    if (kind === 'source') this.sourceSearchRequests.next(search);
+    else this.destinationSearchRequests.next(search);
+  }
+
+  private withSelectedOption(
+    options: RoleTransferPersonOption[],
+    selected: RoleTransferPersonOption | null,
+  ): RoleTransferPersonOption[] {
+    if (
+      !selected ||
+      options.some(
+        (option) => this.normalizeEmail(option.email) === this.normalizeEmail(selected.email),
+      )
+    ) {
+      return options;
+    }
+    return [selected, ...options];
+  }
+
+  private personOption(value: RoleTransferPersonControlValue): RoleTransferPersonOption | null {
+    return value !== null && typeof value !== 'string' ? value : null;
+  }
+
+  private mergePersonOptions(
+    database: ResponsiblePerson[],
+    soffid: SoffidPersonCandidate[],
+    kind: 'source' | 'destination',
+  ): RoleTransferPersonOption[] {
+    const byEmail = new Map<string, RoleTransferPersonOption>();
+    database.forEach((person) => {
+      const email = this.normalizeEmail(person.email);
+      if (!email) return;
+      byEmail.set(
+        email,
+        kind === 'source'
+          ? toRoleTransferSourceOption(person, 'database')
+          : toRoleTransferDestinationOption(person, 'database'),
+      );
+    });
+    soffid.forEach((person) => {
+      const email = this.normalizeEmail(person.email);
+      if (!email || byEmail.has(email)) return;
+      byEmail.set(
+        email,
+        kind === 'source'
+          ? toRoleTransferSourceOption(person, 'soffid')
+          : toRoleTransferDestinationOption(person, 'soffid'),
+      );
+    });
+    return [...byEmail.values()];
+  }
+
+  private setDestinationValidators(): void {
+    this.form.controls.destinationPerson.setValidators([
+      Validators.required,
+      selectedRoleTransferPersonValidator,
+    ]);
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
   }
 
   private focusStableMoveAction(fromSource: boolean): void {

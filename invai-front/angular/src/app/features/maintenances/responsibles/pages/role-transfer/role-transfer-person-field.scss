@@ -1,0 +1,10 @@
+:host {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+:host ::ng-deep .p-select {
+  width: 100%;
+}

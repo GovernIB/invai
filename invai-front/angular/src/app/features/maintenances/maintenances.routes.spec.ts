@@ -13,6 +13,10 @@ import {
   fieldsListResolver,
 } from '@features/fields/pages/list/fields-list.resolver';
 import {
+  ENVIRONMENTS_LIST_RESOLVE_KEY,
+  environmentsListResolver,
+} from '@features/environments/pages/list/environments-list.resolver';
+import {
   SYSTEM_TYPES_LIST_RESOLVE_KEY,
   systemTypesListResolver,
 } from '@features/system-types/pages/list/system-types-list.resolver';
@@ -33,6 +37,10 @@ import {
   TECHNOLOGIES_LIST_RESOLVE_KEY,
   technologiesListResolver,
 } from '@features/technologies/pages/list/technologies-list.resolver';
+import {
+  SECURITY_MAINTENANCE_RESOLVE_KEY,
+  securityMaintenanceResolver,
+} from './security/pages/security-maintenance/security-maintenance.resolver';
 
 import { MAINTENANCES_ROUTES } from './maintenances.routes';
 import { MAINTENANCES_ROUTES_LOC } from './maintenances.routes.i18n';
@@ -58,15 +66,44 @@ describe('MAINTENANCES_ROUTES', () => {
   });
 
   it('preloads the development catalogs and active layer options', () => {
-    const route = children.find(
-      ({ path }) => path === MAINTENANCES_ROUTES_LOC.DEVELOPMENT,
-    );
+    const route = children.find(({ path }) => path === MAINTENANCES_ROUTES_LOC.DEVELOPMENT);
 
     expect(route?.resolve).toEqual({
       [ROLES_LIST_RESOLVE_KEY]: rolesListResolver,
       [LAYERS_LIST_RESOLVE_KEY]: layersListResolver,
       [TECHNOLOGIES_LIST_RESOLVE_KEY]: technologiesListResolver,
       [LAYER_CATALOG_RESOLVE_KEY]: layerCatalogResolver,
+    });
+  });
+
+  it('registers security last and preloads its maintenance resources', () => {
+    const securityIndex = children.findIndex(
+      ({ path }) => path === MAINTENANCES_ROUTES_LOC.SECURITY,
+    );
+    const accessibilityIndex = children.findIndex(
+      ({ path }) => path === MAINTENANCES_ROUTES_LOC.ACCESSIBILITY,
+    );
+
+    expect(securityIndex).toBe(accessibilityIndex + 1);
+    expect(children[securityIndex].resolve).toEqual({
+      [SECURITY_MAINTENANCE_RESOLVE_KEY]: securityMaintenanceResolver,
+    });
+  });
+
+  it('registers systems after responsibles and preloads the environments page', () => {
+    const responsiblesIndex = children.findIndex(
+      ({ path }) => path === MAINTENANCES_ROUTES_LOC.RESPONSIBLES,
+    );
+    const systemsIndex = children.findIndex(({ path }) => path === SYSTEMS_ROUTES_LOC.BASE);
+    const developmentIndex = children.findIndex(
+      ({ path }) => path === MAINTENANCES_ROUTES_LOC.DEVELOPMENT,
+    );
+    const route = children[systemsIndex];
+
+    expect(systemsIndex).toBe(responsiblesIndex + 1);
+    expect(developmentIndex).toBe(systemsIndex + 1);
+    expect(route.resolve).toEqual({
+      [ENVIRONMENTS_LIST_RESOLVE_KEY]: environmentsListResolver,
     });
   });
 
@@ -89,32 +126,33 @@ describe('MAINTENANCES_ROUTES', () => {
     );
 
     expect(result).toBe(expectedTree);
-    expect(createUrlTree).toHaveBeenCalledWith(
-      ['/', MAINTENANCES_ROUTES_LOC.BASE, sectionPath],
-      { fragment },
-    );
-  });
-
-  it.each([
-    MAINTENANCES_ROUTES_LOC.SYSTEMS_DATABASES,
-    MAINTENANCES_ROUTES_LOC.ENVIRONMENTS,
-  ])('redirects the moved %s page to the environments panel in systems', (legacyPath) => {
-    const expectedTree = {} as UrlTree;
-    const createUrlTree = vi.fn(() => expectedTree);
-    TestBed.configureTestingModule({
-      providers: [{ provide: Router, useValue: { createUrlTree } }],
+    expect(createUrlTree).toHaveBeenCalledWith(['/', MAINTENANCES_ROUTES_LOC.BASE, sectionPath], {
+      fragment,
     });
-    const route = children.find(({ path }) => path === legacyPath);
-
-    expect(typeof route?.redirectTo).toBe('function');
-    const result = TestBed.runInInjectionContext(() =>
-      (route!.redirectTo as (data: object) => UrlTree)({}),
-    );
-
-    expect(result).toBe(expectedTree);
-    expect(createUrlTree).toHaveBeenCalledWith(
-      ['/', SYSTEMS_ROUTES_LOC.BASE],
-      { fragment: 'environments' },
-    );
   });
+
+  it.each([MAINTENANCES_ROUTES_LOC.SYSTEMS_DATABASES, MAINTENANCES_ROUTES_LOC.ENVIRONMENTS])(
+    'redirects the moved %s page to the environments panel in systems',
+    (legacyPath) => {
+      const expectedTree = {} as UrlTree;
+      const createUrlTree = vi.fn(() => expectedTree);
+      TestBed.configureTestingModule({
+        providers: [{ provide: Router, useValue: { createUrlTree } }],
+      });
+      const route = children.find(({ path }) => path === legacyPath);
+
+      expect(typeof route?.redirectTo).toBe('function');
+      const result = TestBed.runInInjectionContext(() =>
+        (route!.redirectTo as (data: { queryParams: Record<string, string> }) => UrlTree)({
+          queryParams: { view: 'compact' },
+        }),
+      );
+
+      expect(result).toBe(expectedTree);
+      expect(createUrlTree).toHaveBeenCalledWith(
+        ['/', MAINTENANCES_ROUTES_LOC.BASE, SYSTEMS_ROUTES_LOC.BASE],
+        { queryParams: { view: 'compact' }, fragment: 'environments' },
+      );
+    },
+  );
 });

@@ -1,0 +1,1 @@
+var t={items:[],total:0},o=10,e=[10,20,50,100],s=`${"Mostrant"} {first} a {last} de {totalRecords} ${"registres"}`,c="flex justify-content-end flex-wrap",r="Accions",l="No s'han trobat resultats";export{t as a,o as b,e as c,s as d,c as e,r as f,l as g};/**i18n:85b369cd519586902b7f4f17a6e24b5cb5057fd4d248a08016454ba7f85e36fe*/

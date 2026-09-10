@@ -1,3 +1,4 @@
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -34,7 +35,7 @@ export enum SystemTypeTableAction {
 @Component({
   selector: 'app-system-types-table',
   standalone: true,
-  imports: [Button, Menu, RestoreRecordMenu, Skeleton, TableModule],
+  imports: [StatusTagComponent, Button, Menu, RestoreRecordMenu, Skeleton, TableModule],
   templateUrl: './system-types-table.html',
   styleUrl: './system-types-table.scss',
   encapsulation: ViewEncapsulation.None,

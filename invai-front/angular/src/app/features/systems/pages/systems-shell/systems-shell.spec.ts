@@ -90,17 +90,21 @@ describe('SystemsShell', () => {
       })),
     ).toEqual(SYSTEMS_PANELS.map(({ title, description }) => ({ title, description })));
     expect(SYSTEMS_PANELS.map(({ id }) => id)).toEqual([
-      'environments',
-      'physical-servers',
       'servers',
-      'database-servers',
       'databases',
+      'physical-servers',
+      'database-servers',
       'database-vendors',
+      'environments',
     ]);
   });
 
   it('starts with every panel collapsed', () => {
     expect(activePanels()).toEqual([]);
+  });
+
+  it('renders inside the maintenance page without a nested section container', () => {
+    expect(fixture.nativeElement.querySelector('app-section-container')).toBeNull();
   });
 
   it('keeps one active panel and synchronizes it with the URL fragment', () => {

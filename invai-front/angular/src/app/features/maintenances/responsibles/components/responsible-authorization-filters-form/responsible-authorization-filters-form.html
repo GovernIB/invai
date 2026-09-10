@@ -1,5 +1,5 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input
         id="responsible-authorization-filter-name"
@@ -10,7 +10,7 @@
       <label for="responsible-authorization-filter-name">{{ labels().name }}</label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input
         id="responsible-authorization-filter-name-es"
@@ -21,7 +21,7 @@
       <label for="responsible-authorization-filter-name-es">{{ labels().nameEs }}</label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--compact">
     <p-floatlabel class="w-full">
       <p-select
         inputId="responsible-authorization-filter-status"

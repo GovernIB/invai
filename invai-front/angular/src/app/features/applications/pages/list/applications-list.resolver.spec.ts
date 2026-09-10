@@ -30,6 +30,7 @@ const APPLICATION: Application = {
   informationSystem: 'Instrumental',
   scope: 'Departamental',
   commission: 'Equip directiu',
+  department: 'Conselleria',
   administrativeUnit: 'Direcció General',
   status: ApplicationStatus.ACTIVE,
   description: 'Aplicació interna',
@@ -37,6 +38,14 @@ const APPLICATION: Application = {
   modificationDate: '',
   withdrawalDate: '',
   appResponsibleAuthorizedId: null,
+  incomplete: false,
+  missingResponsibleTypes: false,
+  missingAuthorized: false,
+  missingDevelopmentFields: false,
+  missingSystems: false,
+  missingDatabases: false,
+  missingAccessibilityFields: false,
+  missingSecurityData: false,
 };
 
 const OPTIONS: ApplicationSelectOptions = {
@@ -44,6 +53,7 @@ const OPTIONS: ApplicationSelectOptions = {
   informationSystems: [],
   scopes: [],
   commissions: [],
+  departments: [{ label: 'Conselleria', value: 'GVA01' }],
   administrativeUnits: [],
 };
 
@@ -55,14 +65,23 @@ const INFRASTRUCTURE_OPTIONS: ApplicationInfrastructureFilterOptions = {
 
 describe('applicationsListResolver', () => {
   let getPage: ReturnType<typeof vi.fn>;
-  let getOptions: ReturnType<typeof vi.fn>;
+  let getStaticOptions: ReturnType<typeof vi.fn>;
+  let getDepartmentOptions: ReturnType<typeof vi.fn>;
   let getPhysicalServerOptions: ReturnType<typeof vi.fn>;
   let getDatabaseOptions: ReturnType<typeof vi.fn>;
   let getEnvironmentOptions: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     getPage = vi.fn(() => of(page([APPLICATION])));
-    getOptions = vi.fn(() => of(OPTIONS));
+    getStaticOptions = vi.fn(() =>
+      of({
+        categories: OPTIONS.categories,
+        informationSystems: OPTIONS.informationSystems,
+        scopes: OPTIONS.scopes,
+        commissions: OPTIONS.commissions,
+      }),
+    );
+    getDepartmentOptions = vi.fn(() => of(OPTIONS.departments));
     getPhysicalServerOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.servers));
     getDatabaseOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.databases));
     getEnvironmentOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.environments));
@@ -70,7 +89,10 @@ describe('applicationsListResolver', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ApplicationsService, useValue: { getPage } },
-        { provide: ApplicationOptionsService, useValue: { getOptions } },
+        {
+          provide: ApplicationOptionsService,
+          useValue: { getStaticOptions, getDepartmentOptions },
+        },
         {
           provide: ApplicationInfrastructureFilterOptionsService,
           useValue: { getPhysicalServerOptions, getDatabaseOptions, getEnvironmentOptions },
@@ -87,7 +109,8 @@ describe('applicationsListResolver', () => {
       size: 10,
       statusId: ApplicationStatus.ACTIVE,
     });
-    expect(getOptions).toHaveBeenCalledOnce();
+    expect(getStaticOptions).toHaveBeenCalledOnce();
+    expect(getDepartmentOptions).toHaveBeenCalledOnce();
     expect(getPhysicalServerOptions).toHaveBeenCalledOnce();
     expect(getDatabaseOptions).toHaveBeenCalledOnce();
     expect(getEnvironmentOptions).toHaveBeenCalledOnce();
@@ -97,6 +120,8 @@ describe('applicationsListResolver', () => {
       infrastructureOptions: INFRASTRUCTURE_OPTIONS,
       pageLoadFailed: false,
       optionsLoadFailed: false,
+      departmentsLoadFailed: false,
+      administrativeUnitsLoadFailed: false,
     });
   });
 
@@ -111,11 +136,13 @@ describe('applicationsListResolver', () => {
       infrastructureOptions: INFRASTRUCTURE_OPTIONS,
       pageLoadFailed: true,
       optionsLoadFailed: false,
+      departmentsLoadFailed: false,
+      administrativeUnitsLoadFailed: false,
     });
   });
 
   it('should complete the route with empty options when their orchestration fails', async () => {
-    getOptions.mockReturnValueOnce(throwError(() => new Error('Options unavailable')));
+    getStaticOptions.mockReturnValueOnce(throwError(() => new Error('Options unavailable')));
 
     const result = await resolveList();
 
@@ -126,11 +153,14 @@ describe('applicationsListResolver', () => {
         informationSystems: [],
         scopes: [],
         commissions: [],
+        departments: OPTIONS.departments,
         administrativeUnits: [],
       },
       infrastructureOptions: INFRASTRUCTURE_OPTIONS,
       pageLoadFailed: false,
       optionsLoadFailed: true,
+      departmentsLoadFailed: false,
+      administrativeUnitsLoadFailed: false,
     });
   });
 

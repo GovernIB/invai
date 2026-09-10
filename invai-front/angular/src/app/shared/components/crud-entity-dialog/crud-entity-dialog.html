@@ -1,4 +1,5 @@
 <p-dialog
+  styleClass="invai-dialog"
   [closable]="false"
   [closeOnEscape]="false"
   [dismissableMask]="false"
@@ -12,8 +13,9 @@
 >
   <ng-template #header>
     <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
-      <h2 class="m-0 truncate text-base font-semibold text-color">{{ title() }}</h2>
+      <h2 class="m-0 min-w-0 text-base font-semibold">{{ title() }}</h2>
       <p-button
+        class="invai-dialog__close"
         type="button"
         severity="secondary"
         [ariaLabel]="ariaLabels().close"
@@ -66,7 +68,7 @@
         }
       </div>
 
-      <div class="flex items-center justify-end gap-2">
+      <div class="invai-dialog__primary-actions flex items-center justify-end gap-2">
         @if (mode() === 'view') {
           @if (viewPrimaryAction() === 'edit' && canEdit() && !canRestore()) {
             <p-button
@@ -81,6 +83,7 @@
             <p-button
               type="button"
               [ariaLabel]="ariaLabels().accept"
+              [icon]="icons.CHECK"
               [disabled]="isBusy()"
               [label]="labels.accept"
               (onClick)="requestClose()"
@@ -101,7 +104,7 @@
             type="button"
             [ariaLabel]="mode() === 'create' ? ariaLabels().add : ariaLabels().save"
             [disabled]="isBusy()"
-            [icon]="mode() === 'create' ? icons.PLUS : icons.CHECK"
+            [icon]="mode() === 'create' ? icons.PLUS : icons.SAVE"
             [label]="mode() === 'create' ? labels.add : labels.save"
             [loading]="isSaving()"
             (onClick)="onSubmit()"
@@ -121,6 +124,7 @@
     [cancelOnHide]="false"
     [confirmAriaLabel]="saveAndCloseAriaLabel"
     [confirmLabel]="labels.save"
+    [confirmIcon]="icons.SAVE"
     [confirmOutlined]="false"
     [message]="unsavedMessage"
     [title]="unsavedTitle"

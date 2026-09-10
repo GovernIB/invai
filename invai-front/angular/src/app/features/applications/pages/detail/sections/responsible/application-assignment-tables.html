@@ -29,14 +29,18 @@
       <tr>
         @for (column of columns; track column.key) {
           @if (column.sortBy) {
-            <th [pSortableColumn]="column.sortBy" [style.min-width]="column.minWidth">
+            <th
+              [pSortableColumn]="column.sortBy"
+              [style.min-width]="column.minWidth"
+              [style.width]="column.width"
+            >
               <div class="invai-table-header-content">
                 <span class="invai-table-header-label">{{ column.label }}</span>
                 <p-sortIcon [field]="column.sortBy" />
               </div>
             </th>
           } @else {
-            <th [style.min-width]="column.minWidth">
+            <th [style.min-width]="column.minWidth" [style.width]="column.width">
               <span class="invai-table-header-label">{{ column.label }}</span>
             </th>
           }
@@ -57,24 +61,32 @@
               tabindex="0"
               [autoHide]="false"
               [pTooltip]="copy.incomplete"
-              [style.min-width]="column.minWidth"
+              [style.min-width]="column.minWidth" [style.width]="column.width"
               tooltipEvent="both"
               tooltipPosition="top"
             >
               <span
-                class="application-responsible-incomplete flex w-full items-center justify-center"
+                class="invai-table-cell-content"
+                [class.invai-table-cell-content--wrap]="column.wrap"
+                [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
               >
-                <i
-                  class="text-red-500"
-                  [class]="icons.EXCLAMATION_TRIANGLE"
-                  aria-hidden="true"
-                ></i>
-                <span class="sr-only">{{ copy.incomplete }}</span>
+                <span
+                  class="application-responsible-incomplete flex w-full items-center justify-start"
+                >
+                  <i class="pi pi-exclamation-circle text-red-500" aria-hidden="true"></i>
+                  <span class="sr-only">{{ copy.incomplete }}</span>
+                </span>
               </span>
             </td>
           } @else {
-            <td [style.min-width]="column.minWidth">
-              {{ cellValue(rowData, column.key) }}
+            <td [style.min-width]="column.minWidth" [style.width]="column.width">
+              <span
+                class="invai-table-cell-content"
+                [class.invai-table-cell-content--wrap]="column.wrap"
+                [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+              >
+                {{ cellValue(rowData, column.key) }}
+              </span>
             </td>
           }
         }

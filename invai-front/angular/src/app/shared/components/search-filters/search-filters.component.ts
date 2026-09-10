@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
+import { ButtonPassThrough } from 'primeng/types/button';
 import {
   SEARCH_FILTERS_HIDE_FILTERS,
   SEARCH_FILTERS_MORE_FILTERS,
@@ -37,6 +38,9 @@ export class SearchFiltersComponent {
   onReset = output();
 
   protected isMoreFiltersCollapsed = signal(true);
+  protected readonly moreFiltersPassThrough = computed<ButtonPassThrough>(() => ({
+    root: { 'aria-expanded': String(!this.isMoreFiltersCollapsed()) },
+  }));
 
   protected readonly PrimeIcons = PrimeIcons;
   protected readonly searchLabel = SEARCH_FILTERS_SEARCH;

@@ -431,7 +431,6 @@ export class TechnologiesList
       name: technology?.name ?? '',
       layerId: technology?.layer?.id ?? null,
     });
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private observeQuickSearch(): void {

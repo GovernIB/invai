@@ -12,6 +12,13 @@ export const APPLICATION_CREATE_LABELS = {
   code: $localize`Codi`,
   administrativeUnit: $localize`Unitat administrativa`,
   conselleria: $localize`Conselleria`,
+  departmentsLoading: $localize`Carregant Conselleries…`,
+  departmentsLoadError: $localize`No s'han pogut carregar les Conselleries.`,
+  administrativeUnitsLoading: $localize`Carregant unitats administratives…`,
+  administrativeUnitsLoadError: $localize`No s'han pogut carregar les unitats administratives.`,
+  administrativeUnitsEmpty: $localize`Aquesta Conselleria no té unitats administratives disponibles.`,
+  selectConselleriaFirst: $localize`Selecciona primer una Conselleria.`,
+  retry: $localize`Torna-ho a provar`,
   description: $localize`Descripció (opcional)`,
 };
 

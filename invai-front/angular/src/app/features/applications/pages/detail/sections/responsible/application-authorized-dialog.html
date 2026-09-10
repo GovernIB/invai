@@ -12,7 +12,7 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-form-surface-subtle invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
@@ -28,16 +28,18 @@
         [pt]="personalCaibPassThrough()"
       />
     </div>
-    @if (mode() === 'create') {
-      <p
-        id="application-authorized-dialog-caib-unavailable"
-        class="m-0 text-sm text-color-secondary md:col-span-2"
-      >
-        {{ copy.caibCreationUnavailable }}
-      </p>
-    }
-
-    @if (!form().controls.personalCaib.value) {
+    @if (form().controls.personalCaib.value && mode() === 'create') {
+      <app-application-soffid-person-field
+        idPrefix="application-authorized-dialog"
+        [control]="form().controls.soffidPerson"
+        [loading]="soffidLoading()"
+        [options]="soffidOptions()"
+        [searched]="soffidSearched()"
+        [searchError]="soffidSearchError()"
+        [total]="soffidTotal()"
+        (searchRequested)="soffidSearch.emit($event)"
+      />
+    } @else if (!form().controls.personalCaib.value) {
       <div>
         <p-floatlabel class="w-full">
           <p-select
@@ -79,36 +81,38 @@
       </div>
     }
 
-    <div>
-      <p-floatlabel class="w-full">
-        <p-select
-          inputId="application-authorized-dialog-person"
-          styleClass="w-full"
-          formControlName="personId"
-          [ariaLabelledBy]="personLabelId"
-          [ariaFilterLabel]="copy.personFilterAriaLabel"
-          appendTo="body"
-          optionLabel="label"
-          optionValue="id"
-          [filter]="true"
-          [invalid]="isInvalid(form().controls.personId)"
-          [options]="personOptions()"
-          [pt]="personSelectPassThrough()"
-        />
-        <label [id]="personLabelId" for="application-authorized-dialog-person">
-          {{ copy.person }}
-        </label>
-      </p-floatlabel>
-      @if (isInvalid(form().controls.personId)) {
-        <p
-          id="application-authorized-dialog-person-error"
-          class="mb-0 mt-1 text-sm text-red-600"
-          role="alert"
-        >
-          {{ requiredError }}
-        </p>
-      }
-    </div>
+    @if (!form().controls.personalCaib.value || mode() === 'edit') {
+      <div>
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="application-authorized-dialog-person"
+            styleClass="w-full"
+            formControlName="personId"
+            [ariaLabelledBy]="personLabelId"
+            [ariaFilterLabel]="copy.personFilterAriaLabel"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [filter]="true"
+            [invalid]="isInvalid(form().controls.personId)"
+            [options]="personOptions()"
+            [pt]="personSelectPassThrough()"
+          />
+          <label [id]="personLabelId" for="application-authorized-dialog-person">
+            {{ copy.person }}
+          </label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.personId)) {
+          <p
+            id="application-authorized-dialog-person-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    }
 
     <div>
       <p-floatlabel class="w-full">
@@ -118,6 +122,7 @@
           type="email"
           formControlName="email"
           pInputText
+          readonly
         />
         <label for="application-authorized-dialog-email">{{ copy.email }}</label>
       </p-floatlabel>

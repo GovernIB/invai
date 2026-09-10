@@ -63,14 +63,56 @@ describe('responsible form factories', () => {
     const form = createRoleTransferForm(formBuilder);
 
     expect(form.getRawValue()).toEqual({
-      sourcePersonId: null,
-      destinationPersonId: null,
+      sourcePerson: null,
+      destinationPerson: null,
       revoke: false,
     });
     expect(form.invalid).toBe(true);
-    expect(form.controls.destinationPersonId.disabled).toBe(true);
-    form.controls.destinationPersonId.enable();
-    form.patchValue({ sourcePersonId: 1, destinationPersonId: 2 });
+    expect(form.controls.destinationPerson.disabled).toBe(true);
+    form.controls.destinationPerson.enable();
+    form.patchValue({
+      sourcePerson: {
+        id: 1,
+        firstName: 'Maria',
+        lastName: 'Tur',
+        email: 'maria@example.org',
+        label: 'Maria Tur',
+        source: 'database',
+        disabled: false,
+      },
+      destinationPerson: {
+        id: 2,
+        firstName: 'Joan',
+        lastName: 'Serra',
+        email: 'joan@example.org',
+        label: 'Joan Serra',
+        source: 'database',
+        disabled: false,
+      },
+    });
     expect(form.valid).toBe(true);
+  });
+
+  it('rejects destination text that was not selected from the result list', () => {
+    const form = createRoleTransferForm(formBuilder);
+    form.controls.destinationPerson.enable();
+    form.controls.destinationPerson.setValue('Joan');
+
+    expect(form.controls.destinationPerson.hasError('personSelection')).toBe(true);
+  });
+
+  it('rejects a Soffid-only source without a local InvAI id', () => {
+    const form = createRoleTransferForm(formBuilder);
+    form.controls.sourcePerson.setValue({
+      id: null,
+      firstName: 'Maria',
+      lastName: 'Tur',
+      email: 'maria.tur@caib.es',
+      label: 'Maria Tur',
+      source: 'soffid',
+      disabled: true,
+    });
+
+    expect(form.controls.sourcePerson.hasError('sourceWithoutLocalId')).toBe(true);
   });
 });

@@ -445,7 +445,6 @@ export class DatabasesList implements OnInit {
       databaseType: vendor,
       description: record.description ?? '',
     });
-    if (mode === 'view') this.hostForm.disable({ emitEvent: false });
     this.dialogMode.set(mode);
   }
 

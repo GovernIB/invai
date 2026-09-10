@@ -382,7 +382,6 @@ export class RolesList extends SearchComponentBase<Role, RoleFilters> implements
   private prepareEntityForm(role: Role | null, mode: RoleDialogMode): void {
     this.entityForm.enable({ emitEvent: false });
     this.entityForm.reset({ name: role?.name ?? '', nameEs: role?.nameEs ?? '' });
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private observeQuickSearch(): void {

@@ -11,6 +11,42 @@
   (closed)="closed.emit()"
   (submitForm)="submitForm.emit()"
 >
+  @if (mode() === 'create') {
+    <div class="application-infrastructure-catalog-toolbar">
+      <app-section-actions
+        [hideAddButton]="true"
+        [hideExportButton]="true"
+        [hideColumnsButton]="true"
+        [quickSearchValue]="quickSearch()"
+        [quickSearchPlaceholder]="searchLabel"
+        [quickSearchAriaLabel]="searchLabel"
+        [isSearchLoading]="isLoading()"
+        [filtersSelected]="filtersSelected()"
+        [(isFiltersCollapsed)]="isFiltersCollapsed"
+        (onQuickSearchChange)="quickSearchChange.emit($event)"
+      />
+    </div>
+    @if (!isFiltersCollapsed()) {
+      <div class="mb-4">
+        <app-search-filters
+          class="application-infrastructure-catalog-filters"
+          [hideMoreFiltersButton]="true"
+          [isLoading]="isLoading()"
+          (onSearch)="filterSearch.emit()"
+          (onReset)="filterReset.emit()"
+        >
+          <app-database-filters-form
+            idPrefix="application-database-catalog-filter"
+            [showStatus]="false"
+            [form]="filtersForm()"
+            [labels]="filterLabels"
+            [serverOptions]="serverOptions()"
+            [databaseTypeOptions]="databaseTypeOptions()"
+          />
+        </app-search-filters>
+      </div>
+    }
+  }
   <div
     role="group"
     aria-labelledby="application-database-relation-selection-label"

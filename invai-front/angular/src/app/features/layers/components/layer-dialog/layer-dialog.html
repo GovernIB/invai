@@ -22,7 +22,7 @@
       <span class="sr-only">{{ loadingLabel }}</span>
     </div>
   } @else {
-    <form [formGroup]="form()" (ngSubmit)="onSubmit()" novalidate>
+    <form class="invai-dialog-form-grid" [formGroup]="form()" (ngSubmit)="onSubmit()" novalidate>
       <p-floatlabel class="w-full">
         <input
           id="layer-dialog-name"
@@ -32,7 +32,9 @@
           formControlName="name"
           [attr.aria-describedby]="isInvalid(form().controls.name) ? 'layer-dialog-name-error' : null"
           [attr.aria-invalid]="isInvalid(form().controls.name)"
-          pInputText
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
+            pInputText
         />
         <label for="layer-dialog-name">{{ label }}</label>
       </p-floatlabel>

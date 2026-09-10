@@ -1,0 +1,101 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels()"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5"
+      [class.md:grid-cols-2]="bilingual()"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            class="w-full"
+            type="text"
+            maxlength="150"
+            formControlName="name"
+            pInputText
+            [attr.aria-describedby]="
+              isInvalid(form().controls.name) ? idPrefix() + '-dialog-name-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [class.invai-form-readonly-control]="mode() === 'view'"
+            [id]="idPrefix() + '-dialog-name'"
+            [readOnly]="mode() === 'view'"
+          />
+          <label [for]="idPrefix() + '-dialog-name'">{{ labels.name }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.name)) {
+          <p
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+            [id]="idPrefix() + '-dialog-name-error'"
+          >
+            {{
+              form().controls.name.hasError('required') || form().controls.name.hasError('pattern')
+                ? requiredError
+                : nameMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+      @if (bilingual()) {
+        <div>
+          <p-floatlabel class="w-full">
+            <input
+              class="w-full"
+              type="text"
+              maxlength="100"
+              formControlName="nameEs"
+              pInputText
+              [attr.aria-describedby]="
+                isInvalid(form().controls.nameEs) ? idPrefix() + '-dialog-name-es-error' : null
+              "
+              [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+              [class.invai-form-readonly-control]="mode() === 'view'"
+              [id]="idPrefix() + '-dialog-name-es'"
+              [readOnly]="mode() === 'view'"
+            />
+            <label [for]="idPrefix() + '-dialog-name-es'">{{ labels.nameEs }}</label>
+          </p-floatlabel>
+          @if (isInvalid(form().controls.nameEs)) {
+            <p
+              class="mb-0 mt-1 text-sm text-red-600"
+              role="alert"
+              [id]="idPrefix() + '-dialog-name-es-error'"
+            >
+              {{
+                form().controls.nameEs.hasError('required') ||
+                form().controls.nameEs.hasError('pattern')
+                  ? requiredError
+                  : nameEsMaxLengthError
+              }}
+            </p>
+          }
+        </div>
+      }
+    </form>
+  }
+</app-crud-entity-dialog>

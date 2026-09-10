@@ -1,0 +1,555 @@
+<app-application-detail-section-layout
+  titleId="application-security-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('security')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
+  <section class="application-security">
+    <section
+      class="application-security__resource"
+      aria-labelledby="application-security-roles-title"
+    >
+      <div class="application-security__resource-header">
+        <h3 id="application-security-roles-title">{{ rolesTitle }}</h3>
+      </div>
+      <p class="application-security__notice" role="note">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        <span>{{ roleTemporaryNote }}</span>
+      </p>
+      <app-application-security-resource-table
+        kind="role"
+        [columns]="roleColumns"
+        [first]="roleFirst()"
+        [isLoading]="rolesLoading()"
+        [itemsList]="roles()"
+        (onPageChange)="onPageChange('role', $event)"
+      />
+    </section>
+
+    <section
+      class="application-security__resource"
+      aria-labelledby="application-security-web-contexts-title"
+    >
+      <div class="application-security__resource-header">
+        <h3 id="application-security-web-contexts-title">{{ webContextsTitle }}</h3>
+        @if (showResourceActions()) {
+          <p-button
+            type="button"
+            tooltipPosition="top"
+            [ariaLabel]="addAriaLabels['web-context']"
+            [disabled]="!canManageResources()"
+            [icon]="icons.PLUS"
+            [pTooltip]="canManageResources() ? addAriaLabels['web-context'] : anchorRequired"
+            styleClass="invai-table-toolbar-button"
+            (onClick)="openCreateDialog('web-context')"
+          />
+        }
+      </div>
+      <app-application-security-resource-table
+        kind="web-context"
+        [columns]="webContextColumns"
+        [first]="webContextFirst()"
+        [isLoading]="webContextsLoading()"
+        [isReadOnly]="!canManageResources()"
+        [itemsList]="webContexts()"
+        [showActions]="showResourceActions()"
+        (onPageChange)="onPageChange('web-context', $event)"
+        (onSelectAction)="onTableAction('web-context', $event)"
+      />
+    </section>
+
+    <section class="application-security__ens" aria-labelledby="application-security-ens-title">
+      <h3 id="application-security-ens-title">{{ ensTitle }}</h3>
+      @if (detailState.ensClassificationLoadState() === 'inconsistent') {
+        <div class="application-security__alert" role="alert">
+          <strong>{{ inconsistentTitle }}</strong>
+          <span>{{ inconsistentMessage }}</span>
+        </div>
+      }
+
+      <form
+        class="application-security__ens-form invai-grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12"
+        [formGroup]="detailState.securityForm"
+        novalidate
+      >
+        <div class="application-security__field xl:col-span-2">
+          <label
+            id="application-security-overall-grade-label"
+            for="application-security-overall-grade"
+            >{{ labels.overallGrade }}</label
+          >
+          @if (detailState.isEditing('security')) {
+            <p-select
+              inputId="application-security-overall-grade"
+              formControlName="overallGradeId"
+              ariaLabelledBy="application-security-overall-grade-label"
+              appendTo="body"
+              optionLabel="label"
+              optionValue="value"
+              [fluid]="true"
+              [options]="securityLevelOptions()"
+              [showClear]="true"
+            />
+          } @else {
+            <p
+              class="invai-form-static-value"
+              aria-labelledby="application-security-overall-grade-label"
+            >
+              {{
+                selectLabel(
+                  securityLevelOptions(),
+                  detailState.securityForm.controls.overallGradeId.value,
+                  detailState.ensClassification()?.overallGrade
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="application-security__field xl:col-span-4">
+          <label
+            id="application-security-identity-provider-label"
+            for="application-security-identity-provider"
+            >{{ labels.identityProvider }}</label
+          >
+          @if (detailState.isEditing('security')) {
+            <p-select
+              inputId="application-security-identity-provider"
+              formControlName="identityProviderId"
+              ariaLabelledBy="application-security-identity-provider-label"
+              appendTo="body"
+              optionLabel="label"
+              optionValue="value"
+              [fluid]="true"
+              [options]="identityProviderOptions()"
+              [showClear]="true"
+            />
+          } @else {
+            <p
+              class="invai-form-static-value"
+              aria-labelledby="application-security-identity-provider-label"
+            >
+              {{
+                selectLabel(
+                  identityProviderOptions(),
+                  detailState.securityForm.controls.identityProviderId.value,
+                  detailState.ensClassification()?.identityProvider
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="application-security__field xl:col-span-2">
+          <label
+            id="application-security-ens-subject-label"
+            for="application-security-ens-subject"
+            >{{ labels.ensSubject }}</label
+          >
+          @if (detailState.isEditing('security')) {
+            <p-select
+              inputId="application-security-ens-subject"
+              formControlName="ensSubjectId"
+              ariaLabelledBy="application-security-ens-subject-label"
+              appendTo="body"
+              optionLabel="label"
+              optionValue="value"
+              [fluid]="true"
+              [options]="ensSubjectOptions()"
+              [showClear]="true"
+            />
+          } @else {
+            <p
+              class="invai-form-static-value"
+              aria-labelledby="application-security-ens-subject-label"
+            >
+              {{
+                selectLabel(
+                  ensSubjectOptions(),
+                  detailState.securityForm.controls.ensSubjectId.value,
+                  detailState.ensClassification()?.ensSubject
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="application-security__field xl:col-span-2">
+          <label
+            id="application-security-personal-data-label"
+            for="application-security-personal-data"
+            >{{ labels.personalDataProcessing }}</label
+          >
+          @if (detailState.isEditing('security')) {
+            <p-select
+              inputId="application-security-personal-data"
+              formControlName="personalDataProcessingId"
+              ariaLabelledBy="application-security-personal-data-label"
+              appendTo="body"
+              optionLabel="label"
+              optionValue="value"
+              [fluid]="true"
+              [options]="personalDataProcessingOptions()"
+              [showClear]="true"
+            />
+          } @else {
+            <p
+              class="invai-form-static-value"
+              aria-labelledby="application-security-personal-data-label"
+            >
+              {{
+                selectLabel(
+                  personalDataProcessingOptions(),
+                  detailState.securityForm.controls.personalDataProcessingId.value,
+                  detailState.ensClassification()?.personalDataProcessing
+                )
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="application-security__field xl:col-span-2">
+          <label
+            id="application-security-approval-date-label"
+            for="application-security-approval-date"
+            >{{ labels.approvalDate }}</label
+          >
+          @if (detailState.isEditing('security')) {
+            <p-datepicker
+              inputId="application-security-approval-date"
+              formControlName="approvalDate"
+              ariaLabelledBy="application-security-approval-date-label"
+              appendTo="body"
+              iconDisplay="input"
+              [dateFormat]="dateFormat"
+              [fluid]="true"
+              [placeholder]="datePlaceholder"
+              [pt]="datePassThrough()"
+              [showIcon]="true"
+              [showClear]="true"
+            />
+          } @else {
+            <p
+              class="invai-form-static-value"
+              aria-labelledby="application-security-approval-date-label"
+            >
+              {{ formattedApprovalDate() }}
+            </p>
+          }
+        </div>
+
+        <fieldset
+          class="application-security__dimensions invai-grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5"
+        >
+          <legend>{{ dimensionsTitle }}</legend>
+          <div class="application-security__field">
+            <label
+              id="application-security-confidentiality-label"
+              for="application-security-confidentiality"
+              >{{ labels.confidentiality }}</label
+            >
+            @if (detailState.isEditing('security')) {
+              <p-select
+                inputId="application-security-confidentiality"
+                formControlName="confidentialityId"
+                ariaLabelledBy="application-security-confidentiality-label"
+                appendTo="body"
+                optionLabel="label"
+                optionValue="value"
+                [fluid]="true"
+                [options]="securityLevelOptions()"
+                [showClear]="true"
+              />
+            } @else {
+              <p
+                class="invai-form-static-value"
+                aria-labelledby="application-security-confidentiality-label"
+              >
+                {{
+                  selectLabel(
+                    securityLevelOptions(),
+                    detailState.securityForm.controls.confidentialityId.value,
+                    detailState.ensClassification()?.confidentiality
+                  )
+                }}
+              </p>
+            }
+          </div>
+          <div class="application-security__field">
+            <label id="application-security-integrity-label" for="application-security-integrity">{{
+              labels.integrity
+            }}</label>
+            @if (detailState.isEditing('security')) {
+              <p-select
+                inputId="application-security-integrity"
+                formControlName="integrityId"
+                ariaLabelledBy="application-security-integrity-label"
+                appendTo="body"
+                optionLabel="label"
+                optionValue="value"
+                [fluid]="true"
+                [options]="securityLevelOptions()"
+                [showClear]="true"
+              />
+            } @else {
+              <p
+                class="invai-form-static-value"
+                aria-labelledby="application-security-integrity-label"
+              >
+                {{
+                  selectLabel(
+                    securityLevelOptions(),
+                    detailState.securityForm.controls.integrityId.value,
+                    detailState.ensClassification()?.integrity
+                  )
+                }}
+              </p>
+            }
+          </div>
+          <div class="application-security__field">
+            <label
+              id="application-security-availability-label"
+              for="application-security-availability"
+              >{{ labels.availability }}</label
+            >
+            @if (detailState.isEditing('security')) {
+              <p-select
+                inputId="application-security-availability"
+                formControlName="availabilityId"
+                ariaLabelledBy="application-security-availability-label"
+                appendTo="body"
+                optionLabel="label"
+                optionValue="value"
+                [fluid]="true"
+                [options]="securityLevelOptions()"
+                [showClear]="true"
+              />
+            } @else {
+              <p
+                class="invai-form-static-value"
+                aria-labelledby="application-security-availability-label"
+              >
+                {{
+                  selectLabel(
+                    securityLevelOptions(),
+                    detailState.securityForm.controls.availabilityId.value,
+                    detailState.ensClassification()?.availability
+                  )
+                }}
+              </p>
+            }
+          </div>
+          <div class="application-security__field">
+            <label
+              id="application-security-traceability-label"
+              for="application-security-traceability"
+              >{{ labels.traceability }}</label
+            >
+            @if (detailState.isEditing('security')) {
+              <p-select
+                inputId="application-security-traceability"
+                formControlName="traceabilityId"
+                ariaLabelledBy="application-security-traceability-label"
+                appendTo="body"
+                optionLabel="label"
+                optionValue="value"
+                [fluid]="true"
+                [options]="securityLevelOptions()"
+                [showClear]="true"
+              />
+            } @else {
+              <p
+                class="invai-form-static-value"
+                aria-labelledby="application-security-traceability-label"
+              >
+                {{
+                  selectLabel(
+                    securityLevelOptions(),
+                    detailState.securityForm.controls.traceabilityId.value,
+                    detailState.ensClassification()?.traceability
+                  )
+                }}
+              </p>
+            }
+          </div>
+          <div class="application-security__field">
+            <label
+              id="application-security-authenticity-label"
+              for="application-security-authenticity"
+              >{{ labels.authenticity }}</label
+            >
+            @if (detailState.isEditing('security')) {
+              <p-select
+                inputId="application-security-authenticity"
+                formControlName="authenticityId"
+                ariaLabelledBy="application-security-authenticity-label"
+                appendTo="body"
+                optionLabel="label"
+                optionValue="value"
+                [fluid]="true"
+                [options]="securityLevelOptions()"
+                [showClear]="true"
+              />
+            } @else {
+              <p
+                class="invai-form-static-value"
+                aria-labelledby="application-security-authenticity-label"
+              >
+                {{
+                  selectLabel(
+                    securityLevelOptions(),
+                    detailState.securityForm.controls.authenticityId.value,
+                    detailState.ensClassification()?.authenticity
+                  )
+                }}
+              </p>
+            }
+          </div>
+        </fieldset>
+      </form>
+    </section>
+
+    <section
+      class="application-security__resource"
+      aria-labelledby="application-security-risks-title"
+    >
+      <div class="application-security__resource-header">
+        <h3 id="application-security-risks-title">{{ risksTitle }}</h3>
+        @if (showResourceActions()) {
+          <p-button
+            type="button"
+            tooltipPosition="top"
+            [ariaLabel]="addAriaLabels.risk"
+            [disabled]="!canManageResources()"
+            [icon]="icons.PLUS"
+            [pTooltip]="canManageResources() ? addAriaLabels.risk : anchorRequired"
+            styleClass="invai-table-toolbar-button"
+            (onClick)="openCreateDialog('risk')"
+          />
+        }
+      </div>
+      <app-application-security-resource-table
+        kind="risk"
+        [columns]="riskColumns"
+        [first]="riskFirst()"
+        [isLoading]="risksLoading()"
+        [isReadOnly]="!canManageResources()"
+        [itemsList]="risks()"
+        [showActions]="showResourceActions()"
+        (onPageChange)="onPageChange('risk', $event)"
+        (onSelectAction)="onTableAction('risk', $event)"
+      />
+    </section>
+
+    <section
+      class="application-security__resource"
+      aria-labelledby="application-security-measures-title"
+    >
+      <div class="application-security__resource-header">
+        <h3 id="application-security-measures-title">{{ measuresTitle }}</h3>
+        @if (showResourceActions()) {
+          <p-button
+            type="button"
+            tooltipPosition="top"
+            [ariaLabel]="addAriaLabels.measure"
+            [disabled]="!canManageResources()"
+            [icon]="icons.PLUS"
+            [pTooltip]="canManageResources() ? addAriaLabels.measure : anchorRequired"
+            styleClass="invai-table-toolbar-button"
+            (onClick)="openCreateDialog('measure')"
+          />
+        }
+      </div>
+      <app-application-security-resource-table
+        kind="measure"
+        [columns]="measureColumns"
+        [first]="measureFirst()"
+        [isLoading]="measuresLoading()"
+        [isReadOnly]="!canManageResources()"
+        [itemsList]="measures()"
+        [showActions]="showResourceActions()"
+        (onPageChange)="onPageChange('measure', $event)"
+        (onSelectAction)="onTableAction('measure', $event)"
+      />
+    </section>
+
+    <div class="application-security__documentation">
+      <p-button
+        type="button"
+        [ariaLabel]="documentationAriaLabel"
+        [icon]="icons.EXTERNAL_LINK"
+        [label]="documentationLabel"
+        [outlined]="true"
+        (onClick)="onDocumentation()"
+      />
+    </div>
+
+    <div class="application-security__observations">
+      <label id="application-security-observation-label" for="application-security-observation">{{
+        labels.observation
+      }}</label>
+      @if (detailState.isEditing('security')) {
+        <p-editor
+          id="application-security-observation"
+          [formControl]="detailState.securityForm.controls.observation"
+          [attr.aria-labelledby]="'application-security-observation-label'"
+          [style]="{ height: '10rem' }"
+        />
+      } @else {
+        <div
+          class="invai-form-static-value invai-form-static-value--rich"
+          aria-labelledby="application-security-observation-label"
+          [innerHTML]="detailState.securityForm.controls.observation.value || '-'"
+        ></div>
+      }
+    </div>
+  </section>
+</app-application-detail-section-layout>
+
+@if (resourceDialogVisible()) {
+  <app-application-security-resource-dialog
+    [(visible)]="resourceDialogVisible"
+    [canEdit]="resourceDialogCanEdit()"
+    [ensRequirementOptions]="ensRequirementOptions()"
+    [fieldOptions]="fieldOptions()"
+    [form]="resourceForm"
+    [isDeleting]="isResourceDeleting()"
+    [isSaving]="isResourceSaving()"
+    [kind]="resourceKind()"
+    [measureTypeOptions]="measureTypeOptions()"
+    [mode]="resourceDialogMode()"
+    [securityLevelOptions]="securityLevelOptions()"
+    [webContextOptions]="webContextOptions()"
+    (cancelEdit)="cancelResourceEdit()"
+    (closed)="closeResourceDialog()"
+    (deactivate)="requestDelete()"
+    (edit)="startResourceEdit()"
+    (submitForm)="submitResource()"
+  />
+}
+
+@if (deleteDialogVisible()) {
+  <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
+    [(visible)]="deleteDialogVisible"
+    [cancelAriaLabel]="deleteDialog.cancelAriaLabel"
+    [cancelLabel]="deleteDialog.cancelLabel"
+    [confirmAriaLabel]="deleteDialog.confirmAriaLabel"
+    [confirmLabel]="deleteDialog.confirmLabel"
+    [message]="deleteDialog.message"
+    [title]="deleteDialog.title"
+    (cancel)="closeDeleteDialog()"
+    (confirm)="confirmDelete()"
+    (dismissed)="closeDeleteDialog()"
+  />
+}

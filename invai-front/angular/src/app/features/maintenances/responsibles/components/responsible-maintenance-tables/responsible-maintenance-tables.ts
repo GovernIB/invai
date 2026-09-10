@@ -17,6 +17,7 @@ import { Menu } from 'primeng/menu';
 import { Skeleton } from 'primeng/skeleton';
 import { Table, TableModule } from 'primeng/table';
 
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import {
   ResponsibleAuthorization,
   ResponsibleCompany,
@@ -99,7 +100,7 @@ abstract class ResponsibleMaintenanceTableBase<
   }
 }
 
-const TABLE_IMPORTS = [Button, Menu, RestoreRecordMenu, Skeleton, TableModule];
+const TABLE_IMPORTS = [Button, Menu, RestoreRecordMenu, Skeleton, StatusTagComponent, TableModule];
 
 @Component({
   selector: 'app-responsible-companies-table',

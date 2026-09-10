@@ -1,3 +1,4 @@
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -36,7 +37,7 @@ export enum CommissionTableAction {
 @Component({
   selector: 'app-commissions-table',
   standalone: true,
-  imports: [Button, DatePipe, Menu, RestoreRecordMenu, Skeleton, TableModule],
+  imports: [StatusTagComponent, Button, DatePipe, Menu, RestoreRecordMenu, Skeleton, TableModule],
   templateUrl: './commissions-table.html',
   styleUrl: './commissions-table.scss',
   encapsulation: ViewEncapsulation.None,

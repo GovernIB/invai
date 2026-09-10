@@ -69,6 +69,7 @@
   }
   @if (isDeleteDialogVisible()) {
     <app-confirmation-dialog
+      confirmIcon="pi pi-trash"
       [(visible)]="isDeleteDialogVisible"
       [auxiliaryAriaLabel]="pendingPersonHasAssignments() ? transferAriaLabel() : null"
       [auxiliaryLabel]="pendingPersonHasAssignments() ? copy.transfer : null"

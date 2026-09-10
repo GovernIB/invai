@@ -82,4 +82,24 @@ describe('ApplicationInfrastructureCatalogTable', () => {
     expect(container.querySelector('.p-datatable-mask')).toBeFalsy();
     expect(container.textContent).toContain('app01.caib.es');
   });
+
+  it('keeps the selection control and complete wrapped content in the selected row', () => {
+    fixture.componentRef.setInput('columns', [
+      { ...COLUMNS[0], wrap: true, maxWidth: '24rem' },
+    ]);
+    fixture.componentRef.setInput('selection', ROW);
+    fixture.detectChanges();
+    const selected = fixture.nativeElement.querySelector(
+      '.application-infrastructure-catalog-table__selected',
+    ) as HTMLTableRowElement;
+    expect(selected.querySelector<HTMLInputElement>('input[type="radio"]')?.checked).toBe(true);
+    expect(selected.cells).toHaveLength(2);
+    const content = selected.querySelector<HTMLElement>('.invai-table-cell-content--wrap');
+    expect(content?.textContent?.trim()).toBe(ROW.server);
+    expect(content?.style.maxWidth).toBe('24rem');
+    const selectionChange = vi.fn();
+    component.selectionChange.subscribe(selectionChange);
+    selected.querySelector<HTMLInputElement>('input[type="radio"]')?.click();
+    expect(selectionChange).toHaveBeenCalledExactlyOnceWith(ROW);
+  });
 });

@@ -38,6 +38,8 @@
             formControlName="name"
             [attr.aria-describedby]="isInvalid(form().controls.name) ? 'role-dialog-name-error' : null"
             [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="role-dialog-name">{{ labels.name }}</label>
@@ -64,6 +66,8 @@
               isInvalid(form().controls.nameEs) ? 'role-dialog-name-es-error' : null
             "
             [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="role-dialog-name-es">{{ labels.nameEs }}</label>

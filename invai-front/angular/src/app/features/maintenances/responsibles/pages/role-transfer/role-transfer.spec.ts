@@ -6,9 +6,12 @@ import { of } from 'rxjs';
 import { RoleTransferFormGroup } from '../../forms/responsible-forms.factory';
 import {
   ResponsiblePerson,
+  ResponsiblePersonCombinedSearchOutput,
   RoleAssignmentOutput,
   RoleAssignmentType,
+  RoleTransferDestinationOption,
   RoleTransferInput,
+  RoleTransferPersonOption,
   RoleTransferSourceRequest,
 } from '../../responsibles.model';
 import { ResponsiblePeopleService } from '../../services/responsible-people.service';
@@ -79,7 +82,8 @@ interface AssignmentGroupTest {
 interface RoleTransferTestApi {
   form: RoleTransferFormGroup;
   sourceAssignments: WritableSignal<RoleAssignmentOutput[]>;
-  destinationOptions: WritableSignal<ResponsiblePerson[]>;
+  sourceOptions: WritableSignal<RoleTransferPersonOption[]>;
+  destinationOptions: WritableSignal<RoleTransferDestinationOption[]>;
   preparedAssignments: WritableSignal<RoleAssignmentOutput[]>;
   sourceGroups: () => AssignmentGroupTest[];
   confirmationVisible: WritableSignal<boolean>;
@@ -87,34 +91,44 @@ interface RoleTransferTestApi {
   moveSubgroup(subgroup: AssignmentSubgroupTest, fromSource: boolean): void;
   openApplyConfirmation(): void;
   confirmAction(): void;
+  searchSources(query: string): void;
+  searchDestinations(query: string): void;
 }
 
 describe('RoleTransfer', () => {
   let fixture: ComponentFixture<RoleTransfer>;
   let component: RoleTransferTestApi;
-  let peopleGetPage: ReturnType<typeof vi.fn>;
+  let peopleSearchCombined: ReturnType<typeof vi.fn>;
   let getAssignments: ReturnType<typeof vi.fn>;
   let apply: ReturnType<typeof vi.fn>;
   let addMessage: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    peopleGetPage = vi.fn(() => of(page([SOURCE, DESTINATION, OTHER])));
+    peopleSearchCombined = vi.fn(() =>
+      of({ database: page([DESTINATION, OTHER]), soffid: page([]) }),
+    );
     getAssignments = vi.fn((personId: number) => of(personId === SOURCE.id ? ASSIGNMENTS : []));
     apply = vi.fn(() => of(undefined));
     addMessage = vi.fn();
-    await configureComponent('ca');
+    await configureComponent('ca', combinedPeople([SOURCE, DESTINATION, OTHER]));
   });
 
   it('starts without a source and loads assignments grouped by application and type', () => {
-    expect(component.form.controls.sourcePersonId.value).toBeNull();
+    expect(component.form.controls.sourcePerson.value).toBeNull();
+    expect(component.sourceOptions().map(({ id }) => id)).toEqual([
+      OTHER.id,
+      DESTINATION.id,
+      SOURCE.id,
+    ]);
+
+    component.searchSources('');
 
     selectSource();
+    component.searchDestinations('');
 
     expect(getAssignments).toHaveBeenCalledWith(SOURCE.id);
-    expect(peopleGetPage).toHaveBeenCalledWith(
-      expect.objectContaining({ excludeId: SOURCE.id, size: 1000 }),
-    );
-    expect(component.destinationOptions().map(({ id }) => id)).toEqual([DESTINATION.id, OTHER.id]);
+    expect(peopleSearchCombined).not.toHaveBeenCalled();
+    expect(component.destinationOptions().map(({ id }) => id)).toEqual([OTHER.id, DESTINATION.id]);
     expect(component.sourceGroups().map(({ applicationId }) => applicationId)).toEqual([100, 200]);
     expect(component.sourceGroups()[0].subgroups.map(({ type }) => type)).toEqual([
       RoleAssignmentType.RESPONSIBLE,
@@ -128,6 +142,82 @@ describe('RoleTransfer', () => {
     expect(fixture.nativeElement.textContent).toContain('Responsable de servei');
     expect(fixture.nativeElement.textContent).toContain('Signar peticions');
     expect(fixture.nativeElement.textContent).toContain('Accés als logs');
+  });
+
+  it('lists only registered database sources, including local CAIB people', () => {
+    const localCaib = {
+      ...OTHER,
+      email: 'aina.vidal@caib.es',
+      personalCaib: true,
+    };
+    const duplicateSoffid = {
+      id: null,
+      company: null,
+      firstName: 'Aina',
+      lastName: 'Soffid',
+      email: ' AINA.VIDAL@CAIB.ES ',
+      personalCaib: true as const,
+      deletedAt: null,
+    };
+    const soffidOnly = {
+      ...duplicateSoffid,
+      firstName: 'Pere',
+      lastName: 'Ferrer',
+      email: 'pere.ferrer@caib.es',
+    };
+    peopleSearchCombined.mockReturnValue(
+      of({ database: page([SOURCE, localCaib]), soffid: page([duplicateSoffid, soffidOnly]) }),
+    );
+
+    component.searchSources('Aina');
+
+    expect(peopleSearchCombined).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 0, size: 20, search: 'Aina' }),
+    );
+    expect(component.sourceOptions()).toEqual([
+      sourceOption(localCaib),
+      sourceOption(SOURCE),
+    ]);
+    expect(component.sourceOptions().some(({ email }) => email === soffidOnly.email)).toBe(false);
+  });
+
+  it('preserves the selected source while remote filter results refresh', () => {
+    selectSource();
+    peopleSearchCombined.mockReturnValue(
+      of({ database: page([OTHER]), soffid: page([]) }),
+    );
+
+    component.searchSources('Aina');
+
+    expect(component.sourceOptions()).toEqual([sourceOption(OTHER), sourceOption(SOURCE)]);
+    expect(component.form.controls.sourcePerson.value).toEqual(sourceOption(SOURCE));
+  });
+
+  it('restores the initial page once after reopening a filtered source catalog', () => {
+    component.searchSources('Aina');
+    component.searchSources('');
+    component.searchSources('');
+
+    expect(peopleSearchCombined).toHaveBeenCalledTimes(2);
+    expect(peopleSearchCombined).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ search: 'Aina' }),
+    );
+    expect(peopleSearchCombined).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ search: undefined }),
+    );
+  });
+
+  it('retries an initial resolver failure when the source catalog opens', async () => {
+    TestBed.resetTestingModule();
+    await configureComponent('ca', null, true);
+
+    component.searchSources('');
+
+    expect(peopleSearchCombined).toHaveBeenCalledWith(
+      expect.objectContaining({ search: undefined }),
+    );
   });
 
   it('renders and sorts the nested names using the Spanish locale', async () => {
@@ -226,7 +316,7 @@ describe('RoleTransfer', () => {
       .subgroups.find(({ type }) => type === RoleAssignmentType.AUTHORIZED)!;
     component.moveSubgroup(authorizationGroup, true);
 
-    component.form.controls.destinationPersonId.setValue(DESTINATION.id);
+    component.form.controls.destinationPerson.setValue(destinationOption(DESTINATION));
 
     expect(component.preparedAssignments()).toEqual([]);
     expect(component.sourceAssignments()).toContainEqual(ASSIGNMENTS[1]);
@@ -235,7 +325,7 @@ describe('RoleTransfer', () => {
   it('confirms a transfer with the effective flat batch and resets the complete form', () => {
     selectSource();
     component.moveSubgroup(component.sourceGroups()[0].subgroups[0], true);
-    component.form.controls.destinationPersonId.setValue(DESTINATION.id);
+    component.form.controls.destinationPerson.setValue(destinationOption(DESTINATION));
 
     component.openApplyConfirmation();
     expect(component.confirmationVisible()).toBe(true);
@@ -243,16 +333,70 @@ describe('RoleTransfer', () => {
 
     expect(apply).toHaveBeenCalledWith({
       items: [{ id: ASSIGNMENTS[0].id, type: RoleAssignmentType.RESPONSIBLE }],
-      toPersonId: DESTINATION.id,
+      toPersonEmailAddress: DESTINATION.email,
       revoke: false,
     } satisfies RoleTransferInput);
     expect(component.form.getRawValue()).toEqual({
-      sourcePersonId: null,
-      destinationPersonId: null,
+      sourcePerson: null,
+      destinationPerson: null,
       revoke: false,
     });
     expect(component.preparedAssignments()).toEqual([]);
     expect(addMessage).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
+  });
+
+  it('transfers to a Soffid candidate by email without requesting assignments for a null id', () => {
+    const soffidCandidate = {
+      id: null,
+      company: null,
+      firstName: 'Pere',
+      lastName: 'Ferrer',
+      email: 'pere.ferrer@caib.es',
+      personalCaib: true as const,
+      deletedAt: null,
+    };
+    peopleSearchCombined.mockReturnValue(
+      of({ database: page([]), soffid: page([soffidCandidate]) }),
+    );
+    selectSource();
+    component.moveSubgroup(component.sourceGroups()[0].subgroups[0], true);
+    component.searchDestinations('Pere');
+    const destination = component.destinationOptions()[0];
+
+    component.form.controls.destinationPerson.setValue(destination);
+    component.openApplyConfirmation();
+    component.confirmAction();
+
+    expect(destination.id).toBeNull();
+    expect(getAssignments).not.toHaveBeenCalledWith(null);
+    expect(apply).toHaveBeenCalledWith({
+      items: [{ id: ASSIGNMENTS[0].id, type: RoleAssignmentType.RESPONSIBLE }],
+      toPersonEmailAddress: soffidCandidate.email,
+      revoke: false,
+    } satisfies RoleTransferInput);
+    expect(peopleSearchCombined).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 0, size: 20, search: 'Pere' }),
+    );
+  });
+
+  it('deduplicates combined results by normalized email and prefers the database person', () => {
+    const duplicateSoffid = {
+      id: null,
+      company: null,
+      firstName: 'Joan',
+      lastName: 'Soffid',
+      email: ` ${DESTINATION.email.toUpperCase()} `,
+      personalCaib: true as const,
+      deletedAt: null,
+    };
+    peopleSearchCombined.mockReturnValue(
+      of({ database: page([SOURCE, DESTINATION]), soffid: page([duplicateSoffid]) }),
+    );
+    selectSource();
+
+    component.searchDestinations('Joan');
+
+    expect(component.destinationOptions()).toEqual([destinationOption(DESTINATION)]);
   });
 
   it('revokes with an unset destination and confirms before discarding a staged source', () => {
@@ -262,22 +406,24 @@ describe('RoleTransfer', () => {
     component.openApplyConfirmation();
     component.confirmAction();
 
-    expect(apply).toHaveBeenCalledWith(expect.objectContaining({ toPersonId: null, revoke: true }));
+    expect(apply).toHaveBeenCalledWith(
+      expect.objectContaining({ toPersonEmailAddress: null, revoke: true }),
+    );
 
     selectSource();
     component.moveAll(true);
-    component.form.controls.sourcePersonId.setValue(OTHER.id);
-    expect(component.form.controls.sourcePersonId.value).toBe(SOURCE.id);
+    component.form.controls.sourcePerson.setValue(sourceOption(OTHER));
+    expect(component.form.controls.sourcePerson.value).toEqual(sourceOption(SOURCE));
     expect(component.confirmationVisible()).toBe(true);
     component.confirmAction();
-    expect(component.form.controls.sourcePersonId.value).toBe(OTHER.id);
+    expect(component.form.controls.sourcePerson.value).toEqual(sourceOption(OTHER));
     expect(getAssignments).toHaveBeenCalledWith(OTHER.id);
   });
 
   it('discards a prepared batch, selects an external source and moves focus to it', async () => {
     selectSource();
     component.moveAll(true);
-    component.form.controls.destinationPersonId.setValue(DESTINATION.id);
+    component.form.controls.destinationPerson.setValue(destinationOption(DESTINATION));
     component.confirmationVisible.set(true);
 
     fixture.componentRef.setInput('sourceRequest', {
@@ -287,8 +433,8 @@ describe('RoleTransfer', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(component.form.controls.sourcePersonId.value).toBe(OTHER.id);
-    expect(component.form.controls.destinationPersonId.value).toBeNull();
+    expect(component.form.controls.sourcePerson.value).toEqual(sourceOption(OTHER));
+    expect(component.form.controls.destinationPerson.value).toBeNull();
     expect(component.form.controls.revoke.value).toBe(false);
     expect(component.preparedAssignments()).toEqual([]);
     expect(component.confirmationVisible()).toBe(false);
@@ -298,25 +444,33 @@ describe('RoleTransfer', () => {
     );
   });
 
-  async function configureComponent(locale: string): Promise<void> {
+  async function configureComponent(
+    locale: string,
+    initialPeopleSearch: ResponsiblePersonCombinedSearchOutput | null = null,
+    initialPeopleSearchFailed = false,
+  ): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [RoleTransfer],
       providers: [
         { provide: LOCALE_ID, useValue: locale },
-        { provide: ResponsiblePeopleService, useValue: { getPage: peopleGetPage } },
+        {
+          provide: ResponsiblePeopleService,
+          useValue: { searchCombined: peopleSearchCombined },
+        },
         { provide: RoleTransferService, useValue: { getAssignments, apply } },
         { provide: MessageService, useValue: { add: addMessage } },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RoleTransfer);
-    fixture.componentRef.setInput('initialPeople', [SOURCE, DESTINATION, OTHER]);
+    fixture.componentRef.setInput('initialPeopleSearch', initialPeopleSearch);
+    fixture.componentRef.setInput('initialPeopleSearchFailed', initialPeopleSearchFailed);
     fixture.detectChanges();
     component = fixture.componentInstance as unknown as RoleTransferTestApi;
   }
 
   function selectSource(): void {
-    component.form.controls.sourcePersonId.setValue(SOURCE.id);
+    component.form.controls.sourcePerson.setValue(sourceOption(SOURCE));
     fixture.detectChanges();
   }
 });
@@ -335,5 +489,30 @@ function person(id: number, name: string): ResponsiblePerson {
 }
 
 function page<T>(content: T[]) {
-  return { content, totalElements: content.length };
+  return { content, totalElements: content.length } as never;
+}
+
+function combinedPeople(
+  database: ResponsiblePerson[],
+): ResponsiblePersonCombinedSearchOutput {
+  return { database: page(database), soffid: page([]) };
+}
+
+function destinationOption(
+  value: ResponsiblePerson,
+  source: RoleTransferDestinationOption['source'] = 'database',
+): RoleTransferDestinationOption {
+  return {
+    id: value.id,
+    firstName: value.firstName,
+    lastName: value.lastName,
+    email: value.email,
+    label: `${value.firstName} ${value.lastName}`,
+    source,
+    disabled: false,
+  };
+}
+
+function sourceOption(value: ResponsiblePerson): RoleTransferPersonOption {
+  return destinationOption(value);
 }

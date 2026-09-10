@@ -9,7 +9,21 @@ export const ENVIRONMENT_STATUS_OPTIONS = SOFT_DELETE_STATUS_OPTIONS;
 
 export const ENVIRONMENTS_TABLE_COLUMNS: KeyLabel[] = [
   { key: 'code', label: $localize`Codi`, sortBy: 'code', minWidth: '8rem' },
-  { key: 'name', label: $localize`Nom`, sortBy: 'name', minWidth: '14rem' },
-  { key: 'nameEs', label: $localize`Nom en castellà`, sortBy: 'nameEs', minWidth: '14rem' },
+  {
+    key: 'name',
+    wrap: true,
+    maxWidth: '24rem',
+    label: $localize`Nom`,
+    sortBy: 'name',
+    minWidth: '14rem',
+  },
+  {
+    key: 'nameEs',
+    wrap: true,
+    maxWidth: '24rem',
+    label: $localize`Nom en castellà`,
+    sortBy: 'nameEs',
+    minWidth: '14rem',
+  },
   { key: 'status', label: $localize`Estat`, sortBy: 'deletedAt', minWidth: '8rem' },
 ];

@@ -3,9 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { AutoComplete } from 'primeng/autocomplete';
 import { of, Subject, throwError } from 'rxjs';
 
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
+import { CrudEntityDialog } from '@components/crud-entity-dialog/crud-entity-dialog';
 
 import {
   ApplicationAuthorizedOutput,
@@ -20,6 +22,7 @@ import { ApplicationResponsibleFormGroup } from '../../../../forms/application-r
 import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
 import { ApplicationResponsiblesService } from '../../../../services/application-responsibles.service';
 import { ApplicationsService } from '../../../../services/applications.service';
+import { ResponsiblePeopleService } from '../../../../../maintenances/responsibles/services/responsible-people.service';
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationAssignmentClipboardService } from './application-assignment-clipboard.service';
 import {
@@ -46,6 +49,16 @@ const CAIB_PERSON = {
   lastName: 'Serra',
   email: 'joan@caib.es',
   personalCaib: true,
+};
+const SOFFID_PERSON = {
+  id: null,
+  company: null,
+  firstName: 'Aina',
+  lastName: 'Ferrer',
+  email: 'aina@caib.es',
+  personalCaib: true as const,
+  deletedAt: null,
+  label: 'Aina Ferrer — aina@caib.es',
 };
 const RESPONSIBLE_TYPES = [
   {
@@ -119,6 +132,9 @@ describe('ApplicationResponsibleSection', () => {
     update: vi.fn(() => of(AUTHORIZED[0])),
     deactivate: vi.fn(() => of(undefined)),
   };
+  const peopleService = {
+    searchSoffid: vi.fn(() => of({ content: [SOFFID_PERSON], totalElements: 1 })),
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -131,6 +147,7 @@ describe('ApplicationResponsibleSection', () => {
         { provide: ApplicationDevelopmentService, useValue: {} },
         { provide: ApplicationResponsiblesService, useValue: responsiblesService },
         { provide: ApplicationAuthorizedService, useValue: authorizedService },
+        { provide: ResponsiblePeopleService, useValue: peopleService },
         { provide: ApplicationAssignmentClipboardService, useValue: { copy } },
         {
           provide: ActivatedRoute,
@@ -269,14 +286,12 @@ describe('ApplicationResponsibleSection', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-application-authorized-dialog')).not.toBeNull();
     const component = harness(fixture);
-    expect(component.authorizedForm.controls.personalCaib.disabled).toBe(true);
+    expect(component.authorizedForm.controls.personalCaib.enabled).toBe(true);
     const caibToggle = fixture.nativeElement.querySelector(
       '#application-authorized-dialog-caib',
     ) as HTMLInputElement;
-    expect(caibToggle.disabled || caibToggle.getAttribute('aria-disabled') === 'true').toBe(true);
-    expect(caibToggle.getAttribute('aria-describedby')).toBe(
-      'application-authorized-dialog-caib-unavailable',
-    );
+    expect(caibToggle.disabled || caibToggle.getAttribute('aria-disabled') === 'true').toBe(false);
+    expect(caibToggle.getAttribute('aria-describedby')).toBeNull();
     expect(
       fixture.nativeElement.querySelector('#application-authorized-dialog-observation'),
     ).not.toBeNull();
@@ -544,7 +559,7 @@ describe('ApplicationResponsibleSection', () => {
     expect(component.responsibleForm.controls.responsibleTypeId.disabled).toBe(true);
     expect(component.responsibleForm.controls.companyId.disabled).toBe(true);
     expect(component.responsibleForm.controls.personId.disabled).toBe(true);
-    expect(component.responsibleForm.controls.email.disabled).toBe(true);
+    expect(component.responsibleForm.controls.email.enabled).toBe(true);
     expect(component.responsibleForm.controls.cargo.disabled).toBe(true);
     expect(component.responsibleForm.controls.observation.enabled).toBe(true);
     for (const id of [
@@ -561,8 +576,8 @@ describe('ApplicationResponsibleSection', () => {
     const responsibleEmail = fixture.nativeElement.querySelector(
       '#application-responsible-dialog-email',
     ) as HTMLInputElement;
-    expect(responsibleEmail.disabled).toBe(true);
-    expect(responsibleEmail.readOnly).toBe(false);
+    expect(responsibleEmail.disabled).toBe(false);
+    expect(responsibleEmail.readOnly).toBe(true);
     expect(
       fixture.nativeElement.querySelector('#application-responsible-dialog-observation'),
     ).not.toBeNull();
@@ -585,7 +600,7 @@ describe('ApplicationResponsibleSection', () => {
     expect(component.authorizedForm.controls.personalCaib.disabled).toBe(true);
     expect(component.authorizedForm.controls.companyId.disabled).toBe(true);
     expect(component.authorizedForm.controls.personId.disabled).toBe(true);
-    expect(component.authorizedForm.controls.email.disabled).toBe(true);
+    expect(component.authorizedForm.controls.email.enabled).toBe(true);
     expect(component.authorizedForm.controls.observation.enabled).toBe(true);
     expect(component.authorizedForm.controls.authorizationTypeIds.enabled).toBe(true);
     for (const id of [
@@ -601,8 +616,8 @@ describe('ApplicationResponsibleSection', () => {
     const authorizedEmail = fixture.nativeElement.querySelector(
       '#application-authorized-dialog-email',
     ) as HTMLInputElement;
-    expect(authorizedEmail.disabled).toBe(true);
-    expect(authorizedEmail.readOnly).toBe(false);
+    expect(authorizedEmail.disabled).toBe(false);
+    expect(authorizedEmail.readOnly).toBe(true);
     expect(fixture.nativeElement.querySelector('#application-authorized-dialog-cargo')).toBeNull();
     expect(
       fixture.nativeElement.querySelector('#application-authorized-dialog-observation'),
@@ -620,11 +635,11 @@ describe('ApplicationResponsibleSection', () => {
 
     button('Afegeix un responsable').click();
 
-    expect(component.responsibleForm.controls.personalCaib.disabled).toBe(true);
+    expect(component.responsibleForm.controls.personalCaib.enabled).toBe(true);
     expect(component.responsibleForm.controls.responsibleTypeId.enabled).toBe(true);
     expect(component.responsibleForm.controls.companyId.enabled).toBe(true);
     expect(component.responsibleForm.controls.personId.enabled).toBe(true);
-    expect(component.responsibleForm.controls.email.disabled).toBe(true);
+    expect(component.responsibleForm.controls.email.enabled).toBe(true);
     expect(component.responsibleForm.controls.cargo.disabled).toBe(true);
     expect(component.responsibleForm.controls.observation.enabled).toBe(true);
   });
@@ -815,42 +830,134 @@ describe('ApplicationResponsibleSection', () => {
     );
   });
 
-  it('blocks new CAIB assignments in the control and in stale programmatic submissions', () => {
+  it('searches Soffid only for CAIB and creates an authorized assignment with inline person data', () => {
     startEditing();
-    button('Afegeix un responsable').click();
-    const component = harness(fixture);
-    component.responsibleForm.controls.companyId.setValue(3);
-    expect(component.responsibleSelectablePeople()).toEqual([EXTERNAL_PERSON]);
-    expect(component.responsibleForm.controls.personalCaib.disabled).toBe(true);
-    fixture.detectChanges();
-    const toggle = fixture.nativeElement.querySelector(
-      '#application-responsible-dialog-caib',
-    ) as HTMLInputElement;
-    expect(toggle.disabled || toggle.getAttribute('aria-disabled') === 'true').toBe(true);
-    expect(toggle.getAttribute('aria-describedby')).toBe(
-      'application-responsible-dialog-caib-unavailable',
-    );
-
-    component.responsibleForm.patchValue({
-      personalCaib: true,
-      responsibleTypeId: 3,
-      personId: 12,
-    });
-    component.submitResponsible();
-    expect(responsiblesService.create).not.toHaveBeenCalled();
-
-    component.closeResponsibleDialog();
     button('Afegeix una persona autoritzada').click();
-    component.authorizedForm.patchValue({
-      personalCaib: true,
-      personId: 12,
-      authorizationTypeIds: [1],
+    const component = harness(fixture);
+    component.authorizedForm.controls.personalCaib.setValue(true);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('#application-authorized-dialog-soffid-person'),
+    ).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('#application-authorized-dialog-company'),
+    ).toBeNull();
+    const form = fixture.nativeElement.querySelector(
+      'app-application-authorized-dialog form',
+    ) as HTMLFormElement;
+    const personField = form.querySelector(
+      'app-application-soffid-person-field',
+    ) as HTMLElement;
+    const emailWrapper = form
+      .querySelector('#application-authorized-dialog-email')
+      ?.closest('div') as HTMLElement;
+    expect(form.classList).toContain('grid-cols-1');
+    expect(form.classList).toContain('md:grid-cols-2');
+    expect(personField.classList).not.toContain('md:col-span-2');
+    expect(personField.nextElementSibling).toBe(emailWrapper);
+
+    component.searchSoffidPeople('Ai');
+    expect(peopleService.searchSoffid).not.toHaveBeenCalled();
+    component.searchSoffidPeople('  Aina  ');
+    expect(peopleService.searchSoffid).toHaveBeenCalledWith('Aina');
+    expect(component.soffidOptions()).toEqual([SOFFID_PERSON]);
+
+    const personAutoComplete = fixture.debugElement.query(
+      By.directive(AutoComplete),
+    ).componentInstance as AutoComplete;
+    const personInput = form.querySelector(
+      '#application-authorized-dialog-soffid-person',
+    ) as HTMLInputElement;
+    const emailInput = form.querySelector(
+      '#application-authorized-dialog-email',
+    ) as HTMLInputElement;
+    component.authorizedForm.controls.soffidPerson.setValue(SOFFID_PERSON);
+    personAutoComplete.onSelect.emit({
+      originalEvent: new Event('click'),
+      value: SOFFID_PERSON,
     });
+    component.authorizedForm.controls.authorizationTypeIds.setValue([1]);
+    fixture.detectChanges();
+
+    expect(personInput.value).toBe('Aina Ferrer');
+    expect(personInput.value).not.toContain('aina@caib.es');
+    expect(emailInput.value).toBe('aina@caib.es');
+    expect(component.soffidOptions()[0].label).toBe('Aina Ferrer — aina@caib.es');
+
     component.submitAuthorized();
-    expect(authorizedService.create).not.toHaveBeenCalled();
+    expect(authorizedService.create).toHaveBeenCalledWith({
+      appResponsibleAuthorizedId: 91,
+      personId: null,
+      personFirstName: 'Aina',
+      personLastName: 'Ferrer',
+      personEmail: 'aina@caib.es',
+      companyId: null,
+      personalCaib: true,
+      authorizationTypeIds: [1],
+      observation: null,
+    });
   });
 
-  it('disables CAIB-only responsibility options and rejects stale type selections', () => {
+  it('keeps a Soffid search error assistive-only and leaves the CAIB dialog open', () => {
+    peopleService.searchSoffid.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 503 })),
+    );
+    startEditing();
+    button('Afegeix una persona autoritzada').click();
+    const component = harness(fixture);
+    component.authorizedForm.controls.personalCaib.setValue(true);
+    component.searchSoffidPeople('Aina');
+    fixture.detectChanges();
+
+    component.submitAuthorized();
+    expect(authorizedService.create).not.toHaveBeenCalled();
+    expect(component.authorizedDialogVisible()).toBe(true);
+    const personField = fixture.nativeElement.querySelector(
+      'app-application-authorized-dialog app-application-soffid-person-field',
+    ) as HTMLElement;
+    const searchError = personField.querySelector(
+      '#application-authorized-dialog-soffid-person-search-error',
+    ) as HTMLElement;
+    expect(searchError.classList).toContain('sr-only');
+    expect(searchError.textContent).toContain("No s'ha pogut consultar Soffid");
+    expect(
+      Array.from(personField.querySelectorAll('[role="status"], [role="alert"]')).filter(
+        (element) => !element.classList.contains('sr-only'),
+      ),
+    ).toHaveLength(0);
+  });
+
+  it('cancels stale Soffid searches and announces refinement assistively', () => {
+    const staleSearch = new Subject<{ content: (typeof SOFFID_PERSON)[]; totalElements: number }>();
+    const latestPerson = {
+      ...SOFFID_PERSON,
+      firstName: 'Biel',
+      email: 'biel@caib.es',
+      label: 'Biel Ferrer — biel@caib.es',
+    };
+    peopleService.searchSoffid
+      .mockReturnValueOnce(staleSearch)
+      .mockReturnValueOnce(of({ content: [latestPerson], totalElements: 24 }));
+    startEditing();
+    button('Afegeix una persona autoritzada').click();
+    const component = harness(fixture);
+    component.authorizedForm.controls.personalCaib.setValue(true);
+
+    component.searchSoffidPeople('Aina');
+    component.searchSoffidPeople('Biel');
+    staleSearch.next({ content: [SOFFID_PERSON], totalElements: 1 });
+    fixture.detectChanges();
+
+    expect(component.soffidOptions()).toEqual([latestPerson]);
+    expect(component.soffidTotal()).toBe(24);
+    const status = fixture.nativeElement.querySelector(
+      '#application-authorized-dialog-soffid-person-status',
+    ) as HTMLElement;
+    expect(status.classList).toContain('sr-only');
+    expect(status.textContent).toContain('Refina la cerca');
+  });
+
+  it('forces CAIB for a responsibility that requires it and sends the Soffid payload', () => {
     startEditing();
     const component = harness(fixture);
     component.responsibleAssignments.set([RESPONSIBLES[0]]);
@@ -862,21 +969,36 @@ describe('ApplicationResponsibleSection', () => {
     expect(component.responsibleTypeOptions()).toContainEqual({
       id: 2,
       label: 'Responsable del servei',
-      disabled: true,
     });
     expect(component.responsibleTypeOptions()).toContainEqual({
       id: 3,
       label: 'Responsable de sistemes',
-      disabled: false,
     });
 
     component.responsibleForm.patchValue({
       responsibleTypeId: 2,
-      companyId: 3,
-      personId: 11,
+      soffidPerson: SOFFID_PERSON,
     });
+    fixture.detectChanges();
+    expect(component.responsibleForm.controls.personalCaib.value).toBe(true);
+    expect(component.responsibleForm.controls.personalCaib.disabled).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dialog-caib-required')
+        .textContent,
+    ).toContain('requereix personal CAIB');
     component.submitResponsible();
-    expect(responsiblesService.create).not.toHaveBeenCalled();
+    expect(responsiblesService.create).toHaveBeenCalledWith({
+      appResponsibleAuthorizedId: 91,
+      personId: null,
+      personFirstName: 'Aina',
+      personLastName: 'Ferrer',
+      personEmail: 'aina@caib.es',
+      companyId: null,
+      personalCaib: true,
+      responsibleTypeId: 2,
+      jobTitle: null,
+      observation: null,
+    });
   });
 
   it('keeps currently associated inactive people and authorizations available in edit', () => {
@@ -926,7 +1048,7 @@ describe('ApplicationResponsibleSection', () => {
     expect(addResponsible.getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('explains and disables add when only CAIB responsibilities remain vacant', () => {
+  it('allows add and opens a forced CAIB dialog when only CAIB responsibilities remain vacant', () => {
     startEditing();
     const component = harness(fixture);
     component.responsibleAssignments.set([
@@ -937,13 +1059,75 @@ describe('ApplicationResponsibleSection', () => {
     fixture.detectChanges();
 
     const addResponsible = button('Afegeix un responsable');
-    expect(addResponsible.disabled).toBe(true);
-    expect(addResponsible.getAttribute('aria-describedby')).toBe(
-      'application-responsible-caib-unavailable',
-    );
+    expect(addResponsible.disabled).toBe(false);
+    addResponsible.click();
+    fixture.detectChanges();
+    expect(component.responsibleForm.controls.personalCaib.value).toBe(true);
+    expect(component.responsibleForm.controls.personalCaib.disabled).toBe(true);
     expect(
-      fixture.nativeElement.querySelector('#application-responsible-caib-unavailable').textContent,
-    ).toContain('requereixen personal CAIB');
+      fixture.nativeElement.querySelector('#application-responsible-dialog-soffid-person'),
+    ).not.toBeNull();
+    const dialog = fixture.debugElement.query(By.directive(CrudEntityDialog))
+      .componentInstance as CrudEntityDialog;
+    const form = fixture.nativeElement.querySelector(
+      'app-application-responsible-dialog form',
+    ) as HTMLFormElement;
+    const personField = fixture.nativeElement.querySelector(
+      'app-application-responsible-dialog app-application-soffid-person-field',
+    ) as HTMLElement;
+    const personInput = personField.querySelector(
+      '#application-responsible-dialog-soffid-person',
+    ) as HTMLInputElement;
+    const personInstruction = personField.querySelector(
+      '#application-responsible-dialog-soffid-person-instruction',
+    ) as HTMLElement;
+    const personStatus = personField.querySelector(
+      '#application-responsible-dialog-soffid-person-status',
+    ) as HTMLElement;
+    const personSearchError = personField.querySelector(
+      '#application-responsible-dialog-soffid-person-search-error',
+    ) as HTMLElement;
+    const personError = personField.querySelector(
+      '#application-responsible-dialog-soffid-person-error',
+    ) as HTMLElement;
+    const fieldRoot = personField.firstElementChild as HTMLElement;
+    const personAutoComplete = fixture.debugElement.query(By.directive(AutoComplete))
+      .componentInstance as AutoComplete;
+    expect(dialog.width()).toBe('46rem');
+    expect(form.classList).toContain('grid-cols-1');
+    expect(form.classList).toContain('md:grid-cols-2');
+    expect(personField.classList).not.toContain('md:col-span-2');
+    expect(personField.querySelector('p-floatlabel')).not.toBeNull();
+    for (const assistiveText of [
+      personInstruction,
+      personStatus,
+      personSearchError,
+      personError,
+    ]) {
+      expect(assistiveText.classList).toContain('sr-only');
+      expect(personInput.getAttribute('aria-describedby')?.split(' ')).toContain(
+        assistiveText.id,
+      );
+    }
+    expect(
+      Array.from(fieldRoot.children).filter((element) => !element.classList.contains('sr-only')),
+    ).toEqual([personField.querySelector('p-floatlabel')]);
+    expect(personAutoComplete.forceSelection).toBe(false);
+    expect(personAutoComplete.showEmptyMessage).toBe(true);
+    expect(personAutoComplete.emptyMessage).toBe("No s'han trobat persones a Soffid.");
+
+    component.responsibleForm.controls.soffidPerson.markAsTouched();
+    fixture.detectChanges();
+    expect(personInput.getAttribute('aria-invalid')).toBe('true');
+    expect(personError.textContent).toContain('Selecciona una persona CAIB de Soffid');
+
+    personInput.value = 'Persona inexistent';
+    personInput.dispatchEvent(new Event('input', { bubbles: true }));
+    personInput.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(component.responsibleForm.controls.soffidPerson.value).toBe('Persona inexistent');
+    expect(personInput.value).toBe('Persona inexistent');
+    expect(personError.textContent).toContain('Selecciona una persona completa de la llista');
   });
 
   it('copies visible rows and keeps authorizations comma-separated in one CSV column', async () => {
@@ -1014,6 +1198,9 @@ interface SectionHarness {
   responsibleTypeOptions: () => { id: number; label: string; disabled?: boolean }[];
   authorizationTypeOptions: () => { id: number; label: string }[];
   responsibleDialogVisible: () => boolean;
+  authorizedDialogVisible: () => boolean;
+  soffidOptions: () => (typeof SOFFID_PERSON)[];
+  soffidTotal: () => number;
   deactivateDialogVisible: () => boolean;
   deactivatePending: () => boolean;
   deactivateMessage: () => string;
@@ -1022,6 +1209,7 @@ interface SectionHarness {
   responsibleAssignments: { set(value: ApplicationResponsibleOutput[]): void };
   rebuildResponsibleRows(): void;
   closeResponsibleDialog(): void;
+  searchSoffidPeople(query: string): void;
   submitResponsible(): void;
   submitAuthorized(): void;
   confirmDeactivate(): void;

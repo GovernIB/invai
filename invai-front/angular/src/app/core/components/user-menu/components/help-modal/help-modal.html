@@ -1,4 +1,5 @@
 <p-dialog
+  styleClass="invai-dialog"
   [style]="{ width: '95vw', height: '95vh' }"
   [(visible)]="visible"
   [closable]="true"
@@ -10,17 +11,17 @@
 >
   <ng-template #header>
     <header class="flex items-center justify-between w-full">
-      <h3 class="text-primary font-semibold text-lg">{{ title }}</h3>
+      <h3 class="font-semibold text-lg">{{ title }}</h3>
 
       <span class="text-xs text-muted-color mr-2" i18n>Ctrl + K</span>
     </header>
   </ng-template>
 
-  <section class="invai-grid grid-cols-12 gap-4">
-    <section class="col-span-12">
+  <section class="invai-grid grid-cols-1 gap-4 md:grid-cols-12">
+    <section class="col-span-1 min-w-0 md:col-span-12">
       <p-autoComplete
-        inputStyleClass="w-full p-4 text-lg"
-        class="w-full"
+        inputStyleClass="w-full min-w-0 p-4 text-lg"
+        class="w-full min-w-0"
         #autoCompleteRef
         inputId="help-modal-search"
         [ariaLabel]="searchAriaLabel"
@@ -47,11 +48,11 @@
       </p-autoComplete>
     </section>
 
-    <aside class="col-span-12 md:col-span-3">
+    <aside class="col-span-1 min-w-0 md:col-span-3">
       <p-panelMenu [model]="helpMenu()" />
     </aside>
 
-    <p-card class="bg-surface-0 dark:bg-surface-900 markdown-body col-span-12 md:col-span-9">
+    <p-card class="bg-surface-0 dark:bg-surface-900 markdown-body col-span-1 min-w-0 md:col-span-9">
       <ng-template #header>
         @if (!selectedDoc()) {
           <div class="flex items-center justify-center">

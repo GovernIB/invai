@@ -1,8 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { SpringPage } from '@models/page.model';
 
@@ -87,8 +84,7 @@ describe('SystemsService', () => {
     request.flush(page([SYSTEM]));
 
     service.getAll({ page: 1, size: 25, serverId: 4 }).subscribe();
-    http.expectOne((candidate) => candidate.params.get('serverId') === '4')
-      .flush(page([]));
+    http.expectOne((candidate) => candidate.params.get('serverId') === '4').flush(page([]));
   });
 
   it('separates assignable catalog cache entries by grouping id and omits an absent id', () => {
@@ -96,18 +92,12 @@ describe('SystemsService', () => {
 
     service.getAll({ ...params, unassignedToInformationSystemDbId: 70 }).subscribe();
     http
-      .expectOne(
-        (candidate) =>
-          candidate.params.get('unassignedToInformationSystemDbId') === '70',
-      )
+      .expectOne((candidate) => candidate.params.get('unassignedToInformationSystemDbId') === '70')
       .flush(page([SYSTEM]));
 
     service.getAll({ ...params, unassignedToInformationSystemDbId: 71 }).subscribe();
     http
-      .expectOne(
-        (candidate) =>
-          candidate.params.get('unassignedToInformationSystemDbId') === '71',
-      )
+      .expectOne((candidate) => candidate.params.get('unassignedToInformationSystemDbId') === '71')
       .flush(page([]));
 
     service.getAll(params).subscribe();
@@ -126,10 +116,35 @@ describe('SystemsService', () => {
     http.expectNone((candidate) => candidate.url === URL);
 
     service.getAll({ page: 2 }).subscribe({ error: vi.fn() });
-    http.expectOne((candidate) => candidate.url === URL)
+    http
+      .expectOne((candidate) => candidate.url === URL)
       .flush('fail', { status: 500, statusText: 'Error' });
     service.getAll({ page: 2 }).subscribe();
     http.expectOne((candidate) => candidate.url === URL).flush(page([]));
+  });
+
+  it('sends trimmed quick search with catalog restrictions and does not cache textual searches', () => {
+    const params = {
+      search: ' app ',
+      serverId: 3,
+      statusId: 1 as const,
+      unassignedToInformationSystemDbId: 70,
+    };
+    for (let attempt = 0; attempt < 2; attempt++) {
+      service.getAll(params).subscribe();
+      const request = http.expectOne((candidate) => candidate.url === URL);
+      expect(request.request.params.get('search')).toBe('app');
+      expect(request.request.params.get('serverId')).toBe('3');
+      expect(request.request.params.get('statusId')).toBe('1');
+      expect(request.request.params.get('unassignedToInformationSystemDbId')).toBe('70');
+      request.flush(page([SYSTEM]));
+    }
+    service.getAll({ search: '   ' }).subscribe();
+    const empty = http.expectOne((candidate) => candidate.url === URL);
+    expect(empty.request.params.has('search')).toBe(false);
+    empty.flush(page([]));
+    service.getAll({ search: '' }).subscribe();
+    http.expectNone((candidate) => candidate.url === URL);
   });
 
   it('uses uncached detail and exact mutation contracts', () => {

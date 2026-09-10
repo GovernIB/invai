@@ -473,7 +473,6 @@ export class EnvironmentsList
       nameEs: environment?.nameEs ?? '',
     });
 
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private resetAfterMutation(): void {

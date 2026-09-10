@@ -18,12 +18,12 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
   >
-    <div>
+    <div class="md:col-span-12">
       @if (mode() === 'view') {
         <div class="flex flex-column gap-1">
           <span [id]="companyLabelId" class="text-sm text-color-secondary">{{ copy.company }}</span>
@@ -63,7 +63,7 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-6">
       <p-floatlabel class="w-full">
         <input
           id="responsible-person-dialog-first-name"
@@ -93,7 +93,7 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-6">
       <p-floatlabel class="w-full">
         <input
           id="responsible-person-dialog-last-name"
@@ -121,7 +121,7 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-12">
       <p-floatlabel class="w-full">
         <input
           id="responsible-person-dialog-email"

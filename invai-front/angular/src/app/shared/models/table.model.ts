@@ -7,6 +7,8 @@ export interface KeyLabel {
   sortBy?: string;
   width?: string;
   minWidth?: string;
+  wrap?: boolean;
+  maxWidth?: string;
 }
 
 export interface PaginatedList<TItem> {

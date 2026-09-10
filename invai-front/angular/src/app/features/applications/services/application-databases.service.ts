@@ -15,9 +15,11 @@ import {
   ApplicationDatabasesPageParams,
   ApplicationInfrastructureStatus,
 } from '../applications.model';
+import { ApplicationsService } from './applications.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationDatabasesService extends BaseApiService {
+  private readonly applicationsService = inject(ApplicationsService);
   protected override readonly ENTITY_URI = 'application/database';
 
   private readonly locale = inject(LOCALE_ID);
@@ -48,7 +50,12 @@ export class ApplicationDatabasesService extends BaseApiService {
   ): Observable<ApplicationDatabaseRelationOutput> {
     return this.http
       .post<ApplicationDatabaseRelationOutput>(this.url(), payload)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(
+        tap(() => {
+          this.clearCache();
+          this.applicationsService.clearCache();
+        }),
+      );
   }
 
   update(
@@ -57,11 +64,21 @@ export class ApplicationDatabasesService extends BaseApiService {
   ): Observable<ApplicationDatabaseRelationOutput> {
     return this.http
       .put<ApplicationDatabaseRelationOutput>(this.url(id), payload)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(
+        tap(() => {
+          this.clearCache();
+          this.applicationsService.clearCache();
+        }),
+      );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(this.url(id)).pipe(tap(() => this.clearCache()));
+    return this.http.delete<void>(this.url(id)).pipe(
+      tap(() => {
+        this.clearCache();
+        this.applicationsService.clearCache();
+      }),
+    );
   }
 
   clearCache(): void {

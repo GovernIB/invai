@@ -6,6 +6,8 @@ import {
 } from '@angular/common/http/testing';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
+import { Observable } from 'rxjs';
 
 import {
   Application,
@@ -27,9 +29,16 @@ const EXPECTED_APPLICATION: Application = {
   informationSystem: 'Instrumental',
   informationSystemDbId: 70,
   appDevelopmentId: 90,
+  appSecurityId: null,
+  appAccessibilityId: null,
   appResponsibleAuthorizedId: 91,
+  incomplete: false,
+  missingResponsibleTypes: true,
+  missingAuthorized: false,
+  missingDevelopmentFields: true,
   scope: 'Departamental',
   commission: 'Equip directiu',
+  department: 'Conselleria',
   administrativeUnit: 'Direcció General',
   status: ApplicationStatus.ACTIVE,
   description: 'Aplicació interna',
@@ -40,8 +49,13 @@ const EXPECTED_APPLICATION: Application = {
   informationSystemId: 2,
   scopeId: 3,
   commissionId: 5,
-  administrativeUnitId: 4,
+  admUnitCode: 'DG',
+  departmentCode: 'GVA01',
   statusId: ApplicationStatus.ACTIVE,
+  missingSystems: false,
+  missingDatabases: false,
+  missingAccessibilityFields: false,
+  missingSecurityData: false,
 };
 
 const APPLICATION_INPUT: ApplicationInput = {
@@ -51,7 +65,7 @@ const APPLICATION_INPUT: ApplicationInput = {
   categoryId: 1,
   systemTypeId: 2,
   fieldId: 3,
-  admUnitId: 4,
+  admUnitCode: 'DG',
   commissionId: 5,
   description: 'Aplicació interna',
   statusId: ApplicationStatus.ACTIVE,
@@ -66,10 +80,16 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   systemType: { id: 2, name: 'Instrumental', nameEs: 'Instrumental ES', deletedAt: null },
   field: { id: 3, name: 'Departamental', nameEs: 'Departamental ES', deletedAt: null },
   admUnit: {
-    id: 4,
     code: 'DG',
     name: 'Direcció General',
-    nameEs: 'Dirección General',
+    parentCode: 'GVA01',
+    level: 2,
+  },
+  department: {
+    code: 'GVA01',
+    name: 'Conselleria',
+    parentCode: null,
+    level: 1,
   },
   csCommission: {
     id: 5,
@@ -92,6 +112,14 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   appInformationSystemDbId: 70,
   appDevelopmentId: 90,
   appResponsibleAuthorizedId: 91,
+  incomplete: false,
+  missingResponsibleTypes: true,
+  missingAuthorized: false,
+  missingDevelopmentFields: true,
+  missingSystems: false,
+  missingDatabases: false,
+  missingAccessibilityFields: false,
+  missingSecurityData: false,
 };
 
 const OTHER_APPLICATION_OUTPUT: ApplicationOutput = {
@@ -159,6 +187,9 @@ describe('ApplicationsService', () => {
       expect.objectContaining({
         informationSystemDbId: 70,
         appDevelopmentId: 90,
+        missingResponsibleTypes: true,
+        missingAuthorized: false,
+        missingDevelopmentFields: true,
       }),
     );
   });
@@ -181,7 +212,8 @@ describe('ApplicationsService', () => {
         informationSystem: 'Instrumental ES',
         scope: 'Departamental ES',
         commission: 'Equipo directivo',
-        administrativeUnit: 'Dirección General',
+        department: 'Conselleria',
+        administrativeUnit: 'Direcció General',
       }),
     );
   });
@@ -325,7 +357,7 @@ describe('ApplicationsService', () => {
         systemTypeId: 2,
         fieldId: 3,
         commissionId: 5,
-        admUnitId: 4,
+        admUnitCode: 'DG',
         statusId: ApplicationStatus.ACTIVE,
         description: 'interna',
         quickSearch: 'inv',
@@ -349,7 +381,7 @@ describe('ApplicationsService', () => {
         req.params.get('systemTypeId') === '2' &&
         req.params.get('fieldId') === '3' &&
         req.params.get('commissionId') === '5' &&
-        req.params.get('admUnitId') === '4' &&
+        req.params.get('admUnitCode') === 'DG' &&
         req.params.get('statusId') === '1' &&
         req.params.get('description') === 'interna' &&
         req.params.get('quickSearch') === 'inv' &&
@@ -380,28 +412,78 @@ describe('ApplicationsService', () => {
     expect(result).toHaveBeenCalledWith(APPLICATION_OUTPUT);
   });
 
-  it('shares and reuses the cached application detail request', () => {
-    const firstResult = vi.fn();
-    const secondResult = vi.fn();
-    const cachedResult = vi.fn();
+  it('loads fresh backend indicators on explicit refresh and caches them', () => {
+    service.getById(7).subscribe();
+    httpTesting.expectOne(`${APPLICATION_URL}/7`).flush(APPLICATION_OUTPUT);
 
-    service.getById(7).subscribe(firstResult);
-    service.getById(7).subscribe(secondResult);
+    const result = vi.fn();
+    service.refreshById(7).subscribe(result);
+    const updated = { ...APPLICATION_OUTPUT, incomplete: true, missingSecurityData: true };
+    httpTesting.expectOne(`${APPLICATION_URL}/7`).flush(updated);
 
-    const request = httpTesting.expectOne(`${APPLICATION_URL}/7`);
-    expect(request.request.method).toBe('GET');
-    request.flush(APPLICATION_OUTPUT);
-
-    expect(firstResult).toHaveBeenCalledWith(APPLICATION_OUTPUT);
-    expect(secondResult).toHaveBeenCalledWith(APPLICATION_OUTPUT);
-
-    service.getById(7).subscribe(cachedResult);
-
+    expect(result).toHaveBeenCalledWith(updated);
+    service.getById(7).subscribe(result);
     httpTesting.expectNone(`${APPLICATION_URL}/7`);
-    expect(cachedResult).toHaveBeenCalledWith(APPLICATION_OUTPUT);
+    expect(result).toHaveBeenCalledTimes(2);
+    expect(result).toHaveBeenLastCalledWith(updated);
   });
 
-  it('keeps cached application details separated by id', () => {
+  it('invalidates application pages and details after responsible assignments change', () => {
+    service.getById(7).subscribe();
+    httpTesting.expectOne(`${APPLICATION_URL}/7`).flush(APPLICATION_OUTPUT);
+    service.getPage({ incomplete: true }).subscribe();
+    httpTesting.expectOne((request) => request.params.get('incomplete') === 'true')
+      .flush(page([APPLICATION_OUTPUT]));
+
+    TestBed.inject(ResponsibleDataChangesService).assignmentsChanged();
+
+    service.getById(7).subscribe();
+    httpTesting.expectOne(`${APPLICATION_URL}/7`).flush(APPLICATION_OUTPUT);
+    service.getPage({ incomplete: true }).subscribe();
+    httpTesting.expectOne((request) => request.params.get('incomplete') === 'true')
+      .flush(page([]));
+  });
+
+  it('separates incomplete, complete and unfiltered pages in the cache', () => {
+    for (const incomplete of [undefined, true, false]) {
+      service.getPage({ page: 2, size: 10, incomplete }).subscribe();
+      const request = httpTesting.expectOne((request) =>
+        request.url === APPLICATION_URL
+        && request.params.get('incomplete') === (incomplete === undefined ? null : String(incomplete)));
+      expect(request.request.params.get('page')).toBe('2');
+      request.flush(page([APPLICATION_OUTPUT]));
+    }
+
+    for (const incomplete of [undefined, true, false]) {
+      service.getPage({ page: 2, size: 10, incomplete }).subscribe();
+    }
+    httpTesting.expectNone((request) => request.url === APPLICATION_URL);
+  });
+
+  it('preserves unknown section flags and the aggregate supplied by the list endpoint', () => {
+    expect(service.toApplication({
+      ...APPLICATION_OUTPUT,
+      incomplete: true,
+      missingResponsibleTypes: null,
+      missingAuthorized: null,
+      missingDevelopmentFields: null,
+      missingSystems: null,
+      missingDatabases: null,
+      missingAccessibilityFields: null,
+      missingSecurityData: null,
+    })).toEqual(expect.objectContaining({
+      incomplete: true,
+      missingResponsibleTypes: null,
+      missingAuthorized: null,
+      missingDevelopmentFields: null,
+      missingSystems: null,
+      missingDatabases: null,
+      missingAccessibilityFields: null,
+      missingSecurityData: null,
+    }));
+  });
+
+  it('loads each requested application id', () => {
     const firstResult = vi.fn();
     const secondResult = vi.fn();
 
@@ -502,7 +584,7 @@ describe('ApplicationsService', () => {
     expect(refreshedResult).toHaveBeenCalledWith([EXPECTED_APPLICATION]);
   });
 
-  it('clears cached application details after successful mutations', () => {
+  it('loads fresh application details after successful mutations', () => {
     const cachedResult = vi.fn();
     const createResult = vi.fn();
     const afterCreateResult = vi.fn();
@@ -544,6 +626,36 @@ describe('ApplicationsService', () => {
     expect(deleteResult).toHaveBeenCalledWith(null);
     expect(afterDeleteResult).toHaveBeenCalledWith(APPLICATION_OUTPUT);
   });
+
+  it.each(['create', 'update', 'delete', 'reactivate'] as const)(
+    'preserves detail after failed %s and invalidates only on success',
+    (operation) => {
+      service.getById(7).subscribe();
+      httpTesting.expectOne(`${APPLICATION_URL}/7`).flush(APPLICATION_OUTPUT);
+      const send = (): Observable<unknown> => {
+        switch (operation) {
+          case 'create': return service.create(APPLICATION_INPUT);
+          case 'update': return service.update(7, APPLICATION_INPUT);
+          case 'delete': return service.delete(7);
+          case 'reactivate': return service.reactivate(7);
+        }
+      };
+      send().subscribe({ error: () => undefined });
+      httpTesting.expectOne((request) => request.method !== 'GET')
+        .flush('failed', { status: 500, statusText: 'Error' });
+      const cached = vi.fn();
+      service.getById(7).subscribe(cached);
+      httpTesting.expectNone((request) => request.method === 'GET');
+      expect(cached).toHaveBeenCalledWith(APPLICATION_OUTPUT);
+      send().subscribe();
+      const pending = httpTesting.expectOne((request) => request.method !== 'GET');
+      service.getById(7).subscribe();
+      httpTesting.expectNone((request) => request.method === 'GET');
+      pending.flush(APPLICATION_OUTPUT);
+      service.getById(7).subscribe();
+      httpTesting.expectOne(`${APPLICATION_URL}/7`).flush(APPLICATION_OUTPUT);
+    },
+  );
 });
 
 function flushApplications(request: TestRequest): void {

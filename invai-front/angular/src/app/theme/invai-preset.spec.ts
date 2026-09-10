@@ -1,6 +1,23 @@
 import { InvaiPreset } from './invai-preset';
 
 describe('InvaiPreset', () => {
+  it('uses the legacy surface.300 boundary and surface.100 only for disabled fields', () => {
+    const light = (
+      InvaiPreset.semantic as {
+        colorScheme?: {
+          light?: {
+            surface?: Record<number, string>;
+            formField?: Record<string, string>;
+          };
+        };
+      }
+    )?.colorScheme?.light;
+
+    expect(light?.surface?.[300]).toBe('#d1d5db');
+    expect(light?.formField?.['borderColor']).toBe('{surface.300}');
+    expect(light?.formField?.['disabledBackground']).toBe('{surface.100}');
+  });
+
   it('keeps odd table rows white and even rows lighter than hover', () => {
     const lightRowTokens = InvaiPreset.components?.datatable?.colorScheme?.light?.row;
 

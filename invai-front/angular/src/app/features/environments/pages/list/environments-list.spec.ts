@@ -193,7 +193,7 @@ describe('EnvironmentsList', () => {
       name: ENVIRONMENT.name,
       nameEs: ENVIRONMENT.nameEs,
     });
-    expect(harness().entityForm.disabled).toBe(true);
+    expect(harness().entityForm.enabled).toBe(true);
   });
 
   it('restores an inactive environment from its read-only view', () => {
@@ -208,7 +208,7 @@ describe('EnvironmentsList', () => {
 
     expect(harness().isDialogVisible()).toBe(true);
     expect(harness().selectedEntityCanRestore()).toBe(true);
-    expect(harness().entityForm.disabled).toBe(true);
+    expect(harness().entityForm.enabled).toBe(true);
 
     harness().restoreSelectedEntity();
 
@@ -255,7 +255,7 @@ describe('EnvironmentsList', () => {
     harness().cancelEntityEdit();
 
     expect(harness().dialogMode()).toBe('view');
-    expect(harness().entityForm.disabled).toBe(true);
+    expect(harness().entityForm.enabled).toBe(true);
     expect(harness().entityForm.getRawValue()).toEqual({
       code: ENVIRONMENT.code,
       name: ENVIRONMENT.name,

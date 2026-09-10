@@ -1,15 +1,17 @@
 <div
   [class]="
-    'flex flex-column gap-4 p-6 border-round-2xl shadow-2 w-full text-color' +
+    'section-container shadow-2 w-full text-color' +
     ' ' +
     bgStyle()
   "
 >
   @if (header()) {
-    <div class="section-container__header flex justify-content-between">
-      <h2 class="text-3xl text-primary font-semibold mt-0">{{ header() }}</h2>
+    <header class="section-container__header">
+      <h1 class="section-container__title">{{ header() }}</h1>
       <ng-content select="[right-top]"></ng-content>
-    </div>
+    </header>
   }
-  <ng-content></ng-content>
+  <div class="section-container__body flex flex-column gap-4">
+    <ng-content></ng-content>
+  </div>
 </div>

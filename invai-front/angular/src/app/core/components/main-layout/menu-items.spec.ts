@@ -1,5 +1,6 @@
 import { MAINTENANCE_TABS } from '@features/maintenances/maintenances.constants';
 import { MAINTENANCES_ROUTES_LABELS } from '@features/maintenances/maintenances.routes.i18n';
+import { SYSTEMS_ROUTES_LABELS } from '@features/systems/systems.routes.i18n';
 
 import { MENU_ITEMS } from './menu-items';
 
@@ -20,7 +21,11 @@ describe('MENU_ITEMS', () => {
     expect(maintenanceMenu?.items?.map(({ label }) => label)).toEqual([
       'General',
       'Responsables',
+      'Sistemes',
       'Desenvolupament',
+      'Accessibilitat',
+      'Seguretat',
     ]);
+    expect(MENU_ITEMS.find(({ label }) => label === SYSTEMS_ROUTES_LABELS.BASE)).toBeUndefined();
   });
 });

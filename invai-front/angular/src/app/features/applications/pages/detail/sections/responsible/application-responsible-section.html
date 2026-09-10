@@ -50,16 +50,6 @@
           </div>
         </div>
 
-        @if (canUseRowActions() && responsibleAddBlockedByCaib()) {
-          <p
-            id="application-responsible-caib-unavailable"
-            class="mb-3 mt-0 text-sm text-color-secondary"
-            role="status"
-          >
-            {{ copy.caibOnlyResponsibilitiesUnavailable }}
-          </p>
-        }
-
         <app-application-responsibles-table
           [columns]="responsibleColumns"
           [first]="responsibleFirst()"
@@ -122,10 +112,17 @@
         [form]="responsibleForm"
         [isSaving]="responsibleDialogSaving()"
         [mode]="responsibleDialogMode()"
+        [personalCaibLocked]="responsiblePersonalCaibLocked()"
         [people]="responsibleSelectablePeople()"
         [responsibleTypeOptions]="responsibleTypeOptions()"
+        [soffidLoading]="soffidLoading()"
+        [soffidOptions]="soffidOptions()"
+        [soffidSearched]="soffidSearched()"
+        [soffidSearchError]="soffidSearchError()"
+        [soffidTotal]="soffidTotal()"
         (cancelEdit)="closeResponsibleDialog()"
         (closed)="closeResponsibleDialog()"
+        (soffidSearch)="searchSoffidPeople($event)"
         (submitForm)="submitResponsible()"
       />
     }
@@ -140,14 +137,21 @@
         [isSaving]="authorizedDialogSaving()"
         [mode]="authorizedDialogMode()"
         [people]="authorizedSelectablePeople()"
+        [soffidLoading]="soffidLoading()"
+        [soffidOptions]="soffidOptions()"
+        [soffidSearched]="soffidSearched()"
+        [soffidSearchError]="soffidSearchError()"
+        [soffidTotal]="soffidTotal()"
         (cancelEdit)="closeAuthorizedDialog()"
         (closed)="closeAuthorizedDialog()"
+        (soffidSearch)="searchSoffidPeople($event)"
         (submitForm)="submitAuthorized()"
       />
     }
 
     @if (deactivateDialogVisible()) {
       <app-confirmation-dialog
+        confirmIcon="pi pi-trash"
         [(visible)]="deactivateDialogVisible"
         [cancelAriaLabel]="copy.deactivateCancelAriaLabel"
         [cancelLabel]="copy.deactivateCancel"

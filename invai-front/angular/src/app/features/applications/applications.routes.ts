@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import {
+  APPLICATION_ACCESSIBILITY_RESOLVE_KEY,
+  applicationAccessibilityResolver,
+} from './pages/detail/sections/accessibility/application-accessibility-section.resolver';
+import {
   APPLICATIONS_LIST_RESOLVE_KEY,
   applicationsListResolver,
 } from './pages/list/applications-list.resolver';
@@ -24,6 +28,10 @@ import {
   APPLICATION_RESPONSIBLE_RESOLVE_KEY,
   applicationResponsibleResolver,
 } from './pages/detail/sections/responsible/application-responsible-section.resolver';
+import {
+  APPLICATION_SECURITY_RESOLVE_KEY,
+  applicationSecurityResolver,
+} from './pages/detail/sections/security/application-security-section.resolver';
 
 export const APPLICATIONS_ROUTES: Routes = [
   {
@@ -107,6 +115,32 @@ export const APPLICATIONS_ROUTES: Routes = [
         },
         resolve: {
           [APPLICATION_DEVELOPMENT_RESOLVE_KEY]: applicationDevelopmentResolver,
+        },
+      },
+      {
+        path: 'accessibility',
+        loadComponent: () =>
+          import('./pages/detail/sections/accessibility/application-accessibility-section').then(
+            (m) => m.ApplicationAccessibilitySection,
+          ),
+        data: {
+          breadcrumb: $localize`Accessibilitat`,
+        },
+        resolve: {
+          [APPLICATION_ACCESSIBILITY_RESOLVE_KEY]: applicationAccessibilityResolver,
+        },
+      },
+      {
+        path: 'security',
+        loadComponent: () =>
+          import('./pages/detail/sections/security/application-security-section').then(
+            (m) => m.ApplicationSecuritySection,
+          ),
+        data: {
+          breadcrumb: $localize`Seguretat`,
+        },
+        resolve: {
+          [APPLICATION_SECURITY_RESOLVE_KEY]: applicationSecurityResolver,
         },
       },
     ],

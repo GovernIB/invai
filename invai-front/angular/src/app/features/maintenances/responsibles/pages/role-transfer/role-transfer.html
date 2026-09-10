@@ -16,68 +16,39 @@
     </div>
 
     <div class="role-transfer-person-grid" aria-describedby="role-transfer-instructions">
-      <div class="role-transfer-field">
-        <label id="role-transfer-source-label" for="role-transfer-source">
-          {{ copy.sourcePerson }}
-        </label>
-        <p-select
-          inputId="role-transfer-source"
-          styleClass="w-full"
-          formControlName="sourcePersonId"
-          [ariaFilterLabel]="copy.sourceFilterAriaLabel"
-          ariaLabelledBy="role-transfer-source-label"
-          [filter]="true"
-          [loading]="sourceCatalogLoading()"
-          [options]="sourceOptions()"
-          [showClear]="true"
-          optionLabel="label"
-          optionValue="id"
-        />
-        @if (sourceCatalogLoadFailed()) {
-          <div class="role-transfer-error" role="alert">
-            <span>{{ copy.loadPeopleError }}</span>
-            <p-button
-              type="button"
-              [label]="copy.retry"
-              [text]="true"
-              (onClick)="retrySourceCatalog()"
-            />
-          </div>
-        } @else if (!sourceCatalogLoading() && sourceOptions().length === 0) {
-          <p class="m-0 text-sm text-color-secondary" role="status">{{ copy.noPeople }}</p>
+      <app-role-transfer-person-field
+        class="role-transfer-field"
+        kind="source"
+        [control]="form.controls.sourcePerson"
+        [loading]="sourceSearchLoading()"
+        [options]="sourceOptions()"
+        [searched]="sourceSearched()"
+        [searchError]="sourceSearchFailed()"
+        (searchRequested)="searchSources($event)"
+      >
+        @if (sourceSearchFailed()) {
+          <p-button
+            type="button"
+            [label]="copy.retry"
+            [text]="true"
+            (onClick)="retrySourceCatalog()"
+          />
         }
-      </div>
+      </app-role-transfer-person-field>
 
-      <div class="role-transfer-field">
-        <label id="role-transfer-destination-label" for="role-transfer-destination">
-          {{ copy.destinationPerson }}
-        </label>
-        <p-select
-          inputId="role-transfer-destination"
-          styleClass="w-full"
-          formControlName="destinationPersonId"
-          [ariaFilterLabel]="copy.destinationFilterAriaLabel"
-          ariaLabelledBy="role-transfer-destination-label"
-          [filter]="true"
-          [options]="destinationOptions()"
-          [showClear]="true"
-          optionLabel="label"
-          optionValue="id"
-        />
-        @if (destinationOptionsLoadFailed()) {
-          <div class="role-transfer-error" role="alert">
-            <span>{{ copy.loadPeopleError }}</span>
-            <p-button
-              type="button"
-              [label]="copy.retry"
-              [text]="true"
-              (onClick)="retrySourceLoad()"
-            />
-          </div>
-        }
+      <app-role-transfer-person-field
+        class="role-transfer-field"
+        kind="destination"
+        [control]="form.controls.destinationPerson"
+        [loading]="destinationSearchLoading()"
+        [options]="destinationOptions()"
+        [searched]="destinationSearched()"
+        [searchError]="destinationSearchFailed()"
+        (searchRequested)="searchDestinations($event)"
+      >
         @if (destinationRolesLoadFailed()) {
-          <div class="role-transfer-error" role="alert">
-            <span>{{ copy.loadDestinationError }}</span>
+          <div>
+            <span class="sr-only" role="alert">{{ copy.loadDestinationError }}</span>
             <p-button
               type="button"
               [label]="copy.retry"
@@ -86,7 +57,7 @@
             />
           </div>
         }
-      </div>
+      </app-role-transfer-person-field>
 
       <div class="role-transfer-toggle">
         <span id="role-transfer-revoke-label">{{ copy.revokeRoles }}</span>
@@ -116,7 +87,7 @@
       </header>
 
       <div class="role-transfer-list-content">
-        @if (!form.controls.sourcePersonId.value) {
+        @if (!committedSourceId()) {
           <p class="role-transfer-empty" role="status">{{ copy.selectSource }}</p>
         } @else if (sourceRolesLoadFailed()) {
           <div class="role-transfer-error role-transfer-error--block" role="alert">
@@ -316,6 +287,7 @@
     [(visible)]="confirmationVisible"
     [closeOnConfirm]="false"
     [confirmLabel]="confirmationLabel()"
+    [confirmIcon]="confirmationIcon()"
     [confirmOutlined]="false"
     [message]="confirmationMessage()"
     [pending]="submitting()"

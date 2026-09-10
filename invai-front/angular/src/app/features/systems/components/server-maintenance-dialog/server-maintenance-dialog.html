@@ -16,12 +16,18 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
   >
     <div class="md:col-span-7">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="application-host-server-label" class="invai-dialog-static-field__label">{{ labels.server }}</span>
+          <p class="invai-form-static-value" aria-labelledby="application-host-server-label">{{ serverLabel() }}</p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-select
           inputId="application-host-server"
@@ -38,6 +44,7 @@
         />
         <label for="application-host-server">{{ labels.server }}</label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.server)) {
         <p id="application-host-server-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ requiredError }}
@@ -55,6 +62,8 @@
           maxlength="50"
           [attr.aria-describedby]="isInvalid(form().controls.instance) ? 'application-host-instance-error' : null"
           [attr.aria-invalid]="isInvalid(form().controls.instance)"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
           pInputText
         />
         <label for="application-host-instance">{{ labels.instance }}</label>
@@ -67,6 +76,12 @@
     </div>
 
     <div class="md:col-span-5">
+      @if (mode() === 'view') {
+        <div class="invai-dialog-static-field">
+          <span id="application-host-port-label" class="invai-dialog-static-field__label">{{ labels.port }}</span>
+          <p class="invai-form-static-value" aria-labelledby="application-host-port-label">{{ form().controls.port.value ?? '-' }}</p>
+        </div>
+      } @else {
       <p-floatlabel class="w-full">
         <p-inputnumber
           inputId="application-host-port"
@@ -81,6 +96,7 @@
         />
         <label for="application-host-port">{{ labels.port }}</label>
       </p-floatlabel>
+      }
       @if (isInvalid(form().controls.port)) {
         <p id="application-host-port-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
           {{ portError }}
@@ -98,6 +114,8 @@
           maxlength="20"
           [attr.aria-describedby]="isInvalid(form().controls.version) ? 'application-host-version-error' : null"
           [attr.aria-invalid]="isInvalid(form().controls.version)"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
           pInputText
         />
         <label for="application-host-version">{{ labels.version }}</label>
@@ -118,6 +136,8 @@
         class="w-full"
         rows="4"
         formControlName="description"
+        [readOnly]="mode() === 'view'"
+        [class.invai-form-readonly-control]="mode() === 'view'"
         pTextarea
       ></textarea>
     </div>

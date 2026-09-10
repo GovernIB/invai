@@ -8,8 +8,7 @@ export const APPLICATION_SYSTEM_RELATION_DIALOG_TITLES: Record<
   view: $localize`Consultar servidor de l'aplicació`,
 };
 
-export const APPLICATION_SYSTEM_RELATION_DIALOG_REQUIRED =
-  $localize`Selecciona un servidor.`;
+export const APPLICATION_SYSTEM_RELATION_DIALOG_REQUIRED = $localize`Selecciona un servidor.`;
 
 export const APPLICATION_SYSTEM_RELATION_DIALOG_ARIA_LABELS = {
   accept: $localize`Accepta la consulta del servidor de l'aplicació`,
@@ -20,4 +19,12 @@ export const APPLICATION_SYSTEM_RELATION_DIALOG_ARIA_LABELS = {
   edit: $localize`Edita el servidor de l'aplicació`,
   restore: $localize`Restaura el servidor de l'aplicació`,
   save: $localize`Desa els canvis del servidor de l'aplicació`,
+};
+
+export const APPLICATION_SYSTEM_CATALOG_SEARCH_LABEL = $localize`Cerca ràpida de servidors`;
+export const APPLICATION_SYSTEM_CATALOG_FILTER_LABELS = {
+  server: $localize`Servidor`,
+  instance: $localize`Instància`,
+  version: $localize`Versió`,
+  status: $localize`Estat`,
 };

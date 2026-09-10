@@ -4,11 +4,11 @@
 
 .application-infrastructure-catalog-table {
   .p-datatable-table {
-    min-width: max-content;
+    min-width: 100%;
   }
 
   :is(th, td) {
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .application-infrastructure-catalog-table__selection {

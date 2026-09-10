@@ -11,6 +11,7 @@ import {
   APPLICATION_OPTIONS_RESOLVE_KEY,
   ApplicationOptionsResolvedData,
   applicationOptionsResolver,
+  resolveApplicationOptions,
 } from './application-options.resolver';
 
 const OPTIONS: ApplicationSelectOptions = {
@@ -18,29 +19,66 @@ const OPTIONS: ApplicationSelectOptions = {
   informationSystems: [],
   scopes: [],
   commissions: [],
+  departments: [{ label: 'Conselleria', value: 'GVA01' }],
   administrativeUnits: [],
 };
 
 describe('applicationOptionsResolver', () => {
-  let getOptions: ReturnType<typeof vi.fn>;
+  let getStaticOptions: ReturnType<typeof vi.fn>;
+  let getDepartmentOptions: ReturnType<typeof vi.fn>;
+  let getAdministrativeUnitOptions: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    getOptions = vi.fn(() => of(OPTIONS));
+    getStaticOptions = vi.fn(() =>
+      of({
+        categories: OPTIONS.categories,
+        informationSystems: OPTIONS.informationSystems,
+        scopes: OPTIONS.scopes,
+        commissions: OPTIONS.commissions,
+      }),
+    );
+    getDepartmentOptions = vi.fn(() => of(OPTIONS.departments));
+    getAdministrativeUnitOptions = vi.fn(() =>
+      of([{ label: 'Direcció General', value: 'UA01' }]),
+    );
     TestBed.configureTestingModule({
-      providers: [{ provide: ApplicationOptionsService, useValue: { getOptions } }],
+      providers: [
+        {
+          provide: ApplicationOptionsService,
+          useValue: {
+            getStaticOptions,
+            getDepartmentOptions,
+            getAdministrativeUnitOptions,
+          },
+        },
+      ],
     });
+  });
+
+  it('preloads the units for the department resolved by the detail route', async () => {
+    const service = TestBed.inject(ApplicationOptionsService);
+    const result = await firstValueFrom(resolveApplicationOptions(service, 'GVA01'));
+
+    expect(getAdministrativeUnitOptions).toHaveBeenCalledWith('GVA01');
+    expect(result.options.administrativeUnits).toEqual([
+      { label: 'Direcció General', value: 'UA01' },
+    ]);
+    expect(result.administrativeUnitsLoadFailed).toBe(false);
   });
 
   it('should resolve application form options', async () => {
     await expect(resolveOptions()).resolves.toEqual({
       options: OPTIONS,
       loadFailed: false,
+      departmentsLoadFailed: false,
+      administrativeUnitsLoadFailed: false,
     });
-    expect(getOptions).toHaveBeenCalledOnce();
+    expect(getStaticOptions).toHaveBeenCalledOnce();
+    expect(getDepartmentOptions).toHaveBeenCalledOnce();
   });
 
   it('should complete with empty options when orchestration fails', async () => {
-    getOptions.mockReturnValueOnce(throwError(() => new Error('Options unavailable')));
+    getStaticOptions.mockReturnValueOnce(throwError(() => new Error('Options unavailable')));
 
     await expect(resolveOptions()).resolves.toEqual({
       options: {
@@ -48,9 +86,12 @@ describe('applicationOptionsResolver', () => {
         informationSystems: [],
         scopes: [],
         commissions: [],
+        departments: OPTIONS.departments,
         administrativeUnits: [],
       },
       loadFailed: true,
+      departmentsLoadFailed: false,
+      administrativeUnitsLoadFailed: false,
     });
   });
 

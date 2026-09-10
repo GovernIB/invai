@@ -66,7 +66,7 @@ describe('maintenance dialog actions', () => {
       ).restore.subscribe(restore);
 
       expect(footerButtonLabels(fixture)).toEqual(['Editar', 'Acceptar']);
-      expect(buttonByLabel(fixture, 'Acceptar').icon).toBeUndefined();
+      expect(buttonByLabel(fixture, 'Acceptar').icon).toBe('pi pi-check');
 
       fixture.componentRef.setInput('canRestore', true);
       fixture.detectChanges();

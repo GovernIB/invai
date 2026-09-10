@@ -371,7 +371,6 @@ export class LayersList extends SearchComponentBase<Layer, LayerFilters> impleme
   private prepareEntityForm(layer: Layer | null, mode: LayerDialogMode): void {
     this.entityForm.enable({ emitEvent: false });
     this.entityForm.reset({ name: layer?.name ?? '' });
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private observeQuickSearch(): void {

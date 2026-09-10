@@ -1,3 +1,8 @@
+import { ServerCatalogService } from '@features/systems/services/server-catalog.service';
+import { DatabaseVendorCatalogService } from '@features/systems/services/database-vendor-catalog.service';
+import { ServerFiltersFormGroup } from '@features/systems/forms/server-filters-form.factory';
+import { DatabaseFiltersFormGroup } from '@features/systems/forms/database-filters-form.factory';
+import { InfrastructureSystem, DatabaseRecord } from '@features/systems/systems.model';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { DatabasesService } from '@features/systems/services/databases.service';
@@ -102,6 +107,21 @@ const DATABASE: ApplicationDatabase = {
 };
 
 interface SectionAccess {
+  systemCatalogFiltersForm: ServerFiltersFormGroup;
+  databaseCatalogFiltersForm: DatabaseFiltersFormGroup;
+  systemCatalogQuickSearch: () => string;
+  databaseCatalogQuickSearch: () => string;
+  systemCatalog: () => { total: number };
+  databaseCatalog: () => { total: number };
+  isSystemCatalogLoading: () => boolean;
+  isDatabaseCatalogLoading: () => boolean;
+  systemCatalogFilterCount: () => number;
+  databaseCatalogFilterCount: () => number;
+  closeSystemDialog: () => void;
+  closeDatabaseDialog: () => void;
+  onCatalogQuickSearch: (kind: 'system' | 'database', value: string) => void;
+  applyCatalogFilters: (kind: 'system' | 'database') => void;
+  resetCatalogSearch: (kind: 'system' | 'database') => void;
   servers: () => { items: ApplicationServer[]; total: number };
   databases: () => { items: ApplicationDatabase[]; total: number };
   isServersLoading: () => boolean;
@@ -217,9 +237,28 @@ describe('ApplicationSystemsDatabasesSection', () => {
       providers: [
         ApplicationDetailState,
         MessageService,
+        { provide: ServerCatalogService, useValue: { getActiveOptions: vi.fn(() => of([])) } },
+        {
+          provide: DatabaseVendorCatalogService,
+          useValue: { getActiveOptions: vi.fn(() => of([])) },
+        },
         {
           provide: ApplicationsService,
-          useValue: {},
+          useValue: {
+            refreshById: vi.fn(() =>
+              of({
+                appSecurityId: null,
+                incomplete: false,
+                missingResponsibleTypes: false,
+                missingAuthorized: false,
+                missingDevelopmentFields: false,
+                missingSystems: false,
+                missingDatabases: false,
+                missingAccessibilityFields: false,
+                missingSecurityData: false,
+              }),
+            ),
+          },
         },
         {
           provide: ApplicationDevelopmentService,
@@ -267,6 +306,202 @@ describe('ApplicationSystemsDatabasesSection', () => {
     fixture.detectChanges();
     await fixture.whenStable();
   });
+
+  afterEach(() => vi.useRealTimers());
+
+  it.each(['system', 'database'] as const)(
+    'combines %s catalog search with applied filters, preserving selection only across pages',
+    (kind) => {
+      vi.useFakeTimers();
+      const section = accessSection();
+      const isSystem = kind === 'system';
+      const getCatalog = isSystem ? getSystemsCatalog : getDatabasesCatalog;
+      const otherCatalog = isSystem ? getDatabasesCatalog : getSystemsCatalog;
+      const selection = isSystem
+        ? section.systemRelationForm.controls.system
+        : section.databaseRelationForm.controls.database;
+      const paginate = isSystem
+        ? section.onSystemCatalogPageChange.bind(section)
+        : section.onDatabaseCatalogPageChange.bind(section);
+      if (isSystem)
+        section.systemCatalogFiltersForm.patchValue({
+          serverId: 3,
+          instance: ' jboss ',
+          version: ' 7 ',
+        });
+      else
+        section.databaseCatalogFiltersForm.patchValue({
+          serverId: 4,
+          service: ' invai ',
+          databaseTypeId: 6,
+        });
+      section.applyCatalogFilters(kind);
+      getCatalog.mockClear();
+      selection.setValue((isSystem ? SERVER.catalogItem : DATABASE.catalogItem) as never);
+      paginate({ first: 20, rows: 10, sortField: 'server.name', sortOrder: -1 });
+      expect(selection.value).not.toBeNull();
+      getCatalog.mockClear();
+
+      section.onCatalogQuickSearch(kind, ' app ');
+      vi.advanceTimersByTime(399);
+      expect(getCatalog).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(getCatalog).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          page: 0,
+          size: 10,
+          sort: 'server.name,desc',
+          search: 'app',
+          statusId: 1,
+          unassignedToInformationSystemDbId: 70,
+          ...(isSystem
+            ? { serverId: 3, instance: 'jboss', version: '7' }
+            : { serverId: 4, service: 'invai', databaseTypeId: 6 }),
+        }),
+      );
+      expect(selection.value).toBeNull();
+      expect(otherCatalog).not.toHaveBeenCalled();
+
+      // Pending edits do not affect pagination until Search is pressed.
+      if (isSystem) section.systemCatalogFiltersForm.patchValue({ serverId: 99 });
+      else section.databaseCatalogFiltersForm.patchValue({ serverId: 99 });
+      paginate({ first: 10, rows: 10 });
+      expect(getCatalog).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 1, search: 'app', serverId: isSystem ? 3 : 4 }),
+      );
+      section.applyCatalogFilters(kind);
+      expect(getCatalog).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 0, search: 'app', serverId: 99 }),
+      );
+    },
+  );
+
+  it.each(['system', 'database'] as const)(
+    'clears %s criteria and cancels pending searches on reset and close',
+    (kind) => {
+      vi.useFakeTimers();
+      const section = accessSection();
+      const getCatalog = kind === 'system' ? getSystemsCatalog : getDatabasesCatalog;
+      section.onCatalogQuickSearch(kind, 'stale');
+      section.resetCatalogSearch(kind);
+      getCatalog.mockClear();
+      vi.advanceTimersByTime(400);
+      expect(getCatalog).not.toHaveBeenCalled();
+      expect(
+        kind === 'system'
+          ? section.systemCatalogQuickSearch()
+          : section.databaseCatalogQuickSearch(),
+      ).toBe('');
+      expect(
+        kind === 'system'
+          ? section.systemCatalogFilterCount()
+          : section.databaseCatalogFilterCount(),
+      ).toBe(0);
+      section.onCatalogQuickSearch(kind, 'closed');
+      if (kind === 'system') section.closeSystemDialog();
+      else section.closeDatabaseDialog();
+      vi.advanceTimersByTime(400);
+      expect(getCatalog).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['system', 'database'] as const)(
+    'ignores obsolete %s catalog responses and recovers after errors',
+    (kind) => {
+      const section = accessSection();
+      const getCatalog = kind === 'system' ? getSystemsCatalog : getDatabasesCatalog;
+      const oldRequest = new Subject<SpringPage<InfrastructureSystem | DatabaseRecord>>();
+      const newRequest = new Subject<SpringPage<InfrastructureSystem | DatabaseRecord>>();
+      const retry = new Subject<SpringPage<InfrastructureSystem | DatabaseRecord>>();
+      getCatalog
+        .mockReturnValueOnce(oldRequest)
+        .mockReturnValueOnce(newRequest)
+        .mockReturnValueOnce(retry);
+      const catalog = kind === 'system' ? section.systemCatalog : section.databaseCatalog;
+      const loading =
+        kind === 'system' ? section.isSystemCatalogLoading : section.isDatabaseCatalogLoading;
+      section.applyCatalogFilters(kind);
+      oldRequest.next(page([], 12));
+      expect(catalog().total).toBe(12);
+      section.applyCatalogFilters(kind);
+      expect(loading()).toBe(true);
+      expect(catalog().total).toBe(12);
+      oldRequest.next(page([], 999));
+      oldRequest.complete();
+      expect(loading()).toBe(true);
+      expect(catalog().total).toBe(12);
+      newRequest.error(new Error('network'));
+      expect(loading()).toBe(false);
+      expect(catalog().total).toBe(12);
+      section.applyCatalogFilters(kind);
+      retry.next(page([], 5));
+      retry.complete();
+      expect(catalog().total).toBe(5);
+      expect(loading()).toBe(false);
+    },
+  );
+
+  it.each(['system', 'database'] as const)(
+    'opens %s filters collapsed, renders labelled fields and resets on reopening',
+    (kind) => {
+      const section = accessSection();
+      detailState.startEditing('systems-databases');
+      const open = () =>
+        kind === 'system' ? section.openSystemCreateDialog() : section.openDatabaseCreateDialog();
+      const close = () =>
+        kind === 'system' ? section.closeSystemDialog() : section.closeDatabaseDialog();
+      open();
+      fixture.detectChanges();
+      const dialogSelector = `app-application-${kind}-relation-dialog`;
+      let dialog = fixture.nativeElement.querySelector(dialogSelector) as HTMLElement;
+      expect(dialog.querySelector('app-search-filters')).toBeNull();
+      expect(
+        dialog.querySelector('app-section-actions input')?.getAttribute('aria-label'),
+      ).toContain('Cerca ràpida');
+      const filterButton = dialog.querySelector(
+        '.section-actions__buttons button',
+      ) as HTMLButtonElement;
+      expect(filterButton.getAttribute('aria-expanded')).toBe('false');
+      filterButton.click();
+      fixture.detectChanges();
+      expect(filterButton.getAttribute('aria-expanded')).toBe('true');
+      expect(dialog.querySelector('app-search-filters')).not.toBeNull();
+      const prefix = `application-${kind}-catalog-filter`;
+      expect(dialog.querySelector(`#${prefix}-status`)).toBeNull();
+      expect(dialog.querySelector(`label[for="${prefix}-server"]`)?.textContent).toContain(
+        'Servidor',
+      );
+      const form =
+        kind === 'system' ? section.systemCatalogFiltersForm : section.databaseCatalogFiltersForm;
+      form.patchValue({ serverId: 3 });
+      section.onCatalogQuickSearch(kind, 'app');
+      section.applyCatalogFilters(kind);
+      expect(
+        kind === 'system'
+          ? section.systemCatalogFilterCount()
+          : section.databaseCatalogFilterCount(),
+      ).toBe(1);
+      close();
+      fixture.detectChanges();
+      open();
+      fixture.detectChanges();
+      dialog = fixture.nativeElement.querySelector(dialogSelector);
+      expect(dialog.querySelector('app-search-filters')).toBeNull();
+      expect(form.controls.serverId.value).toBeNull();
+      expect(
+        kind === 'system'
+          ? section.systemCatalogQuickSearch()
+          : section.databaseCatalogQuickSearch(),
+      ).toBe('');
+      expect(TestBed.inject(ServerCatalogService).getActiveOptions).toHaveBeenCalledExactlyOnceWith(
+        kind === 'system' ? 'APPLICATION' : 'DATABASE',
+      );
+      if (kind === 'database')
+        expect(
+          TestBed.inject(DatabaseVendorCatalogService).getActiveOptions,
+        ).toHaveBeenCalledOnce();
+    },
+  );
 
   it('renders both resolved pages without requesting them again', () => {
     const lists = fixture.debugElement.queryAll(By.directive(ApplicationInfrastructureList));
@@ -391,7 +626,12 @@ describe('ApplicationSystemsDatabasesSection', () => {
     });
     fixture.detectChanges();
 
-    expect(fixture.debugElement.query(By.directive(Editor)).componentInstance.readonly).toBe(true);
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(
+        '.application-systems-databases__observations .invai-form-static-value',
+      ),
+    ).not.toBeNull();
     expect(section.systemDialogMode()).toBe('view');
     expect(section.systemRelationForm.enabled).toBe(true);
 
@@ -883,11 +1123,10 @@ describe('ApplicationSystemsDatabasesSection', () => {
     );
   });
 
-  it('renders the documentation action and observations editor', () => {
+  it('renders documentation and switches observations between static and editable', () => {
     const documentationButton = fixture.debugElement
       .queryAll(By.directive(Button))
       .find((button) => button.componentInstance.label === 'Documentació');
-    const editor = fixture.debugElement.query(By.directive(Editor));
     const observationsGroup = fixture.debugElement.query(
       By.css('.application-systems-databases__observations'),
     );
@@ -896,18 +1135,23 @@ describe('ApplicationSystemsDatabasesSection', () => {
     expect(documentationButton?.componentInstance.ariaLabel).toBe(
       'Obrir la documentació de sistemes i bases de dades',
     );
-    expect(editor).toBeTruthy();
-    expect(editor.nativeElement.id).toBe('application-systems-databases-observations');
-    expect(editor.componentInstance.readonly).toBe(true);
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(
+        '.application-systems-databases__observations .invai-form-static-value',
+      ),
+    ).not.toBeNull();
     expect(observationsGroup.attributes['aria-labelledby']).toBe(labelId);
 
     detailState.startEditing('systems-databases');
     fixture.detectChanges();
-    expect(editor.componentInstance.readonly).toBe(false);
+    const editor = fixture.debugElement.query(By.directive(Editor));
+    expect(editor).toBeTruthy();
+    expect(editor.nativeElement.id).toBe('application-systems-databases-observations');
 
     detailState.cancelEditing('systems-databases');
     fixture.detectChanges();
-    expect(editor.componentInstance.readonly).toBe(true);
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
   });
 
   it('binds observations to the page-scoped detail form', () => {
@@ -916,8 +1160,10 @@ describe('ApplicationSystemsDatabasesSection', () => {
     detailState.systemsDatabasesForm.controls.observations.setValue('<p>Text enriquit</p>');
     fixture.detectChanges();
 
-    const editor = fixture.debugElement.query(By.directive(Editor));
-    expect(editor.componentInstance.value).toBe('<p>Text enriquit</p>');
+    const staticValue = fixture.nativeElement.querySelector(
+      '.application-systems-databases__observations .invai-form-static-value',
+    ) as HTMLElement;
+    expect(staticValue.textContent).toContain('Text enriquit');
   });
 
   it('shows a pending message when opening documentation', () => {

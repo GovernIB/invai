@@ -24,13 +24,14 @@ import { Button } from 'primeng/button';
 import { ButtonPassThrough } from 'primeng/types/button';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { Textarea } from 'primeng/textarea';
-import { finalize, Observable } from 'rxjs';
+import { catchError, EMPTY, finalize, map, Observable, of, Subject, switchMap } from 'rxjs';
 
 import {
   ApplicationAuthorizedInput,
   ApplicationAuthorizedOutput,
   ApplicationAssignedResponsibleOutput,
   ApplicationAssignmentDeactivateInput,
+  ApplicationPersonReferenceInput,
   ApplicationResponsibleInput,
   ApplicationResponsibleOutput,
 } from '../../../../applications.model';
@@ -42,11 +43,13 @@ import {
   ApplicationAuthorizedFormGroup,
   createApplicationAuthorizedForm,
   setApplicationAuthorizedCompanyRequired,
+  setApplicationAuthorizedPersonSource,
 } from '../../../../forms/application-authorized-form.factory';
 import {
   ApplicationResponsibleFormGroup,
   createApplicationResponsibleForm,
   setApplicationResponsibleCompanyRequired,
+  setApplicationResponsiblePersonSource,
 } from '../../../../forms/application-responsible-form.factory';
 import { ApplicationAuthorizedService } from '../../../../services/application-authorized.service';
 import { ApplicationResponsiblesService } from '../../../../services/application-responsibles.service';
@@ -55,7 +58,10 @@ import {
   ResponsibleCompanyOption,
   ResponsiblePerson,
   ResponsibleType,
+  SoffidPersonControlValue,
+  SoffidPersonOption,
 } from '../../../../../maintenances/responsibles/responsibles.model';
+import { ResponsiblePeopleService } from '../../../../../maintenances/responsibles/services/responsible-people.service';
 import { responsiblePersonFullName } from '../../../../../maintenances/responsibles/responsibles.utils';
 import {
   APPLICATION_DETAIL_SAVE_ERROR_MESSAGE,
@@ -121,6 +127,7 @@ export class ApplicationResponsibleSection implements OnInit {
   private readonly clipboard = inject(ApplicationAssignmentClipboardService);
   private readonly responsiblesService = inject(ApplicationResponsiblesService);
   private readonly authorizedService = inject(ApplicationAuthorizedService);
+  private readonly peopleService = inject(ResponsiblePeopleService);
 
   protected readonly detailState = inject(ApplicationDetailState);
   protected readonly sectionTitle = APPLICATION_RESPONSIBLE_SECTION_TITLE;
@@ -135,21 +142,50 @@ export class ApplicationResponsibleSection implements OnInit {
   protected readonly responsibleColumns: KeyLabel[] = [
     {
       key: 'responsibility',
+      width: '25%',
+      wrap: true,
+      maxWidth: '24rem',
       label: this.copy.responsibility,
       sortBy: 'responsibleType.name',
       minWidth: '12rem',
     },
-    { key: 'person', label: this.copy.person, sortBy: 'person.firstName', minWidth: '11rem' },
+    {
+      key: 'person',
+      width: '40%',
+      wrap: true,
+      maxWidth: '24rem',
+      label: this.copy.person,
+      sortBy: 'person.firstName',
+      minWidth: '11rem',
+    },
     {
       key: 'roleOrCompany',
+      width: '35%',
+      wrap: true,
+      maxWidth: '24rem',
       label: this.copy.roleOrCompany,
       sortBy: 'person.company.name',
       minWidth: '11rem',
     },
   ];
   protected readonly authorizedColumns: KeyLabel[] = [
-    { key: 'person', label: this.copy.person, sortBy: 'person.firstName', minWidth: '12rem' },
-    { key: 'authorization', label: this.copy.authorization, minWidth: '22rem' },
+    {
+      key: 'person',
+      width: '35%',
+      wrap: true,
+      maxWidth: '24rem',
+      label: this.copy.person,
+      sortBy: 'person.firstName',
+      minWidth: '12rem',
+    },
+    {
+      key: 'authorization',
+      width: '65%',
+      wrap: true,
+      maxWidth: '24rem',
+      label: this.copy.authorization,
+      minWidth: '22rem',
+    },
   ];
 
   protected readonly anchorId = signal<number | null>(null);
@@ -189,6 +225,13 @@ export class ApplicationResponsibleSection implements OnInit {
   protected readonly companyOptionsLoadFailed = signal(false);
   protected readonly peopleLoadFailed = signal(false);
   protected readonly authorizationTypesLoadFailed = signal(false);
+  protected readonly soffidOptions = signal<SoffidPersonOption[]>([]);
+  protected readonly soffidLoading = signal(false);
+  protected readonly soffidSearched = signal(false);
+  protected readonly soffidSearchError = signal(false);
+  protected readonly soffidTotal = signal(0);
+  protected readonly responsiblePersonalCaibLocked = signal(false);
+  private readonly soffidSearchRequests = new Subject<string>();
 
   protected readonly responsiblePersonalCaib = signal(false);
   protected readonly responsibleSelectedCompanyId = signal<number | null>(null);
@@ -206,23 +249,13 @@ export class ApplicationResponsibleSection implements OnInit {
   private readonly vacantResponsibleTypes = computed(() =>
     this.responsibleTypes().filter((type) => !this.assignedResponsibleTypeIds().has(type.id)),
   );
-  protected readonly assignableVacantResponsibleTypes = computed(() =>
-    this.vacantResponsibleTypes().filter((type) => !type.requiresPersonalCaib),
-  );
-  protected readonly responsibleAddBlockedByCaib = computed(
-    () =>
-      this.vacantResponsibleTypes().length > 0 &&
-      this.assignableVacantResponsibleTypes().length === 0,
-  );
+  protected readonly assignableVacantResponsibleTypes = this.vacantResponsibleTypes;
   protected readonly responsibilitiesComplete = computed(
     () => this.responsibleTypes().length > 0 && this.vacantResponsibleTypes().length === 0,
   );
   protected readonly responsibleAddButtonPassThrough = computed<ButtonPassThrough>(() => ({
     root: {
       'aria-disabled': this.responsibilitiesComplete() ? 'true' : undefined,
-      'aria-describedby': this.responsibleAddBlockedByCaib()
-        ? 'application-responsible-caib-unavailable'
-        : undefined,
       class: this.responsibilitiesComplete() ? 'application-responsible__add-complete' : undefined,
     },
   }));
@@ -235,7 +268,6 @@ export class ApplicationResponsibleSection implements OnInit {
       .map((type) => ({
         id: type.id,
         label: localizedName(type, this.locale),
-        disabled: type.requiresPersonalCaib && type.id !== selectedTypeId,
       }));
   });
   protected readonly authorizationTypeOptions = computed<ApplicationResponsibleSelectOption[]>(
@@ -310,6 +342,12 @@ export class ApplicationResponsibleSection implements OnInit {
     this.responsibleForm.controls.personId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((personId) => this.onResponsiblePersonChanged(personId));
+    this.responsibleForm.controls.responsibleTypeId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((typeId) => this.onResponsibleTypeChanged(typeId));
+    this.responsibleForm.controls.soffidPerson.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((person) => this.onSoffidPersonChanged(person, this.responsibleForm));
 
     this.authorizedForm.controls.personalCaib.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -320,6 +358,30 @@ export class ApplicationResponsibleSection implements OnInit {
     this.authorizedForm.controls.personId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((personId) => this.onAuthorizedPersonChanged(personId));
+    this.authorizedForm.controls.soffidPerson.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((person) => this.onSoffidPersonChanged(person, this.authorizedForm));
+
+    this.soffidSearchRequests
+      .pipe(
+        switchMap((query) => this.loadSoffid(query)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((result) => {
+        if (result.error) {
+          this.soffidSearchError.set(true);
+          return;
+        }
+        const page = result.page!;
+        this.soffidOptions.set(
+          page.content.map((person) => ({
+            ...person,
+            label: `${person.firstName} ${person.lastName} — ${person.email}`,
+          })),
+        );
+        this.soffidTotal.set(page.totalElements);
+        this.soffidSearched.set(true);
+      });
   }
 
   ngOnInit(): void {
@@ -385,6 +447,17 @@ export class ApplicationResponsibleSection implements OnInit {
     return this.canPreparePersonDialog() && !this.responsibleTypesLoadFailed();
   }
 
+  protected searchSoffidPeople(query: string): void {
+    const caibDialogActive =
+      (this.responsibleDialogVisible() && this.responsibleForm.controls.personalCaib.value) ||
+      (this.authorizedDialogVisible() && this.authorizedForm.controls.personalCaib.value);
+    if (!caibDialogActive) {
+      this.resetSoffidSearch();
+      return;
+    }
+    this.soffidSearchRequests.next(query.trim());
+  }
+
   protected openResponsibleDialog(): void {
     if (this.responsibilitiesComplete() && this.canAttemptResponsibleAdd()) {
       this.messageService.add({
@@ -397,13 +470,17 @@ export class ApplicationResponsibleSection implements OnInit {
     if (!this.canAttemptResponsibleAdd() || this.assignableVacantResponsibleTypes().length === 0) {
       return;
     }
-    this.prepareResponsibleDialog(null, 'create');
+    const vacantTypes = this.assignableVacantResponsibleTypes();
+    const fixedCaibType =
+      vacantTypes.length === 1 && vacantTypes[0].requiresPersonalCaib ? vacantTypes[0] : null;
+    this.prepareResponsibleDialog(null, 'create', fixedCaibType);
   }
 
   protected closeResponsibleDialog(): void {
     if (this.responsibleDialogSaving()) return;
     this.responsibleDialogVisible.set(false);
     this.selectedResponsible.set(null);
+    this.resetSoffidSearch();
   }
 
   protected submitResponsible(): void {
@@ -424,15 +501,15 @@ export class ApplicationResponsibleSection implements OnInit {
     const anchorId = this.anchorId();
     if (anchorId === null) return;
     const value = this.responsibleForm.getRawValue();
-    if (mode === 'create') {
-      const responsibleType = this.responsibleTypes().find(
-        (type) => type.id === value.responsibleTypeId,
-      );
-      if (!responsibleType || responsibleType.requiresPersonalCaib || value.personalCaib) return;
-    }
+    const personReference = this.personReference(
+      mode === 'edit' ? selected!.person.id : value.personId,
+      mode === 'edit' ? selected!.person.personalCaib : value.personalCaib,
+      value.soffidPerson,
+    );
+    if (!personReference) return;
     const input: ApplicationResponsibleInput = {
+      ...personReference,
       appResponsibleAuthorizedId: anchorId,
-      personId: mode === 'edit' ? selected!.person.id : value.personId!,
       responsibleTypeId: mode === 'edit' ? selected!.responsibleType.id : value.responsibleTypeId!,
       jobTitle:
         mode === 'edit'
@@ -443,7 +520,6 @@ export class ApplicationResponsibleSection implements OnInit {
             ? value.cargo.trim() || null
             : null,
       observation: value.observation.trim() || null,
-      personalCaib: mode === 'edit' ? selected!.person.personalCaib : value.personalCaib,
     };
     const request =
       mode === 'create'
@@ -460,6 +536,7 @@ export class ApplicationResponsibleSection implements OnInit {
         next: () => {
           this.responsibleDialogVisible.set(false);
           this.selectedResponsible.set(null);
+          this.resetSoffidSearch();
           this.showSuccess(
             mode === 'create' ? this.copy.responsibleCreated : this.copy.responsibleUpdated,
           );
@@ -482,6 +559,7 @@ export class ApplicationResponsibleSection implements OnInit {
     if (this.authorizedDialogSaving()) return;
     this.authorizedDialogVisible.set(false);
     this.selectedAuthorized.set(null);
+    this.resetSoffidSearch();
   }
 
   protected submitAuthorized(): void {
@@ -502,13 +580,17 @@ export class ApplicationResponsibleSection implements OnInit {
     const anchorId = this.anchorId();
     if (anchorId === null) return;
     const value = this.authorizedForm.getRawValue();
-    if (mode === 'create' && value.personalCaib) return;
+    const personReference = this.personReference(
+      mode === 'edit' ? selected!.person.id : value.personId,
+      mode === 'edit' ? selected!.person.personalCaib : value.personalCaib,
+      value.soffidPerson,
+    );
+    if (!personReference) return;
     const input: ApplicationAuthorizedInput = {
+      ...personReference,
       appResponsibleAuthorizedId: anchorId,
-      personId: mode === 'edit' ? selected!.person.id : value.personId!,
       authorizationTypeIds: value.authorizationTypeIds,
       observation: value.observation.trim() || null,
-      personalCaib: mode === 'edit' ? selected!.person.personalCaib : value.personalCaib,
     };
     const request =
       mode === 'create'
@@ -525,6 +607,7 @@ export class ApplicationResponsibleSection implements OnInit {
         next: () => {
           this.authorizedDialogVisible.set(false);
           this.selectedAuthorized.set(null);
+          this.resetSoffidSearch();
           this.showSuccess(
             mode === 'create' ? this.copy.authorizedCreated : this.copy.authorizedUpdated,
           );
@@ -654,13 +737,12 @@ export class ApplicationResponsibleSection implements OnInit {
     if (
       this.responsibleTypesLoadFailed() ||
       !this.canPreparePersonDialog(assignment?.person ?? null) ||
-      (mode === 'edit' && !this.canUseRowActions()) ||
-      (mode === 'create' && Boolean(fixedType?.requiresPersonalCaib))
+      (mode === 'edit' && !this.canUseRowActions())
     ) {
       return;
     }
     const person = assignment?.person ?? null;
-    const personalCaib = person?.personalCaib ?? false;
+    const personalCaib = person?.personalCaib ?? Boolean(fixedType?.requiresPersonalCaib);
     const companyId = person?.company?.id ?? null;
     this.selectedResponsible.set(assignment);
     this.responsibleDialogMode.set(mode);
@@ -671,16 +753,25 @@ export class ApplicationResponsibleSection implements OnInit {
         responsibleTypeId: fixedType?.id ?? assignment?.responsibleType.id ?? null,
         companyId,
         personId: person?.id ?? null,
+        soffidPerson: null,
         email: person?.email ?? '',
         cargo: assignment?.jobTitle ?? '',
         observation: assignment?.observation ?? '',
       },
       { emitEvent: false },
     );
+    setApplicationResponsiblePersonSource(this.responsibleForm, personalCaib);
     setApplicationResponsibleCompanyRequired(this.responsibleForm, !personalCaib);
     this.responsiblePersonalCaib.set(personalCaib);
     this.responsibleSelectedCompanyId.set(companyId);
-    this.configureResponsibleFormAvailability(mode, personalCaib, fixedType !== null);
+    this.responsiblePersonalCaibLocked.set(Boolean(fixedType?.requiresPersonalCaib));
+    this.resetSoffidSearch();
+    this.configureResponsibleFormAvailability(
+      mode,
+      personalCaib,
+      fixedType !== null,
+      Boolean(fixedType?.requiresPersonalCaib),
+    );
     this.responsibleForm.markAsPristine();
     this.responsibleForm.markAsUntouched();
     this.responsibleDialogVisible.set(true);
@@ -715,15 +806,18 @@ export class ApplicationResponsibleSection implements OnInit {
         personalCaib,
         companyId,
         personId: person?.id ?? null,
+        soffidPerson: null,
         email: person?.email ?? '',
         observation: assignment?.observation ?? '',
         authorizationTypeIds: assignment?.authorizationTypes.map(({ id }) => id) ?? [],
       },
       { emitEvent: false },
     );
+    setApplicationAuthorizedPersonSource(this.authorizedForm, personalCaib);
     setApplicationAuthorizedCompanyRequired(this.authorizedForm, !personalCaib);
     this.authorizedPersonalCaib.set(personalCaib);
     this.authorizedSelectedCompanyId.set(companyId);
+    this.resetSoffidSearch();
     this.configureAuthorizedFormAvailability(mode, personalCaib);
     this.authorizedForm.markAsPristine();
     this.authorizedForm.markAsUntouched();
@@ -738,26 +832,22 @@ export class ApplicationResponsibleSection implements OnInit {
   }
 
   private canPreparePersonDialog(selectedPerson: ResponsiblePerson | null = null): boolean {
-    if (!this.detailState.canEdit() || this.peopleLoadFailed()) return false;
-    const availablePeople = selectedPerson
-      ? this.uniquePeople([...this.people(), selectedPerson])
-      : this.people();
-    const canUseExternal =
-      !this.companyOptionsLoadFailed() &&
-      availablePeople.some((person) => !person.personalCaib && person.company !== null);
-    return canUseExternal || Boolean(selectedPerson?.personalCaib);
+    return this.detailState.canEdit() && (selectedPerson === null || selectedPerson.id > 0);
   }
 
   private onResponsiblePersonalCaibChanged(personalCaib: boolean): void {
     if (this.responsibleDialogMode() === 'edit') return;
     this.responsiblePersonalCaib.set(personalCaib);
     this.responsibleSelectedCompanyId.set(null);
+    setApplicationResponsiblePersonSource(this.responsibleForm, personalCaib);
     setApplicationResponsibleCompanyRequired(this.responsibleForm, !personalCaib);
     this.responsibleForm.controls.companyId.setValue(null, { emitEvent: false });
     this.responsibleForm.controls.personId.setValue(null, { emitEvent: false });
+    this.responsibleForm.controls.soffidPerson.setValue(null, { emitEvent: false });
     this.responsibleForm.controls.email.setValue('', { emitEvent: false });
     if (!personalCaib) this.responsibleForm.controls.cargo.setValue('', { emitEvent: false });
     this.updateResponsibleConditionalAvailability(personalCaib);
+    this.resetSoffidSearch();
   }
 
   private onResponsibleCompanyChanged(companyId: number | null): void {
@@ -776,15 +866,32 @@ export class ApplicationResponsibleSection implements OnInit {
     this.responsibleForm.controls.email.setValue(person?.email ?? '', { emitEvent: false });
   }
 
+  private onResponsibleTypeChanged(typeId: number | null): void {
+    if (this.responsibleDialogMode() === 'edit') return;
+    const requiresPersonalCaib = Boolean(
+      this.responsibleTypes().find((type) => type.id === typeId)?.requiresPersonalCaib,
+    );
+    this.responsiblePersonalCaibLocked.set(requiresPersonalCaib);
+    if (requiresPersonalCaib) {
+      this.responsibleForm.controls.personalCaib.setValue(true);
+      this.responsibleForm.controls.personalCaib.disable({ emitEvent: false });
+    } else {
+      this.responsibleForm.controls.personalCaib.enable({ emitEvent: false });
+    }
+  }
+
   private onAuthorizedPersonalCaibChanged(personalCaib: boolean): void {
     if (this.authorizedDialogMode() === 'edit') return;
     this.authorizedPersonalCaib.set(personalCaib);
     this.authorizedSelectedCompanyId.set(null);
+    setApplicationAuthorizedPersonSource(this.authorizedForm, personalCaib);
     setApplicationAuthorizedCompanyRequired(this.authorizedForm, !personalCaib);
     this.authorizedForm.controls.companyId.setValue(null, { emitEvent: false });
     this.authorizedForm.controls.personId.setValue(null, { emitEvent: false });
+    this.authorizedForm.controls.soffidPerson.setValue(null, { emitEvent: false });
     this.authorizedForm.controls.email.setValue('', { emitEvent: false });
     this.updateAuthorizedConditionalAvailability(personalCaib);
+    this.resetSoffidSearch();
   }
 
   private onAuthorizedCompanyChanged(companyId: number | null): void {
@@ -801,13 +908,72 @@ export class ApplicationResponsibleSection implements OnInit {
     this.authorizedForm.controls.email.setValue(person?.email ?? '', { emitEvent: false });
   }
 
+  private onSoffidPersonChanged(
+    person: SoffidPersonControlValue,
+    form: ApplicationResponsibleFormGroup | ApplicationAuthorizedFormGroup,
+  ): void {
+    if (person && typeof person !== 'string') {
+      form.controls.email.setValue(person.email, { emitEvent: false });
+      return;
+    }
+    form.controls.email.setValue('', { emitEvent: false });
+    this.resetSoffidSearch();
+  }
+
+  private loadSoffid(query: string) {
+    this.clearSoffidSearchState();
+    if (query.length < 3) return EMPTY;
+
+    this.soffidLoading.set(true);
+    return this.peopleService.searchSoffid(query).pipe(
+      map((page) => ({ page, error: false as const })),
+      catchError(() => of({ page: null, error: true as const })),
+      finalize(() => this.soffidLoading.set(false)),
+    );
+  }
+
+  private resetSoffidSearch(): void {
+    this.clearSoffidSearchState();
+    this.soffidSearchRequests.next('');
+  }
+
+  private clearSoffidSearchState(): void {
+    this.soffidOptions.set([]);
+    this.soffidLoading.set(false);
+    this.soffidSearched.set(false);
+    this.soffidSearchError.set(false);
+    this.soffidTotal.set(0);
+  }
+
+  private personReference(
+    personId: number | null,
+    personalCaib: boolean,
+    soffidPerson: SoffidPersonControlValue,
+  ): ApplicationPersonReferenceInput | null {
+    if (personId !== null) return { personId, personalCaib };
+    if (!personalCaib || !soffidPerson || typeof soffidPerson === 'string') return null;
+    const firstName = soffidPerson.firstName.trim();
+    const lastName = soffidPerson.lastName.trim();
+    const email = soffidPerson.email.trim();
+    if (!firstName || !lastName || !email) return null;
+    return {
+      personId: null,
+      personFirstName: firstName,
+      personLastName: lastName,
+      personEmail: email,
+      companyId: null,
+      personalCaib: true,
+    };
+  }
+
   private configureResponsibleFormAvailability(
     mode: AssignmentDialogMode,
     personalCaib: boolean,
     hasFixedType: boolean,
+    personalCaibLocked: boolean,
   ): void {
     const controls = this.responsibleForm.controls;
-    controls.email.disable({ emitEvent: false });
+    controls.email.enable({ emitEvent: false });
     controls.observation.enable({ emitEvent: false });
 
     if (mode === 'edit') {
@@ -815,9 +981,10 @@ export class ApplicationResponsibleSection implements OnInit {
       controls.responsibleTypeId.disable({ emitEvent: false });
       controls.companyId.disable({ emitEvent: false });
       controls.personId.disable({ emitEvent: false });
+      controls.soffidPerson.disable({ emitEvent: false });
     } else {
-      controls.personalCaib.disable({ emitEvent: false });
-      controls.personId.enable({ emitEvent: false });
+      if (personalCaibLocked) controls.personalCaib.disable({ emitEvent: false });
+      else controls.personalCaib.enable({ emitEvent: false });
       if (hasFixedType) controls.responsibleTypeId.disable({ emitEvent: false });
       else controls.responsibleTypeId.enable({ emitEvent: false });
       this.updateResponsibleConditionalAvailability(personalCaib);
@@ -829,10 +996,14 @@ export class ApplicationResponsibleSection implements OnInit {
 
   private updateResponsibleConditionalAvailability(personalCaib: boolean): void {
     const controls = this.responsibleForm.controls;
-    if (personalCaib || this.companyOptionsLoadFailed()) {
+    if (personalCaib) {
       controls.companyId.disable({ emitEvent: false });
+      controls.personId.disable({ emitEvent: false });
+      controls.soffidPerson.enable({ emitEvent: false });
     } else {
       controls.companyId.enable({ emitEvent: false });
+      controls.personId.enable({ emitEvent: false });
+      controls.soffidPerson.disable({ emitEvent: false });
     }
     if (personalCaib) controls.cargo.enable({ emitEvent: false });
     else controls.cargo.disable({ emitEvent: false });
@@ -843,7 +1014,7 @@ export class ApplicationResponsibleSection implements OnInit {
     personalCaib: boolean,
   ): void {
     const controls = this.authorizedForm.controls;
-    controls.email.disable({ emitEvent: false });
+    controls.email.enable({ emitEvent: false });
     controls.observation.enable({ emitEvent: false });
     controls.authorizationTypeIds.enable({ emitEvent: false });
 
@@ -851,19 +1022,23 @@ export class ApplicationResponsibleSection implements OnInit {
       controls.personalCaib.disable({ emitEvent: false });
       controls.companyId.disable({ emitEvent: false });
       controls.personId.disable({ emitEvent: false });
+      controls.soffidPerson.disable({ emitEvent: false });
     } else {
-      controls.personalCaib.disable({ emitEvent: false });
-      controls.personId.enable({ emitEvent: false });
+      controls.personalCaib.enable({ emitEvent: false });
       this.updateAuthorizedConditionalAvailability(personalCaib);
     }
   }
 
   private updateAuthorizedConditionalAvailability(personalCaib: boolean): void {
     const controls = this.authorizedForm.controls;
-    if (personalCaib || this.companyOptionsLoadFailed()) {
+    if (personalCaib) {
       controls.companyId.disable({ emitEvent: false });
+      controls.personId.disable({ emitEvent: false });
+      controls.soffidPerson.enable({ emitEvent: false });
     } else {
       controls.companyId.enable({ emitEvent: false });
+      controls.personId.enable({ emitEvent: false });
+      controls.soffidPerson.disable({ emitEvent: false });
     }
   }
 

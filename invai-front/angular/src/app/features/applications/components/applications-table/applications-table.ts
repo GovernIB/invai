@@ -1,3 +1,4 @@
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +7,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { TableComponentBase } from '@shared/classes/table-component-base';
-import { Application } from '../../applications.model';
+import { Application, ApplicationStatus } from '../../applications.model';
 import { Skeleton } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { APPLICATION_STATUS_LABELS } from '../../applications.constants';
@@ -18,7 +19,7 @@ export enum ApplicationTableAction {
 @Component({
   selector: 'app-applications-table',
   standalone: true,
-  imports: [Skeleton, TableModule],
+  imports: [StatusTagComponent, Skeleton, TableModule],
   templateUrl: './applications-table.html',
   styleUrl: './applications-table.scss',
   encapsulation: ViewEncapsulation.None,
@@ -28,6 +29,7 @@ export class ApplicationsTable extends TableComponentBase<Application> {
   first = input(0);
   isInitialLoading = input(false);
 
+  protected readonly activeStatus = ApplicationStatus.ACTIVE;
   protected readonly ApplicationTableAction = ApplicationTableAction;
   protected readonly applicationStatusLabels = APPLICATION_STATUS_LABELS;
   protected readonly skeletonRows = Array.from({ length: this.PAGINATOR_ROWS });
