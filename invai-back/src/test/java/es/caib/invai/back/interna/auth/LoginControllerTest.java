@@ -1,6 +1,5 @@
 package es.caib.invai.back.interna.auth;
 
-import es.caib.invai.back.interna.auth.LoginController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletResponse;

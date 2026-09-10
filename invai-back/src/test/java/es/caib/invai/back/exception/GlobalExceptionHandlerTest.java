@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -67,6 +68,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleValidationExceptions(validationException(bindingResult));
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("Validation Error", response.getBody().getError());
         assertEquals("Name is required: foo", response.getBody().getMessage());
     }
@@ -80,6 +82,7 @@ class GlobalExceptionHandlerTest {
                 handler.handleValidationExceptions(validationException(bindingResult));
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("Plain text error", response.getBody().getMessage());
         verify(messageSource, never()).getMessage(eq("Plain text error"), any(), any(Locale.class));
     }
@@ -96,6 +99,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ValidationErrorResponse> response =
                 handler.handleValidationExceptions(validationException(bindingResult));
 
+        assertNotNull(response.getBody());
         assertEquals("validation.application.default", response.getBody().getMessage());
         verify(messageSource, never()).getMessage(eq("validation.application.default"), any(), any(Locale.class));
     }
@@ -110,6 +114,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ValidationErrorResponse> response =
                 handler.handleBusinessExceptions(new BusinessRuleException(null));
 
+        assertNotNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Default business error", response.getBody().getMessage());
     }
@@ -122,6 +127,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ValidationErrorResponse> response =
                 handler.handleBusinessExceptions(new BusinessRuleException("{exception.application.notfound}"));
 
+        assertNotNull(response.getBody());
         assertEquals("Application not found", response.getBody().getMessage());
     }
 
@@ -136,48 +142,80 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ValidationErrorResponse> response =
                 handler.handleBusinessExceptions(new BusinessRuleException("plain.text.without.braces"));
 
+        assertNotNull(response.getBody());
         assertEquals("Resolved message", response.getBody().getMessage());
         verify(messageSource).getMessage(eq("plain.text.without.braces"), eq(null), any(Locale.class));
     }
 
     // --- handlePersistenceExceptions ---
+    // The raw database error (schema/query internals, e.g. Oracle ORA- messages) must never reach
+    // the client - only a generic, localized message. Whatever raw text was extracted from the
+    // exception is exercised here only to confirm it is NOT what gets returned.
 
     @Test
-    void handlePersistenceExceptions_sqlExceptionCause_extractsRawDatabaseMessage() {
+    void handlePersistenceExceptions_sqlExceptionCause_neverLeaksRawDatabaseMessage() {
+        when(messageSource.getMessage(eq("exception.persistence.generic"), eq(null), any(Locale.class)))
+                .thenReturn("A generic, safe error message");
         SQLException sqlException = new SQLException("ORA-00001: unique constraint violated");
         PersistenceException ex = new PersistenceException("wrapper", sqlException);
 
         ResponseEntity<ValidationErrorResponse> response = handler.handlePersistenceExceptions(ex);
 
+        assertNotNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("ORA-00001: unique constraint violated", response.getBody().getMessage());
+        assertEquals("A generic, safe error message", response.getBody().getMessage());
     }
 
     @Test
-    void handlePersistenceExceptions_oraMessageWithoutSqlExceptionType_isDetectedByContent() {
+    void handlePersistenceExceptions_oraMessageWithoutSqlExceptionType_neverLeaksRawDatabaseMessage() {
+        when(messageSource.getMessage(eq("exception.persistence.generic"), eq(null), any(Locale.class)))
+                .thenReturn("A generic, safe error message");
         RuntimeException wrapped = new RuntimeException("Something ORA-12345: failure occurred");
         PersistenceException ex = new PersistenceException("wrapper", wrapped);
 
         ResponseEntity<ValidationErrorResponse> response = handler.handlePersistenceExceptions(ex);
 
-        assertEquals("Something ORA-12345: failure occurred", response.getBody().getMessage());
+        assertNotNull(response.getBody());
+        assertEquals("A generic, safe error message", response.getBody().getMessage());
     }
 
     @Test
-    void handlePersistenceExceptions_noMatchingCause_usesExceptionMessage() {
+    void handlePersistenceExceptions_noMatchingCause_neverLeaksRawDatabaseMessage() {
+        when(messageSource.getMessage(eq("exception.persistence.generic"), eq(null), any(Locale.class)))
+                .thenReturn("A generic, safe error message");
         PersistenceException ex = new PersistenceException("top level persistence failure");
 
         ResponseEntity<ValidationErrorResponse> response = handler.handlePersistenceExceptions(ex);
 
-        assertEquals("top level persistence failure", response.getBody().getMessage());
+        assertNotNull(response.getBody());
+        assertEquals("A generic, safe error message", response.getBody().getMessage());
     }
 
     @Test
-    void handlePersistenceExceptions_noMessageAndNoCause_usesUnknownFallback() {
+    void handlePersistenceExceptions_noMessageAndNoCause_neverLeaksRawDatabaseMessage() {
+        when(messageSource.getMessage(eq("exception.persistence.generic"), eq(null), any(Locale.class)))
+                .thenReturn("A generic, safe error message");
         PersistenceException ex = new PersistenceException((String) null);
 
         ResponseEntity<ValidationErrorResponse> response = handler.handlePersistenceExceptions(ex);
 
-        assertEquals("Unknown persistence error", response.getBody().getMessage());
+        assertNotNull(response.getBody());
+        assertEquals("A generic, safe error message", response.getBody().getMessage());
+    }
+
+    // --- handleUnexpectedExceptions (catch-all) ---
+
+    @Test
+    void handleUnexpectedExceptions_anyException_returns500WithGenericMessageNeverLeakingDetail() {
+        when(messageSource.getMessage(eq("exception.unexpected.generic"), eq(null), any(Locale.class)))
+                .thenReturn("An unexpected error occurred");
+        NullPointerException ex = new NullPointerException("some internal field was null, leaking a stack detail");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleUnexpectedExceptions(ex);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Validation Error", response.getBody().getError());
+        assertEquals("An unexpected error occurred", response.getBody().getMessage());
     }
 }

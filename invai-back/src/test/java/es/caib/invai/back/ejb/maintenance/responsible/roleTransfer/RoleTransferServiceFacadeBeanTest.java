@@ -10,6 +10,9 @@ import es.caib.invai.back.persistence.repository.application.responsibleAuthoriz
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible.AppResponsibleRepository;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.type.AppAuthorizedTypeLinkRepository;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.authorizationType.AuthorizationTypeRepository;
+import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonRepository;
+import es.caib.invai.back.rest.soffid.SoffidClient;
+import es.caib.invai.back.rest.soffid.SoffidUser;
 import es.caib.invai.back.service.mapper.catalog.responsibleType.ResponsibleTypeMapper;
 import es.caib.invai.back.service.mapper.maintenance.responsible.authorizationType.AuthorizationTypeMapper;
 import es.caib.invai.back.service.model.application.core.Application;
@@ -36,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,10 +70,18 @@ class RoleTransferServiceFacadeBeanTest {
     @Mock
     private ResponsibleTypeMapper responsibleTypeMapper;
 
+    @Mock
+    private PersonRepository personRepository;
+
+    @Mock
+    private SoffidClient soffidClient;
+
     @InjectMocks
     private RoleTransferServiceFacadeBean roleTransferServiceFacadeBean;
 
     private AppResponsibleAuthorized anchor;
+
+    private static final String TARGET_EMAIL = "target@example.com";
 
     @BeforeEach
     void setUp() {
@@ -77,6 +89,17 @@ class RoleTransferServiceFacadeBeanTest {
         application.setId(30L);
         application.setName("Application One");
         anchor = AppResponsibleAuthorized.builder().id(40L).application(application).build();
+    }
+
+    /**
+     * Stubs {@code personRepository.findByEmail(TARGET_EMAIL)} to resolve to an existing local
+     * person with the given ID, so the transfer's target-resolution step succeeds without touching
+     * Soffid.
+     */
+    private void stubExistingTargetPerson() {
+        Person person = new Person();
+        person.setId(20L);
+        when(personRepository.findByEmail(TARGET_EMAIL)).thenReturn(person);
     }
 
     // ------------------------------------------------------------------
@@ -161,9 +184,10 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_responsibleItem_notFound_throwsBusinessRuleException() {
+        stubExistingTargetPerson();
         when(appResponsibleRepository.findById(99L)).thenReturn(null);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(99L, RoleAssignmentType.RESPONSIBLE)), 20L, false);
+                List.of(new RoleTransferItemDTO(99L, RoleAssignmentType.RESPONSIBLE)), TARGET_EMAIL, false);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> roleTransferServiceFacadeBean.transfer(inputDTO));
@@ -172,10 +196,11 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_responsibleItem_alreadyInactive_throwsBusinessRuleException() {
+        stubExistingTargetPerson();
         AppResponsible existing = AppResponsible.builder().id(1L).deletedAt(LocalDateTime.now()).build();
         when(appResponsibleRepository.findById(1L)).thenReturn(existing);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), 20L, false);
+                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), TARGET_EMAIL, false);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> roleTransferServiceFacadeBean.transfer(inputDTO));
@@ -184,12 +209,13 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_responsibleItem_reassign_updatesPersonIdOnly() {
+        stubExistingTargetPerson();
         Person person = new Person();
         person.setId(10L);
         AppResponsible existing = AppResponsible.builder().id(1L).person(person).build();
         when(appResponsibleRepository.findById(1L)).thenReturn(existing);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), 20L, false);
+                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), TARGET_EMAIL, false);
 
         roleTransferServiceFacadeBean.transfer(inputDTO);
 
@@ -211,6 +237,8 @@ class RoleTransferServiceFacadeBeanTest {
         assertNotNull(existing.getDeletedBy());
         verify(appResponsibleRepository).delete(existing);
         verify(appResponsibleRepository, never()).update(any(), any());
+        verify(personRepository, never()).findByEmail(any());
+        verify(soffidClient, never()).findByEmail(any());
     }
 
     // ------------------------------------------------------------------
@@ -219,9 +247,10 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_authorizedItem_notFound_throwsBusinessRuleException() {
+        stubExistingTargetPerson();
         when(appAuthorizedRepository.findById(99L)).thenReturn(null);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(99L, RoleAssignmentType.AUTHORIZED)), 20L, false);
+                List.of(new RoleTransferItemDTO(99L, RoleAssignmentType.AUTHORIZED)), TARGET_EMAIL, false);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> roleTransferServiceFacadeBean.transfer(inputDTO));
@@ -230,10 +259,11 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_authorizedItem_alreadyInactive_throwsBusinessRuleException() {
+        stubExistingTargetPerson();
         AppAuthorized existing = AppAuthorized.builder().id(2L).deletedAt(LocalDateTime.now()).build();
         when(appAuthorizedRepository.findById(2L)).thenReturn(existing);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)), 20L, false);
+                List.of(new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)), TARGET_EMAIL, false);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> roleTransferServiceFacadeBean.transfer(inputDTO));
@@ -242,11 +272,12 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_authorizedItem_targetAlreadyHoldsAnchor_throwsBusinessRuleException() {
+        stubExistingTargetPerson();
         AppAuthorized existing = AppAuthorized.builder().id(2L).appResponsibleAuthorized(anchor).build();
         when(appAuthorizedRepository.findById(2L)).thenReturn(existing);
         when(appAuthorizedRepository.existsByAppResponsibleAuthorizedAndPersonAndIdNot(40L, 20L, 2L)).thenReturn(true);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)), 20L, false);
+                List.of(new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)), TARGET_EMAIL, false);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> roleTransferServiceFacadeBean.transfer(inputDTO));
@@ -256,13 +287,14 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_authorizedItem_reassign_updatesPersonIdOnly() {
+        stubExistingTargetPerson();
         Person person = new Person();
         person.setId(11L);
         AppAuthorized existing = AppAuthorized.builder().id(2L).appResponsibleAuthorized(anchor).person(person).build();
         when(appAuthorizedRepository.findById(2L)).thenReturn(existing);
         when(appAuthorizedRepository.existsByAppResponsibleAuthorizedAndPersonAndIdNot(40L, 20L, 2L)).thenReturn(false);
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)), 20L, false);
+                List.of(new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)), TARGET_EMAIL, false);
 
         roleTransferServiceFacadeBean.transfer(inputDTO);
 
@@ -292,6 +324,7 @@ class RoleTransferServiceFacadeBeanTest {
 
     @Test
     void transfer_mixedBatch_processesEachItemByItsOwnType() {
+        stubExistingTargetPerson();
         Person responsiblePerson = new Person();
         responsiblePerson.setId(10L);
         AppResponsible responsible = AppResponsible.builder().id(1L).person(responsiblePerson).build();
@@ -306,7 +339,7 @@ class RoleTransferServiceFacadeBeanTest {
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
                 List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE),
                         new RoleTransferItemDTO(2L, RoleAssignmentType.AUTHORIZED)),
-                20L, false);
+                TARGET_EMAIL, false);
 
         roleTransferServiceFacadeBean.transfer(inputDTO);
 
@@ -314,5 +347,55 @@ class RoleTransferServiceFacadeBeanTest {
         assertEquals(20L, authorized.getPerson().getId());
         verify(appResponsibleRepository).update(responsible, 1L);
         verify(appAuthorizedRepository).update(authorized, 2L);
+    }
+
+    // ------------------------------------------------------------------
+    // transfer - target person resolution by e-mail
+    // ------------------------------------------------------------------
+
+    @Test
+    void transfer_targetNotFoundLocallyButFoundInSoffid_createsLocalPersonAndTransfers() {
+        when(personRepository.findByEmail(TARGET_EMAIL)).thenReturn(null);
+        SoffidUser soffidUser = new SoffidUser();
+        soffidUser.setFirstName("Joan");
+        soffidUser.setLastName("Fuster");
+        soffidUser.setEmailAddress(TARGET_EMAIL);
+        soffidUser.setActive(true);
+        when(soffidClient.findByEmail(TARGET_EMAIL)).thenReturn(soffidUser);
+        Person created = new Person();
+        created.setId(50L);
+        when(personRepository.create(any(Person.class))).thenReturn(created);
+
+        Person existingPerson = new Person();
+        existingPerson.setId(10L);
+        AppResponsible existing = AppResponsible.builder().id(1L).person(existingPerson).build();
+        when(appResponsibleRepository.findById(1L)).thenReturn(existing);
+
+        RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
+                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), TARGET_EMAIL, false);
+
+        roleTransferServiceFacadeBean.transfer(inputDTO);
+
+        assertEquals(50L, existing.getPerson().getId());
+        verify(personRepository).create(argThat(person ->
+                "Joan".equals(person.getFirstName())
+                        && "Fuster".equals(person.getLastName())
+                        && TARGET_EMAIL.equals(person.getEmail())
+                        && person.isPersonalCaib()));
+    }
+
+    @Test
+    void transfer_targetNotFoundLocallyNorInSoffid_throwsBusinessRuleException() {
+        when(personRepository.findByEmail(TARGET_EMAIL)).thenReturn(null);
+        when(soffidClient.findByEmail(TARGET_EMAIL)).thenReturn(null);
+
+        RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
+                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), TARGET_EMAIL, false);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> roleTransferServiceFacadeBean.transfer(inputDTO));
+        assertEquals(Constants.ERR_ROLETRANSFER_TARGET_NOT_FOUND, ex.getMessage());
+        verify(appResponsibleRepository, never()).findById(any());
+        verify(personRepository, never()).create(any());
     }
 }

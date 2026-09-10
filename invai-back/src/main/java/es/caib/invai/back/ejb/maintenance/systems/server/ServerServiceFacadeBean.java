@@ -48,7 +48,7 @@ public class ServerServiceFacadeBean implements ServerService {
     @Override
     @Transactional(readOnly = true)
     public ServerOutputDTO getById(Long id) {
-        log.info("Facade: Fetching server by ID: {}", id);
+        log.debug("Facade: Fetching server by ID: {}", id);
         Server server = serverRepository.findById(id);
 
         if (server == null) {
@@ -68,7 +68,7 @@ public class ServerServiceFacadeBean implements ServerService {
     @Override
     @Transactional(readOnly = true)
     public Page<ServerOutputDTO> getAll(ServerCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching servers via pagination boundaries");
+        log.debug("Facade: Fetching servers via pagination boundaries");
         Page<Server> domainPage = serverRepository.findAll(filter, pageable);
         return domainPage.map(serverMapper::toResponse);
     }

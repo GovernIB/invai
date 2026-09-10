@@ -48,7 +48,7 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
     @Override
     @Transactional(readOnly = true)
     public EnvironmentOutputDTO getById(Long id) {
-        log.info("Facade: Fetching environment by ID: {}", id);
+        log.debug("Facade: Fetching environment by ID: {}", id);
         Environment environment = environmentRepository.findById(id);
 
         if (environment == null) {
@@ -68,7 +68,7 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
     @Override
     @Transactional(readOnly = true)
     public Page<EnvironmentOutputDTO> getAll(EnvironmentCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching environments via pagination boundaries");
+        log.debug("Facade: Fetching environments via pagination boundaries");
         Page<Environment> domainPage = environmentRepository.findAll(filter, pageable);
         return domainPage.map(environmentMapper::toResponse);
     }
@@ -116,7 +116,7 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
         Utils.sanitize(inputDTO);
 
         if (environmentRepository.existsByCodeAndIdNot(inputDTO.getCode(), id)) {
-            throw new BusinessRuleException(Constants.ERR_DATABASE_DUPLICATED);
+            throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_DUPLICATED);
         }
 
         environmentMapper.updateModelFromInput(inputDTO, existing);

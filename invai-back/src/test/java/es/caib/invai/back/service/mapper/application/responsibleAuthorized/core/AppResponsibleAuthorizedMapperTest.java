@@ -1,6 +1,5 @@
 package es.caib.invai.back.service.mapper.application.responsibleAuthorized.core;
 
-import es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
@@ -8,7 +7,6 @@ import es.caib.invai.back.persistence.model.maintenance.general.commission.Commi
 import es.caib.invai.back.persistence.model.maintenance.general.field.FieldEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.systemType.SystemTypeEntity;
 import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
-import es.caib.invai.back.service.model.maintenance.admUnit.AdmUnit;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
 import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.maintenance.general.category.Category;
@@ -27,17 +25,22 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 
 /**
  * Unit tests for the generated {@link AppResponsibleAuthorizedMapperImpl}, exercising every
  * conversion direction declared on {@link AppResponsibleAuthorizedMapper}.
  *
- * <p>{@link AppResponsibleAuthorizedMapper} declares {@code uses = {StatusMapper.class}}. A real
- * {@link StatusMapperImpl} is wired into the generated {@code @Autowired} field via
+ * <p>{@link AppResponsibleAuthorizedMapper} declares {@code uses = {StatusMapper.class, ApplicationMapper.class}}.
+ * A fully wired {@link ApplicationMapperImpl} (with its own sub-mappers, including
+ * {@link StatusMapperImpl}) is wired into the generated {@code @Autowired} field via
  * {@link ReflectionTestUtils} so the deep {@code AppResponsibleAuthorized -> Application -> ...}
- * object graph (mapped through private helper methods declared directly on the generated
- * {@code AppResponsibleAuthorizedMapperImpl}, not through {@code ApplicationMapper}) is exercised
- * with real mapping logic end to end.</p>
+ * object graph (now delegated to {@code ApplicationMapper} for the nested {@code toEntity}
+ * conversion) is exercised with real mapping logic end to end.</p>
  */
 class AppResponsibleAuthorizedMapperTest {
 
@@ -45,8 +48,15 @@ class AppResponsibleAuthorizedMapperTest {
 
     @BeforeEach
     void setUp() {
+        ApplicationMapperImpl applicationMapperImpl = new ApplicationMapperImpl();
+        ReflectionTestUtils.setField(applicationMapperImpl, "categoryMapper", new CategoryMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "systemTypeMapper", new SystemTypeMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "fieldMapper", new FieldMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "commissionMapper", new CommissionMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "statusMapper", new StatusMapperImpl());
+
         AppResponsibleAuthorizedMapperImpl impl = new AppResponsibleAuthorizedMapperImpl();
-        ReflectionTestUtils.setField(impl, "statusMapper", new StatusMapperImpl());
+        ReflectionTestUtils.setField(impl, "applicationMapper", applicationMapperImpl);
         mapper = impl;
     }
 
@@ -67,12 +77,6 @@ class AppResponsibleAuthorizedMapperTest {
         fieldEntity.setId(102L);
         fieldEntity.setName("Field name");
         fieldEntity.setNameEs("Nombre ambito");
-
-        AdmUnitEntity admUnitEntity = new AdmUnitEntity();
-        admUnitEntity.setId(103L);
-        admUnitEntity.setCode("ADM-1");
-        admUnitEntity.setName("Adm unit name");
-        admUnitEntity.setNameEs("Nombre unidad administrativa");
 
         CommissionEntity commissionEntity = new CommissionEntity();
         commissionEntity.setId(104L);
@@ -97,7 +101,7 @@ class AppResponsibleAuthorizedMapperTest {
         applicationEntity.setCategory(categoryEntity);
         applicationEntity.setSystemType(systemTypeEntity);
         applicationEntity.setField(fieldEntity);
-        applicationEntity.setAdmUnit(admUnitEntity);
+        applicationEntity.setAdmUnitCode("ADM-1");
         applicationEntity.setCsCommission(commissionEntity);
         applicationEntity.setStatus(statusEntity);
         applicationEntity.setCreatedAt(LocalDateTime.of(2021, 1, 1, 8, 0));
@@ -122,9 +126,6 @@ class AppResponsibleAuthorizedMapperTest {
 
         Field field = new Field(102L, "Field name", "Nombre ambito", null, null, null, null, null, null);
 
-        AdmUnit admUnit = new AdmUnit(103L, "ADM-1", "Adm unit name", "Nombre unidad administrativa",
-                null, null, null, null, null, null);
-
         Commission commission = new Commission(104L, "Commission name", "Nombre comision", "EXP-2024-01",
                 CommissionType.TECNICA, LocalDate.of(2024, 4, 1), null, null, null, null, null, null);
 
@@ -138,7 +139,7 @@ class AppResponsibleAuthorizedMapperTest {
         application.setCategory(category);
         application.setSystemType(systemType);
         application.setField(field);
-        application.setAdmUnit(admUnit);
+        application.setAdmUnitCode("ADM-1");
         application.setCsCommission(commission);
         application.setStatus(StatusEnum.INACTIVE);
         application.setCreatedAt(LocalDateTime.of(2021, 1, 1, 8, 0));
@@ -194,8 +195,7 @@ class AppResponsibleAuthorizedMapperTest {
         assertEquals(102L, application.getField().getId());
         assertEquals("Field name", application.getField().getName());
 
-        assertEquals(103L, application.getAdmUnit().getId());
-        assertEquals("ADM-1", application.getAdmUnit().getCode());
+        assertEquals("ADM-1", application.getAdmUnitCode());
 
         assertEquals(104L, application.getCsCommission().getId());
         assertEquals("EXP-2024-01", application.getCsCommission().getExpedientNumber());
@@ -248,7 +248,7 @@ class AppResponsibleAuthorizedMapperTest {
         assertEquals("Category name", applicationEntity.getCategory().getName());
         assertEquals(101L, applicationEntity.getSystemType().getId());
         assertEquals(102L, applicationEntity.getField().getId());
-        assertEquals(103L, applicationEntity.getAdmUnit().getId());
+        assertEquals("ADM-1", applicationEntity.getAdmUnitCode());
         assertEquals(104L, applicationEntity.getCsCommission().getId());
         assertEquals(CommissionType.TECNICA, applicationEntity.getCsCommission().getCommissionType());
     }

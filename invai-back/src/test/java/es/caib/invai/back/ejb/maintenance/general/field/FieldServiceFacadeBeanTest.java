@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.general.field;
 
-import es.caib.invai.back.ejb.maintenance.general.field.FieldServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldInputDTO;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
@@ -23,9 +22,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -79,7 +76,7 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.getById(99L));
-        assertEquals(Constants.FIELD_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -119,7 +116,17 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.existsByNameAndDeletedAtIsNull("Cybersecurity")).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.create(inputDTO));
-        assertEquals(Constants.FIELD_DUPLICATED, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_DUPLICATED, ex.getMessage());
+        verify(fieldRepository, never()).create(any());
+    }
+
+    @Test
+    void create_duplicateNameEs_throwsBusinessRuleException() {
+        FieldInputDTO inputDTO = new FieldInputDTO("New Field", "Ciberseguridad");
+        when(fieldRepository.existsByNameEsAndDeletedAtIsNull("Ciberseguridad")).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.create(inputDTO));
+        assertEquals(Constants.ERR_FIELD_DUPLICATED_ES, ex.getMessage());
         verify(fieldRepository, never()).create(any());
     }
 
@@ -129,7 +136,7 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.update(99L, inputDTO));
-        assertEquals(Constants.FIELD_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -139,7 +146,18 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.existsByNameAndIdNotAndDeletedAtIsNull("Taken", 1L)).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.update(1L, inputDTO));
-        assertEquals(Constants.FIELD_DUPLICATED, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_DUPLICATED, ex.getMessage());
+        verify(fieldMapper, never()).updateModelFromInput(any(), any());
+    }
+
+    @Test
+    void update_duplicateNameEs_throwsBusinessRuleException() {
+        FieldInputDTO inputDTO = new FieldInputDTO("Taken", "Ocupado");
+        when(fieldRepository.findById(1L)).thenReturn(activeField);
+        when(fieldRepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Ocupado", 1L)).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.update(1L, inputDTO));
+        assertEquals(Constants.ERR_FIELD_DUPLICATED_ES, ex.getMessage());
         verify(fieldMapper, never()).updateModelFromInput(any(), any());
     }
 
@@ -164,7 +182,7 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.delete(99L));
-        assertEquals(Constants.FIELD_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -173,7 +191,7 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.findById(1L)).thenReturn(activeField);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.delete(1L));
-        assertEquals(Constants.FIELD_NOT_ACTIVE, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_NOT_ACTIVE, ex.getMessage());
     }
 
     @Test
@@ -182,7 +200,7 @@ class FieldServiceFacadeBeanTest {
         when(applicationRepository.existsByFieldId(1L)).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.delete(1L));
-        assertEquals(Constants.FIELD_DELETE_HAS_DEPENDENCIES, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_DELETE_HAS_DEPENDENCIES, ex.getMessage());
         verify(fieldRepository, never()).delete(any());
     }
 
@@ -193,7 +211,7 @@ class FieldServiceFacadeBeanTest {
 
         fieldServiceFacadeBean.delete(1L);
 
-        assertEquals(activeField.getDeletedAt() != null, true);
+        assertNotNull(activeField.getDeletedAt());
         verify(fieldRepository, times(1)).delete(activeField);
     }
 
@@ -202,7 +220,7 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.reactivate(99L));
-        assertEquals(Constants.FIELD_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -210,7 +228,7 @@ class FieldServiceFacadeBeanTest {
         when(fieldRepository.findById(1L)).thenReturn(activeField);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> fieldServiceFacadeBean.reactivate(1L));
-        assertEquals(Constants.FIELD_ACTIVE, ex.getMessage());
+        assertEquals(Constants.ERR_FIELD_ACTIVE, ex.getMessage());
     }
 
     @Test

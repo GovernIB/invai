@@ -48,4 +48,22 @@ public interface CommissionJPARepository extends JpaRepository<CommissionEntity,
      * @return {@code true} if a conflicting active commission exists, {@code false} otherwise
      */
     boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Long id);
+
+    /**
+     * Determines whether an active Commission entry matching a specific Spanish name already exists.
+     *
+     * @param nameEs target Spanish name value to verify
+     * @return {@code true} if a matching active record is found, {@code false} otherwise
+     */
+    boolean existsByNameEsAndDeletedAtIsNull(String nameEs);
+
+    /**
+     * Determines whether an alternative active Commission matching a targeted Spanish name exists,
+     * excluding a designated record reference ID. Typically utilized during update uniqueness checks.
+     *
+     * @param nameEs target Spanish name value to verify
+     * @param id     the persistent primary reference identity to exclude from evaluation scopes
+     * @return {@code true} if a conflicting record matches the given criteria, {@code false} otherwise
+     */
+    boolean existsByNameEsAndIdNotAndDeletedAtIsNull(String nameEs, Long id);
 }

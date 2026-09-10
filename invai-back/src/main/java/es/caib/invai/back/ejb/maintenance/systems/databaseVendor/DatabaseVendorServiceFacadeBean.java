@@ -48,7 +48,7 @@ public class DatabaseVendorServiceFacadeBean implements DatabaseVendorService {
     @Override
     @Transactional(readOnly = true)
     public DatabaseVendorOutputDTO getById(Long id) {
-        log.info("Facade: Fetching database vendor by ID: {}", id);
+        log.debug("Facade: Fetching database vendor by ID: {}", id);
         DatabaseVendor databaseVendor = databaseVendorRepository.findById(id);
 
         if (databaseVendor == null) {
@@ -68,7 +68,7 @@ public class DatabaseVendorServiceFacadeBean implements DatabaseVendorService {
     @Override
     @Transactional(readOnly = true)
     public Page<DatabaseVendorOutputDTO> getAll(DatabaseVendorCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching database vendors via pagination boundaries");
+        log.debug("Facade: Fetching database vendors via pagination boundaries");
         Page<DatabaseVendor> domainPage = databaseVendorRepository.findAll(filter, pageable);
         return domainPage.map(databaseVendorMapper::toResponse);
     }

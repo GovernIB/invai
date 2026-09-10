@@ -2,23 +2,24 @@ package es.caib.invai.back.service.mapper.application.core;
 
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
-import es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.commission.CommissionEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.field.FieldEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.systemType.SystemTypeEntity;
 import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
-import es.caib.invai.back.service.model.maintenance.admUnit.AdmUnit;
+import es.caib.invai.back.service.model.application.accessibility.AppAccessibility;
 import es.caib.invai.back.service.model.application.system_database.core.AppInformationSystemDb;
 import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.maintenance.general.category.Category;
 import es.caib.invai.back.service.model.maintenance.general.commission.Commission;
 import es.caib.invai.back.service.model.application.development.core.AppDevelopment;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
+import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.maintenance.general.field.Field;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.general.systemType.SystemType;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -26,9 +27,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import es.caib.invai.back.service.mapper.maintenance.admUnit.AdmUnitMapperImpl;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
@@ -50,7 +52,6 @@ class ApplicationMapperTest {
         ReflectionTestUtils.setField(impl, "categoryMapper", new CategoryMapperImpl());
         ReflectionTestUtils.setField(impl, "systemTypeMapper", new SystemTypeMapperImpl());
         ReflectionTestUtils.setField(impl, "fieldMapper", new FieldMapperImpl());
-        ReflectionTestUtils.setField(impl, "admUnitMapper", new AdmUnitMapperImpl());
         ReflectionTestUtils.setField(impl, "commissionMapper", new CommissionMapperImpl());
         ReflectionTestUtils.setField(impl, "statusMapper", new StatusMapperImpl());
         mapper = impl;
@@ -69,11 +70,6 @@ class ApplicationMapperTest {
         field.setId(3L);
         field.setName("Field");
 
-        AdmUnitEntity admUnit = new AdmUnitEntity();
-        admUnit.setId(4L);
-        admUnit.setCode("AU1");
-        admUnit.setName("AdmUnit");
-
         CommissionEntity commission = new CommissionEntity();
         commission.setId(5L);
         commission.setName("Commission");
@@ -91,7 +87,7 @@ class ApplicationMapperTest {
         entity.setCategory(category);
         entity.setSystemType(systemType);
         entity.setField(field);
-        entity.setAdmUnit(admUnit);
+        entity.setAdmUnitCode("AU1");
         entity.setCsCommission(commission);
         entity.setStatus(status);
         entity.setCreatedAt(LocalDateTime.of(2026, 1, 1, 0, 0));
@@ -117,8 +113,7 @@ class ApplicationMapperTest {
         assertEquals(2L, model.getSystemType().getId());
         assertNotNull(model.getField());
         assertEquals(3L, model.getField().getId());
-        assertNotNull(model.getAdmUnit());
-        assertEquals(4L, model.getAdmUnit().getId());
+        assertEquals("AU1", model.getAdmUnitCode());
         assertNotNull(model.getCsCommission());
         assertEquals(5L, model.getCsCommission().getId());
         assertEquals("tester", model.getCreatedBy());
@@ -133,12 +128,24 @@ class ApplicationMapperTest {
     void toEntity_mapsEveryModelFieldAndResolvesStatus() {
         Category category = new Category();
         category.setId(10L);
+        Application model = getApplication(category);
+
+        ApplicationEntity entity = mapper.toEntity(model);
+
+        assertEquals(200L, entity.getId());
+        assertEquals("APP02", entity.getCode());
+        assertEquals("AP2", entity.getPrefix());
+        assertNotNull(entity.getCategory());
+        assertEquals(10L, entity.getCategory().getId());
+        assertNotNull(entity.getStatus());
+        assertEquals(StatusEnum.INACTIVE.getId(), entity.getStatus().getId());
+    }
+
+    private static @NonNull Application getApplication(Category category) {
         SystemType systemType = new SystemType();
         systemType.setId(20L);
         Field field = new Field();
         field.setId(30L);
-        AdmUnit admUnit = new AdmUnit();
-        admUnit.setId(40L);
         Commission commission = new Commission();
         commission.setId(50L);
 
@@ -150,19 +157,10 @@ class ApplicationMapperTest {
         model.setCategory(category);
         model.setSystemType(systemType);
         model.setField(field);
-        model.setAdmUnit(admUnit);
+        model.setAdmUnitCode("AU2");
         model.setCsCommission(commission);
         model.setStatus(StatusEnum.INACTIVE);
-
-        ApplicationEntity entity = mapper.toEntity(model);
-
-        assertEquals(200L, entity.getId());
-        assertEquals("APP02", entity.getCode());
-        assertEquals("AP2", entity.getPrefix());
-        assertNotNull(entity.getCategory());
-        assertEquals(10L, entity.getCategory().getId());
-        assertNotNull(entity.getStatus());
-        assertEquals(StatusEnum.INACTIVE.getId(), entity.getStatus().getId());
+        return model;
     }
 
     @Test
@@ -188,7 +186,13 @@ class ApplicationMapperTest {
         AppResponsibleAuthorized appResponsibleAuthorized = new AppResponsibleAuthorized();
         appResponsibleAuthorized.setId(900L);
 
-        ApplicationOutputDTO response = mapper.toResponse(application, infoDb, development, appResponsibleAuthorized);
+        AppSecurity appSecurity = new AppSecurity();
+        appSecurity.setId(1100L);
+
+        AppAccessibility appAccessibility = new AppAccessibility();
+        appAccessibility.setId(1300L);
+
+        ApplicationOutputDTO response = mapper.toResponse(application, infoDb, development, appResponsibleAuthorized, appSecurity, appAccessibility);
 
         assertEquals(1L, response.getId());
         assertEquals("Application One", response.getName());
@@ -201,6 +205,37 @@ class ApplicationMapperTest {
         assertEquals(500L, response.getAppInformationSystemDbId());
         assertEquals(700L, response.getAppDevelopmentId());
         assertEquals(900L, response.getAppResponsibleAuthorizedId());
+        assertEquals(1100L, response.getAppSecurityId());
+        assertEquals(1300L, response.getAppAccessibilityId());
+    }
+
+    @Test
+    void toResponse_neverPopulatesAdmUnit_becauseItIsResolvedByTheFacadeNotMapped() {
+        Application application = new Application();
+        application.setId(1L);
+        application.setStatus(StatusEnum.ACTIVE);
+        application.setAdmUnitCode("AU1");
+
+        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null);
+
+        assertNull(response.getAdmUnit());
+    }
+
+    @Test
+    void toResponse_withCompletenessFlags_mapsEachBooleanToItsOwnField() {
+        Application application = new Application();
+        application.setId(1L);
+        application.setStatus(StatusEnum.ACTIVE);
+
+        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null, true, false, true, true, false, true, false);
+
+        assertTrue(response.getMissingDevelopmentFields());
+        assertFalse(response.getMissingResponsibleTypes());
+        assertTrue(response.getMissingAuthorized());
+        assertTrue(response.getMissingAccessibilityFields());
+        assertFalse(response.getMissingSecurityData());
+        assertTrue(response.getMissingSystems());
+        assertFalse(response.getMissingDatabases());
     }
 
     @Test
@@ -209,17 +244,19 @@ class ApplicationMapperTest {
         application.setId(1L);
         application.setStatus(StatusEnum.ACTIVE);
 
-        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null);
+        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null);
 
         assertEquals(1L, response.getId());
         assertNull(response.getAppInformationSystemDbId());
         assertNull(response.getAppDevelopmentId());
         assertNull(response.getAppResponsibleAuthorizedId());
+        assertNull(response.getAppSecurityId());
+        assertNull(response.getAppAccessibilityId());
     }
 
     @Test
     void toResponse_allSourcesNull_returnsNull() {
-        assertNull(mapper.toResponse(null, null, null, null));
+        assertNull(mapper.toResponse(null, null, null, null, null, null));
     }
 
     private ApplicationInputDTO buildInputDTO() {
@@ -230,7 +267,7 @@ class ApplicationMapperTest {
         inputDTO.setCategoryId(1L);
         inputDTO.setSystemTypeId(2L);
         inputDTO.setFieldId(3L);
-        inputDTO.setAdmUnitId(4L);
+        inputDTO.setAdmUnitCode("AU1");
         inputDTO.setCommissionId(5L);
         inputDTO.setDescription("desc");
         inputDTO.setStatusId(StatusEnum.ACTIVE.getId());
@@ -254,8 +291,7 @@ class ApplicationMapperTest {
         assertEquals(2L, model.getSystemType().getId());
         assertNotNull(model.getField());
         assertEquals(3L, model.getField().getId());
-        assertNotNull(model.getAdmUnit());
-        assertEquals(4L, model.getAdmUnit().getId());
+        assertEquals("AU1", model.getAdmUnitCode());
         assertNotNull(model.getCsCommission());
         assertEquals(5L, model.getCsCommission().getId());
         assertNull(model.getId());
@@ -287,7 +323,7 @@ class ApplicationMapperTest {
         existing.setCategory(new Category());
         existing.setSystemType(new SystemType());
         existing.setField(new Field());
-        existing.setAdmUnit(new AdmUnit());
+        existing.setAdmUnitCode("OLD-AU");
         existing.setCsCommission(new Commission());
 
         ApplicationInputDTO inputDTO = buildInputDTO();
@@ -300,7 +336,7 @@ class ApplicationMapperTest {
         assertEquals(1L, existing.getCategory().getId());
         assertEquals(2L, existing.getSystemType().getId());
         assertEquals(3L, existing.getField().getId());
-        assertEquals(4L, existing.getAdmUnit().getId());
+        assertEquals("AU1", existing.getAdmUnitCode());
         assertEquals(5L, existing.getCsCommission().getId());
         assertEquals(StatusEnum.ACTIVE, existing.getStatus());
     }

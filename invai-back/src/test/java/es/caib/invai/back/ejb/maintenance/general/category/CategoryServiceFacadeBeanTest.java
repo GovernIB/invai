@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.general.category;
 
-import es.caib.invai.back.ejb.maintenance.general.category.CategoryServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.general.category.DTO.CategoryInputDTO;
 import es.caib.invai.back.interna.maintenance.general.category.DTO.CategoryOutputDTO;
@@ -23,9 +22,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -124,6 +121,16 @@ class CategoryServiceFacadeBeanTest {
     }
 
     @Test
+    void create_duplicateNameEs_throwsBusinessRuleException() {
+        CategoryInputDTO inputDTO = new CategoryInputDTO("New Category", "Infraestructura");
+        when(categoryRepository.existsByNameEsAndDeletedAtIsNull("Infraestructura")).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> categoryServiceFacadeBean.create(inputDTO));
+        assertEquals(Constants.ERR_CATEGORY_DUPLICATED_ES, ex.getMessage());
+        verify(categoryRepository, never()).create(any());
+    }
+
+    @Test
     void update_notFound_throwsBusinessRuleException() {
         CategoryInputDTO inputDTO = new CategoryInputDTO("X", "Y");
         when(categoryRepository.findById(99L)).thenReturn(null);
@@ -140,6 +147,17 @@ class CategoryServiceFacadeBeanTest {
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> categoryServiceFacadeBean.update(1L, inputDTO));
         assertEquals(Constants.ERR_CATEGORY_DUPLICATED, ex.getMessage());
+        verify(categoryMapper, never()).updateModelFromInput(any(), any());
+    }
+
+    @Test
+    void update_duplicateNameEs_throwsBusinessRuleException() {
+        CategoryInputDTO inputDTO = new CategoryInputDTO("Taken", "Ocupado");
+        when(categoryRepository.findById(1L)).thenReturn(activeCategory);
+        when(categoryRepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Ocupado", 1L)).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> categoryServiceFacadeBean.update(1L, inputDTO));
+        assertEquals(Constants.ERR_CATEGORY_DUPLICATED_ES, ex.getMessage());
         verify(categoryMapper, never()).updateModelFromInput(any(), any());
     }
 
@@ -193,7 +211,7 @@ class CategoryServiceFacadeBeanTest {
 
         categoryServiceFacadeBean.delete(1L);
 
-        assertEquals(activeCategory.getDeletedAt() != null, true);
+        assertNotNull(activeCategory.getDeletedAt());
         verify(categoryRepository, times(1)).delete(activeCategory);
     }
 

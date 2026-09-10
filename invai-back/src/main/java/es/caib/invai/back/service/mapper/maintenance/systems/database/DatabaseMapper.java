@@ -53,6 +53,7 @@ public interface DatabaseMapper {
      * @param inputDTO inbound client creation payload containing design data
      * @return a decoupled domain state instance ready for orchestration processing pipelines
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "server.id", source = "serverId")
     @Mapping(target = "databaseType.id", source = "databaseTypeId")
     @Mapping(target = "createdAt", ignore = true)
@@ -70,6 +71,7 @@ public interface DatabaseMapper {
      * @param inputDTO delta parameter updates tracking values payload DTO
      * @param model    the active operational business graph container targeted for modifier updates
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "server.id", source = "serverId")
     @Mapping(target = "databaseType.id", source = "databaseTypeId")
     @Mapping(target = "createdAt", ignore = true)

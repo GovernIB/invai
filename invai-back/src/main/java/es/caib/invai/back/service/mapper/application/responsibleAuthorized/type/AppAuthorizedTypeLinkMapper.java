@@ -6,10 +6,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * MapStruct data mapping abstraction interface providing structural state conversions across
- * AppAuthorizedTypeLink join entities and their flat business domain model. There are no
- * input/output DTOs for this join: it is never exposed through its own REST controller and is
- * only manipulated internally by {@code AppAuthorizedServiceFacadeBean}.
+ * MapStruct mapper converting between {@code AppAuthorizedTypeLink} join entities and their flat
+ * business domain model. There are no input/output DTOs for this join: it is never exposed
+ * through its own REST controller and is only manipulated internally by
+ * {@code AppAuthorizedServiceFacadeBean}.
  *
  * @since 1.0.3
  */

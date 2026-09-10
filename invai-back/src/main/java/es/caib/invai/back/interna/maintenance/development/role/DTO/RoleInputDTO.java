@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.development.role.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,11 +22,11 @@ import lombok.Setter;
 public class RoleInputDTO {
 
     /** Localized descriptive role title label string (typically in Catalan). */
-    @NotBlank(message = "{validation.role.name.required}")
-    @Size(max = 100, message = "{validation.role.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_ROLE_NAME_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_ROLE_NAME_SIZE + "}")
     private String name;
 
     /** Secondary translated description text variant explicitly matching Spanish locale records. */
-    @Size(max = 100, message = "{validation.role.nameEs.size}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_ROLE_NAME_ES_SIZE + "}")
     private String nameEs;
 }

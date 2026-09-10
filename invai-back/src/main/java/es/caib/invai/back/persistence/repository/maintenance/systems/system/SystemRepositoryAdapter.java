@@ -102,7 +102,7 @@ public class SystemRepositoryAdapter implements SystemRepository {
 
     @Override
     public Page<System> findAll(SystemCriteria filter, Pageable pageable) {
-        log.info("Repository: Fetching paged systems using standard query layout boundaries");
+        log.debug("Repository: Fetching paged systems using standard query layout boundaries");
         try {
             Specification<SystemEntity> spec = SystemSpecification.filterByCriteria(filter);
             return systemJPARepository.findAll(spec, pageable).map(systemMapper::toModel);
@@ -149,8 +149,8 @@ public class SystemRepositoryAdapter implements SystemRepository {
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
-                        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+                        aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

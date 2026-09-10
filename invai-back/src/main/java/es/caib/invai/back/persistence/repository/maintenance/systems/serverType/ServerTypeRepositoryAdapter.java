@@ -29,7 +29,7 @@ public class ServerTypeRepositoryAdapter implements ServerTypeRepository {
 
     @Override
     public List<ServerType> findAll() {
-        log.info("Repository: Fetching every server type lookup entry");
+        log.debug("Repository: Fetching every server type lookup entry");
         List<LkupServerTypeEntity> entities = serverTypeJPARepository.findAll(Sort.by("name"));
         return serverTypeMapper.toModelList(entities);
     }

@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Infrastructure repository Adapter implementing the outbound port boundary {@link AppAuthorizedRepository}.
+ * {@link AppAuthorizedRepository} implementation delegating persistence to the
+ * {@link AppAuthorizedJPARepository} and writing a historical audit record via
+ * {@link AppAuthorizedAudJPARepository} on every create/update/delete mutation.
  *
  * @since 1.0.3
  */
@@ -81,7 +83,7 @@ public class AppAuthorizedRepositoryAdapter implements AppAuthorizedRepository {
     /** {@inheritDoc} */
     @Override
     public Page<AppAuthorized> findAll(Long appResponsibleAuthorizedId, AppAuthorizedCriteria criteria, Pageable pageable) {
-        log.info("Repository: Dynamic search pattern stream across authorized relations for AppResponsibleAuthorized ID: {}", appResponsibleAuthorizedId);
+        log.debug("Repository: Dynamic search pattern stream across authorized relations for AppResponsibleAuthorized ID: {}", appResponsibleAuthorizedId);
         Specification<AppAuthorizedEntity> spec = AppAuthorizedSpecification.filterByCriteria(appResponsibleAuthorizedId, criteria);
         Page<AppAuthorizedEntity> entityPage = appAuthorizedJPARepository.findAll(spec, pageable);
         return entityPage.map(appAuthorizedMapper::toModel);
@@ -140,8 +142,8 @@ public class AppAuthorizedRepositoryAdapter implements AppAuthorizedRepository {
 
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
-        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-        aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+        aud.setUpdatedAt(entity.getUpdatedAt());
+        aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
 

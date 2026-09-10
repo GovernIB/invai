@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import es.caib.invai.back.ejb.application.system_database.database.AppDatabaseServiceFacadeBean;
 
 /**
  * Unit tests for {@link AppDatabaseServiceFacadeBean}, exercising every branch of its business

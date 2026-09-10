@@ -35,6 +35,7 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
     @Autowired
     private AppResponsibleMapper appResponsibleMapper;
 
+    /** {@inheritDoc} */
     @Override
     public AppResponsible create(AppResponsible appResponsible) {
         AppResponsibleEntity entity = appResponsibleMapper.toEntity(appResponsible);
@@ -43,6 +44,7 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         return appResponsibleMapper.toModel(entity);
     }
 
+    /** {@inheritDoc} */
     @Override
     public AppResponsible update(AppResponsible appResponsible, Long id) {
         AppResponsibleEntity entity = appResponsibleMapper.toEntity(appResponsible);
@@ -52,6 +54,7 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         return appResponsibleMapper.toModel(entity);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void delete(AppResponsible appResponsible) {
         AppResponsibleEntity entity = appResponsibleMapper.toEntity(appResponsible);
@@ -60,11 +63,13 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         saveAuditRecord(entity, "DELETE");
     }
 
+    /** {@inheritDoc} */
     @Override
     public AppResponsible findById(Long id) {
         return appResponsibleJPARepository.findById(id).map(appResponsibleMapper::toModel).orElse(null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public Page<AppResponsible> findAll(Long appResponsibleAuthorizedId, AppResponsibleCriteria criteria, Pageable pageable) {
         Specification<AppResponsibleEntity> spec = AppResponsibleSpecification.filterByCriteria(appResponsibleAuthorizedId, criteria);
@@ -72,11 +77,13 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         return entityPage.map(appResponsibleMapper::toModel);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean existsByAppResponsibleAuthorizedAndResponsibleTypeAndIdNot(Long appResponsibleAuthorizedId, Long responsibleTypeId, Long id) {
         return appResponsibleJPARepository.existsByAppResponsibleAuthorizedIdAndResponsibleTypeIdAndDeletedAtIsNullAndIdNot(appResponsibleAuthorizedId, responsibleTypeId, id);
     }
 
+    /** {@inheritDoc} */
     @Override
     public AppResponsible findActiveByAppResponsibleAuthorizedAndResponsibleType(Long appResponsibleAuthorizedId, Long responsibleTypeId) {
         return appResponsibleJPARepository.findByAppResponsibleAuthorizedIdAndResponsibleTypeIdAndDeletedAtIsNull(appResponsibleAuthorizedId, responsibleTypeId)
@@ -84,6 +91,7 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
                 .orElse(null);
     }
 
+    /** {@inheritDoc} */
     @Override
     public List<AppResponsible> findAllActiveByPersonId(Long personId) {
         return appResponsibleJPARepository.findAllByPersonIdAndDeletedAtIsNull(personId).stream()
@@ -108,8 +116,8 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         aud.setObservation(entity.getObservation());
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
-        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-        aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+        aud.setUpdatedAt(entity.getUpdatedAt());
+        aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
         aud.setAudAction(action);

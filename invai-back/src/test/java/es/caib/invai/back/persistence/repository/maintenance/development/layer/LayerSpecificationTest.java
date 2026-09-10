@@ -64,7 +64,7 @@ class LayerSpecificationTest {
         Predicate result = spec.toPredicate(root, query, cb);
 
         assertNotNull(result);
-        verify(cb).and(new Predicate[0]);
+        verify(cb).and();
     }
 
     @Test

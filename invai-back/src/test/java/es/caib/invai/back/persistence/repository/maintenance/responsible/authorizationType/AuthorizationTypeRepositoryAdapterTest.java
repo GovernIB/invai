@@ -21,11 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,6 +81,24 @@ class AuthorizationTypeRepositoryAdapterTest {
     }
 
     @Test
+    void findAllByIdIn_delegatesToJPARepositoryFindAllByIdAndMapsResults() {
+        adapter = buildAdapter();
+        AuthorizationTypeEntity entity2 = new AuthorizationTypeEntity();
+        entity2.setId(2L);
+        AuthorizationTypeEntity entity3 = new AuthorizationTypeEntity();
+        entity3.setId(3L);
+        AuthorizationType model2 = new AuthorizationType();
+        AuthorizationType model3 = new AuthorizationType();
+        when(authorizationTypeJPARepository.findAllById(List.of(2L, 3L))).thenReturn(List.of(entity2, entity3));
+        when(authorizationTypeMapper.toModel(entity2)).thenReturn(model2);
+        when(authorizationTypeMapper.toModel(entity3)).thenReturn(model3);
+
+        List<AuthorizationType> result = adapter.findAllByIdIn(List.of(2L, 3L));
+
+        assertEquals(List.of(model2, model3), result);
+    }
+
+    @Test
     void findAll_delegatesToJPARepositoryAndMapsPage() {
         adapter = buildAdapter();
         AuthorizationTypeCriteria criteria = new AuthorizationTypeCriteria();
@@ -106,7 +120,7 @@ class AuthorizationTypeRepositoryAdapterTest {
         adapter = buildAdapter();
         when(authorizationTypeJPARepository.existsByNameAndDeletedAtIsNull("Firmar peticiones")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("Firmar peticiones"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("Firmar peticiones"));
     }
 
     @Test
@@ -114,7 +128,7 @@ class AuthorizationTypeRepositoryAdapterTest {
         adapter = buildAdapter();
         when(authorizationTypeJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("Firmar peticiones", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("Firmar peticiones", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("Firmar peticiones", 1L));
     }
 
     @Test

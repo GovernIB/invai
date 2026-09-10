@@ -55,7 +55,7 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
     @Override
     @Transactional(readOnly = true)
     public DatabaseOutputDTO getById(Long id) {
-        log.info("Facade: Fetching database by ID: {}", id);
+        log.debug("Facade: Fetching database by ID: {}", id);
         Database database = databaseRepository.findById(id);
 
         if (database == null) {
@@ -74,7 +74,7 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
     @Override
     @Transactional(readOnly = true)
     public Page<DatabaseOutputDTO> getAll(DatabaseCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching databases via pagination boundaries");
+        log.debug("Facade: Fetching databases via pagination boundaries");
         Page<Database> domainPage = databaseRepository.findAll(filter, pageable);
         return domainPage.map(databaseMapper::toResponse);
     }

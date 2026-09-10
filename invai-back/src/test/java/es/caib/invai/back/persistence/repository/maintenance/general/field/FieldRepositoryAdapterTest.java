@@ -21,11 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,7 +102,7 @@ class FieldRepositoryAdapterTest {
         adapter = buildAdapter();
         when(fieldJPARepository.existsByNameAndDeletedAtIsNull("Finance")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("Finance"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("Finance"));
     }
 
     @Test
@@ -114,7 +110,23 @@ class FieldRepositoryAdapterTest {
         adapter = buildAdapter();
         when(fieldJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("Finance", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("Finance", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("Finance", 1L));
+    }
+
+    @Test
+    void existsByNameEsAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(fieldJPARepository.existsByNameEsAndDeletedAtIsNull("Finance ES")).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndDeletedAtIsNull("Finance ES"));
+    }
+
+    @Test
+    void existsByNameEsAndIdNotAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(fieldJPARepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Finance ES", 1L)).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndIdNotAndDeletedAtIsNull("Finance ES", 1L));
     }
 
     @Test

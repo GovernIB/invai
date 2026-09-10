@@ -148,8 +148,8 @@ class AppProviderRepositoryAdapterTest {
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());
-        assertNotNull(aud.getUpdatedAt());
-        assertEquals("SYSTEM_USER", aud.getUpdatedBy());
+        assertNull(aud.getUpdatedAt());
+        assertNull(aud.getUpdatedBy());
         assertNotNull(aud.getAuditDate());
         assertEquals("SYSTEM_USER", aud.getAuditUser());
     }

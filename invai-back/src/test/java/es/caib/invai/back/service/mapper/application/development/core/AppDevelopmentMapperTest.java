@@ -5,7 +5,6 @@ import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentOu
 import es.caib.invai.back.persistence.model.catalog.modality.LkupModalityEntity;
 import es.caib.invai.back.persistence.model.catalog.standardAdaption.LkupStandardAdaptionEntity;
 import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
-import es.caib.invai.back.service.model.maintenance.admUnit.AdmUnit;
 import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.maintenance.general.category.Category;
 import es.caib.invai.back.service.model.maintenance.general.commission.Commission;
@@ -17,6 +16,7 @@ import es.caib.invai.back.service.model.catalog.modality.Modality;
 import es.caib.invai.back.service.model.catalog.standardAdaption.StandardAdaption;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.general.systemType.SystemType;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.maintenance.systems.environment.EnvironmentEntity;
-import es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity;
 import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.commission.CommissionEntity;
@@ -37,19 +36,25 @@ import es.caib.invai.back.persistence.model.maintenance.general.systemType.Syste
 import es.caib.invai.back.service.mapper.catalog.modality.ModalityMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.standardAdaption.StandardAdaptionMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 
 /**
  * Unit tests for the generated {@link AppDevelopmentMapperImpl}, exercising every conversion
  * direction declared on {@link AppDevelopmentMapper}.
  *
  * <p>{@link AppDevelopmentMapper} declares {@code uses = {ModalityMapper.class,
- * StandardAdaptionMapper.class, StatusMapper.class}}. Since there is no Spring context in a pure
- * unit test, real {@link ModalityMapperImpl}, {@link StandardAdaptionMapperImpl} and
- * {@link StatusMapperImpl} instances are wired into the generated {@code @Autowired} fields via
+ * StandardAdaptionMapper.class, StatusMapper.class, ApplicationMapper.class}}. Since there is no Spring
+ * context in a pure unit test, real {@link ModalityMapperImpl}, {@link StandardAdaptionMapperImpl} and a
+ * fully wired {@link ApplicationMapperImpl} (which itself needs its own sub-mappers, including
+ * {@link StatusMapperImpl}) are wired into the generated {@code @Autowired} fields via
  * {@link ReflectionTestUtils}, so the deep {@code AppDevelopment -> Application -> ...} object graph
- * (which the generated {@code DevelopmentMapperImpl} maps through private helper methods declared
- * directly on itself, not through {@code ApplicationMapper}) is exercised with real mapping logic
- * end to end rather than mocked stand-ins.</p>
+ * (which the generated {@code DevelopmentMapperImpl} now delegates to {@code ApplicationMapper} for the
+ * nested {@code application} property) is exercised with real mapping logic end to end rather than
+ * mocked stand-ins.</p>
  */
 class AppDevelopmentMapperTest {
 
@@ -57,35 +62,24 @@ class AppDevelopmentMapperTest {
 
     @BeforeEach
     void setUp() {
+        ApplicationMapperImpl applicationMapperImpl = new ApplicationMapperImpl();
+        ReflectionTestUtils.setField(applicationMapperImpl, "categoryMapper", new CategoryMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "systemTypeMapper", new SystemTypeMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "fieldMapper", new FieldMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "commissionMapper", new CommissionMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "statusMapper", new StatusMapperImpl());
+
         AppDevelopmentMapperImpl impl = new AppDevelopmentMapperImpl();
         ReflectionTestUtils.setField(impl, "modalityMapper", new ModalityMapperImpl());
         ReflectionTestUtils.setField(impl, "standardAdaptionMapper", new StandardAdaptionMapperImpl());
-        ReflectionTestUtils.setField(impl, "statusMapper", new StatusMapperImpl());
+        ReflectionTestUtils.setField(impl, "applicationMapper", applicationMapperImpl);
         mapper = impl;
     }
 
     private static ApplicationEntity buildDeepApplicationEntity() {
-        CategoryEntity categoryEntity = new CategoryEntity();
-        categoryEntity.setId(100L);
-        categoryEntity.setName("Category name");
-        categoryEntity.setNameEs("Nombre categoria");
-        categoryEntity.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
-        categoryEntity.setCreatedBy("category-creator");
-        categoryEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 1, 0, 0));
-        categoryEntity.setUpdatedBy("category-updater");
-        categoryEntity.setDeletedAt(LocalDateTime.of(2020, 3, 1, 0, 0));
-        categoryEntity.setDeletedBy("category-deleter");
+        CategoryEntity categoryEntity = getCategoryEntity();
 
-        SystemTypeEntity systemTypeEntity = new SystemTypeEntity();
-        systemTypeEntity.setId(101L);
-        systemTypeEntity.setName("System type name");
-        systemTypeEntity.setNameEs("Nombre tipo sistema");
-        systemTypeEntity.setCreatedAt(LocalDateTime.of(2020, 1, 2, 0, 0));
-        systemTypeEntity.setCreatedBy("systemtype-creator");
-        systemTypeEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 2, 0, 0));
-        systemTypeEntity.setUpdatedBy("systemtype-updater");
-        systemTypeEntity.setDeletedAt(LocalDateTime.of(2020, 3, 2, 0, 0));
-        systemTypeEntity.setDeletedBy("systemtype-deleter");
+        SystemTypeEntity systemTypeEntity = getSystemTypeEntity();
 
         FieldEntity fieldEntity = new FieldEntity();
         fieldEntity.setId(102L);
@@ -98,31 +92,39 @@ class AppDevelopmentMapperTest {
         fieldEntity.setDeletedAt(LocalDateTime.of(2020, 3, 3, 0, 0));
         fieldEntity.setDeletedBy("field-deleter");
 
-        AdmUnitEntity admUnitEntity = new AdmUnitEntity();
-        admUnitEntity.setId(103L);
-        admUnitEntity.setCode("ADM-1");
-        admUnitEntity.setName("Adm unit name");
-        admUnitEntity.setNameEs("Nombre unidad administrativa");
-        admUnitEntity.setCreatedAt(LocalDateTime.of(2020, 1, 4, 0, 0));
-        admUnitEntity.setCreatedBy("admunit-creator");
-        admUnitEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 4, 0, 0));
-        admUnitEntity.setUpdatedBy("admunit-updater");
-        admUnitEntity.setDeletedAt(LocalDateTime.of(2020, 3, 4, 0, 0));
-        admUnitEntity.setDeletedBy("admunit-deleter");
+        return getApplicationEntity(categoryEntity, systemTypeEntity, fieldEntity);
+    }
 
-        CommissionEntity commissionEntity = new CommissionEntity();
-        commissionEntity.setId(104L);
-        commissionEntity.setName("Commission name");
-        commissionEntity.setNameEs("Nombre comision");
-        commissionEntity.setExpedientNumber("EXP-2024-01");
-        commissionEntity.setApprovalDate(LocalDate.of(2024, 4, 1));
-        commissionEntity.setCommissionType(CommissionType.SUPERIOR);
-        commissionEntity.setCreatedAt(LocalDateTime.of(2020, 1, 5, 0, 0));
-        commissionEntity.setCreatedBy("commission-creator");
-        commissionEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 5, 0, 0));
-        commissionEntity.setUpdatedBy("commission-updater");
-        commissionEntity.setDeletedAt(LocalDateTime.of(2020, 3, 5, 0, 0));
-        commissionEntity.setDeletedBy("commission-deleter");
+    private static @NonNull SystemTypeEntity getSystemTypeEntity() {
+        SystemTypeEntity systemTypeEntity = new SystemTypeEntity();
+        systemTypeEntity.setId(101L);
+        systemTypeEntity.setName("System type name");
+        systemTypeEntity.setNameEs("Nombre tipo sistema");
+        systemTypeEntity.setCreatedAt(LocalDateTime.of(2020, 1, 2, 0, 0));
+        systemTypeEntity.setCreatedBy("systemtype-creator");
+        systemTypeEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 2, 0, 0));
+        systemTypeEntity.setUpdatedBy("systemtype-updater");
+        systemTypeEntity.setDeletedAt(LocalDateTime.of(2020, 3, 2, 0, 0));
+        systemTypeEntity.setDeletedBy("systemtype-deleter");
+        return systemTypeEntity;
+    }
+
+    private static @NonNull CategoryEntity getCategoryEntity() {
+        CategoryEntity categoryEntity = new CategoryEntity();
+        categoryEntity.setId(100L);
+        categoryEntity.setName("Category name");
+        categoryEntity.setNameEs("Nombre categoria");
+        categoryEntity.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
+        categoryEntity.setCreatedBy("category-creator");
+        categoryEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 1, 0, 0));
+        categoryEntity.setUpdatedBy("category-updater");
+        categoryEntity.setDeletedAt(LocalDateTime.of(2020, 3, 1, 0, 0));
+        categoryEntity.setDeletedBy("category-deleter");
+        return categoryEntity;
+    }
+
+    private static @NonNull ApplicationEntity getApplicationEntity(CategoryEntity categoryEntity, SystemTypeEntity systemTypeEntity, FieldEntity fieldEntity) {
+        CommissionEntity commissionEntity = getCommissionEntity();
 
         LkupStatusEntity statusEntity = new LkupStatusEntity();
         statusEntity.setId(1L);
@@ -139,7 +141,7 @@ class AppDevelopmentMapperTest {
         applicationEntity.setCategory(categoryEntity);
         applicationEntity.setSystemType(systemTypeEntity);
         applicationEntity.setField(fieldEntity);
-        applicationEntity.setAdmUnit(admUnitEntity);
+        applicationEntity.setAdmUnitCode("ADM-1");
         applicationEntity.setCsCommission(commissionEntity);
         applicationEntity.setStatus(statusEntity);
         applicationEntity.setCreatedAt(LocalDateTime.of(2021, 1, 1, 8, 0));
@@ -151,18 +153,37 @@ class AppDevelopmentMapperTest {
         return applicationEntity;
     }
 
-    private static Application buildDeepApplicationModel() {
-        Category category = new Category();
-        category.setId(100L);
-        category.setName("Category name");
-        category.setNameEs("Nombre categoria");
-        category.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
-        category.setCreatedBy("category-creator");
-        category.setUpdatedAt(LocalDateTime.of(2020, 2, 1, 0, 0));
-        category.setUpdatedBy("category-updater");
-        category.setDeletedAt(LocalDateTime.of(2020, 3, 1, 0, 0));
-        category.setDeletedBy("category-deleter");
+    private static @NonNull CommissionEntity getCommissionEntity() {
+        CommissionEntity commissionEntity = new CommissionEntity();
+        commissionEntity.setId(104L);
+        commissionEntity.setName("Commission name");
+        commissionEntity.setNameEs("Nombre comision");
+        commissionEntity.setExpedientNumber("EXP-2024-01");
+        commissionEntity.setApprovalDate(LocalDate.of(2024, 4, 1));
+        commissionEntity.setCommissionType(CommissionType.SUPERIOR);
+        commissionEntity.setCreatedAt(LocalDateTime.of(2020, 1, 5, 0, 0));
+        commissionEntity.setCreatedBy("commission-creator");
+        commissionEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 5, 0, 0));
+        commissionEntity.setUpdatedBy("commission-updater");
+        commissionEntity.setDeletedAt(LocalDateTime.of(2020, 3, 5, 0, 0));
+        commissionEntity.setDeletedBy("commission-deleter");
+        return commissionEntity;
+    }
 
+    private static Application buildDeepApplicationModel() {
+        Category category = getCategory();
+
+        SystemType systemType = getSystemType();
+
+        Field field = new Field(102L, "Field name", "Nombre ambito",
+                LocalDateTime.of(2020, 1, 3, 0, 0), "field-creator",
+                LocalDateTime.of(2020, 2, 3, 0, 0), "field-updater",
+                LocalDateTime.of(2020, 3, 3, 0, 0), "field-deleter");
+
+        return getApplication(category, systemType, field);
+    }
+
+    private static @NonNull SystemType getSystemType() {
         SystemType systemType = new SystemType();
         systemType.setId(101L);
         systemType.setName("System type name");
@@ -173,17 +194,24 @@ class AppDevelopmentMapperTest {
         systemType.setUpdatedBy("systemtype-updater");
         systemType.setDeletedAt(LocalDateTime.of(2020, 3, 2, 0, 0));
         systemType.setDeletedBy("systemtype-deleter");
+        return systemType;
+    }
 
-        Field field = new Field(102L, "Field name", "Nombre ambito",
-                LocalDateTime.of(2020, 1, 3, 0, 0), "field-creator",
-                LocalDateTime.of(2020, 2, 3, 0, 0), "field-updater",
-                LocalDateTime.of(2020, 3, 3, 0, 0), "field-deleter");
+    private static @NonNull Category getCategory() {
+        Category category = new Category();
+        category.setId(100L);
+        category.setName("Category name");
+        category.setNameEs("Nombre categoria");
+        category.setCreatedAt(LocalDateTime.of(2020, 1, 1, 0, 0));
+        category.setCreatedBy("category-creator");
+        category.setUpdatedAt(LocalDateTime.of(2020, 2, 1, 0, 0));
+        category.setUpdatedBy("category-updater");
+        category.setDeletedAt(LocalDateTime.of(2020, 3, 1, 0, 0));
+        category.setDeletedBy("category-deleter");
+        return category;
+    }
 
-        AdmUnit admUnit = new AdmUnit(103L, "ADM-1", "Adm unit name", "Nombre unidad administrativa",
-                LocalDateTime.of(2020, 1, 4, 0, 0), "admunit-creator",
-                LocalDateTime.of(2020, 2, 4, 0, 0), "admunit-updater",
-                LocalDateTime.of(2020, 3, 4, 0, 0), "admunit-deleter");
-
+    private static @NonNull Application getApplication(Category category, SystemType systemType, Field field) {
         Commission commission = new Commission(104L, "Commission name", "Nombre comision", "EXP-2024-01",
                 CommissionType.SUPERIOR, LocalDate.of(2024, 4, 1),
                 LocalDateTime.of(2020, 1, 5, 0, 0), "commission-creator",
@@ -200,7 +228,7 @@ class AppDevelopmentMapperTest {
         application.setCategory(category);
         application.setSystemType(systemType);
         application.setField(field);
-        application.setAdmUnit(admUnit);
+        application.setAdmUnitCode("ADM-1");
         application.setCsCommission(commission);
         application.setStatus(StatusEnum.ACTIVE);
         application.setCreatedAt(LocalDateTime.of(2021, 1, 1, 8, 0));
@@ -328,10 +356,7 @@ class AppDevelopmentMapperTest {
         assertEquals("Field name", application.getField().getName());
         assertEquals("Nombre ambito", application.getField().getNameEs());
 
-        assertEquals(103L, application.getAdmUnit().getId());
-        assertEquals("ADM-1", application.getAdmUnit().getCode());
-        assertEquals("Adm unit name", application.getAdmUnit().getName());
-        assertEquals("Nombre unidad administrativa", application.getAdmUnit().getNameEs());
+        assertEquals("ADM-1", application.getAdmUnitCode());
 
         assertEquals(104L, application.getCsCommission().getId());
         assertEquals("Commission name", application.getCsCommission().getName());
@@ -382,7 +407,7 @@ class AppDevelopmentMapperTest {
         assertNull(application.getCategory());
         assertNull(application.getSystemType());
         assertNull(application.getField());
-        assertNull(application.getAdmUnit());
+        assertNull(application.getAdmUnitCode());
         assertNull(application.getCsCommission());
         assertNull(application.getStatus());
     }
@@ -451,8 +476,7 @@ class AppDevelopmentMapperTest {
         assertEquals("System type name", applicationEntity.getSystemType().getName());
         assertEquals(102L, applicationEntity.getField().getId());
         assertEquals("Field name", applicationEntity.getField().getName());
-        assertEquals(103L, applicationEntity.getAdmUnit().getId());
-        assertEquals("ADM-1", applicationEntity.getAdmUnit().getCode());
+        assertEquals("ADM-1", applicationEntity.getAdmUnitCode());
         assertEquals(104L, applicationEntity.getCsCommission().getId());
         assertEquals("EXP-2024-01", applicationEntity.getCsCommission().getExpedientNumber());
         assertEquals(CommissionType.SUPERIOR, applicationEntity.getCsCommission().getCommissionType());
@@ -496,7 +520,7 @@ class AppDevelopmentMapperTest {
         assertNull(applicationEntity.getCategory());
         assertNull(applicationEntity.getSystemType());
         assertNull(applicationEntity.getField());
-        assertNull(applicationEntity.getAdmUnit());
+        assertNull(applicationEntity.getAdmUnitCode());
         assertNull(applicationEntity.getCsCommission());
         assertNull(applicationEntity.getStatus());
     }
@@ -553,7 +577,7 @@ class AppDevelopmentMapperTest {
         assertEquals("Category name", applicationDTO.getCategory().getName());
         assertEquals(101L, applicationDTO.getSystemType().getId());
         assertEquals(102L, applicationDTO.getField().getId());
-        assertEquals(103L, applicationDTO.getAdmUnit().getId());
+        assertNull(applicationDTO.getAdmUnit());
         assertEquals(104L, applicationDTO.getCsCommission().getId());
         assertEquals(CommissionType.SUPERIOR, applicationDTO.getCsCommission().getCommissionType());
     }

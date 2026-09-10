@@ -4,6 +4,7 @@ import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity;
 import es.caib.invai.back.persistence.model.application.system_database.database.AppDatabaseEntity;
 import es.caib.invai.back.persistence.model.application.system_database.system.AppSystemEntity;
+import jakarta.persistence.criteria.*;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaFunction;
 import org.hibernate.query.criteria.JpaPredicate;
@@ -14,21 +15,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ApplicationSpecification}, verifying that each {@link ApplicationCriteria}
@@ -74,8 +71,12 @@ class ApplicationSpecificationTest {
         lenient().when(cb.ilike(any(), anyString())).thenReturn(predicate);
         lenient().when(cb.equal(any(), any())).thenReturn(predicate);
         lenient().when(cb.isNull(any())).thenReturn(predicate);
+        lenient().when(cb.not(any())).thenReturn(predicate);
         lenient().when(cb.or(any(Predicate[].class))).thenReturn(predicate);
         lenient().when(cb.and(any(Predicate[].class))).thenReturn(predicate);
+        lenient().when(cb.disjunction()).thenReturn(predicate);
+        lenient().when(cb.conjunction()).thenReturn(predicate);
+        lenient().when(path.in(anyCollection())).thenReturn(predicate);
 
         lenient().when(query.subquery(Long.class)).thenReturn(subquery);
         lenient().when(subquery.from(AppResponsibleEntity.class)).thenReturn(appResponsibleRoot);
@@ -84,9 +85,9 @@ class ApplicationSpecificationTest {
         lenient().when(subquery.select(any())).thenReturn(subquery);
         lenient().when(subquery.where(any(Predicate.class))).thenReturn(subquery);
         lenient().when(cb.exists(any())).thenReturn(predicate);
-        lenient().when(appResponsibleRoot.<String>get(anyString())).thenReturn((Path) path);
-        lenient().when(appDatabaseRoot.<String>get(anyString())).thenReturn((Path) path);
-        lenient().when(appSystemRoot.<String>get(anyString())).thenReturn((Path) path);
+        lenient().when(appResponsibleRoot.<String>get(anyString())).thenReturn(path);
+        lenient().when(appDatabaseRoot.<String>get(anyString())).thenReturn(path);
+        lenient().when(appSystemRoot.<String>get(anyString())).thenReturn(path);
     }
 
     @Test
@@ -96,7 +97,7 @@ class ApplicationSpecificationTest {
         Predicate result = spec.toPredicate(root, query, cb);
 
         assertNotNull(result);
-        verify(cb).and(new Predicate[0]);
+        verify(cb).and();
     }
 
     @Test
@@ -172,17 +173,17 @@ class ApplicationSpecificationTest {
     @Test
     void filterByCriteria_withFieldId_addsEqualPredicate() {
         ApplicationCriteria criteria = new ApplicationCriteria();
-        criteria.setFieldId("F1");
+        criteria.setFieldId(4L);
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb).equal(path, "F1");
+        verify(cb).equal(path, 4L);
     }
 
     @Test
-    void filterByCriteria_blankFieldId_isIgnored() {
+    void filterByCriteria_nullFieldId_isIgnored() {
         ApplicationCriteria criteria = new ApplicationCriteria();
-        criteria.setFieldId("");
+        criteria.setFieldId(null);
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
@@ -200,29 +201,39 @@ class ApplicationSpecificationTest {
     }
 
     @Test
-    void filterByCriteria_withAdmUnitId_addsEqualPredicate() {
+    void filterByCriteria_withAdmUnitCode_addsEqualPredicate() {
         ApplicationCriteria criteria = new ApplicationCriteria();
-        criteria.setAdmUnitId(4L);
+        criteria.setAdmUnitCode("A04026919");
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb).equal(path, 4L);
+        verify(cb).equal(path, "A04026919");
+    }
+
+    @Test
+    void filterByCriteria_blankAdmUnitCode_isIgnored() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setAdmUnitCode("   ");
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb, never()).equal(any(), any());
     }
 
     @Test
     void filterByCriteria_withStatusId_addsEqualPredicate() {
         ApplicationCriteria criteria = new ApplicationCriteria();
-        criteria.setStatusId("1");
+        criteria.setStatusId(1L);
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb).equal(path, "1");
+        verify(cb).equal(path, 1L);
     }
 
     @Test
-    void filterByCriteria_blankStatusId_isIgnored() {
+    void filterByCriteria_nullStatusId_isIgnored() {
         ApplicationCriteria criteria = new ApplicationCriteria();
-        criteria.setStatusId("");
+        criteria.setStatusId(null);
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
@@ -249,14 +260,58 @@ class ApplicationSpecificationTest {
         verify(cb, never()).ilike(any(), anyString());
     }
 
+    // criteria.incomplete no longer builds a predicate itself - ApplicationServiceFacadeBean.getAll
+    // pre-resolves the set of incomplete application IDs (via
+    // ApplicationRepository.findIncompleteApplicationIds) onto incompleteApplicationIds before the
+    // query runs, the same "resolve live data, then filter with .in(...)" pattern already used for
+    // quickSearchAdmUnitCodes below. The Specification's only job is the trivial id-in-list check.
+
     @Test
-    void filterByCriteria_withIncompleteTrue_addsEqualPredicate() {
+    void filterByCriteria_withIncompleteTrueAndIds_addsIdInPredicate() {
         ApplicationCriteria criteria = new ApplicationCriteria();
         criteria.setIncomplete(Boolean.TRUE);
+        criteria.setIncompleteApplicationIds(List.of(1L, 2L));
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb).equal(path, Boolean.TRUE);
+        verify(path).in(List.of(1L, 2L));
+        verify(cb, never()).not(any());
+    }
+
+    @Test
+    void filterByCriteria_withIncompleteFalseAndIds_negatesTheIdInPredicate() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setIncomplete(Boolean.FALSE);
+        criteria.setIncompleteApplicationIds(List.of(1L, 2L));
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(path).in(List.of(1L, 2L));
+        verify(cb).not(predicate);
+    }
+
+    @Test
+    void filterByCriteria_withIncompleteTrueAndNoIncompleteApplications_matchesNothing() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setIncomplete(Boolean.TRUE);
+        criteria.setIncompleteApplicationIds(List.of());
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).disjunction();
+        verify(path, never()).in(anyCollection());
+    }
+
+    @Test
+    void filterByCriteria_withIncompleteFalseAndNoIncompleteApplications_matchesEverything() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setIncomplete(Boolean.FALSE);
+        criteria.setIncompleteApplicationIds(null);
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).conjunction();
+        verify(path, never()).in(anyCollection());
     }
 
     @Test
@@ -266,7 +321,9 @@ class ApplicationSpecificationTest {
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb, never()).equal(any(), any());
+        verify(path, never()).in(anyCollection());
+        verify(cb, never()).disjunction();
+        verify(cb, never()).conjunction();
     }
 
     @Test
@@ -364,11 +421,11 @@ class ApplicationSpecificationTest {
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb, times(14)).like(eq(path), eq("%lead%"));
+        verify(cb, times(12)).like(eq(path), eq("%lead%"));
         verify(cb).ilike(eq(path), eq("%lead%"));
         verify(cb).or(predicate, predicate, predicate, predicate, predicate,
                 predicate, predicate, predicate, predicate, predicate,
-                predicate, predicate, predicate, predicate, predicate);
+                predicate, predicate, predicate, predicate);
     }
 
     @Test
@@ -379,5 +436,40 @@ class ApplicationSpecificationTest {
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
         verify(cb, never()).or(any(Predicate[].class));
+    }
+
+    @Test
+    void filterByCriteria_withQuickSearchAndNoResolvedAdmUnitCodes_addsDisjunctionInsteadOfInPredicate() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setQuickSearch("lead");
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).disjunction();
+        verify(path, never()).in(anyCollection());
+    }
+
+    @Test
+    void filterByCriteria_withQuickSearchAndResolvedAdmUnitCodes_addsInPredicateInsteadOfDisjunction() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setQuickSearch("lead");
+        criteria.setQuickSearchAdmUnitCodes(List.of("A04026919"));
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(path).in(List.of("A04026919"));
+        verify(cb, never()).disjunction();
+    }
+
+    @Test
+    void filterByCriteria_withQuickSearchAndEmptyResolvedAdmUnitCodes_addsDisjunctionInsteadOfInPredicate() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setQuickSearch("lead");
+        criteria.setQuickSearchAdmUnitCodes(List.of());
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).disjunction();
+        verify(path, never()).in(anyCollection());
     }
 }

@@ -17,15 +17,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.security.Principal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -66,7 +62,7 @@ class AuthControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody() instanceof UserAuthDTO);
+        assertInstanceOf(UserAuthDTO.class, response.getBody());
 
         UserAuthDTO body = (UserAuthDTO) response.getBody();
         assertTrue(body.isAuthenticated());
@@ -104,12 +100,12 @@ class AuthControllerTest {
     void logout_noActiveSessionOrAuthentication_stillClearsCookieWithRootPath() {
         // No authentication set in SecurityContextHolder, and request.getSession(false) returns null.
         HttpServletRequest request = new MockHttpServletRequest();
-        HttpServletResponse response = new MockHttpServletResponse();
+        MockHttpServletResponse response = new MockHttpServletResponse();
 
         ResponseEntity<Void> result = authController.logout(request, response);
 
         assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
-        Cookie clearedCookie = ((MockHttpServletResponse) response).getCookie("JSESSIONID");
+        Cookie clearedCookie = response.getCookie("JSESSIONID");
         assertNotNull(clearedCookie);
         assertEquals("/", clearedCookie.getPath());
     }

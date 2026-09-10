@@ -29,7 +29,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import es.caib.invai.back.ejb.application.development.technology.AppTechnologyServiceFacadeBean;
 
 /**
  * Unit tests for {@link AppTechnologyServiceFacadeBean}, exercising every branch of its business

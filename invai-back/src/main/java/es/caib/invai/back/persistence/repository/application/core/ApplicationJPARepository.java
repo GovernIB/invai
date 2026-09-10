@@ -84,14 +84,6 @@ public interface ApplicationJPARepository extends JpaRepository<ApplicationEntit
     boolean existsByFieldIdAndDeletedAtIsNull(Long fieldId);
 
     /**
-     * Verifies if any active database application instances are currently bound to a targeted administrative unit reference index.
-     *
-     * @param admUnitId unique sequence identifier tracking the target organizational entity metadata profile
-     * @return {@code true} if matching dependencies are detected, {@code false} otherwise
-     */
-    boolean existsByAdmUnitIdAndDeletedAtIsNull(Long admUnitId);
-
-    /**
      * Verifies if any active database application instances are currently bound to a targeted technical commission index tracker.
      *
      * @param commissionId unique sequence identifier tracking the target structural regulatory profile
@@ -99,11 +91,4 @@ public interface ApplicationJPARepository extends JpaRepository<ApplicationEntit
      */
     boolean existsByCsCommissionIdAndDeletedAtIsNull(Long commissionId);
 
-    /**
-     * Verifies if any active database application instances are currently bound to a targeted execution lifecycle status state.
-     *
-     * @param statusId unique sequence identifier tracking the target operational metric state profile
-     * @return {@code true} if matching dependencies are detected, {@code false} otherwise
-     */
-    boolean existsByStatusIdAndDeletedAtIsNull(Long statusId);
 }

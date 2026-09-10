@@ -23,11 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,14 +60,14 @@ class AppDatabaseRepositoryAdapterTest {
         return a;
     }
 
-    private AppDatabaseEntity entityWithRelations(Long id, Long informationSystemDbId, Long databaseId) {
+    private AppDatabaseEntity entityWithRelations(Long id) {
         AppDatabaseEntity entity = new AppDatabaseEntity();
         entity.setId(id);
         AppInformationSystemDbEntity informationSystemDb = new AppInformationSystemDbEntity();
-        informationSystemDb.setId(informationSystemDbId);
+        informationSystemDb.setId(10L);
         entity.setInformationSystemDb(informationSystemDb);
         DatabaseEntity database = new DatabaseEntity();
-        database.setId(databaseId);
+        database.setId(20L);
         entity.setDatabase(database);
         return entity;
     }
@@ -79,7 +75,7 @@ class AppDatabaseRepositoryAdapterTest {
     @Test
     void findById_found_returnsMappedModel() {
         adapter = buildAdapter();
-        AppDatabaseEntity entity = entityWithRelations(1L, 10L, 20L);
+        AppDatabaseEntity entity = entityWithRelations(1L);
         AppDatabase model = new AppDatabase();
         when(appDatabaseJPARepository.findById(1L)).thenReturn(Optional.of(entity));
         when(appDatabaseMapper.toModel(entity)).thenReturn(model);
@@ -102,7 +98,7 @@ class AppDatabaseRepositoryAdapterTest {
         adapter = buildAdapter();
         AppDatabaseCriteria criteria = new AppDatabaseCriteria();
         Pageable pageable = Pageable.unpaged();
-        AppDatabaseEntity entity = entityWithRelations(1L, 10L, 20L);
+        AppDatabaseEntity entity = entityWithRelations(1L);
         AppDatabase model = new AppDatabase();
         Page<AppDatabaseEntity> entityPage = new PageImpl<>(List.of(entity));
         when(appDatabaseJPARepository.findAll(ArgumentMatchers.<Specification<AppDatabaseEntity>>any(), eq(pageable))).thenReturn(entityPage);
@@ -119,7 +115,7 @@ class AppDatabaseRepositoryAdapterTest {
         adapter = buildAdapter();
         when(appDatabaseJPARepository.existsByInformationSystemDbIdAndDatabaseId(10L, 20L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByInformationSystemDbIdAndDatabaseId(10L, 20L));
+        assertTrue(adapter.existsByInformationSystemDbIdAndDatabaseId(10L, 20L));
     }
 
     @Test
@@ -127,7 +123,7 @@ class AppDatabaseRepositoryAdapterTest {
         adapter = buildAdapter();
         when(appDatabaseJPARepository.existsByInformationSystemDbIdAndDatabaseIdAndIdNot(10L, 20L, 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByUniqueCombinationExcludingId(10L, 20L, 1L));
+        assertTrue(adapter.existsByUniqueCombinationExcludingId(10L, 20L, 1L));
     }
 
     @Test
@@ -135,7 +131,7 @@ class AppDatabaseRepositoryAdapterTest {
         adapter = buildAdapter();
         AppDatabase model = new AppDatabase();
         AppDatabaseEntity toSave = new AppDatabaseEntity();
-        AppDatabaseEntity saved = entityWithRelations(5L, 10L, 20L);
+        AppDatabaseEntity saved = entityWithRelations(5L);
         AppDatabase response = new AppDatabase();
         when(appDatabaseMapper.toEntity(model)).thenReturn(toSave);
         when(appDatabaseJPARepository.save(toSave)).thenReturn(saved);
@@ -162,7 +158,7 @@ class AppDatabaseRepositoryAdapterTest {
         adapter = buildAdapter();
         AppDatabase model = new AppDatabase();
         AppDatabaseEntity toSave = new AppDatabaseEntity();
-        AppDatabaseEntity saved = entityWithRelations(6L, 10L, 20L);
+        AppDatabaseEntity saved = entityWithRelations(6L);
         LocalDateTime existingCreatedAt = LocalDateTime.of(2025, 1, 1, 0, 0);
         saved.setCreatedAt(existingCreatedAt);
         saved.setCreatedBy("jdoe");
@@ -183,7 +179,7 @@ class AppDatabaseRepositoryAdapterTest {
         adapter = buildAdapter();
         AppDatabase model = new AppDatabase();
         AppDatabaseEntity toSave = new AppDatabaseEntity();
-        AppDatabaseEntity saved = entityWithRelations(7L, 10L, 20L);
+        AppDatabaseEntity saved = entityWithRelations(7L);
         AppDatabase response = new AppDatabase();
         when(appDatabaseMapper.toEntity(model)).thenReturn(toSave);
         when(appDatabaseJPARepository.save(toSave)).thenReturn(saved);
@@ -204,7 +200,7 @@ class AppDatabaseRepositoryAdapterTest {
         AppDatabase model = new AppDatabase();
         model.setId(8L);
         AppDatabaseEntity toSave = new AppDatabaseEntity();
-        AppDatabaseEntity saved = entityWithRelations(8L, 10L, 20L);
+        AppDatabaseEntity saved = entityWithRelations(8L);
         saved.setDeletedAt(LocalDateTime.now());
         saved.setDeletedBy("jdoe");
         when(appDatabaseMapper.toEntity(model)).thenReturn(toSave);

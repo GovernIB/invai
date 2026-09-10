@@ -9,15 +9,20 @@ import es.caib.invai.back.persistence.repository.application.responsibleAuthoriz
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible.AppResponsibleRepository;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.type.AppAuthorizedTypeLinkRepository;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.authorizationType.AuthorizationTypeRepository;
+import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonRepository;
+import es.caib.invai.back.rest.soffid.SoffidClient;
+import es.caib.invai.back.rest.soffid.SoffidUser;
 import es.caib.invai.back.service.facade.maintenance.responsible.roleTransfer.RoleTransferService;
 import es.caib.invai.back.service.mapper.catalog.responsibleType.ResponsibleTypeMapper;
 import es.caib.invai.back.service.mapper.maintenance.responsible.authorizationType.AuthorizationTypeMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
+import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.service.model.maintenance.responsible.roleTransfer.RoleAssignmentType;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,34 +45,58 @@ import java.util.Objects;
 @Transactional
 public class RoleTransferServiceFacadeBean implements RoleTransferService {
 
-    /** Repository port used to access AppResponsible persistence operations. */
+    /**
+     * Repository port used to access AppResponsible persistence operations.
+     */
     @Autowired
     private AppResponsibleRepository appResponsibleRepository;
 
-    /** Repository port used to access AppAuthorized persistence operations. */
+    /**
+     * Repository port used to access AppAuthorized persistence operations.
+     */
     @Autowired
     private AppAuthorizedRepository appAuthorizedRepository;
 
-    /** Repository port used to resolve the authorization types attached to an AppAuthorized anchor. */
+    /**
+     * Repository port used to resolve the authorization types attached to an AppAuthorized anchor.
+     */
     @Autowired
     private AppAuthorizedTypeLinkRepository appAuthorizedTypeLinkRepository;
 
-    /** Repository used to resolve authorization type catalog names. */
+    /**
+     * Repository used to resolve authorization type catalog names.
+     */
     @Autowired
     private AuthorizationTypeRepository authorizationTypeRepository;
 
-    /** Mapper converting resolved authorization types into their output DTO representation. */
+    /**
+     * Mapper converting resolved authorization types into their output DTO representation.
+     */
     @Autowired
     private AuthorizationTypeMapper authorizationTypeMapper;
 
-    /** Mapper converting the linked responsible type into its output DTO representation. */
+    /**
+     * Mapper converting the linked responsible type into its output DTO representation.
+     */
     @Autowired
     private ResponsibleTypeMapper responsibleTypeMapper;
+
+    /**
+     * Repository used to resolve/create the destination person by e-mail.
+     */
+    @Autowired
+    private PersonRepository personRepository;
+
+    /**
+     * Port used to look up the destination person against Soffid when no local match exists.
+     */
+    @Autowired
+    private SoffidClient soffidClient;
 
     @Override
     @Transactional(readOnly = true)
     public List<RoleAssignmentOutputDTO> getAssignmentsByPerson(Long personId) {
-        log.info("Facade: Fetching every active role assignment held by person ID: {}", personId);
+        log.debug("Facade: Fetching every active role assignment held by person ID: {}", personId);
 
         List<RoleAssignmentOutputDTO> assignments = new ArrayList<>();
 
@@ -98,26 +127,55 @@ public class RoleTransferServiceFacadeBean implements RoleTransferService {
     public void transfer(RoleTransferInputDTO inputDTO) {
         log.info("Facade: Transferring {} role assignment(s) (revoke={})", inputDTO.getItems().size(), inputDTO.isRevoke());
 
-        if (!inputDTO.isRevoke() && inputDTO.getToPersonId() == null) {
+        if (!inputDTO.isRevoke() && StringUtils.isBlank(inputDTO.getToPersonEmailAddress())) {
             throw new BusinessRuleException(Constants.ERR_ROLETRANSFER_TARGET_REQUIRED);
         }
 
+        Long toPersonId = inputDTO.isRevoke() ? null : resolveTargetPersonId(inputDTO.getToPersonEmailAddress());
+
         for (RoleTransferItemDTO item : inputDTO.getItems()) {
             if (item.getType() == RoleAssignmentType.RESPONSIBLE) {
-                transferResponsible(item.getId(), inputDTO);
+                transferResponsible(item.getId(), inputDTO.isRevoke(), toPersonId);
             } else {
-                transferAuthorized(item.getId(), inputDTO);
+                transferAuthorized(item.getId(), inputDTO.isRevoke(), toPersonId);
             }
         }
     }
 
     /**
+     * Resolves the destination person for a transfer by e-mail: reuses an existing active local
+     * {@link Person} when one already matches, otherwise looks the e-mail up against Soffid and, if
+     * found there, persists it locally as a new CAIB person before the transfer proceeds.
+     *
+     * @param email the destination person's e-mail address
+     * @return the identifier of the (possibly newly created) local person to assign
+     * @throws BusinessRuleException if no person with the given e-mail exists locally or in Soffid
+     */
+    private Long resolveTargetPersonId(String email) {
+        Person existing = personRepository.findByEmail(email);
+        if (existing != null) {
+            return existing.getId();
+        }
+        SoffidUser soffidUser = soffidClient.findByEmail(email);
+        if (soffidUser == null) {
+            throw new BusinessRuleException(Constants.ERR_ROLETRANSFER_TARGET_NOT_FOUND);
+        }
+        Person newPerson = new Person();
+        newPerson.setFirstName(soffidUser.getFirstName());
+        newPerson.setLastName(soffidUser.getLastName());
+        newPerson.setEmail(soffidUser.getEmailAddress());
+        newPerson.setPersonalCaib(true);
+        return personRepository.create(newPerson).getId();
+    }
+
+    /**
      * Transfers or revokes a single AppResponsible assignment.
      *
-     * @param id the AppResponsible identifier to transfer or revoke
-     * @param inputDTO the batch request, providing the target person and revoke flag
+     * @param id         the AppResponsible identifier to transfer or revoke
+     * @param revoke     whether to soft-delete the assignment instead of reassigning it
+     * @param toPersonId the already-resolved destination person identifier, ignored when revoking
      */
-    private void transferResponsible(Long id, RoleTransferInputDTO inputDTO) {
+    private void transferResponsible(Long id, boolean revoke, Long toPersonId) {
         AppResponsible existing = appResponsibleRepository.findById(id);
         if (existing == null) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
@@ -126,24 +184,26 @@ public class RoleTransferServiceFacadeBean implements RoleTransferService {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_ACTIVE);
         }
 
-        if (inputDTO.isRevoke()) {
+        if (revoke) {
             existing.setDeletedAt(LocalDateTime.now());
             existing.setDeletedBy(Utils.resolveCurrentUsername());
             appResponsibleRepository.delete(existing);
-        } else {
-            existing.getPerson().setId(inputDTO.getToPersonId());
-            appResponsibleRepository.update(existing, id);
+            return;
         }
+        existing.getPerson().setId(toPersonId);
+        appResponsibleRepository.update(existing, id);
+
     }
 
     /**
      * Transfers or revokes a single AppAuthorized assignment. When transferring, verifies the
      * target person does not already hold an active authorization on the same anchor.
      *
-     * @param id the AppAuthorized identifier to transfer or revoke
-     * @param inputDTO the batch request, providing the target person and revoke flag
+     * @param id         the AppAuthorized identifier to transfer or revoke
+     * @param revoke     whether to soft-delete the assignment instead of reassigning it
+     * @param toPersonId the already-resolved destination person identifier, ignored when revoking
      */
-    private void transferAuthorized(Long id, RoleTransferInputDTO inputDTO) {
+    private void transferAuthorized(Long id, boolean revoke, Long toPersonId) {
         AppAuthorized existing = appAuthorizedRepository.findById(id);
         if (existing == null) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_NOT_FOUND);
@@ -152,18 +212,19 @@ public class RoleTransferServiceFacadeBean implements RoleTransferService {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_NOT_ACTIVE);
         }
 
-        if (inputDTO.isRevoke()) {
+        if (revoke) {
             existing.setDeletedAt(LocalDateTime.now());
             existing.setDeletedBy(Utils.resolveCurrentUsername());
             appAuthorizedRepository.delete(existing);
-        } else {
-            Long anchorId = existing.getAppResponsibleAuthorized().getId();
-            if (appAuthorizedRepository.existsByAppResponsibleAuthorizedAndPersonAndIdNot(anchorId, inputDTO.getToPersonId(), id)) {
-                throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_DUPLICATED);
-            }
-            existing.getPerson().setId(inputDTO.getToPersonId());
-            appAuthorizedRepository.update(existing, id);
+            return;
         }
+
+        Long anchorId = existing.getAppResponsibleAuthorized().getId();
+        if (appAuthorizedRepository.existsByAppResponsibleAuthorizedAndPersonAndIdNot(anchorId, toPersonId, id)) {
+            throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_DUPLICATED);
+        }
+        existing.getPerson().setId(toPersonId);
+        appAuthorizedRepository.update(existing, id);
     }
 
     /**

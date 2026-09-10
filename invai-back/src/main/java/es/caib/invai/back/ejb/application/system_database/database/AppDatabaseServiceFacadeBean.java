@@ -49,7 +49,7 @@ public class AppDatabaseServiceFacadeBean implements AppDatabaseService {
     @Override
     @Transactional(readOnly = true)
     public Page<AppDatabaseOutputDTO> getAll(Long informationSystemDbId, AppDatabaseCriteria criteria, Pageable pageable) {
-        log.info("Facade: Executing dynamic search pattern pipeline across application database components for informationSystemDb ID: {}", informationSystemDbId);
+        log.debug("Facade: Executing dynamic search pattern pipeline across application database components for informationSystemDb ID: {}", informationSystemDbId);
         Page<AppDatabase> domainPage = appDatabaseRepository.findAll(informationSystemDbId, criteria, pageable);
         return domainPage.map(appDatabaseMapper::toResponse);
     }

@@ -33,7 +33,7 @@ public class ResponsibleTypeServiceFacadeBean implements ResponsibleTypeService 
     @Override
     @Transactional(readOnly = true)
     public List<ResponsibleTypeOutputDTO> getAll() {
-        log.info("Facade: Fetching every responsible type lookup entry");
+        log.debug("Facade: Fetching every responsible type lookup entry");
         List<ResponsibleType> responsibleTypes = responsibleTypeRepository.findAll();
         return responsibleTypeMapper.toResponseList(responsibleTypes);
     }

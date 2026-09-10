@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.systems.databaseVendor.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,11 +19,11 @@ import lombok.Setter;
 public class DatabaseVendorInputDTO {
 
     /** Name of the database vendor/type (e.g., Oracle, PostgreSQL). */
-    @NotBlank(message = "{validation.databasevendor.name}")
-    @Size(max = 100, message = "{validation.databasevendor.name.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_DATABASEVENDOR_NAME + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_DATABASEVENDOR_NAME_OVERFLOW + "}")
     private String name;
 
     /** Default connection port for the database vendor. */
-    @NotNull(message = "{validation.databasevendor.defaultPort}")
+    @NotNull(message = "{" + Constants.VALIDATION_DATABASEVENDOR_DEFAULT_PORT + "}")
     private Integer defaultPort;
 }

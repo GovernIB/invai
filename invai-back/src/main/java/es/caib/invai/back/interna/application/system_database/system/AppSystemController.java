@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Application to System assignment profiles.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.2
@@ -54,7 +54,7 @@ public class AppSystemController {
             @ModelAttribute AppSystemCriteria criteria,
             @PageableDefault(sort = "id") Pageable pageable) {
 
-        log.info("REST: Fetching paged application-system links for informationSystemDb ID: {} and criteria: {}", informationSystemDbId, criteria);
+        log.debug("REST: Fetching paged application-system links for informationSystemDb ID: {} and criteria: {}", informationSystemDbId, criteria);
         Page<AppSystemOutputDTO> page = appSystemService.getAll(informationSystemDbId, criteria, pageable);
         return ResponseEntity.ok(page);
     }

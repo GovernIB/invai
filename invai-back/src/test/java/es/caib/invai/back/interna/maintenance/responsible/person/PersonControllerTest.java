@@ -1,5 +1,6 @@
 package es.caib.invai.back.interna.maintenance.responsible.person;
 
+import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonCombinedSearchOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonCriteria;
@@ -112,5 +113,55 @@ class PersonControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(dto, response.getBody());
+    }
+
+    @Test
+    void searchSoffid_returnsOkWithServiceResult() {
+        Pageable pageable = Pageable.unpaged();
+        Page<PersonOutputDTO> results = new PageImpl<>(List.of(new PersonOutputDTO()));
+        when(personService.searchSoffid("Joan", pageable)).thenReturn(results);
+
+        ResponseEntity<Page<PersonOutputDTO>> response = personController.searchSoffid("Joan", pageable);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(results, response.getBody());
+    }
+
+    @Test
+    void searchSoffid_nullFullName_stillDelegatesAsGetAll() {
+        Pageable pageable = Pageable.unpaged();
+        Page<PersonOutputDTO> results = new PageImpl<>(List.of());
+        when(personService.searchSoffid(null, pageable)).thenReturn(results);
+
+        ResponseEntity<Page<PersonOutputDTO>> response = personController.searchSoffid(null, pageable);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(results, response.getBody());
+    }
+
+    @Test
+    void searchCombined_returnsOkWithServiceResult() {
+        Pageable pageable = Pageable.unpaged();
+        PersonCombinedSearchOutputDTO results = new PersonCombinedSearchOutputDTO(
+                new PageImpl<>(List.of(new PersonOutputDTO())), new PageImpl<>(List.of()));
+        when(personService.searchCombined("Joan", pageable)).thenReturn(results);
+
+        ResponseEntity<PersonCombinedSearchOutputDTO> response = personController.searchCombined("Joan", pageable);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(results, response.getBody());
+    }
+
+    @Test
+    void searchCombined_nullSearch_stillDelegatesAsUnfilteredListing() {
+        Pageable pageable = Pageable.unpaged();
+        PersonCombinedSearchOutputDTO results = new PersonCombinedSearchOutputDTO(
+                new PageImpl<>(List.of()), new PageImpl<>(List.of()));
+        when(personService.searchCombined(null, pageable)).thenReturn(results);
+
+        ResponseEntity<PersonCombinedSearchOutputDTO> response = personController.searchCombined(null, pageable);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(results, response.getBody());
     }
 }

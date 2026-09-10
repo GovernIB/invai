@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
  * for managing operational Field records.
  * <p>
  * Authorization rules are handled at the controller level using Spring Method Security,
- * limiting all operations to authenticated corporate users carrying the {@code ROLE_usuari-tipus-E} role.
+ * limiting all operations to authenticated corporate users carrying the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.1

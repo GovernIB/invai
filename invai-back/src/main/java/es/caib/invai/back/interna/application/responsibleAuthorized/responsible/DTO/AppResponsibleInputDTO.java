@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.application.responsibleAuthorized.responsible.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,8 +9,8 @@ import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Data Transfer Object (DTO) defining the inbound API request payload structure for
- * registering or modifying an AppResponsible assignment.
+ * Inbound payload for creating or updating a responsible assignment, including, when the person
+ * has no local record yet, the inline name/e-mail fields used to resolve or create one.
  *
  * @since 1.0.3
  */
@@ -19,7 +21,7 @@ import jakarta.validation.constraints.NotNull;
 public class AppResponsibleInputDTO {
 
     /** Foreign key unique identification pointer referencing the parent Responsables tab anchor. */
-    @NotNull(message = "{validation.appresponsible.appResponsibleAuthorizedId}")
+    @NotNull(message = "{" + Constants.VALIDATION_APPRESPONSIBLE_APP_RESPONSIBLE_AUTHORIZED_ID + "}")
     private Long appResponsibleAuthorizedId;
 
     /**
@@ -47,7 +49,7 @@ public class AppResponsibleInputDTO {
     private Long companyId;
 
     /** Foreign key unique identification pointer referencing the responsibility type held. */
-    @NotNull(message = "{validation.appresponsible.responsibleTypeId}")
+    @NotNull(message = "{" + Constants.VALIDATION_APPRESPONSIBLE_RESPONSIBLE_TYPE_ID + "}")
     private Long responsibleTypeId;
 
     /** Free-text job title/position held by the responsible person for this assignment. */

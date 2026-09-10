@@ -107,6 +107,6 @@ class CategoryMapperTest {
 
     @Test
     void map_nullId_returnsNull() {
-        assertNull(mapper.map((Long) null));
+        assertNull(mapper.map(null));
     }
 }

@@ -24,8 +24,9 @@ public interface RoleTransferService {
     List<RoleAssignmentOutputDTO> getAssignmentsByPerson(Long personId);
 
     /**
-     * Moves the selected assignments to {@code toPersonId}, or soft-deletes them in place when
-     * {@code revoke} is set.
+     * Moves the selected assignments to the person identified by {@code toPersonEmailAddress}
+     * (resolved locally, then against Soffid), or soft-deletes them in place when {@code revoke} is
+     * set.
      *
      * @param inputDTO the batch of assignments to transfer or revoke
      */

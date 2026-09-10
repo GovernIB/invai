@@ -47,7 +47,7 @@ public class AppSystemServiceFacadeBean implements AppSystemService {
     @Override
     @Transactional(readOnly = true)
     public Page<AppSystemOutputDTO> getAll(Long informationSystemDbId, AppSystemCriteria criteria, Pageable pageable) {
-        log.info("Facade: Fetching application-system links via pagination boundaries for informationSystemDbId ID: {}", informationSystemDbId);
+        log.debug("Facade: Fetching application-system links via pagination boundaries for informationSystemDbId ID: {}", informationSystemDbId);
         Page<AppSystem> domainPage = appSystemRepository.findAll(informationSystemDbId, criteria, pageable);
         return domainPage.map(appSystemMapper::toResponse);
     }

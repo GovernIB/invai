@@ -20,8 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Facade service implementation for managing technology stack entries linked to development modules.
- * Orchestrates transactional mechanics, model mapping mutations, and validation constraints verification.
+ * Facade service for the "AppTechnology" list: technology stack entries (layer, technology, version,
+ * architecture) that hang many-to-one off a single
+ * {@link es.caib.invai.back.service.model.application.development.core.AppDevelopment} record (via
+ * {@code appDevelopmentId}) — unlike {@code AppDevelopment} itself, which is a single record per
+ * application. No uniqueness check on create: a development can have any number of technology
+ * entries, including duplicates for the same layer/technology.
  *
  * @since 1.0.2
  */
@@ -30,35 +34,38 @@ import java.time.LocalDateTime;
 @Transactional
 public class AppTechnologyServiceFacadeBean implements AppTechnologyService {
 
-    /** MapStruct mapper handling transformations between entities, domain models, and DTO layouts. */
+    /** Mapper between {@link AppTechnology}, its entity, and the technology input/output DTOs. */
     @Autowired
     private AppTechnologyMapper appTechnologyMapper;
 
-    /** Infrastructure outbound repository port managing relational lifecycle data operations. */
+    /** Repository handling persistence of {@link AppTechnology} records. */
     @Autowired
     private AppTechnologyRepository appTechnologyRepository;
 
     /**
-     * Streams partitioned chunk metrics using pagination layout boundaries, scoped to a single
-     * parent development module. Never returns technology records belonging to other development modules.
+     * Fetches the technology entries assigned to a single development, filtered by {@code criteria}
+     * and paged. {@code appDevelopmentId} is always applied regardless of {@code criteria}, so this
+     * never returns technology records belonging to a different development module.
      *
-     * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param pageable         pagination layout boundaries and sorting rules configuration
-     * @return a partitioned matrix page containing mapped output definitions
+     * @param appDevelopmentId identifier of the owning development record
+     * @param criteria         optional additional filters (status, search), see {@link AppTechnologyCriteria}
+     * @param pageable         pagination and sorting parameters
+     * @return a page of mapped {@link AppTechnologyOutputDTO} results
      */
     @Override
     @Transactional(readOnly = true)
     public Page<AppTechnologyOutputDTO> getAll(Long appDevelopmentId, AppTechnologyCriteria criteria, Pageable pageable) {
-        log.info("Facade: Fetching paged technology records for Development ID: {}", appDevelopmentId);
+        log.debug("Facade: Fetching paged technology records for Development ID: {}", appDevelopmentId);
         Page<AppTechnology> domainPage = appTechnologyRepository.findAll(appDevelopmentId, criteria, pageable);
         return domainPage.map(appTechnologyMapper::toResponse);
     }
 
     /**
-     * Registers a new technology stack entry linked to a development module.
+     * Creates a new technology stack entry linked to a development module. No check is made for an
+     * existing entry with the same layer/technology, so duplicates are allowed.
      *
-     * @param inputDTO properties dataset containing the development reference and technology details
-     * @return the newly created snapshot parameters state model
+     * @param inputDTO the development reference, layer, technology, version and architecture
+     * @return the mapped output DTO for the newly created record
      */
     @Override
     public AppTechnologyOutputDTO create(AppTechnologyInputDTO inputDTO) {
@@ -72,12 +79,13 @@ public class AppTechnologyServiceFacadeBean implements AppTechnologyService {
     }
 
     /**
-     * Modifies mutable tracking variables belonging to an active existing technology record.
+     * Updates an existing technology record in place. Does not check {@code deletedAt}, so a
+     * soft-deleted record can still be updated through this method.
      *
-     * @param id       targeted structural identifier element index
-     * @param inputDTO property data variables mapping structural items to be merged
-     * @return current modified configuration state properties details wrapper
-     * @throws BusinessRuleException if target record is missing or logically deactivated
+     * @param id       the technology record's own identifier
+     * @param inputDTO the replacement field values to merge onto the existing record
+     * @return the mapped output DTO reflecting the applied changes
+     * @throws BusinessRuleException if no technology record exists with this id
      */
     @Override
     public AppTechnologyOutputDTO update(Long id, AppTechnologyInputDTO inputDTO) {
@@ -95,10 +103,12 @@ public class AppTechnologyServiceFacadeBean implements AppTechnologyService {
     }
 
     /**
-     * Executes soft deactivation over the targeted technology record.
+     * Soft-deletes a technology record: stamps {@code deletedAt}/{@code deletedBy} and persists
+     * them, without removing the row.
      *
-     * @param id persistent tracking row database reference index targeting removal execution paths
-     * @throws BusinessRuleException if target data element cannot be resolved or has already undergone soft deactivation
+     * @param id the technology record's own identifier
+     * @throws BusinessRuleException if no technology record exists with this id, or it is already
+     * soft-deleted ({@code deletedAt} already set)
      */
     @Override
     public void delete(Long id) {

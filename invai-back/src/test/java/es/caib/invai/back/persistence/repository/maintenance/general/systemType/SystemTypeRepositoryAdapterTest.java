@@ -21,11 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,7 +102,7 @@ class SystemTypeRepositoryAdapterTest {
         adapter = buildAdapter();
         when(systemTypeJPARepository.existsByNameAndDeletedAtIsNull("REST API")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("REST API"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("REST API"));
     }
 
     @Test
@@ -114,7 +110,23 @@ class SystemTypeRepositoryAdapterTest {
         adapter = buildAdapter();
         when(systemTypeJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("REST API", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("REST API", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("REST API", 1L));
+    }
+
+    @Test
+    void existsByNameEsAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(systemTypeJPARepository.existsByNameEsAndDeletedAtIsNull("REST API ES")).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndDeletedAtIsNull("REST API ES"));
+    }
+
+    @Test
+    void existsByNameEsAndIdNotAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(systemTypeJPARepository.existsByNameEsAndIdNotAndDeletedAtIsNull("REST API ES", 1L)).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndIdNotAndDeletedAtIsNull("REST API ES", 1L));
     }
 
     @Test
@@ -143,8 +155,8 @@ class SystemTypeRepositoryAdapterTest {
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());
-        assertNotNull(aud.getUpdatedAt());
-        assertEquals("SYSTEM_USER", aud.getUpdatedBy());
+        assertNull(aud.getUpdatedAt());
+        assertNull(aud.getUpdatedBy());
         assertNotNull(aud.getAuditDate());
         assertEquals("SYSTEM_USER", aud.getAuditUser());
     }

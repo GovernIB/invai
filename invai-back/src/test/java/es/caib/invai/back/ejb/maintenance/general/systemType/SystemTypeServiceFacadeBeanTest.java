@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.general.systemType;
 
-import es.caib.invai.back.ejb.maintenance.general.systemType.SystemTypeServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.general.systemType.DTO.SystemTypeInputDTO;
 import es.caib.invai.back.interna.maintenance.general.systemType.DTO.SystemTypeOutputDTO;
@@ -23,9 +22,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -79,7 +76,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.getById(99L));
-        assertEquals(Constants.SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -123,7 +120,20 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.existsByNameAndDeletedAtIsNull("Taken Type")).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.create(inputDTO));
-        assertEquals(Constants.SYSTEM_TYPE_DUPLICATED, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_DUPLICATED, ex.getMessage());
+        verify(systemTypeRepository, never()).create(any());
+    }
+
+    @Test
+    void create_duplicateNameEs_throwsBusinessRuleException() {
+        SystemTypeInputDTO inputDTO = new SystemTypeInputDTO();
+        inputDTO.setName("New Type");
+        inputDTO.setNameEs("Tipo ocupado");
+        when(systemTypeRepository.existsByNameAndDeletedAtIsNull("New Type")).thenReturn(false);
+        when(systemTypeRepository.existsByNameEsAndDeletedAtIsNull("Tipo ocupado")).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.create(inputDTO));
+        assertEquals(Constants.ERR_SYSTEM_TYPE_DUPLICATED_ES, ex.getMessage());
         verify(systemTypeRepository, never()).create(any());
     }
 
@@ -135,7 +145,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.update(99L, inputDTO));
-        assertEquals(Constants.SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -147,7 +157,21 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.existsByNameAndIdNotAndDeletedAtIsNull("Taken", 1L)).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.update(1L, inputDTO));
-        assertEquals(Constants.SYSTEM_TYPE_DUPLICATED, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_DUPLICATED, ex.getMessage());
+        verify(systemTypeMapper, never()).updateModelFromInput(any(), any());
+    }
+
+    @Test
+    void update_duplicateNameEs_throwsBusinessRuleException() {
+        SystemTypeInputDTO inputDTO = new SystemTypeInputDTO();
+        inputDTO.setName("Taken");
+        inputDTO.setNameEs("Ocupado");
+        when(systemTypeRepository.findById(1L)).thenReturn(activeSystemType);
+        when(systemTypeRepository.existsByNameAndIdNotAndDeletedAtIsNull("Taken", 1L)).thenReturn(false);
+        when(systemTypeRepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Ocupado", 1L)).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.update(1L, inputDTO));
+        assertEquals(Constants.ERR_SYSTEM_TYPE_DUPLICATED_ES, ex.getMessage());
         verify(systemTypeMapper, never()).updateModelFromInput(any(), any());
     }
 
@@ -174,7 +198,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.delete(99L));
-        assertEquals(Constants.SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -183,7 +207,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.findById(1L)).thenReturn(activeSystemType);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.delete(1L));
-        assertEquals(Constants.SYSTEM_TYPE_NOT_ACTIVE, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_NOT_ACTIVE, ex.getMessage());
     }
 
     @Test
@@ -192,7 +216,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(applicationRepository.existsBySystemTypeId(1L)).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.delete(1L));
-        assertEquals(Constants.SYSTEM_TYPE_DELETE_HAS_DEPENDENCIES, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_DELETE_HAS_DEPENDENCIES, ex.getMessage());
         verify(systemTypeRepository, never()).delete(any());
     }
 
@@ -203,7 +227,7 @@ class SystemTypeServiceFacadeBeanTest {
 
         systemTypeServiceFacadeBean.delete(1L);
 
-        assertEquals(activeSystemType.getDeletedAt() != null, true);
+        assertNotNull(activeSystemType.getDeletedAt());
         verify(systemTypeRepository, times(1)).delete(activeSystemType);
     }
 
@@ -212,7 +236,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.reactivate(99L));
-        assertEquals(Constants.SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_NOT_FOUND, ex.getMessage());
     }
 
     @Test
@@ -220,7 +244,7 @@ class SystemTypeServiceFacadeBeanTest {
         when(systemTypeRepository.findById(1L)).thenReturn(activeSystemType);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> systemTypeServiceFacadeBean.reactivate(1L));
-        assertEquals(Constants.SYSTEM_TYPE_ACTIVE, ex.getMessage());
+        assertEquals(Constants.ERR_SYSTEM_TYPE_ACTIVE, ex.getMessage());
     }
 
     @Test

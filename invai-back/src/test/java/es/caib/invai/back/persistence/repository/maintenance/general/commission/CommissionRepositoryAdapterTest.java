@@ -23,11 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -108,7 +104,7 @@ class CommissionRepositoryAdapterTest {
         adapter = buildAdapter();
         when(commissionJPARepository.existsByNameAndDeletedAtIsNull("Governance")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("Governance"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("Governance"));
     }
 
     @Test
@@ -116,7 +112,23 @@ class CommissionRepositoryAdapterTest {
         adapter = buildAdapter();
         when(commissionJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("Governance", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("Governance", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("Governance", 1L));
+    }
+
+    @Test
+    void existsByNameEsAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(commissionJPARepository.existsByNameEsAndDeletedAtIsNull("Governance ES")).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndDeletedAtIsNull("Governance ES"));
+    }
+
+    @Test
+    void existsByNameEsAndIdNotAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(commissionJPARepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Governance ES", 1L)).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndIdNotAndDeletedAtIsNull("Governance ES", 1L));
     }
 
     @Test
@@ -124,7 +136,7 @@ class CommissionRepositoryAdapterTest {
         adapter = buildAdapter();
         when(commissionJPARepository.existsByExpedientNumberAndDeletedAtIsNull("EXP-001")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByExpedientNumberAndDeletedAtIsNull("EXP-001"));
+        assertTrue(adapter.existsByExpedientNumberAndDeletedAtIsNull("EXP-001"));
     }
 
     @Test
@@ -132,7 +144,7 @@ class CommissionRepositoryAdapterTest {
         adapter = buildAdapter();
         when(commissionJPARepository.existsByExpedientNumberAndIdNotAndDeletedAtIsNull("EXP-001", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByExpedientNumberAndIdNotAndDeletedAtIsNull("EXP-001", 1L));
+        assertTrue(adapter.existsByExpedientNumberAndIdNotAndDeletedAtIsNull("EXP-001", 1L));
     }
 
     @Test
@@ -167,8 +179,8 @@ class CommissionRepositoryAdapterTest {
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());
-        assertNotNull(aud.getUpdatedAt());
-        assertEquals("SYSTEM_USER", aud.getUpdatedBy());
+        assertNull(aud.getUpdatedAt());
+        assertNull(aud.getUpdatedBy());
         assertNotNull(aud.getAuditDate());
         assertEquals("SYSTEM_USER", aud.getAuditUser());
     }

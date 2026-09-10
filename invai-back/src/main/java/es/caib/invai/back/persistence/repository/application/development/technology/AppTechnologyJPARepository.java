@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Spring Data Native Bridge Interface infrastructure for root Entity.
+ * Spring Data JPA repository for {@link AppTechnologyEntity}, with specification support for
+ * dynamic criteria filtering (see {@link AppTechnologySpecification}).
  *
  * @since 1.0.2
  */

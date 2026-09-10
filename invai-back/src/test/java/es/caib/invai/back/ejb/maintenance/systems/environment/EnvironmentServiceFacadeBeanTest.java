@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.systems.environment;
 
-import es.caib.invai.back.ejb.maintenance.systems.environment.EnvironmentServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.systems.environment.DTO.EnvironmentInputDTO;
 import es.caib.invai.back.interna.maintenance.systems.environment.DTO.EnvironmentOutputDTO;
@@ -22,9 +21,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -143,14 +140,8 @@ class EnvironmentServiceFacadeBeanTest {
         assertEquals(Constants.ERR_ENVIRONMENT_NOT_FOUND, ex.getMessage());
     }
 
-    /**
-     * Real behavior note: {@code EnvironmentServiceFacadeBean.update} throws
-     * {@code Constants.ERR_DATABASE_DUPLICATED} (not {@code ERR_ENVIRONMENT_DUPLICATED}) when the
-     * code collides with another active environment - this looks like a copy/paste bug in production
-     * code, but the test asserts the actual current behavior.
-     */
     @Test
-    void update_duplicateCode_throwsBusinessRuleExceptionWithDatabaseDuplicatedConstant() {
+    void update_duplicateCode_throwsBusinessRuleException() {
         EnvironmentInputDTO inputDTO = new EnvironmentInputDTO();
         inputDTO.setCode("Taken");
         inputDTO.setName("Nom");
@@ -159,7 +150,7 @@ class EnvironmentServiceFacadeBeanTest {
         when(environmentRepository.existsByCodeAndIdNot("Taken", 1L)).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> environmentServiceFacadeBean.update(1L, inputDTO));
-        assertEquals(Constants.ERR_DATABASE_DUPLICATED, ex.getMessage());
+        assertEquals(Constants.ERR_ENVIRONMENT_DUPLICATED, ex.getMessage());
         verify(environmentMapper, never()).updateModelFromInput(any(), any());
     }
 
@@ -210,7 +201,7 @@ class EnvironmentServiceFacadeBeanTest {
 
         environmentServiceFacadeBean.delete(1L);
 
-        assertEquals(activeEnvironment.getDeletedAt() != null, true);
+        assertNotNull(activeEnvironment.getDeletedAt());
         verify(environmentRepository, times(1)).delete(activeEnvironment);
     }
 

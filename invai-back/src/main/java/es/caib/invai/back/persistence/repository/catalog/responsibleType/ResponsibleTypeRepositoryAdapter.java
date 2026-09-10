@@ -29,14 +29,14 @@ public class ResponsibleTypeRepositoryAdapter implements ResponsibleTypeReposito
 
     @Override
     public List<ResponsibleType> findAll() {
-        log.info("Repository: Fetching every responsible type lookup entry");
+        log.debug("Repository: Fetching every responsible type lookup entry");
         List<LkupResponsibleTypeEntity> entities = responsibleTypeJPARepository.findAll(Sort.by("name"));
         return responsibleTypeMapper.toModelList(entities);
     }
 
     @Override
     public ResponsibleType findById(Long id) {
-        log.info("Repository: Fetching responsible type lookup entry by ID: {}", id);
+        log.debug("Repository: Fetching responsible type lookup entry by ID: {}", id);
         return responsibleTypeJPARepository.findById(id)
                 .map(responsibleTypeMapper::toModel)
                 .orElse(null);

@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Server infrastructure metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.2
@@ -57,7 +57,7 @@ public class ServerController {
     public ResponseEntity<Page<ServerOutputDTO>> getAll(
             @ModelAttribute ServerCriteria filter,
             @PageableDefault(sort = "id") Pageable pageable) {
-        log.info("REST: Initiating multi-criteria fetch grid search query parameters");
+        log.debug("REST: Initiating multi-criteria fetch grid search query parameters");
         Page<ServerOutputDTO> multiQueryResult = serverService.getAll(filter, pageable);
         return ResponseEntity.ok(multiQueryResult);
     }
@@ -70,7 +70,7 @@ public class ServerController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<ServerOutputDTO> getById(@PathVariable Long id) {
-        log.info("REST: Fetching server by ID: {}", id);
+        log.debug("REST: Fetching server by ID: {}", id);
         return ResponseEntity.ok(serverService.getById(id));
     }
 

@@ -13,8 +13,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Outbound transport payload detailing the main application development module state,
- * aggregating resolved application, environment, and lookup entity snapshots.
+ * Read-side counterpart of {@link DevelopmentInputDTO} for the "AppDevelopment" tab record: the
+ * same fields, but with the {@code applicationId}, {@code environmentId}, {@code modalityId} and
+ * {@code standardAdaptionId} foreign keys resolved to their full nested DTOs/lookup objects for
+ * display, plus {@code id} and {@code deletedAt}.
  *
  * @since 1.0.2
  */
@@ -27,7 +29,7 @@ public class DevelopmentOutputDTO {
 
     /** Primary key of this development record. */
     private Long id;
-    /** Resolved parent corporate application snapshot. */
+    /** The parent application this development record belongs to. */
     private ApplicationOutputDTO application;
     /** Resolved target deployment environment snapshot. */
     private EnvironmentOutputDTO environment;

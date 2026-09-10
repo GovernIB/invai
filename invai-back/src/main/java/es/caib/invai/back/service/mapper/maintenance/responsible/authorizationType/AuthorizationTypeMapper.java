@@ -48,6 +48,7 @@ public interface AuthorizationTypeMapper {
      * @param inputDTO the input DTO to convert
      * @return the corresponding domain model
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -63,6 +64,7 @@ public interface AuthorizationTypeMapper {
      * @param inputDTO the input DTO providing the new values
      * @param model the existing domain model to update
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

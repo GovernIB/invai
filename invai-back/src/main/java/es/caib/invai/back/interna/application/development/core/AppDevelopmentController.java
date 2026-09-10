@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 /**
- * Primary Inbound REST Adapter providing exposed endpoints for administrative operations
- * targeting the main Application Development module detail under CAIB governance.
+ * REST endpoints for the "AppDevelopment" tab (single development record per application, see
+ * {@link es.caib.invai.back.service.model.application.development.core.AppDevelopment}). All
+ * endpoints require {@code ROLE_INV_SUPER}.
  *
  * @since 1.0.2
  */
@@ -33,26 +34,28 @@ public class AppDevelopmentController {
     private final AppDevelopmentService appDevelopmentService;
 
     /**
-     * Retrieves a paginated sequence of development records scoped to a single parent application.
-     * The application identifier is a mandatory path variable: this endpoint never lists every
-     * development record in the database.
+     * Fetches a development record by its own primary key ({@code id} here is the development
+     * record's id, not the parent application's id — see
+     * {@link es.caib.invai.back.ejb.application.development.core.AppDevelopmentServiceFacadeBean#getById}).
+     * Returns a single object, not a page.
      *
-     * @param id mandatory parent application identifier scoping the result set
-     * @return a paginated payload containing corresponding transfer representations
+     * @param id the development record's own identifier
+     * @return 200 with the mapped development DTO
      */
     @GetMapping("/{id}")
     public ResponseEntity<DevelopmentOutputDTO> getById(
             @PathVariable Long id) {
-        log.info("REST: Initiating dynamic paginated search operation for Application ID: {}", id);
+        log.debug("REST: Initiating dynamic paginated search operation for Application ID: {}", id);
         DevelopmentOutputDTO targetPage = appDevelopmentService.getById(id);
         return ResponseEntity.ok(targetPage);
     }
 
     /**
-     * Executes a transactional instantiation command to persist a new development record.
+     * Creates the development record for an application, rejecting the request if that application
+     * already has an active one (see the 1-to-1 enforcement in the facade's {@code create}).
      *
-     * @param inputDTO validated data configuration schema
-     * @return outbound structural representation of the newly created entity
+     * @param inputDTO the application, environment and lookup references for the new record
+     * @return 201 with the mapped development DTO
      */
     @PostMapping
     public ResponseEntity<DevelopmentOutputDTO> create(@Valid @RequestBody DevelopmentInputDTO inputDTO) {
@@ -62,11 +65,11 @@ public class AppDevelopmentController {
     }
 
     /**
-     * Updates an active development registry with modified metadata parameters.
+     * Updates an existing development record in place.
      *
-     * @param id       primary corporate tracking reference key
-     * @param inputDTO mutated parameter dataset structures
-     * @return updated transfer data mapping payload state
+     * @param id       the development record's own identifier
+     * @param inputDTO the replacement field values
+     * @return 200 with the mapped development DTO reflecting the applied changes
      */
     @PutMapping("/{id}")
     public ResponseEntity<DevelopmentOutputDTO> update(
@@ -77,10 +80,11 @@ public class AppDevelopmentController {
     }
 
     /**
-     * Transitions a target development record into an inactive state by enforcing logical deletion structures.
+     * Soft-deletes a development record (stamps {@code deletedAt}/{@code deletedBy}); the row itself
+     * is not removed.
      *
-     * @param id target primary structural key to process for deprecation
-     * @return an empty response body confirming success status
+     * @param id the development record's own identifier
+     * @return 204 with no body
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

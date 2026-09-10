@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 /**
- * Spring Data Native Bridge Interface infrastructure for the {@link AppAuthorizedTypeLinkEntity} join.
+ * Spring Data JPA repository providing CRUD access to the {@link AppAuthorizedTypeLinkEntity} join.
  *
  * @since 1.0.3
  */

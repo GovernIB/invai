@@ -7,44 +7,48 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Domain Boundary Outbound Port interfacing the internal transactional domain operations
- * targeting provider assignments linked to development modules.
+ * Facade contract for the "AppProvider" list: provider (company) assignments hanging many-to-one
+ * off a single development record. See
+ * {@link es.caib.invai.back.ejb.application.development.provider.AppProviderServiceFacadeBean} for
+ * the implementation.
  *
  * @since 1.0.2
  */
 public interface AppProviderService {
 
     /**
-     * Retrieves a paginated sequence of provider records scoped to a single parent development module.
+     * Fetches the providers assigned to a single development, filtered by {@code criteria} and paged.
      *
-     * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         the multi-parameter business query filter boundaries
-     * @param pageable         pagination structural constraints
-     * @return a paginated payload containing corresponding transfer representations
+     * @param appDevelopmentId identifier of the owning development record
+     * @param criteria         optional additional filters (status, search)
+     * @param pageable         pagination and sorting parameters
+     * @return a page of mapped provider DTOs
      */
     Page<AppProviderOutputDTO> getAll(Long appDevelopmentId, AppProviderCriteria criteria, Pageable pageable);
 
     /**
-     * Registers a new provider assignment record.
+     * Creates a new provider assignment. Duplicates (same company/role on the same development)
+     * are not rejected.
      *
-     * @param inputDTO validated data configuration schema
-     * @return outbound structural representation of the newly created entity
+     * @param inputDTO the development reference, company name, role, and contract dates
+     * @return the mapped output DTO for the newly created record
      */
     AppProviderOutputDTO create(AppProviderInputDTO inputDTO);
 
     /**
-     * Updates an active provider record with modified metadata parameters.
+     * Updates an existing provider record in place.
      *
-     * @param id       primary corporate tracking reference key
-     * @param inputDTO mutated parameter dataset structures
-     * @return updated transfer data mapping payload state
+     * @param id       the provider record's own identifier
+     * @param inputDTO the replacement field values to merge onto the existing record
+     * @return the mapped output DTO reflecting the applied changes
      */
     AppProviderOutputDTO update(Long id, AppProviderInputDTO inputDTO);
 
     /**
-     * Transitions a target provider record into an inactive state by enforcing logical deletion structures.
+     * Soft-deletes a provider record (stamps {@code deletedAt}/{@code deletedBy}); the row itself
+     * is not removed.
      *
-     * @param id target primary structural key to process for deprecation
+     * @param id the provider record's own identifier
      */
     void delete(Long id);
 }

@@ -45,7 +45,7 @@ public class ModalityController {
      */
     @GetMapping
     public ResponseEntity<List<ModalityOutputDTO>> getAll() {
-        log.info("REST: Fetching every modality lookup entry");
+        log.debug("REST: Fetching every modality lookup entry");
         return ResponseEntity.ok(modalityService.getAll());
     }
 }

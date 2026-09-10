@@ -21,11 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,7 +102,7 @@ class EnvironmentRepositoryAdapterTest {
         adapter = buildAdapter();
         when(environmentJPARepository.existsByCodeAndDeletedAtIsNull("PRO")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByCode("PRO"));
+        assertTrue(adapter.existsByCode("PRO"));
     }
 
     @Test
@@ -114,7 +110,7 @@ class EnvironmentRepositoryAdapterTest {
         adapter = buildAdapter();
         when(environmentJPARepository.existsByCodeAndIdNotAndDeletedAtIsNull("PRO", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByCodeAndIdNot("PRO", 1L));
+        assertTrue(adapter.existsByCodeAndIdNot("PRO", 1L));
     }
 
     @Test
@@ -145,8 +141,8 @@ class EnvironmentRepositoryAdapterTest {
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());
-        assertNotNull(aud.getUpdatedAt());
-        assertEquals("SYSTEM_USER", aud.getUpdatedBy());
+        assertNull(aud.getUpdatedAt());
+        assertNull(aud.getUpdatedBy());
         assertNotNull(aud.getAuditDate());
         assertEquals("SYSTEM_USER", aud.getAuditUser());
     }

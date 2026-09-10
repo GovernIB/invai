@@ -196,7 +196,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void delete_personHasActiveResponsibilityOnActiveApplication_throwsBusinessRuleException() {
-        Person person = person(10L, 1L, false);
+        Person person = person(10L, 1L);
         AppResponsibleAuthorized activeAnchor = AppResponsibleAuthorized.builder().id(40L).build();
         AppResponsible responsible = AppResponsible.builder().id(100L).appResponsibleAuthorized(activeAnchor).build();
         when(companyRepository.findById(1L)).thenReturn(activeCompany);
@@ -212,7 +212,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void delete_personHasActiveResponsibilityOnInactiveApplication_doesNotBlockAndCascadesCloseOut() {
-        Person person = person(10L, 1L, false);
+        Person person = person(10L, 1L);
         AppResponsibleAuthorized inactiveAnchor = AppResponsibleAuthorized.builder().id(40L).deletedAt(LocalDateTime.now()).build();
         AppResponsible responsible = AppResponsible.builder().id(100L).appResponsibleAuthorized(inactiveAnchor).build();
         when(companyRepository.findById(1L)).thenReturn(activeCompany);
@@ -230,7 +230,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void delete_personHasActiveAuthorizationOnActiveApplicationWithNoExternalBackup_throwsBusinessRuleException() {
-        Person person = person(10L, 1L, false);
+        Person person = person(10L, 1L);
         AppResponsibleAuthorized activeAnchor = AppResponsibleAuthorized.builder().id(40L).build();
         AppAuthorized authorized = AppAuthorized.builder().id(200L).appResponsibleAuthorized(activeAnchor).person(person).build();
         when(companyRepository.findById(1L)).thenReturn(activeCompany);
@@ -248,8 +248,8 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void delete_personHasActiveAuthorizationOnActiveApplicationWithExternalBackup_allowsDeletionAndCascadesDeactivatesIt() {
-        Person person = person(10L, 1L, false);
-        Person externalPerson = person(20L, 2L, false);
+        Person person = person(10L, 1L);
+        Person externalPerson = person(20L, 2L);
         AppResponsibleAuthorized activeAnchor = AppResponsibleAuthorized.builder().id(40L).build();
         AppAuthorized authorized = AppAuthorized.builder().id(200L).appResponsibleAuthorized(activeAnchor).person(person).build();
         AppAuthorized externalAuthorized = AppAuthorized.builder().id(201L).appResponsibleAuthorized(activeAnchor).person(externalPerson).build();
@@ -270,7 +270,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void delete_personHasActiveAuthorizationBackedByCaibPerson_allowsDeletion() {
-        Person person = person(10L, 1L, false);
+        Person person = person(10L, 1L);
         Person caibPerson = new Person();
         caibPerson.setId(30L);
         caibPerson.setPersonalCaib(true);
@@ -288,10 +288,10 @@ class CompanyServiceFacadeBeanTest {
         verify(companyRepository).delete(activeCompany);
     }
 
-    private static Person person(Long id, Long companyId, boolean personalCaib) {
+    private static Person person(Long id, Long companyId) {
         Person person = new Person();
         person.setId(id);
-        person.setPersonalCaib(personalCaib);
+        person.setPersonalCaib(false);
         Company company = new Company();
         company.setId(companyId);
         person.setCompany(company);

@@ -100,7 +100,6 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/auth/**").authenticated()
                                 .requestMatchers("/**").hasAnyRole("INV_SUPER")
-                                .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> {
                     oauth.authorizationEndpoint(authorization ->

@@ -55,7 +55,7 @@ public class SystemServiceFacadeBean implements SystemService {
     @Override
     @Transactional(readOnly = true)
     public SystemOutputDTO getById(Long id) {
-        log.info("Facade: Fetching system by ID: {}", id);
+        log.debug("Facade: Fetching system by ID: {}", id);
         System system = systemRepository.findById(id);
 
         if (system == null) {
@@ -74,7 +74,7 @@ public class SystemServiceFacadeBean implements SystemService {
     @Override
     @Transactional(readOnly = true)
     public Page<SystemOutputDTO> getAll(SystemCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching systems via pagination boundaries");
+        log.debug("Facade: Fetching systems via pagination boundaries");
         Page<System> domainPage = systemRepository.findAll(filter, pageable);
         return domainPage.map(systemMapper::toResponse);
     }

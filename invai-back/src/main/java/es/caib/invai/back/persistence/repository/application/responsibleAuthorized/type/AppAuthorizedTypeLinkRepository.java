@@ -5,8 +5,8 @@ import es.caib.invai.back.service.model.application.responsibleAuthorized.type.A
 import java.util.List;
 
 /**
- * Core business domain outbound Port boundary interface declaring relational persistence mechanisms
- * for the {@link AppAuthorizedTypeLink} intermediate join table. This join is never exposed
+ * Persistence port abstraction decoupling the service layer from the JPA infrastructure used to
+ * store the {@link AppAuthorizedTypeLink} intermediate join table. This join is never exposed
  * through its own REST controller: it is only manipulated internally by the anchor's service
  * facade. Deliberately lightweight: {@code delete} is a plain hard delete, there is no
  * soft-delete/audit trail on this table.

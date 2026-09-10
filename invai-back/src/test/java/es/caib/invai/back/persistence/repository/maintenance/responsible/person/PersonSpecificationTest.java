@@ -5,6 +5,7 @@ import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
@@ -52,8 +53,8 @@ class PersonSpecificationTest {
         lenient().when(root.<String>get(anyString())).thenReturn(path);
         lenient().when(path.<String>get(anyString())).thenReturn(path);
         lenient().when(cb.lower(any())).thenReturn(path);
-        lenient().when(cb.concat(any(Expression.class), anyString())).thenReturn(path);
-        lenient().when(cb.concat(any(Expression.class), any(Expression.class))).thenReturn(path);
+        lenient().when(cb.concat(ArgumentMatchers.any(), anyString())).thenReturn(path);
+        lenient().when(cb.concat(ArgumentMatchers.<Expression<String>>any(), ArgumentMatchers.<Expression<String>>any())).thenReturn(path);
         lenient().when(cb.like(any(), anyString())).thenReturn(predicate);
         lenient().when(cb.equal(any(), any())).thenReturn(predicate);
         lenient().when(cb.notEqual(any(), any())).thenReturn(predicate);
@@ -73,7 +74,7 @@ class PersonSpecificationTest {
 
         assertNotNull(result);
         verify(cb).isFalse(any());
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb).and(predicate);
     }
 
     @Test

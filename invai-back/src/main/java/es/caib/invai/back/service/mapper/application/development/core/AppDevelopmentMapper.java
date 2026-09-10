@@ -8,51 +8,56 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
 import es.caib.invai.back.service.mapper.catalog.modality.ModalityMapper;
 import es.caib.invai.back.service.mapper.catalog.standardAdaption.StandardAdaptionMapper;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
 
 /**
- * MapStruct data mapping abstraction interface providing structural state conversions across
- * Development relation entities, business domain models, and API transfer schemas.
+ * MapStruct mapper converting between {@link AppDevelopment} domain models, {@link AppDevelopmentEntity}
+ * persistence entities, and the development input/output DTOs, resolving the modality, standard
+ * adaption, and application lookup references along the way.
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {ModalityMapper.class, StandardAdaptionMapper.class, StatusMapper.class})
+@Mapper(componentModel = "spring", uses = {ModalityMapper.class, StandardAdaptionMapper.class, StatusMapper.class, ApplicationMapper.class})
 public interface AppDevelopmentMapper {
 
     /**
-     * Materializes a persistent relation entity into a business domain aggregate.
+     * Maps a persistence {@link AppDevelopmentEntity} to its corresponding {@link AppDevelopment} domain model.
      *
-     * @param entity the persistent relation entity source node
-     * @return a clean domain business layout graph
+     * @param entity the JPA entity to convert
+     * @return the mapped domain model
      */
     AppDevelopment toModel(AppDevelopmentEntity entity);
 
     /**
-     * Maps business domain representations down to persistent relation database entities.
+     * Maps an {@link AppDevelopment} domain model to its corresponding {@link AppDevelopmentEntity} persistence entity.
      *
-     * @param model the active composite business domain model node
-     * @return a mapped relational database entity layout
+     * @param model the domain model to convert
+     * @return the mapped JPA entity
      */
     AppDevelopmentEntity toEntity(AppDevelopment model);
 
     /**
-     * Flattens and structuralizes domain graphs into outbound API presentation response layers.
+     * Maps an {@link AppDevelopment} domain model to an outbound {@link DevelopmentOutputDTO}.
+     * Returns {@code null} when {@code model} is {@code null}, so {@code getById} on a missing
+     * record silently comes back as {@code null} rather than throwing.
      *
-     * @param model source domain business state schema instance
-     * @return the outbound presentation API data carrier DTO
+     * @param model the domain model to convert, may be {@code null}
+     * @return the mapped outbound DTO, or {@code null} if {@code model} is {@code null}
      */
     DevelopmentOutputDTO toResponse(AppDevelopment model);
 
     /**
-     * Maps incoming flat reference fields into a decoupled domain state instance,
-     * resolving relationship IDs (application, environment, modality, standard adaption) to their
-     * respective nested model IDs, while ignoring audit fields.
+     * Maps an inbound {@link DevelopmentInputDTO} to a new {@link AppDevelopment} domain model,
+     * resolving the application, environment, modality and standard adaption references, and
+     * leaving the id and audit metadata fields unset.
      *
-     * @param inputDTO inbound client creation payload containing mapping configuration
-     * @return a decoupled domain state instance ready for orchestration processing pipelines
+     * @param inputDTO the inbound DTO containing development data
+     * @return the mapped domain model
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "application.id", source = "applicationId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "environment.id", source = "environmentId")
     @Mapping(target = "modality", source = "modalityId")
@@ -66,12 +71,14 @@ public interface AppDevelopmentMapper {
     AppDevelopment toModelFromInput(DevelopmentInputDTO inputDTO);
 
     /**
-     * Integrates update parameters from flat payload tracking definitions directly over an active
-     * business entity, avoiding logical soft-delete and primary key attribute modifications.
+     * Applies the values of an inbound {@link DevelopmentInputDTO} onto an existing {@link AppDevelopment}
+     * domain model in place, resolving the application, environment, modality and standard adaption
+     * references, and leaving the id and audit metadata fields untouched.
      *
-     * @param inputDTO delta parameter updates tracking values payload DTO
-     * @param model    the active operational business graph container targeted for modifier updates
+     * @param inputDTO the inbound DTO containing updated development data
+     * @param model    the existing domain model to update
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "application.id", source = "applicationId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "environment.id", source = "environmentId")
     @Mapping(target = "modality", source = "modalityId")

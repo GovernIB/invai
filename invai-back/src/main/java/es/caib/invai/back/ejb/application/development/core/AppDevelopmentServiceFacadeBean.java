@@ -17,8 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Facade service implementation for managing the main application development module detail.
- * Orchestrates transactional mechanics, model mapping mutations, and validation constraints verification.
+ * Facade service for the "AppDevelopment" tab: the single development record attached 1-to-1 to an
+ * {@link es.caib.invai.back.service.model.application.core.Application} (see {@code applicationId} on
+ * {@link AppDevelopment}). Unlike {@link es.caib.invai.back.ejb.application.development.provider.AppProviderServiceFacadeBean}
+ * and {@link es.caib.invai.back.ejb.application.development.technology.AppTechnologyServiceFacadeBean},
+ * which manage lists hanging off a development record, this facade has no list-scoped {@code getAll}:
+ * {@link #create} refuses a second active record for the same application, and {@link #getById} looks
+ * the record up by its own primary key rather than by application id.
  *
  * @since 1.0.2
  */
@@ -27,38 +32,52 @@ import java.time.LocalDateTime;
 @Transactional
 public class AppDevelopmentServiceFacadeBean implements AppDevelopmentService {
 
-    /** MapStruct mapper handling transformations between entities, domain models, and DTO layouts. */
+    /** Mapper between {@link AppDevelopment}, its entity, and the development input/output DTOs. */
     @Autowired
     private AppDevelopmentMapper appDevelopmentMapper;
 
-    /** Infrastructure outbound repository port managing relational lifecycle data operations. */
+    /** Repository handling persistence of {@link AppDevelopment} records. */
     @Autowired
     private AppDevelopmentRepository appDevelopmentRepository;
 
     /**
-     * Fetches a single development module detail record by its own primary key.
+     * Fetches a development record by its own primary key (not the parent application's id).
+     * Unlike {@link #update} and {@link #delete}, this does not check existence itself: if no
+     * record matches, {@code findById} returns {@code null} and the generated mapper's null-check
+     * passes that straight through, so this method silently returns {@code null} rather than
+     * throwing {@link BusinessRuleException}.
      *
-     * @param id mandatory development record identifier
-     * @return the mapped output representation of the resolved record
+     * @param id the development record's own identifier
+     * @return the mapped output DTO, or {@code null} if no record has this id
      */
     @Override
     @Transactional(readOnly = true)
     public DevelopmentOutputDTO getById(Long id) {
-        log.info("Facade: Fetching development record for ID: {}", id);
+        log.debug("Facade: Fetching development record for ID: {}", id);
         AppDevelopment domain = appDevelopmentRepository.findById(id);
         return appDevelopmentMapper.toResponse(domain);
     }
 
     /**
-     * Registers a new development module detail record for a corporate application.
+     * Creates the development record for an application. Enforces the 1-to-1 relationship: if an
+     * active (non-soft-deleted) development record already exists for {@code inputDTO.applicationId},
+     * creation is rejected rather than creating a second one. A previously soft-deleted record for
+     * the same application does not block this, since only {@code existing.getDeletedAt() == null}
+     * triggers the check.
      *
-     * @param inputDTO properties dataset containing the application, environment and lookup references
-     * @return the newly created snapshot parameters state model
+     * @param inputDTO the application, environment and lookup references for the new record
+     * @return the mapped output DTO for the newly created record
+     * @throws BusinessRuleException if the target application already has an active development record
      */
     @Override
     public DevelopmentOutputDTO create(DevelopmentInputDTO inputDTO) {
         log.info("Facade: Creating new development for Application ID: {} and Environment ID: {}",
                 inputDTO.getApplicationId(), inputDTO.getEnvironmentId());
+
+        AppDevelopment existing = appDevelopmentRepository.findByApplicationId(inputDTO.getApplicationId());
+        if (existing != null && existing.getDeletedAt() == null) {
+            throw new BusinessRuleException(Constants.ERR_DEVELOPMENT_ALREADY_EXISTS);
+        }
 
         Utils.sanitize(inputDTO);
 
@@ -68,12 +87,13 @@ public class AppDevelopmentServiceFacadeBean implements AppDevelopmentService {
     }
 
     /**
-     * Modifies mutable tracking variables belonging to an active existing development record.
+     * Updates an existing development record in place. Unlike {@link #create}, this does not check
+     * {@code deletedAt}, so a soft-deleted record can still be updated through this method.
      *
-     * @param id       targeted structural identifier element index
-     * @param inputDTO property data variables mapping structural items to be merged
-     * @return current modified configuration state properties details wrapper
-     * @throws BusinessRuleException if target record is missing or logically deactivated
+     * @param id       the development record's own identifier
+     * @param inputDTO the replacement field values to merge onto the existing record
+     * @return the mapped output DTO reflecting the applied changes
+     * @throws BusinessRuleException if no development record exists with this id
      */
     @Override
     public DevelopmentOutputDTO update(Long id, DevelopmentInputDTO inputDTO) {
@@ -91,10 +111,12 @@ public class AppDevelopmentServiceFacadeBean implements AppDevelopmentService {
     }
 
     /**
-     * Executes soft deactivation over the targeted development record.
+     * Soft-deletes a development record: stamps {@code deletedAt}/{@code deletedBy} and persists
+     * them, without removing the row.
      *
-     * @param id persistent tracking row database reference index targeting removal execution paths
-     * @throws BusinessRuleException if target data element cannot be resolved or has already undergone soft deactivation
+     * @param id the development record's own identifier
+     * @throws BusinessRuleException if no development record exists with this id, or it is already
+     * soft-deleted ({@code deletedAt} already set)
      */
     @Override
     public void delete(Long id) {

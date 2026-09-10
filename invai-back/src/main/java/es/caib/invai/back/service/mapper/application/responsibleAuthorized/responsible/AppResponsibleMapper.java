@@ -12,10 +12,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
- * MapStruct data mapping abstraction interface providing structural state conversions across
- * AppResponsible entities, their business domain model, and API transfer schemas. Delegates the
- * nested anchor, person, and responsible type sub-graphs to {@link AppResponsibleAuthorizedMapper},
- * {@link PersonMapper}, and {@link ResponsibleTypeMapper} respectively.
+ * MapStruct mapper converting between {@code AppResponsible} persistence entities, their business
+ * domain model, and the inbound/outbound AppResponsible DTOs. Delegates the nested anchor, person,
+ * and responsible type sub-graphs to {@link AppResponsibleAuthorizedMapper}, {@link PersonMapper},
+ * and {@link ResponsibleTypeMapper} respectively.
  *
  * @since 1.0.3
  */
@@ -54,6 +54,7 @@ public interface AppResponsibleMapper {
      * @param inputDTO the input payload to convert
      * @return the corresponding new domain model
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "appResponsibleAuthorized.id", source = "appResponsibleAuthorizedId")
     @Mapping(target = "person.id", source = "personId")
     @Mapping(target = "responsibleType.id", source = "responsibleTypeId")
@@ -74,6 +75,7 @@ public interface AppResponsibleMapper {
      * @param inputDTO the input payload with the new values
      * @param model the existing domain model to update
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "appResponsibleAuthorized.id", source = "appResponsibleAuthorizedId")
     @Mapping(target = "person.id", source = "personId")
     @Mapping(target = "responsibleType", ignore = true)

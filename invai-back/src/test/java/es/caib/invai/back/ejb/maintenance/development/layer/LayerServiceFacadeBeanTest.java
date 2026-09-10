@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.development.layer;
 
-import es.caib.invai.back.ejb.maintenance.development.layer.LayerServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.development.layer.DTO.LayerInputDTO;
 import es.caib.invai.back.interna.maintenance.development.layer.DTO.LayerOutputDTO;
@@ -24,9 +23,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -208,7 +205,7 @@ class LayerServiceFacadeBeanTest {
 
         layerServiceFacadeBean.delete(1L);
 
-        assertEquals(activeLayer.getDeletedAt() != null, true);
+        assertNotNull(activeLayer.getDeletedAt());
         verify(layerRepository, times(1)).delete(activeLayer);
     }
 

@@ -54,11 +54,11 @@ public class FieldServiceFacadeBean implements FieldService {
     @Override
     @Transactional(readOnly = true)
     public FieldOutputDTO getById(Long id) {
-        log.info("Facade: Fetching field by ID: {}", id);
+        log.debug("Facade: Fetching field by ID: {}", id);
         Field field = fieldRepository.findById(id);
 
         if (field == null) {
-            throw new BusinessRuleException(Constants.FIELD_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
         return fieldMapper.toResponse(field);
@@ -73,7 +73,7 @@ public class FieldServiceFacadeBean implements FieldService {
     @Override
     @Transactional(readOnly = true)
     public Page<FieldOutputDTO> getAll(FieldCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching fields via pagination boundaries");
+        log.debug("Facade: Fetching fields via pagination boundaries");
         Page<Field> domainPage = fieldRepository.findAll(filter, pageable);
         return domainPage.map(fieldMapper::toResponse);
     }
@@ -94,7 +94,10 @@ public class FieldServiceFacadeBean implements FieldService {
         Utils.sanitize(inputDTO);
 
         if (fieldRepository.existsByNameAndDeletedAtIsNull(inputDTO.getName())) {
-            throw new BusinessRuleException(Constants.FIELD_DUPLICATED);
+            throw new BusinessRuleException(Constants.ERR_FIELD_DUPLICATED);
+        }
+        if (fieldRepository.existsByNameEsAndDeletedAtIsNull(inputDTO.getNameEs())) {
+            throw new BusinessRuleException(Constants.ERR_FIELD_DUPLICATED_ES);
         }
 
         Field model = fieldMapper.toModelFromInput(inputDTO);
@@ -119,13 +122,16 @@ public class FieldServiceFacadeBean implements FieldService {
 
         Field existing = fieldRepository.findById(id);
         if (existing == null) {
-            throw new BusinessRuleException(Constants.FIELD_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
         Utils.sanitize(inputDTO);
 
         if (fieldRepository.existsByNameAndIdNotAndDeletedAtIsNull(inputDTO.getName(), id)) {
-            throw new BusinessRuleException(Constants.FIELD_DUPLICATED);
+            throw new BusinessRuleException(Constants.ERR_FIELD_DUPLICATED);
+        }
+        if (fieldRepository.existsByNameEsAndIdNotAndDeletedAtIsNull(inputDTO.getNameEs(), id)) {
+            throw new BusinessRuleException(Constants.ERR_FIELD_DUPLICATED_ES);
         }
 
         fieldMapper.updateModelFromInput(inputDTO, existing);
@@ -146,15 +152,15 @@ public class FieldServiceFacadeBean implements FieldService {
         Field existing = fieldRepository.findById(id);
 
         if (existing == null) {
-            throw new BusinessRuleException(Constants.FIELD_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
         if (existing.getDeletedAt() != null) {
-            throw new BusinessRuleException(Constants.FIELD_NOT_ACTIVE);
+            throw new BusinessRuleException(Constants.ERR_FIELD_NOT_ACTIVE);
         }
 
         if (applicationRepository.existsByFieldId(id)) {
-            throw new BusinessRuleException(Constants.FIELD_DELETE_HAS_DEPENDENCIES);
+            throw new BusinessRuleException(Constants.ERR_FIELD_DELETE_HAS_DEPENDENCIES);
         }
 
         existing.setDeletedAt(LocalDateTime.now());
@@ -176,11 +182,11 @@ public class FieldServiceFacadeBean implements FieldService {
         Field existing = fieldRepository.findById(id);
 
         if (existing == null) {
-            throw new BusinessRuleException(Constants.FIELD_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
         if (existing.getDeletedAt() == null) {
-            throw new BusinessRuleException(Constants.FIELD_ACTIVE);
+            throw new BusinessRuleException(Constants.ERR_FIELD_ACTIVE);
         }
 
         existing.setDeletedAt(null);

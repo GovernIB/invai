@@ -52,7 +52,7 @@ public class TechnologyServiceFacadeBean implements TechnologyService {
     @Override
     @Transactional(readOnly = true)
     public TechnologyOutputDTO getById(Long id) {
-        log.info("Facade: Fetching technology by ID: {}", id);
+        log.debug("Facade: Fetching technology by ID: {}", id);
         Technology technology = technologyRepository.findById(id);
 
         if (technology == null) {
@@ -72,7 +72,7 @@ public class TechnologyServiceFacadeBean implements TechnologyService {
     @Override
     @Transactional(readOnly = true)
     public Page<TechnologyOutputDTO> getAll(TechnologyCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching technologies via pagination boundaries");
+        log.debug("Facade: Fetching technologies via pagination boundaries");
         Page<Technology> domainPage = technologyRepository.findAll(filter, pageable);
         return domainPage.map(technologyMapper::toResponse);
     }

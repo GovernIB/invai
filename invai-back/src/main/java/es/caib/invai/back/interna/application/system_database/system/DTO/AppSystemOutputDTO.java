@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.application.system_database.system.DTO;
 import es.caib.invai.back.interna.application.system_database.core.DTO.AppInformationSystemDbOutputDTO;
 import es.caib.invai.back.interna.maintenance.systems.system.DTO.SystemOutputDTO;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppSystemOutputDTO {

@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 /**
- * Primary Inbound REST Adapter providing exposed endpoints for administrative operations
- * targeting provider assignments linked to Application Development modules under CAIB governance.
+ * REST endpoints for the "AppProvider" list: provider (company) assignments hanging many-to-one off
+ * a single {@code AppDevelopment} record. All endpoints require {@code ROLE_INV_SUPER}.
  *
  * @since 1.0.2
  */
@@ -37,30 +37,31 @@ public class AppProviderController {
     private final AppProviderService appProviderService;
 
     /**
-     * Retrieves a paginated sequence of provider records scoped to a single parent development
-     * module, additionally filtered by dynamic criteria. The development identifier is a mandatory
-     * path variable: this endpoint never lists every provider in the database.
+     * Fetches the providers assigned to a single development, filtered by {@code criteria} and
+     * paged. {@code appDevelopmentId} is always applied, so this never returns providers belonging
+     * to another development module.
      *
-     * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         the multi-parameter business query filter boundaries
-     * @param pageable         pagination structural constraints
-     * @return a paginated payload containing corresponding transfer representations
+     * @param appDevelopmentId identifier of the owning development record
+     * @param criteria         optional additional filters (status, search)
+     * @param pageable         pagination and sorting parameters, defaulting to sort by {@code id}
+     * @return 200 with a page of mapped provider DTOs
      */
     @GetMapping("/{appDevelopmentId}")
     public ResponseEntity<Page<AppProviderOutputDTO>> getAllByAppDevelopmentId(
             @PathVariable Long appDevelopmentId,
             @ModelAttribute AppProviderCriteria criteria,
             @PageableDefault(sort = "id") Pageable pageable) {
-        log.info("REST: Initiating dynamic paginated search operation for Development ID: {} and criteria: {}", appDevelopmentId, criteria);
+        log.debug("REST: Initiating dynamic paginated search operation for Development ID: {} and criteria: {}", appDevelopmentId, criteria);
         Page<AppProviderOutputDTO> targetPage = appProviderService.getAll(appDevelopmentId, criteria, pageable);
         return ResponseEntity.ok(targetPage);
     }
 
     /**
-     * Executes a transactional instantiation command to persist a new provider record.
+     * Creates a new provider assignment. Duplicates (same company/role on the same development)
+     * are not rejected.
      *
-     * @param inputDTO validated data configuration schema
-     * @return outbound structural representation of the newly created entity
+     * @param inputDTO the development reference, company name, role, and contract dates
+     * @return 201 with the mapped provider DTO
      */
     @PostMapping
     public ResponseEntity<AppProviderOutputDTO> create(@Valid @RequestBody AppProviderInputDTO inputDTO) {
@@ -70,11 +71,11 @@ public class AppProviderController {
     }
 
     /**
-     * Updates an active provider registry with modified metadata parameters.
+     * Updates an existing provider record in place.
      *
-     * @param id       primary corporate tracking reference key
-     * @param inputDTO mutated parameter dataset structures
-     * @return updated transfer data mapping payload state
+     * @param id       the provider record's own identifier
+     * @param inputDTO the replacement field values
+     * @return 200 with the mapped provider DTO reflecting the applied changes
      */
     @PutMapping("/{id}")
     public ResponseEntity<AppProviderOutputDTO> update(
@@ -85,10 +86,11 @@ public class AppProviderController {
     }
 
     /**
-     * Transitions a target provider record into an inactive state by enforcing logical deletion structures.
+     * Soft-deletes a provider record (stamps {@code deletedAt}/{@code deletedBy}); the row itself
+     * is not removed.
      *
-     * @param id target primary structural key to process for deprecation
-     * @return an empty response body confirming success status
+     * @param id the provider record's own identifier
+     * @return 204 with no body
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

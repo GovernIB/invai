@@ -67,7 +67,7 @@ class AppResponsibleSpecificationTest {
         lenient().when(cb.equal(any(), any(Object.class))).thenReturn(predicate);
         lenient().when(cb.isNull(any())).thenReturn(predicate);
         lenient().when(cb.isNotNull(any())).thenReturn(predicate);
-        lenient().when(cb.or(new Predicate[]{predicate, predicate, predicate})).thenReturn(predicate);
+        lenient().when(cb.or(predicate, predicate, predicate)).thenReturn(predicate);
         lenient().when(cb.and(anyPredicate())).thenReturn(predicate);
         lenient().when(cb.and(anyPredicate(), anyPredicate())).thenReturn(predicate);
         lenient().when(cb.and(anyPredicate(), anyPredicate(), anyPredicate(), anyPredicate(), anyPredicate())).thenReturn(predicate);
@@ -85,7 +85,7 @@ class AppResponsibleSpecificationTest {
 
         assertNotNull(result);
         verify(cb).equal(path, 10L);
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb).and(predicate);
     }
 
     @Test
@@ -133,7 +133,7 @@ class AppResponsibleSpecificationTest {
         AppResponsibleSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb, org.mockito.Mockito.times(3)).like(eq(path), eq("%fuster%"));
-        verify(cb).or(new Predicate[]{predicate, predicate, predicate});
+        verify(cb).or(predicate, predicate, predicate);
     }
 
     @Test
@@ -143,8 +143,8 @@ class AppResponsibleSpecificationTest {
         AppResponsibleSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb, never()).like(any(), anyString());
-        verify(cb, never()).or(new Predicate[]{predicate, predicate, predicate});
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb, never()).or(predicate, predicate, predicate);
+        verify(cb).and(predicate);
     }
 
     @Test
@@ -160,7 +160,7 @@ class AppResponsibleSpecificationTest {
 
         assertNotNull(result);
         verify(cb).isNull(path);
-        verify(cb).or(new Predicate[]{predicate, predicate, predicate});
-        verify(cb).and(new Predicate[]{predicate, predicate, predicate, predicate, predicate});
+        verify(cb).or(predicate, predicate, predicate);
+        verify(cb).and(predicate, predicate, predicate, predicate, predicate);
     }
 }

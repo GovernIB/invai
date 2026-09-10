@@ -10,6 +10,7 @@ import es.caib.invai.back.persistence.model.maintenance.systems.serverType.LkupS
 import es.caib.invai.back.service.model.maintenance.systems.database.Database;
 import es.caib.invai.back.service.model.maintenance.systems.databaseVendor.DatabaseVendor;
 import es.caib.invai.back.service.model.maintenance.systems.server.Server;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -47,6 +48,41 @@ class DatabaseMapperTest {
 
     @Test
     void toModel_mapsEveryEntityField() {
+        DatabaseEntity entity = getDatabaseEntity();
+
+        Database model = mapper.toModel(entity);
+
+        assertEquals(100L, model.getId());
+        assertEquals("invai_db", model.getService());
+        assertEquals(5432, model.getPort());
+        assertEquals("Main database", model.getDescription());
+        assertNotNull(model.getServer());
+        assertEquals(10L, model.getServer().getId());
+        assertEquals("db-host-01", model.getServer().getName());
+        assertNotNull(model.getDatabaseType());
+        assertEquals(3L, model.getDatabaseType().getId());
+        assertEquals("PostgreSQL", model.getDatabaseType().getName());
+    }
+
+    private static @NonNull DatabaseEntity getDatabaseEntity() {
+        ServerEntity serverEntity = getServerEntity();
+
+        DatabaseVendorEntity vendorEntity = new DatabaseVendorEntity();
+        vendorEntity.setId(3L);
+        vendorEntity.setName("PostgreSQL");
+        vendorEntity.setDefaultPort(5432);
+
+        DatabaseEntity entity = new DatabaseEntity();
+        entity.setId(100L);
+        entity.setServer(serverEntity);
+        entity.setService("invai_db");
+        entity.setPort(5432);
+        entity.setDatabaseType(vendorEntity);
+        entity.setDescription("Main database");
+        return entity;
+    }
+
+    private static @NonNull ServerEntity getServerEntity() {
         EnvironmentEntity environmentEntity = new EnvironmentEntity();
         environmentEntity.setId(1L);
         environmentEntity.setCode("PRO");
@@ -62,32 +98,7 @@ class DatabaseMapperTest {
         serverEntity.setName("db-host-01");
         serverEntity.setEnvironment(environmentEntity);
         serverEntity.setServerType(serverTypeEntity);
-
-        DatabaseVendorEntity vendorEntity = new DatabaseVendorEntity();
-        vendorEntity.setId(3L);
-        vendorEntity.setName("PostgreSQL");
-        vendorEntity.setDefaultPort(5432);
-
-        DatabaseEntity entity = new DatabaseEntity();
-        entity.setId(100L);
-        entity.setServer(serverEntity);
-        entity.setService("invai_db");
-        entity.setPort(5432);
-        entity.setDatabaseType(vendorEntity);
-        entity.setDescription("Main database");
-
-        Database model = mapper.toModel(entity);
-
-        assertEquals(100L, model.getId());
-        assertEquals("invai_db", model.getService());
-        assertEquals(5432, model.getPort());
-        assertEquals("Main database", model.getDescription());
-        assertNotNull(model.getServer());
-        assertEquals(10L, model.getServer().getId());
-        assertEquals("db-host-01", model.getServer().getName());
-        assertNotNull(model.getDatabaseType());
-        assertEquals(3L, model.getDatabaseType().getId());
-        assertEquals("PostgreSQL", model.getDatabaseType().getName());
+        return serverEntity;
     }
 
     @Test

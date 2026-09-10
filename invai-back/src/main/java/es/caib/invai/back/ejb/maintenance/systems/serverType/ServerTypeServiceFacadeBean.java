@@ -38,7 +38,7 @@ public class ServerTypeServiceFacadeBean implements ServerTypeService {
     @Override
     @Transactional(readOnly = true)
     public List<ServerTypeOutputDTO> getAll() {
-        log.info("Facade: Fetching every server type lookup entry");
+        log.debug("Facade: Fetching every server type lookup entry");
         List<ServerType> serverTypes = serverTypeRepository.findAll();
         return serverTypeMapper.toResponseList(serverTypes);
     }

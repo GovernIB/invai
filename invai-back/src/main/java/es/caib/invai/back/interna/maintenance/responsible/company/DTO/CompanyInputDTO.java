@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.responsible.company.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,7 +22,7 @@ import lombok.Setter;
 public class CompanyInputDTO {
 
     /** Company corporate name label string. */
-    @NotBlank(message = "{validation.company.name.required}")
-    @Size(max = 150, message = "{validation.company.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_COMPANY_NAME_REQUIRED + "}")
+    @Size(max = 150, message = "{" + Constants.VALIDATION_COMPANY_NAME_SIZE + "}")
     private String name;
 }

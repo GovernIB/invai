@@ -22,11 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +103,7 @@ class PersonRepositoryAdapterTest {
         adapter = buildAdapter();
         when(personJPARepository.existsByEmailAndDeletedAtIsNull("joan@example.com")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByEmail("joan@example.com"));
+        assertTrue(adapter.existsByEmail("joan@example.com"));
     }
 
     @Test
@@ -115,7 +111,7 @@ class PersonRepositoryAdapterTest {
         adapter = buildAdapter();
         when(personJPARepository.existsByEmailAndIdNotAndDeletedAtIsNull("joan@example.com", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByEmailAndIdNot("joan@example.com", 1L));
+        assertTrue(adapter.existsByEmailAndIdNot("joan@example.com", 1L));
     }
 
     @Test

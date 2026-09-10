@@ -21,11 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,7 +102,7 @@ class CompanyRepositoryAdapterTest {
         adapter = buildAdapter();
         when(companyJPARepository.existsByNameAndDeletedAtIsNull("Plexus")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("Plexus"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("Plexus"));
     }
 
     @Test
@@ -114,7 +110,7 @@ class CompanyRepositoryAdapterTest {
         adapter = buildAdapter();
         when(companyJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("Plexus", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("Plexus", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("Plexus", 1L));
     }
 
     @Test

@@ -12,10 +12,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,8 +54,8 @@ class ServerTypeRepositoryAdapterTest {
         assertSame(models, result);
         ArgumentCaptor<Sort> sortCaptor = ArgumentCaptor.forClass(Sort.class);
         verify(serverTypeJPARepository).findAll(sortCaptor.capture());
-        assertTrue(sortCaptor.getValue().getOrderFor("name") != null);
-        assertEquals(Sort.Direction.ASC, sortCaptor.getValue().getOrderFor("name").getDirection());
+        assertNotNull(sortCaptor.getValue().getOrderFor("name"));
+        assertEquals(Sort.Direction.ASC, Objects.requireNonNull(sortCaptor.getValue().getOrderFor("name")).getDirection());
     }
 
     @Test

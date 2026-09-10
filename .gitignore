@@ -15,3 +15,5 @@ target/
 nb-configuration.xml
 faces-config.NavData
 /poc-front/
+# JBoss EAP distribution zip (large binary, Red Hat EULA) for the base image build
+invai-cicd/jboss-eap-*.zip

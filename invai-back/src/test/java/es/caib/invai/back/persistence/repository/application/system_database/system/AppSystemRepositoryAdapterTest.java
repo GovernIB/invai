@@ -23,11 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,14 +60,14 @@ class AppSystemRepositoryAdapterTest {
         return a;
     }
 
-    private AppSystemEntity entityWithRelations(Long id, Long informationSystemDbId, Long systemId) {
+    private AppSystemEntity entityWithRelations(Long id) {
         AppSystemEntity entity = new AppSystemEntity();
         entity.setId(id);
         AppInformationSystemDbEntity informationSystemDb = new AppInformationSystemDbEntity();
-        informationSystemDb.setId(informationSystemDbId);
+        informationSystemDb.setId(10L);
         entity.setInformationSystemDb(informationSystemDb);
         SystemEntity system = new SystemEntity();
-        system.setId(systemId);
+        system.setId(20L);
         entity.setSystem(system);
         return entity;
     }
@@ -79,7 +75,7 @@ class AppSystemRepositoryAdapterTest {
     @Test
     void findById_found_returnsMappedModel() {
         adapter = buildAdapter();
-        AppSystemEntity entity = entityWithRelations(1L, 10L, 20L);
+        AppSystemEntity entity = entityWithRelations(1L);
         AppSystem model = new AppSystem();
         when(appSystemJPARepository.findById(1L)).thenReturn(Optional.of(entity));
         when(appSystemMapper.toModel(entity)).thenReturn(model);
@@ -102,7 +98,7 @@ class AppSystemRepositoryAdapterTest {
         adapter = buildAdapter();
         AppSystemCriteria criteria = new AppSystemCriteria();
         Pageable pageable = Pageable.unpaged();
-        AppSystemEntity entity = entityWithRelations(1L, 10L, 20L);
+        AppSystemEntity entity = entityWithRelations(1L);
         AppSystem model = new AppSystem();
         Page<AppSystemEntity> entityPage = new PageImpl<>(List.of(entity));
         when(appSystemJPARepository.findAll(ArgumentMatchers.<Specification<AppSystemEntity>>any(), eq(pageable))).thenReturn(entityPage);
@@ -119,7 +115,7 @@ class AppSystemRepositoryAdapterTest {
         adapter = buildAdapter();
         when(appSystemJPARepository.existsByInformationSystemDbIdAndSystemId(10L, 20L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByInformationSystemDbAndSystem(10L, 20L));
+        assertTrue(adapter.existsByInformationSystemDbAndSystem(10L, 20L));
     }
 
     @Test
@@ -127,7 +123,7 @@ class AppSystemRepositoryAdapterTest {
         adapter = buildAdapter();
         when(appSystemJPARepository.existsByInformationSystemDbIdAndSystemIdAndIdNot(10L, 20L, 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByInformationSystemDbAndSystemAndIdNot(10L, 20L, 1L));
+        assertTrue(adapter.existsByInformationSystemDbAndSystemAndIdNot(10L, 20L, 1L));
     }
 
     @Test
@@ -135,7 +131,7 @@ class AppSystemRepositoryAdapterTest {
         adapter = buildAdapter();
         AppSystem model = new AppSystem();
         AppSystemEntity toSave = new AppSystemEntity();
-        AppSystemEntity saved = entityWithRelations(5L, 10L, 20L);
+        AppSystemEntity saved = entityWithRelations(5L);
         AppSystem response = new AppSystem();
         when(appSystemMapper.toEntity(model)).thenReturn(toSave);
         when(appSystemJPARepository.save(toSave)).thenReturn(saved);
@@ -162,7 +158,7 @@ class AppSystemRepositoryAdapterTest {
         adapter = buildAdapter();
         AppSystem model = new AppSystem();
         AppSystemEntity toSave = new AppSystemEntity();
-        AppSystemEntity saved = entityWithRelations(6L, 10L, 20L);
+        AppSystemEntity saved = entityWithRelations(6L);
         LocalDateTime existingCreatedAt = LocalDateTime.of(2025, 1, 1, 0, 0);
         saved.setCreatedAt(existingCreatedAt);
         saved.setCreatedBy("jdoe");
@@ -183,7 +179,7 @@ class AppSystemRepositoryAdapterTest {
         adapter = buildAdapter();
         AppSystem model = new AppSystem();
         AppSystemEntity toSave = new AppSystemEntity();
-        AppSystemEntity saved = entityWithRelations(7L, 10L, 20L);
+        AppSystemEntity saved = entityWithRelations(7L);
         AppSystem response = new AppSystem();
         when(appSystemMapper.toEntity(model)).thenReturn(toSave);
         when(appSystemJPARepository.save(toSave)).thenReturn(saved);
@@ -204,7 +200,7 @@ class AppSystemRepositoryAdapterTest {
         AppSystem model = new AppSystem();
         model.setId(8L);
         AppSystemEntity toSave = new AppSystemEntity();
-        AppSystemEntity saved = entityWithRelations(8L, 10L, 20L);
+        AppSystemEntity saved = entityWithRelations(8L);
         saved.setDeletedAt(LocalDateTime.now());
         saved.setDeletedBy("jdoe");
         when(appSystemMapper.toEntity(model)).thenReturn(toSave);

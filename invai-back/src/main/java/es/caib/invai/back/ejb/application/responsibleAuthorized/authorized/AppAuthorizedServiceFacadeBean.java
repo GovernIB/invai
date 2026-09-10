@@ -9,18 +9,16 @@ import es.caib.invai.back.persistence.repository.application.responsibleAuthoriz
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.authorized.AppAuthorizedRepository;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.type.AppAuthorizedTypeLinkRepository;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.authorizationType.AuthorizationTypeRepository;
-import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonRepository;
 import es.caib.invai.back.service.facade.application.responsibleAuthorized.authorized.AppAuthorizedService;
+import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.authorized.AppAuthorizedMapper;
 import es.caib.invai.back.service.mapper.maintenance.responsible.authorizationType.AuthorizationTypeMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.type.AppAuthorizedTypeLink;
-import es.caib.invai.back.service.model.maintenance.responsible.authorizationType.AuthorizationType;
-import es.caib.invai.back.service.model.maintenance.responsible.company.Company;
-import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +48,7 @@ import java.util.Set;
  * </p>
  * <p>
  * Create also keeps the linked person's {@code isPersonalCaib} flag in sync with the value
- * submitted alongside the assignment (see {@link #syncPersonalCaib}); update never touches it,
+ * submitted alongside the assignment (see {@link PersonService#syncPersonalCaib}); update never touches it,
  * consistent with the person being immutable on update. On create, {@code personId} is itself
  * optional: when absent, {@link #resolvePersonId} resolves an existing active person by e-mail, or
  * creates a new one, from {@code personFirstName}/{@code personLastName}/{@code personEmail} (and
@@ -85,18 +83,27 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
     @Autowired
     private AuthorizationTypeMapper authorizationTypeMapper;
 
-    /** Repository used to keep the linked person's {@code isPersonalCaib} flag in sync on create. */
+    /** Facade used to resolve/create the linked person and keep its Personal CAIB flag in sync on create. */
     @Autowired
-    private PersonRepository personRepository;
+    private PersonService personService;
 
+    /**
+     * Retrieves a paginated, filtered listing of authorized-person assignments scoped to a single
+     * anchor, resolving each row's attached authorization types via {@link #buildResponse}.
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AppAuthorizedOutputDTO> getAll(Long appResponsibleAuthorizedId, AppAuthorizedCriteria criteria, Pageable pageable) {
-        log.info("Facade: Fetching paged application authorized records for AppResponsibleAuthorized ID: {}", appResponsibleAuthorizedId);
+        log.debug("Facade: Fetching paged application authorized records for AppResponsibleAuthorized ID: {}", appResponsibleAuthorizedId);
         Page<AppAuthorized> domainPage = appAuthorizedRepository.findAll(appResponsibleAuthorizedId, criteria, pageable);
         return domainPage.map(this::buildResponse);
     }
 
+    /**
+     * Creates a new authorization, resolving/creating the person when {@code personId} is absent
+     * (see {@link #resolvePersonId}), deactivating any active authorization the same person
+     * already holds on the same anchor, then attaching the requested authorization types.
+     */
     @Override
     public AppAuthorizedOutputDTO create(AppAuthorizedInputDTO inputDTO) {
         log.info("Facade: Creating new application authorized assignment for AppResponsibleAuthorized ID: {} and Person ID: {}",
@@ -104,7 +111,7 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
 
         Utils.sanitize(inputDTO);
         inputDTO.setPersonId(resolvePersonId(inputDTO));
-        syncPersonalCaib(inputDTO.getPersonId(), inputDTO.isPersonalCaib());
+        personService.syncPersonalCaib(inputDTO.getPersonId(), inputDTO.isPersonalCaib());
 
         AppAuthorized currentAuthorizedHolder = appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(
                 inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getPersonId());
@@ -122,6 +129,13 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         return buildResponse(savedModel);
     }
 
+    /**
+     * Updates an existing authorization's mutable fields (the anchor and person are immutable, see
+     * {@link AppAuthorizedMapper#updateModelFromInput}) and reconciles its attached authorization
+     * types against the requested list (see {@link #reconcileAuthorizationTypes}).
+     *
+     * @throws BusinessRuleException if no authorization exists with the given ID
+     */
     @Override
     public AppAuthorizedOutputDTO update(Long id, AppAuthorizedInputDTO inputDTO) {
         log.info(Constants.LOG_FACADE_DEACTIVATE, id);
@@ -141,6 +155,12 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         return buildResponse(updatedModel);
     }
 
+    /**
+     * Soft-deletes an active authorization, recording the given observation (see
+     * {@link #deactivate}).
+     *
+     * @throws BusinessRuleException if no authorization exists with the given ID, or it is already inactive
+     */
     @Override
     public void delete(Long id, AppAuthorizedDeleteDTO dto) {
         log.info(Constants.LOG_FACADE_DEACTIVATE, id);
@@ -157,6 +177,13 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         deactivate(existingModel, dto != null ? dto.getObservation() : null);
     }
 
+    /**
+     * Reactivates a previously deactivated authorization, rejecting the operation if another
+     * active authorization has since been created for the same (anchor, person) pair.
+     *
+     * @throws BusinessRuleException if no authorization exists with the given ID, it is already
+     * active, or another active authorization now holds the same (anchor, person) pair
+     */
     @Override
     public AppAuthorizedOutputDTO reactivate(Long id) {
         log.info("Facade: Reactivating application authorized assignment for ID: {}", id);
@@ -214,59 +241,11 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         if (inputDTO.getPersonId() != null) {
             return inputDTO.getPersonId();
         }
-        if (isBlank(inputDTO.getPersonFirstName()) || isBlank(inputDTO.getPersonLastName()) || isBlank(inputDTO.getPersonEmail())) {
+        if (StringUtils.isBlank(inputDTO.getPersonFirstName()) || StringUtils.isBlank(inputDTO.getPersonLastName()) || StringUtils.isBlank(inputDTO.getPersonEmail())) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_PERSON_DATA_REQUIRED);
         }
-        Person existing = personRepository.findByEmail(inputDTO.getPersonEmail());
-        if (existing != null) {
-            return existing.getId();
-        }
-        if (!inputDTO.isPersonalCaib() && inputDTO.getCompanyId() == null) {
-            throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
-        }
-        Person newPerson = new Person();
-        newPerson.setFirstName(inputDTO.getPersonFirstName());
-        newPerson.setLastName(inputDTO.getPersonLastName());
-        newPerson.setEmail(inputDTO.getPersonEmail());
-        newPerson.setPersonalCaib(inputDTO.isPersonalCaib());
-        if (!inputDTO.isPersonalCaib()) {
-            Company company = new Company();
-            company.setId(inputDTO.getCompanyId());
-            newPerson.setCompany(company);
-        }
-        return personRepository.create(newPerson).getId();
-    }
-
-    /**
-     * Keeps the linked person's {@code isPersonalCaib} flag in sync with the value submitted
-     * alongside the assignment. A no-op when the value already matches what is stored. Reuses the
-     * same business rule enforced by the Person maintenance itself: a person cannot be flagged as
-     * external (non-CAIB) without an associated company.
-     *
-     * @param personId the linked person's identifier
-     * @param personalCaib the submitted CAIB flag value
-     * @throws BusinessRuleException if setting the person to non-CAIB and it has no company
-     */
-    private void syncPersonalCaib(Long personId, boolean personalCaib) {
-        Person person = personRepository.findById(personId);
-        if (person == null || person.isPersonalCaib() == personalCaib) {
-            return;
-        }
-        if (!personalCaib && person.getCompany() == null) {
-            throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
-        }
-        person.setPersonalCaib(personalCaib);
-        personRepository.update(person, personId);
-    }
-
-    /**
-     * Returns whether the given string is {@code null}, empty, or blank.
-     *
-     * @param value the string to check
-     * @return {@code true} if the string carries no usable content
-     */
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
+        return personService.resolveOrCreatePerson(inputDTO.getPersonFirstName(), inputDTO.getPersonLastName(),
+                inputDTO.getPersonEmail(), inputDTO.isPersonalCaib(), inputDTO.getCompanyId()).getId();
     }
 
     /**
@@ -313,7 +292,9 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
 
     /**
      * Builds the outbound response for an anchor, resolving and attaching the list of authorization
-     * types currently attached to it.
+     * types currently attached to it. Resolves every attached type in a single batched query
+     * ({@link AuthorizationTypeRepository#findAllByIdIn}) rather than one {@code findById} call per
+     * type, to avoid an N+1 query per row when called from a paginated {@link #getAll}.
      */
     private AppAuthorizedOutputDTO buildResponse(AppAuthorized model) {
         AppAuthorizedOutputDTO response = appAuthorizedMapper.toResponse(model);
@@ -321,12 +302,12 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         List<AppAuthorizedTypeLink> currentJoins =
                 appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(model.getId());
 
-        List<AuthorizationTypeOutputDTO> authorizationTypes = currentJoins.stream()
-                .map(join -> {
-                    AuthorizationType authorizationType = authorizationTypeRepository.findById(join.getAuthorizationTypeId());
-                    return authorizationType != null ? authorizationTypeMapper.toResponse(authorizationType) : null;
-                })
-                .filter(java.util.Objects::nonNull)
+        List<Long> authorizationTypeIds = currentJoins.stream()
+                .map(AppAuthorizedTypeLink::getAuthorizationTypeId)
+                .toList();
+
+        List<AuthorizationTypeOutputDTO> authorizationTypes = authorizationTypeRepository.findAllByIdIn(authorizationTypeIds).stream()
+                .map(authorizationTypeMapper::toResponse)
                 .toList();
 
         response.setAuthorizationTypes(authorizationTypes);

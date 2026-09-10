@@ -3,20 +3,23 @@ package es.caib.invai.back.interna.application.responsibleAuthorized.responsible
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Data Transfer Object (DTO) wrapping outgoing AppResponsible state metadata payload models,
- * flattening the parent anchor down to its identifier and embedding the resolved person and
- * responsible type.
+ * Outbound payload describing a responsible assignment, flattening the parent anchor down to its
+ * identifier and embedding the resolved person and responsible type. When returned by the
+ * catalog-driven default listing for a responsible type with no active holder, {@code id} and
+ * {@code person} are {@code null} (see {@code AppResponsibleServiceFacadeBean#buildRow}).
  *
  * @since 1.0.3
  */
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppResponsibleOutputDTO {

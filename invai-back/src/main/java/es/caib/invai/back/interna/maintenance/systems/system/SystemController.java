@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing System profiles metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.1
@@ -57,7 +57,7 @@ public class SystemController {
             @ModelAttribute SystemCriteria filter,
             @PageableDefault(sort = "id") Pageable pageable) {
 
-        log.info("REST: Fetching paged systems via pagination boundaries");
+        log.debug("REST: Fetching paged systems via pagination boundaries");
         Page<SystemOutputDTO> page = systemService.getAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
@@ -70,7 +70,7 @@ public class SystemController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<SystemOutputDTO> getById(@PathVariable Long id) {
-        log.info("REST: Fetching system by ID: {}", id);
+        log.debug("REST: Fetching system by ID: {}", id);
         return ResponseEntity.ok(systemService.getById(id));
     }
 

@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.development.technology;
 
-import es.caib.invai.back.ejb.maintenance.development.technology.TechnologyServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.development.technology.DTO.TechnologyInputDTO;
 import es.caib.invai.back.interna.maintenance.development.technology.DTO.TechnologyOutputDTO;
@@ -23,9 +22,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -192,7 +189,7 @@ class TechnologyServiceFacadeBeanTest {
 
         technologyServiceFacadeBean.delete(1L);
 
-        assertEquals(activeTechnology.getDeletedAt() != null, true);
+        assertNotNull(activeTechnology.getDeletedAt());
         verify(technologyRepository, times(1)).delete(activeTechnology);
     }
 

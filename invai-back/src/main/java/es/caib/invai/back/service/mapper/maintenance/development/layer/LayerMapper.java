@@ -23,6 +23,7 @@ public interface LayerMapper {
 
     LayerOutputDTO toResponse(Layer model);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -31,6 +32,7 @@ public interface LayerMapper {
     @Mapping(target = "deletedBy", ignore = true)
     Layer toModelFromInput(LayerInputDTO inputDTO);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

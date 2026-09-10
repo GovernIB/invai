@@ -52,6 +52,7 @@ public interface CommissionMapper {
      * @param inputDTO the inbound presentation payload containing operational request criteria variables
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -67,6 +68,7 @@ public interface CommissionMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

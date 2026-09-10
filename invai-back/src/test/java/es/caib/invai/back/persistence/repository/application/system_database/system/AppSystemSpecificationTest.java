@@ -61,7 +61,7 @@ class AppSystemSpecificationTest {
         lenient().when(cb.isNull(any())).thenReturn(predicate);
         lenient().when(cb.isNotNull(any())).thenReturn(predicate);
         lenient().when(cb.or(any(Predicate.class), any(Predicate.class), any(Predicate.class))).thenReturn(predicate);
-        lenient().when(cb.and((Predicate[]) any())).thenReturn(predicate);
+        lenient().when(cb.and(any())).thenReturn(predicate);
     }
 
     @Test
@@ -72,7 +72,7 @@ class AppSystemSpecificationTest {
 
         assertNotNull(result);
         verify(cb).equal(eq(path), eq(10L));
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb).and(predicate);
     }
 
     @Test

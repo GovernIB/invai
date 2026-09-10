@@ -45,7 +45,7 @@ public class StandardAdaptionController {
      */
     @GetMapping
     public ResponseEntity<List<StandardAdaptionOutputDTO>> getAll() {
-        log.info("REST: Fetching every standard adaption lookup entry");
+        log.debug("REST: Fetching every standard adaption lookup entry");
         return ResponseEntity.ok(standardAdaptionService.getAll());
     }
 }

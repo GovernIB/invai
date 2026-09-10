@@ -5,6 +5,8 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
+import java.io.Serial;
+
 /**
  * JPA persistent entity representing provider roles assignable within application development modules.
  * Implements historical auditing field inheritances by extending {@link BaseEntity}.
@@ -16,6 +18,9 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 @Getter
 @Setter
 public class RoleEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Primary persistent storage unique sequence row reference. */
     @Id

@@ -62,8 +62,8 @@ class AppDatabaseSpecificationTest {
         lenient().when(cb.equal(any(), any(Object.class))).thenReturn(predicate);
         lenient().when(cb.isNull(any())).thenReturn(predicate);
         lenient().when(cb.isNotNull(any())).thenReturn(predicate);
-        lenient().when(cb.or((Predicate[]) any())).thenReturn(predicate);
-        lenient().when(cb.and((Predicate[]) any())).thenReturn(predicate);
+        lenient().when(cb.or(any())).thenReturn(predicate);
+        lenient().when(cb.and(any())).thenReturn(predicate);
     }
 
     @Test
@@ -74,7 +74,7 @@ class AppDatabaseSpecificationTest {
 
         assertNotNull(result);
         verify(cb).equal(path, 10L);
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb).and(predicate);
     }
 
     @Test
@@ -132,7 +132,7 @@ class AppDatabaseSpecificationTest {
         // each wrapped in cb.lower(...) before the like comparison.
         verify(cb, times(3)).lower(path);
         verify(cb, times(3)).like(eq(path), eq("%prod%"));
-        verify(cb).or(new Predicate[]{predicate, predicate, predicate});
+        verify(cb).or(predicate, predicate, predicate);
     }
 
     @Test

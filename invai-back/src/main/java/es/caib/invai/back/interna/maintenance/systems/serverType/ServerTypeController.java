@@ -17,7 +17,7 @@ import java.util.List;
  * Internal REST controller exposing read-only access to the Server Type lookup dictionary
  * (e.g. DATABASE, APPLICATION).
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.2
@@ -49,7 +49,7 @@ public class ServerTypeController {
      */
     @GetMapping
     public ResponseEntity<List<ServerTypeOutputDTO>> getAll() {
-        log.info("REST: Fetching every server type lookup entry");
+        log.debug("REST: Fetching every server type lookup entry");
         return ResponseEntity.ok(serverTypeService.getAll());
     }
 }

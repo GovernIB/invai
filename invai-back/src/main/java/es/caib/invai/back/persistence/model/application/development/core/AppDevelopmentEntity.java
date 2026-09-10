@@ -24,8 +24,13 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.maintenance.systems.environment.EnvironmentEntity;
 
 /**
- * Persistent aggregate root entity mapping the main software development module detail
- * for a corporate application within a specific deployment environment.
+ * JPA entity backing the "AppDevelopment" tab: one row per {@link ApplicationEntity}, a
+ * relationship enforced at the facade level (see
+ * {@link es.caib.invai.back.ejb.application.development.core.AppDevelopmentServiceFacadeBean#create})
+ * rather than by a database constraint. Extends {@link BaseEntity} for the created/updated
+ * timestamps and the soft-delete ({@code deletedAt}/{@code deletedBy}) columns; every insert,
+ * update and soft-delete performed through {@code AppDevelopmentRepositoryAdapter} additionally
+ * writes a snapshot row to {@link AppDevelopmentAudEntity}.
  *
  * @since 1.0.2
  */
@@ -45,7 +50,7 @@ public class AppDevelopmentEntity extends BaseEntity {
     @Column(name = "ID")
     private Long id;
 
-    /** Parent corporate application this development module detail belongs to. */
+    /** The application this development record belongs to (at most one per application). */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "APPLICATION_ID", nullable = false)
     private ApplicationEntity application;

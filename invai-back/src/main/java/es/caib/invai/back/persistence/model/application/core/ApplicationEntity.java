@@ -4,8 +4,8 @@ import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.time.LocalDateTime;
-import es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity;
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.commission.CommissionEntity;
@@ -23,6 +23,9 @@ import es.caib.invai.back.persistence.model.maintenance.general.systemType.Syste
 @Entity
 @Table(name = "INV_APPLICATION")
 public class ApplicationEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Primary sequence identifier of the application record. */
     @Id
@@ -44,7 +47,7 @@ public class ApplicationEntity extends BaseEntity {
     private String prefix;
 
     /** Descriptive name of the application. */
-    @Column(name = "NAME", length = 255)
+    @Column(name = "NAME")
     private String name;
 
     /** Taxonomy category the application is classified under. */
@@ -62,10 +65,9 @@ public class ApplicationEntity extends BaseEntity {
     @JoinColumn(name = "FIELD_ID")
     private FieldEntity field;
 
-    /** Administrative unit responsible for the application. */
-    @ManyToOne
-    @JoinColumn(name = "ADM_UNIT_ID")
-    private AdmUnitEntity admUnit;
+    /** DIR3CAIB code of the administrative unit responsible for the application, resolved live against the external directory — no local FK. */
+    @Column(name = "ADM_UNIT_CODE", length = 20)
+    private String admUnitCode;
 
     /** Governance commission supervising the application. */
     @ManyToOne

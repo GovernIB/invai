@@ -45,7 +45,7 @@ public class ResponsibleTypeController {
      */
     @GetMapping
     public ResponseEntity<List<ResponsibleTypeOutputDTO>> getAll() {
-        log.info("REST: Fetching every responsible type lookup entry");
+        log.debug("REST: Fetching every responsible type lookup entry");
         return ResponseEntity.ok(responsibleTypeService.getAll());
     }
 }

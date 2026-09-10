@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.application.development.core;
 
-import es.caib.invai.back.ejb.application.development.core.AppDevelopmentServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentInputDTO;
 import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentOutputDTO;
@@ -81,6 +80,38 @@ class AppDevelopmentServiceFacadeBeanTest {
         assertEquals("https://repo", inputDTO.getCode());
         assertEquals("Some observation", inputDTO.getObservation());
         assertEquals(response, result);
+    }
+
+    @Test
+    void create_applicationAlreadyHasDevelopment_throwsBusinessRuleException() {
+        DevelopmentInputDTO inputDTO = new DevelopmentInputDTO(2L, 3L, 4L, "https://repo", 5L,
+                LocalDateTime.now(), "obs");
+        when(appDevelopmentRepository.findByApplicationId(2L)).thenReturn(activeDevelopment);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> developmentServiceFacadeBean.create(inputDTO));
+
+        assertEquals(Constants.ERR_DEVELOPMENT_ALREADY_EXISTS, ex.getMessage());
+        verify(appDevelopmentRepository, never()).create(any());
+    }
+
+    @Test
+    void create_applicationHasOnlySoftDeletedDevelopment_persistsNewRecord() {
+        activeDevelopment.setDeletedAt(LocalDateTime.now());
+        DevelopmentInputDTO inputDTO = new DevelopmentInputDTO(2L, 3L, 4L, "https://repo", 5L,
+                LocalDateTime.now(), "obs");
+        AppDevelopment model = new AppDevelopment();
+        AppDevelopment saved = new AppDevelopment();
+        DevelopmentOutputDTO response = new DevelopmentOutputDTO();
+        when(appDevelopmentRepository.findByApplicationId(2L)).thenReturn(activeDevelopment);
+        when(appDevelopmentMapper.toModelFromInput(inputDTO)).thenReturn(model);
+        when(appDevelopmentRepository.create(model)).thenReturn(saved);
+        when(appDevelopmentMapper.toResponse(saved)).thenReturn(response);
+
+        DevelopmentOutputDTO result = developmentServiceFacadeBean.create(inputDTO);
+
+        assertEquals(response, result);
+        verify(appDevelopmentRepository).create(model);
     }
 
     @Test

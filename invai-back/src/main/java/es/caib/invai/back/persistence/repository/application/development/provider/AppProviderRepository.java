@@ -5,8 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Core business domain outbound port boundary interface declaring relational persistence
- * mechanisms for the {@link AppProvider} entity.
+ * Persistence port for the "AppProvider" list: provider (company) assignments hanging
+ * many-to-one off a single development record. Implemented by
+ * {@link AppProviderRepositoryAdapter}, which also writes an audit trail row alongside every
+ * create/update/delete.
  *
  * @since 1.0.2
  */
@@ -45,13 +47,15 @@ public interface AppProviderRepository {
     AppProvider findById(Long id);
 
     /**
-     * Resolves a paginated, criteria-filtered sequence of provider records scoped to a single
-     * parent development module.
+     * Fetches the providers assigned to a single development, filtered by {@code criteria} and
+     * paged. {@code appDevelopmentId} is always applied regardless of {@code criteria}, so this
+     * never returns records belonging to a different development module.
      *
      * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         the multi-parameter business query filter boundaries
-     * @param pageable         pagination structural constraints
-     * @return a paginated matrix of matching domain models
+     * @param criteria         optional additional filters (status, search); {@code null} applies
+     *                         only the development scope
+     * @param pageable         pagination and sorting parameters
+     * @return the matching page of domain models
      */
     Page<AppProvider> findAll(Long appDevelopmentId, AppProviderCriteria criteria, Pageable pageable);
 

@@ -99,7 +99,7 @@ public class EnvironmentRepositoryAdapter implements EnvironmentRepository {
 
     @Override
     public Page<Environment> findAll(EnvironmentCriteria filter, Pageable pageable) {
-        log.info("Repository: Fetching paged environments using standard query layouts");
+        log.debug("Repository: Fetching paged environments using standard query layouts");
         try {
             log.trace("Repository: Processing criteria evaluation logic within active ecosystem metrics");
             Specification<EnvironmentEntity> spec = EnvironmentSpecification.filterByCriteria(filter);
@@ -144,8 +144,8 @@ public class EnvironmentRepositoryAdapter implements EnvironmentRepository {
 
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
-            aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+            aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

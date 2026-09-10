@@ -14,9 +14,12 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit tests for {@link Utils}, covering its reflective field sanitization routine and its
@@ -90,5 +93,28 @@ class UtilsTest {
         String result = Utils.resolveCurrentUsername();
 
         assertEquals("mmartin", result);
+    }
+
+    @Test
+    void join_completedFuture_returnsResult() {
+        CompletableFuture<String> future = CompletableFuture.completedFuture("value");
+
+        assertEquals("value", Utils.join(future));
+    }
+
+    @Test
+    void join_futureFailsWithRuntimeException_unwrapsAndRethrowsOriginal() {
+        IllegalStateException original = new IllegalStateException("boom");
+        CompletableFuture<String> future = CompletableFuture.failedFuture(original);
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> Utils.join(future));
+        assertEquals(original, thrown);
+    }
+
+    @Test
+    void join_futureFailsWithCheckedException_rethrowsCompletionException() {
+        CompletableFuture<String> future = CompletableFuture.failedFuture(new Exception("checked failure"));
+
+        assertThrows(CompletionException.class, () -> Utils.join(future));
     }
 }

@@ -5,6 +5,8 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 /**
  * Global static utility catalog providing stateless operational routines for data sanitization
@@ -62,6 +64,27 @@ public final class Utils {
             return (String) currentUserObj;
         }
         return Constants.SYSTEM_USER_FALLBACK;
+    }
+
+    /**
+     * Waits for the given future, unwrapping {@link CompletionException} so the original runtime
+     * exception thrown by the future's task (e.g. a {@code BusinessRuleException} raised by an
+     * outbound call run via {@link CompletableFuture#supplyAsync}) propagates as-is instead of
+     * being masked by the future's own wrapper.
+     *
+     * @param future the future to wait for
+     * @param <T> the future's result type
+     * @return the future's result
+     */
+    public static <T> T join(CompletableFuture<T> future) {
+        try {
+            return future.join();
+        } catch (CompletionException ex) {
+            if (ex.getCause() instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw ex;
+        }
     }
 
 }

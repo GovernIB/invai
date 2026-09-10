@@ -12,8 +12,9 @@ import es.caib.invai.back.service.mapper.application.development.core.AppDevelop
 import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper;
 
 /**
- * MapStruct data mapping abstraction interface providing structural state conversions across
- * Provider relation entities, business domain models, and API transfer schemas.
+ * MapStruct mapper converting between {@link AppProvider} domain models, {@link AppProviderEntity}
+ * persistence entities, and the provider input/output DTOs, resolving the parent development and
+ * role lookup references along the way.
  *
  * @since 1.0.2
  */
@@ -21,36 +22,36 @@ import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper
 public interface AppProviderMapper {
 
     /**
-     * Materializes a persistent relation entity into a business domain aggregate.
+     * Maps a persistence {@link AppProviderEntity} to its corresponding {@link AppProvider} domain model.
      *
-     * @param entity the persistent relation entity source node
-     * @return a clean domain business layout graph
+     * @param entity the JPA entity to convert
+     * @return the mapped domain model
      */
     AppProvider toModel(AppProviderEntity entity);
 
     /**
-     * Maps business domain representations down to persistent relation database entities.
+     * Maps an {@link AppProvider} domain model to its corresponding {@link AppProviderEntity} persistence entity.
      *
-     * @param model the active composite business domain model node
-     * @return a mapped relational database entity layout
+     * @param model the domain model to convert
+     * @return the mapped JPA entity
      */
     AppProviderEntity toEntity(AppProvider model);
 
     /**
-     * Flattens and structuralizes domain graphs into outbound API presentation response layers.
+     * Maps an {@link AppProvider} domain model to an outbound {@link AppProviderOutputDTO}.
      *
-     * @param model source domain business state schema instance
-     * @return the outbound presentation API data carrier DTO
+     * @param model the domain model to convert
+     * @return the mapped outbound DTO
      */
     AppProviderOutputDTO toResponse(AppProvider model);
 
     /**
-     * Maps incoming flat reference fields into a decoupled domain state instance,
-     * resolving the parent development relationship ID to its respective nested model ID,
-     * while ignoring audit fields.
+     * Maps an inbound {@link AppProviderInputDTO} to a new {@link AppProvider} domain model,
+     * resolving the parent development reference, and leaving the id and audit metadata fields unset.
+     * See {@link #nullifyRoleWhenIdMissing} for how the optional role reference is handled.
      *
-     * @param inputDTO inbound client creation payload containing mapping configuration
-     * @return a decoupled domain state instance ready for orchestration processing pipelines
+     * @param inputDTO the inbound DTO containing provider data
+     * @return the mapped domain model
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appDevelopment.id", source = "appDevelopmentId")
@@ -64,11 +65,13 @@ public interface AppProviderMapper {
     AppProvider toModelFromInput(AppProviderInputDTO inputDTO);
 
     /**
-     * Integrates update parameters from flat payload tracking definitions directly over an active
-     * business entity, avoiding logical soft-delete and primary key attribute modifications.
+     * Applies the values of an inbound {@link AppProviderInputDTO} onto an existing {@link AppProvider}
+     * domain model in place, resolving the parent development reference, and leaving the id and
+     * audit metadata fields untouched. See {@link #nullifyRoleWhenIdMissing} for how the optional
+     * role reference is handled.
      *
-     * @param inputDTO delta parameter updates tracking values payload DTO
-     * @param model    the active operational business graph container targeted for modifier updates
+     * @param inputDTO the inbound DTO containing updated provider data
+     * @param model    the existing domain model to update
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appDevelopment.id", source = "appDevelopmentId")

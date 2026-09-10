@@ -12,8 +12,9 @@ import es.caib.invai.back.service.mapper.maintenance.development.layer.LayerMapp
 import es.caib.invai.back.service.mapper.maintenance.development.technology.TechnologyMapper;
 
 /**
- * MapStruct data mapping abstraction interface providing structural state conversions across
- * Technology relation entities, business domain models, and API transfer schemas.
+ * MapStruct mapper converting between {@link AppTechnology} domain models, {@link AppTechnologyEntity}
+ * persistence entities, and the technology input/output DTOs, resolving the parent development,
+ * layer, and technology lookup references along the way.
  *
  * @since 1.0.2
  */
@@ -21,36 +22,36 @@ import es.caib.invai.back.service.mapper.maintenance.development.technology.Tech
 public interface AppTechnologyMapper {
 
     /**
-     * Materializes a persistent relation entity into a business domain aggregate.
+     * Maps a persistence {@link AppTechnologyEntity} to its corresponding {@link AppTechnology} domain model.
      *
-     * @param entity the persistent relation entity source node
-     * @return a clean domain business layout graph
+     * @param entity the JPA entity to convert
+     * @return the mapped domain model
      */
     AppTechnology toModel(AppTechnologyEntity entity);
 
     /**
-     * Maps business domain representations down to persistent relation database entities.
+     * Maps an {@link AppTechnology} domain model to its corresponding {@link AppTechnologyEntity} persistence entity.
      *
-     * @param model the active composite business domain model node
-     * @return a mapped relational database entity layout
+     * @param model the domain model to convert
+     * @return the mapped JPA entity
      */
     AppTechnologyEntity toEntity(AppTechnology model);
 
     /**
-     * Flattens and structuralizes domain graphs into outbound API presentation response layers.
+     * Maps an {@link AppTechnology} domain model to an outbound {@link AppTechnologyOutputDTO}.
      *
-     * @param model source domain business state schema instance
-     * @return the outbound presentation API data carrier DTO
+     * @param model the domain model to convert
+     * @return the mapped outbound DTO
      */
     AppTechnologyOutputDTO toResponse(AppTechnology model);
 
     /**
-     * Maps incoming flat reference fields into a decoupled domain state instance,
-     * resolving the parent development relationship ID to its respective nested model ID,
-     * while ignoring audit fields.
+     * Maps an inbound {@link AppTechnologyInputDTO} to a new {@link AppTechnology} domain model,
+     * resolving the parent development, layer, and technology references, and leaving the id and
+     * audit metadata fields unset.
      *
-     * @param inputDTO inbound client creation payload containing mapping configuration
-     * @return a decoupled domain state instance ready for orchestration processing pipelines
+     * @param inputDTO the inbound DTO containing technology data
+     * @return the mapped domain model
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appDevelopment.id", source = "appDevelopmentId")
@@ -65,11 +66,12 @@ public interface AppTechnologyMapper {
     AppTechnology toModelFromInput(AppTechnologyInputDTO inputDTO);
 
     /**
-     * Integrates update parameters from flat payload tracking definitions directly over an active
-     * business entity, avoiding logical soft-delete and primary key attribute modifications.
+     * Applies the values of an inbound {@link AppTechnologyInputDTO} onto an existing {@link AppTechnology}
+     * domain model in place, resolving the parent development, layer, and technology references,
+     * and leaving the id and audit metadata fields untouched.
      *
-     * @param inputDTO delta parameter updates tracking values payload DTO
-     * @param model    the active operational business graph container targeted for modifier updates
+     * @param inputDTO the inbound DTO containing updated technology data
+     * @param model    the existing domain model to update
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appDevelopment.id", source = "appDevelopmentId")

@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Corporate specification provider executing defensive dynamic predicate tree evaluation
- * against the persistence mapping entities via standard javax Criteria APIs.
+ * Builds the JPA {@link Specification} used by {@link AppProviderJPARepository#findAll} to filter
+ * {@link AppProviderEntity} rows dynamically.
  *
  * @since 1.0.2
  */
@@ -23,13 +23,16 @@ import java.util.List;
 public class AppProviderSpecification {
 
     /**
-     * Compiles a highly scannable, multi-tenant compatible query specification criteria filter.
-     * The parent development identifier is a mandatory scoping constraint: results are always
-     * restricted to providers belonging to the specified development module, never to the entire table.
+     * Builds a specification always scoped to {@code appDevelopmentId} — a caller can never widen
+     * the query beyond a single development's providers — plus, when {@code criteria} is non-null,
+     * an active/inactive filter on {@code deletedAt} (by {@code statusId}), an extra
+     * {@code appDevelopmentId} equality check (redundant with the mandatory one above), and a
+     * {@code search} term matched as an exact numeric id when purely digits, otherwise as a
+     * case-insensitive {@code companyName} substring.
      *
      * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         contextual data parameter inputs mapped from presentation interfaces
-     * @return an evaluated, isolated execution blueprint specification
+     * @param criteria         optional additional filters; {@code null} applies only the development scope
+     * @return the composed specification
      */
     public static Specification<AppProviderEntity> filterByCriteria(Long appDevelopmentId, AppProviderCriteria criteria) {
         return (root, query, cb) -> {
