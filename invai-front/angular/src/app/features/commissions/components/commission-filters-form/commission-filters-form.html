@@ -1,5 +1,5 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input id="commissions-filter-name" class="w-full" formControlName="name" pInputText />
       <label id="commissions-filter-name-label" for="commissions-filter-name">
@@ -8,7 +8,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input id="commissions-filter-name-es" class="w-full" formControlName="nameEs" pInputText />
       <label id="commissions-filter-name-es-label" for="commissions-filter-name-es">
@@ -17,7 +17,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <input
         id="commissions-filter-expedient-number"
@@ -34,7 +34,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <p-select
         inputId="commissions-filter-type"
@@ -52,7 +52,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <p-datepicker
         inputId="commissions-filter-date-from"
@@ -73,7 +73,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <p-datepicker
         inputId="commissions-filter-date-to"
@@ -94,7 +94,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--compact">
     <p-floatlabel class="w-full">
       <p-select
         inputId="commissions-filter-status"

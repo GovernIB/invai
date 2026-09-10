@@ -1,11 +1,11 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <p-select
-        inputId="databases-filter-server"
+        [inputId]="idPrefix() + '-server'"
         styleClass="w-full"
         formControlName="serverId"
-        ariaLabelledBy="databases-filter-server-label"
+        [ariaLabelledBy]="idPrefix() + '-server-label'"
         [ariaFilterLabel]="labels().server"
         [filter]="true"
         [options]="serverOptions()"
@@ -13,32 +13,32 @@
         optionLabel="label"
         optionValue="id"
       />
-      <label id="databases-filter-server-label" for="databases-filter-server">
+      <label [id]="idPrefix() + '-server-label'" [for]="idPrefix() + '-server'">
         {{ labels().server }}
       </label>
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <input
-        id="databases-filter-service"
+        [id]="idPrefix() + '-service'"
         class="w-full"
         type="text"
         formControlName="service"
         pInputText
       />
-      <label for="databases-filter-service">{{ labels().service }}</label>
+      <label [for]="idPrefix() + '-service'">{{ labels().service }}</label>
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <p-select
-        inputId="databases-filter-type"
+        [inputId]="idPrefix() + '-type'"
         styleClass="w-full"
         formControlName="databaseTypeId"
-        ariaLabelledBy="databases-filter-type-label"
+        [ariaLabelledBy]="idPrefix() + '-type-label'"
         [ariaFilterLabel]="labels().databaseType"
         [filter]="true"
         [options]="databaseTypeOptions()"
@@ -46,27 +46,29 @@
         optionLabel="name"
         optionValue="id"
       />
-      <label id="databases-filter-type-label" for="databases-filter-type">
+      <label [id]="idPrefix() + '-type-label'" [for]="idPrefix() + '-type'">
         {{ labels().databaseType }}
       </label>
     </p-floatlabel>
   </div>
 
-  <div>
-    <p-floatlabel class="w-full">
-      <p-select
-        inputId="databases-filter-status"
-        styleClass="w-full"
-        formControlName="status"
-        ariaLabelledBy="databases-filter-status-label"
-        [options]="statusOptions"
-        [showClear]="true"
-        optionLabel="label"
-        optionValue="value"
-      />
-      <label id="databases-filter-status-label" for="databases-filter-status">
-        {{ labels().status }}
-      </label>
-    </p-floatlabel>
-  </div>
+  @if (showStatus()) {
+    <div class="invai-filter-field--compact">
+      <p-floatlabel class="w-full">
+        <p-select
+          [inputId]="idPrefix() + '-status'"
+          styleClass="w-full"
+          formControlName="status"
+          [ariaLabelledBy]="idPrefix() + '-status-label'"
+          [options]="statusOptions"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label [id]="idPrefix() + '-status-label'" [for]="idPrefix() + '-status'">
+          {{ labels().status }}
+        </label>
+      </p-floatlabel>
+    </div>
+  }
 </form>

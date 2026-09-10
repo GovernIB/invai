@@ -28,7 +28,11 @@
     <ng-template let-columns pTemplate="header">
       <tr>
         @for (column of columns; track column.key) {
-          <th [pSortableColumn]="column.sortBy" [style.min-width]="column.minWidth">
+          <th
+            [pSortableColumn]="column.sortBy"
+            [style.min-width]="column.minWidth"
+            [style.width]="column.width"
+          >
             <div class="invai-table-header-content">
               <span class="invai-table-header-label">{{ column.label }}</span>
               <p-sortIcon [field]="column.sortBy" />
@@ -50,21 +54,27 @@
         (keydown.enter)="onRowActivate($event, ApplicationProviderTableAction.View, rowData)"
       >
         @for (column of columns; track column.key) {
-          <td [style.min-width]="column.minWidth">
-            @switch (column.key) {
-              @case ('role') {
-                {{ roleLabel(rowData) }}
+          <td [style.min-width]="column.minWidth" [style.width]="column.width">
+            <span
+              class="invai-table-cell-content"
+              [class.invai-table-cell-content--wrap]="column.wrap"
+              [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+            >
+              @switch (column.key) {
+                @case ('role') {
+                  {{ roleLabel(rowData) }}
+                }
+                @case ('startDate') {
+                  {{ (rowData.startDate | date: 'dd/MM/yyyy') || emptyValue }}
+                }
+                @case ('expireDate') {
+                  {{ (rowData.expireDate | date: 'dd/MM/yyyy') || emptyValue }}
+                }
+                @default {
+                  {{ rowData[column.key] }}
+                }
               }
-              @case ('startDate') {
-                {{ (rowData.startDate | date: 'dd/MM/yyyy') || emptyValue }}
-              }
-              @case ('expireDate') {
-                {{ (rowData.expireDate | date: 'dd/MM/yyyy') || emptyValue }}
-              }
-              @default {
-                {{ rowData[column.key] }}
-              }
-            }
+            </span>
           </td>
         }
         @if (showActions()) {

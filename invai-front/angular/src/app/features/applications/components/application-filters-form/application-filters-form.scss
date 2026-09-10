@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.application-filters {
+  display: grid;
+  row-gap: 1.75rem;
+}
+
+.application-filter-row {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.application-filter-row--state > :last-child {
+  align-self: center;
+}
+
+@container (min-width: 40rem) {
+  .application-filter-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 72rem) {
+  .application-filter-row--identity {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) repeat(3, minmax(0, 2fr));
+  }
+
+  .application-filter-row--organization {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .application-filter-row--resources {
+    grid-template-columns: repeat(3, minmax(0, 3fr)) minmax(0, 2fr);
+  }
+
+  .application-filter-row--state {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}

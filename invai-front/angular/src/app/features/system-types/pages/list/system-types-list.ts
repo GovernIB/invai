@@ -441,7 +441,6 @@ export class SystemTypesList
       nameEs: systemType?.nameEs ?? '',
     });
 
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
   }
 
   private resetAfterMutation(): void {

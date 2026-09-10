@@ -18,10 +18,17 @@ const LABELS: ApplicationFilterLabels = {
   informationSystem: "Sistema d'informació",
   scope: 'Àmbit',
   commission: 'Comissió',
+  conselleria: 'Conselleria',
   administrativeUnit: 'Unitat administrativa',
+  departmentsLoading: 'Carregant conselleries…',
+  departmentsLoadError: 'No es poden carregar les conselleries.',
+  administrativeUnitsLoading: 'Carregant unitats…',
+  administrativeUnitsLoadError: 'No es poden carregar les unitats.',
+  administrativeUnitsEmpty: 'No hi ha unitats.',
+  selectConselleriaFirst: 'Selecciona una conselleria.',
+  retry: 'Torna-ho a provar',
   status: 'Estat',
-  description: 'Descripció',
-  responsible: 'Responsables',
+  responsible: 'Responsable',
   database: 'Bases de dades',
   server: 'Servidor',
   environment: 'Entorn',
@@ -43,7 +50,8 @@ const OPTIONS: ApplicationSelectOptions = {
       commissionType: CommissionType.TECNICA,
     },
   ],
-  administrativeUnits: [{ label: 'Unitat', value: 5 }],
+  departments: [{ label: 'Conselleria', value: 'GVA01' }],
+  administrativeUnits: [{ label: 'Unitat', value: 'UA01' }],
 };
 
 const INFRASTRUCTURE_OPTIONS: ApplicationInfrastructureFilterOptions = {
@@ -67,7 +75,7 @@ describe('ApplicationFiltersForm', () => {
 
   it('should render context-prefixed ids and the inline incomplete toggle', () => {
     expect(fixture.nativeElement.querySelector('#applications-filter-prefix')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('#applications-filter-description')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#applications-filter-description')).toBeNull();
     expect(fixture.nativeElement.querySelector('#applications-filter-responsible')).toBeTruthy();
 
     const responsible = fixture.debugElement.query(By.directive(AutoComplete))
@@ -91,17 +99,25 @@ describe('ApplicationFiltersForm', () => {
       .queryAll(By.directive(Select))
       .map((debugElement) => debugElement.componentInstance as Select);
 
-    expect(selects[0]!.options).toEqual(OPTIONS.categories);
-    expect(selects[3]!.options).toEqual(OPTIONS.commissions);
-    expect(selects[5]!.options).toEqual([
+    expect(selects.find(({ inputId }) => inputId === 'applications-filter-category')?.options).toEqual(
+      OPTIONS.categories,
+    );
+    expect(selects.find(({ inputId }) => inputId === 'applications-filter-commission')?.options).toEqual(
+      OPTIONS.commissions,
+    );
+    expect(selects.find(({ inputId }) => inputId === 'applications-filter-status')?.options).toEqual([
       { label: 'Actiu', value: 1 },
       { label: 'Inactiu', value: 2 },
     ]);
-    expect(selects[6]!.inputId).toBe('applications-filter-database');
-    expect(selects[6]!.ariaLabelledBy).toBe('applications-filter-database-label');
-    expect(selects[6]!.options).toEqual(INFRASTRUCTURE_OPTIONS.databases);
-    expect(selects[7]!.options).toEqual(INFRASTRUCTURE_OPTIONS.servers);
-    expect(selects[8]!.options).toEqual(INFRASTRUCTURE_OPTIONS.environments);
+    const database = selects.find(({ inputId }) => inputId === 'applications-filter-database');
+    expect(database?.ariaLabelledBy).toBe('applications-filter-database-label');
+    expect(database?.options).toEqual(INFRASTRUCTURE_OPTIONS.databases);
+    expect(selects.find(({ inputId }) => inputId === 'applications-filter-server')?.options).toEqual(
+      INFRASTRUCTURE_OPTIONS.servers,
+    );
+    expect(selects.find(({ inputId }) => inputId === 'applications-filter-environment')?.options).toEqual(
+      INFRASTRUCTURE_OPTIONS.environments,
+    );
   });
 
   it('should filter catalog selectors but not the local status selector', () => {
@@ -113,7 +129,7 @@ describe('ApplicationFiltersForm', () => {
     );
     const catalogs = selects.filter((select) => select !== status);
 
-    expect(catalogs).toHaveLength(8);
+    expect(catalogs).toHaveLength(9);
     expect(catalogs.every((select) => select.filter === true)).toBe(true);
     expect(catalogs.every((select) => Boolean(select.ariaFilterLabel))).toBe(
       true,

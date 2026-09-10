@@ -11,6 +11,8 @@
 @use "./reset";
 @use "./full-calendar";
 @use "./table-toolbar";
+@use "./table-presentation";
+@use "./dialog-presentation";
 
 @import "../../../node_modules/primeflex/primeflex.css";
 
@@ -18,8 +20,31 @@
   display: grid;
 }
 
-.invai-dialog-form-grid {
-  padding-top: 1.5rem;
+.invai-form-readonly-control,
+input.invai-form-readonly-control[readonly],
+textarea.invai-form-readonly-control[readonly] {
+  color: var(--p-text-color);
+  background: var(--p-surface-50, var(--surface-50));
+  border-color: var(--invai-form-control-border-color);
+}
+
+.invai-form-static-value {
+  display: flex;
+  width: 100%;
+  min-height: 2.625rem;
+  align-items: center;
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  color: var(--p-text-color);
+  background: var(--p-surface-50, var(--surface-50));
+  border: 1px solid var(--invai-form-control-border-color);
+  border-radius: var(--p-border-radius-md, var(--border-radius));
+}
+
+.invai-form-static-value--rich {
+  display: block;
+  min-height: 10rem;
+  padding: 0.75rem;
 }
 
 .invai-table-consultable-row {

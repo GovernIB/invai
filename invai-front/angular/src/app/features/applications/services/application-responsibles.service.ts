@@ -53,7 +53,7 @@ export class ApplicationResponsiblesService extends BaseApiService {
   create(input: ApplicationResponsibleInput): Observable<ApplicationAssignedResponsibleOutput> {
     return this.http
       .post<ApplicationAssignedResponsibleOutput>(this.url(), input)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   update(
@@ -62,7 +62,7 @@ export class ApplicationResponsiblesService extends BaseApiService {
   ): Observable<ApplicationAssignedResponsibleOutput> {
     return this.http
       .put<ApplicationAssignedResponsibleOutput>(this.url(id), input)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   deactivate(
@@ -71,16 +71,20 @@ export class ApplicationResponsiblesService extends BaseApiService {
   ): Observable<ApplicationResponsibleOutput> {
     return this.http
       .put<ApplicationResponsibleOutput>(this.url('deactivate', id), input)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   reactivate(id: number): Observable<ApplicationAssignedResponsibleOutput> {
     return this.http
       .put<ApplicationAssignedResponsibleOutput>(this.url('reactivate', id), {})
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   clearCache(): void {
     this.cache.clear();
+  }
+
+  private changed(): void {
+    this.changes.assignmentsChanged();
   }
 }

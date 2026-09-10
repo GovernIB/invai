@@ -1,3 +1,4 @@
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -29,7 +30,7 @@ export enum ApplicationInfrastructureTableAction {
 @Component({
   selector: 'app-application-infrastructure-table',
   standalone: true,
-  imports: [Button, Menu, TableModule],
+  imports: [StatusTagComponent, Button, Menu, TableModule],
   templateUrl: './application-infrastructure-table.html',
   styleUrls: [
     './application-infrastructure-table.scss',

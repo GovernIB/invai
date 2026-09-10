@@ -1,6 +1,6 @@
 <app-crud-entity-dialog
   [(visible)]="visible"
-  width="42rem"
+  width="46rem"
   [ariaLabels]="actionAriaLabels"
   [hasUnsavedChanges]="hasUnsavedChanges"
   [isSaving]="isSaving()"
@@ -12,7 +12,7 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-form-surface-subtle invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
@@ -28,12 +28,12 @@
         [pt]="personalCaibPassThrough()"
       />
     </div>
-    @if (mode() === 'create') {
+    @if (personalCaibLocked()) {
       <p
-        id="application-responsible-dialog-caib-unavailable"
+        id="application-responsible-dialog-caib-required"
         class="m-0 text-sm text-color-secondary md:col-span-2"
       >
-        {{ copy.caibCreationUnavailable }}
+        {{ copy.caibRequiredByResponsibility }}
       </p>
     }
 
@@ -68,6 +68,19 @@
         </p>
       }
     </div>
+
+    @if (form().controls.personalCaib.value && mode() === 'create') {
+      <app-application-soffid-person-field
+        idPrefix="application-responsible-dialog"
+        [control]="form().controls.soffidPerson"
+        [loading]="soffidLoading()"
+        [options]="soffidOptions()"
+        [searched]="soffidSearched()"
+        [searchError]="soffidSearchError()"
+        [total]="soffidTotal()"
+        (searchRequested)="soffidSearch.emit($event)"
+      />
+    }
 
     @if (form().controls.personalCaib.value) {
       <div>
@@ -124,36 +137,38 @@
       </div>
     }
 
-    <div>
-      <p-floatlabel class="w-full">
-        <p-select
-          inputId="application-responsible-dialog-person"
-          styleClass="w-full"
-          formControlName="personId"
-          [ariaLabelledBy]="personLabelId"
-          [ariaFilterLabel]="copy.personFilterAriaLabel"
-          appendTo="body"
-          optionLabel="label"
-          optionValue="id"
-          [filter]="true"
-          [invalid]="isInvalid(form().controls.personId)"
-          [options]="personOptions()"
-          [pt]="personSelectPassThrough()"
-        />
-        <label [id]="personLabelId" for="application-responsible-dialog-person">
-          {{ copy.person }}
-        </label>
-      </p-floatlabel>
-      @if (isInvalid(form().controls.personId)) {
-        <p
-          id="application-responsible-dialog-person-error"
-          class="mb-0 mt-1 text-sm text-red-600"
-          role="alert"
-        >
-          {{ requiredError }}
-        </p>
-      }
-    </div>
+    @if (!form().controls.personalCaib.value || mode() === 'edit') {
+      <div>
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="application-responsible-dialog-person"
+            styleClass="w-full"
+            formControlName="personId"
+            [ariaLabelledBy]="personLabelId"
+            [ariaFilterLabel]="copy.personFilterAriaLabel"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [filter]="true"
+            [invalid]="isInvalid(form().controls.personId)"
+            [options]="personOptions()"
+            [pt]="personSelectPassThrough()"
+          />
+          <label [id]="personLabelId" for="application-responsible-dialog-person">
+            {{ copy.person }}
+          </label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.personId)) {
+          <p
+            id="application-responsible-dialog-person-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    }
 
     <div>
       <p-floatlabel class="w-full">
@@ -163,6 +178,7 @@
           type="email"
           formControlName="email"
           pInputText
+          readonly
         />
         <label for="application-responsible-dialog-email">{{ copy.email }}</label>
       </p-floatlabel>

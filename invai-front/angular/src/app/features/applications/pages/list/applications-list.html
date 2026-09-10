@@ -1,5 +1,6 @@
 <app-section-container [header]="header">
   <app-section-actions
+    appearance="on-primary"
     [(isFiltersCollapsed)]="isFiltersCollapsed"
     [(quickSearchValue)]="quickSearchTerm"
     [(selectedColumns)]="selectedColumns"
@@ -28,9 +29,16 @@
         [infrastructureOptions]="infrastructureFilterOptions()"
         [labels]="filterLabels"
         [options]="filterOptions()"
+        [departmentsLoading]="isDepartmentsLoading()"
+        [departmentsLoadFailed]="departmentsLoadFailed()"
+        [administrativeUnitsLoading]="isAdministrativeUnitsLoading()"
+        [administrativeUnitsLoadFailed]="administrativeUnitsLoadFailed()"
         [responsibleLoading]="isResponsibleSearchLoading()"
         [responsibleOptions]="responsibleOptions()"
         (responsibleSearch)="onResponsibleSearch($event)"
+        (conselleriaSelected)="selectConselleria($event)"
+        (departmentsRetry)="retryDepartments()"
+        (administrativeUnitsRetry)="retryAdministrativeUnits()"
       />
     </app-search-filters>
   }

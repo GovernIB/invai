@@ -108,6 +108,16 @@ export class CommissionDialog {
     };
   }
 
+  protected approvalDateLabel(): string {
+    const value = this.form().controls.approvalDate.value;
+    return value ? new Intl.DateTimeFormat().format(value) : '-';
+  }
+
+  protected commissionTypeLabel(): string {
+    const value = this.form().controls.commissionType.value;
+    return this.commissionTypeOptions.find((option) => option.value === value)?.label ?? '-';
+  }
+
   protected onSubmit(): void {
     if (this.isLoading() || this.isSaving() || this.mode() === 'view') return;
     this.submitForm.emit();

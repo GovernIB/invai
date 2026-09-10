@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Dialog } from 'primeng/dialog';
+import { Button } from 'primeng/button';
 
 import { ConfirmationDialogComponent } from './confirmation-dialog.component';
 
@@ -23,6 +24,22 @@ describe('ConfirmationDialogComponent', () => {
     const dialog = fixture.debugElement.query(By.directive(Dialog)).componentInstance as Dialog;
 
     expect(dialog.focusOnShow).toBe(true);
+  });
+
+  it('keeps text and icons on every action and supports domain-specific icons', () => {
+    fixture.componentRef.setInput('auxiliaryLabel', 'Transfereix');
+    fixture.componentRef.setInput('confirmIcon', 'pi pi-save');
+    fixture.detectChanges();
+    const buttons = fixture.debugElement.queryAll(By.directive(Button))
+      .map(element => element.componentInstance as Button)
+      .filter(button => button.label);
+    expect(buttons.map(button => button.icon)).toEqual([
+      'pi pi-arrow-right', 'pi pi-times', 'pi pi-save',
+    ]);
+    expect(buttons.every(button => Boolean(button.ariaLabel))).toBe(true);
+    fixture.componentRef.setInput('auxiliaryIcon', 'pi pi-refresh');
+    fixture.detectChanges();
+    expect(buttons[0].icon).toBe('pi pi-refresh');
   });
 
   it('uses the backward-compatible width by default and accepts a wider override', () => {

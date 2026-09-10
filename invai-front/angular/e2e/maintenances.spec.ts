@@ -128,7 +128,7 @@ const SCENARIOS: MaintenanceScenario[] = [
   {
     key: 'environment',
     title: 'Entorns',
-    route: '/sistemes#environments',
+    route: '/manteniments/sistemes#environments',
     apiPath: '/invaiapi/interna/environment',
     addButton: 'Afegeix un entorn',
     addDialogTitle: 'Afegir entorn',
@@ -235,7 +235,16 @@ test.describe('maintenance section navigation', () => {
     await page.goto('/manteniments/general');
 
     const tabs = page.locator('.maintenances-tabs');
-    await expect(tabs.getByRole('link')).toHaveText(['General', 'Responsables', 'Desenvolupament']);
+    await expect(tabs.getByRole('link')).toHaveText([
+      'General',
+      'Responsables',
+      'Sistemes',
+      'Desenvolupament',
+    ]);
+    await expect(tabs.getByRole('link', { name: 'General' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
 
     const categories = page.getByRole('button', { name: /^Categories/ });
     const systemTypes = page.getByRole('button', { name: /^Sistemes d'informació/ });
@@ -410,11 +419,14 @@ test.describe('maintenance section navigation', () => {
 test.describe('systems maintenance navigation', () => {
   test('groups system resources into expansion panels', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto('/sistemes');
+    await page.goto('/manteniments/sistemes');
 
     const databases = page.getByRole('button', { name: /^Bases de dades/ });
     const servers = page.getByRole('button', { name: /^Servidors d'aplicacions/ });
     const environments = page.getByRole('button', { name: /^Entorns/ });
+    await expect(
+      page.locator('.maintenances-tabs').getByRole('link', { name: 'Sistemes' }),
+    ).toHaveAttribute('aria-current', 'page');
 
     await expect(page.locator('.maintenance-panel-title')).toHaveText([
       'Entorns',
@@ -430,7 +442,7 @@ test.describe('systems maintenance navigation', () => {
     await expect(environments).toHaveAttribute('aria-expanded', 'false');
 
     await databases.click();
-    await expect(page).toHaveURL(/\/sistemes#databases$/);
+    await expect(page).toHaveURL(/\/manteniments\/sistemes#databases$/);
     await expect(databases).toHaveAttribute('aria-expanded', 'true');
 
     const databasesPanel = page.locator('p-accordion-panel').filter({ has: databases });
@@ -450,21 +462,21 @@ test.describe('systems maintenance navigation', () => {
     expect(tableWidths.scrollWidth).toBeGreaterThan(tableWidths.clientWidth);
 
     await environments.click();
-    await expect(page).toHaveURL(/\/sistemes#environments$/);
+    await expect(page).toHaveURL(/\/manteniments\/sistemes#environments$/);
     await expect(environments).toHaveAttribute('aria-expanded', 'true');
     await expect(databases).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('redirects previous systems and maintenance URLs to their panels', async ({ page }) => {
     await page.goto('/sistemes/bases-de-dades');
-    await expect(page).toHaveURL(/\/sistemes#databases$/);
+    await expect(page).toHaveURL(/\/manteniments\/sistemes#databases$/);
     await expect(page.getByRole('button', { name: /^Bases de dades/ })).toHaveAttribute(
       'aria-expanded',
       'true',
     );
 
-    await page.goto('/manteniments/entorns');
-    await expect(page).toHaveURL(/\/sistemes#environments$/);
+    await page.goto('/manteniments/entorns?view=compact');
+    await expect(page).toHaveURL(/\/manteniments\/sistemes\?view=compact#environments$/);
     await expect(page.getByRole('button', { name: /^Entorns/ })).toHaveAttribute(
       'aria-expanded',
       'true',
@@ -487,7 +499,7 @@ test.describe('systems maintenance navigation', () => {
     };
 
     try {
-      await page.goto('/sistemes');
+      await page.goto('/manteniments/sistemes');
       await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
       const physicalServer = await ensurePhysicalServer(page, cleanup, token, 'APPLICATION');
       const environmentLabel =

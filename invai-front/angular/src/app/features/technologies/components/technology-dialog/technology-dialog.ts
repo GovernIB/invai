@@ -80,6 +80,11 @@ export class TechnologyDialog {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected layerLabel(): string {
+    const value = this.form().controls.layerId.value;
+    return this.layerOptions().find((option) => option.id === value)?.label ?? '-';
+  }
+
   protected onSubmit(): void {
     if (!this.isLoading() && !this.isSaving() && this.mode() !== 'view') this.submitForm.emit();
   }

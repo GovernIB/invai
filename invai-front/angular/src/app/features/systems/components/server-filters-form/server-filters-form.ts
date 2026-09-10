@@ -19,13 +19,7 @@ export interface ServerFilterLabels {
 @Component({
   selector: 'app-server-filters-form',
   standalone: true,
-  imports: [
-    FloatLabel,
-    InputText,
-    ReactiveFormsModule,
-    SearchFilterGridDirective,
-    Select,
-  ],
+  imports: [FloatLabel, InputText, ReactiveFormsModule, SearchFilterGridDirective, Select],
   templateUrl: './server-filters-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -33,6 +27,8 @@ export class ServerFiltersForm {
   form = input.required<ServerFiltersFormGroup>();
   labels = input.required<ServerFilterLabels>();
   serverOptions = input.required<ServerCatalogOption[]>();
+  showStatus = input(true);
+  idPrefix = input('systems-filter');
 
   protected readonly statusOptions = INFRASTRUCTURE_STATUS_OPTIONS;
 }

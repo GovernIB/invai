@@ -35,8 +35,8 @@
           }
           @case ('role-transfer') {
             <app-role-transfer
-              [initialPeople]="resolved.transferPeoplePage?.content ?? []"
-              [initialPeopleLoadFailed]="resolved.transferPeopleLoadFailed"
+              [initialPeopleSearch]="resolved.transferPeopleSearch"
+              [initialPeopleSearchFailed]="resolved.transferPeopleSearchFailed"
               [sourceRequest]="transferSourceRequest()"
             />
           }

@@ -1,3 +1,4 @@
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -34,7 +35,7 @@ export enum LayerTableAction {
 @Component({
   selector: 'app-layers-table',
   standalone: true,
-  imports: [Button, Menu, RestoreRecordMenu, Skeleton, TableModule],
+  imports: [StatusTagComponent, Button, Menu, RestoreRecordMenu, Skeleton, TableModule],
   templateUrl: './layers-table.html',
   styleUrl: '../../../../shared/styles/development-maintenance-table.scss',
   encapsulation: ViewEncapsulation.None,

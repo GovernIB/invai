@@ -16,12 +16,12 @@
   (submitForm)="onSubmit()"
 >
   <form
-    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
     [formGroup]="form()"
     (ngSubmit)="onSubmit()"
     novalidate
   >
-    <div>
+    <div class="md:col-span-8">
       <p-floatlabel class="w-full">
         @if (mode() === 'view') {
           <input
@@ -71,7 +71,7 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-4">
       <p-floatlabel class="w-full">
         <input
           id="application-technology-dialog-layer"
@@ -85,7 +85,7 @@
       </p-floatlabel>
     </div>
 
-    <div>
+    <div class="md:col-span-4">
       <p-floatlabel class="w-full">
         <input
           id="application-technology-dialog-version"
@@ -121,7 +121,7 @@
       }
     </div>
 
-    <div>
+    <div class="md:col-span-4">
       <p-floatlabel class="w-full">
         <input
           id="application-technology-dialog-architecture"

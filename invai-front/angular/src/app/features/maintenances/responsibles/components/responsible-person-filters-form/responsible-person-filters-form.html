@@ -1,5 +1,5 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <p-select
         inputId="responsible-people-filter-company"
@@ -19,7 +19,7 @@
       </label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input
         id="responsible-people-filter-first-name"
@@ -31,7 +31,7 @@
       <label for="responsible-people-filter-first-name">{{ labels().firstName }}</label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input
         id="responsible-people-filter-last-name"
@@ -43,7 +43,7 @@
       <label for="responsible-people-filter-last-name">{{ labels().lastName }}</label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <input
         id="responsible-people-filter-email"
@@ -55,7 +55,7 @@
       <label for="responsible-people-filter-email">{{ labels().email }}</label>
     </p-floatlabel>
   </div>
-  <div>
+  <div class="invai-filter-field--compact">
     <p-floatlabel class="w-full">
       <p-select
         inputId="responsible-people-filter-status"

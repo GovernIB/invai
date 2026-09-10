@@ -16,7 +16,10 @@ export class RoleTransferService extends BaseApiService {
 
   apply(input: RoleTransferInput): Observable<void> {
     return this.http.post<void>(this.url(), input).pipe(
-      tap(() => this.changes.assignmentsChanged()),
+      tap(() => {
+        this.changes.peopleChanged();
+        this.changes.assignmentsChanged();
+      }),
     );
   }
 }

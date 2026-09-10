@@ -62,11 +62,20 @@
       >
         @for (column of columns; track column.key) {
           <td [style.min-width]="column.minWidth" [style.width]="column.width">
-            @if (column.key === 'status') {
-              <span>{{ getApplicationStatusLabel(rowData) }}</span>
-            } @else {
-              <span>{{ rowData[column.key] }}</span>
-            }
+            <span
+              class="invai-table-cell-content"
+              [class.invai-table-cell-content--wrap]="column.wrap"
+              [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+            >
+              @if (column.key === 'status') {
+                <app-status-tag
+                  [active]="rowData.status ? rowData.status === activeStatus : null"
+                  [label]="getApplicationStatusLabel(rowData)"
+                />
+              } @else {
+                <span>{{ rowData[column.key] }}</span>
+              }
+            </span>
           </td>
         }
       </tr>

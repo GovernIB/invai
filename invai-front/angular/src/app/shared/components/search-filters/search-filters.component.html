@@ -1,4 +1,4 @@
-<div class="flex flex-column gap-5">
+<div class="invai-filter-panel flex flex-column gap-5">
   <div class="flex flex-column gap-4">
     <h3 class="font-semibold text-xl text-color">{{ title() }}</h3>
     <ng-content />
@@ -11,10 +11,10 @@
     </div>
   }
 
-  <footer class="flex justify-content-between align-items-center">
-    <section class="flex justify-content-start gap-3">
+  <footer class="flex flex-wrap gap-3 justify-content-between align-items-center">
+    <section class="flex flex-wrap justify-content-start gap-3">
       <p-button
-        styleClass="px-6"
+        styleClass="invai-filter-action"
         [disabled]="isDisable()"
         [loading]="isLoading()"
         (onClick)="search()"
@@ -23,7 +23,7 @@
         size="large"
       ></p-button>
       <p-button
-        styleClass="px-6"
+        styleClass="invai-filter-action"
         [text]="true"
         (click)="reset()"
         icon="pi pi-eraser"
@@ -36,7 +36,7 @@
         [icon]="iconMoreFilters()"
         [label]="labelMoreFilters()"
         [text]="true"
-        [attr.aria-expanded]="!isMoreFiltersCollapsed()"
+        [pt]="moreFiltersPassThrough()"
         (click)="onToggleMoreFiltersCollapsed()"
       />
     }

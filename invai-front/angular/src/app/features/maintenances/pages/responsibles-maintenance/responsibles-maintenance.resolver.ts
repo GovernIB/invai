@@ -9,7 +9,9 @@ import {
   ResponsibleCompany,
   ResponsibleCompanyOption,
   ResponsiblePerson,
+  ResponsiblePersonCombinedSearchOutput,
 } from '../../responsibles/responsibles.model';
+import { ROLE_TRANSFER_PERSON_SEARCH_PARAMS } from '../../responsibles/responsibles.constants';
 import { ResponsibleAuthorizationTypesService } from '../../responsibles/services/responsible-authorization-types.service';
 import { ResponsibleCompaniesService } from '../../responsibles/services/responsible-companies.service';
 import { ResponsiblePeopleService } from '../../responsibles/services/responsible-people.service';
@@ -21,8 +23,8 @@ export interface ResponsiblesMaintenanceResolvedData {
   companiesLoadFailed: boolean;
   peoplePage: SpringPage<ResponsiblePerson> | null;
   peopleLoadFailed: boolean;
-  transferPeoplePage: SpringPage<ResponsiblePerson> | null;
-  transferPeopleLoadFailed: boolean;
+  transferPeopleSearch: ResponsiblePersonCombinedSearchOutput | null;
+  transferPeopleSearchFailed: boolean;
   authorizationsPage: SpringPage<ResponsibleAuthorization> | null;
   authorizationsLoadFailed: boolean;
   activeCompanyOptions: ResponsibleCompanyOption[];
@@ -35,13 +37,6 @@ const INITIAL_PARAMS = {
   page: 0,
   size: 10,
   sort: 'id,asc',
-  statusId: SoftDeleteStatus.ACTIVE,
-} as const;
-
-const TRANSFER_PEOPLE_PARAMS = {
-  page: 0,
-  size: 1000,
-  sort: ['firstName,asc', 'lastName,asc'] as string[],
   statusId: SoftDeleteStatus.ACTIVE,
 } as const;
 
@@ -60,7 +55,7 @@ export const responsiblesMaintenanceResolver: ResolveFn<
   return forkJoin({
     companies: result(companiesService.getPage(INITIAL_PARAMS)),
     people: result(peopleService.getPage(INITIAL_PARAMS)),
-    transferPeople: result(peopleService.getPage(TRANSFER_PEOPLE_PARAMS)),
+    transferPeople: result(peopleService.searchCombined(ROLE_TRANSFER_PERSON_SEARCH_PARAMS)),
     authorizations: result(inject(ResponsibleAuthorizationTypesService).getPage(INITIAL_PARAMS)),
     activeCompanies: result(companiesService.getOptions(true)),
     allCompanies: result(companiesService.getOptions(false)),
@@ -70,8 +65,8 @@ export const responsiblesMaintenanceResolver: ResolveFn<
       companiesLoadFailed: companies.failed,
       peoplePage: people.value,
       peopleLoadFailed: people.failed,
-      transferPeoplePage: transferPeople.value,
-      transferPeopleLoadFailed: transferPeople.failed,
+      transferPeopleSearch: transferPeople.value,
+      transferPeopleSearchFailed: transferPeople.failed,
       authorizationsPage: authorizations.value,
       authorizationsLoadFailed: authorizations.failed,
       activeCompanyOptions: activeCompanies.value ?? [],

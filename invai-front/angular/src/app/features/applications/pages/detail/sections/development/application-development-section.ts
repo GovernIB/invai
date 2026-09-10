@@ -393,6 +393,20 @@ export class ApplicationDevelopmentSection implements OnInit {
     return validationErrors === null ? control.value.trim() : null;
   }
 
+  protected environmentLabel(): string {
+    const value = this.detailState.developmentForm.controls.environment.value;
+    return this.displayedEnvironmentOptions().find((option) => option.id === value)?.label ?? '-';
+  }
+
+  protected selectOptionLabel<T>(options: SelectOption<T>[], value: T | null): string {
+    return options.find((option) => option.value === value)?.label ?? '-';
+  }
+
+  protected formattedRevisionDate(): string {
+    const value = this.detailState.developmentForm.controls.revisionDate.value;
+    return value ? new Intl.DateTimeFormat(this.locale).format(value) : '-';
+  }
+
   protected datePassThrough(errorId: string, invalid: boolean): DatePickerPassThrough {
     return {
       pcInputText: {
@@ -801,7 +815,6 @@ export class ApplicationDevelopmentSection implements OnInit {
       },
       { emitEvent: false },
     );
-    if (mode === 'view') this.providerForm.disable({ emitEvent: false });
   }
 
   private prepareTechnologyForm(technology: ApplicationTechnologyOutput | null): void {

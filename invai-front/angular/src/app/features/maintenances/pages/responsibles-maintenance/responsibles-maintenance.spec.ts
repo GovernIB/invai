@@ -12,9 +12,14 @@ import { ResponsiblePeopleList } from '../../responsibles/pages/responsible-peop
 import { RoleTransfer } from '../../responsibles/pages/role-transfer/role-transfer';
 import {
   ResponsiblePerson,
+  ResponsiblePersonCombinedSearchOutput,
   RoleTransferSourceRequest,
 } from '../../responsibles/responsibles.model';
 import { ResponsiblesMaintenance } from './responsibles-maintenance';
+import {
+  RESPONSIBLES_MAINTENANCE_RESOLVE_KEY,
+  ResponsiblesMaintenanceResolvedData,
+} from './responsibles-maintenance.resolver';
 
 @Component({ selector: 'app-responsible-companies-list', standalone: true, template: '' })
 class ResponsibleCompaniesListStub {
@@ -40,10 +45,30 @@ class ResponsibleAuthorizationsListStub {
 
 @Component({ selector: 'app-role-transfer', standalone: true, template: '' })
 class RoleTransferStub {
-  readonly initialPeople = input<unknown>();
-  readonly initialPeopleLoadFailed = input(false);
+  readonly initialPeopleSearch = input<ResponsiblePersonCombinedSearchOutput | null>(null);
+  readonly initialPeopleSearchFailed = input(false);
   readonly sourceRequest = input<RoleTransferSourceRequest | null>(null);
 }
+
+const INITIAL_TRANSFER_PEOPLE: ResponsiblePersonCombinedSearchOutput = {
+  database: { content: [], totalElements: 0 } as never,
+  soffid: { content: [], totalElements: 0 } as never,
+};
+
+const RESOLVED_DATA: ResponsiblesMaintenanceResolvedData = {
+  companiesPage: null,
+  companiesLoadFailed: false,
+  peoplePage: null,
+  peopleLoadFailed: false,
+  transferPeopleSearch: INITIAL_TRANSFER_PEOPLE,
+  transferPeopleSearchFailed: false,
+  authorizationsPage: null,
+  authorizationsLoadFailed: false,
+  activeCompanyOptions: [],
+  activeCompanyOptionsLoadFailed: false,
+  allCompanyOptions: [],
+  allCompanyOptionsLoadFailed: false,
+};
 
 describe('ResponsiblesMaintenance', () => {
   let fixture: ComponentFixture<ResponsiblesMaintenance>;
@@ -56,7 +81,16 @@ describe('ResponsiblesMaintenance', () => {
     await TestBed.configureTestingModule({
       imports: [ResponsiblesMaintenance],
       providers: [
-        { provide: ActivatedRoute, useValue: { snapshot: { fragment: null }, fragment } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              fragment: null,
+              data: { [RESPONSIBLES_MAINTENANCE_RESOLVE_KEY]: RESOLVED_DATA },
+            },
+            fragment,
+          },
+        },
         { provide: Router, useValue: { navigate } },
       ],
     })
@@ -89,7 +123,7 @@ describe('ResponsiblesMaintenance', () => {
       fixture.debugElement
         .queryAll(By.directive(AccordionPanel))
         .map(({ componentInstance }) => componentInstance.value()),
-    ).toEqual(['role-transfer', 'companies', 'people', 'authorizations']);
+    ).toEqual(['role-transfer', 'people', 'authorizations', 'companies']);
 
     const headers = fixture.nativeElement.querySelectorAll(
       '.maintenance-panel-header',
@@ -164,6 +198,14 @@ describe('ResponsiblesMaintenance', () => {
     const transfer = fixture.debugElement.query(By.directive(RoleTransferStub))
       .componentInstance as RoleTransferStub;
     expect(transfer.sourceRequest()).toEqual({ requestId: 1, person });
+  });
+
+  it('passes the resolved transfer catalog without requesting it from the panel', () => {
+    const transfer = fixture.debugElement.query(By.directive(RoleTransferStub))
+      .componentInstance as RoleTransferStub;
+
+    expect(transfer.initialPeopleSearch()).toBe(INITIAL_TRANSFER_PEOPLE);
+    expect(transfer.initialPeopleSearchFailed()).toBe(false);
   });
 
   function activePanels(): string[] {

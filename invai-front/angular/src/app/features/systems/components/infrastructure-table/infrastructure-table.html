@@ -64,7 +64,20 @@
       >
         @for (column of columns; track column.key) {
           <td [style.min-width]="column.minWidth" [style.width]="column.width">
-            {{ rowData[column.key] }}
+            <span
+              class="invai-table-cell-content"
+              [class.invai-table-cell-content--wrap]="column.wrap"
+              [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+            >
+              @if (column.key === 'status') {
+                <app-status-tag
+                  [active]="!rowData.deletedAt"
+                  [label]="rowData.status"
+                />
+              } @else {
+                {{ rowData[column.key] }}
+              }
+            </span>
           </td>
         }
         <td class="invai-table-actions-column" pFrozenColumn alignFrozen="right">

@@ -52,28 +52,32 @@ export class ApplicationAuthorizedService extends BaseApiService {
   create(input: ApplicationAuthorizedInput): Observable<ApplicationAuthorizedOutput> {
     return this.http
       .post<ApplicationAuthorizedOutput>(this.url(), input)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   update(id: number, input: ApplicationAuthorizedInput): Observable<ApplicationAuthorizedOutput> {
     return this.http
       .put<ApplicationAuthorizedOutput>(this.url(id), input)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   deactivate(id: number, input: ApplicationAssignmentDeactivateInput): Observable<void> {
     return this.http
       .put<void>(this.url('deactivate', id), input)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   reactivate(id: number): Observable<ApplicationAuthorizedOutput> {
     return this.http
       .put<ApplicationAuthorizedOutput>(this.url('reactivate', id), {})
-      .pipe(tap(() => this.clearCache()));
+      .pipe(tap(() => this.changed()));
   }
 
   clearCache(): void {
     this.cache.clear();
+  }
+
+  private changed(): void {
+    this.changes.assignmentsChanged();
   }
 }

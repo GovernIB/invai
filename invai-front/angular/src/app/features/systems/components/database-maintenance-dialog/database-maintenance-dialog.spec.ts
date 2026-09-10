@@ -103,9 +103,29 @@ describe('DatabaseMaintenanceDialog', () => {
     );
   });
 
+  it('renders complex view values statically and text as readonly', () => {
+    const form = createDatabaseHostForm(formBuilder);
+    form.reset({
+      server: SERVER,
+      service: 'INVAI',
+      port: 15432,
+      databaseType: POSTGRESQL,
+      description: 'Principal',
+    });
+    const fixture = createFixture(form, 'view');
+    const service = fixture.nativeElement.querySelector('#database-host-service') as HTMLInputElement;
+
+    expect(service.readOnly).toBe(true);
+    expect(service.disabled).toBe(false);
+    expect(fixture.debugElement.query(By.directive(Select))).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain(SERVER.label);
+    expect(fixture.nativeElement.textContent).toContain(POSTGRESQL.name);
+    expect(fixture.nativeElement.textContent).toContain('15432');
+  });
+
   function createFixture(
     form: ReturnType<typeof createDatabaseHostForm>,
-    mode: 'create' | 'edit' = 'create',
+    mode: 'create' | 'view' | 'edit' = 'create',
   ): ComponentFixture<DatabaseMaintenanceDialog> {
     const fixture = TestBed.createComponent(DatabaseMaintenanceDialog);
     fixture.componentRef.setInput('visible', true);

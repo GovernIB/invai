@@ -95,7 +95,7 @@ test.describe('systems CRUD lifecycles through the UI', () => {
       };
 
       try {
-        await page.goto('/sistemes');
+        await page.goto('/manteniments/sistemes');
         await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
         const [environment, serverType] = await Promise.all([
           ensureEnvironment(page, cleanup, token),
@@ -304,7 +304,7 @@ test.describe('systems CRUD lifecycles through the UI', () => {
     };
 
     try {
-      await page.goto('/sistemes');
+      await page.goto('/manteniments/sistemes');
       await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
       registerSoftDeleteCleanup<DatabaseVendorRecord>({
         page,
@@ -510,7 +510,7 @@ test.describe('systems CRUD lifecycles through the UI', () => {
     };
 
     try {
-      await page.goto('/sistemes');
+      await page.goto('/manteniments/sistemes');
       await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
       const [server, vendor] = await Promise.all([
         ensurePhysicalServer(page, cleanup, token, 'DATABASE'),

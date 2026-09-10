@@ -1,3 +1,4 @@
+import { StatusTagComponent } from '@components/status-tag/status-tag.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -34,7 +35,7 @@ export enum FieldTableAction {
 @Component({
   selector: 'app-fields-table',
   standalone: true,
-  imports: [Button, Menu, RestoreRecordMenu, Skeleton, TableModule],
+  imports: [StatusTagComponent, Button, Menu, RestoreRecordMenu, Skeleton, TableModule],
   templateUrl: './fields-table.html',
   styleUrl: './fields-table.scss',
   encapsulation: ViewEncapsulation.None,

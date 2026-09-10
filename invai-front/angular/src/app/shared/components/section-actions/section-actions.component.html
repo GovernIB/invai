@@ -1,4 +1,8 @@
-<div class="section-actions" [class.section-actions--without-search]="hideQuickSearch()">
+<div
+  class="section-actions"
+  [class.section-actions--without-search]="hideQuickSearch()"
+  [class.section-actions--on-primary]="appearance() === 'on-primary'"
+>
   @if (!hideQuickSearch()) {
     <div class="section-actions__search relative flex w-[400px] max-w-full items-center">
       <span
@@ -44,7 +48,7 @@
         i18n-pTooltip
       >
         <p-button
-          badgeStyleClass="bg-primary text-secondary"
+          [badgeStyleClass]="appearance() === 'on-primary' ? 'section-actions__badge-on-primary' : 'bg-primary text-secondary'"
           [badgeDisabled]="!filtersSelected()"
           [icon]="PrimeIcons.FILTER"
           [outlined]="true"
@@ -65,7 +69,7 @@
         [ariaLabel]="columnsButtonAriaLabel()"
         [inputId]="columnsInputId()"
         [options]="availableColumns()"
-        appendTo="self"
+        [appendTo]="appearance() === 'on-primary' ? 'body' : 'self'"
         [filter]="true"
         filterBy="label"
         [filterPlaceHolder]="columnsFilterPlaceholder()"

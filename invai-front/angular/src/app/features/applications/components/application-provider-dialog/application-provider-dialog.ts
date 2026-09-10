@@ -95,6 +95,15 @@ export class ApplicationProviderDialog {
     };
   }
 
+  protected roleLabel(): string {
+    const value = this.form().controls.roleId.value;
+    return this.roleOptions().find((option) => option.id === value)?.label ?? '-';
+  }
+
+  protected dateLabel(value: Date | null): string {
+    return value ? new Intl.DateTimeFormat().format(value) : '-';
+  }
+
   protected onSubmit(): void {
     if (!this.isSaving() && !this.isDeleting() && this.mode() !== 'view') {
       this.submitForm.emit();

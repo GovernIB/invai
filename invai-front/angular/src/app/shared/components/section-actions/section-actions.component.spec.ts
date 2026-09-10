@@ -71,6 +71,36 @@ describe('SectionActionsComponent', () => {
     expect(filtersButton.getAttribute('aria-expanded')).toBe('true');
   });
 
+  it('preserves accessible actions, search and disabled behavior on a primary frame', () => {
+    fixture.componentRef.setInput('appearance', 'on-primary');
+    fixture.componentRef.setInput('disableAddButton', true);
+    fixture.componentRef.setInput('isFiltersCollapsed', true);
+    fixture.detectChanges();
+    const add = vi.fn();
+    const search = vi.fn();
+    fixture.componentInstance.onAdd.subscribe(add);
+    fixture.componentInstance.onQuickSearchChange.subscribe(search);
+    const buttons = fixture.nativeElement.querySelectorAll('.section-actions__buttons button');
+    const addButton = buttons[buttons.length - 1] as HTMLButtonElement;
+
+    expect(addButton.disabled).toBe(true);
+    expect(addButton.getAttribute('aria-label')).toBeTruthy();
+    addButton.click();
+    expect(add).not.toHaveBeenCalled();
+    fixture.componentRef.setInput('disableAddButton', false);
+    fixture.detectChanges();
+    addButton.click();
+    expect(add).toHaveBeenCalledOnce();
+
+    buttons[0].click();
+    fixture.detectChanges();
+    expect(buttons[0].getAttribute('aria-expanded')).toBe('true');
+    const input = fixture.nativeElement.querySelector('input[type="text"]') as HTMLInputElement;
+    input.value = 'Inventory';
+    input.dispatchEvent(new Event('input'));
+    expect(search).toHaveBeenCalledWith('Inventory');
+  });
+
   it('should accept a unique input id for the column selector', () => {
     fixture.componentRef.setInput('columnsInputId', 'responsible-companies-columns');
     fixture.detectChanges();

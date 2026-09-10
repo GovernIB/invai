@@ -428,7 +428,6 @@ export class PhysicalServersList implements OnInit {
     this.canRestore.set(mode === 'view' && Boolean(record.deletedAt));
     this.entityForm.enable({ emitEvent: false });
     this.entityForm.reset({ name: record.name ?? '', environment });
-    if (mode === 'view') this.entityForm.disable({ emitEvent: false });
     this.dialogMode.set(mode);
   }
 

@@ -7,7 +7,7 @@ import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { MessageService } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 
 import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
 import {
@@ -17,7 +17,10 @@ import {
   ApplicationStatus,
 } from '../../applications.model';
 import { ApplicationFiltersFormGroup } from '../../forms/application-form.factory';
-import { ApplicationSelectOptions } from '../../services/application-options.service';
+import {
+  ApplicationOptionsService,
+  ApplicationSelectOptions,
+} from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
 import { ApplicationsList } from './applications-list';
 import {
@@ -43,6 +46,7 @@ const APPLICATIONS: Application[] = [
     informationSystem: 'Instrumental',
     scope: 'Departamental',
     commission: 'Equip directiu',
+    department: 'Conselleria',
     administrativeUnit: 'Direcció General',
     status: ApplicationStatus.ACTIVE,
     description: 'Aplicació interna',
@@ -50,6 +54,14 @@ const APPLICATIONS: Application[] = [
     modificationDate: '',
     withdrawalDate: '',
     appResponsibleAuthorizedId: null,
+    incomplete: false,
+    missingResponsibleTypes: false,
+    missingAuthorized: false,
+    missingDevelopmentFields: false,
+    missingSystems: false,
+    missingDatabases: false,
+    missingAccessibilityFields: false,
+    missingSecurityData: false,
   },
   {
     id: '2',
@@ -60,6 +72,7 @@ const APPLICATIONS: Application[] = [
     informationSystem: 'Corporatiu',
     scope: 'Transversal',
     commission: 'Comissió tècnica',
+    department: 'Conselleria',
     administrativeUnit: 'Servei TIC',
     status: ApplicationStatus.INACTIVE,
     description: 'Portal corporatiu',
@@ -67,6 +80,14 @@ const APPLICATIONS: Application[] = [
     modificationDate: '',
     withdrawalDate: '',
     appResponsibleAuthorizedId: null,
+    incomplete: false,
+    missingResponsibleTypes: false,
+    missingAuthorized: false,
+    missingDevelopmentFields: false,
+    missingSystems: false,
+    missingDatabases: false,
+    missingAccessibilityFields: false,
+    missingSecurityData: false,
   },
 ];
 
@@ -83,7 +104,8 @@ const FILTER_OPTIONS: ApplicationSelectOptions = {
       commissionType: CommissionType.SUPERIOR,
     },
   ],
-  administrativeUnits: [{ label: 'Direcció General', value: 5 }],
+  departments: [{ label: 'Conselleria', value: 'GVA01' }],
+  administrativeUnits: [{ label: 'Direcció General', value: 'UA01' }],
 };
 
 const INFRASTRUCTURE_FILTER_OPTIONS: ApplicationInfrastructureFilterOptions = {
@@ -152,6 +174,13 @@ describe('ApplicationsList', () => {
       providers: [
         MessageService,
         { provide: ApplicationsService, useValue: { getPage } },
+        {
+          provide: ApplicationOptionsService,
+          useValue: {
+            getDepartmentOptions: vi.fn(() => of(FILTER_OPTIONS.departments)),
+            getAdministrativeUnitOptions: vi.fn(() => of(FILTER_OPTIONS.administrativeUnits)),
+          },
+        },
         { provide: ResponsiblePeopleService, useValue: { getPage: getPeoplePage } },
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: Router, useValue: { navigate } },
@@ -249,7 +278,7 @@ describe('ApplicationsList', () => {
     );
 
     component.selectedColumns.update((columns) => columns.filter(({ key }) => key !== 'status'));
-    list.filtersForm.controls.description.setValue('interna');
+    list.filtersForm.controls.application.setValue('interna');
     list.onFilterSearch();
 
     expect(component.sortedSelectedColumns().map(({ key }) => key)).not.toContain('status');
@@ -342,9 +371,9 @@ describe('ApplicationsList', () => {
       informationSystem: 2,
       scope: 3,
       commission: 4,
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       status: ApplicationStatus.INACTIVE,
-      description: ' interna ',
       responsible: { id: 11, label: 'Maria Tur' },
       database: 8,
       server: 5,
@@ -369,9 +398,8 @@ describe('ApplicationsList', () => {
       systemTypeId: 2,
       fieldId: 3,
       commissionId: 4,
-      admUnitId: 5,
+      admUnitCode: 'UA01',
       statusId: ApplicationStatus.INACTIVE,
-      description: 'interna',
       responsibleId: 11,
       databaseId: 8,
       serverId: 5,
@@ -461,20 +489,28 @@ describe('ApplicationsList', () => {
     expect(accessList().tableFirst()).toBe(0);
   });
 
-  it('should count incomplete but omit it from the request and warn in the console', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  it('should request incomplete applications and omit the filter when unchecked', () => {
     const list = accessList();
     list.filtersForm.patchValue({ incomplete: true });
-
     list.onFilterSearch();
 
     expect(component.selectedFilters()).toBe(2);
-    expect(warn).toHaveBeenCalledOnce();
+    expect(getPage).toHaveBeenLastCalledWith({
+      page: 0,
+      size: 10,
+      statusId: ApplicationStatus.ACTIVE,
+      incomplete: true,
+    });
+
+    list.filtersForm.patchValue({ incomplete: false });
+    list.onFilterSearch();
+
     expect(getPage).toHaveBeenLastCalledWith({
       page: 0,
       size: 10,
       statusId: ApplicationStatus.ACTIVE,
     });
+    expect(component.selectedFilters()).toBe(1);
   });
 
   it('should debounce remote responsible searches and map active people to options', () => {
@@ -571,6 +607,8 @@ describe('ApplicationsList', () => {
       infrastructureOptions: INFRASTRUCTURE_FILTER_OPTIONS,
       pageLoadFailed: true,
       optionsLoadFailed: false,
+      departmentsLoadFailed: false,
+      administrativeUnitsLoadFailed: false,
     });
 
     expect(getPage).not.toHaveBeenCalled();
@@ -608,9 +646,9 @@ describe('ApplicationsList', () => {
       informationSystem: null,
       scope: null,
       commission: null,
+      conselleria: null,
       administrativeUnit: null,
       status: ApplicationStatus.ACTIVE,
-      description: null,
       responsible: null,
       database: null,
       server: null,
@@ -693,6 +731,8 @@ function resolvedData(content: Application[], totalElements: number): Applicatio
     infrastructureOptions: INFRASTRUCTURE_FILTER_OPTIONS,
     pageLoadFailed: false,
     optionsLoadFailed: false,
+    departmentsLoadFailed: false,
+    administrativeUnitsLoadFailed: false,
   };
 }
 

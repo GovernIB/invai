@@ -1,11 +1,11 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <p-select
-        inputId="systems-filter-server"
+        [inputId]="idPrefix() + '-server'"
         styleClass="w-full"
         formControlName="serverId"
-        ariaLabelledBy="systems-filter-server-label"
+        [ariaLabelledBy]="idPrefix() + '-server-label'"
         [ariaFilterLabel]="labels().server"
         [filter]="true"
         [options]="serverOptions()"
@@ -13,53 +13,55 @@
         optionLabel="label"
         optionValue="id"
       />
-      <label id="systems-filter-server-label" for="systems-filter-server">
+      <label [id]="idPrefix() + '-server-label'" [for]="idPrefix() + '-server'">
         {{ labels().server }}
       </label>
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <input
-        id="systems-filter-instance"
+        [id]="idPrefix() + '-instance'"
         class="w-full"
         type="text"
         formControlName="instance"
         pInputText
       />
-      <label for="systems-filter-instance">{{ labels().instance }}</label>
+      <label [for]="idPrefix() + '-instance'">{{ labels().instance }}</label>
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <input
-        id="systems-filter-version"
+        [id]="idPrefix() + '-version'"
         class="w-full"
         type="text"
         formControlName="version"
         pInputText
       />
-      <label for="systems-filter-version">{{ labels().version }}</label>
+      <label [for]="idPrefix() + '-version'">{{ labels().version }}</label>
     </p-floatlabel>
   </div>
 
-  <div>
-    <p-floatlabel class="w-full">
-      <p-select
-        inputId="systems-filter-status"
-        styleClass="w-full"
-        formControlName="status"
-        ariaLabelledBy="systems-filter-status-label"
-        [options]="statusOptions"
-        [showClear]="true"
-        optionLabel="label"
-        optionValue="value"
-      />
-      <label id="systems-filter-status-label" for="systems-filter-status">
-        {{ labels().status }}
-      </label>
-    </p-floatlabel>
-  </div>
+  @if (showStatus()) {
+    <div class="invai-filter-field--compact">
+      <p-floatlabel class="w-full">
+        <p-select
+          [inputId]="idPrefix() + '-status'"
+          styleClass="w-full"
+          formControlName="status"
+          [ariaLabelledBy]="idPrefix() + '-status-label'"
+          [options]="statusOptions"
+          [showClear]="true"
+          optionLabel="label"
+          optionValue="value"
+        />
+        <label [id]="idPrefix() + '-status-label'" [for]="idPrefix() + '-status'">
+          {{ labels().status }}
+        </label>
+      </p-floatlabel>
+    </div>
+  }
 </form>

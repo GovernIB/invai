@@ -27,24 +27,30 @@
         >
           {{ labels.environment }}
         </label>
-        <p-select
-          inputId="application-development-environment"
-          formControlName="environment"
-          ariaLabelledBy="application-development-environment-label"
-          appendTo="body"
-          optionLabel="label"
-          optionValue="id"
-          [ariaFilterLabel]="labels.environment"
-          [attr.aria-describedby]="
-            isInvalid(detailState.developmentForm.controls.environment)
-              ? 'application-development-environment-error'
-              : null
-          "
-          [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.environment)"
-          [filter]="true"
-          [fluid]="true"
-          [options]="displayedEnvironmentOptions()"
-        />
+        @if (detailState.isEditing('development')) {
+          <p-select
+            inputId="application-development-environment"
+            formControlName="environment"
+            ariaLabelledBy="application-development-environment-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="id"
+            [ariaFilterLabel]="labels.environment"
+            [attr.aria-describedby]="
+              isInvalid(detailState.developmentForm.controls.environment)
+                ? 'application-development-environment-error'
+                : null
+            "
+            [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.environment)"
+            [filter]="true"
+            [fluid]="true"
+            [options]="displayedEnvironmentOptions()"
+          />
+        } @else {
+          <p class="invai-form-static-value" aria-labelledby="application-development-environment-label">
+            {{ environmentLabel() }}
+          </p>
+        }
         @if (isInvalid(detailState.developmentForm.controls.environment)) {
           <p
             id="application-development-environment-error"
@@ -60,6 +66,7 @@
         <label id="application-development-modality-label" for="application-development-modality">
           {{ labels.modality }}
         </label>
+        @if (detailState.isEditing('development')) {
         <p-select
           inputId="application-development-modality"
           formControlName="modality"
@@ -76,6 +83,11 @@
           [fluid]="true"
           [options]="modalityOptions()"
         />
+        } @else {
+          <p class="invai-form-static-value" aria-labelledby="application-development-modality-label">
+            {{ selectOptionLabel(modalityOptions(), detailState.developmentForm.controls.modality.value) }}
+          </p>
+        }
         @if (isInvalid(detailState.developmentForm.controls.modality)) {
           <p
             id="application-development-modality-error"
@@ -87,7 +99,7 @@
         }
       </div>
 
-      <div class="application-development__field xl:col-span-2">
+      <div class="application-development__field md:col-span-2 xl:col-span-2">
         <label for="application-development-code">{{ labels.code }}</label>
         <div class="application-development__source-code">
           <input
@@ -101,6 +113,8 @@
                 : null
             "
             [attr.aria-invalid]="isInvalid(detailState.developmentForm.controls.code)"
+            [readOnly]="!detailState.isEditing('development')"
+            [class.invai-form-readonly-control]="!detailState.isEditing('development')"
             pInputText
           />
           @if (sourceCodeUrl(); as url) {
@@ -144,6 +158,7 @@
         <label id="application-development-standard-label" for="application-development-standard">
           {{ labels.standardAdaption }}
         </label>
+        @if (detailState.isEditing('development')) {
         <p-select
           inputId="application-development-standard"
           formControlName="standardAdaption"
@@ -160,6 +175,11 @@
           [fluid]="true"
           [options]="standardAdaptionOptions()"
         />
+        } @else {
+          <p class="invai-form-static-value" aria-labelledby="application-development-standard-label">
+            {{ selectOptionLabel(standardAdaptionOptions(), detailState.developmentForm.controls.standardAdaption.value) }}
+          </p>
+        }
         @if (isInvalid(detailState.developmentForm.controls.standardAdaption)) {
           <p
             id="application-development-standard-error"
@@ -178,6 +198,7 @@
         >
           {{ labels.revisionDate }}
         </label>
+        @if (detailState.isEditing('development')) {
         <p-datepicker
           inputId="application-development-revision-date"
           formControlName="revisionDate"
@@ -196,6 +217,11 @@
           "
           [showIcon]="true"
         />
+        } @else {
+          <p class="invai-form-static-value" aria-labelledby="application-development-revision-date-label">
+            {{ formattedRevisionDate() }}
+          </p>
+        }
         @if (isInvalid(detailState.developmentForm.controls.revisionDate)) {
           <p
             id="application-development-revision-date-error"
@@ -284,13 +310,20 @@
       >
         {{ labels.observation }}
       </label>
-      <p-editor
-        id="application-development-observation"
-        [formControl]="detailState.developmentForm.controls.observation"
-        [attr.aria-labelledby]="'application-development-observation-label'"
-        [readonly]="!detailState.isEditing('development')"
-        [style]="{ height: '10rem' }"
-      />
+      @if (detailState.isEditing('development')) {
+        <p-editor
+          id="application-development-observation"
+          [formControl]="detailState.developmentForm.controls.observation"
+          [attr.aria-labelledby]="'application-development-observation-label'"
+          [style]="{ height: '10rem' }"
+        />
+      } @else {
+        <div
+          class="invai-form-static-value invai-form-static-value--rich"
+          aria-labelledby="application-development-observation-label"
+          [innerHTML]="detailState.developmentForm.controls.observation.value || '-'"
+        ></div>
+      }
     </div>
   </section>
 </app-application-detail-section-layout>
@@ -331,6 +364,7 @@
 
 @if (providerDeleteDialogVisible()) {
   <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
     [(visible)]="providerDeleteDialogVisible"
     [cancelAriaLabel]="providerDeleteDialogCancelAriaLabel"
     [cancelLabel]="deleteDialogCancelLabel"
@@ -346,6 +380,7 @@
 
 @if (technologyDeleteDialogVisible()) {
   <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
     [(visible)]="technologyDeleteDialogVisible"
     [cancelAriaLabel]="technologyDeleteDialogCancelAriaLabel"
     [cancelLabel]="deleteDialogCancelLabel"

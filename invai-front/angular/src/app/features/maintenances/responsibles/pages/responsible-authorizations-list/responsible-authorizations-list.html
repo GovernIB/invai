@@ -55,6 +55,7 @@
   }
   @if (isDeleteDialogVisible()) {
     <app-confirmation-dialog
+      confirmIcon="pi pi-trash"
       [(visible)]="isDeleteDialogVisible"
       [message]="deleteDialogMessage()"
       [title]="copy.deactivateTitle"

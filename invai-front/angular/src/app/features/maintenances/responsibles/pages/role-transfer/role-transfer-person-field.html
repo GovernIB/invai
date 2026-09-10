@@ -1,0 +1,59 @@
+<label [id]="labelId()" [for]="inputId()">{{ label() }}</label>
+<span [id]="instructionId()" class="sr-only">{{ instruction() }}</span>
+
+<p-select
+  class="w-full"
+  dataKey="email"
+  filterBy="label,email"
+  optionDisabled="disabled"
+  optionLabel="label"
+  appendTo="body"
+  [ariaFilterLabel]="label()"
+  [ariaLabelledBy]="labelId()"
+  [emptyMessage]="panelEmptyMessage()"
+  [emptyFilterMessage]="panelEmptyMessage()"
+  [filter]="true"
+  [formControl]="control()"
+  [inputId]="inputId()"
+  [invalid]="invalid()"
+  [loading]="loading()"
+  [options]="options()"
+  [placeholder]="placeholder()"
+  [pt]="passThrough()"
+  [resetFilterOnHide]="true"
+  [showClear]="true"
+  (onFilter)="onFilter($event)"
+  (onShow)="onOpen()"
+>
+  <ng-template #item let-person>
+    <div class="flex flex-col">
+      <span>{{ person.label }}</span>
+      <span class="text-sm text-color-secondary">
+        {{ person.email }} · {{ sourceLabel(person.source) }}
+      </span>
+      @if (person.disabled) {
+        <span class="text-sm text-color-secondary">{{ copy.sourceUnavailable }}</span>
+      }
+    </div>
+  </ng-template>
+</p-select>
+
+<small [id]="statusId()" class="sr-only" role="status">
+  {{ statusMessage() }}
+</small>
+@if (searchError()) {
+  <small [id]="searchErrorId()" class="sr-only" role="alert">
+    {{ searchErrorMessage() }}
+  </small>
+} @else {
+  <span [id]="searchErrorId()" class="sr-only"></span>
+}
+@if (validationErrorMessage()) {
+  <small [id]="errorId()" class="sr-only" role="alert">
+    {{ validationErrorMessage() }}
+  </small>
+} @else {
+  <span [id]="errorId()" class="sr-only"></span>
+}
+
+<ng-content />

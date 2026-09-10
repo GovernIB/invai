@@ -8,8 +8,11 @@ import {
   ResponsibleAuthorizationPageParams,
   ResponsiblePersonFilters,
   ResponsiblePerson,
+  ResponsiblePersonSearchSource,
   ResponsiblePersonOption,
   ResponsiblePersonPageParams,
+  RoleTransferDestinationOption,
+  RoleTransferPersonOption,
 } from './responsibles.model';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -35,6 +38,42 @@ export function responsiblePersonFullName(
 
 export function toResponsiblePersonOption(person: ResponsiblePerson): ResponsiblePersonOption {
   return { id: person.id, label: responsiblePersonFullName(person) };
+}
+
+export function toRoleTransferDestinationOption(
+  person: Pick<ResponsiblePerson, 'firstName' | 'lastName' | 'email'> & {
+    id: number | null;
+  },
+  source: ResponsiblePersonSearchSource,
+): RoleTransferDestinationOption {
+  return toRoleTransferPersonOption(person, source, false);
+}
+
+export function toRoleTransferSourceOption(
+  person: Pick<ResponsiblePerson, 'firstName' | 'lastName' | 'email'> & {
+    id: number | null;
+  },
+  source: ResponsiblePersonSearchSource,
+): RoleTransferPersonOption {
+  return toRoleTransferPersonOption(person, source, person.id === null);
+}
+
+function toRoleTransferPersonOption(
+  person: Pick<ResponsiblePerson, 'firstName' | 'lastName' | 'email'> & {
+    id: number | null;
+  },
+  source: ResponsiblePersonSearchSource,
+  disabled: boolean,
+): RoleTransferPersonOption {
+  return {
+    id: person.id,
+    firstName: person.firstName,
+    lastName: person.lastName,
+    email: person.email,
+    label: responsiblePersonFullName(person),
+    source,
+    disabled,
+  };
 }
 
 export function toResponsiblePersonPageParams(

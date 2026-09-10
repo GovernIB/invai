@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, convertToParamMap } from '@angular/router';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
-
 import { APPLICATIONS_ROUTES } from '../../applications.routes';
 import { ApplicationOutput } from '../../applications.model';
+import { ApplicationEnsClassificationsService } from '../../services/application-security.service';
 import { ApplicationsService } from '../../services/applications.service';
 import {
   APPLICATION_DETAIL_RESOLVE_KEY,
@@ -20,6 +20,7 @@ const APPLICATION: ApplicationOutput = {
   systemType: null,
   field: null,
   admUnit: null,
+  department: null,
   csCommission: null,
   description: null,
   status: null,
@@ -33,59 +34,59 @@ const APPLICATION: ApplicationOutput = {
   appInformationSystemDbId: null,
   appDevelopmentId: null,
   appResponsibleAuthorizedId: null,
+  incomplete: false,
+  missingResponsibleTypes: false,
+  missingAuthorized: false,
+  missingDevelopmentFields: false,
+  missingSystems: false,
+  missingDatabases: false,
+  missingAccessibilityFields: false,
+  missingSecurityData: false,
 };
 
 describe('applicationDetailResolver', () => {
-  let getById: ReturnType<typeof vi.fn>;
+  const getById = vi.fn();
+  const getClassifications = vi.fn();
 
   beforeEach(() => {
-    getById = vi.fn(() => of(APPLICATION));
+    getById.mockReset().mockReturnValue(of(APPLICATION));
+    getClassifications.mockReset();
     TestBed.configureTestingModule({
-      providers: [{ provide: ApplicationsService, useValue: { getById } }],
+      providers: [
+        { provide: ApplicationsService, useValue: { getById } },
+        { provide: ApplicationEnsClassificationsService, useValue: { getPage: getClassifications } },
+      ],
     });
   });
 
-  it('should resolve the application identified by the route', async () => {
-    const result = await resolveDetail('7');
-
-    expect(getById).toHaveBeenCalledWith(7);
-    expect(result).toEqual({ application: APPLICATION, loadFailed: false });
+  it('resolves backend flags without loading ENS classifications', async () => {
+    const response = { ...APPLICATION, appSecurityId: 8, incomplete: true, missingSecurityData: true };
+    getById.mockReturnValue(of(response));
+    await expect(resolveDetail('7')).resolves.toEqual({ application: response, loadFailed: false });
+    expect(getById).toHaveBeenCalledExactlyOnceWith(7);
+    expect(getClassifications).not.toHaveBeenCalled();
   });
 
-  it.each(['', 'invalid', '0', '-1'])(
-    'should reject an invalid application id without requesting it (%s)',
-    async (id) => {
-      await expect(resolveDetail(id)).resolves.toEqual({
-        application: null,
-        loadFailed: true,
-      });
-      expect(getById).not.toHaveBeenCalled();
-    },
-  );
-
-  it('should complete the route with a degraded state when loading fails', async () => {
-    getById.mockReturnValueOnce(throwError(() => new Error('Application unavailable')));
-
-    await expect(resolveDetail('7')).resolves.toEqual({
-      application: null,
-      loadFailed: true,
-    });
+  it.each(['', 'invalid', '0', '-1'])('rejects an invalid id (%s)', async (id) => {
+    await expect(resolveDetail(id)).resolves.toEqual({ application: null, loadFailed: true });
+    expect(getById).not.toHaveBeenCalled();
   });
 
-  it('should be registered on the application detail route', () => {
-    const route = APPLICATIONS_ROUTES.find(({ path }) => path === ':id');
+  it('returns a degraded route when the application load fails', async () => {
+    getById.mockReturnValue(throwError(() => new Error('Unavailable')));
+    await expect(resolveDetail('7')).resolves.toEqual({ application: null, loadFailed: true });
+  });
 
-    expect(route?.resolve?.[APPLICATION_DETAIL_RESOLVE_KEY]).toBe(applicationDetailResolver);
+  it('is registered on the detail route', () => {
+    expect(APPLICATIONS_ROUTES.find(({ path }) => path === ':id')?.resolve?.[APPLICATION_DETAIL_RESOLVE_KEY])
+      .toBe(applicationDetailResolver);
   });
 
   function resolveDetail(id: string): Promise<ApplicationDetailResolvedData> {
-    const route = {
-      paramMap: convertToParamMap({ id }),
-    } as ActivatedRouteSnapshot;
-    const result = TestBed.runInInjectionContext(() =>
-      applicationDetailResolver(route, {} as RouterStateSnapshot),
-    );
-
+    const result = TestBed.runInInjectionContext(() => applicationDetailResolver(
+      { paramMap: convertToParamMap({ id }) } as ActivatedRouteSnapshot,
+      {} as RouterStateSnapshot,
+    ));
     return firstValueFrom(result as Observable<ApplicationDetailResolvedData>);
   }
 });

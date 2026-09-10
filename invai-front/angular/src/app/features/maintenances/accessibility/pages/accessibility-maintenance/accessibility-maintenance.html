@@ -1,0 +1,22 @@
+<p-accordion [value]="activePanel()" (valueChange)="onPanelChange($event)">
+  @for (panel of panels; track panel.id) {
+    <p-accordion-panel [value]="panel.id">
+      <p-accordion-header>
+        <span class="maintenance-panel-header">
+          <span class="maintenance-panel-title">{{ panel.title }}</span>
+          <span class="maintenance-panel-description">{{ panel.description }}</span>
+        </span>
+      </p-accordion-header>
+      <p-accordion-content>
+        @if (panel.resource; as resource) {
+          <app-accessibility-resource-list
+            [initialForbidden]="resourceState(resource).forbidden"
+            [initialLoadFailed]="resourceState(resource).loadFailed"
+            [initialPage]="resourceState(resource).page"
+            [resource]="resource"
+          />
+        }
+      </p-accordion-content>
+    </p-accordion-panel>
+  }
+</p-accordion>

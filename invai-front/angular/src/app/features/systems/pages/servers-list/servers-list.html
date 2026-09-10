@@ -58,6 +58,7 @@
 
 @if (isDeleteDialogVisible()) {
   <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
     [(visible)]="isDeleteDialogVisible"
     [cancelLabel]="deleteCancel"
     [confirmLabel]="deleteConfirm"

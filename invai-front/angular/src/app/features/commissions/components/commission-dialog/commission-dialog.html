@@ -23,7 +23,7 @@
     </div>
   } @else {
     <form
-      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+      class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
       [formGroup]="form()"
       (ngSubmit)="onSubmit()"
       novalidate
@@ -38,6 +38,8 @@
             formControlName="name"
             [attr.aria-describedby]="isInvalid(form().controls.name) ? 'commission-dialog-name-error' : null"
             [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="commission-dialog-name">{{ labels.name }}</label>
@@ -63,6 +65,8 @@
             formControlName="nameEs"
             [attr.aria-describedby]="isInvalid(form().controls.nameEs) ? 'commission-dialog-name-es-error' : null"
             [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="commission-dialog-name-es">{{ labels.nameEs }}</label>
@@ -79,7 +83,7 @@
         }
       </div>
 
-      <div class="md:col-span-6">
+      <div class="md:col-span-8">
         <p-floatlabel class="w-full">
           <input
             id="commission-dialog-expedient-number"
@@ -89,6 +93,8 @@
             formControlName="expedientNumber"
             [attr.aria-describedby]="isInvalid(form().controls.expedientNumber) ? 'commission-dialog-expedient-number-error' : null"
             [attr.aria-invalid]="isInvalid(form().controls.expedientNumber)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="commission-dialog-expedient-number">{{ labels.expedientNumber }}</label>
@@ -105,7 +111,20 @@
         }
       </div>
 
-      <div class="md:col-span-6">
+      <div class="md:col-span-4">
+        @if (mode() === 'view') {
+          <p-floatlabel class="w-full">
+            <input
+              id="commission-dialog-approval-date-view"
+              class="w-full invai-form-readonly-control"
+              type="text"
+              [value]="approvalDateLabel()"
+              readonly
+              pInputText
+            />
+            <label for="commission-dialog-approval-date-view">{{ labels.approvalDate }}</label>
+          </p-floatlabel>
+        } @else {
         <p-floatlabel class="w-full">
           <p-datepicker
             inputId="commission-dialog-approval-date"
@@ -124,6 +143,7 @@
             {{ labels.approvalDate }}
           </label>
         </p-floatlabel>
+        }
         @if (isInvalid(form().controls.approvalDate)) {
           <p id="commission-dialog-approval-date-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
             {{ requiredError }}
@@ -131,7 +151,20 @@
         }
       </div>
 
-      <div class="commission-dialog-type-field md:col-span-6">
+      <div class="commission-dialog-type-field md:col-span-4">
+        @if (mode() === 'view') {
+          <p-floatlabel class="w-full">
+            <input
+              id="commission-dialog-type-view"
+              class="w-full invai-form-readonly-control"
+              type="text"
+              [value]="commissionTypeLabel()"
+              readonly
+              pInputText
+            />
+            <label for="commission-dialog-type-view">{{ labels.commissionType }}</label>
+          </p-floatlabel>
+        } @else {
         <p-floatlabel class="w-full">
           <p-select
             inputId="commission-dialog-type"
@@ -149,6 +182,7 @@
             {{ labels.commissionType }}
           </label>
         </p-floatlabel>
+        }
         @if (isInvalid(form().controls.commissionType)) {
           <p id="commission-dialog-type-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
             {{ requiredError }}

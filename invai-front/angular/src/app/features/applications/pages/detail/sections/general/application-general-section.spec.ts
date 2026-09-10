@@ -7,6 +7,7 @@ import { By } from '@angular/platform-browser';
 import { ApplicationStatus } from '../../../../applications.model';
 import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
 import { ApplicationsService } from '../../../../services/applications.service';
+import { ApplicationOptionsService } from '../../../../services/application-options.service';
 import { APPLICATION_OPTIONS_RESOLVE_KEY } from '../../../../resolvers/application-options.resolver';
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationGeneralSection } from './application-general-section';
@@ -23,6 +24,13 @@ describe('ApplicationGeneralSection', () => {
         MessageService,
         provideRouter([]),
         { provide: ApplicationsService, useValue: {} },
+        {
+          provide: ApplicationOptionsService,
+          useValue: {
+            getDepartmentOptions: vi.fn(),
+            getAdministrativeUnitOptions: vi.fn(),
+          },
+        },
         { provide: ApplicationDevelopmentService, useValue: {} },
         {
           provide: ActivatedRoute,
@@ -35,9 +43,12 @@ describe('ApplicationGeneralSection', () => {
                     informationSystems: [],
                     scopes: [],
                     commissions: [],
+                    departments: [],
                     administrativeUnits: [],
                   },
                   loadFailed: false,
+                  departmentsLoadFailed: false,
+                  administrativeUnitsLoadFailed: false,
                 },
               },
             },
@@ -83,20 +94,24 @@ describe('ApplicationGeneralSection', () => {
     expect(findWithdrawalButton()).toBeUndefined();
   });
 
-  it('keeps the rich description editor rendered and toggles its read-only mode', () => {
+  it('switches the rich description between static view and editable control', () => {
     detailState.form.controls.description.setValue(
       '<p>Application <strong>description</strong></p>',
     );
     fixture.detectChanges();
 
-    const readOnlyEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
-    expect(readOnlyEditor.readonly).toBe(true);
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
+    expect(
+      fixture.nativeElement
+        .querySelector('.invai-form-static-value--rich')
+        .getAttribute('aria-labelledby'),
+    ).toBe('detail-application-description-label');
 
     detailState.startEditing('general');
     fixture.detectChanges();
 
     const editableEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
-    expect(editableEditor).toBe(readOnlyEditor);
+    expect(editableEditor).toBeTruthy();
     expect(editableEditor.readonly).toBe(false);
   });
 

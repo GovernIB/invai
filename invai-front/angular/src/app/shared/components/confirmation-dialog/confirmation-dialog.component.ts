@@ -24,6 +24,7 @@ export class ConfirmationDialogComponent {
   cancelLabel = input(CONFIRMATION_DIALOG_CANCEL_LABEL);
   confirmLabel = input(CONFIRMATION_DIALOG_CONFIRM_LABEL);
   auxiliaryLabel = input<string | null>(null);
+  auxiliaryIcon = input<string>(PrimeIcons.ARROW_RIGHT);
   auxiliaryAriaLabel = input<string | null>(null);
   cancelAriaLabel = input(CONFIRMATION_DIALOG_CANCEL_ARIA_LABEL);
   confirmAriaLabel = input(CONFIRMATION_DIALOG_CONFIRM_ARIA_LABEL);

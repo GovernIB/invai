@@ -15,9 +15,11 @@ import {
   ApplicationSystemsPageParams,
   ApplicationSystemRelationOutput,
 } from '../applications.model';
+import { ApplicationsService } from './applications.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationSystemsService extends BaseApiService {
+  private readonly applicationsService = inject(ApplicationsService);
   protected override readonly ENTITY_URI = 'application/system';
 
   private readonly locale = inject(LOCALE_ID);
@@ -41,7 +43,12 @@ export class ApplicationSystemsService extends BaseApiService {
   create(payload: ApplicationSystemRelationInput): Observable<ApplicationSystemRelationOutput> {
     return this.http
       .post<ApplicationSystemRelationOutput>(this.url(), payload)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(
+        tap(() => {
+          this.clearCache();
+          this.applicationsService.clearCache();
+        }),
+      );
   }
 
   update(
@@ -50,11 +57,21 @@ export class ApplicationSystemsService extends BaseApiService {
   ): Observable<ApplicationSystemRelationOutput> {
     return this.http
       .put<ApplicationSystemRelationOutput>(this.url(id), payload)
-      .pipe(tap(() => this.clearCache()));
+      .pipe(
+        tap(() => {
+          this.clearCache();
+          this.applicationsService.clearCache();
+        }),
+      );
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(this.url(id)).pipe(tap(() => this.clearCache()));
+    return this.http.delete<void>(this.url(id)).pipe(
+      tap(() => {
+        this.clearCache();
+        this.applicationsService.clearCache();
+      }),
+    );
   }
 
   clearCache(): void {

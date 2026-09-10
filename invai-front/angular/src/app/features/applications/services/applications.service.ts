@@ -1,11 +1,14 @@
 import { HttpParams } from '@angular/common/http';
 import { Injectable, LOCALE_ID, inject } from '@angular/core';
 import { BaseApiService } from '@core/services/base-api.service';
+import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
 import { SpringPage } from '@models/page.model';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
 import { cachedRequest } from '@shared/utils/service-cache.utils';
 import { localizedName } from '@shared/utils/localized-name.utils';
 import { Observable, map, tap } from 'rxjs';
+import { readApplicationCompleteness } from '../application-completeness';
+import { APPLICATION_DETAIL_CACHE_TTL_MS } from './application-cache.constants';
 
 import {
   Application,
@@ -26,9 +29,15 @@ export class ApplicationsService extends BaseApiService {
   protected override readonly ENTITY_URI = 'application';
 
   private readonly locale = inject(LOCALE_ID);
+  private readonly responsibleChanges = inject(ResponsibleDataChangesService);
 
   private readonly _applicationsCache = new Map<string, Observable<SpringPage<Application>>>();
-  private readonly _applicationDetailsCache = new Map<string, Observable<ApplicationOutput>>();
+  private readonly detailsCache = new Map<string, Observable<ApplicationOutput>>();
+
+  constructor() {
+    super();
+    this.responsibleChanges.assignments.subscribe(() => this.clearCache());
+  }
 
   getAll(): Observable<Application[]> {
     return this.getPage().pipe(map((page) => page.content));
@@ -55,9 +64,17 @@ export class ApplicationsService extends BaseApiService {
   }
 
   getById(id: number): Observable<ApplicationOutput> {
-    return cachedRequest(this._applicationDetailsCache, String(id), () =>
-      this.http.get<ApplicationOutput>(this.url(id)),
+    return cachedRequest(
+      this.detailsCache,
+      String(id),
+      () => this.http.get<ApplicationOutput>(this.url(id)),
+      APPLICATION_DETAIL_CACHE_TTL_MS,
     );
+  }
+
+  refreshById(id: number): Observable<ApplicationOutput> {
+    this.detailsCache.delete(String(id));
+    return this.getById(id);
   }
 
   create(payload: ApplicationInput): Observable<ApplicationOutput> {
@@ -84,7 +101,7 @@ export class ApplicationsService extends BaseApiService {
 
   clearCache(): void {
     this._applicationsCache.clear();
-    this._applicationDetailsCache.clear();
+    this.detailsCache.clear();
   }
 
   toApplication(response: ApplicationOutput): Application {
@@ -100,7 +117,10 @@ export class ApplicationsService extends BaseApiService {
       scope: response.field ? localizedName(response.field, this.locale) : '',
       commission: response.csCommission ? localizedName(response.csCommission, this.locale) : '',
       administrativeUnit: response.admUnit
-        ? localizedName(response.admUnit, this.locale, response.admUnit.code)
+        ? response.admUnit.name || response.admUnit.code
+        : '',
+      department: response.department
+        ? response.department.name || response.department.code
         : '',
       status,
       description: response.description ?? '',
@@ -111,11 +131,15 @@ export class ApplicationsService extends BaseApiService {
       informationSystemId: response.systemType?.id,
       scopeId: response.field?.id,
       commissionId: response.csCommission?.id,
-      administrativeUnitId: response.admUnit?.id,
+      admUnitCode: response.admUnit?.code,
+      departmentCode: response.department?.code,
       statusId: status ?? undefined,
       informationSystemDbId: response.appInformationSystemDbId,
       appDevelopmentId: response.appDevelopmentId,
+      appSecurityId: response.appSecurityId ?? null,
+      appAccessibilityId: response.appAccessibilityId ?? null,
       appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
+      ...readApplicationCompleteness(response),
     };
   }
 
@@ -124,14 +148,15 @@ export class ApplicationsService extends BaseApiService {
 
     let httpParams = toPageHttpParams(params) ?? new HttpParams();
 
-    const criteria: Record<string, string | number | undefined> = {
+    const criteria: Record<string, string | number | boolean | undefined> = {
+      incomplete: params.incomplete,
       prefix: params.prefix,
       applicationName: params.applicationName,
       categoryId: params.categoryId,
       systemTypeId: params.systemTypeId,
       fieldId: params.fieldId,
       commissionId: params.commissionId,
-      admUnitId: params.admUnitId,
+      admUnitCode: params.admUnitCode,
       statusId: params.statusId,
       description: params.description,
       quickSearch: params.quickSearch?.trim() || undefined,
@@ -154,6 +179,7 @@ export class ApplicationsService extends BaseApiService {
     const sort = Array.isArray(params?.sort) ? params.sort.join('|') : (params?.sort ?? '');
 
     return JSON.stringify({
+      incomplete: params?.incomplete ?? null,
       page: params?.page ?? null,
       size: params?.size ?? null,
       sort,
@@ -163,7 +189,7 @@ export class ApplicationsService extends BaseApiService {
       systemTypeId: params?.systemTypeId ?? null,
       fieldId: params?.fieldId ?? null,
       commissionId: params?.commissionId ?? null,
-      admUnitId: params?.admUnitId ?? null,
+      admUnitCode: params?.admUnitCode ?? null,
       statusId: params?.statusId ?? null,
       description: params?.description ?? '',
       responsibleId: params?.responsibleId ?? null,

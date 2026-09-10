@@ -7,10 +7,7 @@ import { Select } from 'primeng/select';
 
 import { DatabaseFiltersFormGroup } from '../../forms/database-filters-form.factory';
 import { INFRASTRUCTURE_STATUS_OPTIONS } from '../../systems.constants';
-import {
-  DatabaseVendorCatalogOption,
-  ServerCatalogOption,
-} from '../../systems.model';
+import { DatabaseVendorCatalogOption, ServerCatalogOption } from '../../systems.model';
 
 export interface DatabaseFilterLabels {
   server: string;
@@ -22,13 +19,7 @@ export interface DatabaseFilterLabels {
 @Component({
   selector: 'app-database-filters-form',
   standalone: true,
-  imports: [
-    FloatLabel,
-    InputText,
-    ReactiveFormsModule,
-    SearchFilterGridDirective,
-    Select,
-  ],
+  imports: [FloatLabel, InputText, ReactiveFormsModule, SearchFilterGridDirective, Select],
   templateUrl: './database-filters-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -37,6 +28,8 @@ export class DatabaseFiltersForm {
   labels = input.required<DatabaseFilterLabels>();
   serverOptions = input.required<ServerCatalogOption[]>();
   databaseTypeOptions = input.required<DatabaseVendorCatalogOption[]>();
+  showStatus = input(true);
+  idPrefix = input('databases-filter');
 
   protected readonly statusOptions = INFRASTRUCTURE_STATUS_OPTIONS;
 }

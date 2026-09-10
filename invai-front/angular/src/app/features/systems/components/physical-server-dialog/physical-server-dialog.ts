@@ -72,6 +72,10 @@ export class PhysicalServerDialog {
     return control.invalid && (control.dirty || control.touched);
   }
 
+  protected environmentLabel(): string {
+    return this.form().controls.environment.value?.label ?? '-';
+  }
+
   protected onSubmit(): void {
     if (this.mode() !== 'view' && !this.isSaving()) this.submitForm.emit();
   }

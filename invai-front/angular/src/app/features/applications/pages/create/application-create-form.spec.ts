@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { MessageService } from 'primeng/api';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { ApplicationStatus } from '../../applications.model';
 import { ApplicationCreateFormGroup } from '../../forms/application-form.factory';
@@ -12,6 +12,7 @@ import {
   ApplicationSelectOptions,
 } from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
+import { ApplicationOptionsService } from '../../services/application-options.service';
 import { ApplicationCreateForm } from './application-create-form';
 
 class ResizeObserverMock implements ResizeObserver {
@@ -35,7 +36,8 @@ const OPTIONS: ApplicationSelectOptions = {
       commissionType: CommissionType.TECNICA,
     },
   ],
-  administrativeUnits: [{ label: 'DGEDOT', value: 5 }],
+  departments: [{ label: 'Conselleria', value: 'GVA01' }],
+  administrativeUnits: [{ label: 'DGEDOT', value: 'UA01' }],
 };
 
 describe('ApplicationCreateForm', () => {
@@ -47,12 +49,14 @@ describe('ApplicationCreateForm', () => {
   };
   let messageService: MessageService;
   let create: ReturnType<typeof vi.fn>;
+  let getAdministrativeUnitOptions: ReturnType<typeof vi.fn>;
   const route = {};
   const router = { navigate: vi.fn() };
 
   beforeEach(async () => {
     router.navigate.mockReset();
     create = vi.fn(() => of({ id: 1 }));
+    getAdministrativeUnitOptions = vi.fn(() => of(OPTIONS.administrativeUnits));
 
     await TestBed.configureTestingModule({
       imports: [ApplicationCreateForm],
@@ -60,6 +64,13 @@ describe('ApplicationCreateForm', () => {
         MessageService,
         { provide: ActivatedRoute, useValue: route },
         { provide: ApplicationsService, useValue: { create } },
+        {
+          provide: ApplicationOptionsService,
+          useValue: {
+            getDepartmentOptions: vi.fn(() => of(OPTIONS.departments)),
+            getAdministrativeUnitOptions,
+          },
+        },
         { provide: Router, useValue: router },
       ],
     }).compileComponents();
@@ -69,6 +80,7 @@ describe('ApplicationCreateForm', () => {
     formComponent = fixture.componentInstance as unknown as typeof formComponent;
     messageService = TestBed.inject(MessageService);
     fixture.detectChanges();
+    formComponent.form.controls.administrativeUnit.enable({ emitEvent: false });
   });
 
   it('marks invalid controls and exposes accessible errors without navigating', () => {
@@ -102,7 +114,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '0001',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: '',
     });
 
@@ -115,7 +128,7 @@ describe('ApplicationCreateForm', () => {
       categoryId: 1,
       systemTypeId: 2,
       fieldId: 3,
-      admUnitId: 5,
+      admUnitCode: 'UA01',
       commissionId: 4,
       description: '',
       statusId: ApplicationStatus.ACTIVE,
@@ -133,7 +146,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '0001',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: '<p>Descripció amb <strong>format</strong></p>',
     });
 
@@ -146,6 +160,37 @@ describe('ApplicationCreateForm', () => {
     );
   });
 
+  it('clears the unit and keeps only the latest selected Conselleria request', () => {
+    const first = new Subject<ApplicationSelectOptions['administrativeUnits']>();
+    const second = new Subject<ApplicationSelectOptions['administrativeUnits']>();
+    getAdministrativeUnitOptions
+      .mockReturnValueOnce(first)
+      .mockReturnValueOnce(second);
+    const access = fixture.componentInstance as unknown as {
+      selectConselleria: (code: string | null) => void;
+      currentOptions: () => ApplicationSelectOptions;
+    };
+
+    formComponent.form.controls.administrativeUnit.setValue('OLD');
+    formComponent.form.controls.conselleria.setValue('GVA01');
+    access.selectConselleria('GVA01');
+    formComponent.form.controls.conselleria.setValue('GVA02');
+    access.selectConselleria('GVA02');
+    first.next([{ label: 'Obsoleta', value: 'OLD' }]);
+
+    expect(formComponent.form.controls.administrativeUnit.value).toBeNull();
+    expect(access.currentOptions().administrativeUnits).toEqual([]);
+
+    second.next([{ label: 'Unitat actual', value: 'UA02' }]);
+
+    expect(getAdministrativeUnitOptions).toHaveBeenNthCalledWith(1, 'GVA01');
+    expect(getAdministrativeUnitOptions).toHaveBeenNthCalledWith(2, 'GVA02');
+    expect(access.currentOptions().administrativeUnits).toEqual([
+      { label: 'Unitat actual', value: 'UA02' },
+    ]);
+    expect(formComponent.form.controls.administrativeUnit.enabled).toBe(true);
+  });
+
   it('submits visually empty rich text descriptions as an empty string', () => {
     formComponent.form.patchValue({
       application: 'Invai',
@@ -155,7 +200,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '0001',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: '<p><br></p><p>&nbsp;</p>',
     });
 
@@ -177,7 +223,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '123',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: '',
     });
 
@@ -217,7 +264,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '0001',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: '',
     });
     formComponent.form.controls[field].setValue(value);
@@ -252,7 +300,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '0001',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: 'Desc',
     });
 
@@ -289,7 +338,8 @@ describe('ApplicationCreateForm', () => {
       commission: 4,
       prefix: 'CVF',
       code: '0001',
-      administrativeUnit: 5,
+      conselleria: 'GVA01',
+      administrativeUnit: 'UA01',
       description: 'Desc',
     });
 

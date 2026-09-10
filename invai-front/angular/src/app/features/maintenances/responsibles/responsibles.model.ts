@@ -18,6 +18,22 @@ export interface ResponsiblePerson extends ResponsibleMaintenanceEntity {
   personalCaib: boolean;
 }
 
+export interface SoffidPersonCandidate {
+  id: null;
+  company: null;
+  firstName: string;
+  lastName: string;
+  email: string;
+  personalCaib: true;
+  deletedAt: null;
+}
+
+export interface SoffidPersonOption extends SoffidPersonCandidate {
+  label: string;
+}
+
+export type SoffidPersonControlValue = SoffidPersonOption | string | null;
+
 export interface ResponsibleAuthorization extends ResponsibleMaintenanceEntity {
   name: string;
   nameEs: string;
@@ -73,6 +89,15 @@ export interface ResponsiblePersonPageParams extends PageParams {
   search?: string;
 }
 
+export interface ResponsiblePersonCombinedSearchParams extends PageParams {
+  search?: string;
+}
+
+export interface ResponsiblePersonCombinedSearchOutput {
+  database: import('@models/page.model').SpringPage<ResponsiblePerson>;
+  soffid: import('@models/page.model').SpringPage<SoffidPersonCandidate>;
+}
+
 export interface ResponsibleAuthorizationPageParams extends ResponsibleNamePageParams {
   nameEs?: string;
 }
@@ -86,6 +111,23 @@ export interface ResponsiblePersonOption {
   id: number;
   label: string;
 }
+
+export type ResponsiblePersonSearchSource = 'database' | 'soffid';
+
+export interface RoleTransferPersonOption {
+  id: number | null;
+  firstName: string;
+  lastName: string;
+  email: string;
+  label: string;
+  source: ResponsiblePersonSearchSource;
+  disabled: boolean;
+}
+
+export type RoleTransferPersonControlValue = RoleTransferPersonOption | string | null;
+
+export type RoleTransferDestinationOption = RoleTransferPersonOption;
+export type RoleTransferDestinationControlValue = RoleTransferPersonControlValue;
 
 export interface ResponsibleLookup<TId extends number = number> {
   id: TId;
@@ -121,7 +163,7 @@ export interface RoleTransferItemInput {
 
 export interface RoleTransferInput {
   items: RoleTransferItemInput[];
-  toPersonId: number | null;
+  toPersonEmailAddress: string | null;
   revoke: boolean;
 }
 

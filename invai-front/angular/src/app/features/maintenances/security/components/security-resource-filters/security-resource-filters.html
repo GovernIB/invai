@@ -1,0 +1,48 @@
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
+    <p-floatlabel class="w-full">
+      <input
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+        [id]="idPrefix() + '-filter-name'"
+      />
+      <label [for]="idPrefix() + '-filter-name'">{{ labels().name }}</label>
+    </p-floatlabel>
+  </div>
+  @if (bilingual()) {
+    <div class="invai-filter-field--wide">
+      <p-floatlabel class="w-full">
+        <input
+          class="w-full"
+          type="text"
+          formControlName="nameEs"
+          pInputText
+          [id]="idPrefix() + '-filter-name-es'"
+        />
+        <label [for]="idPrefix() + '-filter-name-es'">{{ labels().nameEs }}</label>
+      </p-floatlabel>
+    </div>
+  }
+  <div class="invai-filter-field--compact">
+    <p-floatlabel class="w-full">
+      <p-select
+        styleClass="w-full"
+        formControlName="status"
+        [ariaLabelledBy]="idPrefix() + '-filter-status-label'"
+        [inputId]="idPrefix() + '-filter-status'"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label
+        [for]="idPrefix() + '-filter-status'"
+        [id]="idPrefix() + '-filter-status-label'"
+      >
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

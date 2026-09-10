@@ -35,7 +35,7 @@ interface ApplicationInput {
   categoryId: number;
   systemTypeId: number;
   fieldId: number;
-  admUnitId: number;
+  admUnitCode: string;
   commissionId: number;
   description: string;
   statusId: number;
@@ -88,6 +88,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       await selectOption(page, 'create-application-scope');
       await page.locator('#create-application-prefix').fill(prefix);
       await page.locator('#create-application-code').fill(code);
+      await selectOption(page, 'create-application-conselleria');
       await selectOption(page, 'create-application-administrative-unit');
       await selectOption(page, 'create-application-commission');
       await page.locator('#create-application-description').fill(initialDescription);
@@ -292,12 +293,13 @@ function expectPositiveReferenceIds(input: ApplicationInput): void {
     input.categoryId,
     input.systemTypeId,
     input.fieldId,
-    input.admUnitId,
     input.commissionId,
   ]) {
     expect(id).toEqual(expect.any(Number));
     expect(id).toBeGreaterThan(0);
   }
+  expect(input.admUnitCode).toEqual(expect.any(String));
+  expect(input.admUnitCode.length).toBeGreaterThan(0);
 }
 
 function applicationRow(page: Page, code: string) {

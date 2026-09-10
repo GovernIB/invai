@@ -19,7 +19,7 @@ export class ApplicationCreate {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly header = $localize`Afegir aplicació`;
-  protected readonly options = (
+  protected readonly resolvedOptions = (
     this.route.snapshot.data[APPLICATION_OPTIONS_RESOLVE_KEY] as ApplicationOptionsResolvedData
-  ).options;
+  );
 }

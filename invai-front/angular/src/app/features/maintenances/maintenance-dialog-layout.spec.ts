@@ -88,7 +88,7 @@ describe('maintenance dialog form layouts', () => {
         mode: 'create',
         form: createCommissionForm(formBuilder),
       },
-      [6, 6, 6, 6, 6],
+      [6, 6, 8, 4, 4],
     );
     const typeField = form.querySelector('.commission-dialog-type-field') as HTMLElement;
 

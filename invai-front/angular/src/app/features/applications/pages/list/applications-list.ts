@@ -34,7 +34,10 @@ import {
 } from '../../applications.model';
 import { ApplicationFiltersForm, ApplicationsTable } from '../../components';
 import { createApplicationFiltersForm } from '../../forms/application-form.factory';
-import { ApplicationSelectOptions } from '../../services/application-options.service';
+import {
+  ApplicationOptionsService,
+  ApplicationSelectOptions,
+} from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
 import {
   APPLICATIONS_LIST_RESOLVE_KEY,
@@ -44,19 +47,26 @@ import {
   APPLICATIONS_ADD_ARIA_LABEL,
   APPLICATIONS_EXPORT_ARIA_LABEL,
   APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT,
+  APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT_EMPTY,
+  APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT_ERROR,
+  APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT_LOADING,
   APPLICATIONS_FILTER_APPLICATION,
   APPLICATIONS_FILTER_CATEGORY,
   APPLICATIONS_FILTER_COMMISSION,
+  APPLICATIONS_FILTER_CONSELLERIA,
+  APPLICATIONS_FILTER_CONSELLERIA_ERROR,
+  APPLICATIONS_FILTER_CONSELLERIA_LOADING,
   APPLICATIONS_FILTER_DATABASE,
-  APPLICATIONS_FILTER_DESCRIPTION,
   APPLICATIONS_FILTER_ENVIRONMENT,
   APPLICATIONS_FILTER_INCOMPLETE,
   APPLICATIONS_FILTER_INFORMATION_SYSTEM,
   APPLICATIONS_FILTER_PREFIX,
+  APPLICATIONS_FILTER_RETRY,
   APPLICATIONS_FILTER_RESPONSIBLE,
   APPLICATIONS_FILTER_RESPONSIBLE_EMPTY,
   APPLICATIONS_FILTER_RESPONSIBLE_LOADING,
   APPLICATIONS_FILTER_SCOPE,
+  APPLICATIONS_FILTER_SELECT_CONSELLERIA_FIRST,
   APPLICATIONS_FILTER_SERVER,
   APPLICATIONS_FILTER_STATUS,
   APPLICATIONS_LOAD_ERROR_DETAIL,
@@ -74,8 +84,6 @@ const DEFAULT_PAGE_SIZE = 10;
 const QUICK_SEARCH_DEBOUNCE_MS = 400;
 const RESPONSIBLE_FILTER_DEBOUNCE_MS = 400;
 const RESPONSIBLE_FILTER_PAGE_SIZE = 20;
-const INCOMPLETE_FILTER_WARNING =
-  "El filtre d'aplicacions incompletes encara no està suportat pel backend i s'omet de la petició.";
 
 @Component({
   standalone: true,
@@ -111,9 +119,16 @@ export class ApplicationsList
     informationSystem: APPLICATIONS_FILTER_INFORMATION_SYSTEM,
     scope: APPLICATIONS_FILTER_SCOPE,
     commission: APPLICATIONS_FILTER_COMMISSION,
+    conselleria: APPLICATIONS_FILTER_CONSELLERIA,
     administrativeUnit: APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT,
+    departmentsLoading: APPLICATIONS_FILTER_CONSELLERIA_LOADING,
+    departmentsLoadError: APPLICATIONS_FILTER_CONSELLERIA_ERROR,
+    administrativeUnitsLoading: APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT_LOADING,
+    administrativeUnitsLoadError: APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT_ERROR,
+    administrativeUnitsEmpty: APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT_EMPTY,
+    selectConselleriaFirst: APPLICATIONS_FILTER_SELECT_CONSELLERIA_FIRST,
+    retry: APPLICATIONS_FILTER_RETRY,
     status: APPLICATIONS_FILTER_STATUS,
-    description: APPLICATIONS_FILTER_DESCRIPTION,
     responsible: APPLICATIONS_FILTER_RESPONSIBLE,
     responsibleEmpty: APPLICATIONS_FILTER_RESPONSIBLE_EMPTY,
     responsibleLoading: APPLICATIONS_FILTER_RESPONSIBLE_LOADING,
@@ -139,11 +154,13 @@ export class ApplicationsList
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly applicationsService = inject(ApplicationsService);
+  private readonly applicationOptionsService = inject(ApplicationOptionsService);
   private readonly responsiblePeopleService = inject(ResponsiblePeopleService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly quickSearchChanges = new Subject<string>();
   private readonly responsibleSearchChanges = new Subject<string>();
   private readonly searchRequests = new Subject<ApplicationSearchRequest>();
+  private readonly administrativeUnitRequests = new Subject<string | null>();
   private responsibleSearchTerm = '';
 
   protected override filtersForm = createApplicationFiltersForm(this.fb);
@@ -152,11 +169,16 @@ export class ApplicationsList
     signal<ApplicationInfrastructureFilterOptions | null>(null);
   protected readonly responsibleOptions = signal<ResponsiblePersonOption[]>([]);
   protected readonly isResponsibleSearchLoading = signal(false);
+  protected readonly isDepartmentsLoading = signal(false);
+  protected readonly departmentsLoadFailed = signal(false);
+  protected readonly isAdministrativeUnitsLoading = signal(false);
+  protected readonly administrativeUnitsLoadFailed = signal(false);
 
   override ngOnInit(): void {
     this.observeSearchRequests();
     this.observeQuickSearch();
     this.observeResponsibleSearch();
+    this.observeAdministrativeUnitRequests();
     super.ngOnInit();
   }
 
@@ -164,10 +186,6 @@ export class ApplicationsList
     filters: ApplicationFilters,
     $event?: TableLazyLoadEvent,
   ): void {
-    if (filters.incomplete) {
-      console.warn(INCOMPLETE_FILTER_WARNING);
-    }
-
     this.searchRequests.next({
       params: this.toPageParams(filters, $event),
     });
@@ -180,6 +198,8 @@ export class ApplicationsList
 
     this.updateSearchState();
     this.filterOptions.set(resolvedData.options);
+    this.departmentsLoadFailed.set(resolvedData.departmentsLoadFailed);
+    this.administrativeUnitsLoadFailed.set(resolvedData.administrativeUnitsLoadFailed);
     this.infrastructureFilterOptions.set(resolvedData.infrastructureOptions);
     this.hasLoadedResults.set(true);
 
@@ -226,6 +246,39 @@ export class ApplicationsList
     this.responsibleSearchChanges.next(query);
   }
 
+  protected selectConselleria(code: string | null): void {
+    this.filtersForm.controls.administrativeUnit.reset(null, { emitEvent: false });
+    this.filterOptions.update((options) =>
+      options ? { ...options, administrativeUnits: [] } : options,
+    );
+    this.administrativeUnitRequests.next(code);
+  }
+
+  protected retryAdministrativeUnits(): void {
+    this.administrativeUnitRequests.next(this.filtersForm.controls.conselleria.value);
+  }
+
+  protected retryDepartments(): void {
+    if (this.isDepartmentsLoading()) return;
+
+    this.isDepartmentsLoading.set(true);
+    this.applicationOptionsService
+      .getDepartmentOptions()
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.isDepartmentsLoading.set(false)),
+      )
+      .subscribe({
+        next: (departments) => {
+          this.filterOptions.update((options) =>
+            options ? { ...options, departments } : options,
+          );
+          this.departmentsLoadFailed.set(false);
+        },
+        error: () => this.departmentsLoadFailed.set(true),
+      });
+  }
+
   protected onPageChange(event: TableLazyLoadEvent): void {
     this.tableFirst.set(event.first ?? 0);
     this.onSearch(event);
@@ -238,6 +291,10 @@ export class ApplicationsList
     this.isResponsibleSearchLoading.set(false);
     this.responsibleSearchChanges.next('');
     super.reset();
+    this.filterOptions.update((options) =>
+      options ? { ...options, administrativeUnits: [] } : options,
+    );
+    this.administrativeUnitRequests.next(null);
   }
 
   protected onViewApplication(application: Application): void {
@@ -335,6 +392,36 @@ export class ApplicationsList
       .subscribe((options) => this.responsibleOptions.set(options));
   }
 
+  private observeAdministrativeUnitRequests(): void {
+    this.administrativeUnitRequests
+      .pipe(
+        tap((departmentCode) => {
+          this.isAdministrativeUnitsLoading.set(Boolean(departmentCode));
+          this.administrativeUnitsLoadFailed.set(false);
+          this.filtersForm.controls.administrativeUnit.disable({ emitEvent: false });
+        }),
+        switchMap((departmentCode) =>
+          departmentCode
+            ? this.applicationOptionsService.getAdministrativeUnitOptions(departmentCode).pipe(
+                map((options) => ({ departmentCode, options, failed: false })),
+                catchError(() => of({ departmentCode, options: [], failed: true })),
+              )
+            : of({ departmentCode: null, options: [], failed: false }),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ departmentCode, options, failed }) => {
+        this.isAdministrativeUnitsLoading.set(false);
+        this.administrativeUnitsLoadFailed.set(failed);
+        this.filterOptions.update((current) =>
+          current ? { ...current, administrativeUnits: options } : current,
+        );
+        if (!failed && departmentCode === this.filtersForm.controls.conselleria.value) {
+          this.filtersForm.controls.administrativeUnit.enable({ emitEvent: false });
+        }
+      });
+  }
+
   private toPageParams(
     filters: ApplicationFilters,
     event?: TableLazyLoadEvent,
@@ -352,6 +439,7 @@ export class ApplicationsList
 
     return {
       page: Math.floor(first / size),
+      incomplete: filters.incomplete ? true : undefined,
       size,
       sort: sort?.length === 1 ? sort[0] : sort,
       prefix: filters.prefix || undefined,
@@ -360,9 +448,8 @@ export class ApplicationsList
       systemTypeId: filters.informationSystem ?? undefined,
       fieldId: filters.scope ?? undefined,
       commissionId: filters.commission ?? undefined,
-      admUnitId: filters.administrativeUnit ?? undefined,
+      admUnitCode: filters.administrativeUnit ?? undefined,
       statusId: filters.status ?? undefined,
-      description: filters.description || undefined,
       quickSearch: quickSearch || undefined,
       responsibleId: filters.responsible?.id,
       databaseId: filters.database ?? undefined,

@@ -1,0 +1,150 @@
+:root {
+  // UI/UX surface/200; intentionally independent of PrimeNG's surface palette.
+  --invai-dialog-header-background: #eeeeee;
+  --invai-dialog-header-title-color: #4b5563;
+  --invai-dialog-form-top-spacing: 12px;
+}
+
+.invai-dialog.p-dialog {
+  .p-dialog-header {
+    min-height: 52px;
+    box-sizing: border-box;
+    background: var(--invai-dialog-header-background);
+    color: var(--p-text-color);
+    border-start-start-radius: inherit;
+    border-start-end-radius: inherit;
+  }
+
+  .p-dialog-title,
+  .p-dialog-header h2,
+  .p-dialog-header h3 {
+    min-width: 0;
+    margin: 0;
+    color: var(--invai-dialog-header-title-color);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .p-dialog-header-actions {
+    flex-shrink: 0;
+  }
+
+  .p-dialog-header-actions .p-button,
+  .invai-dialog__close .p-button {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+
+  .invai-dialog__close {
+    flex-shrink: 0;
+  }
+
+  .p-dialog-content {
+    min-width: 0;
+  }
+
+  .invai-dialog-form-grid {
+    // Separate the first row from the header and retain float-label clearance
+    // beyond the body inset when text grows.
+    padding-top: calc(var(--invai-dialog-form-top-spacing) + max(0px, calc(1.5rem - 24px)));
+
+    > * {
+      min-width: 0;
+    }
+  }
+
+  // Static values share the same origin as filled FloatLabel controls.
+  .invai-dialog-static-field {
+    position: relative;
+    min-width: 0;
+
+    > .invai-dialog-static-field__label {
+      position: absolute;
+      inset-block-start: var(--p-floatlabel-over-active-top);
+      inset-inline-start: var(--p-floatlabel-position-x);
+      max-width: calc(100% - var(--p-floatlabel-position-x));
+      color: var(--p-floatlabel-active-color);
+      font-size: var(--p-floatlabel-active-font-size);
+      font-weight: var(--p-floatlabel-active-font-weight);
+      line-height: 1;
+    }
+
+    > .invai-form-static-value {
+      min-height: 0;
+      padding-block: var(--p-inputtext-padding-y, var(--p-form-field-padding-y));
+      padding-inline: var(--p-inputtext-padding-x, var(--p-form-field-padding-x));
+      font-size: 1rem;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  @media (width < 768px) {
+    // In a single column, let translated labels grow above the value instead
+    // of overlapping it when text is enlarged. Single-line labels keep their
+    // normal floating position and consume no additional space.
+    .invai-dialog-form-grid--floating {
+      .invai-dialog-static-field,
+      .p-floatlabel:has(
+        input:focus,
+        input.p-filled,
+        input[readonly],
+        input[placeholder],
+        .p-inputwrapper-focus,
+        .p-inputwrapper-filled
+      ) {
+        display: flex;
+        flex-direction: column;
+
+        > .invai-dialog-static-field__label,
+        > label {
+          position: static;
+          order: -1;
+          transform: none;
+          margin-block-start: var(--p-floatlabel-over-active-top);
+          margin-block-end: calc(
+            0px - var(--p-floatlabel-over-active-top) - var(--p-floatlabel-active-font-size)
+          );
+          margin-inline-start: var(--p-floatlabel-position-x);
+          font-size: var(--p-floatlabel-active-font-size);
+          font-weight: var(--p-floatlabel-active-font-weight);
+        }
+      }
+    }
+  }
+
+  .p-dialog-footer {
+    > div,
+    > div > div {
+      min-width: 0;
+      max-width: 100%;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    p-button {
+      display: inline-flex;
+      max-width: 100%;
+    }
+
+    .p-button {
+      min-height: 40px;
+      height: auto;
+      padding: 8px 12px;
+      white-space: normal;
+    }
+
+    .p-button-label {
+      overflow-wrap: anywhere;
+    }
+
+    .p-button-icon {
+      flex-shrink: 0;
+    }
+  }
+
+  .invai-dialog__primary-actions {
+    margin-inline-start: auto;
+  }
+}

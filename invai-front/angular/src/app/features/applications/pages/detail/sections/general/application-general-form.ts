@@ -25,7 +25,14 @@ export class ApplicationGeneralForm {
   form = input.required<ApplicationDetailFormGroup>();
   isReadOnly = input.required<boolean>();
   options = input.required<ApplicationSelectOptions>();
+  departmentsLoading = input(false);
+  departmentsLoadFailed = input(false);
+  administrativeUnitsLoading = input(false);
+  administrativeUnitsLoadFailed = input(false);
   commissionSelected = output<ApplicationCommissionOption | null>();
+  conselleriaSelected = output<string | null>();
+  departmentsRetry = output<void>();
+  administrativeUnitsRetry = output<void>();
 
   protected readonly labels = APPLICATION_GENERAL_LABELS;
   protected readonly requiredError = APPLICATION_GENERAL_REQUIRED_ERROR;
@@ -33,5 +40,9 @@ export class ApplicationGeneralForm {
   protected readonly selectPlaceholder = APPLICATION_GENERAL_SELECT_PLACEHOLDER;
   protected selectCommission(commission: ApplicationCommissionOption | null): void {
     this.commissionSelected.emit(commission);
+  }
+
+  protected selectConselleria(code: string | null): void {
+    this.conselleriaSelected.emit(code);
   }
 }

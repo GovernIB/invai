@@ -3,52 +3,48 @@ import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
 import { cachedRequest, pageParamsCacheKey } from '@shared/utils/service-cache.utils';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 
-import {
-  AdministrativeUnit,
-  AdministrativeUnitInput,
-  AdministrativeUnitPageParams,
-} from '../administrative-units.model';
+import { AdministrativeUnit, AdministrativeUnitPageParams } from '../administrative-units.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdministrativeUnitsService extends BaseApiService {
   protected override readonly ENTITY_URI = 'adm-unit';
 
-  private readonly _administrativeUnitsCache = new Map<
+  private readonly departmentsCache = new Map<
+    string,
+    Observable<SpringPage<AdministrativeUnit>>
+  >();
+  private readonly administrativeUnitsCache = new Map<
     string,
     Observable<SpringPage<AdministrativeUnit>>
   >();
 
-  getAll(params?: AdministrativeUnitPageParams): Observable<SpringPage<AdministrativeUnit>> {
-    return cachedRequest(this._administrativeUnitsCache, pageParamsCacheKey(params), () =>
-      this.http.get<SpringPage<AdministrativeUnit>>(this.url(), {
+  getDepartments(
+    params?: AdministrativeUnitPageParams,
+  ): Observable<SpringPage<AdministrativeUnit>> {
+    return cachedRequest(this.departmentsCache, pageParamsCacheKey(params), () =>
+      this.http.get<SpringPage<AdministrativeUnit>>(this.url('departments'), {
         params: toPageHttpParams(params),
       }),
     );
   }
 
-  getById(id: number): Observable<AdministrativeUnit> {
-    return this.http.get<AdministrativeUnit>(this.url(id));
-  }
-
-  create(payload: AdministrativeUnitInput): Observable<AdministrativeUnit> {
-    return this.http
-      .post<AdministrativeUnit>(this.url(), payload)
-      .pipe(tap(() => this.clearCache()));
-  }
-
-  update(id: number, payload: AdministrativeUnitInput): Observable<AdministrativeUnit> {
-    return this.http
-      .put<AdministrativeUnit>(this.url(id), payload)
-      .pipe(tap(() => this.clearCache()));
-  }
-
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(this.url(id)).pipe(tap(() => this.clearCache()));
+  getAdmUnitsByDepartment(
+    departmentCode: string,
+    params?: AdministrativeUnitPageParams,
+  ): Observable<SpringPage<AdministrativeUnit>> {
+    const key = `${departmentCode};${pageParamsCacheKey(params)}`;
+    return cachedRequest(this.administrativeUnitsCache, key, () =>
+      this.http.get<SpringPage<AdministrativeUnit>>(
+        this.url('departments', encodeURIComponent(departmentCode), 'adm-units'),
+        { params: toPageHttpParams(params) },
+      ),
+    );
   }
 
   clearCache(): void {
-    this._administrativeUnitsCache.clear();
+    this.departmentsCache.clear();
+    this.administrativeUnitsCache.clear();
   }
 }

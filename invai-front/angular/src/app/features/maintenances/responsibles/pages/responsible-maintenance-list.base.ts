@@ -47,6 +47,10 @@ export interface ResponsibleMaintenanceListCopy {
   updated: string;
   deactivated: string;
   restored: string;
+  saveError?: string;
+  deactivateError?: string;
+  restoreError?: string;
+  forbidden?: string;
 }
 
 @Directive()
@@ -217,7 +221,10 @@ export abstract class ResponsibleMaintenanceListBase<
           this.refreshCurrentPage();
         },
         error: (error: unknown) =>
-          this.showMutationError(error, RESPONSIBLE_COMMON_COPY.restoreError),
+          this.showRequestError(
+            error,
+            this.copy.restoreError ?? RESPONSIBLE_COMMON_COPY.restoreError,
+          ),
       });
   }
 
@@ -247,7 +254,8 @@ export abstract class ResponsibleMaintenanceListBase<
           this.showSuccess(mode === 'create' ? this.copy.created : this.copy.updated);
           this.refreshCurrentPage();
         },
-        error: (error: unknown) => this.showMutationError(error, RESPONSIBLE_COMMON_COPY.saveError),
+        error: (error: unknown) =>
+          this.showRequestError(error, this.copy.saveError ?? RESPONSIBLE_COMMON_COPY.saveError),
       });
   }
 
@@ -278,7 +286,10 @@ export abstract class ResponsibleMaintenanceListBase<
         },
         error: (error: unknown) => {
           this.pendingDelete.set(null);
-          this.showMutationError(error, RESPONSIBLE_COMMON_COPY.deactivateError);
+          this.showRequestError(
+            error,
+            this.copy.deactivateError ?? RESPONSIBLE_COMMON_COPY.deactivateError,
+          );
         },
       });
   }
@@ -322,10 +333,10 @@ export abstract class ResponsibleMaintenanceListBase<
           this.selectedEntityCanRestore.set(mode === 'view' && Boolean(loaded.deletedAt));
           this.prepareEntityForm(loaded);
         },
-        error: () => {
+        error: (error: unknown) => {
           this.isDialogVisible.set(false);
           this.clearSelection();
-          this.showError(this.copy.entityLoadError);
+          this.showRequestError(error, this.copy.entityLoadError);
         },
       });
   }
@@ -357,9 +368,8 @@ export abstract class ResponsibleMaintenanceListBase<
         switchMap((params) => {
           this.isLoading.set(true);
           return this.listRequest(params).pipe(
-            catchError(() => {
-              this.itemsList.set({ items: [], total: 0 });
-              this.showError(this.copy.loadError);
+            catchError((error: unknown) => {
+              this.showRequestError(error, this.copy.loadError);
               return EMPTY;
             }),
             finalize(() => this.isLoading.set(false)),
@@ -395,11 +405,11 @@ export abstract class ResponsibleMaintenanceListBase<
     });
   }
 
-  private showMutationError(error: unknown, fallback: string): void {
+  private showRequestError(error: unknown, fallback: string): void {
     if (isStructuredBadRequest(error)) return;
     this.showError(
       error instanceof HttpErrorResponse && error.status === 403
-        ? RESPONSIBLE_COMMON_COPY.forbidden
+        ? (this.copy.forbidden ?? RESPONSIBLE_COMMON_COPY.forbidden)
         : this.mutationErrorDetail(error, fallback),
     );
   }

@@ -175,8 +175,14 @@ describe('application responsible and authorized services', () => {
     responsibles.create(responsibleInput).subscribe();
     http.expectOne('/invaiapi/interna/application/responsible').flush({ id: 1 });
     expect(responsibleClearCache).toHaveBeenCalledOnce();
+    expect(authorizedClearCache).toHaveBeenCalledOnce();
     responsibles.getPage(params).subscribe();
     http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    authorized.getPage(params).subscribe();
+    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+
+    responsibleClearCache.mockClear();
+    authorizedClearCache.mockClear();
 
     authorized.create(authorizedInput).subscribe({ error: vi.fn() });
     http
@@ -189,8 +195,12 @@ describe('application responsible and authorized services', () => {
     authorized.create(authorizedInput).subscribe();
     http.expectOne('/invaiapi/interna/application/authorized').flush({ id: 1 });
     expect(authorizedClearCache).toHaveBeenCalledOnce();
+    expect(responsibleClearCache).toHaveBeenCalledOnce();
     authorized.getPage(params).subscribe();
     http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+
+    responsibleClearCache.mockClear();
+    authorizedClearCache.mockClear();
 
     responsibles.update(1, responsibleInput).subscribe();
     http.expectOne('/invaiapi/interna/application/responsible/1').flush({ id: 1 });
@@ -198,7 +208,11 @@ describe('application responsible and authorized services', () => {
     http.expectOne('/invaiapi/interna/application/responsible/deactivate/1').flush({ id: 1 });
     responsibles.reactivate(1).subscribe();
     http.expectOne('/invaiapi/interna/application/responsible/reactivate/1').flush({ id: 1 });
-    expect(responsibleClearCache).toHaveBeenCalledTimes(4);
+    expect(responsibleClearCache).toHaveBeenCalledTimes(3);
+    expect(authorizedClearCache).toHaveBeenCalledTimes(3);
+
+    responsibleClearCache.mockClear();
+    authorizedClearCache.mockClear();
 
     authorized.update(1, authorizedInput).subscribe();
     http.expectOne('/invaiapi/interna/application/authorized/1').flush({ id: 1 });
@@ -208,7 +222,8 @@ describe('application responsible and authorized services', () => {
       .flush(null, { status: 204, statusText: 'No Content' });
     authorized.reactivate(1).subscribe();
     http.expectOne('/invaiapi/interna/application/authorized/reactivate/1').flush({ id: 1 });
-    expect(authorizedClearCache).toHaveBeenCalledTimes(4);
+    expect(authorizedClearCache).toHaveBeenCalledTimes(3);
+    expect(responsibleClearCache).toHaveBeenCalledTimes(3);
   });
 
   it('models responsible deactivation as 200 and authorized deactivation as 204', () => {

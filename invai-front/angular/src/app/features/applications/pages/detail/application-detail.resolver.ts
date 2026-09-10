@@ -18,10 +18,8 @@ export const applicationDetailResolver: ResolveFn<ApplicationDetailResolvedData>
     return of({ application: null, loadFailed: true });
   }
 
-  return inject(ApplicationsService)
-    .getById(id)
-    .pipe(
-      map((application) => ({ application, loadFailed: false })),
-      catchError(() => of({ application: null, loadFailed: true })),
-    );
+  return inject(ApplicationsService).getById(id).pipe(
+    map((application) => ({ application, loadFailed: false })),
+    catchError(() => of({ application: null, loadFailed: true })),
+  );
 };

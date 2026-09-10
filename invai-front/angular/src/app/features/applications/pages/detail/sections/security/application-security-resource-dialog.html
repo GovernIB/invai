@@ -1,0 +1,263 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="46rem"
+  [ariaLabels]="actionAriaLabels"
+  [canEdit]="canEdit()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  viewPrimaryAction="edit"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="onSubmit()"
+>
+  <form
+    class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+    [formGroup]="form()"
+    (ngSubmit)="onSubmit()"
+    novalidate
+  >
+    @if (kind() === 'web-context') {
+      <div class="md:col-span-8">
+        <label
+          id="application-security-dialog-web-context-label"
+          for="application-security-dialog-web-context"
+          >{{ labels.webContext }}</label
+        >
+        @if (mode() === 'view') {
+          <p
+            class="invai-form-static-value"
+            aria-labelledby="application-security-dialog-web-context-label"
+          >
+            {{ optionLabel(webContextOptions(), form().controls.webContextId.value) }}
+          </p>
+        } @else {
+          <p-select
+            inputId="application-security-dialog-web-context"
+            formControlName="webContextId"
+            ariaLabelledBy="application-security-dialog-web-context-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [ariaFilterLabel]="labels.webContext"
+            [filter]="true"
+            [fluid]="true"
+            [invalid]="isInvalid(form().controls.webContextId)"
+            [options]="webContextOptions()"
+          />
+        }
+        @if (isInvalid(form().controls.webContextId)) {
+          <p
+            id="application-security-dialog-web-context-error"
+            class="mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+      <div class="md:col-span-4">
+        <label
+          id="application-security-dialog-field-label"
+          for="application-security-dialog-field"
+          >{{ labels.field }}</label
+        >
+        @if (mode() === 'view') {
+          <p
+            class="invai-form-static-value"
+            aria-labelledby="application-security-dialog-field-label"
+          >
+            {{ optionLabel(fieldOptions(), form().controls.fieldId.value) }}
+          </p>
+        } @else {
+          <p-select
+            inputId="application-security-dialog-field"
+            formControlName="fieldId"
+            ariaLabelledBy="application-security-dialog-field-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [ariaFilterLabel]="labels.field"
+            [filter]="true"
+            [fluid]="true"
+            [invalid]="isInvalid(form().controls.fieldId)"
+            [options]="fieldOptions()"
+          />
+        }
+        @if (isInvalid(form().controls.fieldId)) {
+          <p
+            id="application-security-dialog-field-error"
+            class="mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+      <div class="md:col-span-12">
+        <label for="application-security-dialog-observation">{{ labels.observation }}</label>
+        <textarea
+          id="application-security-dialog-observation"
+          class="w-full"
+          rows="5"
+          formControlName="observation"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
+          pTextarea
+        ></textarea>
+      </div>
+    }
+
+    @if (kind() === 'risk') {
+      <div class="md:col-span-4">
+        <label
+          id="application-security-dialog-level-label"
+          for="application-security-dialog-level"
+          >{{ labels.level }}</label
+        >
+        @if (mode() === 'view') {
+          <p
+            class="invai-form-static-value"
+            aria-labelledby="application-security-dialog-level-label"
+          >
+            {{ optionLabel(securityLevelOptions(), form().controls.levelId.value) }}
+          </p>
+        } @else {
+          <p-select
+            inputId="application-security-dialog-level"
+            formControlName="levelId"
+            ariaLabelledBy="application-security-dialog-level-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [ariaFilterLabel]="labels.level"
+            [filter]="true"
+            [fluid]="true"
+            [options]="securityLevelOptions()"
+            [showClear]="true"
+          />
+        }
+      </div>
+      <div class="md:col-span-8">
+        <label
+          id="application-security-dialog-risk-field-label"
+          for="application-security-dialog-risk-field"
+          >{{ labels.field }}</label
+        >
+        @if (mode() === 'view') {
+          <p
+            class="invai-form-static-value"
+            aria-labelledby="application-security-dialog-risk-field-label"
+          >
+            {{ optionLabel(fieldOptions(), form().controls.fieldId.value) }}
+          </p>
+        } @else {
+          <p-select
+            inputId="application-security-dialog-risk-field"
+            formControlName="fieldId"
+            ariaLabelledBy="application-security-dialog-risk-field-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [ariaFilterLabel]="labels.field"
+            [filter]="true"
+            [fluid]="true"
+            [options]="fieldOptions()"
+            [showClear]="true"
+          />
+        }
+      </div>
+      <div class="md:col-span-12">
+        <label for="application-security-dialog-description">{{ labels.description }}</label>
+        <textarea
+          id="application-security-dialog-description"
+          class="w-full"
+          rows="5"
+          formControlName="description"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
+          pTextarea
+        ></textarea>
+      </div>
+    }
+
+    @if (kind() === 'measure') {
+      <div class="md:col-span-4">
+        <label
+          id="application-security-dialog-measure-type-label"
+          for="application-security-dialog-measure-type"
+          >{{ labels.measureType }}</label
+        >
+        @if (mode() === 'view') {
+          <p
+            class="invai-form-static-value"
+            aria-labelledby="application-security-dialog-measure-type-label"
+          >
+            {{ optionLabel(measureTypeOptions(), form().controls.typeId.value) }}
+          </p>
+        } @else {
+          <p-select
+            inputId="application-security-dialog-measure-type"
+            formControlName="typeId"
+            ariaLabelledBy="application-security-dialog-measure-type-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [ariaFilterLabel]="labels.measureType"
+            [filter]="true"
+            [fluid]="true"
+            [options]="measureTypeOptions()"
+            [showClear]="true"
+          />
+        }
+      </div>
+      <div class="md:col-span-8">
+        <label
+          id="application-security-dialog-ens-requirement-label"
+          for="application-security-dialog-ens-requirement"
+          >{{ labels.ensRequirement }}</label
+        >
+        @if (mode() === 'view') {
+          <p
+            class="invai-form-static-value"
+            aria-labelledby="application-security-dialog-ens-requirement-label"
+          >
+            {{ optionLabel(ensRequirementOptions(), form().controls.ensRequirementId.value) }}
+          </p>
+        } @else {
+          <p-select
+            inputId="application-security-dialog-ens-requirement"
+            formControlName="ensRequirementId"
+            ariaLabelledBy="application-security-dialog-ens-requirement-label"
+            appendTo="body"
+            optionLabel="label"
+            optionValue="value"
+            [ariaFilterLabel]="labels.ensRequirement"
+            [filter]="true"
+            [fluid]="true"
+            [options]="ensRequirementOptions()"
+            [showClear]="true"
+          />
+        }
+      </div>
+      <div class="md:col-span-12">
+        <label for="application-security-dialog-measure-description">{{
+          labels.description
+        }}</label>
+        <textarea
+          id="application-security-dialog-measure-description"
+          class="w-full"
+          rows="5"
+          formControlName="description"
+          [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
+          pTextarea
+        ></textarea>
+      </div>
+    }
+  </form>
+</app-crud-entity-dialog>

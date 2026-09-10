@@ -1,3 +1,4 @@
+import { AccessibilityResource } from '@features/maintenances/accessibility/accessibility.model';
 import { AdministrativeUnit } from '@features/administrative-units/administrative-units.model';
 import { Category } from '@features/categories/categories.model';
 import { Commission } from '@features/commissions/commissions.model';
@@ -26,6 +27,7 @@ export interface Application {
   scope: string;
   commission: string;
   administrativeUnit: string;
+  department: string;
   status: ApplicationStatus | null;
   description: string;
   creationDate: string;
@@ -39,11 +41,22 @@ export interface Application {
   informationSystemId?: number;
   scopeId?: number;
   commissionId?: number;
-  administrativeUnitId?: number;
+  admUnitCode?: string;
+  departmentCode?: string;
   statusId?: ApplicationStatus;
   informationSystemDbId?: number | null;
   appDevelopmentId?: number | null;
+  appSecurityId?: number | null;
+  appAccessibilityId?: number | null;
   appResponsibleAuthorizedId: number | null;
+  incomplete: boolean | null;
+  missingResponsibleTypes: boolean | null;
+  missingAuthorized: boolean | null;
+  missingDevelopmentFields: boolean | null;
+  missingSystems: boolean | null;
+  missingDatabases: boolean | null;
+  missingAccessibilityFields: boolean | null;
+  missingSecurityData: boolean | null;
 }
 
 export enum ApplicationStatus {
@@ -65,6 +78,7 @@ export interface ApplicationOutput {
   systemType: SystemType | null;
   field: Field | null;
   admUnit: AdministrativeUnit | null;
+  department: AdministrativeUnit | null;
   csCommission: Commission | null;
   description: string | null;
   status: ApplicationStatusCode | null;
@@ -77,7 +91,17 @@ export interface ApplicationOutput {
   loadDate: string | null;
   appInformationSystemDbId: number | null;
   appDevelopmentId: number | null;
+  appSecurityId?: number | null;
+  appAccessibilityId?: number | null;
   appResponsibleAuthorizedId: number | null;
+  incomplete: boolean | null;
+  missingResponsibleTypes: boolean | null;
+  missingAuthorized: boolean | null;
+  missingDevelopmentFields: boolean | null;
+  missingSystems: boolean | null;
+  missingDatabases: boolean | null;
+  missingAccessibilityFields: boolean | null;
+  missingSecurityData: boolean | null;
 }
 
 export interface ApplicationInput {
@@ -87,20 +111,21 @@ export interface ApplicationInput {
   categoryId: number;
   systemTypeId: number;
   fieldId: number;
-  admUnitId: number;
+  admUnitCode: string;
   commissionId: number;
   description: string;
   statusId: ApplicationStatus;
 }
 
 export interface ApplicationPageParams extends PageParams {
+  incomplete?: boolean;
   prefix?: string;
   applicationName?: string;
   categoryId?: number;
   systemTypeId?: number;
   fieldId?: number;
   commissionId?: number;
-  admUnitId?: number;
+  admUnitCode?: string;
   statusId?: ApplicationStatus;
   description?: string;
   quickSearch?: string;
@@ -117,9 +142,9 @@ export interface ApplicationFilters {
   informationSystem: number | null;
   scope: number | null;
   commission: number | null;
-  administrativeUnit: number | null;
+  conselleria: string | null;
+  administrativeUnit: string | null;
   status: ApplicationStatus | null;
-  description: string | null;
   responsible: ResponsiblePersonOption | null;
   database: number | null;
   server: number | null;
@@ -380,14 +405,26 @@ export interface ApplicationResponsiblePlaceholderOutput extends ApplicationResp
 export type ApplicationResponsibleOutput =
   ApplicationAssignedResponsibleOutput | ApplicationResponsiblePlaceholderOutput;
 
-export interface ApplicationResponsibleInput {
+export type ApplicationPersonReferenceInput =
+  | {
+      personId: number;
+      personalCaib: boolean;
+    }
+  | {
+      personId: null;
+      personFirstName: string;
+      personLastName: string;
+      personEmail: string;
+      companyId: null;
+      personalCaib: true;
+    };
+
+export type ApplicationResponsibleInput = ApplicationPersonReferenceInput & {
   appResponsibleAuthorizedId: number;
-  personId: number;
   responsibleTypeId: number;
   jobTitle: string | null;
   observation: string | null;
-  personalCaib: boolean;
-}
+};
 
 export interface ApplicationAuthorizedOutput {
   id: number;
@@ -398,13 +435,11 @@ export interface ApplicationAuthorizedOutput {
   deletedAt: string | null;
 }
 
-export interface ApplicationAuthorizedInput {
+export type ApplicationAuthorizedInput = ApplicationPersonReferenceInput & {
   appResponsibleAuthorizedId: number;
-  personId: number;
   authorizationTypeIds: number[];
   observation: string | null;
-  personalCaib: boolean;
-}
+};
 
 export interface ApplicationAssignmentDeactivateInput {
   observation: string | null;
@@ -424,3 +459,153 @@ export interface ApplicationAuthorizedPageParams extends PageParams {
   personId?: number;
   search?: string;
 }
+
+export interface SecurityCatalogItem {
+  id: number;
+  name: string | null;
+  nameEs?: string | null;
+  deletedAt?: string | null;
+}
+
+export interface ApplicationSecurityOutput {
+  id: number;
+  application: ApplicationOutput;
+  observation: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationSecurityInput {
+  applicationId: number;
+  observation: string | null;
+}
+
+export interface ApplicationSecurityRole {
+  id: number | null;
+  roleId: number | null;
+  name: string | null;
+  system: string | null;
+  description: string | null;
+}
+
+export interface ApplicationSecurityRoleOutput {
+  id: number;
+  appSecurity: ApplicationSecurityOutput;
+  securityRole: ApplicationSecurityRole;
+  deletedAt: string | null;
+}
+
+export interface ApplicationWebContextOutput {
+  id: number;
+  appSecurity: ApplicationSecurityOutput;
+  webContext: SecurityCatalogItem;
+  field: Field;
+  observation: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationWebContextInput {
+  appSecurityId: number;
+  webContextId: number;
+  fieldId: number;
+  observation: string | null;
+}
+
+export interface ApplicationEnsClassificationOutput {
+  id: number;
+  appSecurity: ApplicationSecurityOutput;
+  identityProvider: SecurityCatalogItem | null;
+  ensSubject: SecurityCatalogItem | null;
+  personalDataProcessing: SecurityCatalogItem | null;
+  approvalDate: string | null;
+  confidentiality: SecurityCatalogItem | null;
+  integrity: SecurityCatalogItem | null;
+  traceability: SecurityCatalogItem | null;
+  availability: SecurityCatalogItem | null;
+  authenticity: SecurityCatalogItem | null;
+  overallGrade: SecurityCatalogItem | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationEnsClassificationInput {
+  appSecurityId: number;
+  identityProviderId: number | null;
+  ensSubjectId: number | null;
+  personalDataProcessingId: number | null;
+  approvalDate: string | null;
+  confidentialityId: number | null;
+  integrityId: number | null;
+  traceabilityId: number | null;
+  availabilityId: number | null;
+  authenticityId: number | null;
+  overallGradeId: number | null;
+}
+
+export interface ApplicationSecurityRiskOutput {
+  id: number;
+  appSecurity: ApplicationSecurityOutput;
+  level: SecurityCatalogItem | null;
+  description: string | null;
+  field: Field | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationSecurityRiskInput {
+  appSecurityId: number;
+  levelId: number | null;
+  description: string | null;
+  fieldId: number | null;
+}
+
+export interface ApplicationSecurityMeasureOutput {
+  id: number;
+  appSecurity: ApplicationSecurityOutput;
+  type: SecurityCatalogItem | null;
+  ensRequirement: SecurityCatalogItem | null;
+  description: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationSecurityMeasureInput {
+  appSecurityId: number;
+  typeId: number | null;
+  ensRequirementId: number | null;
+  description: string | null;
+}
+
+export interface ApplicationSecurityPageParams extends PageParams {
+  appSecurityId: number;
+  statusId?: SoftDeleteStatus;
+}
+
+export type ApplicationSecurityResourceOutput =
+  | ApplicationSecurityRoleOutput
+  | ApplicationWebContextOutput
+  | ApplicationSecurityRiskOutput
+  | ApplicationSecurityMeasureOutput;
+
+export interface ApplicationAccessibilityInput {
+  applicationId: number;
+  complianceId: number | null;
+  classificationSegmentId: number | null;
+  publicUrl: string | null;
+  mobileApplication: boolean | null;
+  mobileApplicationName: string | null;
+  nonAccessibleContent: string | null;
+  observations: string | null;
+  expireDate: string | null;
+}
+
+export interface ApplicationAccessibilityOutput {
+  id: number;
+  application: Pick<ApplicationOutput, 'id'> | null;
+  compliance: AccessibilityResource | null;
+  classificationSegment: AccessibilityResource | null;
+  publicUrl: string | null;
+  mobileApplication: boolean | null;
+  mobileApplicationName: string | null;
+  nonAccessibleContent: string | null;
+  observations: string | null;
+  expireDate: string | null;
+  deletedAt: string | null;
+}
+export type EnsClassificationLoadState = 'ready' | 'unknown' | 'inconsistent';

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { SYSTEMS_ROUTES } from '@features/systems/systems.routes';
+import { MAINTENANCES_ROUTES } from '@features/maintenances/maintenances.routes';
+import { SYSTEMS_ROUTES_LOC } from '@features/systems/systems.routes.i18n';
 import { SpringPage } from '@models/page.model';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 
@@ -51,7 +52,9 @@ describe('environmentsListResolver', () => {
   });
 
   it('is registered on the grouped systems route', () => {
-    const route = SYSTEMS_ROUTES.find(({ path }) => path === '');
+    const route = MAINTENANCES_ROUTES[0].children?.find(
+      ({ path }) => path === SYSTEMS_ROUTES_LOC.BASE,
+    );
 
     expect(route?.resolve?.[ENVIRONMENTS_LIST_RESOLVE_KEY]).toBe(environmentsListResolver);
   });

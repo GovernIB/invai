@@ -10,8 +10,14 @@ import {
   ApplicationStatusCode,
 } from '../../applications.model';
 import { ApplicationDevelopmentService } from '../../services/application-development.service';
+import {
+  ApplicationEnsClassificationsService,
+  ApplicationSecurityService,
+} from '../../services/application-security.service';
 import { ApplicationsService } from '../../services/applications.service';
+import { ApplicationOptionsService } from '../../services/application-options.service';
 import { ApplicationDetail } from './application-detail';
+import { ApplicationDetailState } from './application-detail-state';
 import {
   APPLICATION_DETAIL_RESOLVE_KEY,
   ApplicationDetailResolvedData,
@@ -25,7 +31,8 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   category: { id: 1, name: 'Categoria', deletedAt: null },
   systemType: { id: 2, name: 'Sistema', deletedAt: null },
   field: { id: 3, name: 'Àmbit', deletedAt: null },
-  admUnit: { id: 4, code: 'UT', name: 'Unitat' },
+  admUnit: { code: 'UT', name: 'Unitat', parentCode: 'GVA01', level: 2 },
+  department: { code: 'GVA01', name: 'Conselleria', parentCode: null, level: 1 },
   csCommission: null,
   description: '',
   status: ApplicationStatusCode.ACTIVE,
@@ -39,6 +46,14 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   appInformationSystemDbId: 70,
   appDevelopmentId: 90,
   appResponsibleAuthorizedId: 91,
+  incomplete: false,
+  missingResponsibleTypes: false,
+  missingAuthorized: false,
+  missingDevelopmentFields: false,
+  missingSystems: false,
+  missingDatabases: false,
+  missingAccessibilityFields: false,
+  missingSecurityData: true,
 };
 
 describe('ApplicationDetail', () => {
@@ -77,6 +92,10 @@ describe('ApplicationDetail', () => {
         },
         { provide: BreadcrumbService, useValue: breadcrumbs },
         {
+          provide: ApplicationOptionsService,
+          useValue: { getAdministrativeUnitOptions: vi.fn(() => of([])) },
+        },
+        {
           provide: ApplicationsService,
           useValue: {
             toApplication,
@@ -89,6 +108,14 @@ describe('ApplicationDetail', () => {
           provide: ApplicationDevelopmentService,
           useValue: { create: vi.fn(), update: vi.fn() },
         },
+        {
+          provide: ApplicationSecurityService,
+          useValue: { create: vi.fn(), update: vi.fn() },
+        },
+        {
+          provide: ApplicationEnsClassificationsService,
+          useValue: { create: vi.fn(), update: vi.fn() },
+        },
       ],
     }).compileComponents();
 
@@ -97,7 +124,7 @@ describe('ApplicationDetail', () => {
     fixture.detectChanges();
   });
 
-  it('renders the four tabs without a global edit toolbar', () => {
+  it('renders the six tabs without a global edit toolbar', () => {
     const tabs = [
       ...fixture.nativeElement.querySelectorAll('.application-detail-tab'),
     ] as HTMLAnchorElement[];
@@ -107,8 +134,74 @@ describe('ApplicationDetail', () => {
       'Responsables',
       'Sistemes i BD',
       'Desenvolupament',
+      'Accessibilitat',
+      'SeguretatLa secció Seguretat està incompleta: falta almenys un context web, una classificació ENS o un risc actiu.',
     ]);
     expect(fixture.nativeElement.querySelector('.application-detail-toolbar')).toBeNull();
+  });
+
+  it('renders one shared page heading above the detail tabs', () => {
+    const root = fixture.nativeElement as HTMLElement;
+    const headings = root.querySelectorAll('h1');
+    expect(headings).toHaveLength(1);
+    expect(headings[0].closest('app-section-container')).not.toBeNull();
+    expect(root.querySelector('.application-detail-header')).toBeNull();
+    expect(root.querySelector('.section-container__body .application-detail-tabs')).not.toBeNull();
+  });
+
+  it('marks incomplete responsible and development tabs with the established accessible icon', () => {
+    const access = component as unknown as {
+      detailState: {
+        application: {
+          update(update: (value: Application | null) => Application | null): void;
+        };
+      };
+    };
+    access.detailState.application.update((application) =>
+      application
+        ? {
+            ...application,
+            missingResponsibleTypes: true,
+            missingAuthorized: true,
+            missingDevelopmentFields: true,
+          }
+        : application,
+    );
+    fixture.detectChanges();
+    const tabs = [
+      ...fixture.nativeElement.querySelectorAll('.application-detail-tab'),
+    ] as HTMLAnchorElement[];
+
+    expect(tabs[1].querySelector('.pi-exclamation-circle.text-red-500')).toBeTruthy();
+    expect(tabs[1].textContent).toContain('no hi ha cap persona autoritzada');
+    expect(tabs[3].querySelector('.pi-exclamation-circle.text-red-500')).toBeTruthy();
+    expect(tabs[3].textContent).toContain('falten camps obligatoris');
+    expect(tabs[5].querySelector('.pi-exclamation-circle.text-red-500')).toBeTruthy();
+    expect(tabs[0].querySelector('.pi-exclamation-circle')).toBeNull();
+  });
+
+  it('offers an accessible retry while preserving the section content', () => {
+    const state = fixture.debugElement.injector.get(ApplicationDetailState);
+    const retry = vi.spyOn(state, 'refreshCompletenessAfterMutation').mockImplementation(() => {});
+    state.completenessRefreshFailed.set(true);
+    fixture.detectChanges();
+
+    const status = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
+    const button = status.parentElement!.querySelector('button') as HTMLButtonElement;
+    expect(status.textContent).toContain("Es mantenen els últims valors");
+    expect(button.textContent).toContain('Torna a carregar els indicadors');
+    expect(button.disabled).toBe(false);
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    button.click();
+    expect(retry).toHaveBeenCalledOnce();
+    expect(document.activeElement?.closest('.application-detail-tabs')).toBeTruthy();
+
+    state.completenessRefreshing.set(true);
+    fixture.detectChanges();
+    expect(button.disabled).toBe(true);
+    expect(status.parentElement!.getAttribute('aria-busy')).toBe('true');
+    expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
   });
 
   it('initializes the application and breadcrumbs', () => {
@@ -183,6 +276,7 @@ function toApplication(response: ApplicationOutput): Application {
     informationSystem: response.systemType?.name ?? '',
     scope: response.field?.name ?? '',
     commission: '',
+    department: response.department?.name ?? '',
     administrativeUnit: response.admUnit?.name ?? '',
     status: ApplicationStatus.ACTIVE,
     description: response.description ?? '',
@@ -192,8 +286,19 @@ function toApplication(response: ApplicationOutput): Application {
     categoryId: response.category?.id,
     informationSystemId: response.systemType?.id,
     scopeId: response.field?.id,
-    administrativeUnitId: response.admUnit?.id,
+    admUnitCode: response.admUnit?.code,
+    departmentCode: response.department?.code,
     statusId: ApplicationStatus.ACTIVE,
     appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
+    appSecurityId: response.appSecurityId ?? null,
+    appAccessibilityId: response.appAccessibilityId ?? null,
+    incomplete: response.incomplete,
+    missingResponsibleTypes: response.missingResponsibleTypes,
+    missingAuthorized: response.missingAuthorized,
+    missingDevelopmentFields: response.missingDevelopmentFields,
+    missingSystems: response.missingSystems,
+    missingDatabases: response.missingDatabases,
+    missingAccessibilityFields: response.missingAccessibilityFields,
+    missingSecurityData: response.missingSecurityData,
   };
 }

@@ -36,6 +36,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SectionActionsComponent {
+  appearance = input<'default' | 'on-primary'>('default');
   hideQuickSearch = input(false);
   hideCollapseButton = input(false);
   hideColumnsButton = input(false);

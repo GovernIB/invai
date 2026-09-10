@@ -26,6 +26,8 @@ export interface ApplicationsListResolvedData {
   infrastructureOptions: ApplicationInfrastructureFilterOptions;
   pageLoadFailed: boolean;
   optionsLoadFailed: boolean;
+  departmentsLoadFailed: boolean;
+  administrativeUnitsLoadFailed: boolean;
 }
 
 const INITIAL_PAGE_PARAMS = {
@@ -72,6 +74,8 @@ export const applicationsListResolver: ResolveFn<ApplicationsListResolvedData> =
         },
         pageLoadFailed: pageResult.failed,
         optionsLoadFailed: optionsResult.loadFailed,
+        departmentsLoadFailed: optionsResult.departmentsLoadFailed,
+        administrativeUnitsLoadFailed: optionsResult.administrativeUnitsLoadFailed,
       }),
     ),
   );

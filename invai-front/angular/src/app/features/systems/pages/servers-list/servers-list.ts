@@ -394,7 +394,6 @@ export class ServersList implements OnInit {
       version: record.version ?? '',
       description: record.description ?? '',
     });
-    if (mode === 'view') this.hostForm.disable({ emitEvent: false });
     this.dialogMode.set(mode);
   }
 

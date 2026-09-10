@@ -1,0 +1,55 @@
+:root {
+  --invai-filter-panel-background: var(--p-surface-50);
+  --invai-table-header-separator-color: var(--p-content-border-color);
+  --invai-table-row-height: 50px;
+  --invai-status-active-background: var(--p-green-100);
+  --invai-status-active-color: var(--p-green-800);
+  --invai-status-inactive-background: var(--p-surface-100);
+  --invai-status-inactive-color: var(--p-surface-700);
+}
+
+.p-datatable {
+  .p-datatable-tbody > tr {
+    // Native table rows treat height as a minimum and grow to fit their content.
+    height: var(--invai-table-row-height);
+  }
+
+  .p-datatable-tbody > tr > .invai-table-actions-column {
+    padding-block: 4px;
+  }
+
+  :where(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td) {
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  .p-datatable-thead > tr > th + th {
+    border-inline-start: 1px solid var(--invai-table-header-separator-color);
+  }
+}
+
+.invai-table-cell-content {
+  display: block;
+  white-space: nowrap;
+}
+
+.invai-table-cell-content--wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.p-tag.invai-status-tag {
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--invai-status-inactive-color);
+  background: var(--invai-status-inactive-background);
+}
+
+.p-tag.invai-status-tag--active {
+  color: var(--invai-status-active-color);
+  background: var(--invai-status-active-background);
+}

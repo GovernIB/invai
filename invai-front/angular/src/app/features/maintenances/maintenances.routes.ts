@@ -1,6 +1,11 @@
+import { ACCESSIBILITY_MAINTENANCE_RESOLVE_KEY, accessibilityMaintenanceResolver } from './accessibility/pages/accessibility-maintenance/accessibility-maintenance.resolver';
 import { inject } from '@angular/core';
-import { Router, Routes } from '@angular/router';
-import { SYSTEMS_ROUTES_LOC } from '@features/systems/systems.routes.i18n';
+import { Route, Router, Routes } from '@angular/router';
+import {
+  ENVIRONMENTS_LIST_RESOLVE_KEY,
+  environmentsListResolver,
+} from '@features/environments/pages/list/environments-list.resolver';
+import { SYSTEMS_ROUTES_LABELS, SYSTEMS_ROUTES_LOC } from '@features/systems/systems.routes.i18n';
 
 import { MAINTENANCES_ROUTES_LABELS, MAINTENANCES_ROUTES_LOC } from './maintenances.routes.i18n';
 import {
@@ -39,6 +44,10 @@ import {
   RESPONSIBLES_MAINTENANCE_RESOLVE_KEY,
   responsiblesMaintenanceResolver,
 } from './pages/responsibles-maintenance/responsibles-maintenance.resolver';
+import {
+  SECURITY_MAINTENANCE_RESOLVE_KEY,
+  securityMaintenanceResolver,
+} from './security/pages/security-maintenance/security-maintenance.resolver';
 
 export const MAINTENANCES_ROUTES: Routes = [
   {
@@ -81,6 +90,17 @@ export const MAINTENANCES_ROUTES: Routes = [
         },
       },
       {
+        path: SYSTEMS_ROUTES_LOC.BASE,
+        loadComponent: () =>
+          import('@features/systems/pages/systems-shell/systems-shell').then((m) => m.SystemsShell),
+        data: {
+          breadcrumb: SYSTEMS_ROUTES_LABELS.BASE,
+        },
+        resolve: {
+          [ENVIRONMENTS_LIST_RESOLVE_KEY]: environmentsListResolver,
+        },
+      },
+      {
         path: MAINTENANCES_ROUTES_LOC.DEVELOPMENT,
         loadComponent: () =>
           import('./pages/development-maintenance/development-maintenance').then(
@@ -94,6 +114,28 @@ export const MAINTENANCES_ROUTES: Routes = [
           [LAYERS_LIST_RESOLVE_KEY]: layersListResolver,
           [TECHNOLOGIES_LIST_RESOLVE_KEY]: technologiesListResolver,
           [LAYER_CATALOG_RESOLVE_KEY]: layerCatalogResolver,
+        },
+      },
+      {
+        path: MAINTENANCES_ROUTES_LOC.ACCESSIBILITY,
+        loadComponent: () =>
+          import('./accessibility/pages/accessibility-maintenance/accessibility-maintenance').then(
+            (m) => m.AccessibilityMaintenance,
+          ),
+        data: { breadcrumb: MAINTENANCES_ROUTES_LABELS.ACCESSIBILITY },
+        resolve: { [ACCESSIBILITY_MAINTENANCE_RESOLVE_KEY]: accessibilityMaintenanceResolver },
+      },
+      {
+        path: MAINTENANCES_ROUTES_LOC.SECURITY,
+        loadComponent: () =>
+          import('./security/pages/security-maintenance/security-maintenance').then(
+            (m) => m.SecurityMaintenance,
+          ),
+        data: {
+          breadcrumb: MAINTENANCES_ROUTES_LABELS.SECURITY,
+        },
+        resolve: {
+          [SECURITY_MAINTENANCE_RESOLVE_KEY]: securityMaintenanceResolver,
         },
       },
       legacyMaintenanceRoute(
@@ -132,10 +174,13 @@ function legacyMaintenanceRoute(path: string, sectionPath: string, panelId: stri
   };
 }
 
-function legacyEnvironmentRoute(path: string) {
+function legacyEnvironmentRoute(path: string): Route {
   return {
     path,
-    redirectTo: () =>
-      inject(Router).createUrlTree(['/', SYSTEMS_ROUTES_LOC.BASE], { fragment: 'environments' }),
+    redirectTo: ({ queryParams }) =>
+      inject(Router).createUrlTree(['/', MAINTENANCES_ROUTES_LOC.BASE, SYSTEMS_ROUTES_LOC.BASE], {
+        queryParams,
+        fragment: 'environments',
+      }),
   };
 }

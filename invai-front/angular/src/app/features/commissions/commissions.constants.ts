@@ -6,8 +6,22 @@ export const COMMISSION_DATE_FORMAT = 'dd/mm/yy';
 export const COMMISSION_DATE_PLACEHOLDER = 'dd/mm/aaaa';
 
 export const COMMISSIONS_TABLE_COLUMNS: KeyLabel[] = [
-  { key: 'name', label: $localize`Nom`, sortBy: 'name', minWidth: '14rem' },
-  { key: 'nameEs', label: $localize`Nom en castellà`, sortBy: 'nameEs', minWidth: '14rem' },
+  {
+    key: 'name',
+    wrap: true,
+    maxWidth: '24rem',
+    label: $localize`Nom`,
+    sortBy: 'name',
+    minWidth: '14rem',
+  },
+  {
+    key: 'nameEs',
+    wrap: true,
+    maxWidth: '24rem',
+    label: $localize`Nom en castellà`,
+    sortBy: 'nameEs',
+    minWidth: '14rem',
+  },
   {
     key: 'expedientNumber',
     label: $localize`Número d'expedient`,

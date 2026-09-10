@@ -36,6 +36,15 @@
   border-top-right-radius: 0;
 }
 
+.application-development__source-code > input[readonly] {
+  background: var(--p-surface-50, var(--surface-50));
+}
+
+.application-development__external-link:focus-visible {
+  outline: 2px solid var(--p-focus-ring-color, var(--p-primary-color));
+  outline-offset: 2px;
+}
+
 .application-development__source-code:focus-within > input:enabled:focus {
   box-shadow: none;
   outline: none;

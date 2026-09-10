@@ -101,7 +101,7 @@ describe('ApplicationResponsiblesTable', () => {
     expect(emptyCell.colSpan).toBe(2);
   });
 
-  it('shows only the alert icon and exposes the incomplete label by tooltip and keyboard', () => {
+  it('shows only the circular alert icon and exposes the incomplete label by tooltip and keyboard', () => {
     expect(fixture.nativeElement.querySelector('.application-responsible-incomplete')).toBeNull();
 
     fixture.componentRef.setInput('itemsList', {
@@ -116,12 +116,14 @@ describe('ApplicationResponsiblesTable', () => {
     const cell = incomplete.closest('td') as HTMLTableCellElement;
     const icon = incomplete.querySelector('i') as HTMLElement;
     expect(incomplete.firstElementChild).toBe(icon);
-    expect(icon.classList).toContain('pi-exclamation-triangle');
+    expect(icon.classList).toContain('pi-exclamation-circle');
+    expect(icon.classList).not.toContain('pi-exclamation-triangle');
     expect(icon.classList).toContain('text-red-500');
     expect(icon.getAttribute('aria-hidden')).toBe('true');
     expect(incomplete.querySelector('.sr-only')?.textContent?.trim()).toBe('Incomplet');
     expect(incomplete.classList).toContain('w-full');
-    expect(incomplete.classList).toContain('justify-center');
+    expect(incomplete.classList).toContain('justify-start');
+    expect(incomplete.classList).not.toContain('justify-center');
     expect(cell.tabIndex).toBe(0);
 
     const tooltip = fixture.debugElement.query(By.directive(Tooltip)).injector.get(Tooltip);

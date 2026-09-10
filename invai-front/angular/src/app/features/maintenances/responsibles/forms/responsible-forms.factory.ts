@@ -1,5 +1,14 @@
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+
+import { RoleTransferPersonControlValue } from '../responsibles.model';
 
 export interface ResponsibleNameFormControls {
   name: FormControl<string>;
@@ -50,8 +59,8 @@ export interface ResponsiblePersonFiltersFormControls {
 export type ResponsiblePersonFiltersFormGroup = FormGroup<ResponsiblePersonFiltersFormControls>;
 
 export interface RoleTransferFormControls {
-  sourcePersonId: FormControl<number | null>;
-  destinationPersonId: FormControl<number | null>;
+  sourcePerson: FormControl<RoleTransferPersonControlValue>;
+  destinationPerson: FormControl<RoleTransferPersonControlValue>;
   revoke: FormControl<boolean>;
 }
 
@@ -132,11 +141,30 @@ export function createResponsibleAuthorizationFiltersForm(
 
 export function createRoleTransferForm(formBuilder: FormBuilder): RoleTransferFormGroup {
   return formBuilder.group({
-    sourcePersonId: formBuilder.control<number | null>(null, Validators.required),
-    destinationPersonId: formBuilder.control<number | null>(
-      { value: null, disabled: true },
+    sourcePerson: formBuilder.control<RoleTransferPersonControlValue>(null, [
       Validators.required,
+      selectedRoleTransferPersonValidator,
+      transferableRoleSourceValidator,
+    ]),
+    destinationPerson: formBuilder.control<RoleTransferPersonControlValue>(
+      { value: null, disabled: true },
+      [Validators.required, selectedRoleTransferPersonValidator],
     ),
     revoke: formBuilder.nonNullable.control(false),
   });
+}
+
+export function selectedRoleTransferPersonValidator(
+  control: AbstractControl<RoleTransferPersonControlValue>,
+): ValidationErrors | null {
+  return typeof control.value === 'string' ? { personSelection: true } : null;
+}
+
+export function transferableRoleSourceValidator(
+  control: AbstractControl<RoleTransferPersonControlValue>,
+): ValidationErrors | null {
+  const value = control.value;
+  return value && typeof value !== 'string' && value.id === null
+    ? { sourceWithoutLocalId: true }
+    : null;
 }

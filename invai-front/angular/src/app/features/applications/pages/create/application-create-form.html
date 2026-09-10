@@ -6,11 +6,18 @@
     [codeMaxLengthError]="codeMaxLengthError"
     [codeMinLengthError]="codeMinLengthError"
     [labels]="labels"
-    [options]="options()"
+    [options]="currentOptions()"
+    [departmentsLoading]="isDepartmentsLoading()"
+    [departmentsLoadFailed]="hasDepartmentsLoadFailed()"
+    [administrativeUnitsLoading]="isAdministrativeUnitsLoading()"
+    [administrativeUnitsLoadFailed]="hasAdministrativeUnitsLoadFailed()"
     [prefixMaxLengthError]="prefixMaxLengthError"
     [requiredError]="requiredError"
     [selectPlaceholder]="selectPlaceholder"
     (commissionSelected)="selectCommission($event)"
+    (conselleriaSelected)="selectConselleria($event)"
+    (departmentsRetry)="retryDepartments()"
+    (administrativeUnitsRetry)="retryAdministrativeUnits()"
   />
 
   <div class="application-create-form__actions">

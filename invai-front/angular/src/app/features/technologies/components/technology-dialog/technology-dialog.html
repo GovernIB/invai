@@ -23,12 +23,12 @@
     </div>
   } @else {
     <form
-      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+      class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
       [formGroup]="form()"
       (ngSubmit)="onSubmit()"
       novalidate
     >
-      <div>
+      <div class="md:col-span-8">
         <p-floatlabel class="w-full">
           <input
             id="technology-dialog-name"
@@ -40,6 +40,8 @@
               isInvalid(form().controls.name) ? 'technology-dialog-name-error' : null
             "
             [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
             pInputText
           />
           <label for="technology-dialog-name">{{ labels.name }}</label>
@@ -54,7 +56,17 @@
           </p>
         }
       </div>
-      <div>
+      <div class="md:col-span-4">
+        @if (mode() === 'view') {
+          <div class="invai-dialog-static-field">
+            <span id="technology-dialog-layer-view-label" class="invai-dialog-static-field__label">
+              {{ labels.layer }}
+            </span>
+            <p class="invai-form-static-value" aria-labelledby="technology-dialog-layer-view-label">
+              {{ layerLabel() }}
+            </p>
+          </div>
+        } @else {
         <p-floatlabel class="w-full">
           <p-select
             inputId="technology-dialog-layer"
@@ -76,6 +88,7 @@
             {{ labels.layer }}
           </label>
         </p-floatlabel>
+        }
         @if (isInvalid(form().controls.layerId)) {
           <p id="technology-dialog-layer-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
             {{ requiredError }}

@@ -1,4 +1,31 @@
 app-search-filters {
+  .invai-filter-panel {
+    container-type: inline-size;
+    padding: 16px;
+    border-radius: 10px;
+    background: var(--invai-filter-panel-background);
+
+    .invai-filter-action {
+      padding-inline: 3rem;
+    }
+  }
+
+  @media (max-width: 575px) {
+    .invai-filter-panel footer {
+      section,
+      p-button,
+      .p-button {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .p-button {
+        padding-inline: 12px;
+        white-space: normal;
+      }
+    }
+  }
+
   .invai-search-filter-grid {
     display: grid;
     grid-template-columns: repeat(
@@ -25,6 +52,44 @@ app-search-filters {
   @media (min-width: 992px) {
     .invai-search-filter-grid {
       grid-template-columns: repeat(var(--invai-search-filter-columns, 3), minmax(0, 1fr));
+    }
+  }
+
+  // Spans describe expected content, independently of current filter values.
+  // Use available panel width in rem so a sidebar or enlarged text can reflow it.
+  .invai-search-filter-grid--semantic {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .invai-search-filter-grid--semantic > .invai-filter-field--full {
+    grid-column: 1 / -1;
+  }
+
+  @container (min-width: 40rem) {
+    .invai-search-filter-grid--semantic {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container (min-width: 72rem) {
+    .invai-search-filter-grid--semantic {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+
+      > * {
+        grid-column: span 4;
+      }
+
+      > .invai-filter-field--compact {
+        grid-column: span 2;
+      }
+
+      > .invai-filter-field--wide {
+        grid-column: span 5;
+      }
+
+      > .invai-filter-field--full {
+        grid-column: 1 / -1;
+      }
     }
   }
 }

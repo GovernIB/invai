@@ -1,5 +1,5 @@
-<form appSearchFilterGrid [formGroup]="form()">
-  <div>
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <p-select
         inputId="application-servers-filter-environment"
@@ -22,7 +22,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--wide">
     <p-floatlabel class="w-full">
       <p-select
         inputId="application-servers-filter-server"
@@ -42,7 +42,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <input
         id="application-servers-filter-instance"
@@ -60,7 +60,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--compact">
     <p-floatlabel class="w-full">
       <p-inputnumber
         inputId="application-servers-filter-port"
@@ -76,7 +76,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--standard">
     <p-floatlabel class="w-full">
       <input
         id="application-servers-filter-version"
@@ -91,7 +91,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--compact">
     <p-floatlabel class="w-full">
       <p-select
         inputId="application-servers-filter-status"
@@ -109,7 +109,7 @@
     </p-floatlabel>
   </div>
 
-  <div>
+  <div class="invai-filter-field--full">
     <p-floatlabel class="w-full">
       <input
         id="application-servers-filter-observations"

@@ -36,6 +36,13 @@ describe('ApplicationFormFields', () => {
     prefix: 'Prefix',
     administrativeUnit: 'Administrative unit',
     conselleria: 'Conselleria',
+    departmentsLoading: 'Loading departments',
+    departmentsLoadError: 'Departments unavailable',
+    administrativeUnitsLoading: 'Loading units',
+    administrativeUnitsLoadError: 'Units unavailable',
+    administrativeUnitsEmpty: 'No units',
+    selectConselleriaFirst: 'Select a department',
+    retry: 'Retry',
     description: 'Description',
     code: 'Code',
     creationDate: 'Creation date',
@@ -149,42 +156,40 @@ describe('ApplicationFormFields', () => {
     expect(root.getAttribute('aria-labelledby')).toBe('test-application-description-label');
   });
 
-  it('keeps the rich text editor rendered while the description is read-only', () => {
+  it('renders rich text as one static labelled value in read-only mode', () => {
     const form = createApplicationDetailForm(formBuilder);
     form.controls.description.setValue('<p>Legacy <strong>description</strong></p>');
-    form.disable();
     fixture.componentRef.setInput('controls', form.controls);
     fixture.componentRef.setInput('auditControls', form.controls);
-    fixture.componentRef.setInput('descriptionReadOnly', true);
+    fixture.componentRef.setInput('isReadOnly', true);
 
     fixture.detectChanges();
 
-    const editor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+    const editor = fixture.debugElement.query(By.directive(Editor));
+    const value = fixture.nativeElement.querySelector('.invai-form-static-value--rich');
 
-    expect(editor).toBeTruthy();
-    expect(editor.readonly).toBe(true);
+    expect(editor).toBeNull();
+    expect(value.getAttribute('aria-labelledby')).toBe('test-application-description-label');
+    expect(value.textContent).toContain('Legacy description');
     expect(form.controls.description.value).toBe(
       '<p>Legacy <strong>description</strong></p>',
     );
   });
 
-  it('makes the existing rich text editor editable when the detail control is enabled', () => {
+  it('replaces the static rich text value with an editor in edit mode', () => {
     const form = createApplicationDetailForm(formBuilder);
-    form.disable();
     fixture.componentRef.setInput('controls', form.controls);
     fixture.componentRef.setInput('auditControls', form.controls);
-    fixture.componentRef.setInput('descriptionReadOnly', true);
+    fixture.componentRef.setInput('isReadOnly', true);
     fixture.detectChanges();
 
-    const readOnlyEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
-    expect(readOnlyEditor.readonly).toBe(true);
+    expect(fixture.debugElement.query(By.directive(Editor))).toBeNull();
 
-    form.controls.description.enable();
-    fixture.componentRef.setInput('descriptionReadOnly', false);
+    fixture.componentRef.setInput('isReadOnly', false);
     fixture.detectChanges();
 
     const editableEditor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
-    expect(editableEditor).toBe(readOnlyEditor);
+    expect(editableEditor).toBeTruthy();
     expect(editableEditor.readonly).toBe(false);
   });
 
@@ -252,7 +257,8 @@ describe('ApplicationFormFields', () => {
           commissionType: CommissionType.TECNICA,
         },
       ],
-      administrativeUnits: [{ label: 'Dynamic unit', value: 5 }],
+      departments: [{ label: 'Dynamic department', value: 'GVA01' }],
+      administrativeUnits: [{ label: 'Dynamic unit', value: 'UA01' }],
     };
 
     fixture.componentRef.setInput('controls', form.controls);
@@ -285,7 +291,7 @@ describe('ApplicationFormFields', () => {
       .queryAll(By.directive(Select))
       .map(({ componentInstance }) => componentInstance as Select);
 
-    expect(selects).toHaveLength(5);
+    expect(selects).toHaveLength(6);
     expect(selects.every((select) => select.filter === true)).toBe(true);
     expect(selects.every((select) => Boolean(select.ariaFilterLabel))).toBe(
       true,
