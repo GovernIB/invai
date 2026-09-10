@@ -1,6 +1,5 @@
 package es.caib.invai.back.persistence.repository.application.core;
 
-import es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationAudEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
@@ -32,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,9 +67,9 @@ class ApplicationRepositoryAdapterTest {
         return a;
     }
 
-    private ApplicationEntity buildFullyLinkedEntity(Long id) {
+    private ApplicationEntity buildFullyLinkedEntity() {
         ApplicationEntity entity = new ApplicationEntity();
-        entity.setId(id);
+        entity.setId(10L);
         entity.setCode("APP001");
         entity.setPrefix("AP1");
         entity.setName("Inventory App");
@@ -90,9 +88,7 @@ class ApplicationRepositoryAdapterTest {
         field.setId(3L);
         entity.setField(field);
 
-        AdmUnitEntity admUnit = new AdmUnitEntity();
-        admUnit.setId(4L);
-        entity.setAdmUnit(admUnit);
+        entity.setAdmUnitCode("AU1");
 
         CommissionEntity commission = new CommissionEntity();
         commission.setId(5L);
@@ -201,14 +197,6 @@ class ApplicationRepositoryAdapterTest {
     }
 
     @Test
-    void existsByAdmUnitId_delegatesToJPARepositoryUsingDeletedAtIsNullVariant() {
-        adapter = buildAdapter();
-        when(applicationJPARepository.existsByAdmUnitIdAndDeletedAtIsNull(4L)).thenReturn(true);
-
-        assertTrue(adapter.existsByAdmUnitId(4L));
-    }
-
-    @Test
     void existsByCommissionId_delegatesToJPARepositoryUsingCsCommissionVariant() {
         adapter = buildAdapter();
         when(applicationJPARepository.existsByCsCommissionIdAndDeletedAtIsNull(5L)).thenReturn(true);
@@ -221,7 +209,7 @@ class ApplicationRepositoryAdapterTest {
         adapter = buildAdapter();
         Application model = new Application();
         ApplicationEntity toSave = new ApplicationEntity();
-        ApplicationEntity saved = buildFullyLinkedEntity(10L);
+        ApplicationEntity saved = buildFullyLinkedEntity();
         Application response = new Application();
         when(applicationMapper.toEntity(model)).thenReturn(toSave);
         when(applicationJPARepository.save(toSave)).thenReturn(saved);
@@ -242,14 +230,14 @@ class ApplicationRepositoryAdapterTest {
         assertEquals(1L, aud.getCategoryId());
         assertEquals(2L, aud.getSystemTypeId());
         assertEquals(3L, aud.getFieldId());
-        assertEquals(4L, aud.getAdmUnitId());
+        assertEquals("AU1", aud.getAdmUnitCode());
         assertEquals(5L, aud.getCommissionId());
         assertEquals(6L, aud.getStatusId());
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());
-        assertNotNull(aud.getUpdatedAt());
-        assertEquals("SYSTEM_USER", aud.getUpdatedBy());
+        assertNull(aud.getUpdatedAt());
+        assertNull(aud.getUpdatedBy());
         assertNotNull(aud.getAuditDate());
         assertEquals("SYSTEM_USER", aud.getAuditUser());
     }
@@ -274,7 +262,7 @@ class ApplicationRepositoryAdapterTest {
         assertNull(aud.getCategoryId());
         assertNull(aud.getSystemTypeId());
         assertNull(aud.getFieldId());
-        assertNull(aud.getAdmUnitId());
+        assertNull(aud.getAdmUnitCode());
         assertNull(aud.getCommissionId());
         assertNull(aud.getStatusId());
     }

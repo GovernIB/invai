@@ -22,7 +22,7 @@ import jakarta.validation.Valid;
  * for Category taxonomy assets.
  * <p>
  * Secured globally at the type level, allowing access exclusively to authenticated
- * corporate operators assigned the {@code ROLE_usuari-tipus-E} role.
+ * corporate operators assigned the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.1

@@ -73,4 +73,21 @@ public interface SystemTypeRepository {
      * @return {@code true} if duplicates exist outside the index parameter, {@code false} otherwise
      */
     boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Long id);
+
+    /**
+     * Evaluates active namespace tracking records to check for Spanish descriptive label collisions.
+     *
+     * @param nameEs target Spanish description name query criteria
+     * @return {@code true} if conflicts exist, {@code false} otherwise
+     */
+    boolean existsByNameEsAndDeletedAtIsNull(String nameEs);
+
+    /**
+     * Verifies if alternative active entities share a requested Spanish name flag, filtering target references.
+     *
+     * @param nameEs target Spanish description name query criteria
+     * @param id     row entry identification key index to ignore
+     * @return {@code true} if duplicates exist outside the index parameter, {@code false} otherwise
+     */
+    boolean existsByNameEsAndIdNotAndDeletedAtIsNull(String nameEs, Long id);
 }

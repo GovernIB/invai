@@ -36,9 +36,9 @@ import static org.mockito.Mockito.verify;
  * applies the matcher per-element, matching an invocation with any number of {@code Predicate}
  * arguments. Using {@code any(Predicate[].class)} instead only reliably matches a zero-length
  * invocation in this project's Mockito version and desynchronizes the matcher stack for
- * subsequent stubs/verifications once a non-empty array is actually passed.
+ * later stubs/verifications once a non-empty array is actually passed.
  *
- * <p>Note: {@link javax.persistence.criteria.CriteriaBuilder#equal} is overloaded as both
+ * <p>Note: {@link CriteriaBuilder#equal} is overloaded as both
  * {@code equal(Expression<?>, Expression<?>)} and {@code equal(Expression<?>, Object)}. The
  * production code always calls the latter (comparing a path against a plain {@code Long}), so
  * every {@code any(), any()} pairing used to stub/verify it here is written as {@code any(),
@@ -70,10 +70,10 @@ class AppProviderSpecificationTest {
         lenient().when(path.<String>get(anyString())).thenReturn(path);
         lenient().when(cb.lower(any())).thenReturn(path);
         lenient().when(cb.like(any(), anyString())).thenReturn(predicate);
-        // Explicitly typed as Object (not the bare, doubly-generic any()) so this stub binds to
+        // Explicitly typed as Object (not the bare, doubly generic any()) so this stub binds to
         // the CriteriaBuilder#equal(Expression<?>, Object) overload - the one the production code
         // actually calls (always comparing a path against a Long id/search value). Left ambiguous,
-        // any()/any() resolves at compile time to the *other*, more-specific equal(Expression<?>,
+        // any()/any() resolves at compile time to the *other*, more-specific equal (Expression<?>,
         // Expression<?>) overload, which production code never calls, so the stub would silently
         // never apply and every cb.equal(...) call would return null.
         lenient().when(cb.equal(any(), any(Object.class))).thenReturn(predicate);
@@ -100,7 +100,7 @@ class AppProviderSpecificationTest {
 
         assertNotNull(result);
         verify(cb).equal(path, 10L);
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb).and(predicate);
     }
 
     @Test

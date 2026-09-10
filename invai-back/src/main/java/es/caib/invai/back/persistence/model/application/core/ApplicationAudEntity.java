@@ -58,9 +58,9 @@ public class ApplicationAudEntity {
     @Column(name = "FIELD_ID")
     private Long fieldId;
 
-    /** Snapshot of the application's administrative unit foreign key at the time of the audited change. */
-    @Column(name = "ADM_UNIT_ID")
-    private Long admUnitId;
+    /** Snapshot of the application's administrative unit DIR3CAIB code at the time of the audited change. */
+    @Column(name = "ADM_UNIT_CODE", length = 20)
+    private String admUnitCode;
 
     /** Snapshot of the application's commission foreign key at the time of the audited change. */
     @Column(name = "COMMISSION_ID")

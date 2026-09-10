@@ -42,9 +42,9 @@ import static org.mockito.Mockito.verify;
  * applies the matcher per-element, matching an invocation with any number of {@code Predicate}
  * arguments. Using {@code any(Predicate[].class)} instead only reliably matches a zero-length
  * invocation in this project's Mockito version and desynchronizes the matcher stack for
- * subsequent stubs/verifications once a non-empty array is actually passed.
+ * later stubs/verifications once a non-empty array is actually passed.
  *
- * <p>Note: {@link javax.persistence.criteria.CriteriaBuilder#equal} is overloaded as both
+ * <p>Note: {@link CriteriaBuilder#equal} is overloaded as both
  * {@code equal(Expression<?>, Expression<?>)} and {@code equal(Expression<?>, Object)}. The
  * production code always calls the latter (comparing a path against a plain {@code Long}), so
  * every {@code any(), any()} pairing used to stub/verify it here is written as {@code any(),
@@ -100,7 +100,7 @@ class AppTechnologySpecificationTest {
 
         assertNotNull(result);
         verify(cb).equal(path, 10L);
-        verify(cb).and(new Predicate[]{predicate});
+        verify(cb).and(predicate);
     }
 
     @Test

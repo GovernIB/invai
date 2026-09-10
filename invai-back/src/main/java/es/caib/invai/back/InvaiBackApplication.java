@@ -5,13 +5,18 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Main application entry point and configuration bootstrap configuration for the INVAI Core API engine.
@@ -32,12 +37,13 @@ import org.springframework.context.annotation.PropertySource;
 		DataSourceAutoConfiguration.class,
 		HibernateJpaAutoConfiguration.class
 })
+@EnableScheduling
 @PropertySource("file:${es.caib.invai.system.properties}")
 @OpenAPIDefinition(
 		info = @Info(
 				title = "INVAI – API INTERNA",
 				description = "Servei de gestió de l'inventari d'aplicacions informàtiques de les Illes Balears (INVAI).",
-				version = "1.0.2"
+				version = "1.0.4"
 		),
 		servers = @Server(url = "/invaiapi/interna")
 )

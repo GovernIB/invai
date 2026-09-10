@@ -7,6 +7,7 @@ import es.caib.invai.back.service.model.application.system_database.database.App
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
 
 /**
@@ -15,7 +16,7 @@ import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {StatusMapper.class})
+@Mapper(componentModel = "spring", uses = {StatusMapper.class, ApplicationMapper.class})
 public interface AppDatabaseMapper {
 
     /**

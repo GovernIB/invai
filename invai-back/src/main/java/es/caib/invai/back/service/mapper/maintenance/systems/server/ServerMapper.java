@@ -37,6 +37,7 @@ public interface ServerMapper {
     /**
      * Constructs a pure domain business structure from incoming input payload parameter DTOs.
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "environment.id", source = "environmentId")
     @Mapping(target = "serverType.id", source = "serverTypeId")
     @Mapping(target = "createdAt", ignore = true)
@@ -50,6 +51,7 @@ public interface ServerMapper {
     /**
      * Merges update parameters from an API input payload DTO into an existing active domain business model.
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "environment.id", source = "environmentId")
     @Mapping(target = "serverType.id", source = "serverTypeId")
     @Mapping(target = "createdAt", ignore = true)

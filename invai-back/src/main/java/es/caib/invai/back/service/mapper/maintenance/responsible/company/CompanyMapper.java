@@ -47,6 +47,7 @@ public interface CompanyMapper {
      * @param inputDTO the input DTO to convert
      * @return the converted domain model
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -61,6 +62,7 @@ public interface CompanyMapper {
      * @param inputDTO the input DTO holding the new values
      * @param model    the target domain model to update in place
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

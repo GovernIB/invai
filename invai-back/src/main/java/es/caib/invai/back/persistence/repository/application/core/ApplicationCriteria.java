@@ -3,6 +3,8 @@ package es.caib.invai.back.persistence.repository.application.core;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * Data Transfer Object (DTO) capturing search filters and evaluation metrics used
  * to build dynamic database queries targeting application registry assets.
@@ -23,17 +25,19 @@ public class ApplicationCriteria {
     /** Foreign key filter restricting results to a specific system type. */
     private Long systemTypeId;
     /** Foreign key filter restricting results to a specific operational field. */
-    private String fieldId;
+    private Long fieldId;
     /** Foreign key filter restricting results to a specific commission. */
     private Long commissionId;
-    /** Foreign key filter restricting results to a specific administrative unit. */
-    private Long admUnitId;
+    /** DIR3CAIB code filter restricting results to a specific administrative unit. */
+    private String admUnitCode;
     /** Foreign key filter restricting results to a specific lifecycle status. */
-    private String statusId;
+    private Long statusId;
     /** Substring filter applied to the application's description. */
     private String description;
     /** Flag restricting results to applications flagged as incomplete. */
     private Boolean incomplete;
+
+    private List<Long> incompleteApplicationIds;
 
     /** Foreign key filter restricting results to applications with an active responsible assignment for this person. */
     private Long responsibleId;
@@ -46,4 +50,12 @@ public class ApplicationCriteria {
 
     /** Alphanumeric text token applied across multiple structural string fields during comprehensive global queries. */
     private String quickSearch;
+
+    /**
+     * DIR3CAIB codes of administrative units whose name matches {@link #quickSearch}, resolved by
+     * the facade against the live DIR3CAIB cached tree before the query is built (an admin unit's
+     * name is no longer stored locally, so it can't be searched via a SQL join). Internal only —
+     * any client-supplied value is overwritten before use.
+     */
+    private List<String> quickSearchAdmUnitCodes;
 }

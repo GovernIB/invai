@@ -1,5 +1,7 @@
 package es.caib.invai.back.exception;
 
+import java.io.Serial;
+
 /**
  * Custom runtime exception thrown when a corporate or business domain validation rule is violated.
  * <p>
@@ -10,6 +12,9 @@ package es.caib.invai.back.exception;
  * @since 1.0.1
  */
 public class BusinessRuleException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with the specified localization message key or raw message text.

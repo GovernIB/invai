@@ -12,8 +12,8 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
- * MapStruct data mapping abstraction interface providing structural state conversions across
- * AppAuthorized database entities, business domain models, and API transfer schemas.
+ * MapStruct mapper converting between {@code AppAuthorized} persistence entities, their business
+ * domain model, and the inbound/outbound AppAuthorized DTOs.
  * <p>
  * {@code observation} is editable both on create ({@code toModelFromInput}) and on update
  * ({@code updateModelFromInput}); the dedicated delete flow may also overwrite it with a

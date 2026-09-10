@@ -29,7 +29,7 @@ public class StatusRepositoryAdapter implements StatusRepository {
 
     @Override
     public List<Status> findAll() {
-        log.info("Repository: Fetching every status lookup entry");
+        log.debug("Repository: Fetching every status lookup entry");
         List<LkupStatusEntity> entities = statusJPARepository.findAll(Sort.by("name"));
         return statusMapper.toModelList(entities);
     }

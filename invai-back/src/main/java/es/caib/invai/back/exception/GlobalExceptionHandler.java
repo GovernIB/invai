@@ -1,5 +1,6 @@
 package es.caib.invai.back.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import es.caib.invai.back.utils.Constants;
+
 import java.util.Locale;
 
 /**
@@ -17,11 +20,14 @@ import java.util.Locale;
  * application errors across all REST controllers.
  * <p>
  * It automatically extracts localization keys from validation constraints or business failures
- * and maps them into an explicit HTTP 400 (Bad Request) payload structure.
+ * and maps them into a standard, localized error payload structure: HTTP 400 (Bad Request) for
+ * validation/business-rule/persistence failures, and HTTP 500 (Internal Server Error) as the
+ * final catch-all for anything else otherwise unhandled.
  * </p>
  *
  * @since 1.0.1
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -40,7 +46,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         ObjectError firstError = ex.getBindingResult().getAllErrors().stream()
                 .findFirst()
-                .orElse(new ObjectError("application", "validation.application.default"));
+                .orElse(new ObjectError("application", Constants.VALIDATION_APPLICATION_DEFAULT));
 
         String rawMessage = firstError.getDefaultMessage();
 
@@ -64,7 +70,7 @@ public class GlobalExceptionHandler {
         String rawMessage = ex.getMessage();
 
         if (rawMessage == null) {
-            return buildLocalizedErrorResponse("validation.application.default", null, true);
+            return buildLocalizedErrorResponse(Constants.VALIDATION_APPLICATION_DEFAULT, null, true);
         }
 
         if (rawMessage.startsWith("{") && rawMessage.endsWith("}")) {
@@ -75,11 +81,12 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Intercepts transaction flush/commit database exceptions and exposes
-     * the real raw database engine error message to the client response.
+     * Intercepts transaction flush/commit database exceptions. The raw database engine error
+     * (which can include schema/query internals, e.g. Oracle {@code ORA-} messages) is logged
+     * server-side only; the client always receives a generic, localized message.
      *
      * @param ex the intercepted persistence exception
-     * @return structured response containing the actual raw database error string
+     * @return a generic localized error response, never containing the raw database error text
      */
     @ExceptionHandler(jakarta.persistence.PersistenceException.class)
     public ResponseEntity<ValidationErrorResponse> handlePersistenceExceptions(jakarta.persistence.PersistenceException ex) {
@@ -97,7 +104,33 @@ public class GlobalExceptionHandler {
         if (databaseErrorMessage == null) {
             databaseErrorMessage = ex.getMessage() != null ? ex.getMessage() : "Unknown persistence error";
         }
-        return buildLocalizedErrorResponse(databaseErrorMessage, null, false);
+        log.error("Unhandled persistence exception: {}", databaseErrorMessage, ex);
+
+        return buildLocalizedErrorResponse(Constants.ERR_PERSISTENCE_GENERIC, null, true);
+    }
+
+    /**
+     * Catch-all for any exception not handled by a more specific {@code @ExceptionHandler} above
+     * (a genuine programming error, an unexpected runtime failure, etc). Without this, such an
+     * exception would fall through to the servlet container/Spring Boot's default error handling
+     * instead of this API's standard, localized, i18n'd error payload shape. Logs the full
+     * exception server-side; the client only ever receives a generic message, never any exception
+     * detail.
+     *
+     * @param ex the intercepted exception
+     * @return a generic localized error response with HTTP 500 (Internal Server Error)
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ValidationErrorResponse> handleUnexpectedExceptions(Exception ex) {
+        log.error("Unhandled exception reached the global exception handler", ex);
+
+        Locale currentLocale = LocaleContextHolder.getLocale();
+        ValidationErrorResponse response = new ValidationErrorResponse(
+                messageSource.getMessage(Constants.VALIDATION_APPLICATION_TITLE, null, currentLocale),
+                messageSource.getMessage(Constants.ERR_UNEXPECTED_GENERIC, null, currentLocale)
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -112,7 +145,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ValidationErrorResponse> buildLocalizedErrorResponse(String messageOrKey, Object[] args, boolean isKey) {
         Locale currentLocale = LocaleContextHolder.getLocale();
 
-        String translatedTitle = messageSource.getMessage("validation.application.title", null, currentLocale);
+        String translatedTitle = messageSource.getMessage(Constants.VALIDATION_APPLICATION_TITLE, null, currentLocale);
 
         String translatedMessage;
         if (isKey) {

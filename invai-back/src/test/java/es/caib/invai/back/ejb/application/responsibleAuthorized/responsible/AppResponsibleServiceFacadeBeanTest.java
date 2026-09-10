@@ -9,6 +9,7 @@ import es.caib.invai.back.persistence.repository.application.responsibleAuthoriz
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible.AppResponsibleRepository;
 import es.caib.invai.back.persistence.repository.catalog.responsibleType.ResponsibleTypeRepository;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonRepository;
+import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.responsible.AppResponsibleMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,6 +37,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,6 +61,9 @@ class AppResponsibleServiceFacadeBeanTest {
 
     @Mock
     private PersonRepository personRepository;
+
+    @Mock
+    private PersonService personService;
 
     @InjectMocks
     private AppResponsibleServiceFacadeBean appResponsibleServiceFacadeBean;
@@ -236,15 +240,14 @@ class AppResponsibleServiceFacadeBeanTest {
     }
 
     @Test
-    void create_noPersonIdWithExistingEmail_reusesExistingPersonAndSkipsCreation() {
+    void create_noPersonIdGiven_resolvesPersonIdViaPersonService() {
         AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, null, "Joan", "Fuster", "joan@caib.es", null, 20L, null, null, true);
-        Person existingPerson = new Person();
-        existingPerson.setId(99L);
-        existingPerson.setPersonalCaib(true);
+        Person resolved = new Person();
+        resolved.setId(99L);
         AppResponsible model = new AppResponsible();
         AppResponsible saved = new AppResponsible();
         AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        when(personRepository.findByEmail("joan@caib.es")).thenReturn(existingPerson);
+        when(personService.resolveOrCreatePerson("Joan", "Fuster", "joan@caib.es", true, null)).thenReturn(resolved);
         when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
         when(appResponsibleMapper.toModelFromInput(inputDTO)).thenReturn(model);
         when(appResponsibleRepository.create(model)).thenReturn(saved);
@@ -253,121 +256,13 @@ class AppResponsibleServiceFacadeBeanTest {
         appResponsibleServiceFacadeBean.create(inputDTO);
 
         assertEquals(99L, inputDTO.getPersonId());
-        verify(personRepository, never()).create(any());
     }
 
     @Test
-    void create_noPersonIdNoExistingEmailPersonalCaib_createsNewCaibPerson() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, null, "Joan", "Fuster", "joan@caib.es", null, 20L, null, null, true);
-        AppResponsible model = new AppResponsible();
-        AppResponsible saved = new AppResponsible();
-        AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        Person createdPerson = new Person();
-        createdPerson.setId(55L);
-        when(personRepository.findByEmail("joan@caib.es")).thenReturn(null);
-        when(personRepository.create(any())).thenReturn(createdPerson);
-        when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
-        when(appResponsibleMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appResponsibleRepository.create(model)).thenReturn(saved);
-        when(appResponsibleMapper.toResponse(saved)).thenReturn(response);
-
-        appResponsibleServiceFacadeBean.create(inputDTO);
-
-        ArgumentCaptor<Person> captor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).create(captor.capture());
-        assertEquals("Joan", captor.getValue().getFirstName());
-        assertEquals("Fuster", captor.getValue().getLastName());
-        assertEquals("joan@caib.es", captor.getValue().getEmail());
-        assertTrue(captor.getValue().isPersonalCaib());
-        assertNull(captor.getValue().getCompany());
-        assertEquals(55L, inputDTO.getPersonId());
-    }
-
-    @Test
-    void create_noPersonIdExternalWithoutCompany_throwsBusinessRuleException() {
+    void create_personServiceResolveOrCreatePersonThrows_propagatesException() {
         AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, null, "Maria", "Puig", "maria@extern.es", null, 20L, null, null, false);
-        when(personRepository.findByEmail("maria@extern.es")).thenReturn(null);
-
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appResponsibleServiceFacadeBean.create(inputDTO));
-
-        assertEquals(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB, ex.getMessage());
-        verify(personRepository, never()).create(any());
-    }
-
-    @Test
-    void create_noPersonIdExternalWithCompany_createsNewExternalPersonWithCompany() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, null, "Maria", "Puig", "maria@extern.es", 5L, 20L, null, null, false);
-        AppResponsible model = new AppResponsible();
-        AppResponsible saved = new AppResponsible();
-        AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        Person createdPerson = new Person();
-        createdPerson.setId(56L);
-        when(personRepository.findByEmail("maria@extern.es")).thenReturn(null);
-        when(personRepository.create(any())).thenReturn(createdPerson);
-        when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
-        when(appResponsibleMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appResponsibleRepository.create(model)).thenReturn(saved);
-        when(appResponsibleMapper.toResponse(saved)).thenReturn(response);
-
-        appResponsibleServiceFacadeBean.create(inputDTO);
-
-        ArgumentCaptor<Person> captor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).create(captor.capture());
-        assertFalse(captor.getValue().isPersonalCaib());
-        assertEquals(5L, captor.getValue().getCompany().getId());
-        assertEquals(56L, inputDTO.getPersonId());
-    }
-
-    @Test
-    void create_personalCaibDiffersFromStoredValue_updatesPerson() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, true);
-        Person person = new Person();
-        person.setId(10L);
-        person.setPersonalCaib(false);
-        AppResponsible model = new AppResponsible();
-        AppResponsible saved = new AppResponsible();
-        AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        when(personRepository.findById(10L)).thenReturn(person);
-        when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
-        when(appResponsibleMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appResponsibleRepository.create(model)).thenReturn(saved);
-        when(appResponsibleMapper.toResponse(saved)).thenReturn(response);
-
-        appResponsibleServiceFacadeBean.create(inputDTO);
-
-        assertTrue(person.isPersonalCaib());
-        verify(personRepository).update(person, 10L);
-    }
-
-    @Test
-    void create_personalCaibMatchesStoredValue_doesNotTouchPerson() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, true);
-        Person person = new Person();
-        person.setId(10L);
-        person.setPersonalCaib(true);
-        AppResponsible model = new AppResponsible();
-        AppResponsible saved = new AppResponsible();
-        AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        when(personRepository.findById(10L)).thenReturn(person);
-        when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
-        when(appResponsibleMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appResponsibleRepository.create(model)).thenReturn(saved);
-        when(appResponsibleMapper.toResponse(saved)).thenReturn(response);
-
-        appResponsibleServiceFacadeBean.create(inputDTO);
-
-        verify(personRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void create_settingNonCaibWithoutCompany_throwsBusinessRuleException() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false);
-        Person person = new Person();
-        person.setId(10L);
-        person.setPersonalCaib(true);
-        person.setCompany(null);
-        when(personRepository.findById(10L)).thenReturn(person);
+        when(personService.resolveOrCreatePerson("Maria", "Puig", "maria@extern.es", false, null))
+                .thenThrow(new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB));
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> appResponsibleServiceFacadeBean.create(inputDTO));
@@ -377,16 +272,11 @@ class AppResponsibleServiceFacadeBeanTest {
     }
 
     @Test
-    void create_settingNonCaibWithCompany_updatesPerson() {
+    void create_delegatesPersonalCaibSyncToPersonService() {
         AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false);
-        Person person = new Person();
-        person.setId(10L);
-        person.setPersonalCaib(true);
-        person.setCompany(new Company());
         AppResponsible model = new AppResponsible();
         AppResponsible saved = new AppResponsible();
         AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        when(personRepository.findById(10L)).thenReturn(person);
         when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
         when(appResponsibleMapper.toModelFromInput(inputDTO)).thenReturn(model);
         when(appResponsibleRepository.create(model)).thenReturn(saved);
@@ -394,8 +284,20 @@ class AppResponsibleServiceFacadeBeanTest {
 
         appResponsibleServiceFacadeBean.create(inputDTO);
 
-        assertFalse(person.isPersonalCaib());
-        verify(personRepository).update(person, 10L);
+        verify(personService).syncPersonalCaib(10L, false);
+    }
+
+    @Test
+    void create_personServiceSyncPersonalCaibThrows_propagatesException() {
+        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false);
+        doThrow(new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB))
+                .when(personService).syncPersonalCaib(10L, false);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> appResponsibleServiceFacadeBean.create(inputDTO));
+
+        assertEquals(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB, ex.getMessage());
+        verify(appResponsibleRepository, never()).create(any());
     }
 
     @Test
@@ -455,15 +357,14 @@ class AppResponsibleServiceFacadeBeanTest {
     }
 
     @Test
-    void update_responsibleTypeRequiresPersonalCaib_syncFlipsPersonToNonCaib_throwsBusinessRuleException() {
+    void update_responsibleTypeRequiresPersonalCaib_personIsNotCaib_throwsBusinessRuleException() {
         ResponsibleType type = responsibleType(20L, "Responsable de la informacio");
         type.setRequiresPersonalCaib(true);
         activeAppResponsible.setResponsibleType(type);
         AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false);
         Person person = new Person();
         person.setId(10L);
-        person.setPersonalCaib(true);
-        person.setCompany(new Company());
+        person.setPersonalCaib(false);
         when(appResponsibleRepository.findById(1L)).thenReturn(activeAppResponsible);
         when(personRepository.findById(10L)).thenReturn(person);
 

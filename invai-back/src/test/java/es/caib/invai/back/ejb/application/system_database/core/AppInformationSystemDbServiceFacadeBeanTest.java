@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import es.caib.invai.back.ejb.application.system_database.core.AppInformationSystemDbServiceFacadeBean;
 
 /**
  * Unit tests for {@link AppInformationSystemDbServiceFacadeBean}, exercising every branch of its
@@ -86,6 +85,35 @@ class AppInformationSystemDbServiceFacadeBeanTest {
         appInformationSystemDbServiceFacadeBean.create(inputDTO);
 
         assertEquals("Notes", inputDTO.getObservation());
+    }
+
+    @Test
+    void create_applicationAlreadyHasActiveGrouping_throwsBusinessRuleException() {
+        AppInformationSystemDbInputDTO inputDTO = new AppInformationSystemDbInputDTO(10L, "Notes");
+        when(appInformationSystemDbRepository.findByApplicationId(10L)).thenReturn(activeModel);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> appInformationSystemDbServiceFacadeBean.create(inputDTO));
+
+        assertEquals(Constants.ERR_APP_INFORMATION_SYSTEM_DB_ALREADY_EXISTS, ex.getMessage());
+        verify(appInformationSystemDbRepository, org.mockito.Mockito.never()).create(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void create_applicationHasOnlySoftDeletedGrouping_persistsNewRecord() {
+        activeModel.setDeletedAt(LocalDateTime.now());
+        AppInformationSystemDbInputDTO inputDTO = new AppInformationSystemDbInputDTO(10L, "Notes");
+        AppInformationSystemDb model = new AppInformationSystemDb();
+        AppInformationSystemDb saved = new AppInformationSystemDb();
+        AppInformationSystemDbOutputDTO response = new AppInformationSystemDbOutputDTO();
+        when(appInformationSystemDbRepository.findByApplicationId(10L)).thenReturn(activeModel);
+        when(appInformationSystemDbMapper.toModelFromInput(inputDTO)).thenReturn(model);
+        when(appInformationSystemDbRepository.create(model)).thenReturn(saved);
+        when(appInformationSystemDbMapper.toResponse(saved)).thenReturn(response);
+
+        AppInformationSystemDbOutputDTO result = appInformationSystemDbServiceFacadeBean.create(inputDTO);
+
+        assertEquals(response, result);
     }
 
     @Test

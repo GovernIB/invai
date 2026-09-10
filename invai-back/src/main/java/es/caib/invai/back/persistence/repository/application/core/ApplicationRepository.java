@@ -4,6 +4,7 @@ import es.caib.invai.back.service.model.application.core.Application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+
 /**
  * Outbound Port boundary interface declaring relational persistence mechanisms
  * for the application domain model layer.
@@ -115,15 +116,6 @@ public interface ApplicationRepository {
      * @return {@code true} if operational conflicts exist due to active dependencies, {@code false} otherwise
      */
     boolean existsByFieldId(Long fieldId);
-
-    /**
-     * Verifies whether any active application instance within the system remains associated
-     * with a specific administrative unit sequence index.
-     *
-     * @param admUnitId unique primary reference identifier tracking the organizational structure item
-     * @return {@code true} if operational conflicts exist due to active dependencies, {@code false} otherwise
-     */
-    boolean existsByAdmUnitId(Long admUnitId);
 
     /**
      * Verifies whether any active application instance within the system remains associated

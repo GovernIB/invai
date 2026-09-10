@@ -42,29 +42,30 @@ public class AppAuthorizedController {
     private final AppAuthorizedService appAuthorizedService;
 
     /**
-     * Retrieves a paginated sequence of authorized assignment records scoped to a single parent
-     * application, additionally filtered by dynamic criteria.
+     * Retrieves a paginated, filtered listing of authorized-person assignments scoped to a single
+     * "Responsables i Autoritzats" anchor.
      *
-     * @param appResponsibleAuthorizedId mandatory parent Responsables tab anchor identifier scoping the result set
-     * @param criteria      the multi-parameter business query filter boundaries
-     * @param pageable      pagination structural constraints
-     * @return a paginated payload containing corresponding transfer representations
+     * @param appResponsibleAuthorizedId mandatory parent anchor identifier scoping the result set
+     * @param criteria      optional filter values (status, person, free-text search)
+     * @param pageable      pagination and sorting parameters
+     * @return the matching page of authorizations, each carrying its resolved authorization types
      */
     @GetMapping("/{appResponsibleAuthorizedId}")
     public ResponseEntity<Page<AppAuthorizedOutputDTO>> getAllByAppResponsibleAuthorizedId(
             @PathVariable Long appResponsibleAuthorizedId,
             @ModelAttribute AppAuthorizedCriteria criteria,
             @PageableDefault(sort = "id") Pageable pageable) {
-        log.info("REST: Fetching paged application authorized records for AppResponsibleAuthorized ID: {} and criteria: {}", appResponsibleAuthorizedId, criteria);
+        log.debug("REST: Fetching paged application authorized records for AppResponsibleAuthorized ID: {} and criteria: {}", appResponsibleAuthorizedId, criteria);
         Page<AppAuthorizedOutputDTO> targetPage = appAuthorizedService.getAll(appResponsibleAuthorizedId, criteria, pageable);
         return ResponseEntity.ok(targetPage);
     }
 
     /**
-     * Registers a new authorized assignment anchor together with its initial set of authorization types.
+     * Creates a new authorized-person assignment together with its initial set of authorization
+     * types.
      *
-     * @param inputDTO validated data configuration schema
-     * @return outbound structural representation of the newly created entity
+     * @param inputDTO validated create payload
+     * @return the newly created assignment, with HTTP 201 status
      */
     @PostMapping
     public ResponseEntity<AppAuthorizedOutputDTO> create(@Valid @RequestBody AppAuthorizedInputDTO inputDTO) {
@@ -77,9 +78,9 @@ public class AppAuthorizedController {
      * Updates an active authorized assignment, reconciling its attached authorization types
      * against the requested list.
      *
-     * @param id       primary corporate tracking reference key
-     * @param inputDTO mutated parameter dataset structures
-     * @return updated transfer data mapping payload state
+     * @param id       identifier of the assignment to update
+     * @param inputDTO validated update payload
+     * @return the updated assignment
      */
     @PutMapping("/{id}")
     public ResponseEntity<AppAuthorizedOutputDTO> update(
@@ -90,10 +91,10 @@ public class AppAuthorizedController {
     }
 
     /**
-     * Transitions a target authorized assignment into an inactive state ("donar de baixa"),
-     * optionally capturing a free-text observation.
+     * Soft-deletes an active authorized assignment ("donar de baixa"), optionally capturing a
+     * free-text observation.
      *
-     * @param id  target primary structural key to process for deletion
+     * @param id  identifier of the assignment to deactivate
      * @param dto optional payload carrying the deletion observation
      * @return an empty response body confirming success status
      */
@@ -109,7 +110,7 @@ public class AppAuthorizedController {
     /**
      * Reactivates a previously deactivated authorized assignment.
      *
-     * @param id target primary structural key to process for reactivation
+     * @param id identifier of the assignment to reactivate
      * @return a {@link ResponseEntity} containing the reactivated payload with an HTTP 200 OK status
      */
     @PutMapping("reactivate/{id}")

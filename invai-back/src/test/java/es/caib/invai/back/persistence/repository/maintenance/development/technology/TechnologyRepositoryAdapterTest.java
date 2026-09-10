@@ -22,11 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +103,7 @@ class TechnologyRepositoryAdapterTest {
         adapter = buildAdapter();
         when(technologyJPARepository.existsByNameAndDeletedAtIsNull("React")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("React"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("React"));
     }
 
     @Test
@@ -115,7 +111,7 @@ class TechnologyRepositoryAdapterTest {
         adapter = buildAdapter();
         when(technologyJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("React", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("React", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("React", 1L));
     }
 
     @Test
@@ -123,7 +119,7 @@ class TechnologyRepositoryAdapterTest {
         adapter = buildAdapter();
         when(technologyJPARepository.existsByLayerId(2L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByLayerId(2L));
+        assertTrue(adapter.existsByLayerId(2L));
     }
 
     @Test

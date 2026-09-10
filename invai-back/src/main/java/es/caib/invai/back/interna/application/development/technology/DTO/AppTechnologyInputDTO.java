@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.application.development.technology.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * Inbound validation data transport contract containing properties required for
- * instantiation and mutation of a technology stack entry linked to a development module.
+ * Inbound payload for creating or updating a technology stack entry linked to a development module.
  *
  * @since 1.0.2
  */
@@ -21,25 +22,25 @@ import jakarta.validation.constraints.Size;
 @AllArgsConstructor
 public class AppTechnologyInputDTO {
 
-    /** Foreign key unique identification pointer referencing the parent development module entry. */
-    @NotNull(message = "{validation.technology.appDevelopmentId}")
+    /** Identifier of the owning development record. */
+    @NotNull(message = "{" + Constants.VALIDATION_TECHNOLOGY_APP_DEVELOPMENT_ID + "}")
     private Long appDevelopmentId;
 
-    /** Foreign key unique identification pointer referencing the architecture layer catalog entry. */
-    @NotNull(message = "{validation.technology.layerId}")
+    /** Identifier of the architecture layer catalog entry. */
+    @NotNull(message = "{" + Constants.VALIDATION_TECHNOLOGY_LAYER_ID + "}")
     private Long layerId;
 
-    /** Foreign key unique identification pointer referencing the technology catalog entry. */
-    @NotNull(message = "{validation.technology.technologyId}")
+    /** Identifier of the technology catalog entry. */
+    @NotNull(message = "{" + Constants.VALIDATION_TECHNOLOGY_TECHNOLOGY_ID + "}")
     private Long technologyId;
 
     /** Version release details. */
-    @NotBlank(message = "{validation.technology.version.required}")
-    @Size(max = 255, message = "{validation.technology.version.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_TECHNOLOGY_VERSION_REQUIRED + "}")
+    @Size(max = 255, message = "{" + Constants.VALIDATION_TECHNOLOGY_VERSION_OVERFLOW + "}")
     private String version;
 
     /** Architectural model description. */
-    @NotBlank(message = "{validation.technology.architecture.required}")
-    @Size(max = 255, message = "{validation.technology.architecture.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_TECHNOLOGY_ARCHITECTURE_REQUIRED + "}")
+    @Size(max = 255, message = "{" + Constants.VALIDATION_TECHNOLOGY_ARCHITECTURE_OVERFLOW + "}")
     private String architecture;
 }

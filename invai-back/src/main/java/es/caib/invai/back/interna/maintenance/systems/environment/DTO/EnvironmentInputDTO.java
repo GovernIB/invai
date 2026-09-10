@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.systems.environment.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -16,17 +18,17 @@ import lombok.Setter;
 public class EnvironmentInputDTO {
 
     /** Mnemonic alphanumeric code identifying the execution environment. */
-    @NotBlank(message = "{validation.environment.code}")
-    @Size(max = 50, message = "{validation.environment.code.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_ENVIRONMENT_CODE + "}")
+    @Size(max = 50, message = "{" + Constants.VALIDATION_ENVIRONMENT_CODE_OVERFLOW + "}")
     private String code;
 
     /** Descriptive descriptive text name in Catalan language. */
-    @NotBlank(message = "{validation.environment.name}")
-    @Size(max = 100, message = "{validation.environment.name.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_ENVIRONMENT_NAME + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_ENVIRONMENT_NAME_OVERFLOW + "}")
     private String name;
 
     /** Descriptive descriptive text name in Spanish language. */
-    @NotBlank(message = "{validation.environment.name_es}")
-    @Size(max = 100, message = "{validation.environment.name_es.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_ENVIRONMENT_NAME_ES + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_ENVIRONMENT_NAME_ES_OVERFLOW + "}")
     private String nameEs;
 }

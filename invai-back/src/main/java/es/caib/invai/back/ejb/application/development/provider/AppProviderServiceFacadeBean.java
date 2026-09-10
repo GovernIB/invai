@@ -20,8 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Facade service implementation for managing provider assignments linked to development modules.
- * Orchestrates transactional mechanics, model mapping mutations, and validation constraints verification.
+ * Facade service for the "AppProvider" list: provider (company) assignments that hang many-to-one
+ * off a single {@link es.caib.invai.back.service.model.application.development.core.AppDevelopment}
+ * record (via {@code appDevelopmentId}) — unlike {@code AppDevelopment} itself, which is a single
+ * record per application. No uniqueness check on create: a development can have any number of
+ * provider assignments, including duplicates.
  *
  * @since 1.0.2
  */
@@ -30,35 +33,38 @@ import java.time.LocalDateTime;
 @Transactional
 public class AppProviderServiceFacadeBean implements AppProviderService {
 
-    /** MapStruct mapper handling transformations between entities, domain models, and DTO layouts. */
+    /** Mapper between {@link AppProvider}, its entity, and the provider input/output DTOs. */
     @Autowired
     private AppProviderMapper appProviderMapper;
 
-    /** Infrastructure outbound repository port managing relational lifecycle data operations. */
+    /** Repository handling persistence of {@link AppProvider} records. */
     @Autowired
     private AppProviderRepository appProviderRepository;
 
     /**
-     * Streams partitioned chunk metrics using pagination layout boundaries, scoped to a single
-     * parent development module. Never returns provider records belonging to other development modules.
+     * Fetches the providers assigned to a single development, filtered by {@code criteria} and paged.
+     * {@code appDevelopmentId} is always applied regardless of {@code criteria}, so this never
+     * returns provider records belonging to a different development module.
      *
-     * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param pageable         pagination layout boundaries and sorting rules configuration
-     * @return a partitioned matrix page containing mapped output definitions
+     * @param appDevelopmentId identifier of the owning development record
+     * @param criteria         optional additional filters (status, search), see {@link AppProviderCriteria}
+     * @param pageable         pagination and sorting parameters
+     * @return a page of mapped {@link AppProviderOutputDTO} results
      */
     @Override
     @Transactional(readOnly = true)
     public Page<AppProviderOutputDTO> getAll(Long appDevelopmentId, AppProviderCriteria criteria, Pageable pageable) {
-        log.info("Facade: Fetching paged provider records for Development ID: {}", appDevelopmentId);
+        log.debug("Facade: Fetching paged provider records for Development ID: {}", appDevelopmentId);
         Page<AppProvider> domainPage = appProviderRepository.findAll(appDevelopmentId, criteria, pageable);
         return domainPage.map(appProviderMapper::toResponse);
     }
 
     /**
-     * Registers a new provider assignment linked to a development module.
+     * Creates a new provider assignment linked to a development module. No check is made for an
+     * existing assignment with the same company/role, so duplicates are allowed.
      *
-     * @param inputDTO properties dataset containing the development reference and provider details
-     * @return the newly created snapshot parameters state model
+     * @param inputDTO the development reference, company name, role, and contract dates
+     * @return the mapped output DTO for the newly created record
      */
     @Override
     public AppProviderOutputDTO create(AppProviderInputDTO inputDTO) {
@@ -73,12 +79,13 @@ public class AppProviderServiceFacadeBean implements AppProviderService {
     }
 
     /**
-     * Modifies mutable tracking variables belonging to an active existing provider record.
+     * Updates an existing provider record in place. Does not check {@code deletedAt}, so a
+     * soft-deleted record can still be updated through this method.
      *
-     * @param id       targeted structural identifier element index
-     * @param inputDTO property data variables mapping structural items to be merged
-     * @return current modified configuration state properties details wrapper
-     * @throws BusinessRuleException if target record is missing or logically deactivated
+     * @param id       the provider record's own identifier
+     * @param inputDTO the replacement field values to merge onto the existing record
+     * @return the mapped output DTO reflecting the applied changes
+     * @throws BusinessRuleException if no provider record exists with this id
      */
     @Override
     public AppProviderOutputDTO update(Long id, AppProviderInputDTO inputDTO) {
@@ -96,10 +103,12 @@ public class AppProviderServiceFacadeBean implements AppProviderService {
     }
 
     /**
-     * Executes soft deactivation over the targeted provider record.
+     * Soft-deletes a provider record: stamps {@code deletedAt}/{@code deletedBy} and persists them,
+     * without removing the row.
      *
-     * @param id persistent tracking row database reference index targeting removal execution paths
-     * @throws BusinessRuleException if target data element cannot be resolved or has already undergone soft deactivation
+     * @param id the provider record's own identifier
+     * @throws BusinessRuleException if no provider record exists with this id, or it is already
+     * soft-deleted ({@code deletedAt} already set)
      */
     @Override
     public void delete(Long id) {

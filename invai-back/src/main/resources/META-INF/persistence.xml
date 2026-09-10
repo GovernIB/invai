@@ -10,9 +10,6 @@
         <class>es.caib.invai.back.persistence.model.application.core.ApplicationEntity</class>
         <class>es.caib.invai.back.persistence.model.application.core.ApplicationAudEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity</class>
-        <class>es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitAudEntity</class>
-
         <class>es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.general.category.CategoryAudEntity</class>
 
@@ -96,6 +93,48 @@
 
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.type.AppAuthorizedTypeLinkEntity</class>
 
+        <class>es.caib.invai.back.persistence.model.maintenance.security.identityProvider.IdentityProviderEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.security.identityProvider.IdentityProviderAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.security.personalDataProcessing.PersonalDataProcessingEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.security.personalDataProcessing.PersonalDataProcessingAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.security.securityRole.SecurityRoleEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.security.securityMeasureType.SecurityMeasureTypeEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.security.securityMeasureType.SecurityMeasureTypeAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.security.ensRequirement.EnsRequirementEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.security.ensRequirement.EnsRequirementAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.catalog.securityLevel.LkupSecurityLevelEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.ensSubject.LkupEnsSubjectEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.core.AppSecurityAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.security.role.AppRoleEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.role.AppRoleAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.ensClassification.AppEnsClassificationEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.ensClassification.AppEnsClassificationAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.risk.AppSecurityRiskEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.risk.AppSecurityRiskAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.measure.AppSecurityMeasureEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.security.measure.AppSecurityMeasureAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.accessibility.AppAccessibilityEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.accessibility.AppAccessibilityAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentAudEntity</class>
+
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <validation-mode>CALLBACK</validation-mode>
 
@@ -107,8 +146,10 @@
             <property name="hibernate.archive.autodetection" value="class"/>
 
             <property name="hibernate.query.substitutions" value="true 1, false 0"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
+            <!-- Must stay false in production per the JavaEE standard; JpaConfig re-enables both
+                 for the "local" Spring profile only, for developer convenience. -->
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

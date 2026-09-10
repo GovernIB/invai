@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.responsible.roleTransfer.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +13,11 @@ import java.util.List;
 
 /**
  * Inbound payload for the "Transferència de rols" bulk operation: moves the selected
- * {@code AppResponsible}/{@code AppAuthorized} assignments to {@code toPersonId}, or soft-deletes
- * them in place when {@code revoke} is {@code true} (in which case {@code toPersonId} is ignored).
+ * {@code AppResponsible}/{@code AppAuthorized} assignments to the person identified by
+ * {@code toPersonEmailAddress}, or soft-deletes them in place when {@code revoke} is {@code true}
+ * (in which case {@code toPersonEmailAddress} is ignored). The destination person is resolved by
+ * e-mail: an existing local match is reused as-is; otherwise Soffid is queried and, if found there,
+ * a new local {@code Person} row is created from it before the transfer proceeds.
  *
  * @since 1.0.3
  */
@@ -23,15 +28,16 @@ import java.util.List;
 public class RoleTransferInputDTO {
 
     /** Assignment rows selected for transfer or revocation. */
-    @NotEmpty(message = "{validation.roletransfer.items}")
+    @NotEmpty(message = "{" + Constants.VALIDATION_ROLETRANSFER_ITEMS + "}")
     @Valid
     private List<RoleTransferItemDTO> items;
 
     /**
-     * Destination person identifier. Required unless {@code revoke} is {@code true}, in which case
-     * it is ignored.
+     * E-mail address of the destination person. Required unless {@code revoke} is {@code true}, in
+     * which case it is ignored. Resolved first against the local {@code Person} catalog, then
+     * against Soffid when no local match exists.
      */
-    private Long toPersonId;
+    private String toPersonEmailAddress;
 
     /** When {@code true}, the selected items are soft-deleted instead of reassigned. */
     private boolean revoke;

@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.application.responsibleAuthorized.authorized.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,9 +13,9 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Inbound validation data transport contract containing properties required for
- * instantiation and mutation of an application authorized assignment, including the
- * multi-select list of authorization type identifiers to attach to it.
+ * Inbound payload for creating or updating an authorized-person assignment, including the
+ * multi-select list of authorization type identifiers to attach to it and, when the person has
+ * no local record yet, the inline name/e-mail fields used to resolve or create one.
  *
  * @since 1.0.3
  */
@@ -24,7 +26,7 @@ import java.util.List;
 public class AppAuthorizedInputDTO {
 
     /** Foreign key unique identification pointer referencing the parent Responsables tab anchor (AppResponsibleAuthorized). */
-    @NotNull(message = "{validation.appauthorized.appResponsibleAuthorizedId}")
+    @NotNull(message = "{" + Constants.VALIDATION_APPAUTHORIZED_APP_RESPONSIBLE_AUTHORIZED_ID + "}")
     private Long appResponsibleAuthorizedId;
 
     /**
@@ -52,7 +54,7 @@ public class AppAuthorizedInputDTO {
     private Long companyId;
 
     /** List of authorization type catalog identifiers to attach to this assignment. */
-    @NotEmpty(message = "{validation.appauthorized.authorizationTypeIds}")
+    @NotEmpty(message = "{" + Constants.VALIDATION_APPAUTHORIZED_AUTHORIZATION_TYPE_IDS + "}")
     private List<Long> authorizationTypeIds;
 
     /** Free-text remarks about this authorization. Optional; editable both on create and on update. */

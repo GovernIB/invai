@@ -11,8 +11,13 @@ import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.company.CompanyEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonEntity;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.core.AppResponsibleAuthorizedMapperImpl;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.responsibleType.ResponsibleTypeMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.responsible.company.CompanyMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.responsible.person.PersonMapperImpl;
 import es.caib.invai.back.service.model.application.core.Application;
@@ -22,6 +27,7 @@ import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.responsible.company.Company;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -39,7 +45,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * {@code @Autowired} fields for those three collaborators. Since no Spring context is bootstrapped
  * here, real {@code *MapperImpl} instances are injected manually via {@link ReflectionTestUtils},
  * following the same pattern used in {@code AppSystemMapperTest}. {@link AppResponsibleAuthorizedMapperImpl}
- * itself carries a {@code statusMapper} field (resolving {@code Application.status}) and
+ * itself carries an {@code applicationMapper} field (a fully wired {@link ApplicationMapperImpl}
+ * resolving the nested {@code Application} conversion, including its {@code status}) and
  * {@link PersonMapperImpl} carries a {@code companyMapper} field, both wired the same way.
  * </p>
  */
@@ -49,8 +56,15 @@ class AppResponsibleMapperTest {
 
     @BeforeEach
     void setUp() {
+        ApplicationMapperImpl applicationMapperImpl = new ApplicationMapperImpl();
+        ReflectionTestUtils.setField(applicationMapperImpl, "categoryMapper", new CategoryMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "systemTypeMapper", new SystemTypeMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "fieldMapper", new FieldMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "commissionMapper", new CommissionMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "statusMapper", new StatusMapperImpl());
+
         AppResponsibleAuthorizedMapperImpl appResponsibleAuthorizedMapperImpl = new AppResponsibleAuthorizedMapperImpl();
-        ReflectionTestUtils.setField(appResponsibleAuthorizedMapperImpl, "statusMapper", new StatusMapperImpl());
+        ReflectionTestUtils.setField(appResponsibleAuthorizedMapperImpl, "applicationMapper", applicationMapperImpl);
 
         PersonMapperImpl personMapperImpl = new PersonMapperImpl();
         ReflectionTestUtils.setField(personMapperImpl, "companyMapper", new CompanyMapperImpl());
@@ -84,6 +98,12 @@ class AppResponsibleMapperTest {
         responsibleTypeEntity.setName("Responsable funcional");
         responsibleTypeEntity.setNameEs("Responsable funcional");
 
+        AppResponsibleAuthorizedEntity anchorEntity = getAppResponsibleAuthorizedEntity();
+
+        return getAppResponsibleEntity(anchorEntity, personEntity, responsibleTypeEntity);
+    }
+
+    private static @NonNull AppResponsibleAuthorizedEntity getAppResponsibleAuthorizedEntity() {
         LkupStatusEntity statusEntity = new LkupStatusEntity();
         statusEntity.setId(StatusEnum.ACTIVE.getId());
 
@@ -97,7 +117,10 @@ class AppResponsibleMapperTest {
         AppResponsibleAuthorizedEntity anchorEntity = new AppResponsibleAuthorizedEntity();
         anchorEntity.setId(40L);
         anchorEntity.setApplication(applicationEntity);
+        return anchorEntity;
+    }
 
+    private static @NonNull AppResponsibleEntity getAppResponsibleEntity(AppResponsibleAuthorizedEntity anchorEntity, PersonEntity personEntity, LkupResponsibleTypeEntity responsibleTypeEntity) {
         AppResponsibleEntity entity = new AppResponsibleEntity();
         entity.setId(1L);
         entity.setAppResponsibleAuthorized(anchorEntity);
@@ -110,7 +133,6 @@ class AppResponsibleMapperTest {
         entity.setUpdatedBy("updater");
         entity.setDeletedAt(LocalDateTime.of(2025, 3, 1, 0, 0));
         entity.setDeletedBy("deleter");
-
         return entity;
     }
 

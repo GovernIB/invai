@@ -4,6 +4,8 @@ import es.caib.invai.back.service.model.maintenance.responsible.authorizationTyp
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Core business domain outbound Port boundary interface declaring relational persistence mechanisms
  * for the AuthorizationType catalog layer.
@@ -19,6 +21,15 @@ public interface AuthorizationTypeRepository {
      * @return the matching domain model, or {@code null} if not found
      */
     AuthorizationType findById(Long id);
+
+    /**
+     * Finds every authorization type matching any of the given identifiers, in a single batched
+     * query - use this instead of calling {@link #findById} in a loop to avoid N+1 queries.
+     *
+     * @param ids the authorization type identifiers to resolve
+     * @return the matching domain models (fewer than {@code ids.size()} if some ids don't exist)
+     */
+    List<AuthorizationType> findAllByIdIn(List<Long> ids);
 
     /**
      * Finds authorization types matching the given filter criteria, paginated.

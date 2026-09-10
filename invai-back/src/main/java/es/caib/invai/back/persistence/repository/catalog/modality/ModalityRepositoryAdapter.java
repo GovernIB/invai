@@ -29,7 +29,7 @@ public class ModalityRepositoryAdapter implements ModalityRepository {
 
     @Override
     public List<Modality> findAll() {
-        log.info("Repository: Fetching every modality lookup entry");
+        log.debug("Repository: Fetching every modality lookup entry");
         List<LkupModalityEntity> entities = modalityJPARepository.findAll(Sort.by("name"));
         return modalityMapper.toModelList(entities);
     }

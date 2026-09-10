@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing DatabaseVendor catalog metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.2
@@ -56,7 +56,7 @@ public class DatabaseVendorController {
     public ResponseEntity<Page<DatabaseVendorOutputDTO>> getAll(
             @ModelAttribute DatabaseVendorCriteria filter,
             @PageableDefault(sort = "id") Pageable pageable) {
-        log.info("REST: Fetching paged database vendors via pagination boundaries");
+        log.debug("REST: Fetching paged database vendors via pagination boundaries");
         Page<DatabaseVendorOutputDTO> page = databaseVendorService.getAll(filter, pageable);
         return ResponseEntity.ok(page);
     }
@@ -69,7 +69,7 @@ public class DatabaseVendorController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<DatabaseVendorOutputDTO> getById(@PathVariable Long id) {
-        log.info("REST: Fetching database vendor by ID: {}", id);
+        log.debug("REST: Fetching database vendor by ID: {}", id);
         return ResponseEntity.ok(databaseVendorService.getById(id));
     }
 

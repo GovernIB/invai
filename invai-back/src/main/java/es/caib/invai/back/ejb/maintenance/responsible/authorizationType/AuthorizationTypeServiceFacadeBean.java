@@ -47,7 +47,7 @@ public class AuthorizationTypeServiceFacadeBean implements AuthorizationTypeServ
     @Override
     @Transactional(readOnly = true)
     public AuthorizationTypeOutputDTO getById(Long id) {
-        log.info("Facade: Fetching authorization type by ID: {}", id);
+        log.debug("Facade: Fetching authorization type by ID: {}", id);
         AuthorizationType authorizationType = authorizationTypeRepository.findById(id);
 
         if (authorizationType == null) {
@@ -67,7 +67,7 @@ public class AuthorizationTypeServiceFacadeBean implements AuthorizationTypeServ
     @Override
     @Transactional(readOnly = true)
     public Page<AuthorizationTypeOutputDTO> getAll(AuthorizationTypeCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching authorization types via pagination boundaries");
+        log.debug("Facade: Fetching authorization types via pagination boundaries");
         Page<AuthorizationType> domainPage = authorizationTypeRepository.findAll(filter, pageable);
         return domainPage.map(authorizationTypeMapper::toResponse);
     }

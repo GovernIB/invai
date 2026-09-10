@@ -5,6 +5,8 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
+import java.io.Serial;
+
 /**
  * JPA persistent entity representing companies assignable within the Manteniments / Responsables catalog.
  * Implements historical auditing field inheritances by extending {@link BaseEntity}.
@@ -16,6 +18,9 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 @Getter
 @Setter
 public class CompanyEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Unique auto-generated database identifier of the company. */
     @Id

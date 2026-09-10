@@ -43,7 +43,7 @@ public class AppInformationSystemDbController {
     @GetMapping("/{id}")
     public ResponseEntity<AppInformationSystemDbOutputDTO> getAllInformationSystemDbId(
             @PathVariable Long id) {
-        log.info("REST: Initiating dynamic paginated search operation for Application ID: {}", id);
+        log.debug("REST: Initiating dynamic paginated search operation for Application ID: {}", id);
         AppInformationSystemDbOutputDTO targetPage = appInformationSystemDbService.getById(id);
         return ResponseEntity.ok(targetPage);
     }

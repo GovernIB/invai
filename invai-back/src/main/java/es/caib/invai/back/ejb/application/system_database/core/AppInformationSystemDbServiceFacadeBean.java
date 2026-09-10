@@ -49,7 +49,7 @@ public class AppInformationSystemDbServiceFacadeBean implements AppInformationSy
     @Override
     @Transactional(readOnly = true)
     public AppInformationSystemDbOutputDTO getById(Long id) {
-        log.info("Facade: Fetching paged application information system database groupings for informationSystemDb ID: {}", id);
+        log.debug("Facade: Fetching paged application information system database groupings for informationSystemDb ID: {}", id);
         AppInformationSystemDb domain = appInformationSystemDbRepository.findById(id);
         return (appInformationSystemDbMapper.toResponse(domain));
     }
@@ -59,9 +59,16 @@ public class AppInformationSystemDbServiceFacadeBean implements AppInformationSy
      *
      * @param inputDTO property dataset containing the application reference and observation notes
      * @return the newly created snapshot parameters state model
+     * @throws BusinessRuleException if the target application already has an active information system database grouping
      */
     @Override
     public AppInformationSystemDbOutputDTO create(AppInformationSystemDbInputDTO inputDTO) {
+        log.info("Facade: Creating new information system database grouping for Application ID: {}", inputDTO.getApplicationId());
+
+        AppInformationSystemDb existing = appInformationSystemDbRepository.findByApplicationId(inputDTO.getApplicationId());
+        if (existing != null && existing.getDeletedAt() == null) {
+            throw new BusinessRuleException(Constants.ERR_APP_INFORMATION_SYSTEM_DB_ALREADY_EXISTS);
+        }
 
         Utils.sanitize(inputDTO);
 

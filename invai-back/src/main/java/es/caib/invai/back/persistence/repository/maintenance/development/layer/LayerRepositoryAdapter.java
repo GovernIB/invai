@@ -106,8 +106,8 @@ public class LayerRepositoryAdapter implements LayerRepository {
 
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
-        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-        aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+        aud.setUpdatedAt(entity.getUpdatedAt());
+        aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
 

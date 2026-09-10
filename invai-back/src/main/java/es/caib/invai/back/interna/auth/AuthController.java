@@ -60,7 +60,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        log.info("Auth: Processing logout request for current authenticated user");
+        log.debug("Auth: Processing logout request for current authenticated user");
 
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());

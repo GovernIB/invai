@@ -12,8 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Specification provider executing dynamic predicate tree evaluation against the
- * {@link AppAuthorizedEntity} persistence mapping via standard Criteria APIs.
+ * Utility factory class responsible for building programmatic JPA {@link Specification}
+ * structures using the Criteria API targeting AppAuthorized entities. The parent
+ * {@code appResponsibleAuthorizedId} is a mandatory scoping constraint: results are always
+ * restricted to authorizations belonging to the specified "Responsables i Autoritzats" anchor,
+ * never to the entire table.
  *
  * @since 1.0.3
  */
@@ -23,13 +26,13 @@ import java.util.List;
 public class AppAuthorizedSpecification {
 
     /**
-     * Compiles the query specification filter. The parent application identifier is a mandatory
-     * scoping constraint: results are always restricted to authorized assignments belonging to the
-     * specified application, never to the entire table.
+     * Compiles a query specification filtering AppAuthorized records for the given anchor,
+     * optionally narrowed by status, person, and free-text search on the assigned person's
+     * name and e-mail.
      *
-     * @param appResponsibleAuthorizedId mandatory parent Responsables tab anchor identifier scoping the result set
-     * @param criteria      contextual data parameter inputs mapped from presentation interfaces
-     * @return an evaluated, isolated execution blueprint specification
+     * @param appResponsibleAuthorizedId mandatory parent anchor identifier scoping the result set
+     * @param criteria                   optional filter values mapped from presentation inputs
+     * @return an evaluated JPA {@link Specification} ready to be executed against the repository
      */
     public static Specification<AppAuthorizedEntity> filterByCriteria(Long appResponsibleAuthorizedId, AppAuthorizedCriteria criteria) {
         return (root, query, cb) -> {

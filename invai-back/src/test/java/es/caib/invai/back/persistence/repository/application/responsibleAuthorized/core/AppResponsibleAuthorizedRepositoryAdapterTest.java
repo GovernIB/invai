@@ -55,11 +55,11 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
         return a;
     }
 
-    private AppResponsibleAuthorizedEntity entityWithApplication(Long id, Long applicationId) {
+    private AppResponsibleAuthorizedEntity entityWithApplication(Long id) {
         AppResponsibleAuthorizedEntity entity = new AppResponsibleAuthorizedEntity();
         entity.setId(id);
         ApplicationEntity application = new ApplicationEntity();
-        application.setId(applicationId);
+        application.setId(10L);
         entity.setApplication(application);
         return entity;
     }
@@ -67,7 +67,7 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
     @Test
     void findById_found_returnsMappedModel() {
         adapter = buildAdapter();
-        AppResponsibleAuthorizedEntity entity = entityWithApplication(1L, 10L);
+        AppResponsibleAuthorizedEntity entity = entityWithApplication(1L);
         AppResponsibleAuthorized model = new AppResponsibleAuthorized();
         when(appResponsibleAuthorizedJPARepository.findById(1L)).thenReturn(Optional.of(entity));
         when(appResponsibleAuthorizedMapper.toModel(entity)).thenReturn(model);
@@ -88,7 +88,7 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
     @Test
     void findByApplicationId_found_delegatesToJPARepositoryAndMapsModel() {
         adapter = buildAdapter();
-        AppResponsibleAuthorizedEntity entity = entityWithApplication(1L, 10L);
+        AppResponsibleAuthorizedEntity entity = entityWithApplication(1L);
         AppResponsibleAuthorized model = new AppResponsibleAuthorized();
         when(appResponsibleAuthorizedJPARepository.findByApplicationId(10L)).thenReturn(Optional.of(entity));
         when(appResponsibleAuthorizedMapper.toModel(entity)).thenReturn(model);
@@ -111,7 +111,7 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
         adapter = buildAdapter();
         AppResponsibleAuthorized model = new AppResponsibleAuthorized();
         AppResponsibleAuthorizedEntity toSave = new AppResponsibleAuthorizedEntity();
-        AppResponsibleAuthorizedEntity saved = entityWithApplication(5L, 10L);
+        AppResponsibleAuthorizedEntity saved = entityWithApplication(5L);
         AppResponsibleAuthorized response = new AppResponsibleAuthorized();
         when(appResponsibleAuthorizedMapper.toEntity(model)).thenReturn(toSave);
         when(appResponsibleAuthorizedJPARepository.save(toSave)).thenReturn(saved);
@@ -137,7 +137,7 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
         adapter = buildAdapter();
         AppResponsibleAuthorized model = new AppResponsibleAuthorized();
         AppResponsibleAuthorizedEntity toSave = new AppResponsibleAuthorizedEntity();
-        AppResponsibleAuthorizedEntity saved = entityWithApplication(6L, 10L);
+        AppResponsibleAuthorizedEntity saved = entityWithApplication(6L);
         LocalDateTime existingCreatedAt = LocalDateTime.of(2025, 1, 1, 0, 0);
         saved.setCreatedAt(existingCreatedAt);
         saved.setCreatedBy("jdoe");
@@ -158,7 +158,7 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
         adapter = buildAdapter();
         AppResponsibleAuthorized model = new AppResponsibleAuthorized();
         AppResponsibleAuthorizedEntity toSave = new AppResponsibleAuthorizedEntity();
-        AppResponsibleAuthorizedEntity saved = entityWithApplication(7L, 10L);
+        AppResponsibleAuthorizedEntity saved = entityWithApplication(7L);
         AppResponsibleAuthorized response = new AppResponsibleAuthorized();
         when(appResponsibleAuthorizedMapper.toEntity(model)).thenReturn(toSave);
         when(appResponsibleAuthorizedJPARepository.save(toSave)).thenReturn(saved);
@@ -179,7 +179,7 @@ class AppResponsibleAuthorizedRepositoryAdapterTest {
         AppResponsibleAuthorized model = new AppResponsibleAuthorized();
         model.setId(8L);
         AppResponsibleAuthorizedEntity toSave = new AppResponsibleAuthorizedEntity();
-        AppResponsibleAuthorizedEntity saved = entityWithApplication(8L, 10L);
+        AppResponsibleAuthorizedEntity saved = entityWithApplication(8L);
         saved.setDeletedAt(LocalDateTime.now());
         saved.setDeletedBy("jdoe");
         when(appResponsibleAuthorizedMapper.toEntity(model)).thenReturn(toSave);

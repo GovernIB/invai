@@ -13,8 +13,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 /**
- * Infrastructure repository Adapter implementing the outbound port boundary
- * {@link AppDevelopmentRepository}.
+ * Implementation of {@link AppDevelopmentRepository} backed by {@link AppDevelopmentJPARepository}.
+ * Every {@link #create}, {@link #update} and {@link #delete} additionally writes a snapshot row to
+ * {@link AppDevelopmentAudEntity} via {@link #saveAuditRecord} — this audit trail is populated
+ * manually here, not automatically by Hibernate Envers.
  *
  * @since 1.0.2
  */
@@ -130,7 +132,7 @@ public class AppDevelopmentRepositoryAdapter implements AppDevelopmentRepository
      */
     @Override
     public AppDevelopment findByApplicationId(Long applicationId) {
-        log.info("Repository: Dynamic search pattern stream across application development relations for Application ID: {}", applicationId);
+        log.debug("Repository: Dynamic search pattern stream across application development relations for Application ID: {}", applicationId);
         try {
             return appDevelopmentJPARepository.findByApplicationId(applicationId).map(appDevelopmentMapper::toModel).orElse(null);
         } catch (DataAccessException e) {
@@ -161,8 +163,8 @@ public class AppDevelopmentRepositoryAdapter implements AppDevelopmentRepository
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
-            aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+            aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.systems.databaseVendor;
 
-import es.caib.invai.back.ejb.maintenance.systems.databaseVendor.DatabaseVendorServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.systems.databaseVendor.DTO.DatabaseVendorInputDTO;
 import es.caib.invai.back.interna.maintenance.systems.databaseVendor.DTO.DatabaseVendorOutputDTO;
@@ -22,9 +21,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -185,7 +182,7 @@ class DatabaseVendorServiceFacadeBeanTest {
 
         databaseVendorServiceFacadeBean.delete(1L);
 
-        assertEquals(activeDatabaseVendor.getDeletedAt() != null, true);
+        assertNotNull(activeDatabaseVendor.getDeletedAt());
         verify(databaseVendorRepository, times(1)).delete(activeDatabaseVendor);
     }
 

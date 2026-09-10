@@ -50,7 +50,7 @@ public class LayerServiceFacadeBean implements LayerService {
     @Override
     @Transactional(readOnly = true)
     public LayerOutputDTO getById(Long id) {
-        log.info("Facade: Fetching layer by ID: {}", id);
+        log.debug("Facade: Fetching layer by ID: {}", id);
         Layer layer = layerRepository.findById(id);
 
         if (layer == null) {
@@ -63,7 +63,7 @@ public class LayerServiceFacadeBean implements LayerService {
     @Override
     @Transactional(readOnly = true)
     public Page<LayerOutputDTO> getAll(LayerCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching layers via pagination boundaries");
+        log.debug("Facade: Fetching layers via pagination boundaries");
         Page<Layer> domainPage = layerRepository.findAll(filter, pageable);
         return domainPage.map(layerMapper::toResponse);
     }

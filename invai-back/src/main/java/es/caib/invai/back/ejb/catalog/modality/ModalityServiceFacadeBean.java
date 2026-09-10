@@ -33,7 +33,7 @@ public class ModalityServiceFacadeBean implements ModalityService {
     @Override
     @Transactional(readOnly = true)
     public List<ModalityOutputDTO> getAll() {
-        log.info("Facade: Fetching every modality lookup entry");
+        log.debug("Facade: Fetching every modality lookup entry");
         List<Modality> modalities = modalityRepository.findAll();
         return modalityMapper.toResponseList(modalities);
     }

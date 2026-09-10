@@ -7,14 +7,15 @@ import es.caib.invai.back.interna.application.responsibleAuthorized.authorized.D
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.authorized.AppAuthorizedCriteria;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.authorized.AppAuthorizedRepository;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.type.AppAuthorizedTypeLinkRepository;
+import es.caib.invai.back.interna.maintenance.responsible.authorizationType.DTO.AuthorizationTypeOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.authorizationType.AuthorizationTypeRepository;
-import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonRepository;
+import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.authorized.AppAuthorizedMapper;
 import es.caib.invai.back.service.mapper.maintenance.responsible.authorizationType.AuthorizationTypeMapper;
+import es.caib.invai.back.service.model.maintenance.responsible.authorizationType.AuthorizationType;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.type.AppAuthorizedTypeLink;
-import es.caib.invai.back.service.model.maintenance.responsible.company.Company;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,9 +34,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -63,7 +66,7 @@ class AppAuthorizedServiceFacadeBeanTest {
     private AuthorizationTypeMapper authorizationTypeMapper;
 
     @Mock
-    private PersonRepository personRepository;
+    private PersonService personService;
 
     @InjectMocks
     private AppAuthorizedServiceFacadeBean appAuthorizedServiceFacadeBean;
@@ -93,6 +96,34 @@ class AppAuthorizedServiceFacadeBeanTest {
         assertEquals(1, result.getTotalElements());
         assertEquals(mapped, result.getContent().get(0));
         assertEquals(List.of(), mapped.getAuthorizationTypes());
+    }
+
+    @Test
+    void getAll_multipleAttachedTypes_resolvesThemInOneBatchedCallNotOnePerType() {
+        AppAuthorizedCriteria criteria = new AppAuthorizedCriteria();
+        Pageable pageable = Pageable.unpaged();
+        Page<AppAuthorized> domainPage = new PageImpl<>(List.of(activeModel));
+        AppAuthorizedOutputDTO mapped = AppAuthorizedOutputDTO.builder().id(1L).build();
+        AppAuthorizedTypeLink link2 = AppAuthorizedTypeLink.builder().appAuthorizedId(1L).authorizationTypeId(2L).build();
+        AppAuthorizedTypeLink link3 = AppAuthorizedTypeLink.builder().appAuthorizedId(1L).authorizationTypeId(3L).build();
+        AuthorizationType type2 = new AuthorizationType();
+        type2.setId(2L);
+        AuthorizationType type3 = new AuthorizationType();
+        type3.setId(3L);
+        AuthorizationTypeOutputDTO typeDto2 = new AuthorizationTypeOutputDTO();
+        AuthorizationTypeOutputDTO typeDto3 = new AuthorizationTypeOutputDTO();
+        when(appAuthorizedRepository.findAll(10L, criteria, pageable)).thenReturn(domainPage);
+        when(appAuthorizedMapper.toResponse(activeModel)).thenReturn(mapped);
+        when(appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(1L)).thenReturn(List.of(link2, link3));
+        when(authorizationTypeRepository.findAllByIdIn(List.of(2L, 3L))).thenReturn(List.of(type2, type3));
+        when(authorizationTypeMapper.toResponse(type2)).thenReturn(typeDto2);
+        when(authorizationTypeMapper.toResponse(type3)).thenReturn(typeDto3);
+
+        appAuthorizedServiceFacadeBean.getAll(10L, criteria, pageable);
+
+        assertEquals(List.of(typeDto2, typeDto3), mapped.getAuthorizationTypes());
+        verify(authorizationTypeRepository).findAllByIdIn(List.of(2L, 3L));
+        verify(authorizationTypeRepository, never()).findById(any());
     }
 
     // ------------------------------------------------------------------
@@ -160,15 +191,14 @@ class AppAuthorizedServiceFacadeBeanTest {
     }
 
     @Test
-    void create_noPersonIdWithExistingEmail_reusesExistingPersonAndSkipsCreation() {
+    void create_noPersonIdGiven_resolvesPersonIdViaPersonService() {
         AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, null, "Joan", "Fuster", "joan@caib.es", null, List.of(2L), null, true);
-        Person existingPerson = new Person();
-        existingPerson.setId(99L);
-        existingPerson.setPersonalCaib(true);
+        Person resolved = new Person();
+        resolved.setId(99L);
         AppAuthorized model = new AppAuthorized();
         AppAuthorized saved = AppAuthorized.builder().id(1L).build();
         AppAuthorizedOutputDTO response = AppAuthorizedOutputDTO.builder().id(1L).build();
-        when(personRepository.findByEmail("joan@caib.es")).thenReturn(existingPerson);
+        when(personService.resolveOrCreatePerson("Joan", "Fuster", "joan@caib.es", true, null)).thenReturn(resolved);
         when(appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(10L, 99L)).thenReturn(null);
         when(appAuthorizedMapper.toModelFromInput(inputDTO)).thenReturn(model);
         when(appAuthorizedRepository.create(model)).thenReturn(saved);
@@ -178,104 +208,13 @@ class AppAuthorizedServiceFacadeBeanTest {
         appAuthorizedServiceFacadeBean.create(inputDTO);
 
         assertEquals(99L, inputDTO.getPersonId());
-        verify(personRepository, never()).create(any());
     }
 
     @Test
-    void create_noPersonIdNoExistingEmailPersonalCaib_createsNewCaibPerson() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, null, "Joan", "Fuster", "joan@caib.es", null, List.of(2L), null, true);
-        AppAuthorized model = new AppAuthorized();
-        AppAuthorized saved = AppAuthorized.builder().id(1L).build();
-        AppAuthorizedOutputDTO response = AppAuthorizedOutputDTO.builder().id(1L).build();
-        Person createdPerson = new Person();
-        createdPerson.setId(55L);
-        when(personRepository.findByEmail("joan@caib.es")).thenReturn(null);
-        when(personRepository.create(any())).thenReturn(createdPerson);
-        when(appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(10L, 55L)).thenReturn(null);
-        when(appAuthorizedMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appAuthorizedRepository.create(model)).thenReturn(saved);
-        when(appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(1L)).thenReturn(List.of());
-        when(appAuthorizedMapper.toResponse(saved)).thenReturn(response);
-
-        appAuthorizedServiceFacadeBean.create(inputDTO);
-
-        ArgumentCaptor<Person> captor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).create(captor.capture());
-        assertEquals("Joan", captor.getValue().getFirstName());
-        assertEquals("Fuster", captor.getValue().getLastName());
-        assertEquals("joan@caib.es", captor.getValue().getEmail());
-        assertTrue(captor.getValue().isPersonalCaib());
-        assertNull(captor.getValue().getCompany());
-        assertEquals(55L, inputDTO.getPersonId());
-    }
-
-    @Test
-    void create_noPersonIdExternalWithoutCompany_throwsBusinessRuleException() {
+    void create_personServiceResolveOrCreatePersonThrows_propagatesException() {
         AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, null, "Maria", "Puig", "maria@extern.es", null, List.of(2L), null, false);
-        when(personRepository.findByEmail("maria@extern.es")).thenReturn(null);
-
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appAuthorizedServiceFacadeBean.create(inputDTO));
-
-        assertEquals(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB, ex.getMessage());
-        verify(personRepository, never()).create(any());
-    }
-
-    @Test
-    void create_noPersonIdExternalWithCompany_createsNewExternalPersonWithCompany() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, null, "Maria", "Puig", "maria@extern.es", 5L, List.of(2L), null, false);
-        AppAuthorized model = new AppAuthorized();
-        AppAuthorized saved = AppAuthorized.builder().id(1L).build();
-        AppAuthorizedOutputDTO response = AppAuthorizedOutputDTO.builder().id(1L).build();
-        Person createdPerson = new Person();
-        createdPerson.setId(56L);
-        when(personRepository.findByEmail("maria@extern.es")).thenReturn(null);
-        when(personRepository.create(any())).thenReturn(createdPerson);
-        when(appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(10L, 56L)).thenReturn(null);
-        when(appAuthorizedMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appAuthorizedRepository.create(model)).thenReturn(saved);
-        when(appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(1L)).thenReturn(List.of());
-        when(appAuthorizedMapper.toResponse(saved)).thenReturn(response);
-
-        appAuthorizedServiceFacadeBean.create(inputDTO);
-
-        ArgumentCaptor<Person> captor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository).create(captor.capture());
-        assertFalse(captor.getValue().isPersonalCaib());
-        assertEquals(5L, captor.getValue().getCompany().getId());
-        assertEquals(56L, inputDTO.getPersonId());
-    }
-
-    @Test
-    void create_personalCaibDiffersFromStoredValue_updatesPerson() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, true);
-        Person person = new Person();
-        person.setId(7L);
-        person.setPersonalCaib(false);
-        AppAuthorized model = new AppAuthorized();
-        AppAuthorized saved = AppAuthorized.builder().id(1L).build();
-        AppAuthorizedOutputDTO response = AppAuthorizedOutputDTO.builder().id(1L).build();
-        when(personRepository.findById(7L)).thenReturn(person);
-        when(appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(10L, 7L)).thenReturn(null);
-        when(appAuthorizedMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appAuthorizedRepository.create(model)).thenReturn(saved);
-        when(appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(1L)).thenReturn(List.of());
-        when(appAuthorizedMapper.toResponse(saved)).thenReturn(response);
-
-        appAuthorizedServiceFacadeBean.create(inputDTO);
-
-        assertTrue(person.isPersonalCaib());
-        verify(personRepository).update(person, 7L);
-    }
-
-    @Test
-    void create_settingNonCaibWithoutCompany_throwsBusinessRuleException() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false);
-        Person person = new Person();
-        person.setId(7L);
-        person.setPersonalCaib(true);
-        person.setCompany(null);
-        when(personRepository.findById(7L)).thenReturn(person);
+        when(personService.resolveOrCreatePerson("Maria", "Puig", "maria@extern.es", false, null))
+                .thenThrow(new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB));
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
                 () -> appAuthorizedServiceFacadeBean.create(inputDTO));
@@ -285,16 +224,11 @@ class AppAuthorizedServiceFacadeBeanTest {
     }
 
     @Test
-    void create_settingNonCaibWithCompany_updatesPerson() {
+    void create_delegatesPersonalCaibSyncToPersonService() {
         AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false);
-        Person person = new Person();
-        person.setId(7L);
-        person.setPersonalCaib(true);
-        person.setCompany(new Company());
         AppAuthorized model = new AppAuthorized();
         AppAuthorized saved = AppAuthorized.builder().id(1L).build();
         AppAuthorizedOutputDTO response = AppAuthorizedOutputDTO.builder().id(1L).build();
-        when(personRepository.findById(7L)).thenReturn(person);
         when(appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(10L, 7L)).thenReturn(null);
         when(appAuthorizedMapper.toModelFromInput(inputDTO)).thenReturn(model);
         when(appAuthorizedRepository.create(model)).thenReturn(saved);
@@ -303,8 +237,20 @@ class AppAuthorizedServiceFacadeBeanTest {
 
         appAuthorizedServiceFacadeBean.create(inputDTO);
 
-        assertFalse(person.isPersonalCaib());
-        verify(personRepository).update(person, 7L);
+        verify(personService).syncPersonalCaib(7L, false);
+    }
+
+    @Test
+    void create_personServiceSyncPersonalCaibThrows_propagatesException() {
+        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false);
+        doThrow(new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB))
+                .when(personService).syncPersonalCaib(7L, false);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> appAuthorizedServiceFacadeBean.create(inputDTO));
+
+        assertEquals(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB, ex.getMessage());
+        verify(appAuthorizedRepository, never()).create(any());
     }
 
     // ------------------------------------------------------------------
@@ -337,7 +283,7 @@ class AppAuthorizedServiceFacadeBeanTest {
 
         verify(appAuthorizedMapper).updateModelFromInput(inputDTO, activeModel);
         verify(appAuthorizedRepository, never()).existsByAppResponsibleAuthorizedAndPersonAndIdNot(any(), any(), any());
-        verify(personRepository, never()).findById(any());
+        verifyNoInteractions(personService);
         verify(appAuthorizedTypeLinkRepository).delete(existingLink1);
         verify(appAuthorizedTypeLinkRepository, never()).delete(existingLink2);
         ArgumentCaptor<AppAuthorizedTypeLink> captor = ArgumentCaptor.forClass(AppAuthorizedTypeLink.class);

@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.application.system_database.system.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,12 +24,12 @@ public class AppSystemInputDTO {
     /**
      * Foreign key unique identification pointer referencing the parent Application Information System Database grouping.
      */
-    @NotNull(message = "{validation.applicationsystem.informationSystemDbId}")
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATIONSYSTEM_INFORMATION_SYSTEM_DB + "}")
     private Long informationSystemDbId;
 
     /**
      * Foreign key unique identification pointer referencing the target host infrastructure System profile.
      */
-    @NotNull(message = "{validation.applicationsystem.system}")
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATIONSYSTEM_SYSTEM + "}")
     private Long systemId;
 }

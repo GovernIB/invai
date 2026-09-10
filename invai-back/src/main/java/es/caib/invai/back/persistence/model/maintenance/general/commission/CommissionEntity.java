@@ -4,6 +4,7 @@ import es.caib.invai.back.service.model.maintenance.general.commission.Commissio
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.*;
+import java.io.Serial;
 import java.time.LocalDate;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
@@ -22,6 +23,9 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 @Entity
 @Table(name = "INV_COMMISSION")
 public class CommissionEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** The primary surrogate auto-incremented storage index generated through sequence tracking. */
     @Id

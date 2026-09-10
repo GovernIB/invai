@@ -13,8 +13,11 @@ import es.caib.invai.back.service.model.catalog.modality.Modality;
 import es.caib.invai.back.service.model.catalog.standardAdaption.StandardAdaption;
 
 /**
- * Domain aggregate model representing the main software development module detail
- * for a corporate {@link Application} within a specific deployment {@link Environment}.
+ * Domain model for the "AppDevelopment" tab record: one per {@link Application} (the facade
+ * rejects creating a second active one for the same application), carrying the resolved
+ * {@link Environment}, {@link Modality} and {@link StandardAdaption} references plus the
+ * created/updated/soft-delete audit fields mirrored from {@link
+ * es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity}.
  *
  * @since 1.0.2
  */
@@ -26,7 +29,7 @@ import es.caib.invai.back.service.model.catalog.standardAdaption.StandardAdaptio
 public class AppDevelopment {
     /** Primary key of this development record. */
     private Long id;
-    /** Parent corporate application this development module detail belongs to. */
+    /** The application this development record belongs to (at most one per application). */
     private Application application;
     /** Deployment environment zone targeted by this development. */
     private Environment environment;

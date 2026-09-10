@@ -1,7 +1,6 @@
 package es.caib.invai.back.service.mapper.catalog.modality;
 
 import es.caib.invai.back.persistence.model.catalog.modality.LkupModalityEntity;
-import es.caib.invai.back.service.mapper.catalog.modality.ModalityMapper;
 import es.caib.invai.back.service.model.catalog.modality.Modality;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

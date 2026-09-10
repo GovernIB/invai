@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 /**
- * Internal REST controller handling lifecycle endpoints for managing Application profiles metadata.
+ * REST controller exposing CRUD and soft-delete/reactivate endpoints for {@code Application}, the
+ * root inventory record each of the Development, Accessibility, Security, System/Database, and
+ * Responsible/Authorized tabs hangs off of.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Every endpoint requires the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.1
@@ -33,13 +35,11 @@ import jakarta.validation.Valid;
 @PreAuthorize("hasRole('ROLE_INV_SUPER')")
 public class ApplicationController {
 
-    /** Business service layer facade handling Application use cases and orchestration rules. */
+    /** Facade implementing the Application use cases invoked by this controller. */
     private final ApplicationService applicationService;
 
     /**
-     * Constructs a new Application controller with necessary dependent business service layer references.
-     *
-     * @param applicationService domain engine layer interface executing core transactional steps
+     * @param applicationService facade this controller delegates all Application use cases to
      */
     @Autowired
     public ApplicationController(ApplicationService applicationService) {
@@ -47,40 +47,47 @@ public class ApplicationController {
     }
 
     /**
-     * Streams partitioned chunk metrics using advanced query filter parameters and specifications.
+     * Lists applications matching the given dynamic search criteria, paginated. Each row's {@code
+     * incomplete} flag is computed per application unless {@code criteria.incomplete} filters on it,
+     * in which case every returned row shares that filter value (see {@code
+     * ApplicationServiceFacadeBean#getAll}).
      *
-     * @param criteria dynamic constraint filter maps targeting application properties
-     * @param pageable pagination layout boundaries (defaults to size 10 sorted ascending by ID)
-     * @return a {@link ResponseEntity} wrapping the filtered {@link Page} matrix containing mapped {@link ApplicationOutputDTO} definitions
+     * @param criteria dynamic filtering constraints applied to the application query
+     * @param pageable pagination and sorting parameters (defaults to size 10 sorted ascending by ID)
+     * @return a {@link ResponseEntity} wrapping a page of mapped {@link ApplicationOutputDTO} results
      */
     @GetMapping
     public ResponseEntity<Page<ApplicationOutputDTO>> getAll(
             ApplicationCriteria criteria,
             @PageableDefault(sort = "id") Pageable pageable) {
 
-        log.info("REST: Fetching paged applications via advanced filters and quick search criteria");
+        log.debug("REST: Fetching paged applications via advanced filters and quick search criteria");
         Page<ApplicationOutputDTO> page = applicationService.getAll(criteria, pageable);
         return ResponseEntity.ok(page);
     }
 
     /**
-     * Resolves matching application settings snapshot based on unique index values.
+     * Fetches a single application, together with the completeness flags of every tab (Responsables,
+     * Desenvolupament, Accessibilitat, Seguretat, Sistemes/Bases de dades) computed for it — unlike
+     * {@link #getAll}, which only ever returns the aggregate {@code incomplete} flag.
      *
-     * @param id key structure reference primary identifier
-     * @return a {@link ResponseEntity} wrapping the matching output properties model details with an HTTP 200 OK status
+     * @param id primary key of the application to fetch
+     * @return a {@link ResponseEntity} wrapping the mapped {@link ApplicationOutputDTO}, HTTP 200
+     * @throws BusinessRuleException if no application exists with the given ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApplicationOutputDTO> getById(@PathVariable Long id) {
-        log.info("REST: Fetching application by ID: {}", id);
+        log.debug("REST: Fetching application by ID: {}", id);
         return ResponseEntity.ok(applicationService.getById(id));
     }
 
     /**
-     * Persists a new system application structure specification parameters configuration into the database.
-     * Evaluates active constraint descriptors before routing parameters across execution lines.
+     * Creates a new application, rejecting a duplicate {@code code} or {@code prefix}, and
+     * automatically instantiates the default (empty) Development, Security, System/Database, and
+     * Responsible/Authorized tab records bound to it.
      *
-     * @param inputDTO properties dataset containing application configurations, variables, parameters data profiles
-     * @return a {@link ResponseEntity} wrapping the created snapshot parameters state with an HTTP 201 Created response
+     * @param inputDTO application data to persist
+     * @return a {@link ResponseEntity} wrapping the created {@link ApplicationOutputDTO}, HTTP 201
      */
     @PostMapping
     public ResponseEntity<ApplicationOutputDTO> create(@Valid @RequestBody ApplicationInputDTO inputDTO) {
@@ -90,11 +97,14 @@ public class ApplicationController {
     }
 
     /**
-     * Alters active configuration profiles mapping properties corresponding to target database references.
+     * Updates an existing, non-deleted application, rejecting a {@code code} or {@code prefix}
+     * already owned by a different application, and backfills any of the Development, Security,
+     * System/Database, or Responsible/Authorized tab records missing on it.
      *
-     * @param id       targeted structural identifier element index
-     * @param inputDTO property data variables mapping structural items
-     * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
+     * @param id       primary key of the application to update
+     * @param inputDTO new application data
+     * @return a {@link ResponseEntity} wrapping the updated {@link ApplicationOutputDTO}, HTTP 200
+     * @throws BusinessRuleException if no application exists with the given ID, or it is already deleted
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApplicationOutputDTO> update(@PathVariable Long id, @Valid @RequestBody ApplicationInputDTO inputDTO) {
@@ -103,10 +113,13 @@ public class ApplicationController {
     }
 
     /**
-     * Routes explicit request signals targeting domain deactivation soft deletion routines.
+     * Soft-deletes the application: stamps {@code deletedAt}/{@code deletedBy} and sets its status
+     * to inactive, cascading the same soft delete to its linked System/Database, Development,
+     * Responsible/Authorized, and Security records.
      *
-     * @param id persistent tracking row database reference index targeting removal execution paths
-     * @return a {@link ResponseEntity} providing an empty success feedback with an HTTP 204 No Content response
+     * @param id primary key of the application to delete
+     * @return a {@link ResponseEntity} with no body, HTTP 204
+     * @throws BusinessRuleException if no application exists with the given ID, or it is already deleted
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -116,18 +129,13 @@ public class ApplicationController {
     }
 
     /**
-     * Reactivates an application and updates its configuration profiles mapping
-     * properties corresponding to target database references.
-     * <p>
-     * This endpoint triggers the transition of the specified application's state,
-     * logging the request, performing the reactivation process via the service layer,
-     * and returning the freshly modified configuration properties.
-     * </p>
+     * Reactivates a soft-deleted application: clears {@code deletedAt}/{@code deletedBy} and
+     * restores its status to active, cascading the same reactivation to its linked
+     * System/Database, Development, Responsible/Authorized, and Security records.
      *
-     * @param id the targeted structural identifier element index of the application to reactivate
-     * @return a {@link ResponseEntity} containing the current modified configuration state
-     *         properties details (as an {@link ApplicationOutputDTO}) with an HTTP 200 OK status
-     * @throws BusinessRuleException if no application exists with the provided structural identifier
+     * @param id primary key of the application to reactivate
+     * @return a {@link ResponseEntity} wrapping the reactivated {@link ApplicationOutputDTO}, HTTP 200
+     * @throws BusinessRuleException if no application exists with the given ID, or it is not deleted
      */
     @PutMapping("reactivate/{id}")
     public ResponseEntity<ApplicationOutputDTO> reactivate(@PathVariable Long id) {

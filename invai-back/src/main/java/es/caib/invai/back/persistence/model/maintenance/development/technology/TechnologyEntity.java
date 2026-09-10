@@ -14,6 +14,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import es.caib.invai.back.persistence.model.BaseEntity;
+
+import java.io.Serial;
 import es.caib.invai.back.persistence.model.maintenance.development.layer.LayerEntity;
 
 /**
@@ -28,6 +30,9 @@ import es.caib.invai.back.persistence.model.maintenance.development.layer.LayerE
 @Getter
 @Setter
 public class TechnologyEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Unique identification pointer of the technology. */
     @Id

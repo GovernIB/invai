@@ -51,7 +51,7 @@ class RoleTransferControllerTest {
     @Test
     void transfer_returnsNoContentAndDelegatesToService() {
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
-                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), 20L, false);
+                List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), "target@example.com", false);
 
         ResponseEntity<Void> response = roleTransferController.transfer(inputDTO);
 

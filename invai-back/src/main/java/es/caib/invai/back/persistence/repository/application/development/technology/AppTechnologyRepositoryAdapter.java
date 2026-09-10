@@ -16,7 +16,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 /**
- * Infrastructure repository Adapter implementing the outbound port boundary {@link AppTechnologyRepository}.
+ * {@link AppTechnologyRepository} implementation backed by Spring Data JPA. Every write (create,
+ * update, delete) also persists a corresponding {@link AppTechnologyAudEntity} audit trail row via
+ * {@link #saveAuditRecord}.
  *
  * @since 1.0.2
  */
@@ -125,17 +127,17 @@ public class AppTechnologyRepositoryAdapter implements AppTechnologyRepository {
 
     /**
      * Resolves a paginated, criteria-filtered sequence of technology entities scoped to a single
-     * parent development module.
+     * parent development module, via {@link AppTechnologySpecification#filterByCriteria}.
      *
-     * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         the multi-parameter business query filter boundaries
-     * @param pageable         pagination structural constraints
-     * @return a paginated matrix of matching domain models
+     * @param appDevelopmentId identifier of the owning development record; always applied regardless of {@code criteria}
+     * @param criteria         optional additional filters (status, search), see {@link AppTechnologyCriteria}
+     * @param pageable         pagination and sorting parameters
+     * @return a page of matching domain models
      * @throws DataAccessException if the underlying relational read fails
      */
     @Override
     public Page<AppTechnology> findAll(Long appDevelopmentId, AppTechnologyCriteria criteria, Pageable pageable) {
-        log.info("Repository: Dynamic search pattern stream across technology relations for Development ID: {}", appDevelopmentId);
+        log.debug("Repository: Dynamic search pattern stream across technology relations for Development ID: {}", appDevelopmentId);
         try {
             Specification<AppTechnologyEntity> spec = AppTechnologySpecification.filterByCriteria(appDevelopmentId, criteria);
             Page<AppTechnologyEntity> entityPage = appTechnologyJPARepository.findAll(spec, pageable);
@@ -188,8 +190,8 @@ public class AppTechnologyRepositoryAdapter implements AppTechnologyRepository {
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
-                        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+                        aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

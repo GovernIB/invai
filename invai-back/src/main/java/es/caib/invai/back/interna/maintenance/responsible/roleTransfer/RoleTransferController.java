@@ -41,7 +41,7 @@ public class RoleTransferController {
      */
     @GetMapping("/{personId}")
     public ResponseEntity<List<RoleAssignmentOutputDTO>> getAssignmentsByPerson(@PathVariable Long personId) {
-        log.info("REST: Fetching role assignments for person ID: {}", personId);
+        log.debug("REST: Fetching role assignments for person ID: {}", personId);
         return ResponseEntity.ok(roleTransferService.getAssignmentsByPerson(personId));
     }
 

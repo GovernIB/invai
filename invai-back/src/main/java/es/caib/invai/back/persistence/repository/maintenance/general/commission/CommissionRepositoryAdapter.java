@@ -63,7 +63,7 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
      */
     @Override
     public Page<Commission> findAll(CommissionCriteria criteria, Pageable pageable) {
-        log.info("Repository: Fetching paged applications using isolated Specification component");
+        log.debug("Repository: Fetching paged applications using isolated Specification component");
         try {
             Specification<CommissionEntity> spec = CommissionSpecification.filterByCriteria(criteria);
 
@@ -95,6 +95,16 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
     @Override
     public boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Long id) {
         return commissionJPARepository.existsByNameAndIdNotAndDeletedAtIsNull(name, id);
+    }
+
+    @Override
+    public boolean existsByNameEsAndDeletedAtIsNull(String nameEs) {
+        return commissionJPARepository.existsByNameEsAndDeletedAtIsNull(nameEs);
+    }
+
+    @Override
+    public boolean existsByNameEsAndIdNotAndDeletedAtIsNull(String nameEs, Long id) {
+        return commissionJPARepository.existsByNameEsAndIdNotAndDeletedAtIsNull(nameEs, id);
     }
 
     /**
@@ -199,8 +209,8 @@ public class CommissionRepositoryAdapter implements CommissionRepository {
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
        
-                    aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+                    aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());
         aud.setDeletedBy(entity.getDeletedBy());
 

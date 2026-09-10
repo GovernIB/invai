@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.general.systemType.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
@@ -22,15 +24,15 @@ public class SystemTypeInputDTO {
      * System class architecture type designator structural description label string (typically in Catalan).
      * Field content values are required and are capped below an execution layout ceiling of 100 characters.
      */
-    @NotBlank(message = "{validation.systemtype.name.required}")
-    @Size(max = 100, message = "{validation.systemtype.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_SYSTEMTYPE_NAME_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_SYSTEMTYPE_NAME_SIZE + "}")
     private String name;
 
     /**
      * Alternate architectural technology category pattern mapping title description for Spanish localized outputs.
      * Field content values are required and are capped below an execution layout ceiling of 100 characters.
      */
-    @NotBlank(message = "{validation.systemtype.nameEs.required}")
-    @Size(max = 100, message = "{validation.systemtype.nameEs.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_SYSTEMTYPE_NAME_ES_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_SYSTEMTYPE_NAME_ES_SIZE + "}")
     private String nameEs;
 }

@@ -33,7 +33,7 @@ public class StatusServiceFacadeBean implements StatusService {
     @Override
     @Transactional(readOnly = true)
     public List<StatusOutputDTO> getAll() {
-        log.info("Facade: Fetching every status lookup entry");
+        log.debug("Facade: Fetching every status lookup entry");
         List<Status> statuses = statusRepository.findAll();
         return statusMapper.toResponseList(statuses);
     }

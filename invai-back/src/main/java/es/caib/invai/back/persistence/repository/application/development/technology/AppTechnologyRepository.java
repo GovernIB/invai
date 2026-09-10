@@ -5,8 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Core business domain outbound port boundary interface declaring relational persistence
- * mechanisms for the {@link AppTechnology} entity.
+ * Repository contract for persisting and querying {@link AppTechnology} records. See
+ * {@link AppTechnologyRepositoryAdapter} for the implementation, which also writes a
+ * corresponding audit trail row on every write.
  *
  * @since 1.0.2
  */
@@ -45,13 +46,14 @@ public interface AppTechnologyRepository {
     AppTechnology findById(Long id);
 
     /**
-     * Resolves a paginated, criteria-filtered sequence of technology records scoped to a single
-     * parent development module.
+     * Fetches the technology entries assigned to a single development, filtered by {@code criteria}
+     * and paged. {@code appDevelopmentId} is always applied regardless of {@code criteria}, so this
+     * never returns technology records belonging to a different development module.
      *
-     * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         the multi-parameter business query filter boundaries
-     * @param pageable         pagination structural constraints
-     * @return a paginated matrix of matching domain models
+     * @param appDevelopmentId identifier of the owning development record
+     * @param criteria         optional additional filters (status, search), see {@link AppTechnologyCriteria}
+     * @param pageable         pagination and sorting parameters
+     * @return a page of matching {@link AppTechnology} domain models
      */
     Page<AppTechnology> findAll(Long appDevelopmentId, AppTechnologyCriteria criteria, Pageable pageable);
 

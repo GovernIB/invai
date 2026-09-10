@@ -6,6 +6,8 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
+import java.io.Serial;
+
 /**
  * JPA persistent entity representing technical architectural System Types (e.g., REST Microservices, Web Apps).
  * Extends {@link BaseEntity} to enable native tracking vectors, timestamps, and audit structures.
@@ -17,6 +19,9 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 @Getter
 @Setter
 public class SystemTypeEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Unique auto-generated primary key identifying the system type record. */
     @Id

@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.systems.server.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,15 +19,15 @@ import lombok.Setter;
 public class ServerInputDTO {
 
     /** Host name or server identification label. */
-    @NotBlank(message = "{validation.server.name}")
-    @Size(max = 255, message = "{validation.server.name.overflow}")
+    @NotBlank(message = "{" + Constants.VALIDATION_SERVER_NAME + "}")
+    @Size(max = 255, message = "{" + Constants.VALIDATION_SERVER_NAME_OVERFLOW + "}")
     private String name;
 
     /** Foreign key unique identification pointer referencing the target deployment Environment zone. */
-    @NotNull(message = "{validation.server.environmentId}")
+    @NotNull(message = "{" + Constants.VALIDATION_SERVER_ENVIRONMENT_ID + "}")
     private Long environmentId;
 
     /** Foreign key reference pointing to the server type lookup entry. */
-    @NotNull(message = "{validation.server.serverTypeId}")
+    @NotNull(message = "{" + Constants.VALIDATION_SERVER_SERVER_TYPE_ID + "}")
     private Long serverTypeId;
 }

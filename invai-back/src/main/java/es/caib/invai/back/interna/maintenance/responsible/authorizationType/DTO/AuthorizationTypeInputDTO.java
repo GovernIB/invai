@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.responsible.authorizationType.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,15 +22,15 @@ import lombok.Setter;
 public class AuthorizationTypeInputDTO {
 
     /** Authorization type descriptive label string (e.g. "Firmar peticiones"). */
-    @NotBlank(message = "{validation.authorizationtype.name.required}")
-    @Size(max = 150, message = "{validation.authorizationtype.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_AUTHORIZATIONTYPE_NAME_REQUIRED + "}")
+    @Size(max = 150, message = "{" + Constants.VALIDATION_AUTHORIZATIONTYPE_NAME_SIZE + "}")
     private String name;
 
     /**
      * Secondary translated description text variant explicitly matching Spanish locale records.
      * Constraint demands content presence capped at a maximum sequence of 100 characters.
      */
-    @NotBlank(message = "{validation.authorizationtype.nameEs.required}")
-    @Size(max = 100, message = "{validation.authorizationtype.nameEs.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_AUTHORIZATIONTYPE_NAME_ES_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_AUTHORIZATIONTYPE_NAME_ES_SIZE + "}")
     private String nameEs;
 }

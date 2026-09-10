@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * <p>
  * Access control restrictions are enforced globally at the class level via Spring Method Security,
  * restricting all operations exclusively to authenticated operators holding the corporate
- * role {@code ROLE_usuari-tipus-E}.
+ * role {@code ROLE_INV_SUPER}.
  * </p>
  *
  * @since 1.0.2

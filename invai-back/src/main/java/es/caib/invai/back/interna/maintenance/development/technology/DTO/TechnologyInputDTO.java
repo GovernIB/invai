@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.development.technology.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,11 +23,11 @@ import lombok.Setter;
 public class TechnologyInputDTO {
 
     /** Name of the technology. */
-    @NotBlank(message = "{validation.technologycatalog.name.required}")
-    @Size(max = 100, message = "{validation.technologycatalog.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_TECHNOLOGYCATALOG_NAME_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_TECHNOLOGYCATALOG_NAME_SIZE + "}")
     private String name;
 
     /** Foreign key unique identification pointer referencing the parent architecture layer. */
-    @NotNull(message = "{validation.technologycatalog.layerId}")
+    @NotNull(message = "{" + Constants.VALIDATION_TECHNOLOGYCATALOG_LAYER_ID + "}")
     private Long layerId;
 }

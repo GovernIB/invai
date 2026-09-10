@@ -4,42 +4,45 @@ import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentIn
 import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentOutputDTO;
 
 /**
- * Domain Boundary Outbound Port interfacing the internal transactional domain operations
- * targeting the main application development module detail.
+ * Facade contract for the "AppDevelopment" tab: the single development record attached 1-to-1 to
+ * an application. See {@link es.caib.invai.back.ejb.application.development.core.AppDevelopmentServiceFacadeBean}
+ * for the implementation.
  *
  * @since 1.0.2
  */
 public interface AppDevelopmentService {
 
     /**
-     * Retrieves a paginated sequence of development records scoped to a single parent application.
+     * Fetches a development record by its own primary key (not the parent application's id).
      *
-     * @param id mandatory parent application identifier scoping the result set
-     * @return a paginated payload containing corresponding transfer representations
+     * @param id the development record's own identifier
+     * @return the mapped output DTO, or {@code null} if no record has this id
      */
     DevelopmentOutputDTO getById(Long id);
 
     /**
-     * Registers a new development module detail record.
+     * Creates the development record for an application, rejecting the request if that application
+     * already has an active one.
      *
-     * @param inputDTO validated data configuration schema
-     * @return outbound structural representation of the newly created entity
+     * @param inputDTO the application, environment and lookup references for the new record
+     * @return the mapped output DTO for the newly created record
      */
     DevelopmentOutputDTO create(DevelopmentInputDTO inputDTO);
 
     /**
-     * Updates an active development record with modified metadata parameters.
+     * Updates an existing development record in place.
      *
-     * @param id       primary corporate tracking reference key
-     * @param inputDTO mutated parameter dataset structures
-     * @return updated transfer data mapping payload state
+     * @param id       the development record's own identifier
+     * @param inputDTO the replacement field values to merge onto the existing record
+     * @return the mapped output DTO reflecting the applied changes
      */
     DevelopmentOutputDTO update(Long id, DevelopmentInputDTO inputDTO);
 
     /**
-     * Transitions a target development record into an inactive state by enforcing logical deletion structures.
+     * Soft-deletes a development record (stamps {@code deletedAt}/{@code deletedBy}); the row
+     * itself is not removed.
      *
-     * @param id target primary structural key to process for deprecation
+     * @param id the development record's own identifier
      */
     void delete(Long id);
 }

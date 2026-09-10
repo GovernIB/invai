@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Spring Data Native Bridge Interface infrastructure for the {@link AppAuthorizedEntity} anchor.
+ * Spring Data JPA repository providing CRUD and specification-based query access to the
+ * {@link AppAuthorizedEntity} anchor.
  *
  * @since 1.0.3
  */

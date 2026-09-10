@@ -4,6 +4,7 @@ import es.caib.invai.back.interna.maintenance.development.technology.DTO.Technol
 import es.caib.invai.back.interna.maintenance.development.technology.DTO.TechnologyOutputDTO;
 import es.caib.invai.back.persistence.model.maintenance.development.layer.LayerEntity;
 import es.caib.invai.back.persistence.model.maintenance.development.technology.TechnologyEntity;
+import es.caib.invai.back.service.mapper.maintenance.development.layer.LayerMapper;
 import es.caib.invai.back.service.model.maintenance.development.layer.Layer;
 import es.caib.invai.back.service.model.maintenance.development.technology.Technology;
 import org.junit.jupiter.api.BeforeEach;
@@ -141,6 +142,6 @@ class TechnologyMapperTest {
 
     @Test
     void map_nullId_returnsNull() {
-        assertNull(mapper.map((Long) null));
+        assertNull(mapper.map(null));
     }
 }

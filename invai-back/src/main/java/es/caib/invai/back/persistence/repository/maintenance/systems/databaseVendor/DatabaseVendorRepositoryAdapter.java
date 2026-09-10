@@ -132,7 +132,7 @@ public class DatabaseVendorRepositoryAdapter implements DatabaseVendorRepository
      */
     @Override
     public Page<DatabaseVendor> findAll(DatabaseVendorCriteria filter, Pageable pageable) {
-        log.info("Repository: Fetching paged database vendors using standard query layout boundaries");
+        log.debug("Repository: Fetching paged database vendors using standard query layout boundaries");
         try {
             log.trace("Repository: Processing criteria evaluation logic within active ecosystem metrics");
             Specification<DatabaseVendorEntity> spec = DatabaseVendorSpecification.filterByCriteria(filter);
@@ -195,8 +195,8 @@ public class DatabaseVendorRepositoryAdapter implements DatabaseVendorRepository
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
-            aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+            aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

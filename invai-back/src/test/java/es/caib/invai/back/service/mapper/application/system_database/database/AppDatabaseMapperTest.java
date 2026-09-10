@@ -7,7 +7,6 @@ import es.caib.invai.back.interna.application.system_database.database.DTO.AppDa
 import es.caib.invai.back.interna.maintenance.systems.database.DTO.DatabaseOutputDTO;
 import es.caib.invai.back.interna.maintenance.systems.databaseVendor.DTO.DatabaseVendorOutputDTO;
 import es.caib.invai.back.interna.maintenance.systems.server.DTO.ServerOutputDTO;
-import es.caib.invai.back.persistence.model.maintenance.admUnit.AdmUnitEntity;
 import es.caib.invai.back.persistence.model.application.system_database.database.AppDatabaseEntity;
 import es.caib.invai.back.persistence.model.application.system_database.core.AppInformationSystemDbEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
@@ -21,7 +20,7 @@ import es.caib.invai.back.persistence.model.maintenance.systems.server.ServerEnt
 import es.caib.invai.back.persistence.model.maintenance.general.systemType.SystemTypeEntity;
 import es.caib.invai.back.persistence.model.maintenance.systems.serverType.LkupServerTypeEntity;
 import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
-import es.caib.invai.back.service.model.maintenance.admUnit.AdmUnit;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
 import es.caib.invai.back.service.model.application.system_database.database.AppDatabase;
 import es.caib.invai.back.service.model.application.system_database.core.AppInformationSystemDb;
 import es.caib.invai.back.service.model.application.core.Application;
@@ -36,6 +35,7 @@ import es.caib.invai.back.service.model.maintenance.systems.server.Server;
 import es.caib.invai.back.service.model.maintenance.systems.serverType.ServerType;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.general.systemType.SystemType;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -46,16 +46,22 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 
 /**
  * Unit tests for the generated {@link AppDatabaseMapperImpl}, exercising every conversion
  * direction declared on {@link AppDatabaseMapper}.
  * <p>
- * {@link AppDatabaseMapper} declares {@code uses = {StatusMapper.class}}, so the generated
- * implementation carries an {@code @Autowired} {@link StatusMapper} field used internally by the
- * nested {@code Application -> ApplicationEntity} conversions. Since no Spring context is
- * bootstrapped here, a real {@link StatusMapperImpl} is injected manually via
- * {@link ReflectionTestUtils}, following the same pattern used in {@code TechnologyMapperTest}.
+ * {@link AppDatabaseMapper} declares {@code uses = {StatusMapper.class, ApplicationMapper.class}},
+ * so the generated implementation carries an {@code @Autowired} {@link ApplicationMapper} field used
+ * internally by the nested {@code Application -> ApplicationEntity} conversions. Since no Spring
+ * context is bootstrapped here, a fully wired {@link ApplicationMapperImpl} (with its own sub-mappers,
+ * including {@link StatusMapperImpl}) is injected manually via {@link ReflectionTestUtils}, following
+ * the same pattern used in {@code TechnologyMapperTest}.
  * </p>
  * <p>
  * Because {@link AppDatabaseEntity} carries a deep object graph
@@ -74,8 +80,15 @@ class AppDatabaseMapperTest {
 
     @BeforeEach
     void setUp() {
+        ApplicationMapperImpl applicationMapperImpl = new ApplicationMapperImpl();
+        ReflectionTestUtils.setField(applicationMapperImpl, "categoryMapper", new CategoryMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "systemTypeMapper", new SystemTypeMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "fieldMapper", new FieldMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "commissionMapper", new CommissionMapperImpl());
+        ReflectionTestUtils.setField(applicationMapperImpl, "statusMapper", new StatusMapperImpl());
+
         AppDatabaseMapperImpl impl = new AppDatabaseMapperImpl();
-        ReflectionTestUtils.setField(impl, "statusMapper", new StatusMapperImpl());
+        ReflectionTestUtils.setField(impl, "applicationMapper", applicationMapperImpl);
         mapper = impl;
     }
 
@@ -84,6 +97,142 @@ class AppDatabaseMapperTest {
     // ------------------------------------------------------------------
 
     private AppDatabaseEntity buildDeepEntity() {
+        EnvironmentEntity environmentEntity = getEnvironmentEntity();
+
+        ServerEntity serverEntity = getServerEntity(environmentEntity);
+
+        DatabaseVendorEntity databaseVendorEntity = getDatabaseVendorEntity();
+
+        DatabaseEntity databaseEntity = getDatabaseEntity(serverEntity, databaseVendorEntity);
+
+        CategoryEntity categoryEntity = getCategoryEntity();
+
+        SystemTypeEntity systemTypeEntity = getSystemTypeEntity();
+
+        FieldEntity fieldEntity = getFieldEntity();
+
+        ApplicationEntity applicationEntity = getApplicationEntity(categoryEntity, systemTypeEntity, fieldEntity);
+
+        AppInformationSystemDbEntity informationSystemDbEntity = getAppInformationSystemDbEntity(applicationEntity);
+
+        return getAppDatabaseEntity(informationSystemDbEntity, databaseEntity);
+    }
+
+    private static @NonNull AppDatabaseEntity getAppDatabaseEntity(AppInformationSystemDbEntity informationSystemDbEntity, DatabaseEntity databaseEntity) {
+        AppDatabaseEntity entity = new AppDatabaseEntity();
+        entity.setId(1L);
+        entity.setInformationSystemDb(informationSystemDbEntity);
+        entity.setDatabase(databaseEntity);
+        entity.setCreatedAt(LocalDateTime.of(2017, 1, 1, 0, 0));
+        entity.setCreatedBy("appdb-creator");
+        entity.setUpdatedAt(LocalDateTime.of(2017, 2, 1, 0, 0));
+        entity.setUpdatedBy("appdb-updater");
+        entity.setDeletedAt(LocalDateTime.of(2017, 3, 1, 0, 0));
+        entity.setDeletedBy("appdb-deleter");
+        return entity;
+    }
+
+    private static @NonNull AppInformationSystemDbEntity getAppInformationSystemDbEntity(ApplicationEntity applicationEntity) {
+        AppInformationSystemDbEntity informationSystemDbEntity = new AppInformationSystemDbEntity();
+        informationSystemDbEntity.setId(10L);
+        informationSystemDbEntity.setApplication(applicationEntity);
+        informationSystemDbEntity.setObservation("Some observation");
+        informationSystemDbEntity.setCreatedAt(LocalDateTime.of(2018, 1, 1, 0, 0));
+        informationSystemDbEntity.setCreatedBy("isdb-creator");
+        informationSystemDbEntity.setUpdatedAt(LocalDateTime.of(2018, 2, 1, 0, 0));
+        informationSystemDbEntity.setUpdatedBy("isdb-updater");
+        informationSystemDbEntity.setDeletedAt(LocalDateTime.of(2018, 3, 1, 0, 0));
+        informationSystemDbEntity.setDeletedBy("isdb-deleter");
+        return informationSystemDbEntity;
+    }
+
+    private static @NonNull FieldEntity getFieldEntity() {
+        FieldEntity fieldEntity = new FieldEntity();
+        fieldEntity.setId(202L);
+        fieldEntity.setName("Hisenda");
+        fieldEntity.setNameEs("Hacienda");
+        fieldEntity.setCreatedAt(LocalDateTime.of(2019, 1, 3, 0, 0));
+        fieldEntity.setCreatedBy("field-creator");
+        fieldEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 3, 0, 0));
+        fieldEntity.setUpdatedBy("field-updater");
+        fieldEntity.setDeletedAt(LocalDateTime.of(2019, 3, 3, 0, 0));
+        fieldEntity.setDeletedBy("field-deleter");
+        return fieldEntity;
+    }
+
+    private static @NonNull SystemTypeEntity getSystemTypeEntity() {
+        SystemTypeEntity systemTypeEntity = new SystemTypeEntity();
+        systemTypeEntity.setId(201L);
+        systemTypeEntity.setName("Web App");
+        systemTypeEntity.setNameEs("Aplicacion Web");
+        systemTypeEntity.setCreatedAt(LocalDateTime.of(2019, 1, 2, 0, 0));
+        systemTypeEntity.setCreatedBy("st-creator");
+        systemTypeEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 2, 0, 0));
+        systemTypeEntity.setUpdatedBy("st-updater");
+        systemTypeEntity.setDeletedAt(LocalDateTime.of(2019, 3, 2, 0, 0));
+        systemTypeEntity.setDeletedBy("st-deleter");
+        return systemTypeEntity;
+    }
+
+    private static @NonNull CategoryEntity getCategoryEntity() {
+        CategoryEntity categoryEntity = new CategoryEntity();
+        categoryEntity.setId(200L);
+        categoryEntity.setName("Categoria");
+        categoryEntity.setNameEs("Categoria ES");
+        categoryEntity.setCreatedAt(LocalDateTime.of(2019, 1, 1, 0, 0));
+        categoryEntity.setCreatedBy("cat-creator");
+        categoryEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 1, 0, 0));
+        categoryEntity.setUpdatedBy("cat-updater");
+        categoryEntity.setDeletedAt(LocalDateTime.of(2019, 3, 1, 0, 0));
+        categoryEntity.setDeletedBy("cat-deleter");
+        return categoryEntity;
+    }
+
+    private static @NonNull DatabaseVendorEntity getDatabaseVendorEntity() {
+        DatabaseVendorEntity databaseVendorEntity = new DatabaseVendorEntity();
+        databaseVendorEntity.setId(103L);
+        databaseVendorEntity.setName("PostgreSQL");
+        databaseVendorEntity.setDefaultPort(5432);
+        databaseVendorEntity.setCreatedAt(LocalDateTime.of(2020, 1, 3, 0, 0));
+        databaseVendorEntity.setCreatedBy("vendor-creator");
+        databaseVendorEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 3, 0, 0));
+        databaseVendorEntity.setUpdatedBy("vendor-updater");
+        databaseVendorEntity.setDeletedAt(LocalDateTime.of(2020, 3, 3, 0, 0));
+        databaseVendorEntity.setDeletedBy("vendor-deleter");
+        return databaseVendorEntity;
+    }
+
+    private static @NonNull ApplicationEntity getApplicationEntity(CategoryEntity categoryEntity, SystemTypeEntity systemTypeEntity, FieldEntity fieldEntity) {
+        CommissionEntity commissionEntity = getCommissionEntity();
+
+        LkupStatusEntity statusEntity = new LkupStatusEntity();
+        statusEntity.setId(StatusEnum.ACTIVE.getId());
+        statusEntity.setName("Actiu");
+        statusEntity.setNameEs("Activo");
+
+        ApplicationEntity applicationEntity = new ApplicationEntity();
+        applicationEntity.setId(205L);
+        applicationEntity.setCode("APP01");
+        applicationEntity.setPrefix("AP1");
+        applicationEntity.setName("Application One");
+        applicationEntity.setCategory(categoryEntity);
+        applicationEntity.setSystemType(systemTypeEntity);
+        applicationEntity.setField(fieldEntity);
+        applicationEntity.setAdmUnitCode("ADM-01");
+        applicationEntity.setCsCommission(commissionEntity);
+        applicationEntity.setStatus(statusEntity);
+        applicationEntity.setDescription("Application description");
+        applicationEntity.setExpirationDate(LocalDateTime.of(2030, 12, 31, 0, 0));
+        applicationEntity.setCreatedAt(LocalDateTime.of(2019, 1, 6, 0, 0));
+        applicationEntity.setCreatedBy("app-creator");
+        applicationEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 6, 0, 0));
+        applicationEntity.setUpdatedBy("app-updater");
+        applicationEntity.setDeletedAt(LocalDateTime.of(2019, 3, 6, 0, 0));
+        applicationEntity.setDeletedBy("app-deleter");
+        return applicationEntity;
+    }
+
+    private static @NonNull EnvironmentEntity getEnvironmentEntity() {
         EnvironmentEntity environmentEntity = new EnvironmentEntity();
         environmentEntity.setId(100L);
         environmentEntity.setCode("PRO");
@@ -95,7 +244,44 @@ class AppDatabaseMapperTest {
         environmentEntity.setUpdatedBy("env-updater");
         environmentEntity.setDeletedAt(LocalDateTime.of(2020, 3, 1, 0, 0));
         environmentEntity.setDeletedBy("env-deleter");
+        return environmentEntity;
+    }
 
+    private static @NonNull CommissionEntity getCommissionEntity() {
+        CommissionEntity commissionEntity = new CommissionEntity();
+        commissionEntity.setId(204L);
+        commissionEntity.setName("Comissio");
+        commissionEntity.setNameEs("Comision");
+        commissionEntity.setExpedientNumber("EXP-2024-01");
+        commissionEntity.setCommissionType(CommissionType.TECNICA);
+        commissionEntity.setApprovalDate(LocalDate.of(2024, 1, 15));
+        commissionEntity.setCreatedAt(LocalDateTime.of(2019, 1, 5, 0, 0));
+        commissionEntity.setCreatedBy("com-creator");
+        commissionEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 5, 0, 0));
+        commissionEntity.setUpdatedBy("com-updater");
+        commissionEntity.setDeletedAt(LocalDateTime.of(2019, 3, 5, 0, 0));
+        commissionEntity.setDeletedBy("com-deleter");
+        return commissionEntity;
+    }
+
+    private static @NonNull DatabaseEntity getDatabaseEntity(ServerEntity serverEntity, DatabaseVendorEntity databaseVendorEntity) {
+        DatabaseEntity databaseEntity = new DatabaseEntity();
+        databaseEntity.setId(20L);
+        databaseEntity.setServer(serverEntity);
+        databaseEntity.setService("invai-service");
+        databaseEntity.setPort(5432);
+        databaseEntity.setDatabaseType(databaseVendorEntity);
+        databaseEntity.setDescription("Main invai database");
+        databaseEntity.setCreatedAt(LocalDateTime.of(2020, 1, 4, 0, 0));
+        databaseEntity.setCreatedBy("db-creator");
+        databaseEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 4, 0, 0));
+        databaseEntity.setUpdatedBy("db-updater");
+        databaseEntity.setDeletedAt(LocalDateTime.of(2020, 3, 4, 0, 0));
+        databaseEntity.setDeletedBy("db-deleter");
+        return databaseEntity;
+    }
+
+    private static @NonNull ServerEntity getServerEntity(EnvironmentEntity environmentEntity) {
         LkupServerTypeEntity serverTypeEntity = new LkupServerTypeEntity();
         serverTypeEntity.setId(101L);
         serverTypeEntity.setCode("DATABASE");
@@ -113,142 +299,103 @@ class AppDatabaseMapperTest {
         serverEntity.setUpdatedBy("srv-updater");
         serverEntity.setDeletedAt(LocalDateTime.of(2020, 3, 2, 0, 0));
         serverEntity.setDeletedBy("srv-deleter");
-
-        DatabaseVendorEntity databaseVendorEntity = new DatabaseVendorEntity();
-        databaseVendorEntity.setId(103L);
-        databaseVendorEntity.setName("PostgreSQL");
-        databaseVendorEntity.setDefaultPort(5432);
-        databaseVendorEntity.setCreatedAt(LocalDateTime.of(2020, 1, 3, 0, 0));
-        databaseVendorEntity.setCreatedBy("vendor-creator");
-        databaseVendorEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 3, 0, 0));
-        databaseVendorEntity.setUpdatedBy("vendor-updater");
-        databaseVendorEntity.setDeletedAt(LocalDateTime.of(2020, 3, 3, 0, 0));
-        databaseVendorEntity.setDeletedBy("vendor-deleter");
-
-        DatabaseEntity databaseEntity = new DatabaseEntity();
-        databaseEntity.setId(20L);
-        databaseEntity.setServer(serverEntity);
-        databaseEntity.setService("invai-service");
-        databaseEntity.setPort(5432);
-        databaseEntity.setDatabaseType(databaseVendorEntity);
-        databaseEntity.setDescription("Main invai database");
-        databaseEntity.setCreatedAt(LocalDateTime.of(2020, 1, 4, 0, 0));
-        databaseEntity.setCreatedBy("db-creator");
-        databaseEntity.setUpdatedAt(LocalDateTime.of(2020, 2, 4, 0, 0));
-        databaseEntity.setUpdatedBy("db-updater");
-        databaseEntity.setDeletedAt(LocalDateTime.of(2020, 3, 4, 0, 0));
-        databaseEntity.setDeletedBy("db-deleter");
-
-        CategoryEntity categoryEntity = new CategoryEntity();
-        categoryEntity.setId(200L);
-        categoryEntity.setName("Categoria");
-        categoryEntity.setNameEs("Categoria ES");
-        categoryEntity.setCreatedAt(LocalDateTime.of(2019, 1, 1, 0, 0));
-        categoryEntity.setCreatedBy("cat-creator");
-        categoryEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 1, 0, 0));
-        categoryEntity.setUpdatedBy("cat-updater");
-        categoryEntity.setDeletedAt(LocalDateTime.of(2019, 3, 1, 0, 0));
-        categoryEntity.setDeletedBy("cat-deleter");
-
-        SystemTypeEntity systemTypeEntity = new SystemTypeEntity();
-        systemTypeEntity.setId(201L);
-        systemTypeEntity.setName("Web App");
-        systemTypeEntity.setNameEs("Aplicacion Web");
-        systemTypeEntity.setCreatedAt(LocalDateTime.of(2019, 1, 2, 0, 0));
-        systemTypeEntity.setCreatedBy("st-creator");
-        systemTypeEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 2, 0, 0));
-        systemTypeEntity.setUpdatedBy("st-updater");
-        systemTypeEntity.setDeletedAt(LocalDateTime.of(2019, 3, 2, 0, 0));
-        systemTypeEntity.setDeletedBy("st-deleter");
-
-        FieldEntity fieldEntity = new FieldEntity();
-        fieldEntity.setId(202L);
-        fieldEntity.setName("Hisenda");
-        fieldEntity.setNameEs("Hacienda");
-        fieldEntity.setCreatedAt(LocalDateTime.of(2019, 1, 3, 0, 0));
-        fieldEntity.setCreatedBy("field-creator");
-        fieldEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 3, 0, 0));
-        fieldEntity.setUpdatedBy("field-updater");
-        fieldEntity.setDeletedAt(LocalDateTime.of(2019, 3, 3, 0, 0));
-        fieldEntity.setDeletedBy("field-deleter");
-
-        AdmUnitEntity admUnitEntity = new AdmUnitEntity();
-        admUnitEntity.setId(203L);
-        admUnitEntity.setCode("ADM-01");
-        admUnitEntity.setName("Unitat");
-        admUnitEntity.setNameEs("Unidad");
-        admUnitEntity.setCreatedAt(LocalDateTime.of(2019, 1, 4, 0, 0));
-        admUnitEntity.setCreatedBy("adm-creator");
-        admUnitEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 4, 0, 0));
-        admUnitEntity.setUpdatedBy("adm-updater");
-        admUnitEntity.setDeletedAt(LocalDateTime.of(2019, 3, 4, 0, 0));
-        admUnitEntity.setDeletedBy("adm-deleter");
-
-        CommissionEntity commissionEntity = new CommissionEntity();
-        commissionEntity.setId(204L);
-        commissionEntity.setName("Comissio");
-        commissionEntity.setNameEs("Comision");
-        commissionEntity.setExpedientNumber("EXP-2024-01");
-        commissionEntity.setCommissionType(CommissionType.TECNICA);
-        commissionEntity.setApprovalDate(LocalDate.of(2024, 1, 15));
-        commissionEntity.setCreatedAt(LocalDateTime.of(2019, 1, 5, 0, 0));
-        commissionEntity.setCreatedBy("com-creator");
-        commissionEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 5, 0, 0));
-        commissionEntity.setUpdatedBy("com-updater");
-        commissionEntity.setDeletedAt(LocalDateTime.of(2019, 3, 5, 0, 0));
-        commissionEntity.setDeletedBy("com-deleter");
-
-        LkupStatusEntity statusEntity = new LkupStatusEntity();
-        statusEntity.setId(StatusEnum.ACTIVE.getId());
-        statusEntity.setName("Actiu");
-        statusEntity.setNameEs("Activo");
-
-        ApplicationEntity applicationEntity = new ApplicationEntity();
-        applicationEntity.setId(205L);
-        applicationEntity.setCode("APP01");
-        applicationEntity.setPrefix("AP1");
-        applicationEntity.setName("Application One");
-        applicationEntity.setCategory(categoryEntity);
-        applicationEntity.setSystemType(systemTypeEntity);
-        applicationEntity.setField(fieldEntity);
-        applicationEntity.setAdmUnit(admUnitEntity);
-        applicationEntity.setCsCommission(commissionEntity);
-        applicationEntity.setStatus(statusEntity);
-        applicationEntity.setDescription("Application description");
-        applicationEntity.setExpirationDate(LocalDateTime.of(2030, 12, 31, 0, 0));
-        applicationEntity.setCreatedAt(LocalDateTime.of(2019, 1, 6, 0, 0));
-        applicationEntity.setCreatedBy("app-creator");
-        applicationEntity.setUpdatedAt(LocalDateTime.of(2019, 2, 6, 0, 0));
-        applicationEntity.setUpdatedBy("app-updater");
-        applicationEntity.setDeletedAt(LocalDateTime.of(2019, 3, 6, 0, 0));
-        applicationEntity.setDeletedBy("app-deleter");
-
-        AppInformationSystemDbEntity informationSystemDbEntity = new AppInformationSystemDbEntity();
-        informationSystemDbEntity.setId(10L);
-        informationSystemDbEntity.setApplication(applicationEntity);
-        informationSystemDbEntity.setObservation("Some observation");
-        informationSystemDbEntity.setCreatedAt(LocalDateTime.of(2018, 1, 1, 0, 0));
-        informationSystemDbEntity.setCreatedBy("isdb-creator");
-        informationSystemDbEntity.setUpdatedAt(LocalDateTime.of(2018, 2, 1, 0, 0));
-        informationSystemDbEntity.setUpdatedBy("isdb-updater");
-        informationSystemDbEntity.setDeletedAt(LocalDateTime.of(2018, 3, 1, 0, 0));
-        informationSystemDbEntity.setDeletedBy("isdb-deleter");
-
-        AppDatabaseEntity entity = new AppDatabaseEntity();
-        entity.setId(1L);
-        entity.setInformationSystemDb(informationSystemDbEntity);
-        entity.setDatabase(databaseEntity);
-        entity.setCreatedAt(LocalDateTime.of(2017, 1, 1, 0, 0));
-        entity.setCreatedBy("appdb-creator");
-        entity.setUpdatedAt(LocalDateTime.of(2017, 2, 1, 0, 0));
-        entity.setUpdatedBy("appdb-updater");
-        entity.setDeletedAt(LocalDateTime.of(2017, 3, 1, 0, 0));
-        entity.setDeletedBy("appdb-deleter");
-
-        return entity;
+        return serverEntity;
     }
 
     private AppDatabase buildDeepModel() {
+        Environment environment = getEnvironment();
+
+        Server server = getServer(environment);
+
+        DatabaseVendor databaseVendor = getDatabaseVendor();
+
+        Database database = getDatabase(server, databaseVendor);
+
+        Category category = new Category();
+        category.setId(400L);
+        category.setName("Categoria2");
+        category.setNameEs("Categoria2 ES");
+        category.setCreatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
+        category.setCreatedBy("cat-creator");
+        category.setUpdatedAt(LocalDateTime.of(2022, 2, 1, 0, 0));
+        category.setUpdatedBy("cat-updater");
+        category.setDeletedAt(LocalDateTime.of(2022, 3, 1, 0, 0));
+        category.setDeletedBy("cat-deleter");
+
+        SystemType systemType = getSystemType();
+
+        Field field = new Field();
+        field.setId(402L);
+        field.setName("Educacio");
+        field.setNameEs("Educacion");
+        field.setCreatedAt(LocalDateTime.of(2022, 1, 3, 0, 0));
+        field.setCreatedBy("field-creator");
+        field.setUpdatedAt(LocalDateTime.of(2022, 2, 3, 0, 0));
+        field.setUpdatedBy("field-updater");
+        field.setDeletedAt(LocalDateTime.of(2022, 3, 3, 0, 0));
+        field.setDeletedBy("field-deleter");
+
+        Application application = getApplication(category, systemType, field);
+
+        AppInformationSystemDb informationSystemDb = getAppInformationSystemDb(application);
+
+        AppDatabase model = new AppDatabase();
+        model.setId(2L);
+        model.setInformationSystemDb(informationSystemDb);
+        model.setDatabase(database);
+        model.setCreatedAt(LocalDateTime.of(2016, 1, 1, 0, 0));
+        model.setCreatedBy("appdb-creator");
+        model.setUpdatedAt(LocalDateTime.of(2016, 2, 1, 0, 0));
+        model.setUpdatedBy("appdb-updater");
+        model.setDeletedAt(LocalDateTime.of(2016, 3, 1, 0, 0));
+        model.setDeletedBy("appdb-deleter");
+
+        return model;
+    }
+
+    private static @NonNull AppInformationSystemDb getAppInformationSystemDb(Application application) {
+        AppInformationSystemDb informationSystemDb = new AppInformationSystemDb();
+        informationSystemDb.setId(11L);
+        informationSystemDb.setApplication(application);
+        informationSystemDb.setObservation("Model observation");
+        informationSystemDb.setCreatedAt(LocalDateTime.of(2023, 1, 1, 0, 0));
+        informationSystemDb.setCreatedBy("isdb-creator");
+        informationSystemDb.setUpdatedAt(LocalDateTime.of(2023, 2, 1, 0, 0));
+        informationSystemDb.setUpdatedBy("isdb-updater");
+        informationSystemDb.setDeletedAt(LocalDateTime.of(2023, 3, 1, 0, 0));
+        informationSystemDb.setDeletedBy("isdb-deleter");
+        return informationSystemDb;
+    }
+
+    private static @NonNull SystemType getSystemType() {
+        SystemType systemType = new SystemType();
+        systemType.setId(401L);
+        systemType.setName("Microservice");
+        systemType.setNameEs("Microservicio");
+        systemType.setCreatedAt(LocalDateTime.of(2022, 1, 2, 0, 0));
+        systemType.setCreatedBy("st-creator");
+        systemType.setUpdatedAt(LocalDateTime.of(2022, 2, 2, 0, 0));
+        systemType.setUpdatedBy("st-updater");
+        systemType.setDeletedAt(LocalDateTime.of(2022, 3, 2, 0, 0));
+        systemType.setDeletedBy("st-deleter");
+        return systemType;
+    }
+
+    private static @NonNull DatabaseVendor getDatabaseVendor() {
+        DatabaseVendor databaseVendor = new DatabaseVendor();
+        databaseVendor.setId(303L);
+        databaseVendor.setName("Oracle");
+        databaseVendor.setDefaultPort(1521);
+        databaseVendor.setCreatedAt(LocalDateTime.of(2021, 1, 3, 0, 0));
+        databaseVendor.setCreatedBy("vendor-creator");
+        databaseVendor.setUpdatedAt(LocalDateTime.of(2021, 2, 3, 0, 0));
+        databaseVendor.setUpdatedBy("vendor-updater");
+        databaseVendor.setDeletedAt(LocalDateTime.of(2021, 3, 3, 0, 0));
+        databaseVendor.setDeletedBy("vendor-deleter");
+        return databaseVendor;
+    }
+
+    private static @NonNull Environment getEnvironment() {
         Environment environment = new Environment();
         environment.setId(300L);
         environment.setCode("DEV");
@@ -260,7 +407,27 @@ class AppDatabaseMapperTest {
         environment.setUpdatedBy("env-updater");
         environment.setDeletedAt(LocalDateTime.of(2021, 3, 1, 0, 0));
         environment.setDeletedBy("env-deleter");
+        return environment;
+    }
 
+    private static @NonNull Database getDatabase(Server server, DatabaseVendor databaseVendor) {
+        Database database = new Database();
+        database.setId(21L);
+        database.setServer(server);
+        database.setService("invai-service-dev");
+        database.setPort(1521);
+        database.setDatabaseType(databaseVendor);
+        database.setDescription("Dev database");
+        database.setCreatedAt(LocalDateTime.of(2021, 1, 4, 0, 0));
+        database.setCreatedBy("db-creator");
+        database.setUpdatedAt(LocalDateTime.of(2021, 2, 4, 0, 0));
+        database.setUpdatedBy("db-updater");
+        database.setDeletedAt(LocalDateTime.of(2021, 3, 4, 0, 0));
+        database.setDeletedBy("db-deleter");
+        return database;
+    }
+
+    private static @NonNull Server getServer(Environment environment) {
         ServerType serverType = new ServerType();
         serverType.setId(301L);
         serverType.setCode("DATABASE");
@@ -278,70 +445,10 @@ class AppDatabaseMapperTest {
         server.setUpdatedBy("srv-updater");
         server.setDeletedAt(LocalDateTime.of(2021, 3, 2, 0, 0));
         server.setDeletedBy("srv-deleter");
+        return server;
+    }
 
-        DatabaseVendor databaseVendor = new DatabaseVendor();
-        databaseVendor.setId(303L);
-        databaseVendor.setName("Oracle");
-        databaseVendor.setDefaultPort(1521);
-        databaseVendor.setCreatedAt(LocalDateTime.of(2021, 1, 3, 0, 0));
-        databaseVendor.setCreatedBy("vendor-creator");
-        databaseVendor.setUpdatedAt(LocalDateTime.of(2021, 2, 3, 0, 0));
-        databaseVendor.setUpdatedBy("vendor-updater");
-        databaseVendor.setDeletedAt(LocalDateTime.of(2021, 3, 3, 0, 0));
-        databaseVendor.setDeletedBy("vendor-deleter");
-
-        Database database = new Database();
-        database.setId(21L);
-        database.setServer(server);
-        database.setService("invai-service-dev");
-        database.setPort(1521);
-        database.setDatabaseType(databaseVendor);
-        database.setDescription("Dev database");
-        database.setCreatedAt(LocalDateTime.of(2021, 1, 4, 0, 0));
-        database.setCreatedBy("db-creator");
-        database.setUpdatedAt(LocalDateTime.of(2021, 2, 4, 0, 0));
-        database.setUpdatedBy("db-updater");
-        database.setDeletedAt(LocalDateTime.of(2021, 3, 4, 0, 0));
-        database.setDeletedBy("db-deleter");
-
-        Category category = new Category();
-        category.setId(400L);
-        category.setName("Categoria2");
-        category.setNameEs("Categoria2 ES");
-        category.setCreatedAt(LocalDateTime.of(2022, 1, 1, 0, 0));
-        category.setCreatedBy("cat-creator");
-        category.setUpdatedAt(LocalDateTime.of(2022, 2, 1, 0, 0));
-        category.setUpdatedBy("cat-updater");
-        category.setDeletedAt(LocalDateTime.of(2022, 3, 1, 0, 0));
-        category.setDeletedBy("cat-deleter");
-
-        SystemType systemType = new SystemType();
-        systemType.setId(401L);
-        systemType.setName("Microservice");
-        systemType.setNameEs("Microservicio");
-        systemType.setCreatedAt(LocalDateTime.of(2022, 1, 2, 0, 0));
-        systemType.setCreatedBy("st-creator");
-        systemType.setUpdatedAt(LocalDateTime.of(2022, 2, 2, 0, 0));
-        systemType.setUpdatedBy("st-updater");
-        systemType.setDeletedAt(LocalDateTime.of(2022, 3, 2, 0, 0));
-        systemType.setDeletedBy("st-deleter");
-
-        Field field = new Field();
-        field.setId(402L);
-        field.setName("Educacio");
-        field.setNameEs("Educacion");
-        field.setCreatedAt(LocalDateTime.of(2022, 1, 3, 0, 0));
-        field.setCreatedBy("field-creator");
-        field.setUpdatedAt(LocalDateTime.of(2022, 2, 3, 0, 0));
-        field.setUpdatedBy("field-updater");
-        field.setDeletedAt(LocalDateTime.of(2022, 3, 3, 0, 0));
-        field.setDeletedBy("field-deleter");
-
-        AdmUnit admUnit = new AdmUnit(410L, "ADM-02", "Unitat2", "Unidad2",
-                LocalDateTime.of(2022, 1, 4, 0, 0), "adm-creator",
-                LocalDateTime.of(2022, 2, 4, 0, 0), "adm-updater",
-                LocalDateTime.of(2022, 3, 4, 0, 0), "adm-deleter");
-
+    private static @NonNull Application getApplication(Category category, SystemType systemType, Field field) {
         Commission commission = new Commission(411L, "Comissio2", "Comision2", "EXP-2024-02",
                 CommissionType.SUPERIOR, LocalDate.of(2024, 2, 20),
                 LocalDateTime.of(2022, 1, 5, 0, 0), "com-creator",
@@ -356,7 +463,7 @@ class AppDatabaseMapperTest {
         application.setCategory(category);
         application.setSystemType(systemType);
         application.setField(field);
-        application.setAdmUnit(admUnit);
+        application.setAdmUnitCode("ADM-02");
         application.setCsCommission(commission);
         application.setStatus(StatusEnum.INACTIVE);
         application.setDescription("Application two description");
@@ -367,30 +474,7 @@ class AppDatabaseMapperTest {
         application.setUpdatedBy("app-updater");
         application.setDeletedAt(LocalDateTime.of(2022, 3, 6, 0, 0));
         application.setDeletedBy("app-deleter");
-
-        AppInformationSystemDb informationSystemDb = new AppInformationSystemDb();
-        informationSystemDb.setId(11L);
-        informationSystemDb.setApplication(application);
-        informationSystemDb.setObservation("Model observation");
-        informationSystemDb.setCreatedAt(LocalDateTime.of(2023, 1, 1, 0, 0));
-        informationSystemDb.setCreatedBy("isdb-creator");
-        informationSystemDb.setUpdatedAt(LocalDateTime.of(2023, 2, 1, 0, 0));
-        informationSystemDb.setUpdatedBy("isdb-updater");
-        informationSystemDb.setDeletedAt(LocalDateTime.of(2023, 3, 1, 0, 0));
-        informationSystemDb.setDeletedBy("isdb-deleter");
-
-        AppDatabase model = new AppDatabase();
-        model.setId(2L);
-        model.setInformationSystemDb(informationSystemDb);
-        model.setDatabase(database);
-        model.setCreatedAt(LocalDateTime.of(2016, 1, 1, 0, 0));
-        model.setCreatedBy("appdb-creator");
-        model.setUpdatedAt(LocalDateTime.of(2016, 2, 1, 0, 0));
-        model.setUpdatedBy("appdb-updater");
-        model.setDeletedAt(LocalDateTime.of(2016, 3, 1, 0, 0));
-        model.setDeletedBy("appdb-deleter");
-
-        return model;
+        return application;
     }
 
     // ------------------------------------------------------------------
@@ -472,11 +556,7 @@ class AppDatabaseMapperTest {
         assertEquals("Hisenda", field.getName());
         assertEquals("Hacienda", field.getNameEs());
 
-        AdmUnit admUnit = application.getAdmUnit();
-        assertEquals(203L, admUnit.getId());
-        assertEquals("ADM-01", admUnit.getCode());
-        assertEquals("Unitat", admUnit.getName());
-        assertEquals("Unidad", admUnit.getNameEs());
+        assertEquals("ADM-01", application.getAdmUnitCode());
 
         Commission commission = application.getCsCommission();
         assertEquals(204L, commission.getId());
@@ -503,6 +583,21 @@ class AppDatabaseMapperTest {
 
     @Test
     void toModel_applicationWithNullNestedCatalogReferences_leavesApplicationNestedFieldsNull() {
+        AppDatabaseEntity entity = getAppDatabaseEntity();
+
+        AppDatabase model = mapper.toModel(entity);
+
+        Application application = model.getInformationSystemDb().getApplication();
+        assertEquals(205L, application.getId());
+        assertNull(application.getCategory());
+        assertNull(application.getSystemType());
+        assertNull(application.getField());
+        assertNull(application.getAdmUnitCode());
+        assertNull(application.getCsCommission());
+        assertNull(application.getStatus());
+    }
+
+    private static @NonNull AppDatabaseEntity getAppDatabaseEntity() {
         AppInformationSystemDbEntity informationSystemDbEntity = new AppInformationSystemDbEntity();
         informationSystemDbEntity.setId(10L);
         ApplicationEntity applicationEntity = new ApplicationEntity();
@@ -514,17 +609,7 @@ class AppDatabaseMapperTest {
         entity.setId(1L);
         entity.setInformationSystemDb(informationSystemDbEntity);
         entity.setDatabase(null);
-
-        AppDatabase model = mapper.toModel(entity);
-
-        Application application = model.getInformationSystemDb().getApplication();
-        assertEquals(205L, application.getId());
-        assertNull(application.getCategory());
-        assertNull(application.getSystemType());
-        assertNull(application.getField());
-        assertNull(application.getAdmUnit());
-        assertNull(application.getCsCommission());
-        assertNull(application.getStatus());
+        return entity;
     }
 
     @Test
@@ -598,9 +683,7 @@ class AppDatabaseMapperTest {
         assertEquals(402L, fieldEntity.getId());
         assertEquals("Educacio", fieldEntity.getName());
 
-        AdmUnitEntity admUnitEntity = applicationEntity.getAdmUnit();
-        assertEquals(410L, admUnitEntity.getId());
-        assertEquals("ADM-02", admUnitEntity.getCode());
+        assertEquals("ADM-02", applicationEntity.getAdmUnitCode());
 
         CommissionEntity commissionEntity = applicationEntity.getCsCommission();
         assertEquals(411L, commissionEntity.getId());
@@ -672,7 +755,7 @@ class AppDatabaseMapperTest {
         assertEquals(400L, applicationOutputDTO.getCategory().getId());
         assertEquals(401L, applicationOutputDTO.getSystemType().getId());
         assertEquals(402L, applicationOutputDTO.getField().getId());
-        assertEquals(410L, applicationOutputDTO.getAdmUnit().getId());
+        assertNull(applicationOutputDTO.getAdmUnit());
         assertEquals(411L, applicationOutputDTO.getCsCommission().getId());
         assertEquals(LocalDate.of(2031, 12, 31), applicationOutputDTO.getExpirationDate());
     }

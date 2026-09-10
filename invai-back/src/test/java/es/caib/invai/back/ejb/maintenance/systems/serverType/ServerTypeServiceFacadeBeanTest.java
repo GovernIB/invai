@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.systems.serverType;
 
-import es.caib.invai.back.ejb.maintenance.systems.serverType.ServerTypeServiceFacadeBean;
 import es.caib.invai.back.interna.maintenance.systems.serverType.DTO.ServerTypeOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.systems.serverType.ServerTypeRepository;
 import es.caib.invai.back.service.mapper.maintenance.systems.serverType.ServerTypeMapper;

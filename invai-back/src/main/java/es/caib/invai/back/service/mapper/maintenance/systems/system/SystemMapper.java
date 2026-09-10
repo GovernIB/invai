@@ -49,6 +49,7 @@ public interface SystemMapper {
      * @param inputDTO the inbound presentation payload containing parameters
      * @return a clean business domain instance with isolated metadata parameters
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "server.id", source = "serverId")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -65,6 +66,7 @@ public interface SystemMapper {
      * @param inputDTO incoming operational variables delta payload
      * @param model    the active target business domain model instance to update inline
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "server.id", source = "serverId")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)

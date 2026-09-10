@@ -62,7 +62,7 @@ public final class ApplicationSpecification {
                 predicates.add(cb.equal(root.get("systemType").get("id"), criteria.getSystemTypeId()));
             }
 
-            if (criteria.getFieldId() != null && !criteria.getFieldId().isEmpty()) {
+            if (criteria.getFieldId() != null && !criteria.getFieldId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("field").get("id"), criteria.getFieldId()));
             }
 
@@ -70,11 +70,11 @@ public final class ApplicationSpecification {
                 predicates.add(cb.equal(root.get("csCommission").get("id"), criteria.getCommissionId()));
             }
 
-            if (criteria.getAdmUnitId() != null && !criteria.getAdmUnitId().toString().isEmpty()) {
-                predicates.add(cb.equal(root.get("admUnit").get("id"), criteria.getAdmUnitId()));
+            if (criteria.getAdmUnitCode() != null && !criteria.getAdmUnitCode().trim().isEmpty()) {
+                predicates.add(cb.equal(root.get("admUnitCode"), criteria.getAdmUnitCode()));
             }
 
-            if (criteria.getStatusId() != null && !criteria.getStatusId().isEmpty()) {
+            if (criteria.getStatusId() != null && !criteria.getStatusId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("status").get("id"), criteria.getStatusId()));
             }
 
@@ -83,7 +83,13 @@ public final class ApplicationSpecification {
             }
 
             if (criteria.getIncomplete() != null) {
-                predicates.add(cb.equal(root.get("incomplete"), criteria.getIncomplete()));
+                List<Long> incompleteIds = criteria.getIncompleteApplicationIds();
+                boolean noneIncomplete = incompleteIds == null || incompleteIds.isEmpty();
+                if (criteria.getIncomplete()) {
+                    predicates.add(noneIncomplete ? cb.disjunction() : root.get("id").in(incompleteIds));
+                } else {
+                    predicates.add(noneIncomplete ? cb.conjunction() : cb.not(root.get("id").in(incompleteIds)));
+                }
             }
 
             if (criteria.getResponsibleId() != null) {
@@ -166,14 +172,19 @@ public final class ApplicationSpecification {
                 Predicate searchSystem = cb.like(cb.lower(root.get("systemType").get("name")), pattern);
                 Predicate searchField = cb.like(cb.lower(root.get("field").get("name")), pattern);
                 Predicate searchCommission = cb.like(cb.lower(root.get("csCommission").get("name")), pattern);
-                Predicate searchAdmUnit = cb.like(cb.lower(root.get("admUnit").get("name")), pattern);
                 Predicate searchStatus = cb.like(cb.lower(root.get("status").get("name")), pattern);
 
                 Predicate searchCategoryEs = cb.like(cb.lower(root.get("category").get("nameEs")), pattern);
                 Predicate searchSystemEs = cb.like(cb.lower(root.get("systemType").get("nameEs")), pattern);
                 Predicate searchFieldEs = cb.like(cb.lower(root.get("field").get("nameEs")), pattern);
                 Predicate searchCommissionEs = cb.like(cb.lower(root.get("csCommission").get("nameEs")), pattern);
-                Predicate searchAdmUnitEs = cb.like(cb.lower(root.get("admUnit").get("nameEs")), pattern);
+
+                // Admin units are no longer stored locally, so their name can't be matched via a SQL
+                // join — the facade pre-resolves matching DIR3CAIB codes onto quickSearchAdmUnitCodes.
+                List<String> admUnitCodes = criteria.getQuickSearchAdmUnitCodes();
+                Predicate searchAdmUnit = (admUnitCodes == null || admUnitCodes.isEmpty())
+                        ? cb.disjunction()
+                        : root.get("admUnitCode").in(admUnitCodes);
 
                 predicates.add(cb.or(
                         searchCode, searchPrefix, searchName, searchDesc,
@@ -181,7 +192,7 @@ public final class ApplicationSpecification {
                         searchSystem, searchSystemEs,
                         searchField, searchFieldEs,
                         searchCommission, searchCommissionEs,
-                        searchAdmUnit, searchAdmUnitEs,
+                        searchAdmUnit,
                         searchStatus
                 ));
             }

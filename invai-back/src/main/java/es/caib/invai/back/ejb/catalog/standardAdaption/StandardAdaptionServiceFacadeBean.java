@@ -33,7 +33,7 @@ public class StandardAdaptionServiceFacadeBean implements StandardAdaptionServic
     @Override
     @Transactional(readOnly = true)
     public List<StandardAdaptionOutputDTO> getAll() {
-        log.info("Facade: Fetching every standard adaption lookup entry");
+        log.debug("Facade: Fetching every standard adaption lookup entry");
         List<StandardAdaption> standardAdaptions = standardAdaptionRepository.findAll();
         return standardAdaptionMapper.toResponseList(standardAdaptions);
     }

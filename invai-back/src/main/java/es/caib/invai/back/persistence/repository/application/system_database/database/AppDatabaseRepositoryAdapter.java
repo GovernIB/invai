@@ -138,7 +138,7 @@ public class AppDatabaseRepositoryAdapter implements AppDatabaseRepository {
      */
     @Override
     public Page<AppDatabase> findAll(Long informationSystemDbId, AppDatabaseCriteria criteria, Pageable pageable) {
-        log.info("Repository: Dynamic search pattern stream across application database relations for informationSystemDbId ID: {}", informationSystemDbId);
+        log.debug("Repository: Dynamic search pattern stream across application database relations for informationSystemDbId ID: {}", informationSystemDbId);
         try {
             Specification<AppDatabaseEntity> spec = AppDatabaseSpecification.filterByCriteria(informationSystemDbId, criteria);
             Page<AppDatabaseEntity> entityPage = appDatabaseJPARepository.findAll(spec, pageable);
@@ -207,8 +207,8 @@ public class AppDatabaseRepositoryAdapter implements AppDatabaseRepository {
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
-                        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+                        aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

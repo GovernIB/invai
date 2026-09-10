@@ -5,6 +5,8 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
+import java.io.Serial;
+
 /**
  * JPA persistent entity representing architecture layers assignable to technologies and
  * application development technology stack entries.
@@ -17,6 +19,9 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 @Getter
 @Setter
 public class LayerEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Primary key unique identifier. */
     @Id

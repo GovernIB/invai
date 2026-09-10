@@ -54,7 +54,7 @@ public class CategoryServiceFacadeBean implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryOutputDTO getById(Long id) {
-        log.info("Facade: Fetching category by ID: {}", id);
+        log.debug("Facade: Fetching category by ID: {}", id);
         Category category = categoryRepository.findById(id);
 
         if (category == null) {
@@ -74,7 +74,7 @@ public class CategoryServiceFacadeBean implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public Page<CategoryOutputDTO> getAll(CategoryCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching categories via pagination boundaries");
+        log.debug("Facade: Fetching categories via pagination boundaries");
         Page<Category> domainPage = categoryRepository.findAll(filter, pageable);
         return domainPage.map(categoryMapper::toResponse);
     }
@@ -96,6 +96,9 @@ public class CategoryServiceFacadeBean implements CategoryService {
 
         if (categoryRepository.existsByNameAndDeletedAtIsNull(inputDTO.getName())) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_DUPLICATED);
+        }
+        if (categoryRepository.existsByNameEsAndDeletedAtIsNull(inputDTO.getNameEs())) {
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_DUPLICATED_ES);
         }
 
         Category model = categoryMapper.toModelFromInput(inputDTO);
@@ -127,6 +130,9 @@ public class CategoryServiceFacadeBean implements CategoryService {
 
         if (categoryRepository.existsByNameAndIdNotAndDeletedAtIsNull(inputDTO.getName(), id)) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_DUPLICATED);
+        }
+        if (categoryRepository.existsByNameEsAndIdNotAndDeletedAtIsNull(inputDTO.getNameEs(), id)) {
+            throw new BusinessRuleException(Constants.ERR_CATEGORY_DUPLICATED_ES);
         }
 
         categoryMapper.updateModelFromInput(inputDTO, existing);

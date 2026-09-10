@@ -4,7 +4,7 @@
     <parent>
         <artifactId>invai</artifactId>
         <groupId>es.caib.invai</groupId>
-        <version>1.0.2</version>
+        <version>1.0.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

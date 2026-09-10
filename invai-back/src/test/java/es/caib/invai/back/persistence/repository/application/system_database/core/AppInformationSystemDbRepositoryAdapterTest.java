@@ -55,11 +55,11 @@ class AppInformationSystemDbRepositoryAdapterTest {
         return a;
     }
 
-    private AppInformationSystemDbEntity entityWithApplication(Long id, Long applicationId) {
+    private AppInformationSystemDbEntity entityWithApplication(Long id) {
         AppInformationSystemDbEntity entity = new AppInformationSystemDbEntity();
         entity.setId(id);
         ApplicationEntity application = new ApplicationEntity();
-        application.setId(applicationId);
+        application.setId(10L);
         entity.setApplication(application);
         return entity;
     }
@@ -67,7 +67,7 @@ class AppInformationSystemDbRepositoryAdapterTest {
     @Test
     void findById_found_returnsMappedModel() {
         adapter = buildAdapter();
-        AppInformationSystemDbEntity entity = entityWithApplication(1L, 10L);
+        AppInformationSystemDbEntity entity = entityWithApplication(1L);
         AppInformationSystemDb model = new AppInformationSystemDb();
         when(appInformationSystemDbJPARepository.findById(1L)).thenReturn(Optional.of(entity));
         when(appInformationSystemDbMapper.toModel(entity)).thenReturn(model);
@@ -88,7 +88,7 @@ class AppInformationSystemDbRepositoryAdapterTest {
     @Test
     void findByApplicationId_found_delegatesToJPARepositoryAndMapsModel() {
         adapter = buildAdapter();
-        AppInformationSystemDbEntity entity = entityWithApplication(1L, 10L);
+        AppInformationSystemDbEntity entity = entityWithApplication(1L);
         AppInformationSystemDb model = new AppInformationSystemDb();
         when(appInformationSystemDbJPARepository.findByApplicationId(10L)).thenReturn(Optional.of(entity));
         when(appInformationSystemDbMapper.toModel(entity)).thenReturn(model);
@@ -111,7 +111,7 @@ class AppInformationSystemDbRepositoryAdapterTest {
         adapter = buildAdapter();
         AppInformationSystemDb model = new AppInformationSystemDb();
         AppInformationSystemDbEntity toSave = new AppInformationSystemDbEntity();
-        AppInformationSystemDbEntity saved = entityWithApplication(5L, 10L);
+        AppInformationSystemDbEntity saved = entityWithApplication(5L);
         saved.setObservation("Legacy ledger");
         AppInformationSystemDb response = new AppInformationSystemDb();
         when(appInformationSystemDbMapper.toEntity(model)).thenReturn(toSave);
@@ -139,7 +139,7 @@ class AppInformationSystemDbRepositoryAdapterTest {
         adapter = buildAdapter();
         AppInformationSystemDb model = new AppInformationSystemDb();
         AppInformationSystemDbEntity toSave = new AppInformationSystemDbEntity();
-        AppInformationSystemDbEntity saved = entityWithApplication(6L, 10L);
+        AppInformationSystemDbEntity saved = entityWithApplication(6L);
         LocalDateTime existingCreatedAt = LocalDateTime.of(2025, 1, 1, 0, 0);
         saved.setCreatedAt(existingCreatedAt);
         saved.setCreatedBy("jdoe");
@@ -160,7 +160,7 @@ class AppInformationSystemDbRepositoryAdapterTest {
         adapter = buildAdapter();
         AppInformationSystemDb model = new AppInformationSystemDb();
         AppInformationSystemDbEntity toSave = new AppInformationSystemDbEntity();
-        AppInformationSystemDbEntity saved = entityWithApplication(7L, 10L);
+        AppInformationSystemDbEntity saved = entityWithApplication(7L);
         AppInformationSystemDb response = new AppInformationSystemDb();
         when(appInformationSystemDbMapper.toEntity(model)).thenReturn(toSave);
         when(appInformationSystemDbJPARepository.save(toSave)).thenReturn(saved);
@@ -181,7 +181,7 @@ class AppInformationSystemDbRepositoryAdapterTest {
         AppInformationSystemDb model = new AppInformationSystemDb();
         model.setId(8L);
         AppInformationSystemDbEntity toSave = new AppInformationSystemDbEntity();
-        AppInformationSystemDbEntity saved = entityWithApplication(8L, 10L);
+        AppInformationSystemDbEntity saved = entityWithApplication(8L);
         saved.setDeletedAt(LocalDateTime.now());
         saved.setDeletedBy("jdoe");
         when(appInformationSystemDbMapper.toEntity(model)).thenReturn(toSave);

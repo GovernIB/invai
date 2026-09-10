@@ -51,7 +51,7 @@ public class AppDatabaseController {
             @PathVariable Long informationSystemDbId,
             @ModelAttribute AppDatabaseCriteria criteria,
             @PageableDefault(sort = "id") Pageable pageable) {
-        log.info("REST: Initiating dynamic paginated search operation for informationSystemDb ID: {} and criteria: {}", informationSystemDbId, criteria);
+        log.debug("REST: Initiating dynamic paginated search operation for informationSystemDb ID: {} and criteria: {}", informationSystemDbId, criteria);
         Page<AppDatabaseOutputDTO> targetPage = appDatabaseService.getAll(informationSystemDbId, criteria, pageable);
         return ResponseEntity.ok(targetPage);
     }

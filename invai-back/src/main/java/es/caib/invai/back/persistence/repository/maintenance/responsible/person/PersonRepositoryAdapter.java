@@ -100,7 +100,7 @@ public class PersonRepositoryAdapter implements PersonRepository {
 
     @Override
     public Page<Person> findAll(PersonCriteria filter, Pageable pageable) {
-        log.info("Repository: Fetching paged persons using standard query layouts");
+        log.debug("Repository: Fetching paged persons using standard query layouts");
         try {
             Specification<PersonEntity> spec = PersonSpecification.filterByCriteria(filter);
             return personJPARepository.findAll(spec, pageable).map(personMapper::toModel);
@@ -169,8 +169,8 @@ public class PersonRepositoryAdapter implements PersonRepository {
 
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
-            aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+            aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

@@ -16,7 +16,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 /**
- * Infrastructure repository Adapter implementing the outbound port boundary {@link AppProviderRepository}.
+ * JPA-backed implementation of {@link AppProviderRepository}: delegates CRUD and filtered
+ * lookups to {@link AppProviderJPARepository}, and records an {@link AppProviderAudEntity}
+ * snapshot on every create, update, and (soft) delete.
  *
  * @since 1.0.2
  */
@@ -124,18 +126,19 @@ public class AppProviderRepositoryAdapter implements AppProviderRepository {
     }
 
     /**
-     * Resolves a paginated, criteria-filtered sequence of provider entities scoped to a single
-     * parent development module.
+     * Fetches the providers assigned to a single development, filtered by {@code criteria} and
+     * paged, via the {@link AppProviderSpecification} built from both parameters.
      *
      * @param appDevelopmentId mandatory parent development identifier scoping the result set
-     * @param criteria         the multi-parameter business query filter boundaries
-     * @param pageable         pagination structural constraints
-     * @return a paginated matrix of matching domain models
+     * @param criteria         optional additional filters (status, search); {@code null} applies
+     *                         only the development scope
+     * @param pageable         pagination and sorting parameters
+     * @return the matching page of domain models
      * @throws DataAccessException if the underlying relational read fails
      */
     @Override
     public Page<AppProvider> findAll(Long appDevelopmentId, AppProviderCriteria criteria, Pageable pageable) {
-        log.info("Repository: Dynamic search pattern stream across provider relations for Development ID: {}", appDevelopmentId);
+        log.debug("Repository: Dynamic search pattern stream across provider relations for Development ID: {}", appDevelopmentId);
         try {
             Specification<AppProviderEntity> spec = AppProviderSpecification.filterByCriteria(appDevelopmentId, criteria);
             Page<AppProviderEntity> entityPage = appProviderJPARepository.findAll(spec, pageable);
@@ -177,8 +180,8 @@ public class AppProviderRepositoryAdapter implements AppProviderRepository {
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
-                        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+                        aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 

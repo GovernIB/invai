@@ -22,11 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +103,7 @@ class SystemRepositoryAdapterTest {
         adapter = buildAdapter();
         when(systemJPARepository.existsByServerIdAndInstance(1L, "INST01")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByServerIdAndInstance(1L, "INST01"));
+        assertTrue(adapter.existsByServerIdAndInstance(1L, "INST01"));
     }
 
     @Test
@@ -115,7 +111,7 @@ class SystemRepositoryAdapterTest {
         adapter = buildAdapter();
         when(systemJPARepository.existsByServerIdAndInstanceAndId(1L, "INST01", 2L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByServerIdAndInstanceAndId(1L, "INST01", 2L));
+        assertTrue(adapter.existsByServerIdAndInstanceAndId(1L, "INST01", 2L));
     }
 
     @Test

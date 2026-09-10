@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.responsible.authorizationType;
 
-import es.caib.invai.back.ejb.maintenance.responsible.authorizationType.AuthorizationTypeServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.responsible.authorizationType.DTO.AuthorizationTypeInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.authorizationType.DTO.AuthorizationTypeOutputDTO;
@@ -22,9 +21,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -176,7 +173,7 @@ class AuthorizationTypeServiceFacadeBeanTest {
 
         authorizationTypeServiceFacadeBean.delete(1L);
 
-        assertEquals(true, activeAuthorizationType.getDeletedAt() != null);
+        assertNotNull(activeAuthorizationType.getDeletedAt());
         verify(authorizationTypeRepository, times(1)).delete(activeAuthorizationType);
     }
 

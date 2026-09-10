@@ -5,6 +5,8 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
+import java.io.Serial;
+
 /**
  * JPA persistent entity representing classification taxonomy Categories for registered corporate software profiles.
  * Implements historical auditing field inheritances by extending {@link BaseEntity}.
@@ -16,6 +18,9 @@ import es.caib.invai.back.persistence.model.BaseEntity;
 @Getter
 @Setter
 public class CategoryEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = "CATEGORY_ID")

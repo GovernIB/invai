@@ -21,11 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,7 +102,7 @@ class CategoryRepositoryAdapterTest {
         adapter = buildAdapter();
         when(categoryJPARepository.existsByNameAndDeletedAtIsNull("Hardware")).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndDeletedAtIsNull("Hardware"));
+        assertTrue(adapter.existsByNameAndDeletedAtIsNull("Hardware"));
     }
 
     @Test
@@ -114,7 +110,23 @@ class CategoryRepositoryAdapterTest {
         adapter = buildAdapter();
         when(categoryJPARepository.existsByNameAndIdNotAndDeletedAtIsNull("Hardware", 1L)).thenReturn(true);
 
-        assertEquals(true, adapter.existsByNameAndIdNotAndDeletedAtIsNull("Hardware", 1L));
+        assertTrue(adapter.existsByNameAndIdNotAndDeletedAtIsNull("Hardware", 1L));
+    }
+
+    @Test
+    void existsByNameEsAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(categoryJPARepository.existsByNameEsAndDeletedAtIsNull("Hardware ES")).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndDeletedAtIsNull("Hardware ES"));
+    }
+
+    @Test
+    void existsByNameEsAndIdNotAndDeletedAtIsNull_delegatesToJPARepository() {
+        adapter = buildAdapter();
+        when(categoryJPARepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Hardware ES", 1L)).thenReturn(true);
+
+        assertTrue(adapter.existsByNameEsAndIdNotAndDeletedAtIsNull("Hardware ES", 1L));
     }
 
     @Test

@@ -3,7 +3,6 @@ package es.caib.invai.back.service.model.application.core;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
-import es.caib.invai.back.service.model.maintenance.admUnit.AdmUnit;
 import es.caib.invai.back.service.model.maintenance.general.category.Category;
 import es.caib.invai.back.service.model.maintenance.general.commission.Commission;
 import es.caib.invai.back.service.model.maintenance.general.field.Field;
@@ -47,8 +46,8 @@ public class Application {
     /** Functional area assignment boundary tracking business domain alignment. */
     private Field field;
 
-    /** Responsible structural corporate administrative node identity wrapper. */
-    private AdmUnit admUnit;
+    /** DIR3CAIB code of the administrative unit responsible for the application, resolved live — not stored locally. */
+    private String admUnitCode;
 
     /** Supervising governance working commission evaluation group connection. */
     private Commission csCommission;
@@ -56,13 +55,13 @@ public class Application {
     /** Current operational asset lifecycle state enumeration status token. */
     private StatusEnum status;
 
-    /** Timestamp marking the asset's validation timeline soft-deletion target point. */
+    /** Timestamp marking when the application record was created. */
     private LocalDateTime createdAt;
 
     /** Username of the actor who created the application record. */
     private String createdBy;
 
-    /** Timestamp marking the asset's validation timeline soft-deletion target point. */
+    /** Timestamp marking when the application record was last updated. */
     private LocalDateTime updatedAt;
 
     /** Username of the actor who last updated the application record. */

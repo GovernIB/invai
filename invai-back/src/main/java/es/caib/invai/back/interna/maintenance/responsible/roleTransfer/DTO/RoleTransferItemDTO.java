@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.responsible.roleTransfer.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import es.caib.invai.back.service.model.maintenance.responsible.roleTransfer.RoleAssignmentType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,10 +23,10 @@ import jakarta.validation.constraints.NotNull;
 public class RoleTransferItemDTO {
 
     /** Primary key of the {@code AppResponsible} or {@code AppAuthorized} row selected. */
-    @NotNull(message = "{validation.roletransfer.item.id}")
+    @NotNull(message = "{" + Constants.VALIDATION_ROLETRANSFER_ITEM_ID + "}")
     private Long id;
 
     /** Discriminates whether {@code id} refers to an {@code AppResponsible} or {@code AppAuthorized} row. */
-    @NotNull(message = "{validation.roletransfer.item.type}")
+    @NotNull(message = "{" + Constants.VALIDATION_ROLETRANSFER_ITEM_TYPE + "}")
     private RoleAssignmentType type;
 }

@@ -37,13 +37,15 @@ public class AppResponsibleController {
     private final AppResponsibleService appResponsibleService;
 
     /**
-     * Retrieves a paginated sequence of responsible assignment records scoped to a single parent
-     * "Responsables i Autoritzats" anchor, additionally filtered by dynamic criteria.
+     * Retrieves a paginated, filtered listing of responsible assignments scoped to a single
+     * "Responsables i Autoritzats" anchor. Unless the inactive status is explicitly requested, the
+     * listing is driven by the full responsible type catalog: every registered type is always
+     * returned, carrying its active holder when one exists or an empty placeholder otherwise.
      *
      * @param appResponsibleAuthorizedId mandatory parent anchor identifier scoping the result set
-     * @param criteria the multi-parameter business query filter boundaries
-     * @param pageable pagination structural constraints
-     * @return a paginated payload containing corresponding transfer representations
+     * @param criteria optional filter values (status, person, responsible type, free-text search)
+     * @param pageable pagination and sorting parameters
+     * @return the matching page of responsible assignment rows
      */
     @GetMapping("/{appResponsibleAuthorizedId}")
     public ResponseEntity<Page<AppResponsibleOutputDTO>> getAllByAppResponsibleAuthorizedId(
@@ -55,10 +57,11 @@ public class AppResponsibleController {
     }
 
     /**
-     * Registers a new responsible assignment.
+     * Creates a new responsible assignment. If another person already holds the requested
+     * responsible type on the same anchor, it is automatically deactivated in favor of the new one.
      *
-     * @param inputDTO validated data configuration schema
-     * @return outbound structural representation of the newly created assignment, with HTTP 201 status
+     * @param inputDTO validated create payload
+     * @return the newly created assignment, with HTTP 201 status
      */
     @PostMapping
     public ResponseEntity<AppResponsibleOutputDTO> create(@Valid @RequestBody AppResponsibleInputDTO inputDTO) {
@@ -67,10 +70,11 @@ public class AppResponsibleController {
     }
 
     /**
-     * Updates an active responsible assignment.
+     * Updates an active responsible assignment (the responsible type is immutable; only the
+     * person and job title can change).
      *
-     * @param id primary tracking reference key
-     * @param inputDTO mutated parameter dataset
+     * @param id identifier of the assignment to update
+     * @param inputDTO validated update payload
      * @return the updated assignment
      */
     @PutMapping("/{id}")
@@ -79,10 +83,10 @@ public class AppResponsibleController {
     }
 
     /**
-     * Logically deletes a responsible assignment ("donar de baixa"), optionally capturing a
+     * Soft-deletes an active responsible assignment ("donar de baixa"), optionally capturing a
      * free-text observation.
      *
-     * @param id target primary structural key to delete
+     * @param id identifier of the assignment to deactivate
      * @param dto optional payload carrying the deletion observation
      * @return an empty response body confirming success status
      */
@@ -95,9 +99,10 @@ public class AppResponsibleController {
     }
 
     /**
-     * Reactivates a previously deleted responsible assignment.
+     * Reactivates a previously deactivated responsible assignment, rejecting the operation if
+     * another active assignment has since taken over the same responsible type on the same anchor.
      *
-     * @param id target primary structural key to reactivate
+     * @param id identifier of the assignment to reactivate
      * @return the reactivated assignment
      */
     @PutMapping("reactivate/{id}")

@@ -1,7 +1,6 @@
 package es.caib.invai.back.service.mapper.catalog.status;
 
 import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
-import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
 import es.caib.invai.back.service.model.catalog.status.Status;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import org.junit.jupiter.api.BeforeEach;

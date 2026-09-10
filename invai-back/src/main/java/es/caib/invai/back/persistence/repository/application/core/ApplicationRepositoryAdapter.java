@@ -139,7 +139,7 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
      */
     @Override
     public Page<Application> findAll(ApplicationCriteria criteria, Pageable pageable) {
-        log.info("Repository: Fetching paged applications using isolated Specification component");
+        log.debug("Repository: Fetching paged applications using isolated Specification component");
         try {
             Specification<ApplicationEntity> spec = ApplicationSpecification.filterByCriteria(criteria);
 
@@ -261,18 +261,6 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
     }
 
     /**
-     * Queries the active database layers using native specifications to verify structural administrative unit
-     * bindings against active application records.
-     *
-     * @param admUnitId unique primary reference identifier tracking the target organizational entity metadata profile
-     * @return {@code true} if operational conflicts exist due to active dependencies, {@code false} otherwise
-     */
-    @Override
-    public boolean existsByAdmUnitId(Long admUnitId) {
-        return applicationJPARepository.existsByAdmUnitIdAndDeletedAtIsNull(admUnitId);
-    }
-
-    /**
      * Queries the active database layers using native specifications to verify structural technical commission
      * bindings against active application records.
      *
@@ -306,15 +294,15 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
-                        aud.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
-            aud.setUpdatedBy(entity.getUpdatedBy() != null ? entity.getUpdatedBy() : Utils.resolveCurrentUsername());
+                        aud.setUpdatedAt(entity.getUpdatedAt());
+            aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 
             if (entity.getCategory() != null) aud.setCategoryId(entity.getCategory().getId());
             if (entity.getSystemType() != null) aud.setSystemTypeId(entity.getSystemType().getId());
             if (entity.getField() != null) aud.setFieldId(entity.getField().getId());
-            if (entity.getAdmUnit() != null) aud.setAdmUnitId(entity.getAdmUnit().getId());
+            aud.setAdmUnitCode(entity.getAdmUnitCode());
             if (entity.getCsCommission() != null) aud.setCommissionId(entity.getCsCommission().getId());
             if (entity.getStatus() != null) aud.setStatusId(entity.getStatus().getId());
 

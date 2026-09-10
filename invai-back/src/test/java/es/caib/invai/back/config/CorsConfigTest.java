@@ -36,7 +36,6 @@ class CorsConfigTest {
 
         assertNotNull(resolved);
         assertEquals(java.util.List.of("https://invai.example.com"), resolved.getAllowedOrigins());
-        assertNotNull(resolved.getAllowedMethods());
         assertTrue(resolved.getAllowedMethods().containsAll(
                 java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")));
         assertEquals(java.util.List.of("*"), resolved.getAllowedHeaders());

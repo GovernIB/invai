@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.development.layer.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,7 +22,7 @@ import lombok.Setter;
 public class LayerInputDTO {
 
     /** Layer name. */
-    @NotBlank(message = "{validation.layer.name.required}")
-    @Size(max = 100, message = "{validation.layer.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_LAYER_NAME_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_LAYER_NAME_SIZE + "}")
     private String name;
 }

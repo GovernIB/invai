@@ -9,15 +9,16 @@ import es.caib.invai.back.persistence.repository.catalog.responsibleType.Respons
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonRepository;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.responsible.AppResponsibleMapper;
 import es.caib.invai.back.service.facade.application.responsibleAuthorized.responsible.AppResponsibleService;
+import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
 import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
-import es.caib.invai.back.service.model.maintenance.responsible.company.Company;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,7 +47,7 @@ import java.util.List;
  * </p>
  * <p>
  * Create and update also keep the linked person's {@code isPersonalCaib} flag in sync with the
- * value submitted alongside the assignment (see {@link #syncPersonalCaib}). On create,
+ * value submitted alongside the assignment (see {@link PersonService#syncPersonalCaib}). On create,
  * {@code personId} is itself optional: when absent, {@link #resolvePersonId} resolves an existing
  * active person by e-mail, or creates a new one, from {@code personFirstName}/{@code personLastName}/
  * {@code personEmail} (and {@code companyId} when not Personal CAIB) — this is what lets a CAIB
@@ -70,10 +71,20 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     /** Repository providing the full responsible type catalog driving the default listing. */
     @Autowired
     private ResponsibleTypeRepository responsibleTypeRepository;
-    /** Repository used to keep the linked person's {@code isPersonalCaib} flag in sync. */
+    /** Repository used to look up the linked person when enforcing the Personal CAIB restriction. */
     @Autowired
     private PersonRepository personRepository;
+    /** Facade used to resolve/create the linked person and keep its Personal CAIB flag in sync. */
+    @Autowired
+    private PersonService personService;
 
+    /**
+     * Retrieves a paginated, filtered listing of responsible assignments scoped to a single
+     * anchor. Falls back to the plain persisted-row listing when the inactive status is
+     * explicitly requested; otherwise builds one row per registered responsible type (see
+     * {@link #buildRow}), filters in-memory (see {@link #matchesCriteria}), and paginates the
+     * result in-memory (see {@link #paginate}).
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<AppResponsibleOutputDTO> getAll(Long appResponsibleAuthorizedId, AppResponsibleCriteria criteria, Pageable pageable) {
@@ -88,6 +99,99 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
                 .toList();
 
         return paginate(rows, pageable);
+    }
+
+    /**
+     * Creates a new responsible assignment, resolving/creating the person when {@code personId}
+     * is absent (see {@link #resolvePersonId}), enforcing the Personal CAIB restriction for the
+     * requested responsible type (see {@link #requirePersonalCaibIfRequiredByType}), and
+     * deactivating any active holder of the same responsible type on the same anchor.
+     *
+     * @throws BusinessRuleException if the responsible type requires a Personal CAIB person and
+     * the resolved person isn't one, or if person data is missing/invalid (see {@link #resolvePersonId})
+     */
+    @Override
+    public AppResponsibleOutputDTO create(AppResponsibleInputDTO inputDTO) {
+        Utils.sanitize(inputDTO);
+        inputDTO.setPersonId(resolvePersonId(inputDTO));
+        personService.syncPersonalCaib(inputDTO.getPersonId(), inputDTO.isPersonalCaib());
+        requirePersonalCaibIfRequiredByType(inputDTO.getResponsibleTypeId(), inputDTO.getPersonId());
+        AppResponsible currentHolder = appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(
+                inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getResponsibleTypeId());
+        if (currentHolder != null) {
+            deactivate(currentHolder, null);
+        }
+        AppResponsible model = appResponsibleMapper.toModelFromInput(inputDTO);
+        AppResponsible savedModel = appResponsibleRepository.create(model);
+        return appResponsibleMapper.toResponse(savedModel);
+    }
+
+    /**
+     * Updates an existing assignment's mutable fields. Unlike {@link #create}, {@code personId} is
+     * mandatory here (no inline person resolution) and the responsible type itself is immutable
+     * (see {@link AppResponsibleMapper#updateModelFromInput}), so only the person and job title
+     * can actually change.
+     *
+     * @throws BusinessRuleException if no assignment exists with the given ID, {@code personId} is
+     * missing, or the assignment's responsible type requires a Personal CAIB person and the
+     * resolved person isn't one
+     */
+    @Override
+    public AppResponsibleOutputDTO update(Long id, AppResponsibleInputDTO inputDTO) {
+        AppResponsible existing = appResponsibleRepository.findById(id);
+        if (existing == null) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
+        }
+        Utils.sanitize(inputDTO);
+        if (inputDTO.getPersonId() == null) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_PERSON_DATA_REQUIRED);
+        }
+        personService.syncPersonalCaib(inputDTO.getPersonId(), inputDTO.isPersonalCaib());
+        requirePersonalCaibIfRequiredByType(existing.getResponsibleType(), inputDTO.getPersonId());
+        appResponsibleMapper.updateModelFromInput(inputDTO, existing);
+        return appResponsibleMapper.toResponse(appResponsibleRepository.update(existing, id));
+    }
+
+    /**
+     * Soft-deletes an active assignment, recording the given observation (see {@link #deactivate}).
+     *
+     * @throws BusinessRuleException if no assignment exists with the given ID, or it is already inactive
+     */
+    @Override
+    public void delete(Long id, AppResponsibleDeleteDTO dto) {
+        AppResponsible existing = appResponsibleRepository.findById(id);
+        if (existing == null) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
+        }
+        if (existing.getDeletedAt() != null) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_ACTIVE);
+        }
+        deactivate(existing, dto != null ? dto.getObservation() : null);
+    }
+
+    /**
+     * Reactivates a previously deactivated assignment, rejecting the operation if another active
+     * assignment has since taken over the same responsible type on the same anchor.
+     *
+     * @throws BusinessRuleException if no assignment exists with the given ID, it is already
+     * active, or another active assignment now holds the same responsible type on the same anchor
+     */
+    @Override
+    public AppResponsibleOutputDTO reactivate(Long id) {
+        AppResponsible existing = appResponsibleRepository.findById(id);
+        if (existing == null) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
+        }
+        if (existing.getDeletedAt() == null) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_ACTIVE);
+        }
+        if (appResponsibleRepository.existsByAppResponsibleAuthorizedAndResponsibleTypeAndIdNot(
+                existing.getAppResponsibleAuthorized().getId(), existing.getResponsibleType().getId(), id)) {
+            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_DUPLICATED);
+        }
+        existing.setDeletedAt(null);
+        existing.setDeletedBy(null);
+        return appResponsibleMapper.toResponse(appResponsibleRepository.update(existing, id));
     }
 
     /**
@@ -156,38 +260,6 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
         return new PageImpl<>(rows.subList(start, end), pageable, rows.size());
     }
 
-    @Override
-    public AppResponsibleOutputDTO create(AppResponsibleInputDTO inputDTO) {
-        Utils.sanitize(inputDTO);
-        inputDTO.setPersonId(resolvePersonId(inputDTO));
-        syncPersonalCaib(inputDTO.getPersonId(), inputDTO.isPersonalCaib());
-        requirePersonalCaibIfRequiredByType(inputDTO.getResponsibleTypeId(), inputDTO.getPersonId());
-        AppResponsible currentHolder = appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(
-                inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getResponsibleTypeId());
-        if (currentHolder != null) {
-            deactivate(currentHolder, null);
-        }
-        AppResponsible model = appResponsibleMapper.toModelFromInput(inputDTO);
-        AppResponsible savedModel = appResponsibleRepository.create(model);
-        return appResponsibleMapper.toResponse(savedModel);
-    }
-
-    @Override
-    public AppResponsibleOutputDTO update(Long id, AppResponsibleInputDTO inputDTO) {
-        AppResponsible existing = appResponsibleRepository.findById(id);
-        if (existing == null) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
-        }
-        Utils.sanitize(inputDTO);
-        if (inputDTO.getPersonId() == null) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_PERSON_DATA_REQUIRED);
-        }
-        syncPersonalCaib(inputDTO.getPersonId(), inputDTO.isPersonalCaib());
-        requirePersonalCaibIfRequiredByType(existing.getResponsibleType(), inputDTO.getPersonId());
-        appResponsibleMapper.updateModelFromInput(inputDTO, existing);
-        return appResponsibleMapper.toResponse(appResponsibleRepository.update(existing, id));
-    }
-
     /**
      * Resolves the person to assign: returns {@code personId} as-is when provided; otherwise
      * resolves an existing active person by {@code personEmail}, or creates a new one from
@@ -204,49 +276,11 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
         if (inputDTO.getPersonId() != null) {
             return inputDTO.getPersonId();
         }
-        if (isBlank(inputDTO.getPersonFirstName()) || isBlank(inputDTO.getPersonLastName()) || isBlank(inputDTO.getPersonEmail())) {
+        if (StringUtils.isBlank(inputDTO.getPersonFirstName()) || StringUtils.isBlank(inputDTO.getPersonLastName()) || StringUtils.isBlank(inputDTO.getPersonEmail())) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_PERSON_DATA_REQUIRED);
         }
-        Person existing = personRepository.findByEmail(inputDTO.getPersonEmail());
-        if (existing != null) {
-            return existing.getId();
-        }
-        if (!inputDTO.isPersonalCaib() && inputDTO.getCompanyId() == null) {
-            throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
-        }
-        Person newPerson = new Person();
-        newPerson.setFirstName(inputDTO.getPersonFirstName());
-        newPerson.setLastName(inputDTO.getPersonLastName());
-        newPerson.setEmail(inputDTO.getPersonEmail());
-        newPerson.setPersonalCaib(inputDTO.isPersonalCaib());
-        if (!inputDTO.isPersonalCaib()) {
-            Company company = new Company();
-            company.setId(inputDTO.getCompanyId());
-            newPerson.setCompany(company);
-        }
-        return personRepository.create(newPerson).getId();
-    }
-
-    /**
-     * Keeps the linked person's {@code isPersonalCaib} flag in sync with the value submitted
-     * alongside the assignment. A no-op when the value already matches what is stored. Reuses the
-     * same business rule enforced by the Person maintenance itself: a person cannot be flagged as
-     * external (non-CAIB) without an associated company.
-     *
-     * @param personId the linked person's identifier
-     * @param personalCaib the submitted CAIB flag value
-     * @throws BusinessRuleException if setting the person to non-CAIB and it has no company
-     */
-    private void syncPersonalCaib(Long personId, boolean personalCaib) {
-        Person person = personRepository.findById(personId);
-        if (person == null || person.isPersonalCaib() == personalCaib) {
-            return;
-        }
-        if (!personalCaib && person.getCompany() == null) {
-            throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
-        }
-        person.setPersonalCaib(personalCaib);
-        personRepository.update(person, personId);
+        return personService.resolveOrCreatePerson(inputDTO.getPersonFirstName(), inputDTO.getPersonLastName(),
+                inputDTO.getPersonEmail(), inputDTO.isPersonalCaib(), inputDTO.getCompanyId()).getId();
     }
 
     /**
@@ -281,28 +315,6 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     }
 
     /**
-     * Returns whether the given string is {@code null}, empty, or blank.
-     *
-     * @param value the string to check
-     * @return {@code true} if the string carries no usable content
-     */
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
-    }
-
-    @Override
-    public void delete(Long id, AppResponsibleDeleteDTO dto) {
-        AppResponsible existing = appResponsibleRepository.findById(id);
-        if (existing == null) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
-        }
-        if (existing.getDeletedAt() != null) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_ACTIVE);
-        }
-        deactivate(existing, dto != null ? dto.getObservation() : null);
-    }
-
-    /**
      * Soft-deletes the given assignment, stamping the deletion audit fields and the given
      * observation (possibly {@code null}), used both by the explicit delete flow and by the
      * automatic swap-out performed on create when another person already holds the same
@@ -318,21 +330,5 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
         appResponsibleRepository.delete(existing);
     }
 
-    @Override
-    public AppResponsibleOutputDTO reactivate(Long id) {
-        AppResponsible existing = appResponsibleRepository.findById(id);
-        if (existing == null) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
-        }
-        if (existing.getDeletedAt() == null) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_ACTIVE);
-        }
-        if (appResponsibleRepository.existsByAppResponsibleAuthorizedAndResponsibleTypeAndIdNot(
-                existing.getAppResponsibleAuthorized().getId(), existing.getResponsibleType().getId(), id)) {
-            throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_DUPLICATED);
-        }
-        existing.setDeletedAt(null);
-        existing.setDeletedBy(null);
-        return appResponsibleMapper.toResponse(appResponsibleRepository.update(existing, id));
-    }
+
 }

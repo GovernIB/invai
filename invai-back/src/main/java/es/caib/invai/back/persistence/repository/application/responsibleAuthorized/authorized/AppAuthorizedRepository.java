@@ -7,8 +7,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 /**
- * Core business domain outbound Port boundary interface declaring relational persistence mechanisms
- * for the {@link AppAuthorized} anchor.
+ * Persistence port abstraction decoupling the service layer from the JPA infrastructure used to
+ * store the {@link AppAuthorized} anchor entity.
  *
  * @since 1.0.3
  */

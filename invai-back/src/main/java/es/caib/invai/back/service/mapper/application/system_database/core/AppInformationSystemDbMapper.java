@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
 
 /**
@@ -16,7 +17,7 @@ import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {StatusMapper.class})
+@Mapper(componentModel = "spring", uses = {StatusMapper.class, ApplicationMapper.class})
 public interface AppInformationSystemDbMapper {
 
     /**
@@ -51,6 +52,7 @@ public interface AppInformationSystemDbMapper {
      * @param inputDTO inbound client creation payload containing mapping configuration
      * @return a decoupled domain state instance ready for orchestration processing pipelines
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "application.id", source = "applicationId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -67,6 +69,7 @@ public interface AppInformationSystemDbMapper {
      * @param inputDTO delta parameter updates tracking values payload DTO
      * @param model    the active operational business graph container targeted for modifier updates
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "application.id", source = "applicationId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)

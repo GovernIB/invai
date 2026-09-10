@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.maintenance.general.category.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,15 +28,15 @@ public class CategoryInputDTO {
      * Localized descriptive classification title label string (typically in Catalan).
      * Constraint demands content presence capped at a maximum sequence of 50 characters.
      */
-    @NotBlank(message = "{validation.category.name.required}")
-    @Size(max = 50, message = "{validation.category.name.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_CATEGORY_NAME_REQUIRED + "}")
+    @Size(max = 50, message = "{" + Constants.VALIDATION_CATEGORY_NAME_SIZE + "}")
     private String name;
 
     /**
      * Secondary translated description text variant explicitly matching Spanish locale records.
      * Constraint demands content presence capped at a maximum sequence of 100 characters.
      */
-    @NotBlank(message = "{validation.category.nameEs.required}")
-    @Size(max = 100, message = "{validation.category.nameEs.size}")
+    @NotBlank(message = "{" + Constants.VALIDATION_CATEGORY_NAME_ES_REQUIRED + "}")
+    @Size(max = 100, message = "{" + Constants.VALIDATION_CATEGORY_NAME_ES_SIZE + "}")
     private String nameEs;
 }

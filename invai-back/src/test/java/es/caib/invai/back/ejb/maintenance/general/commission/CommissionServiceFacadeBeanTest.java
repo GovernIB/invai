@@ -1,6 +1,5 @@
 package es.caib.invai.back.ejb.maintenance.general.commission;
 
-import es.caib.invai.back.ejb.maintenance.general.commission.CommissionServiceFacadeBean;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.general.commission.DTO.CommissionInputDTO;
 import es.caib.invai.back.interna.maintenance.general.commission.DTO.CommissionOutputDTO;
@@ -25,9 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -140,6 +137,17 @@ class CommissionServiceFacadeBeanTest {
     }
 
     @Test
+    void create_duplicateNameEs_throwsBusinessRuleException() {
+        CommissionInputDTO inputDTO = buildInputDTO("Fresh Name", "Ocupado", "EXP-2026-004");
+        when(commissionRepository.existsByNameAndDeletedAtIsNull("Fresh Name")).thenReturn(false);
+        when(commissionRepository.existsByNameEsAndDeletedAtIsNull("Ocupado")).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> commissionServiceFacadeBean.create(inputDTO));
+        assertEquals(Constants.ERR_COMMISSION_DUPLICATED_ES, ex.getMessage());
+        verify(commissionRepository, never()).create(any());
+    }
+
+    @Test
     void create_duplicateExpedientNumber_throwsBusinessRuleException() {
         CommissionInputDTO inputDTO = buildInputDTO("Fresh Name", "Nombre Fresco", "EXP-DUP");
         when(commissionRepository.existsByNameAndDeletedAtIsNull("Fresh Name")).thenReturn(false);
@@ -167,6 +175,18 @@ class CommissionServiceFacadeBeanTest {
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> commissionServiceFacadeBean.update(1L, inputDTO));
         assertEquals(Constants.ERR_COMMISSION_DUPLICATED, ex.getMessage());
+        verify(commissionMapper, never()).updateModelFromInput(any(), any());
+    }
+
+    @Test
+    void update_duplicateNameEs_throwsBusinessRuleException() {
+        CommissionInputDTO inputDTO = buildInputDTO("Comissio Tecnica", "Ocupado", "EXP-2026-005");
+        when(commissionRepository.findById(1L)).thenReturn(activeCommission);
+        when(commissionRepository.existsByNameAndIdNotAndDeletedAtIsNull("Comissio Tecnica", 1L)).thenReturn(false);
+        when(commissionRepository.existsByNameEsAndIdNotAndDeletedAtIsNull("Ocupado", 1L)).thenReturn(true);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> commissionServiceFacadeBean.update(1L, inputDTO));
+        assertEquals(Constants.ERR_COMMISSION_DUPLICATED_ES, ex.getMessage());
         verify(commissionMapper, never()).updateModelFromInput(any(), any());
     }
 
@@ -208,6 +228,17 @@ class CommissionServiceFacadeBeanTest {
     }
 
     @Test
+    void delete_alreadyInactive_throwsBusinessRuleException() {
+        activeCommission.setDeletedAt(LocalDateTime.now());
+        when(commissionRepository.findById(1L)).thenReturn(activeCommission);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> commissionServiceFacadeBean.delete(1L));
+        assertEquals(Constants.ERR_COMMISSION_NOT_ACTIVE, ex.getMessage());
+        verify(commissionRepository, never()).delete(any());
+        verify(applicationRepository, never()).existsByCommissionId(any());
+    }
+
+    @Test
     void delete_hasDependencies_throwsBusinessRuleException() {
         when(commissionRepository.findById(1L)).thenReturn(activeCommission);
         when(applicationRepository.existsByCommissionId(1L)).thenReturn(true);
@@ -224,7 +255,7 @@ class CommissionServiceFacadeBeanTest {
 
         commissionServiceFacadeBean.delete(1L);
 
-        assertEquals(activeCommission.getDeletedAt() != null, true);
+        assertNotNull(activeCommission.getDeletedAt());
         verify(commissionRepository, times(1)).delete(activeCommission);
     }
 

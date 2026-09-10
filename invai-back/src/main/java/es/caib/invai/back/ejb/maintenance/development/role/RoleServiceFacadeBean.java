@@ -52,7 +52,7 @@ public class RoleServiceFacadeBean implements RoleService {
     @Override
     @Transactional(readOnly = true)
     public RoleOutputDTO getById(Long id) {
-        log.info("Facade: Fetching role by ID: {}", id);
+        log.debug("Facade: Fetching role by ID: {}", id);
         Role role = roleRepository.findById(id);
 
         if (role == null) {
@@ -72,7 +72,7 @@ public class RoleServiceFacadeBean implements RoleService {
     @Override
     @Transactional(readOnly = true)
     public Page<RoleOutputDTO> getAll(RoleCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching roles via pagination boundaries");
+        log.debug("Facade: Fetching roles via pagination boundaries");
         Page<Role> domainPage = roleRepository.findAll(filter, pageable);
         return domainPage.map(roleMapper::toResponse);
     }

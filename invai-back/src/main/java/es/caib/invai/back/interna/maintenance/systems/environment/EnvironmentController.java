@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Environment profiles metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_usuari-tipus-E} role.
+ * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
  * </p>
  *
  * @since 1.0.1
@@ -55,7 +55,7 @@ public class EnvironmentController {
     public ResponseEntity<Page<EnvironmentOutputDTO>> getAll(
             @ModelAttribute EnvironmentCriteria filter,
             @PageableDefault(sort = "id") Pageable pageable) {
-        log.info("REST: Initiating multi-criteria fetch grid search query parameters");
+        log.debug("REST: Initiating multi-criteria fetch grid search query parameters");
         Page<EnvironmentOutputDTO> multiQueryResult = environmentService.getAll(filter, pageable);
         return ResponseEntity.ok(multiQueryResult);
     }
@@ -68,7 +68,7 @@ public class EnvironmentController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<EnvironmentOutputDTO> getById(@PathVariable Long id) {
-        log.info("REST: Fetching environment by ID: {}", id);
+        log.debug("REST: Fetching environment by ID: {}", id);
         return ResponseEntity.ok(environmentService.getById(id));
     }
 

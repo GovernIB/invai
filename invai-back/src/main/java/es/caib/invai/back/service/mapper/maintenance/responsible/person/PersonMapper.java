@@ -36,6 +36,7 @@ public interface PersonMapper {
     /**
      * Constructs a pure domain business structure from incoming input payload parameter DTOs.
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "company.id", source = "companyId")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -48,6 +49,7 @@ public interface PersonMapper {
     /**
      * Merges update parameters from an API input payload DTO into an existing active domain business model.
      */
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "company.id", source = "companyId")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)

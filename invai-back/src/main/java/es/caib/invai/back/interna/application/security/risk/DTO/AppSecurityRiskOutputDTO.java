@@ -1,0 +1,39 @@
+package es.caib.invai.back.interna.application.security.risk.DTO;
+
+import es.caib.invai.back.interna.application.security.core.DTO.AppSecurityOutputDTO;
+import es.caib.invai.back.interna.catalog.securityLevel.DTO.SecurityLevelOutputDTO;
+import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+/**
+ * Outbound transport payload detailing technical context mappings of the target
+ * application security risk entity definitions.
+ *
+ * @since 1.0.4
+ */
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AppSecurityRiskOutputDTO {
+
+    /** Unique identification pointer of this security risk. */
+    private Long id;
+    /** Security anchor this risk belongs to. */
+    private AppSecurityOutputDTO appSecurity;
+    /** Security level lookup classifying the severity of this risk. */
+    private SecurityLevelOutputDTO level;
+    /** Free-text description of this security risk. */
+    private String description;
+    /** Functional business field ("Àmbit") this risk is associated with. */
+    private FieldOutputDTO field;
+    /** Timestamp at which this record was logically deleted, or {@code null} if still active. */
+    private LocalDateTime deletedAt;
+}

@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,9 +70,9 @@ class DatabaseRepositoryAdapterTest {
         return server;
     }
 
-    private DatabaseVendorEntity buildDatabaseType(Long id) {
+    private DatabaseVendorEntity buildDatabaseType() {
         DatabaseVendorEntity vendor = new DatabaseVendorEntity();
-        vendor.setId(id);
+        vendor.setId(3L);
         return vendor;
     }
 
@@ -142,7 +141,7 @@ class DatabaseRepositoryAdapterTest {
         saved.setServer(buildServer(10L));
         saved.setService("invai_db");
         saved.setPort(5432);
-        saved.setDatabaseType(buildDatabaseType(3L));
+        saved.setDatabaseType(buildDatabaseType());
         saved.setDescription("Main database");
         Database response = new Database();
         when(databaseMapper.toEntity(model)).thenReturn(toSave);
@@ -164,8 +163,8 @@ class DatabaseRepositoryAdapterTest {
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());
-        assertNotNull(aud.getUpdatedAt());
-        assertEquals("SYSTEM_USER", aud.getUpdatedBy());
+        assertNull(aud.getUpdatedAt());
+        assertNull(aud.getUpdatedBy());
         assertNotNull(aud.getAuditDate());
         assertEquals("SYSTEM_USER", aud.getAuditUser());
     }

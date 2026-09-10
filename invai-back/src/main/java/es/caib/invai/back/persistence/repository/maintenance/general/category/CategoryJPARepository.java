@@ -1,11 +1,8 @@
 package es.caib.invai.back.persistence.repository.maintenance.general.category;
 
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -16,16 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CategoryJPARepository extends JpaRepository<CategoryEntity, Long>, JpaSpecificationExecutor<CategoryEntity> {
-
-    /**
-     * Obtains a paginated and sorted slice of all active asset category taxonomy units that have not
-     * been logically soft-deleted.
-     *
-     * @param pageable pagination and sorting configuration parameters
-     * @return a {@link Page} encapsulating the matching active {@link CategoryEntity} records
-     */
-    @Query("SELECT c FROM CategoryEntity c WHERE c.deletedAt IS NULL")
-    Page<CategoryEntity> findAllActive(Pageable pageable);
 
     /**
      * Determines whether an active category entry matching a specific structural descriptor name already exists.
@@ -44,4 +31,22 @@ public interface CategoryJPARepository extends JpaRepository<CategoryEntity, Lon
      * @return {@code true} if a conflicting record matches the given criteria, {@code false} otherwise
      */
     boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Long id);
+
+    /**
+     * Determines whether an active Category entry matching a specific Spanish name already exists.
+     *
+     * @param nameEs target Spanish name value to verify
+     * @return {@code true} if a matching active record is found, {@code false} otherwise
+     */
+    boolean existsByNameEsAndDeletedAtIsNull(String nameEs);
+
+    /**
+     * Determines whether an alternative active Category matching a targeted Spanish name exists,
+     * excluding a designated record reference ID. Typically utilized during update uniqueness checks.
+     *
+     * @param nameEs target Spanish name value to verify
+     * @param id     the persistent primary reference identity to exclude from evaluation scopes
+     * @return {@code true} if a conflicting record matches the given criteria, {@code false} otherwise
+     */
+    boolean existsByNameEsAndIdNotAndDeletedAtIsNull(String nameEs, Long id);
 }

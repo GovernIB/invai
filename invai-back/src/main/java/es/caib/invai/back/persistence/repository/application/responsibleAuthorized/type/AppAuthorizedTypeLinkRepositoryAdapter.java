@@ -10,8 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Infrastructure repository Adapter implementing the outbound port boundary {@link AppAuthorizedTypeLinkRepository}.
- * Deliberately lightweight: no audit trail, detach is a plain hard delete.
+ * {@link AppAuthorizedTypeLinkRepository} implementation delegating persistence to the
+ * {@link AppAuthorizedTypeLinkJPARepository}. Deliberately lightweight: no audit trail is written,
+ * and detaching a type is a plain hard delete rather than a soft-delete.
  *
  * @since 1.0.3
  */

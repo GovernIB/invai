@@ -66,7 +66,7 @@ public class CompanyServiceFacadeBean implements CompanyService {
     @Override
     @Transactional(readOnly = true)
     public CompanyOutputDTO getById(Long id) {
-        log.info("Facade: Fetching company by ID: {}", id);
+        log.debug("Facade: Fetching company by ID: {}", id);
         Company company = companyRepository.findById(id);
 
         if (company == null) {
@@ -86,7 +86,7 @@ public class CompanyServiceFacadeBean implements CompanyService {
     @Override
     @Transactional(readOnly = true)
     public Page<CompanyOutputDTO> getAll(CompanyCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching companies via pagination boundaries");
+        log.debug("Facade: Fetching companies via pagination boundaries");
         Page<Company> domainPage = companyRepository.findAll(filter, pageable);
         return domainPage.map(companyMapper::toResponse);
     }

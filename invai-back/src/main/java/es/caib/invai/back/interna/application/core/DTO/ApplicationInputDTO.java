@@ -1,5 +1,7 @@
 package es.caib.invai.back.interna.application.core.DTO;
 
+import es.caib.invai.back.utils.Constants;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,11 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) capturing incoming payload attributes required to register or update
- * an Application software asset record within the enterprise inventory system framework.
- * <p>
- * Enforces declarative bean validation attributes tied to localization message bundles and map structures.
- * </p>
+ * Inbound payload for creating or updating an {@code Application}. {@code code} and {@code prefix}
+ * must each be unique across applications — enforced by the facade, not by validation here.
  *
  * @since 1.0.1
  */
@@ -20,45 +19,48 @@ import lombok.Setter;
 @Setter
 public class ApplicationInputDTO {
 
-    /** The public descriptive identification name designation parameter of the application. */
-    @NotBlank(message = "{validation.application.name}")
-    @Size(max = 100, message = "{validation.application.name.overflow}")
+    /** Display name of the application. */
+    @NotBlank(message = "{" + Constants.VALIDATION_APPLICATION_NAME + "}")
+    @Size(max = 100, message = "{" + Constants.ERR_APPLICATION_NAME_OVERFLOW + "}")
     private String name;
 
-    /** Corporate technical shorthand acronym prefix routing indicator identifying application scopes. */
-    @NotBlank(message = "{validation.application.prefix}")
-    @Size(max = 3, message = "{validation.application.prefix.overflow}")
+    /** Short (max 3 characters) acronym used to prefix identifiers generated for this application. */
+    @NotBlank(message = "{" + Constants.VALIDATION_APPLICATION_PREFIX + "}")
+    @Size(max = 3, message = "{" + Constants.ERR_APPLICATION_PREFIX_OVERFLOW + "}")
     private String prefix;
 
-    /** Unique administrative identification classification system alphanumeric code string tracker. */
-    @NotBlank(message = "{validation.application.code}")
-    @Size(min = 3, max = 50, message = "{validation.application.code.size}") // Se asume min=3 y un max estándar de 50 para el código
+    /** Unique alphanumeric code identifying the application. */
+    @NotBlank(message = "{" + Constants.VALIDATION_APPLICATION_CODE + "}")
+    @Size(min = Constants.CODE_MIN_LENGTH, max = Constants.APPLICATION_CODE_MAX_LENGTH, message = "{" + Constants.ERR_APPLICATION_CODE_SIZE + "}")
     private String code;
 
-    /** Foreign primary reference key tracking target taxonomic classification Category records. */
-    @NotNull(message = "{validation.application.categoryId}")
+    /** Identifier of the {@code Category} this application is classified under. */
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATION_CATEGORY_ID + "}")
     private Long categoryId;
 
-    /** Foreign primary reference key tracking structural architecture execution infrastructure classifications. */
-    @NotNull(message = "{validation.application.systemTypeId}")
+    /** Identifier of the {@code SystemType} (infrastructure/architecture classification) of this application. */
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATION_SYSTEM_TYPE_ID + "}")
     private Long systemTypeId;
 
-    /** Foreign primary reference key detailing the targeted operational business field perimeter layout. */
-    @NotNull(message = "{validation.application.fieldId}")
+    /** Identifier of the {@code Field} (business domain) this application belongs to. */
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATION_FIELD_ID + "}")
     private Long fieldId;
 
-    /** Foreign primary reference key mapping structural corporate administrative accountability unit locations. */
-    @NotNull(message = "{validation.application.admUnitId}")
-    private Long admUnitId;
+    /**
+     * DIR3CAIB code of the administrative unit responsible for the application. Optional. When
+     * provided, it must match a unit in the live DIR3CAIB tree (validated by the facade); no local
+     * record is created or referenced — the code is stored as-is.
+     */
+    private String admUnitCode;
 
-    /** Foreign primary reference key defining the supervising governance working commission group. */
-    @NotNull(message = "{validation.application.commissionId}")
+    /** Identifier of the {@code Commission} overseeing this application. */
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATION_CS_COMMISSION_ID + "}")
     private Long commissionId;
 
-    /** Verbose description narrative text highlighting structural operational scopes or functional metrics. */
+    /** Free-text description of the application. Optional. */
     private String description;
 
-    /** Target status configuration map status identifier tracking active lifecycle asset boundaries. */
-    @NotNull(message = "{validation.application.statusId}")
+    /** Identifier of the {@code Status} (e.g. active/inactive) to set on the application. */
+    @NotNull(message = "{" + Constants.VALIDATION_APPLICATION_STATUS_ID + "}")
     private Long statusId;
 }

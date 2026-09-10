@@ -54,11 +54,11 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
     @Override
     @Transactional(readOnly = true)
     public SystemTypeOutputDTO getById(Long id) {
-        log.info("Facade: Fetching system type by ID: {}", id);
+        log.debug("Facade: Fetching system type by ID: {}", id);
         SystemType systemType = systemTypeRepository.findById(id);
 
         if (systemType == null) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
         return systemTypeMapper.toResponse(systemType);
@@ -73,7 +73,7 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
     @Override
     @Transactional(readOnly = true)
     public Page<SystemTypeOutputDTO> getAll(SystemTypeCriteria filter, Pageable pageable) {
-        log.info("Facade: Fetching system types via pagination boundaries");
+        log.debug("Facade: Fetching system types via pagination boundaries");
         Page<SystemType> domainPage = systemTypeRepository.findAll(filter, pageable);
         return domainPage.map(systemTypeMapper::toResponse);
     }
@@ -94,7 +94,10 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         Utils.sanitize(inputDTO);
 
         if (systemTypeRepository.existsByNameAndDeletedAtIsNull(inputDTO.getName())) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_DUPLICATED);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_DUPLICATED);
+        }
+        if (systemTypeRepository.existsByNameEsAndDeletedAtIsNull(inputDTO.getNameEs())) {
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_DUPLICATED_ES);
         }
 
         SystemType model = systemTypeMapper.toModelFromInput(inputDTO);
@@ -119,13 +122,16 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
 
         SystemType existing = systemTypeRepository.findById(id);
         if (existing == null) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
         Utils.sanitize(inputDTO);
 
         if (systemTypeRepository.existsByNameAndIdNotAndDeletedAtIsNull(inputDTO.getName(), id)) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_DUPLICATED);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_DUPLICATED);
+        }
+        if (systemTypeRepository.existsByNameEsAndIdNotAndDeletedAtIsNull(inputDTO.getNameEs(), id)) {
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_DUPLICATED_ES);
         }
 
         systemTypeMapper.updateModelFromInput(inputDTO, existing);
@@ -146,15 +152,15 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         SystemType existing = systemTypeRepository.findById(id);
 
         if (existing == null) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
         if (existing.getDeletedAt() != null) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_NOT_ACTIVE);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_ACTIVE);
         }
 
         if (applicationRepository.existsBySystemTypeId(id)) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_DELETE_HAS_DEPENDENCIES);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_DELETE_HAS_DEPENDENCIES);
         }
 
         existing.setDeletedAt(LocalDateTime.now());
@@ -176,11 +182,11 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         SystemType existing = systemTypeRepository.findById(id);
 
         if (existing == null) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_NOT_FOUND);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
         if (existing.getDeletedAt() == null) {
-            throw new BusinessRuleException(Constants.SYSTEM_TYPE_ACTIVE);
+            throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_ACTIVE);
         }
 
         existing.setDeletedAt(null);

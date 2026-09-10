@@ -1,7 +1,6 @@
 package es.caib.invai.back.service.mapper.catalog.standardAdaption;
 
 import es.caib.invai.back.persistence.model.catalog.standardAdaption.LkupStandardAdaptionEntity;
-import es.caib.invai.back.service.mapper.catalog.standardAdaption.StandardAdaptionMapper;
 import es.caib.invai.back.service.model.catalog.standardAdaption.StandardAdaption;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

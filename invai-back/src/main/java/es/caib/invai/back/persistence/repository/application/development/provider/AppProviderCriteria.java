@@ -7,8 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Filter criteria DTO encapsulating query search parameters for dynamically constructing
- * JPA Specifications and filtering {@code ProviderEntity} records.
+ * Filter parameters accepted by the AppProvider list endpoint, consumed by
+ * {@link AppProviderSpecification#filterByCriteria}: {@code statusId} switches between active
+ * ({@code deletedAt IS NULL}) and soft-deleted rows, {@code appDevelopmentId} adds a redundant
+ * equality check on top of the mandatory path-parameter scope, and {@code search} matches either
+ * an exact numeric id or a case-insensitive {@code companyName} substring.
  *
  * @since 1.0.2
  */

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * Internal REST controller exposing operations and lifecycle endpoints for Commission domain resources.
  * <p>
  * Access control restrictions are enforced globally at the class level via Spring Method Security,
- * allowing access only to authenticated users who possess the corporate role {@code ROLE_usuari-tipus-E}.
+ * allowing access only to authenticated users who possess the corporate role {@code ROLE_INV_SUPER}.
  * </p>
  *
  * @since 1.0.1

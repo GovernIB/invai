@@ -45,7 +45,7 @@ public class StatusController {
      */
     @GetMapping
     public ResponseEntity<List<StatusOutputDTO>> getAll() {
-        log.info("REST: Fetching every status lookup entry");
+        log.debug("REST: Fetching every status lookup entry");
         return ResponseEntity.ok(statusService.getAll());
     }
 }

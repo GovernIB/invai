@@ -59,7 +59,7 @@ public class CommissionServiceFacadeBean implements CommissionService {
     @Override
     @Transactional(readOnly = true)
     public CommissionOutputDTO getById(Long id) {
-        log.info("Facade: Fetching commission by id: {}", id);
+        log.debug("Facade: Fetching commission by id: {}", id);
         Commission commission = commissionRepository.findById(id);
         if (commission == null) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_FOUND);
@@ -76,7 +76,7 @@ public class CommissionServiceFacadeBean implements CommissionService {
     @Override
     @Transactional(readOnly = true)
     public Page<CommissionOutputDTO> getAll(CommissionCriteria criteria, Pageable pageable) {
-        log.info("Facade: Fetching paged commissions");
+        log.debug("Facade: Fetching paged commissions");
         return commissionRepository.findAll(criteria, pageable).map(commissionMapper::toResponse);
     }
 
@@ -94,6 +94,9 @@ public class CommissionServiceFacadeBean implements CommissionService {
 
         if (commissionRepository.existsByNameAndDeletedAtIsNull(inputDTO.getName())) {
             throw new BusinessRuleException(ERR_COMMISSION_DUPLICATED);
+        }
+        if (commissionRepository.existsByNameEsAndDeletedAtIsNull(inputDTO.getNameEs())) {
+            throw new BusinessRuleException(ERR_COMMISSION_DUPLICATED_ES);
         }
         if (commissionRepository.existsByExpedientNumberAndDeletedAtIsNull(inputDTO.getExpedientNumber())) {
             throw new BusinessRuleException(ERR_COMMISSION_DUPLICATED);
@@ -125,6 +128,9 @@ public class CommissionServiceFacadeBean implements CommissionService {
         if (commissionRepository.existsByNameAndIdNotAndDeletedAtIsNull(inputDTO.getName(), id)) {
             throw new BusinessRuleException(ERR_COMMISSION_DUPLICATED);
         }
+        if (commissionRepository.existsByNameEsAndIdNotAndDeletedAtIsNull(inputDTO.getNameEs(), id)) {
+            throw new BusinessRuleException(ERR_COMMISSION_DUPLICATED_ES);
+        }
         if (commissionRepository.existsByExpedientNumberAndIdNotAndDeletedAtIsNull(inputDTO.getExpedientNumber(), id)) {
             throw new BusinessRuleException(ERR_COMMISSION_DUPLICATED);
         }
@@ -148,6 +154,10 @@ public class CommissionServiceFacadeBean implements CommissionService {
         Commission existing = commissionRepository.findById(id);
         if (existing == null) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_FOUND);
+        }
+
+        if (existing.getDeletedAt() != null) {
+            throw new BusinessRuleException(ERR_COMMISSION_NOT_ACTIVE);
         }
 
         if (applicationRepository.existsByCommissionId(id)) {

@@ -15,14 +15,16 @@ public interface Constants {
     // =========================================================================
 
     /**
-     * Configuration environment property pointer key linking back to the target SSO authentication host.
-     */
-    String KEY_HOST = "es.caib.invai.login.host";
-
-    /**
      * Mandatory physical lower size constraint threshold evaluated during dynamic text asset code parsing.
      */
     int CODE_MIN_LENGTH = 4;
+
+    /**
+     * Upper size constraint for {@code Application.code}, matching the {@code INV_APPLICATION.CODE
+     * VARCHAR2(10 CHAR)} column so bean validation rejects an oversized code before it ever reaches
+     * the database.
+     */
+    int APPLICATION_CODE_MAX_LENGTH = 10;
 
     /**
      * Fallback literal name string assigned to system-driven historical lifecycle audit events.
@@ -44,7 +46,6 @@ public interface Constants {
     // =========================================================================
 
     // --- 1. APPLICATION VALIDATIONS ---
-    String VALIDATION_APPLICATION_ADM_UNIT_ID = "validation.application.admUnitId";
     String VALIDATION_APPLICATION_CATEGORY_ID = "validation.application.categoryId";
     String VALIDATION_APPLICATION_CODE = "validation.application.code";
     String VALIDATION_APPLICATION_CS_COMMISSION_ID = "validation.application.csCommissionId";
@@ -55,6 +56,12 @@ public interface Constants {
     String VALIDATION_APPLICATION_STATUS_ID = "validation.application.statusId";
     String VALIDATION_APPLICATION_SYSTEM_TYPE_ID = "validation.application.systemTypeId";
     String VALIDATION_APPLICATION_TITLE = "validation.application.title";
+
+    /** Generic client-facing message for an unhandled persistence-layer failure; never exposes the raw DB error. */
+    String ERR_PERSISTENCE_GENERIC = "exception.persistence.generic";
+
+    /** Generic client-facing message for any otherwise-unhandled server-side exception. */
+    String ERR_UNEXPECTED_GENERIC = "exception.unexpected.generic";
 
     // --- 2. CATEGORY VALIDATIONS ---
     String VALIDATION_CATEGORY_NAME_ES_REQUIRED = "validation.category.nameEs.required";
@@ -67,14 +74,6 @@ public interface Constants {
     String VALIDATION_FIELD_NAME_ES_SIZE = "validation.field.nameEs.size";
     String VALIDATION_FIELD_NAME_REQUIRED = "validation.field.name.required";
     String VALIDATION_FIELD_NAME_SIZE = "validation.field.name.size";
-
-    // --- 4. ADMINISTRATIVE UNIT (ADMUNIT) VALIDATIONS ---
-    String VALIDATION_ADMUNIT_CODE_REQUIRED = "validation.admunit.code.required";
-    String VALIDATION_ADMUNIT_CODE_SIZE = "validation.admunit.code.size";
-    String VALIDATION_ADMUNIT_NAME_ES_REQUIRED = "validation.admunit.nameEs.required";
-    String VALIDATION_ADMUNIT_NAME_ES_SIZE = "validation.admunit.nameEs.size";
-    String VALIDATION_ADMUNIT_NAME_REQUIRED = "validation.admunit.name.required";
-    String VALIDATION_ADMUNIT_NAME_SIZE = "validation.admunit.name.size";
 
     // --- 5. COMMISSION VALIDATIONS ---
     String VALIDATION_COMMISSION_APPROVAL_DATE_REQUIRED = "validation.commission.approvalDate.required";
@@ -96,7 +95,6 @@ public interface Constants {
     String VALIDATION_DATABASE_DATABASE_TYPE_ID = "validation.database.databaseTypeId";
     String VALIDATION_DATABASE_PORT = "validation.database.port";
     String VALIDATION_DATABASE_SERVER = "validation.database.server";
-    String VALIDATION_DATABASE_SERVER_OVERFLOW = "validation.database.server.overflow";
     String VALIDATION_DATABASE_SERVICE = "validation.database.service";
     String VALIDATION_DATABASE_SERVICE_OVERFLOW = "validation.database.service.overflow";
 
@@ -125,8 +123,9 @@ public interface Constants {
     String VALIDATION_APPDATABASE_INFORMATION_SYSTEM_DB_ID = "validation.appdatabase.informationSystemDbId";
     String VALIDATION_APPDATABASE_DATABASE_ID = "validation.appdatabase.databaseId";
 
-    // --- 12. APPLICATION INFORMATION SYSTEM DATABASE VALIDATIONS ---
-    String VALIDATION_APPINFORMATIONSYSTEMDB_APPLICATION_ID = "validation.appinformationsystemdb.applicationId";
+    // --- 12. APPLICATION SECURITY / INFORMATION SYSTEM DATABASE ANCHOR VALIDATIONS ---
+    String VALIDATION_APP_SECURITY_APPLICATION_ID = "validation.appsecurity.applicationId";
+    String VALIDATION_APP_INFORMATION_SYSTEM_DB_APPLICATION_ID = "validation.appinformationsystemdb.applicationId";
 
     // --- 13. APPLICATION DEVELOPMENT VALIDATIONS ---
     String VALIDATION_DEVELOPMENT_APPLICATION_ID = "validation.development.applicationId";
@@ -136,20 +135,14 @@ public interface Constants {
     String VALIDATION_DEVELOPMENT_CODE_OVERFLOW = "validation.development.code.overflow";
     String VALIDATION_DEVELOPMENT_STANDARD_ADAPTION_ID = "validation.development.standardAdaptionId";
     String VALIDATION_DEVELOPMENT_REVISION_DATE = "validation.development.revisionDate";
-    String VALIDATION_DEVELOPMENT_OBSERVATION_REQUIRED = "validation.development.observation.required";
 
     // --- 14. APPLICATION DEVELOPMENT PROVIDER VALIDATIONS ---
     String VALIDATION_PROVIDER_APP_DEVELOPMENT_ID = "validation.provider.appDevelopmentId";
     String VALIDATION_PROVIDER_COMPANY_NAME_REQUIRED = "validation.provider.companyName.required";
     String VALIDATION_PROVIDER_COMPANY_NAME_OVERFLOW = "validation.provider.companyName.overflow";
-    String VALIDATION_PROVIDER_ROLE_OVERFLOW = "validation.provider.role.overflow";
 
     // --- 15. APPLICATION DEVELOPMENT TECHNOLOGY VALIDATIONS ---
     String VALIDATION_TECHNOLOGY_APP_DEVELOPMENT_ID = "validation.technology.appDevelopmentId";
-    String VALIDATION_TECHNOLOGY_LAYER_REQUIRED = "validation.technology.layer.required";
-    String VALIDATION_TECHNOLOGY_LAYER_OVERFLOW = "validation.technology.layer.overflow";
-    String VALIDATION_TECHNOLOGY_TECHNOLOGY_REQUIRED = "validation.technology.technology.required";
-    String VALIDATION_TECHNOLOGY_TECHNOLOGY_OVERFLOW = "validation.technology.technology.overflow";
     String VALIDATION_TECHNOLOGY_VERSION_REQUIRED = "validation.technology.version.required";
     String VALIDATION_TECHNOLOGY_VERSION_OVERFLOW = "validation.technology.version.overflow";
     String VALIDATION_TECHNOLOGY_ARCHITECTURE_REQUIRED = "validation.technology.architecture.required";
@@ -181,7 +174,6 @@ public interface Constants {
     String VALIDATION_TECHNOLOGYCATALOG_LAYER_ID = "validation.technologycatalog.layerId";
 
     // --- 21. APPLICATION DEVELOPMENT PROVIDER / TECHNOLOGY FK VALIDATIONS ---
-    String VALIDATION_PROVIDER_ROLE_ID = "validation.provider.roleId";
     String VALIDATION_TECHNOLOGY_LAYER_ID = "validation.technology.layerId";
     String VALIDATION_TECHNOLOGY_TECHNOLOGY_ID = "validation.technology.technologyId";
 
@@ -216,6 +208,22 @@ public interface Constants {
     String VALIDATION_ROLETRANSFER_ITEM_ID = "validation.roletransfer.item.id";
     String VALIDATION_ROLETRANSFER_ITEM_TYPE = "validation.roletransfer.item.type";
 
+    // --- 29. IDENTITY PROVIDER VALIDATIONS ---
+    String VALIDATION_IDENTITYPROVIDER_NAME_REQUIRED = "validation.identityprovider.name.required";
+    String VALIDATION_IDENTITYPROVIDER_NAME_SIZE = "validation.identityprovider.name.size";
+
+    // --- 30. PERSONAL DATA PROCESSING VALIDATIONS ---
+    String VALIDATION_PERSONALDATAPROCESSING_NAME_REQUIRED = "validation.personaldataprocessing.name.required";
+    String VALIDATION_PERSONALDATAPROCESSING_NAME_SIZE = "validation.personaldataprocessing.name.size";
+    String VALIDATION_PERSONALDATAPROCESSING_NAME_ES_REQUIRED = "validation.personaldataprocessing.nameEs.required";
+    String VALIDATION_PERSONALDATAPROCESSING_NAME_ES_SIZE = "validation.personaldataprocessing.nameEs.size";
+
+    // --- 31. WEB CONTEXT VALIDATIONS ---
+    String VALIDATION_WEBCONTEXT_NAME_REQUIRED = "validation.webcontext.name.required";
+    String VALIDATION_WEBCONTEXT_NAME_SIZE = "validation.webcontext.name.size";
+    String VALIDATION_WEBCONTEXT_NAME_ES_REQUIRED = "validation.webcontext.nameEs.required";
+    String VALIDATION_WEBCONTEXT_NAME_ES_SIZE = "validation.webcontext.nameEs.size";
+
     // =========================================================================
     // EXCEPTION TRANSLATION BUNDLE KEYS (Business Rules Exceptions)
     // =========================================================================
@@ -227,6 +235,8 @@ public interface Constants {
     String ERR_APPLICATION_CODE_SIZE = "exception.application.codesize";
     String ERR_APPLICATION_NAME_OVERFLOW = "exception.application.name.overflow";
     String ERR_APPLICATION_PREFIX_OVERFLOW = "exception.application.prefix.overflow";
+    String ERR_APPLICATION_ADMUNIT_NOT_FOUND = "exception.application.admunit.notfound";
+    String ERR_APPLICATION_ADMUNIT_MUST_BE_DEPARTMENT_CHILD = "exception.application.admunit.mustbedepartmentchild";
     String ERR_CODE_DUPLICATED = "exception.application.codeduplicated";
     String ERR_CODE_OWNED_BY_OTHER = "exception.application.codeowned";
     String ERR_PREFIX_DUPLICATED = "exception.application.prefixduplicated";
@@ -237,45 +247,35 @@ public interface Constants {
     String ERR_CATEGORY_DELETE_HAS_DEPENDENCIES = "exception.category.delete.hasdependencies";
     String ERR_CATEGORY_DUPLICATED = "exception.category.duplicated";
     String ERR_CATEGORY_DUPLICATED_ES = "exception.category.duplicatedEs";
-    String ERR_CATEGORY_HAS_APPLICATIONS = "exception.category.hasapplications";
     String ERR_CATEGORY_NOT_ACTIVE = "exception.category.notactive";
     String ERR_CATEGORY_NOT_FOUND = "exception.category.notfound";
 
     // --- FIELD ERRORS ---
-    String FIELD_ACTIVE = "exception.field.active";
-    String FIELD_DELETE_HAS_DEPENDENCIES = "exception.field.delete.hasdependencies";
-    String FIELD_DUPLICATED = "exception.field.duplicated";
-    String FIELD_DUPLICATED_ES = "exception.field.duplicatedEs";
-    String FIELD_HAS_APPLICATIONS = "exception.field.hasapplications";
-    String FIELD_NOT_ACTIVE = "exception.field.notactive";
-    String FIELD_NOT_FOUND = "exception.field.notfound";
+    String ERR_FIELD_ACTIVE = "exception.field.active";
+    String ERR_FIELD_DELETE_HAS_DEPENDENCIES = "exception.field.delete.hasdependencies";
+    String ERR_FIELD_DUPLICATED = "exception.field.duplicated";
+    String ERR_FIELD_DUPLICATED_ES = "exception.field.duplicatedEs";
+    String ERR_FIELD_NOT_ACTIVE = "exception.field.notactive";
+    String ERR_FIELD_NOT_FOUND = "exception.field.notfound";
 
     // --- ADMINISTRATIVE UNIT (ADMUNIT) ERRORS ---
-    String ERR_ADMUNIT_ACTIVE = "exception.admunit.active";
-    String ERR_ADMUNIT_CODE_DUPLICATED = "exception.admunit.code.duplicated";
-    String ERR_ADMUNIT_DELETE_HAS_DEPENDENCIES = "exception.admunit.delete.hasdependencies";
-    String ERR_ADMUNIT_DUPLICATED = "exception.admunit.duplicated";
-    String ERR_ADMUNIT_DUPLICATED_ES = "exception.admunit.duplicatedEs";
-    String ERR_ADMUNIT_HAS_APPLICATIONS = "exception.admunit.hasapplications";
-    String ERR_ADMUNIT_NOT_ACTIVE = "exception.admunit.notactive";
-    String ERR_ADMUNIT_NOT_FOUND = "exception.admunit.notfound";
+    String ERR_ADMUNIT_DIR3_UNAVAILABLE = "exception.admunit.dir3.unavailable";
 
     // --- COMMISSION ERRORS ---
     String ERR_COMMISSION_ACTIVE = "exception.commission.active";
     String ERR_COMMISSION_DELETE_HAS_DEPENDENCIES = "exception.commission.delete.hasdependencies";
     String ERR_COMMISSION_DUPLICATED = "exception.commission.duplicated";
     String ERR_COMMISSION_DUPLICATED_ES = "exception.commission.duplicatedEs";
-    String ERR_COMMISSION_HAS_APPLICATIONS = "exception.commission.hasapplications";
     String ERR_COMMISSION_NOT_FOUND = "exception.commission.notfound";
+    String ERR_COMMISSION_NOT_ACTIVE = "exception.commission.notactive";
 
     // --- SYSTEM TYPE ERRORS ---
-    String SYSTEM_TYPE_ACTIVE = "exception.systemtype.active";
-    String SYSTEM_TYPE_DELETE_HAS_DEPENDENCIES = "exception.systemtype.delete.hasdependencies";
-    String SYSTEM_TYPE_DUPLICATED = "exception.systemtype.duplicated";
-    String SYSTEM_TYPE_DUPLICATED_ES = "exception.systemtype.duplicatedEs";
-    String SYSTEM_TYPE_HAS_APPLICATIONS = "exception.systemtype.hasapplications";
-    String SYSTEM_TYPE_NOT_ACTIVE = "exception.systemtype.notactive";
-    String SYSTEM_TYPE_NOT_FOUND = "exception.systemtype.notfound";
+    String ERR_SYSTEM_TYPE_ACTIVE = "exception.systemtype.active";
+    String ERR_SYSTEM_TYPE_DELETE_HAS_DEPENDENCIES = "exception.systemtype.delete.hasdependencies";
+    String ERR_SYSTEM_TYPE_DUPLICATED = "exception.systemtype.duplicated";
+    String ERR_SYSTEM_TYPE_DUPLICATED_ES = "exception.systemtype.duplicatedEs";
+    String ERR_SYSTEM_TYPE_NOT_ACTIVE = "exception.systemtype.notactive";
+    String ERR_SYSTEM_TYPE_NOT_FOUND = "exception.systemtype.notfound";
 
     // --- DATABASE ERRORS ---
     String ERR_DATABASE_ACTIVE = "exception.database.active";
@@ -312,10 +312,42 @@ public interface Constants {
     // --- APPLICATION INFORMATION SYSTEM DATABASE ERRORS ---
     String ERR_APP_INFORMATION_SYSTEM_DB_NOT_ACTIVE = "exception.appinformationsystemdb.notactive";
     String ERR_APP_INFORMATION_SYSTEM_DB_NOT_FOUND = "exception.appinformationsystemdb.notfound";
+    String ERR_APP_INFORMATION_SYSTEM_DB_ALREADY_EXISTS = "exception.appinformationsystemdb.alreadyexists";
+
+    // --- APPLICATION SECURITY ERRORS ---
+    String ERR_APP_SECURITY_NOT_ACTIVE = "exception.appsecurity.notactive";
+    String ERR_APP_SECURITY_NOT_FOUND = "exception.appsecurity.notfound";
+    String ERR_APP_SECURITY_ALREADY_EXISTS = "exception.appsecurity.alreadyexists";
+
+    // --- APPLICATION ACCESSIBILITY ERRORS ---
+    String ERR_APP_ACCESSIBILITY_NOT_ACTIVE = "exception.appaccessibility.notactive";
+    String ERR_APP_ACCESSIBILITY_NOT_FOUND = "exception.appaccessibility.notfound";
+    String ERR_APP_ACCESSIBILITY_ALREADY_EXISTS = "exception.appaccessibility.alreadyexists";
+
+    // --- APPLICATION SECURITY ROLE ERRORS ---
+    String ERR_APP_ROLE_NOT_ACTIVE = "exception.approle.notactive";
+    String ERR_APP_ROLE_NOT_FOUND = "exception.approle.notfound";
+
+    // --- APPLICATION SECURITY WEB CONTEXT ERRORS ---
+    String ERR_APP_WEB_CONTEXT_NOT_ACTIVE = "exception.appwebcontext.notactive";
+    String ERR_APP_WEB_CONTEXT_NOT_FOUND = "exception.appwebcontext.notfound";
+
+    // --- APPLICATION SECURITY ENS CLASSIFICATION ERRORS ---
+    String ERR_APP_ENS_CLASSIFICATION_NOT_ACTIVE = "exception.appensclassification.notactive";
+    String ERR_APP_ENS_CLASSIFICATION_NOT_FOUND = "exception.appensclassification.notfound";
+
+    // --- APPLICATION SECURITY RISK ERRORS ---
+    String ERR_APP_SECURITY_RISK_NOT_ACTIVE = "exception.appsecurityrisk.notactive";
+    String ERR_APP_SECURITY_RISK_NOT_FOUND = "exception.appsecurityrisk.notfound";
+
+    // --- APPLICATION SECURITY MEASURE ERRORS ---
+    String ERR_APP_SECURITY_MEASURE_NOT_ACTIVE = "exception.appsecuritymeasure.notactive";
+    String ERR_APP_SECURITY_MEASURE_NOT_FOUND = "exception.appsecuritymeasure.notfound";
 
     // --- APPLICATION DEVELOPMENT ERRORS ---
     String ERR_DEVELOPMENT_NOT_ACTIVE = "exception.development.notactive";
     String ERR_DEVELOPMENT_NOT_FOUND = "exception.development.notfound";
+    String ERR_DEVELOPMENT_ALREADY_EXISTS = "exception.development.alreadyexists";
 
     // --- APPLICATION DEVELOPMENT PROVIDER ERRORS ---
     String ERR_PROVIDER_NOT_ACTIVE = "exception.provider.notactive";
@@ -399,10 +431,52 @@ public interface Constants {
 
     // --- ROLE TRANSFER ERRORS ---
     String ERR_ROLETRANSFER_TARGET_REQUIRED = "exception.roletransfer.targetrequired";
+    String ERR_ROLETRANSFER_TARGET_NOT_FOUND = "exception.roletransfer.targetnotfound";
 
-    // --- GLOBAL / AUXILIARY ERROR CODES ---
-    String ERR_AUXILIARY_DUPLICATED = "exception.auxiliary.duplicated";
-    String ERR_AUXILIARY_NOT_FOUND = "exception.auxiliary.notfound";
+    // --- IDENTITY PROVIDER CORE ERRORS ---
+    String ERR_IDENTITYPROVIDER_ACTIVE = "exception.identityprovider.active";
+    String ERR_IDENTITYPROVIDER_DUPLICATED = "exception.identityprovider.duplicated";
+    String ERR_IDENTITYPROVIDER_NOT_ACTIVE = "exception.identityprovider.notactive";
+    String ERR_IDENTITYPROVIDER_NOT_FOUND = "exception.identityprovider.notfound";
+
+    // --- PERSONAL DATA PROCESSING CORE ERRORS ---
+    String ERR_PERSONALDATAPROCESSING_ACTIVE = "exception.personaldataprocessing.active";
+    String ERR_PERSONALDATAPROCESSING_DUPLICATED = "exception.personaldataprocessing.duplicated";
+    String ERR_PERSONALDATAPROCESSING_NOT_ACTIVE = "exception.personaldataprocessing.notactive";
+    String ERR_PERSONALDATAPROCESSING_NOT_FOUND = "exception.personaldataprocessing.notfound";
+
+    // --- WEB CONTEXT CORE ERRORS ---
+    String ERR_WEBCONTEXT_ACTIVE = "exception.webcontext.active";
+    String ERR_WEBCONTEXT_DUPLICATED = "exception.webcontext.duplicated";
+    String ERR_WEBCONTEXT_NOT_ACTIVE = "exception.webcontext.notactive";
+    String ERR_WEBCONTEXT_NOT_FOUND = "exception.webcontext.notfound";
+
+    // --- SECURITY MEASURE TYPE CORE ERRORS ---
+    String ERR_SECURITYMEASURETYPE_ACTIVE = "exception.securitymeasuretype.active";
+    String ERR_SECURITYMEASURETYPE_DUPLICATED = "exception.securitymeasuretype.duplicated";
+    String ERR_SECURITYMEASURETYPE_NOT_ACTIVE = "exception.securitymeasuretype.notactive";
+    String ERR_SECURITYMEASURETYPE_NOT_FOUND = "exception.securitymeasuretype.notfound";
+
+    // --- COMPLIANCE SITUATION CORE ERRORS ---
+    String ERR_COMPLIANCESITUATION_ACTIVE = "exception.compliancesituation.active";
+    String ERR_COMPLIANCESITUATION_DUPLICATED = "exception.compliancesituation.duplicated";
+    String ERR_COMPLIANCESITUATION_NOT_ACTIVE = "exception.compliancesituation.notactive";
+    String ERR_COMPLIANCESITUATION_NOT_FOUND = "exception.compliancesituation.notfound";
+
+    // --- CLASSIFICATION SEGMENT CORE ERRORS ---
+    String ERR_CLASSIFICATIONSEGMENT_ACTIVE = "exception.classificationsegment.active";
+    String ERR_CLASSIFICATIONSEGMENT_DUPLICATED = "exception.classificationsegment.duplicated";
+    String ERR_CLASSIFICATIONSEGMENT_NOT_ACTIVE = "exception.classificationsegment.notactive";
+    String ERR_CLASSIFICATIONSEGMENT_NOT_FOUND = "exception.classificationsegment.notfound";
+
+    // --- ENS REQUIREMENT CORE ERRORS ---
+    String ERR_ENSREQUIREMENT_ACTIVE = "exception.ensrequirement.active";
+    String ERR_ENSREQUIREMENT_DUPLICATED = "exception.ensrequirement.duplicated";
+    String ERR_ENSREQUIREMENT_NOT_ACTIVE = "exception.ensrequirement.notactive";
+    String ERR_ENSREQUIREMENT_NOT_FOUND = "exception.ensrequirement.notfound";
+
+    // --- SOFFID INTEGRATION ERRORS ---
+    String ERR_SOFFID_UNAVAILABLE = "exception.soffid.unavailable";
 
     // =========================================================================
     // TRACE DIAGNOSTIC LOG STRINGS & PATTERNS

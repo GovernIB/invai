@@ -3,8 +3,10 @@ package es.caib.invai.back.persistence.repository.application.development.core;
 import es.caib.invai.back.service.model.application.development.core.AppDevelopment;
 
 /**
- * Core business domain outbound port boundary interface declaring relational persistence
- * mechanisms for the {@link AppDevelopment} anchor.
+ * Persistence port for the "AppDevelopment" tab: create/update/delete and lookup by the record's
+ * own id or by its parent application id ({@link #findByApplicationId}, used by the facade to
+ * enforce the 1-to-1 relationship on {@code create}). Implemented by
+ * {@code AppDevelopmentRepositoryAdapter}, which also writes an audit-trail row on every write.
  *
  * @since 1.0.2
  */

@@ -29,7 +29,7 @@ public class StandardAdaptionRepositoryAdapter implements StandardAdaptionReposi
 
     @Override
     public List<StandardAdaption> findAll() {
-        log.info("Repository: Fetching every standard adaption lookup entry");
+        log.debug("Repository: Fetching every standard adaption lookup entry");
         List<LkupStandardAdaptionEntity> entities = standardAdaptionJPARepository.findAll(Sort.by("name"));
         return standardAdaptionMapper.toModelList(entities);
     }
