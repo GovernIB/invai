@@ -21,7 +21,7 @@ describe('MENU_ITEMS', () => {
     expect(maintenanceMenu?.items?.map(({ label }) => label)).toEqual([
       'General',
       'Responsables',
-      'Sistemes',
+      'Sistemes i DB',
       'Desenvolupament',
       'Accessibilitat',
       'Seguretat',

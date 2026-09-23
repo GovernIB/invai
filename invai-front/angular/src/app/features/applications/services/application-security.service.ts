@@ -17,6 +17,7 @@ import {
   ApplicationSecurityRiskInput,
   ApplicationSecurityRiskOutput,
   ApplicationSecurityRoleOutput,
+  ApplicationSecurityRolePageParams,
   ApplicationWebContextInput,
   ApplicationWebContextOutput,
   SecurityCatalogItem,
@@ -62,14 +63,18 @@ export class ApplicationSecurityService extends BaseApiService {
   }
 }
 
-abstract class ApplicationSecurityPageService<TOutput> extends BaseApiService {
+abstract class ApplicationSecurityPageService<TOutput, TParams extends ApplicationSecurityPageParams = ApplicationSecurityPageParams> extends BaseApiService {
   private readonly pagesCache = new Map<string, Observable<SpringPage<TOutput>>>();
 
-  getPage(params: ApplicationSecurityPageParams): Observable<SpringPage<TOutput>> {
+  getPage(params: TParams): Observable<SpringPage<TOutput>> {
     const { appSecurityId, statusId, ...pageParams } = params;
-    const key = `${appSecurityId};status=${statusId ?? ''};${pageParamsCacheKey(pageParams)}`;
+    const criteria = this.criteria(params);
+    const key = `${appSecurityId};status=${statusId ?? ''};${pageParamsCacheKey(pageParams)};${JSON.stringify(criteria)}`;
     let httpParams = toPageHttpParams(pageParams) ?? new HttpParams();
     if (statusId != null) httpParams = httpParams.set('statusId', String(statusId));
+    for (const [key, value] of Object.entries(criteria)) {
+      if (value) httpParams = httpParams.set(key, value);
+    }
 
     return cachedRequest(this.pagesCache, key, () =>
       this.http.get<SpringPage<TOutput>>(this.url(appSecurityId), { params: httpParams }),
@@ -79,12 +84,15 @@ abstract class ApplicationSecurityPageService<TOutput> extends BaseApiService {
   clearCache(): void {
     this.pagesCache.clear();
   }
+
+  protected criteria(params: TParams): Record<string, string | undefined> { return {}; }
 }
 
 abstract class MutableApplicationSecurityPageService<
   TOutput,
   TInput,
-> extends ApplicationSecurityPageService<TOutput> {
+  TParams extends ApplicationSecurityPageParams = ApplicationSecurityPageParams,
+> extends ApplicationSecurityPageService<TOutput, TParams> {
   private readonly applicationsService = inject(ApplicationsService);
   create(payload: TInput): Observable<TOutput> {
     return this.http.post<TOutput>(this.url(), payload).pipe(
@@ -115,8 +123,14 @@ abstract class MutableApplicationSecurityPageService<
 }
 
 @Injectable({ providedIn: 'root' })
-export class ApplicationSecurityRolesService extends ApplicationSecurityPageService<ApplicationSecurityRoleOutput> {
+export class ApplicationSecurityRolesService extends ApplicationSecurityPageService<
+  ApplicationSecurityRoleOutput,
+  ApplicationSecurityRolePageParams
+> {
   protected override readonly ENTITY_URI = 'application/security/role';
+  protected override criteria(params: ApplicationSecurityRolePageParams): Record<string, string | undefined> {
+    return { system: params.system?.trim() || undefined };
+  }
 }
 
 @Injectable({ providedIn: 'root' })

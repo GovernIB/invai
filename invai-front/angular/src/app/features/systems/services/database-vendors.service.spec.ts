@@ -9,7 +9,7 @@ import { SpringPage } from '@models/page.model';
 import { DatabaseVendor, DatabaseVendorInput } from '../systems.model';
 import { DatabaseVendorsService } from './database-vendors.service';
 
-const URL = '/invaiapi/interna/database-vendor';
+const URL = '/invaiback/database-vendor';
 const VENDOR: DatabaseVendor = {
   id: 2,
   name: 'PostgreSQL',

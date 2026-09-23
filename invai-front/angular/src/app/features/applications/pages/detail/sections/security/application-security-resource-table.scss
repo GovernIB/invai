@@ -1,0 +1,28 @@
+app-application-security-resource-table {
+  display: block;
+  min-width: 0;
+
+  .application-web-context-pending {
+    display: inline-flex;
+    margin-inline-start: 0.5rem;
+    cursor: help;
+
+    &:focus-visible {
+      outline: 2px solid var(--p-primary-color);
+      outline-offset: 2px;
+    }
+  }
+
+  .invai-scrollable-table .application-security-verification-column {
+    width: 9rem;
+    min-width: 9rem;
+    max-width: none;
+
+    .p-button {
+      width: auto;
+      height: auto;
+      min-height: 2rem;
+      padding: 0.375rem 0.75rem;
+    }
+  }
+}

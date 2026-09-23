@@ -3,8 +3,8 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 const canonicalAppOrigin = 'https://invai.plexus.services';
 const apiSessionCookieName = 'JSESSIONID';
-const apiSessionCookiePath = '/invaiapi';
-const authMePath = `${apiSessionCookiePath}/interna/auth/me`;
+const apiSessionCookiePath = '/invaiback';
+const authMePath = `${apiSessionCookiePath}/auth/me`;
 const idpNavigationTimeout = 60_000;
 
 export async function ensureAuthenticatedSession(page: Page, baseURL: string): Promise<boolean> {

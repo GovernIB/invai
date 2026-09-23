@@ -6,10 +6,10 @@ import { ApplicationAccessibilityService } from './application-accessibility.ser
 import { ApplicationsService } from './applications.service';
 
 describe.each([
-  { name: 'application', url: '/invaiapi/interna/application', service: ApplicationsService },
+  { name: 'application', url: '/invaiback/application', service: ApplicationsService },
   {
     name: 'accessibility',
-    url: '/invaiapi/interna/application/accessibility',
+    url: '/invaiback/application/accessibility',
     service: ApplicationAccessibilityService,
   },
 ])('$name detail cache', ({ url, service: serviceType }) => {

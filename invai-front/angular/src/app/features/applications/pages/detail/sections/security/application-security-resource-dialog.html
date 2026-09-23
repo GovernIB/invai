@@ -99,6 +99,17 @@
         }
       </div>
       <div class="md:col-span-12">
+        <label for="application-security-dialog-url">{{ labels.url }}</label>
+        <input pInputText id="application-security-dialog-url" class="w-full" type="url" maxlength="255"
+          formControlName="url" [readOnly]="mode() === 'view'"
+          [class.invai-form-readonly-control]="mode() === 'view'"
+          [attr.aria-invalid]="isInvalid(form().controls.url)"
+          [attr.aria-describedby]="isInvalid(form().controls.url) ? 'application-security-dialog-url-error' : null" />
+        @if (isInvalid(form().controls.url)) {
+          <p id="application-security-dialog-url-error" class="mt-1 text-sm text-red-600" role="alert">{{ labels.urlError }}</p>
+        }
+      </div>
+      <div class="md:col-span-12">
         <label for="application-security-dialog-observation">{{ labels.observation }}</label>
         <textarea
           id="application-security-dialog-observation"

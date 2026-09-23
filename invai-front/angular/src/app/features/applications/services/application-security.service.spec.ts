@@ -16,7 +16,7 @@ import {
   SecurityLevelsService,
 } from './application-security.service';
 
-const BASE_URL = '/invaiapi/interna/application/security';
+const BASE_URL = '/invaiback/application/security';
 
 describe('application security services', () => {
   let httpTesting: HttpTestingController;
@@ -37,6 +37,28 @@ describe('application security services', () => {
   });
 
   afterEach(() => httpTesting.verify());
+
+  it('normalizes role systems, separates their cache entries and shares identical queries', () => {
+    for (const system of [' weblogic ', 'other', '   ']) {
+      rolesService.getPage({ appSecurityId: 8, system }).subscribe();
+      rolesService.getPage({ appSecurityId: 8, system: system.trim() }).subscribe();
+      const request = httpTesting.expectOne(req => req.url === `${BASE_URL}/role/8`);
+      expect(request.request.params.get('system')).toBe(system.trim() || null);
+      request.flush(page([]));
+    }
+    rolesService.getPage({ appSecurityId: 8, system: 'weblogic' }).subscribe();
+    rolesService.getPage({ appSecurityId: 8 }).subscribe();
+    httpTesting.expectNone(req => req.url === `${BASE_URL}/role/8`);
+  });
+
+  it('retries a failed filtered role request', () => {
+    const params = { appSecurityId: 8, system: 'weblogic' };
+    rolesService.getPage(params).subscribe({ error: () => undefined });
+    httpTesting.expectOne(req => req.url === `${BASE_URL}/role/8`)
+      .flush(null, { status: 500, statusText: 'Server error' });
+    rolesService.getPage(params).subscribe();
+    httpTesting.expectOne(req => req.url === `${BASE_URL}/role/8`).flush(page([]));
+  });
 
   it('shares detail reads, retries errors and invalidates after an update', () => {
     const first = vi.fn();
@@ -79,6 +101,7 @@ describe('application security services', () => {
     httpTesting.expectOne(`${BASE_URL}/web-context/8?page=0&size=10`).flush(page([]));
 
     const payload: ApplicationWebContextInput = {
+      url: null,
       appSecurityId: 8,
       webContextId: 2,
       fieldId: 3,
@@ -100,12 +123,12 @@ describe('application security services', () => {
 
     securityLevelsService.getAll().subscribe(first);
     securityLevelsService.getAll().subscribe(shared);
-    httpTesting.expectOne('/invaiapi/interna/security-level').flush(items);
+    httpTesting.expectOne('/invaiback/security-level').flush(items);
 
     expect(first).toHaveBeenCalledWith(items);
     expect(shared).toHaveBeenCalledWith(items);
     securityLevelsService.getAll().subscribe();
-    httpTesting.expectNone('/invaiapi/interna/security-level');
+    httpTesting.expectNone('/invaiback/security-level');
   });
 });
 

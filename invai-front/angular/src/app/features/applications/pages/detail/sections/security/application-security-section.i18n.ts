@@ -17,7 +17,6 @@ export const APPLICATION_SECURITY_DOCUMENTATION_LABEL = $localize`Documentació`
 export const APPLICATION_SECURITY_DOCUMENTATION_ARIA_LABEL = $localize`Obre la documentació de seguretat`;
 export const APPLICATION_SECURITY_DOCUMENTATION_PENDING = $localize`La documentació de seguretat encara no està disponible.`;
 export const APPLICATION_SECURITY_PENDING_TITLE = $localize`Funcionalitat pendent`;
-export const APPLICATION_SECURITY_ROLE_TEMPORARY_NOTE = $localize`La consulta de rols és temporal i de només lectura fins que estigui disponible el provider de Soffid.`;
 export const APPLICATION_SECURITY_INCONSISTENT_TITLE = $localize`Dades ENS inconsistents`;
 export const APPLICATION_SECURITY_INCONSISTENT_MESSAGE = $localize`S'ha trobat més d'una classificació ENS activa. L'edició d'aquest formulari està bloquejada fins que backend corregeixi les dades.`;
 export const APPLICATION_SECURITY_ANCHOR_REQUIRED = $localize`Desa primer les dades generals de Seguretat per poder gestionar aquesta taula.`;
@@ -35,6 +34,10 @@ export const APPLICATION_SECURITY_DATE_FORMAT = $localize`:@@primengDateFormat:d
 export const APPLICATION_SECURITY_DATE_PLACEHOLDER = $localize`dd/mm/aaaa`;
 
 export const APPLICATION_SECURITY_LABELS = {
+  url: $localize`URL`,
+  system: $localize`Sistema`,
+  applyRoleFilters: $localize`:@@applicationSecurityRoleSearch:Cerca rols per sistema`,
+  urlError: $localize`:@@webContextUrlError:Introdueix una URL http:// o https:// de fins a 255 caràcters.`,
   overallGrade: $localize`Grau d'adequació a l'ENS`,
   identityProvider: $localize`Proveïdor d'identitat`,
   ensSubject: $localize`Subjecció a l'ENS`,
@@ -100,6 +103,7 @@ export const APPLICATION_SECURITY_WEB_CONTEXT_COLUMNS: Partial<KeyLabel>[] = [
     sortBy: 'field.name',
     minWidth: '11rem',
   },
+  { key: 'url', label: $localize`URL`, sortBy: 'url', minWidth: '18rem', maxWidth: '32rem', wrap: true },
   {
     key: 'observation',
     width: '58%',
@@ -154,12 +158,19 @@ export const APPLICATION_SECURITY_MEASURE_COLUMNS: Partial<KeyLabel>[] = [
 ];
 
 export const APPLICATION_SECURITY_TABLE_ACTIONS = {
+  verify: $localize`:@@applicationWebContextVerify:Verificar`,
   header: $localize`Accions`,
   ariaLabel: $localize`Obre les accions del registre`,
   view: $localize`Consulta`,
   edit: $localize`Edita`,
   delete: $localize`Dona de baixa`,
 };
+
+export const APPLICATION_WEB_CONTEXT_VERIFICATION_PENDING =
+  $localize`:@@applicationWebContextVerificationPending:La verificació de contextos web encara no està implementada.`;
+
+export const APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION =
+  $localize`:@@applicationWebContextPendingVerification:Context web pendent de verificar.`;
 
 export const APPLICATION_SECURITY_ADD_ARIA_LABELS: Record<ApplicationSecurityResourceKind, string> =
   {

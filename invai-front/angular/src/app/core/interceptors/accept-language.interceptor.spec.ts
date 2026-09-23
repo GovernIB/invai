@@ -25,12 +25,17 @@ describe('acceptLanguageInterceptor', () => {
     TestBed.inject(HttpTestingController).verify();
   });
 
-  it('adds the Catalan locale to backend requests', () => {
+  it.each([
+    '/invaiback',
+    '/invaiback/application',
+    '/invaiback/application?page=0',
+    '/invaiapi/externa/api/application',
+  ])('adds the Catalan locale to backend request %s', (url) => {
     const { http, httpTesting } = setup('ca');
 
-    http.get('/invaiapi/interna/application').subscribe();
+    http.get(url).subscribe();
 
-    const request = httpTesting.expectOne('/invaiapi/interna/application');
+    const request = httpTesting.expectOne(url);
     expect(request.request.headers.get('Accept-Language')).toBe('ca');
     request.flush(null);
   });
@@ -45,12 +50,16 @@ describe('acceptLanguageInterceptor', () => {
     request.flush(null);
   });
 
-  it('does not add the locale to requests outside the backend API', () => {
+  it.each([
+    '/assets/help/index.json',
+    '/invaiback-other/application',
+    '/invaiapi/interna/soffid/users',
+  ])('does not add the locale to unrelated request %s', (url) => {
     const { http, httpTesting } = setup('ca');
 
-    http.get('/assets/help/index.json').subscribe();
+    http.get(url).subscribe();
 
-    const request = httpTesting.expectOne('/assets/help/index.json');
+    const request = httpTesting.expectOne(url);
     expect(request.request.headers.has('Accept-Language')).toBe(false);
     request.flush(null);
   });

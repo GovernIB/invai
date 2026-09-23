@@ -1,0 +1,58 @@
+<app-crud-entity-dialog
+  [visible]="true"
+  mode="view"
+  width="46rem"
+  [title]="title()"
+  [ariaLabels]="ariaLabels()"
+  [canEdit]="false"
+  [canRestore]="false"
+  [showDeactivate]="false"
+  (closed)="closed.emit()"
+>
+  <div class="assignment-detail">
+    <div>
+      <label [for]="fieldId('first-name')">{{ detailCopy.firstName }}</label>
+      <input [id]="fieldId('first-name')" pInputText readonly class="invai-form-readonly-control" [value]="person().firstName || '—'" />
+    </div>
+    <div>
+      <label [for]="fieldId('last-name')">{{ detailCopy.lastName }}</label>
+      <input [id]="fieldId('last-name')" pInputText readonly class="invai-form-readonly-control" [value]="person().lastName || '—'" />
+    </div>
+    <div class="assignment-detail__wide">
+      <label [for]="fieldId('email')">{{ copy.email }}</label>
+      <input [id]="fieldId('email')" pInputText readonly class="invai-form-readonly-control" [value]="person().email || '—'" />
+    </div>
+    @if (detail().kind === 'responsible') {
+      <div>
+        <label [for]="fieldId('responsibility')">{{ copy.responsibility }}</label>
+        <input [id]="fieldId('responsibility')" pInputText readonly class="invai-form-readonly-control" [value]="responsibility() || '—'" />
+      </div>
+    }
+    <div [class.assignment-detail__caib]="detail().kind === 'responsible'">
+      <label [for]="fieldId('personal-caib')">{{ copy.personalCaib }}</label>
+      <input [id]="fieldId('personal-caib')" pInputText readonly class="invai-form-readonly-control" [value]="person().personalCaib ? copy.yes : copy.no" />
+    </div>
+    @if (detail().kind === 'responsible') {
+      <div class="assignment-detail__job-title">
+        <label [for]="fieldId('job-title')">{{ copy.cargo }}</label>
+        <input [id]="fieldId('job-title')" pInputText readonly class="invai-form-readonly-control" [value]="jobTitle() || '—'" />
+      </div>
+    }
+    @if (!person().personalCaib) {
+      <div [class.assignment-detail__wide]="detail().kind === 'responsible'">
+        <label [for]="fieldId('company')">{{ copy.company }}</label>
+        <input [id]="fieldId('company')" pInputText readonly class="invai-form-readonly-control" [value]="person().company?.name || '—'" />
+      </div>
+    }
+    @if (detail().kind === 'authorized') {
+      <div class="assignment-detail__wide">
+        <label [for]="fieldId('authorizations')">{{ detailCopy.authorizations }}</label>
+        <textarea [id]="fieldId('authorizations')" pTextarea readonly rows="2" [autoResize]="true" class="invai-form-readonly-control" [value]="authorizations() || '—'"></textarea>
+      </div>
+    }
+    <div class="assignment-detail__wide">
+      <label [for]="fieldId('observations')">{{ detailCopy.observations }}</label>
+      <textarea [id]="fieldId('observations')" pTextarea readonly rows="4" [autoResize]="true" class="invai-form-readonly-control" [value]="detail().assignment.observation || '—'"></textarea>
+    </div>
+  </div>
+</app-crud-entity-dialog>

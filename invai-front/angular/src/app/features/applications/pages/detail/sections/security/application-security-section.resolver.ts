@@ -35,6 +35,7 @@ import {
   SecurityLevelsService,
 } from '../../../../services/application-security.service';
 import { ApplicationsService } from '../../../../services/applications.service';
+import { APPLICATION_SECURITY_DEFAULT_ROLE_SYSTEM } from '../../../../applications.constants';
 import {
   APPLICATION_DETAIL_RESOLVE_KEY,
   ApplicationDetailResolvedData,
@@ -169,7 +170,12 @@ export const applicationSecurityResolver: ResolveFn<ApplicationSecurityResolvedD
         resolvedAppSecurityId == null ? of(null) : securityService.getById(resolvedAppSecurityId),
         null,
       ),
-      roles: resolveValue(pageParams == null ? of(null) : rolesService.getPage(pageParams), null),
+      roles: resolveValue(
+        pageParams == null
+          ? of(null)
+          : rolesService.getPage({ ...pageParams, system: APPLICATION_SECURITY_DEFAULT_ROLE_SYSTEM }),
+        null,
+      ),
       webContexts: resolveValue(
         pageParams == null ? of(null) : appWebContextsService.getPage(pageParams),
         null,

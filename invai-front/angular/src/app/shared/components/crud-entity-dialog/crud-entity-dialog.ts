@@ -57,6 +57,9 @@ export class CrudEntityDialog implements OnDestroy {
   width = input('38rem');
   isLoading = input(false);
   isSaving = input(false);
+  submitDisabled = input(false);
+  submitLabel = input<string | null>(null);
+  submitIcon = input<string | null>(null);
   isDeleting = input(false);
   canRestore = input(false);
   canEdit = input(true);
@@ -133,7 +136,7 @@ export class CrudEntityDialog implements OnDestroy {
   }
 
   protected onSubmit(): void {
-    if (!this.isBusy() && this.mode() !== 'view') this.submitForm.emit();
+    if (!this.isBusy() && !this.submitDisabled() && this.mode() !== 'view') this.submitForm.emit();
   }
 
   protected onEdit(): void {
@@ -170,6 +173,7 @@ export class CrudEntityDialog implements OnDestroy {
   }
 
   protected saveAndClose(): void {
+    if (this.isBusy() || this.submitDisabled()) return;
     this.isUnsavedChangesDialogVisible.set(false);
     this.submitForm.emit();
   }

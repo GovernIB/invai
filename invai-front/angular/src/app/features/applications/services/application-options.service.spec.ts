@@ -96,37 +96,6 @@ describe('ApplicationOptionsService', () => {
     expect(result.informationSystems).toHaveLength(1);
   });
 
-  it('maps and sorts departments by label using their DIR3 code as value', async () => {
-    const result = await firstValueFrom(
-      TestBed.inject(ApplicationOptionsService).getDepartmentOptions(),
-    );
-
-    expect(result).toEqual([
-      { label: 'Agricultura', value: 'GVA01' },
-      { label: 'Educació', value: 'GVA02' },
-    ]);
-    expect(administrativeUnitsService.getDepartments).toHaveBeenCalledWith({ page: 0, size: 100 });
-  });
-
-  it('loads every page of units for the selected department', async () => {
-    administrativeUnitsService.getAdmUnitsByDepartment
-      .mockReturnValueOnce(of(page([unit('UA01', 'Unitat A', 'GVA01')], 2)))
-      .mockReturnValueOnce(of(page([unit('UA02', 'Unitat B', 'GVA01')], 2)));
-
-    const result = await firstValueFrom(
-      TestBed.inject(ApplicationOptionsService).getAdministrativeUnitOptions('GVA01'),
-    );
-
-    expect(result).toEqual([
-      { label: 'Unitat A', value: 'UA01' },
-      { label: 'Unitat B', value: 'UA02' },
-    ]);
-    expect(administrativeUnitsService.getAdmUnitsByDepartment).toHaveBeenNthCalledWith(
-      2,
-      'GVA01',
-      { page: 1, size: 100 },
-    );
-  });
 });
 
 function unit(code: string, name: string, parentCode: string | null = null) {

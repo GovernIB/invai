@@ -72,4 +72,12 @@
       </label>
     </p-floatlabel>
   </div>
+  <div class="invai-filter-field--compact">
+    <p-floatlabel class="w-full">
+      <p-select inputId="responsible-people-filter-origin" styleClass="w-full" formControlName="personalCaib"
+        ariaLabelledBy="responsible-people-filter-origin-label" [options]="originOptions" [showClear]="true"
+        optionLabel="label" optionValue="value" />
+      <label id="responsible-people-filter-origin-label" for="responsible-people-filter-origin">{{ originLabel }}</label>
+    </p-floatlabel>
+  </div>
 </form>

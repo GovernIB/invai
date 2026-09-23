@@ -16,6 +16,12 @@
   position: relative;
 }
 
+:is(app-application-responsibles-table, app-application-authorized-table)
+  .p-datatable-tbody > .invai-table-consultable-row:hover {
+  background: var(--p-datatable-row-hover-background);
+  color: var(--p-datatable-row-hover-color);
+}
+
 .invai-table-loading-shield {
   position: absolute;
   inset: 0;

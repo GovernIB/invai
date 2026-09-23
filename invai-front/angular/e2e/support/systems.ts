@@ -8,12 +8,12 @@ export const ACTIVE_STATUS_ID = 1;
 export const INACTIVE_STATUS_ID = 2;
 
 export const SYSTEMS_API = {
-  environments: '/invaiapi/interna/environment',
-  servers: '/invaiapi/interna/server',
-  systems: '/invaiapi/interna/system',
-  databaseVendors: '/invaiapi/interna/database-vendor',
-  databases: '/invaiapi/interna/database',
-  serverTypes: '/invaiapi/interna/server-type',
+  environments: '/invaiback/environment',
+  servers: '/invaiback/server',
+  systems: '/invaiback/system',
+  databaseVendors: '/invaiback/database-vendor',
+  databases: '/invaiback/database',
+  serverTypes: '/invaiback/server-type',
 } as const;
 
 export type ServerTypeCode = 'APPLICATION' | 'DATABASE';

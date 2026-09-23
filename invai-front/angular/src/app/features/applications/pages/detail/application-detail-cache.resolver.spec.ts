@@ -10,6 +10,8 @@ import { Observable, firstValueFrom, of } from 'rxjs';
 import { ApplicationAccessibilityInput } from '../../applications.model';
 import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
 import { ApplicationsService } from '../../services/applications.service';
+import { ApplicationResponsiblesService } from '../../services/application-responsibles.service';
+import { ApplicationWebContextsService } from '../../services/application-security.service';
 import { ApplicationDetailResolvedData, applicationDetailResolver } from './application-detail.resolver';
 import {
   ApplicationAccessibilityResolvedData,
@@ -19,8 +21,8 @@ import {
 
 describe('application detail and accessibility resolver caches', () => {
   let http: HttpTestingController;
-  const applicationUrl = '/invaiapi/interna/application/7';
-  const accessibilityUrl = '/invaiapi/interna/application/accessibility';
+  const applicationUrl = '/invaiback/application/7';
+  const accessibilityUrl = '/invaiback/application/accessibility';
   const application = { id: 7, appAccessibilityId: 99 };
   const record = { id: 99, application: { id: 7 }, deletedAt: null };
 
@@ -142,6 +144,45 @@ describe('application detail and accessibility resolver caches', () => {
     const next = resolveDetail();
     http.expectOne(applicationUrl).flush(application);
     expect((await next).loadFailed).toBe(false);
+  });
+
+  it('reuses the responsible assignment request for the tab and clears its pending flag after invalidation', async () => {
+    const detail = resolveDetail();
+    http.expectOne(applicationUrl).flush({ ...application, appResponsibleAuthorizedId: 91 });
+    const params = { appResponsibleAuthorizedId: 91, page: 0, size: 1000, sort: 'id,asc', statusId: 1 };
+    const service = TestBed.inject(ApplicationResponsiblesService);
+    const sectionPage = firstValueFrom(service.getPage(params));
+    http.expectOne((request) => request.url === '/invaiback/application/responsible/91')
+      .flush({ content: [{ person: { personalCaib: true }, deletedAt: null, dir3Validation: { dir3Status: 'NOT_VALIDATED' } }], totalElements: 1 });
+    expect((await detail).hasPendingResponsibleDir3).toBe(true);
+    expect((await sectionPage).content).toHaveLength(1);
+    const reentry = resolveDetail();
+    http.expectNone((request) => request.method === 'GET');
+    expect((await reentry).hasPendingResponsibleDir3).toBe(true);
+    service.clearCache();
+    const refreshed = resolveDetail();
+    http.expectOne((request) => request.url === '/invaiback/application/responsible/91')
+      .flush({ content: [{ person: { personalCaib: true }, deletedAt: null, dir3Validation: { dir3Status: 'MANUAL' } }], totalElements: 1 });
+    expect((await refreshed).hasPendingResponsibleDir3).toBe(false);
+  });
+
+  it('reuses the context page loaded for the tab indicator and refreshes it after deletion', async () => {
+    const first = resolveDetail();
+    http.expectOne(applicationUrl).flush({ ...application, appSecurityId: 8 });
+    http.expectOne((request) => request.url === '/invaiback/application/security/web-context/8')
+      .flush({ content: [], totalElements: 25 });
+    expect((await first).hasUnverifiedWebContexts).toBe(true);
+    const service = TestBed.inject(ApplicationWebContextsService);
+    const sectionPage = firstValueFrom(service.getPage({ appSecurityId: 8, page: 0, size: 10, sort: 'id,asc', statusId: 1 }));
+    http.expectNone((request) => request.method === 'GET');
+    expect((await sectionPage).totalElements).toBe(25);
+    service.delete(903).subscribe();
+    http.expectOne('/invaiback/application/security/web-context/903').flush(null);
+    const refreshed = resolveDetail();
+    http.expectOne(applicationUrl).flush({ ...application, appSecurityId: 8 });
+    http.expectOne((request) => request.url === '/invaiback/application/security/web-context/8')
+      .flush({ content: [], totalElements: 0 });
+    expect((await refreshed).hasUnverifiedWebContexts).toBe(false);
   });
 
   it.each(['create', 'update'] as const)('refreshes both caches after accessibility %s', async (operation) => {

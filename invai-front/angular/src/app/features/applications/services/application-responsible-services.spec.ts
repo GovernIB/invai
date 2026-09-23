@@ -41,7 +41,7 @@ describe('application responsible and authorized services', () => {
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/application/responsible/90' &&
+          request.url === '/invaiback/application/responsible/90' &&
           request.params.get('page') === '2' &&
           request.params.get('size') === '25' &&
           request.params.get('sort') === 'person.firstName,asc' &&
@@ -73,22 +73,22 @@ describe('application responsible and authorized services', () => {
 
     http
       .expectOne(
-        '/invaiapi/interna/application/responsible/90?page=0&size=10&sort=id,asc&statusId=1',
+        '/invaiback/application/responsible/90?page=0&size=10&sort=id,asc&statusId=1',
       )
       .flush(page([{ id: 900 } as never]));
     http
       .expectOne(
-        '/invaiapi/interna/application/responsible/91?page=0&size=10&sort=id,asc&statusId=1',
+        '/invaiback/application/responsible/91?page=0&size=10&sort=id,asc&statusId=1',
       )
       .flush(page([{ id: 910 } as never]));
     http
       .expectOne(
-        '/invaiapi/interna/application/authorized/90?page=0&size=10&sort=id,asc&statusId=1',
+        '/invaiback/application/authorized/90?page=0&size=10&sort=id,asc&statusId=1',
       )
       .flush(page([{ id: 901 } as never]));
     http
       .expectOne(
-        '/invaiapi/interna/application/authorized/91?page=0&size=10&sort=id,asc&statusId=1',
+        '/invaiback/application/authorized/91?page=0&size=10&sort=id,asc&statusId=1',
       )
       .flush(page([{ id: 911 } as never]));
 
@@ -105,16 +105,16 @@ describe('application responsible and authorized services', () => {
 
     responsibles.getPage(params).subscribe(responsibleFirst);
     responsibles.getPage(params).subscribe(responsibleSecond);
-    http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/responsible/90?page=0&size=10').flush(page([]));
 
     authorized.getPage(params).subscribe(authorizedFirst);
     authorized.getPage(params).subscribe(authorizedSecond);
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
 
     responsibles.getPage(params).subscribe(responsibleFirst);
     authorized.getPage(params).subscribe(authorizedFirst);
-    http.expectNone('/invaiapi/interna/application/responsible/90?page=0&size=10');
-    http.expectNone('/invaiapi/interna/application/authorized/90?page=0&size=10');
+    http.expectNone('/invaiback/application/responsible/90?page=0&size=10');
+    http.expectNone('/invaiback/application/authorized/90?page=0&size=10');
     expect(responsibleFirst).toHaveBeenCalledTimes(2);
     expect(responsibleSecond).toHaveBeenCalledOnce();
     expect(authorizedFirst).toHaveBeenCalledTimes(2);
@@ -126,17 +126,17 @@ describe('application responsible and authorized services', () => {
 
     responsibles.getPage(params).subscribe({ error: vi.fn() });
     http
-      .expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10')
+      .expectOne('/invaiback/application/responsible/90?page=0&size=10')
       .flush(null, { status: 500, statusText: 'Server Error' });
     responsibles.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/responsible/90?page=0&size=10').flush(page([]));
 
     authorized.getPage(params).subscribe({ error: vi.fn() });
     http
-      .expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10')
+      .expectOne('/invaiback/application/authorized/90?page=0&size=10')
       .flush(null, { status: 500, statusText: 'Server Error' });
     authorized.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
   });
 
   it('invalidates each page cache only after a successful write', () => {
@@ -160,54 +160,54 @@ describe('application responsible and authorized services', () => {
     };
 
     responsibles.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/responsible/90?page=0&size=10').flush(page([]));
     authorized.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
 
     responsibles.create(responsibleInput).subscribe({ error: vi.fn() });
     http
-      .expectOne('/invaiapi/interna/application/responsible')
+      .expectOne('/invaiback/application/responsible')
       .flush(null, { status: 500, statusText: 'Server Error' });
     expect(responsibleClearCache).not.toHaveBeenCalled();
     responsibles.getPage(params).subscribe();
-    http.expectNone('/invaiapi/interna/application/responsible/90?page=0&size=10');
+    http.expectNone('/invaiback/application/responsible/90?page=0&size=10');
 
     responsibles.create(responsibleInput).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible').flush({ id: 1 });
+    http.expectOne('/invaiback/application/responsible').flush({ id: 1 });
     expect(responsibleClearCache).toHaveBeenCalledOnce();
     expect(authorizedClearCache).toHaveBeenCalledOnce();
     responsibles.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/responsible/90?page=0&size=10').flush(page([]));
     authorized.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
 
     responsibleClearCache.mockClear();
     authorizedClearCache.mockClear();
 
     authorized.create(authorizedInput).subscribe({ error: vi.fn() });
     http
-      .expectOne('/invaiapi/interna/application/authorized')
+      .expectOne('/invaiback/application/authorized')
       .flush(null, { status: 500, statusText: 'Server Error' });
     expect(authorizedClearCache).not.toHaveBeenCalled();
     authorized.getPage(params).subscribe();
-    http.expectNone('/invaiapi/interna/application/authorized/90?page=0&size=10');
+    http.expectNone('/invaiback/application/authorized/90?page=0&size=10');
 
     authorized.create(authorizedInput).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized').flush({ id: 1 });
+    http.expectOne('/invaiback/application/authorized').flush({ id: 1 });
     expect(authorizedClearCache).toHaveBeenCalledOnce();
     expect(responsibleClearCache).toHaveBeenCalledOnce();
     authorized.getPage(params).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
 
     responsibleClearCache.mockClear();
     authorizedClearCache.mockClear();
 
     responsibles.update(1, responsibleInput).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/1').flush({ id: 1 });
+    http.expectOne('/invaiback/application/responsible/1').flush({ id: 1 });
     responsibles.deactivate(1, { observation: null }).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/deactivate/1').flush({ id: 1 });
+    http.expectOne('/invaiback/application/responsible/deactivate/1').flush({ id: 1 });
     responsibles.reactivate(1).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/reactivate/1').flush({ id: 1 });
+    http.expectOne('/invaiback/application/responsible/reactivate/1').flush({ id: 1 });
     expect(responsibleClearCache).toHaveBeenCalledTimes(3);
     expect(authorizedClearCache).toHaveBeenCalledTimes(3);
 
@@ -215,27 +215,27 @@ describe('application responsible and authorized services', () => {
     authorizedClearCache.mockClear();
 
     authorized.update(1, authorizedInput).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/1').flush({ id: 1 });
+    http.expectOne('/invaiback/application/authorized/1').flush({ id: 1 });
     authorized.deactivate(1, { observation: null }).subscribe();
     http
-      .expectOne('/invaiapi/interna/application/authorized/deactivate/1')
+      .expectOne('/invaiback/application/authorized/deactivate/1')
       .flush(null, { status: 204, statusText: 'No Content' });
     authorized.reactivate(1).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/reactivate/1').flush({ id: 1 });
+    http.expectOne('/invaiback/application/authorized/reactivate/1').flush({ id: 1 });
     expect(authorizedClearCache).toHaveBeenCalledTimes(3);
     expect(responsibleClearCache).toHaveBeenCalledTimes(3);
   });
 
   it('models responsible deactivation as 200 and authorized deactivation as 204', () => {
     responsibles.deactivate(7, { observation: 'Baixa' }).subscribe();
-    const responsible = http.expectOne('/invaiapi/interna/application/responsible/deactivate/7');
+    const responsible = http.expectOne('/invaiback/application/responsible/deactivate/7');
     expect(responsible.request.method).toBe('PUT');
     expect(responsible.request.body).toEqual({ observation: 'Baixa' });
     responsible.flush({ id: 7, observation: 'Baixa', deletedAt: '2026-08-14' });
 
     authorized.deactivate(8, { observation: null }).subscribe();
     const authorizedRequest = http.expectOne(
-      '/invaiapi/interna/application/authorized/deactivate/8',
+      '/invaiback/application/authorized/deactivate/8',
     );
     expect(authorizedRequest.request.body).toEqual({ observation: null });
     authorizedRequest.flush(null, { status: 204, statusText: 'No Content' });
@@ -245,17 +245,17 @@ describe('application responsible and authorized services', () => {
     const responsibleParams = { appResponsibleAuthorizedId: 90, page: 0, size: 10 };
     const authorizedParams = { appResponsibleAuthorizedId: 90, page: 0, size: 10 };
     responsibles.getPage(responsibleParams).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/responsible/90?page=0&size=10').flush(page([]));
     authorized.getPage(authorizedParams).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
 
     changes.peopleChanged();
     changes.authorizationTypesChanged();
     changes.assignmentsChanged();
     responsibles.getPage(responsibleParams).subscribe();
-    http.expectOne('/invaiapi/interna/application/responsible/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/responsible/90?page=0&size=10').flush(page([]));
     authorized.getPage(authorizedParams).subscribe();
-    http.expectOne('/invaiapi/interna/application/authorized/90?page=0&size=10').flush(page([]));
+    http.expectOne('/invaiback/application/authorized/90?page=0&size=10').flush(page([]));
   });
 });
 

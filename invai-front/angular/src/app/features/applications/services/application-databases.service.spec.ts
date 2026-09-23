@@ -10,7 +10,7 @@ import {
 } from '../applications.model';
 import { ApplicationDatabasesService } from './application-databases.service';
 
-const DATABASES_URL = '/invaiapi/interna/application/database';
+const DATABASES_URL = '/invaiback/application/database';
 const ACTIVE_RELATION = relation(20, null);
 
 describe('ApplicationDatabasesService', () => {

@@ -29,6 +29,26 @@ describe('responsible HTTP maintenance services', () => {
 
   afterEach(() => http.verify());
 
+  it('keeps false, true and omitted personalCaib in distinct cache entries', () => {
+    for (const personalCaib of [false, true, undefined]) {
+      const params = { page: 0, personalCaib };
+      people.getPage(params).subscribe();
+      people.getPage(params).subscribe();
+      const request = http.expectOne(req => req.url === '/invaiback/person/database-search');
+      expect(request.request.params.get('personalCaib')).toBe(personalCaib === undefined ? null : String(personalCaib));
+      request.flush(page([]));
+    }
+  });
+
+  it('sends and keys the NIF company criterion', () => {
+    for (const nif of ['B12345678', 'A87654321']) {
+      companies.getPage({ nif }).subscribe();
+      const request = http.expectOne(req => req.url === '/invaiback/company');
+      expect(request.request.params.get('nif')).toBe(nif);
+      request.flush(page([]));
+    }
+  });
+
   it('uses exact company filters, shares cache entries and retries a failed entry', () => {
     const params = {
       page: 1,
@@ -44,7 +64,7 @@ describe('responsible HTTP maintenance services', () => {
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/company' &&
+          request.url === '/invaiback/company' &&
           request.params.get('page') === '1' &&
           request.params.get('size') === '25' &&
           request.params.get('sort') === 'name,desc' &&
@@ -58,7 +78,7 @@ describe('responsible HTTP maintenance services', () => {
     companies.getPage(params).subscribe();
     http
       .expectOne(
-        '/invaiapi/interna/company?page=1&size=25&sort=name,desc&name=Plexus&statusId=1&search=plex',
+        '/invaiback/company?page=1&size=25&sort=name,desc&name=Plexus&statusId=1&search=plex',
       )
       .flush(page([]));
   });
@@ -67,27 +87,27 @@ describe('responsible HTTP maintenance services', () => {
     const companyParams = { page: 0, size: 10, statusId: SoftDeleteStatus.ACTIVE };
     const personParams = { page: 0, size: 10, companyId: 7, statusId: SoftDeleteStatus.ACTIVE };
     companies.getPage(companyParams).subscribe();
-    http.expectOne((request) => request.url === '/invaiapi/interna/company').flush(page([]));
+    http.expectOne((request) => request.url === '/invaiback/company').flush(page([]));
     people.getPage(personParams).subscribe();
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/person/database-search' &&
+          request.url === '/invaiback/person/database-search' &&
           request.params.get('companyId') === '7',
       )
       .flush(page([]));
 
-    companies.create({ name: 'Nova' }).subscribe();
+    companies.create({ name: 'Nova', nif: null }).subscribe();
     http
       .expectOne(
-        (request) => request.method === 'POST' && request.url === '/invaiapi/interna/company',
+        (request) => request.method === 'POST' && request.url === '/invaiback/company',
       )
       .flush({ id: 8, name: 'Nova', deletedAt: null });
     companies.getPage(companyParams).subscribe();
-    http.expectOne((request) => request.url === '/invaiapi/interna/company').flush(page([]));
+    http.expectOne((request) => request.url === '/invaiback/company').flush(page([]));
     people.getPage(personParams).subscribe();
     http
-      .expectOne((request) => request.url === '/invaiapi/interna/person/database-search')
+      .expectOne((request) => request.url === '/invaiback/person/database-search')
       .flush(page([]));
   });
 
@@ -100,11 +120,11 @@ describe('responsible HTTP maintenance services', () => {
       personalCaib: false as const,
     };
     people.create(person).subscribe();
-    const personRequest = http.expectOne('/invaiapi/interna/person');
+    const personRequest = http.expectOne('/invaiback/person');
     expect(personRequest.request.body).toEqual(person);
     personRequest.flush({
       id: 1,
-      company: { id: 4, name: 'Plexus', deletedAt: null },
+      company: { nif: null, id: 4, name: 'Plexus', deletedAt: null },
       ...person,
       deletedAt: null,
     });
@@ -121,7 +141,7 @@ describe('responsible HTTP maintenance services', () => {
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/authorization-type' &&
+          request.url === '/invaiback/authorization-type' &&
           request.params.get('name') === 'Signar' &&
           request.params.get('nameEs') === 'Firmar' &&
           request.params.get('statusId') === '2',
@@ -134,7 +154,7 @@ describe('responsible HTTP maintenance services', () => {
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/person/database-search' &&
+          request.url === '/invaiback/person/database-search' &&
           request.params.get('firstName') === 'Maria' &&
           request.params.get('lastName') === 'Tur' &&
           !request.params.has('name'),
@@ -149,7 +169,7 @@ describe('responsible HTTP maintenance services', () => {
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/person/database-search' &&
+          request.url === '/invaiback/person/database-search' &&
           request.params.get('excludeId') === '7',
       )
       .flush(page([]));
@@ -158,7 +178,7 @@ describe('responsible HTTP maintenance services', () => {
     http
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/person/database-search' &&
+          request.url === '/invaiback/person/database-search' &&
           request.params.get('excludeId') === '8',
       )
       .flush(page([]));
@@ -178,7 +198,7 @@ describe('responsible HTTP maintenance services', () => {
 
     const requests = http.match(
       (request) =>
-        request.url === '/invaiapi/interna/person/database-search' &&
+        request.url === '/invaiback/person/database-search' &&
         request.params.get('search') === 'maria' &&
         request.params.getAll('sort')?.join('|') === 'firstName,asc|lastName,asc',
     );
@@ -193,8 +213,8 @@ describe('responsible HTTP maintenance services', () => {
 
     const requests = http.match(
       (request) =>
-        request.url === '/invaiapi/interna/person/soffid-search' &&
-        request.params.get('fullName') === 'Maria Tur' &&
+        request.url === '/invaiback/person/soffid-search' &&
+        request.params.get('search') === 'Maria Tur' &&
         request.params.get('page') === '0' &&
         request.params.get('size') === '20' &&
         !request.params.has('sort'),
@@ -205,7 +225,7 @@ describe('responsible HTTP maintenance services', () => {
 
     people.searchSoffid('Maria Tur').subscribe({ error });
     http
-      .expectOne('/invaiapi/interna/person/soffid-search?fullName=Maria%20Tur&page=0&size=20')
+      .expectOne('/invaiback/person/soffid-search?search=Maria%20Tur&page=0&size=20')
       .flush('failed again', { status: 500, statusText: 'Error' });
     expect(error).toHaveBeenCalledOnce();
   });
@@ -223,7 +243,7 @@ describe('responsible HTTP maintenance services', () => {
 
     const requests = http.match(
       (request) =>
-        request.url === '/invaiapi/interna/person/all' &&
+        request.url === '/invaiback/person/all' &&
         request.params.get('search') === 'Maria' &&
         request.params.get('page') === '0' &&
         request.params.get('size') === '20' &&
@@ -245,7 +265,7 @@ describe('responsible HTTP maintenance services', () => {
     people.searchCombined({ ...params, search: '' }).subscribe(received);
     people.searchCombined({ ...params, search: '   ' }).subscribe(received);
 
-    const request = http.expectOne((request) => request.url === '/invaiapi/interna/person/all');
+    const request = http.expectOne((request) => request.url === '/invaiback/person/all');
     expect(request.request.params.get('page')).toBe('0');
     expect(request.request.params.get('size')).toBe('20');
     expect(request.request.params.getAll('sort')).toEqual(['firstName,asc', 'lastName,asc']);
@@ -253,7 +273,7 @@ describe('responsible HTTP maintenance services', () => {
     request.flush(response);
 
     people.searchCombined({ ...params, sort: [...params.sort] }).subscribe(received);
-    http.expectNone((request) => request.url === '/invaiapi/interna/person/all');
+    http.expectNone((request) => request.url === '/invaiback/person/all');
     expect(received).toHaveBeenCalledTimes(5);
     expect(received.mock.calls).toEqual(Array.from({ length: 5 }, () => [response]));
   });
@@ -270,15 +290,15 @@ describe('responsible HTTP maintenance services', () => {
     const otherResponse = { database: page([{ id: 8 }]), soffid: page([]) };
 
     people.searchCombined(initialParams).subscribe();
-    http.expectOne((request) => request.url === '/invaiapi/interna/person/all').flush(initialResponse);
+    http.expectOne((request) => request.url === '/invaiback/person/all').flush(initialResponse);
     people.searchCombined(otherParams).subscribe();
-    http.expectOne((request) => request.url === '/invaiapi/interna/person/all').flush(otherResponse);
+    http.expectOne((request) => request.url === '/invaiback/person/all').flush(otherResponse);
 
     const initial = vi.fn();
     const other = vi.fn();
     people.searchCombined(initialParams).subscribe(initial);
     people.searchCombined(otherParams).subscribe(other);
-    http.expectNone((request) => request.url === '/invaiapi/interna/person/all');
+    http.expectNone((request) => request.url === '/invaiback/person/all');
     expect(initial).toHaveBeenCalledWith(initialResponse);
     expect(other).toHaveBeenCalledWith(otherResponse);
   });
@@ -286,24 +306,24 @@ describe('responsible HTTP maintenance services', () => {
   it('retries a failed combined catalog without evicting another page', () => {
     const params = ROLE_TRANSFER_PERSON_SEARCH_PARAMS;
     people.searchCombined({ ...params, page: 1 }).subscribe();
-    http.expectOne((request) => request.url === '/invaiapi/interna/person/all')
+    http.expectOne((request) => request.url === '/invaiback/person/all')
       .flush({ database: page([]), soffid: page([]) });
 
     const error = vi.fn();
     people.searchCombined(params).subscribe({ error });
     people.searchCombined(params).subscribe({ error });
-    http.expectOne((request) => request.url === '/invaiapi/interna/person/all')
+    http.expectOne((request) => request.url === '/invaiback/person/all')
       .flush('failed', { status: 500, statusText: 'Error' });
     expect(error).toHaveBeenCalledTimes(2);
 
     const cached = vi.fn();
     people.searchCombined({ ...params, page: 1 }).subscribe(cached);
-    http.expectNone((request) => request.url === '/invaiapi/interna/person/all');
+    http.expectNone((request) => request.url === '/invaiback/person/all');
     expect(cached).toHaveBeenCalledOnce();
 
     const retried = vi.fn();
     people.searchCombined(params).subscribe(retried);
-    http.expectOne((request) => request.url === '/invaiapi/interna/person/all')
+    http.expectOne((request) => request.url === '/invaiback/person/all')
       .flush({ database: page([]), soffid: page([]) });
     expect(retried).toHaveBeenCalledOnce();
   });
@@ -324,25 +344,25 @@ describe('responsible HTTP maintenance services', () => {
     }
 
     function flushCatalogs(): void {
-      http.expectOne((request) => request.url === '/invaiapi/interna/person/database-search')
+      http.expectOne((request) => request.url === '/invaiback/person/database-search')
         .flush(page([]));
-      http.expectOne((request) => request.url === '/invaiapi/interna/person/all')
+      http.expectOne((request) => request.url === '/invaiback/person/all')
         .flush({ database: page([]), soffid: page([]) });
     }
 
     const mutations: { name: string; run: () => Observable<unknown>; url: string }[] = [
-      { name: 'create', run: () => people.create(input), url: '/invaiapi/interna/person' },
-      { name: 'update', run: () => people.update(7, input), url: '/invaiapi/interna/person/7' },
-      { name: 'deactivate', run: () => people.deactivate(7), url: '/invaiapi/interna/person/7' },
+      { name: 'create', run: () => people.create(input), url: '/invaiback/person' },
+      { name: 'update', run: () => people.update(7, input), url: '/invaiback/person/7' },
+      { name: 'deactivate', run: () => people.deactivate(7), url: '/invaiback/person/7' },
       {
         name: 'reactivate',
         run: () => people.reactivate(7),
-        url: '/invaiapi/interna/person/reactivate/7',
+        url: '/invaiback/person/reactivate/7',
       },
       {
         name: 'company update',
-        run: () => companies.update(4, { name: 'Nova' }),
-        url: '/invaiapi/interna/company/4',
+        run: () => companies.update(4, { name: 'Nova', nif: null }),
+        url: '/invaiback/company/4',
       },
       {
         name: 'role transfer',
@@ -352,7 +372,7 @@ describe('responsible HTTP maintenance services', () => {
             toPersonEmailAddress: 'maria@example.org',
             revoke: false,
           }),
-        url: '/invaiapi/interna/role-transfer',
+        url: '/invaiback/role-transfer',
       },
     ];
 

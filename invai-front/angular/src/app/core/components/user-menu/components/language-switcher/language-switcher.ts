@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
 import { Language } from '@core/enums/language.enum';
+import { LanguagePreferenceService } from '@core/services/language-preference.service';
 import { Button } from 'primeng/button';
 
 const LANGUAGE_SWITCHER_LABELS = {
@@ -21,7 +22,7 @@ const LANGUAGE_SWITCHER_LABELS = {
           [text]="true"
           severity="secondary"
           size="small"
-          [attr.aria-pressed]="selectedLanguage === language"
+          [pt]="{ root: { 'aria-pressed': selectedLanguage === language } }"
           [styleClass]="selectedLanguage === language ? 'bg-surface-100' : ''"
           (click)="changeLanguage(language)"
           [label]="language.toUpperCase()"
@@ -31,13 +32,13 @@ const LANGUAGE_SWITCHER_LABELS = {
   `,
 })
 export class LanguageSwitcher {
+  private readonly languagePreference = inject(LanguagePreferenceService);
   protected readonly selectedLanguage = inject(LOCALE_ID);
   protected readonly labels = LANGUAGE_SWITCHER_LABELS;
 
   protected readonly availableLanguages: Language[] = Object.values(Language);
 
   protected changeLanguage(lang: Language) {
-    globalThis.location.href = `/invaifront/${lang}`;
-    sessionStorage.clear();
+    this.languagePreference.select(lang);
   }
 }

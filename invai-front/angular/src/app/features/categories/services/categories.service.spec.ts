@@ -29,7 +29,7 @@ describe('CategoriesService', () => {
     const request = httpTesting.expectOne(
       (req) =>
         req.method === 'GET' &&
-        req.url === '/invaiapi/interna/category' &&
+        req.url === '/invaiback/category' &&
         req.params.get('page') === '2' &&
         req.params.get('size') === '25' &&
         req.params.getAll('sort')?.join('|') === 'name,asc|id,desc',
@@ -75,7 +75,7 @@ describe('CategoriesService', () => {
     const request = httpTesting.expectOne(
       (req) =>
         req.method === 'GET' &&
-        req.url === '/invaiapi/interna/category' &&
+        req.url === '/invaiback/category' &&
         req.params.get('page') === '2',
     );
 
@@ -83,7 +83,7 @@ describe('CategoriesService', () => {
 
     service.getAll({ page: 2, size: 25, sort: ['name,asc', 'id,desc'] }).subscribe(cachedResult);
 
-    httpTesting.expectNone('/invaiapi/interna/category');
+    httpTesting.expectNone('/invaiback/category');
     expect(firstResult).toHaveBeenCalledWith(expect.objectContaining({ totalElements: 1 }));
     expect(secondResult).toHaveBeenCalledWith(expect.objectContaining({ totalElements: 1 }));
     expect(cachedResult).toHaveBeenCalledWith(expect.objectContaining({ totalElements: 1 }));
@@ -98,7 +98,7 @@ describe('CategoriesService', () => {
       .expectOne(
         (req) =>
           req.method === 'GET' &&
-          req.url === '/invaiapi/interna/category' &&
+          req.url === '/invaiback/category' &&
           req.params.get('page') === '0',
       )
       .flush(categoryPage([{ id: 1, name: 'DRASSANA' }]));
@@ -108,7 +108,7 @@ describe('CategoriesService', () => {
       .expectOne(
         (req) =>
           req.method === 'GET' &&
-          req.url === '/invaiapi/interna/category' &&
+          req.url === '/invaiback/category' &&
           req.params.get('page') === '1',
       )
       .flush(categoryPage([{ id: 2, name: 'Operacional' }]));
@@ -131,7 +131,7 @@ describe('CategoriesService', () => {
       .expectOne(
         (req) =>
           req.method === 'GET' &&
-          req.url === '/invaiapi/interna/category' &&
+          req.url === '/invaiback/category' &&
           req.params.get('page') === '0',
       )
       .flush('Request failed', {
@@ -144,7 +144,7 @@ describe('CategoriesService', () => {
       .expectOne(
         (req) =>
           req.method === 'GET' &&
-          req.url === '/invaiapi/interna/category' &&
+          req.url === '/invaiback/category' &&
           req.params.get('page') === '0',
       )
       .flush(categoryPage([{ id: 1, name: 'DRASSANA' }]));
@@ -158,7 +158,7 @@ describe('CategoriesService', () => {
 
     service.getById(7).subscribe(result);
 
-    const request = httpTesting.expectOne('/invaiapi/interna/category/7');
+    const request = httpTesting.expectOne('/invaiback/category/7');
     expect(request.request.method).toBe('GET');
     request.flush({ id: 7, name: 'Operacional' });
 
@@ -170,7 +170,7 @@ describe('CategoriesService', () => {
 
     service.create({ name: 'Sistemes', nameEs: 'Sistemas' }).subscribe(result);
 
-    const request = httpTesting.expectOne('/invaiapi/interna/category');
+    const request = httpTesting.expectOne('/invaiback/category');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ name: 'Sistemes', nameEs: 'Sistemas' });
     request.flush({ id: 9, name: 'Sistemes' });
@@ -183,13 +183,13 @@ describe('CategoriesService', () => {
     const refreshedResult = vi.fn();
 
     service.getAll().subscribe(cachedResult);
-    httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 1, name: 'A' }]));
+    httpTesting.expectOne('/invaiback/category').flush(categoryPage([{ id: 1, name: 'A' }]));
 
     service.create({ name: 'B', nameEs: 'B ES' }).subscribe();
-    httpTesting.expectOne('/invaiapi/interna/category').flush({ id: 2, name: 'B' });
+    httpTesting.expectOne('/invaiback/category').flush({ id: 2, name: 'B' });
 
     service.getAll().subscribe(refreshedResult);
-    httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 2, name: 'B' }]));
+    httpTesting.expectOne('/invaiback/category').flush(categoryPage([{ id: 2, name: 'B' }]));
 
     expect(refreshedResult).toHaveBeenCalledWith(
       expect.objectContaining({ content: [{ id: 2, name: 'B' }] }),
@@ -203,7 +203,7 @@ describe('CategoriesService', () => {
       .update(9, { name: 'Sistemes interns', nameEs: 'Sistemas internos' })
       .subscribe(result);
 
-    const request = httpTesting.expectOne('/invaiapi/interna/category/9');
+    const request = httpTesting.expectOne('/invaiback/category/9');
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual({
       name: 'Sistemes interns',
@@ -218,13 +218,13 @@ describe('CategoriesService', () => {
     const refreshedResult = vi.fn();
 
     service.getAll().subscribe();
-    httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 1, name: 'A' }]));
+    httpTesting.expectOne('/invaiback/category').flush(categoryPage([{ id: 1, name: 'A' }]));
 
     service.update(1, { name: 'B', nameEs: 'B ES' }).subscribe();
-    httpTesting.expectOne('/invaiapi/interna/category/1').flush({ id: 1, name: 'B' });
+    httpTesting.expectOne('/invaiback/category/1').flush({ id: 1, name: 'B' });
 
     service.getAll().subscribe(refreshedResult);
-    httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 1, name: 'B' }]));
+    httpTesting.expectOne('/invaiback/category').flush(categoryPage([{ id: 1, name: 'B' }]));
 
     expect(refreshedResult).toHaveBeenCalledWith(
       expect.objectContaining({ content: [{ id: 1, name: 'B' }] }),
@@ -236,7 +236,7 @@ describe('CategoriesService', () => {
 
     service.delete(9).subscribe(result);
 
-    const request = httpTesting.expectOne('/invaiapi/interna/category/9');
+    const request = httpTesting.expectOne('/invaiback/category/9');
     expect(request.request.method).toBe('DELETE');
     request.flush(null);
 
@@ -247,13 +247,13 @@ describe('CategoriesService', () => {
     const refreshedResult = vi.fn();
 
     service.getAll().subscribe();
-    httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([{ id: 1, name: 'A' }]));
+    httpTesting.expectOne('/invaiback/category').flush(categoryPage([{ id: 1, name: 'A' }]));
 
     service.delete(1).subscribe();
-    httpTesting.expectOne('/invaiapi/interna/category/1').flush(null);
+    httpTesting.expectOne('/invaiback/category/1').flush(null);
 
     service.getAll().subscribe(refreshedResult);
-    httpTesting.expectOne('/invaiapi/interna/category').flush(categoryPage([]));
+    httpTesting.expectOne('/invaiback/category').flush(categoryPage([]));
 
     expect(refreshedResult).toHaveBeenCalledWith(expect.objectContaining({ content: [] }));
   });

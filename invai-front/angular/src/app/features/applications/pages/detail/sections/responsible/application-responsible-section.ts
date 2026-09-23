@@ -3,13 +3,19 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  Injector,
+  afterNextRender,
+  viewChild,
   LOCALE_ID,
   OnInit,
   computed,
+  effect,
+  untracked,
   inject,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Validators } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -73,6 +79,10 @@ import { ApplicationDetailSectionLayout } from '../../components/application-det
 import { ApplicationAssignmentClipboardService } from './application-assignment-clipboard.service';
 import { ApplicationAuthorizedDialog } from './application-authorized-dialog';
 import {
+  ApplicationAssignmentDetail,
+  ApplicationAssignmentDetailDialog,
+} from './application-assignment-detail-dialog';
+import {
   ApplicationAssignmentTableAction,
   ApplicationAuthorizedTable,
   ApplicationResponsibleTableRow,
@@ -93,6 +103,12 @@ import {
   ApplicationResponsibleResolvedData,
 } from './application-responsible-section.resolver';
 
+import { ApplicationDir3ValidationService } from '../../../../services/application-dir3-validation.service';
+import { createApplicationDir3ManualForm } from '../../../../forms/application-dir3-manual-form.factory';
+import { ApplicationDir3CheckState } from './application-dir3-check.state';
+import { DIR3_COPY } from './application-dir3.i18n';
+import { ResponsibleDataChangesService } from '../../../../../maintenances/responsibles/services/responsible-data-changes.service';
+
 type AssignmentKind = 'responsible' | 'authorized';
 type AssignmentDialogMode = Extract<CrudEntityDialogMode, 'create' | 'edit'>;
 type PendingDeactivate =
@@ -103,6 +119,7 @@ type PendingDeactivate =
   standalone: true,
   selector: 'app-application-responsible-section',
   imports: [
+    ApplicationAssignmentDetailDialog,
     ApplicationAuthorizedDialog,
     ApplicationAuthorizedTable,
     ApplicationDetailSectionActions,
@@ -119,6 +136,9 @@ type PendingDeactivate =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationResponsibleSection implements OnInit {
+  private readonly injector = inject(Injector);
+  private readonly responsibleTable = viewChild(ApplicationResponsiblesTable);
+  private focusResponsibleTypeAfterRefresh: number | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
@@ -206,6 +226,7 @@ export class ApplicationResponsibleSection implements OnInit {
   protected readonly isSaving = signal(false);
 
   protected readonly responsibleDialogVisible = signal(false);
+  protected readonly consultedAssignment = signal<ApplicationAssignmentDetail | null>(null);
   protected readonly responsibleDialogSaving = signal(false);
   protected readonly responsibleDialogMode = signal<AssignmentDialogMode>('create');
   private readonly selectedResponsible = signal<ApplicationAssignedResponsibleOutput | null>(null);
@@ -332,7 +353,39 @@ export class ApplicationResponsibleSection implements OnInit {
   private responsibleEvent: TableLazyLoadEvent | undefined;
   private authorizedEvent: TableLazyLoadEvent | undefined;
 
+  protected readonly dir3Copy = DIR3_COPY;
+  private readonly dir3Service = inject(ApplicationDir3ValidationService);
+  private readonly assignmentChanges = inject(ResponsibleDataChangesService);
+  protected readonly responsibleDir3 = new ApplicationDir3CheckState((email, unit) =>
+    this.peopleService.checkDir3(email, unit),
+  );
+  protected readonly authorizedDir3 = new ApplicationDir3CheckState((email, unit) =>
+    this.peopleService.checkDir3(email, unit),
+  );
+  protected readonly manualForm = createApplicationDir3ManualForm(this.formBuilder);
+  protected readonly manualTarget = signal<ApplicationAssignedResponsibleOutput | null>(null);
+  protected readonly manualError = signal<string | null>(null);
+  protected readonly manualPartial = signal(false);
+  protected readonly manualConflict = signal(false);
+
   constructor() {
+    this.responsibleForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateDir3Check('responsible'));
+    this.authorizedForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateDir3Check('authorized'));
+    effect(() => {
+      this.detailState.application()?.admUnitCode;
+      untracked(() => {
+        this.updateDir3Check('responsible');
+        this.updateDir3Check('authorized');
+      });
+    });
+    this.destroyRef.onDestroy(() => {
+      this.responsibleDir3.reset();
+      this.authorizedDir3.reset();
+    });
     this.responsibleForm.controls.personalCaib.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((personalCaib) => this.onResponsiblePersonalCaibChanged(personalCaib));
@@ -391,6 +444,9 @@ export class ApplicationResponsibleSection implements OnInit {
     this.anchorId.set(resolved.anchorId);
     this.available.set(resolved.available);
     this.responsibleAssignments.set(resolved.responsiblesPage?.content ?? []);
+    if (resolved.responsiblesPage && !resolved.responsiblesLoadFailed) {
+      this.detailState.updateResponsibleDir3(resolved.responsiblesPage.content);
+    }
     this.authorized.set({
       items: resolved.authorizedPage?.content ?? [],
       total: resolved.authorizedPage?.totalElements ?? 0,
@@ -478,12 +534,26 @@ export class ApplicationResponsibleSection implements OnInit {
 
   protected closeResponsibleDialog(): void {
     if (this.responsibleDialogSaving()) return;
+    this.responsibleDir3.reset();
+    this.resetManualValidation();
     this.responsibleDialogVisible.set(false);
     this.selectedResponsible.set(null);
     this.resetSoffidSearch();
   }
 
   protected submitResponsible(): void {
+    if (this.manualTarget()) {
+      this.submitManualValidation();
+      return;
+    }
+    if (this.responsibleDialogMode() === 'create') {
+      this.updateDir3Check('responsible');
+      if (!this.responsibleDir3.canSubmit()) return;
+      if (this.responsibleDir3.mismatch() && this.manualForm.invalid) {
+        this.manualForm.markAllAsTouched();
+        return;
+      }
+    }
     const mode = this.responsibleDialogMode();
     const selected = this.selectedResponsible();
     if (
@@ -509,6 +579,7 @@ export class ApplicationResponsibleSection implements OnInit {
     if (!personReference) return;
     const input: ApplicationResponsibleInput = {
       ...personReference,
+      ...(mode === 'create' ? { dir3Status: this.responsibleDir3.result()?.matches ?? null } : {}),
       appResponsibleAuthorizedId: anchorId,
       responsibleTypeId: mode === 'edit' ? selected!.responsibleType.id : value.responsibleTypeId!,
       jobTitle:
@@ -526,14 +597,32 @@ export class ApplicationResponsibleSection implements OnInit {
         ? this.responsiblesService.create(input)
         : this.responsiblesService.update(selected!.id, input);
 
+    const manuallyValidate =
+      mode === 'create' &&
+      this.responsibleDir3.mismatch() &&
+      this.manualForm.controls.validate.value;
     this.responsibleDialogSaving.set(true);
     request
       .pipe(
-        finalize(() => this.responsibleDialogSaving.set(false)),
+        finalize(() => {
+          if (!this.manualTarget()) this.responsibleDialogSaving.set(false);
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: () => {
+        next: (saved) => {
+          if (manuallyValidate && saved.dir3Validation?.dir3Status === 'NOT_VALIDATED') {
+            this.manualTarget.set(saved);
+            this.manualPartial.set(true);
+            this.manualForm.controls.validate.setValidators(Validators.requiredTrue);
+            this.manualForm.controls.validate.updateValueAndValidity();
+            // The POST is committed; subsequent attempts must only repeat the PUT.
+            this.responsibleDialogSaving.set(false);
+            this.submitManualValidation();
+            return;
+          }
+          this.responsibleDir3.reset();
+          this.resetManualValidation();
           this.responsibleDialogVisible.set(false);
           this.selectedResponsible.set(null);
           this.resetSoffidSearch();
@@ -557,12 +646,17 @@ export class ApplicationResponsibleSection implements OnInit {
 
   protected closeAuthorizedDialog(): void {
     if (this.authorizedDialogSaving()) return;
+    this.authorizedDir3.reset();
     this.authorizedDialogVisible.set(false);
     this.selectedAuthorized.set(null);
     this.resetSoffidSearch();
   }
 
   protected submitAuthorized(): void {
+    if (this.authorizedDialogMode() === 'create') {
+      this.updateDir3Check('authorized');
+      if (!this.authorizedDir3.canSubmit()) return;
+    }
     const mode = this.authorizedDialogMode();
     const selected = this.selectedAuthorized();
     if (
@@ -588,6 +682,7 @@ export class ApplicationResponsibleSection implements OnInit {
     if (!personReference) return;
     const input: ApplicationAuthorizedInput = {
       ...personReference,
+      ...(mode === 'create' ? { dir3Status: this.authorizedDir3.result()?.matches ?? null } : {}),
       appResponsibleAuthorizedId: anchorId,
       authorizationTypeIds: value.authorizationTypeIds,
       observation: value.observation.trim() || null,
@@ -605,6 +700,7 @@ export class ApplicationResponsibleSection implements OnInit {
       )
       .subscribe({
         next: () => {
+          this.authorizedDir3.reset();
           this.authorizedDialogVisible.set(false);
           this.selectedAuthorized.set(null);
           this.resetSoffidSearch();
@@ -622,7 +718,35 @@ export class ApplicationResponsibleSection implements OnInit {
   }
 
   protected onResponsibleTableAction(event: ActionParams<ApplicationResponsibleTableRow>): void {
+    if (event.action === ApplicationAssignmentTableAction.View) {
+      if (event.params.assignment) {
+        this.consultedAssignment.set(
+          structuredClone({
+            kind: 'responsible',
+            assignment: event.params.assignment,
+          }),
+        );
+      }
+      return;
+    }
     if (!this.canUseRowActions()) return;
+    if (event.action === ApplicationAssignmentTableAction.ValidateManually) {
+      const assignment = event.params.assignment;
+      if (
+        !assignment?.person.personalCaib ||
+        assignment.deletedAt ||
+        assignment.dir3Validation?.dir3Status !== 'NOT_VALIDATED'
+      )
+        return;
+      this.resetManualValidation();
+      this.responsibleDir3.reset();
+      this.manualTarget.set(structuredClone(assignment));
+      this.manualForm.controls.validate.setValidators(Validators.requiredTrue);
+      this.manualForm.reset({ validate: false, reason: '' });
+      this.responsibleDialogVisible.set(true);
+      this.updateDir3Check('responsible');
+      return;
+    }
     if (event.action === ApplicationAssignmentTableAction.Add && !event.params.assignment) {
       this.prepareResponsibleDialog(null, 'create', event.params.responsibleType);
     } else if (event.action === ApplicationAssignmentTableAction.Edit && event.params.assignment) {
@@ -639,6 +763,15 @@ export class ApplicationResponsibleSection implements OnInit {
   }
 
   protected onAuthorizedTableAction(event: ActionParams<ApplicationAuthorizedOutput>): void {
+    if (event.action === ApplicationAssignmentTableAction.View) {
+      this.consultedAssignment.set(
+        structuredClone({
+          kind: 'authorized',
+          assignment: event.params,
+        }),
+      );
+      return;
+    }
     if (!this.canUseRowActions()) return;
     if (event.action === ApplicationAssignmentTableAction.Edit) {
       if (this.canOpenAuthorizedDialog(event.params)) {
@@ -741,6 +874,8 @@ export class ApplicationResponsibleSection implements OnInit {
     ) {
       return;
     }
+    this.responsibleDir3.reset();
+    this.resetManualValidation();
     const person = assignment?.person ?? null;
     const personalCaib = person?.personalCaib ?? Boolean(fixedType?.requiresPersonalCaib);
     const companyId = person?.company?.id ?? null;
@@ -775,6 +910,7 @@ export class ApplicationResponsibleSection implements OnInit {
     this.responsibleForm.markAsPristine();
     this.responsibleForm.markAsUntouched();
     this.responsibleDialogVisible.set(true);
+    this.updateDir3Check('responsible');
   }
 
   private openDeactivateDialog(pending: PendingDeactivate): void {
@@ -821,7 +957,9 @@ export class ApplicationResponsibleSection implements OnInit {
     this.configureAuthorizedFormAvailability(mode, personalCaib);
     this.authorizedForm.markAsPristine();
     this.authorizedForm.markAsUntouched();
+    this.authorizedDir3.reset();
     this.authorizedDialogVisible.set(true);
+    this.updateDir3Check('authorized');
   }
 
   protected canOpenAuthorizedDialog(existing: ApplicationAuthorizedOutput | null = null): boolean {
@@ -1151,6 +1289,102 @@ export class ApplicationResponsibleSection implements OnInit {
       .finally(() => this.copying.set(null));
   }
 
+  protected updateDir3Check(kind: AssignmentKind, force = false): void {
+    const responsible = kind === 'responsible';
+    const visible = responsible ? this.responsibleDialogVisible() : this.authorizedDialogVisible();
+    const mode = responsible ? this.responsibleDialogMode() : this.authorizedDialogMode();
+    if (!visible) return;
+    const target = responsible ? this.manualTarget() : null;
+    if (target) {
+      if (
+        this.responsibleDir3.update(
+          target.person.personalCaib,
+          target.person.email?.trim() ?? '',
+          this.detailState.application()?.admUnitCode?.trim() ?? '',
+          force,
+        ) &&
+        !force
+      ) {
+        this.manualForm.reset({ validate: false, reason: '' });
+      }
+      return;
+    }
+    if (mode !== 'create') return;
+    const form = responsible ? this.responsibleForm : this.authorizedForm;
+    const value = form.getRawValue();
+    const candidate = value.soffidPerson;
+    const email = candidate && typeof candidate !== 'string' ? candidate.email.trim() : '';
+    const check = responsible ? this.responsibleDir3 : this.authorizedDir3;
+    if (
+      check.update(
+        value.personalCaib,
+        email,
+        this.detailState.application()?.admUnitCode?.trim() ?? '',
+        force,
+      ) &&
+      responsible
+    ) {
+      this.manualForm.reset({ validate: false, reason: '' });
+    }
+  }
+
+  private resetManualValidation(): void {
+    this.manualTarget.set(null);
+    this.manualPartial.set(false);
+    this.manualError.set(null);
+    this.manualConflict.set(false);
+    this.manualForm.controls.validate.clearValidators();
+    this.manualForm.reset({ validate: false, reason: '' });
+  }
+
+  private submitManualValidation(): void {
+    const target = this.manualTarget();
+    if (
+      !this.canUseRowActions() ||
+      this.responsibleDialogSaving() ||
+      this.manualConflict() ||
+      !this.responsibleDir3.mismatch() ||
+      !target?.person.personalCaib ||
+      target.dir3Validation?.dir3Status !== 'NOT_VALIDATED'
+    )
+      return;
+    if (this.manualForm.invalid) {
+      this.manualForm.markAllAsTouched();
+      return;
+    }
+    this.manualError.set(null);
+    this.responsibleDialogSaving.set(true);
+    this.dir3Service
+      .validateManually(target.dir3Validation.id, this.manualForm.controls.reason.value.trim())
+      .pipe(
+        finalize(() => this.responsibleDialogSaving.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.responsibleDialogVisible.set(false);
+          this.responsibleDir3.reset();
+          this.resetManualValidation();
+          this.selectedResponsible.set(null);
+          this.resetSoffidSearch();
+          this.showSuccess(this.dir3Copy.success);
+          this.focusResponsibleTypeAfterRefresh = target.responsibleType.id;
+          this.refreshResponsibles();
+          this.refreshAuthorized();
+        },
+        error: (error: unknown) => {
+          this.manualError.set(
+            error instanceof HttpErrorResponse && error.status === 403
+              ? this.dir3Copy.denied
+              : this.dir3Copy.manualError,
+          );
+          this.assignmentChanges.assignmentsChanged();
+          this.refreshResponsibles();
+          this.refreshAuthorized();
+        },
+      });
+  }
+
   private refreshResponsibles(): void {
     const anchorId = this.anchorId();
     if (anchorId === null) return;
@@ -1171,9 +1405,32 @@ export class ApplicationResponsibleSection implements OnInit {
       .subscribe({
         next: (page) => {
           this.responsibleAssignments.set(page.content);
+          this.detailState.updateResponsibleDir3(page.content);
+          const target = this.manualTarget();
+          if (target && this.manualError()) {
+            const current = page.content.find((assignment) => assignment.id === target.id);
+            if (
+              !current?.person?.personalCaib ||
+              current.dir3Validation?.id !== target.dir3Validation?.id ||
+              current.dir3Validation?.dir3Status !== 'NOT_VALIDATED'
+            ) {
+              this.manualConflict.set(true);
+              this.manualError.set(this.dir3Copy.changed);
+            }
+          }
           this.rebuildResponsibleRows();
+          const focusTypeId = this.focusResponsibleTypeAfterRefresh;
+          this.focusResponsibleTypeAfterRefresh = null;
+          if (focusTypeId !== null) {
+            afterNextRender(() => this.responsibleTable()?.focusResponsibleAction(focusTypeId), {
+              injector: this.injector,
+            });
+          }
         },
-        error: (error) => this.handleError(error, this.copy.responsiblesLoadError),
+        error: (error) => {
+          this.focusResponsibleTypeAfterRefresh = null;
+          this.handleError(error, this.copy.responsiblesLoadError);
+        },
       });
   }
 

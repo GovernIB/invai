@@ -62,7 +62,7 @@ describe('RoleTransferService', () => {
 
     service.getAssignments(12).subscribe((assignments) => expect(assignments).toEqual(expected));
 
-    const request = http.expectOne('/invaiapi/interna/role-transfer/12');
+    const request = http.expectOne('/invaiback/role-transfer/12');
     expect(request.request.method).toBe('GET');
     request.flush(expected);
   });
@@ -79,7 +79,7 @@ describe('RoleTransferService', () => {
     };
 
     service.apply(input).subscribe();
-    const request = http.expectOne('/invaiapi/interna/role-transfer');
+    const request = http.expectOne('/invaiback/role-transfer');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual(input);
     expect(assignmentsChanged).not.toHaveBeenCalled();

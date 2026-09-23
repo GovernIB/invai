@@ -1,11 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
+  inject,
   LOCALE_ID,
   OnInit,
-  computed,
-  inject,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,20 +14,21 @@ import { ActivatedRoute } from '@angular/router';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
 import { CrudEntityDialogMode } from '@components/crud-entity-dialog/crud-entity-dialog';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
-import { ActionParams, PaginatedList } from '@models/table.model';
 import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+import { ActionParams, PaginatedList } from '@models/table.model';
 import { PAGINATOR_ROWS } from '@shared/constants/table.constants';
 import { localizedName } from '@shared/utils/localized-name.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
 import { Editor } from 'primeng/editor';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
 import { DatePickerPassThrough } from 'primeng/types/datepicker';
-import { EMPTY, Observable, catchError, finalize } from 'rxjs';
+import { catchError, EMPTY, finalize, Observable, Subject, takeUntil } from 'rxjs';
 
 import {
   ApplicationSecurityMeasureInput,
@@ -36,7 +37,6 @@ import {
   ApplicationSecurityRiskInput,
   ApplicationSecurityRiskOutput,
   ApplicationSecurityRoleOutput,
-  ApplicationWebContextInput,
   ApplicationWebContextOutput,
   SecurityCatalogItem,
   SelectOption,
@@ -46,6 +46,7 @@ import {
   ApplicationSecurityResourceKind,
   configureApplicationSecurityResourceForm,
   createApplicationSecurityResourceForm,
+  createApplicationSecurityRoleFiltersForm,
 } from '../../../../forms/application-security-form.factory';
 import {
   ApplicationSecurityMeasuresService,
@@ -53,13 +54,13 @@ import {
   ApplicationSecurityRolesService,
   ApplicationWebContextsService,
 } from '../../../../services/application-security.service';
+import { ApplicationDetailState } from '../../application-detail-state';
 import {
   APPLICATION_DETAIL_SAVE_ERROR_MESSAGE,
   APPLICATION_DETAIL_SAVE_ERROR_TITLE,
   APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE,
   APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE,
 } from '../../application-detail.i18n';
-import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationDetailSectionActions } from '../../components/application-detail-section-actions/application-detail-section-actions';
 import { ApplicationDetailSectionLayout } from '../../components/application-detail-section-layout/application-detail-section-layout';
 import { ApplicationSecurityResourceDialog } from './application-security-resource-dialog';
@@ -69,11 +70,13 @@ import {
   ApplicationSecurityTableKind,
 } from './application-security-resource-table';
 import {
+  APPLICATION_WEB_CONTEXT_VERIFICATION_PENDING,
   APPLICATION_SECURITY_ADD_ARIA_LABELS,
   APPLICATION_SECURITY_ANCHOR_REQUIRED,
   APPLICATION_SECURITY_DATE_FORMAT,
   APPLICATION_SECURITY_DATE_PLACEHOLDER,
   APPLICATION_SECURITY_DELETE_DIALOG,
+  APPLICATION_SECURITY_DIMENSIONS_TITLE,
   APPLICATION_SECURITY_DOCUMENTATION_ARIA_LABEL,
   APPLICATION_SECURITY_DOCUMENTATION_LABEL,
   APPLICATION_SECURITY_DOCUMENTATION_PENDING,
@@ -94,12 +97,10 @@ import {
   APPLICATION_SECURITY_RISKS_TITLE,
   APPLICATION_SECURITY_ROLE_COLUMNS,
   APPLICATION_SECURITY_ROLES_TITLE,
-  APPLICATION_SECURITY_ROLE_TEMPORARY_NOTE,
   APPLICATION_SECURITY_SECTION_TITLE,
   APPLICATION_SECURITY_SUCCESS_TITLE,
   APPLICATION_SECURITY_WEB_CONTEXT_COLUMNS,
   APPLICATION_SECURITY_WEB_CONTEXTS_TITLE,
-  APPLICATION_SECURITY_DIMENSIONS_TITLE,
 } from './application-security-section.i18n';
 import {
   APPLICATION_SECURITY_RESOLVE_KEY,
@@ -112,7 +113,7 @@ type MutableSecurityResource =
 @Component({
   selector: 'app-application-security-section',
   standalone: true,
-  imports: [
+  imports: [InputText,
     ApplicationDetailSectionActions,
     ApplicationDetailSectionLayout,
     ApplicationSecurityResourceDialog,
@@ -156,7 +157,6 @@ export class ApplicationSecuritySection implements OnInit {
   protected readonly risksTitle = APPLICATION_SECURITY_RISKS_TITLE;
   protected readonly measuresTitle = APPLICATION_SECURITY_MEASURES_TITLE;
   protected readonly labels = APPLICATION_SECURITY_LABELS;
-  protected readonly roleTemporaryNote = APPLICATION_SECURITY_ROLE_TEMPORARY_NOTE;
   protected readonly inconsistentTitle = APPLICATION_SECURITY_INCONSISTENT_TITLE;
   protected readonly inconsistentMessage = APPLICATION_SECURITY_INCONSISTENT_MESSAGE;
   protected readonly anchorRequired = APPLICATION_SECURITY_ANCHOR_REQUIRED;
@@ -218,8 +218,12 @@ export class ApplicationSecuritySection implements OnInit {
   protected readonly personalDataProcessingOptions = computed(() =>
     this.toOptions(this.personalDataProcessingCatalog()),
   );
-  protected readonly webContextOptions = computed(() => this.toOptions(this.webContextCatalog()));
-  protected readonly fieldOptions = computed(() => this.toOptions(this.fieldCatalog()));
+  protected readonly webContextOptions = computed(() =>
+    this.withSelectedWebContextOption(this.webContextCatalog(), 'webContext'),
+  );
+  protected readonly fieldOptions = computed(() =>
+    this.withSelectedWebContextOption(this.fieldCatalog(), 'field'),
+  );
   protected readonly measureTypeOptions = computed(() => this.toOptions(this.measureTypeCatalog()));
   protected readonly ensRequirementOptions = computed(() =>
     this.toOptions(this.ensRequirementCatalog()),
@@ -227,6 +231,15 @@ export class ApplicationSecuritySection implements OnInit {
 
   protected readonly resourceForm: ApplicationSecurityResourceFormGroup =
     createApplicationSecurityResourceForm(this.formBuilder);
+  protected readonly roleFilters = createApplicationSecurityRoleFiltersForm(this.formBuilder);
+  private appliedRoleSystem: string | undefined = this.roleFilters.controls.system.value;
+  private readonly cancelRolePage = new Subject<void>();
+  private readonly cancelWebContextPage = new Subject<void>();
+  protected applyRoleFilters(): void {
+    this.appliedRoleSystem = this.roleFilters.controls.system.value.trim() || undefined;
+    this.onPageChange('role', { ...this.tableStates.role, first: 0 });
+  }
+
   protected readonly resourceDialogVisible = signal(false);
   protected readonly resourceDialogMode = signal<CrudEntityDialogMode>('create');
   protected readonly resourceKind = signal<ApplicationSecurityResourceKind>('web-context');
@@ -247,7 +260,8 @@ export class ApplicationSecuritySection implements OnInit {
     () => this.detailState.canEdit() && this.detailState.isEditing('security'),
   );
   protected readonly resourceDialogCanEdit = computed(
-    () => this.canManageResources() && !this.selectedResource()?.deletedAt,
+    () => this.resourceKind() !== 'web-context' &&
+      this.canManageResources() && !this.selectedResource()?.deletedAt,
   );
 
   ngOnInit(): void {
@@ -262,6 +276,7 @@ export class ApplicationSecuritySection implements OnInit {
     );
     this.roles.set(this.toList(resolved.rolesPage));
     this.webContexts.set(this.toList(resolved.webContextsPage));
+    if (resolved.webContextsPage) this.detailState.updateWebContextCount(resolved.webContextsPage.totalElements);
     this.risks.set(this.toList(resolved.risksPage));
     this.measures.set(this.toList(resolved.measuresPage));
     this.securityLevelCatalog.set(resolved.options.securityLevels);
@@ -350,6 +365,16 @@ export class ApplicationSecuritySection implements OnInit {
     kind: ApplicationSecurityResourceKind,
     event: ActionParams<ApplicationSecurityResourceOutput>,
   ): void {
+    if (kind === 'web-context' && event.action === ApplicationSecurityTableAction.Verify) {
+      if (!this.showResourceActions()) return;
+      this.messageService.add({
+        severity: 'info',
+        summary: APPLICATION_SECURITY_PENDING_TITLE,
+        detail: APPLICATION_WEB_CONTEXT_VERIFICATION_PENDING,
+      });
+      return;
+    }
+    if (kind === 'web-context' && event.action !== ApplicationSecurityTableAction.View) return;
     const resource = event.params as MutableSecurityResource;
     this.resourceKind.set(kind);
     switch (event.action) {
@@ -366,7 +391,7 @@ export class ApplicationSecuritySection implements OnInit {
   }
 
   protected openCreateDialog(kind: ApplicationSecurityResourceKind): void {
-    if (!this.canManageResources()) return;
+    if (kind === 'web-context' || !this.canManageResources()) return;
     configureApplicationSecurityResourceForm(this.resourceForm, kind);
     this.resourceKind.set(kind);
     this.selectedResource.set(null);
@@ -392,7 +417,11 @@ export class ApplicationSecuritySection implements OnInit {
   }
 
   protected submitResource(): void {
-    if (this.isResourceSaving()) return;
+    if (
+      this.resourceKind() === 'web-context' ||
+      !this.canManageResources() ||
+      this.resourceDialogMode() === 'view'
+    ) return;
     if (this.resourceForm.invalid) {
       this.resourceForm.markAllAsTouched();
       return;
@@ -425,7 +454,7 @@ export class ApplicationSecuritySection implements OnInit {
   }
 
   protected requestDelete(resource = this.selectedResource()): void {
-    if (!resource || !this.canManageResources()) return;
+    if (this.resourceKind() === 'web-context' || !resource || !this.canManageResources()) return;
     this.pendingDelete.set(resource);
     this.deleteDialogVisible.set(true);
   }
@@ -437,7 +466,7 @@ export class ApplicationSecuritySection implements OnInit {
 
   protected confirmDelete(): void {
     const resource = this.pendingDelete();
-    if (!resource || this.isResourceDeleting()) return;
+    if (this.resourceKind() === 'web-context' || !resource || !this.canManageResources()) return;
     const kind = this.resourceKind();
     const request = this.resourceDeleteRequest(kind, resource.id);
     this.isResourceDeleting.set(true);
@@ -493,6 +522,7 @@ export class ApplicationSecuritySection implements OnInit {
       this.resourceForm.patchValue({
         webContextId: item.webContext?.id ?? null,
         fieldId: item.field?.id ?? null,
+        url: item.url ?? '',
         observation: item.observation ?? '',
       });
     } else if (kind === 'risk') {
@@ -519,17 +549,7 @@ export class ApplicationSecuritySection implements OnInit {
     id: number | null,
   ): Observable<ApplicationSecurityResourceOutput> {
     const value = this.resourceForm.getRawValue();
-    if (kind === 'web-context') {
-      const payload: ApplicationWebContextInput = {
-        appSecurityId,
-        webContextId: value.webContextId as number,
-        fieldId: value.fieldId as number,
-        observation: value.observation.trim() || null,
-      };
-      return id == null
-        ? this.webContextsService.create(payload)
-        : this.webContextsService.update(id, payload);
-    }
+    if (kind === 'web-context') return EMPTY;
     if (kind === 'risk') {
       const payload: ApplicationSecurityRiskInput = {
         appSecurityId,
@@ -556,7 +576,7 @@ export class ApplicationSecuritySection implements OnInit {
   ): Observable<void> {
     switch (kind) {
       case 'web-context':
-        return this.webContextsService.delete(id);
+        return EMPTY;
       case 'risk':
         return this.risksService.delete(id);
       case 'measure':
@@ -579,14 +599,17 @@ export class ApplicationSecuritySection implements OnInit {
       sort: `${sortField},${sortDirection}`,
       statusId: SoftDeleteStatus.ACTIVE,
     };
+    if (kind === 'role') this.cancelRolePage.next();
+    if (kind === 'web-context') this.cancelWebContextPage.next();
     this.setLoading(kind, true);
 
     if (kind === 'role') {
-      this.subscribePage(kind, this.rolesService.getPage(params), (page) => this.roles.set(page));
+      this.subscribePage(kind, this.rolesService.getPage({ ...params, system: this.appliedRoleSystem }), (page) => this.roles.set(page));
     } else if (kind === 'web-context') {
-      this.subscribePage(kind, this.webContextsService.getPage(params), (page) =>
-        this.webContexts.set(page),
-      );
+      this.subscribePage(kind, this.webContextsService.getPage(params), (page) => {
+        this.webContexts.set(page);
+        this.detailState.updateWebContextCount(page.total);
+      });
     } else if (kind === 'risk') {
       this.subscribePage(kind, this.risksService.getPage(params), (page) => this.risks.set(page));
     } else {
@@ -603,6 +626,7 @@ export class ApplicationSecuritySection implements OnInit {
   ): void {
     request
       .pipe(
+        takeUntil(kind === 'role' ? this.cancelRolePage : kind === 'web-context' ? this.cancelWebContextPage : EMPTY),
         catchError(() => {
           this.showError(APPLICATION_SECURITY_LOAD_ERROR);
           return EMPTY;
@@ -646,6 +670,18 @@ export class ApplicationSecuritySection implements OnInit {
       value: item.id,
       label: localizedName(item, this.locale, `#${item.id}`),
     }));
+  }
+
+  private withSelectedWebContextOption(
+    items: SecurityCatalogItem[],
+    key: 'webContext' | 'field',
+  ): SelectOption<number>[] {
+    const selected = this.resourceKind() === 'web-context'
+      ? (this.selectedResource() as ApplicationWebContextOutput | null)?.[key]
+      : null;
+    return this.toOptions(
+      selected && !items.some((item) => item.id === selected.id) ? [...items, selected] : items,
+    );
   }
 
   private showError(detail: string): void {

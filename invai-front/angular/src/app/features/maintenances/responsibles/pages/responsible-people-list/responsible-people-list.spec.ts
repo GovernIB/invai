@@ -26,7 +26,7 @@ globalThis.ResizeObserver ??= ResizeObserverMock;
 
 const PERSON: ResponsiblePerson = {
   id: 12,
-  company: { id: 3, name: 'Plexus', deletedAt: null },
+  company: { nif: null, id: 3, name: 'Plexus', deletedAt: null },
   firstName: 'Maria',
   lastName: 'Tur Roig',
   email: 'maria@example.org',

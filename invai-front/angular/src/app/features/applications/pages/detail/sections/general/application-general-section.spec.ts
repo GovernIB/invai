@@ -1,14 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ActivatedRoute, provideRouter } from '@angular/router';
+import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { MessageService } from 'primeng/api';
 import { Editor } from 'primeng/editor';
-import { By } from '@angular/platform-browser';
 
 import { ApplicationStatus } from '../../../../applications.model';
-import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
-import { ApplicationsService } from '../../../../services/applications.service';
-import { ApplicationOptionsService } from '../../../../services/application-options.service';
 import { APPLICATION_OPTIONS_RESOLVE_KEY } from '../../../../resolvers/application-options.resolver';
+import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
+import { ApplicationOptionsService } from '../../../../services/application-options.service';
+import { ApplicationsService } from '../../../../services/applications.service';
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationGeneralSection } from './application-general-section';
 
@@ -19,7 +20,7 @@ describe('ApplicationGeneralSection', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ApplicationGeneralSection],
-      providers: [
+      providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } },
         ApplicationDetailState,
         MessageService,
         provideRouter([]),
@@ -43,12 +44,10 @@ describe('ApplicationGeneralSection', () => {
                     informationSystems: [],
                     scopes: [],
                     commissions: [],
-                    departments: [],
-                    administrativeUnits: [],
+
                   },
                   loadFailed: false,
-                  departmentsLoadFailed: false,
-                  administrativeUnitsLoadFailed: false,
+
                 },
               },
             },

@@ -1,11 +1,10 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { finalize } from 'rxjs';
 
 import { ApplicationStatus } from '../../../../applications.model';
 import { APPLICATIONS_ROUTES_LOC } from '../../../../applications.routes.i18n';
@@ -13,10 +12,7 @@ import {
   APPLICATION_OPTIONS_RESOLVE_KEY,
   ApplicationOptionsResolvedData,
 } from '../../../../resolvers/application-options.resolver';
-import {
-  ApplicationOptionsService,
-  ApplicationSelectOptions,
-} from '../../../../services/application-options.service';
+import { ApplicationDetailState } from '../../application-detail-state';
 import {
   APPLICATION_DETAIL_ACTIVATION_ARIA_LABEL,
   APPLICATION_DETAIL_ACTIVATION_DIALOG_CANCEL_ARIA_LABEL,
@@ -48,7 +44,6 @@ import {
   APPLICATION_DETAIL_WITHDRAWAL_SUCCESS_MESSAGE,
   APPLICATION_DETAIL_WITHDRAWAL_SUCCESS_TITLE,
 } from '../../application-detail.i18n';
-import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationDetailSectionActions } from '../../components/application-detail-section-actions/application-detail-section-actions';
 import { ApplicationDetailSectionLayout } from '../../components/application-detail-section-layout/application-detail-section-layout';
 import { ApplicationGeneralForm } from './application-general-form';
@@ -72,7 +67,6 @@ export class ApplicationGeneralSection {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly messageService = inject(MessageService);
-  private readonly applicationOptionsService = inject(ApplicationOptionsService);
 
   protected readonly detailState = inject(ApplicationDetailState);
   protected readonly sectionTitle = APPLICATION_GENERAL_SECTION_TITLE;
@@ -80,29 +74,6 @@ export class ApplicationGeneralSection {
     this.route.snapshot.data[APPLICATION_OPTIONS_RESOLVE_KEY] as ApplicationOptionsResolvedData
   );
   protected readonly options = signal(this.resolvedOptions.options);
-  protected readonly currentOptions = computed<ApplicationSelectOptions>(() => {
-    const options = this.options();
-    const application = this.detailState.application();
-    const departments = this.withCurrentOption(
-      options.departments,
-      application?.departmentCode,
-      application?.department,
-    );
-    const administrativeUnits =
-      this.detailState.form.controls.conselleria.value === application?.departmentCode
-        ? this.withCurrentOption(
-            this.detailState.administrativeUnitOptions(),
-            application?.admUnitCode,
-            application?.administrativeUnit,
-          )
-        : this.detailState.administrativeUnitOptions();
-
-    return { ...options, departments, administrativeUnits };
-  });
-  protected readonly isDepartmentsLoading = signal(false);
-  protected readonly departmentsLoadFailed = signal(
-    this.resolvedOptions.departmentsLoadFailed,
-  );
   protected readonly isSaving = signal(false);
   protected readonly isActivating = signal(false);
   protected readonly isWithdrawing = signal(false);
@@ -146,46 +117,12 @@ export class ApplicationGeneralSection {
     APPLICATION_DETAIL_WITHDRAWAL_DIALOG_CONFIRM_ARIA_LABEL;
   protected readonly icons = PrimeIcons;
 
-  constructor() {
-    this.detailState.initializeAdministrativeUnitOptions(
-      this.resolvedOptions.options.administrativeUnits,
-      this.resolvedOptions.administrativeUnitsLoadFailed,
-    );
-  }
-
   protected startEditing(): void {
     this.detailState.startEditing('general');
   }
 
   protected cancelEditing(): void {
     this.detailState.cancelEditing('general');
-  }
-
-  protected selectConselleria(code: string | null): void {
-    this.detailState.selectConselleria(code);
-  }
-
-  protected retryAdministrativeUnits(): void {
-    this.detailState.retryAdministrativeUnits();
-  }
-
-  protected retryDepartments(): void {
-    if (this.isDepartmentsLoading()) return;
-
-    this.isDepartmentsLoading.set(true);
-    this.applicationOptionsService
-      .getDepartmentOptions()
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isDepartmentsLoading.set(false)),
-      )
-      .subscribe({
-        next: (departments) => {
-          this.options.update((options) => ({ ...options, departments }));
-          this.departmentsLoadFailed.set(false);
-        },
-        error: () => this.departmentsLoadFailed.set(true),
-      });
   }
 
   protected save(): void {
@@ -306,12 +243,4 @@ export class ApplicationGeneralSection {
       });
   }
 
-  private withCurrentOption(
-    options: ApplicationSelectOptions['departments'],
-    value: string | undefined,
-    label: string | undefined,
-  ): ApplicationSelectOptions['departments'] {
-    if (!value || options.some((option) => option.value === value)) return options;
-    return [{ label: label || value, value }, ...options];
-  }
 }

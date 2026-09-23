@@ -11,7 +11,7 @@ import {
 } from '../applications.model';
 import { ApplicationSystemDatabaseService } from './application-system-database.service';
 
-const BASE_URL = '/invaiapi/interna/application/system-database';
+const BASE_URL = '/invaiback/application/system-database';
 const RECORD: ApplicationSystemDatabaseOutput = {
   id: 70,
   application: {

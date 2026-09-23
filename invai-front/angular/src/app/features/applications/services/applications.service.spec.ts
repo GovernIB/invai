@@ -18,7 +18,7 @@ import {
 } from '../applications.model';
 import { ApplicationsService } from './applications.service';
 
-const APPLICATION_URL = '/invaiapi/interna/application';
+const APPLICATION_URL = '/invaiback/application';
 
 const EXPECTED_APPLICATION: Application = {
   id: '7',

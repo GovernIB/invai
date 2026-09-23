@@ -50,6 +50,9 @@
             </th>
           }
         }
+        <th class="invai-table-actions-column">
+          <span class="sr-only">{{ ACTIONS }}</span>
+        </th>
       </tr>
     </ng-template>
 
@@ -78,6 +81,22 @@
             </span>
           </td>
         }
+        <td class="invai-table-actions-column">
+          <p-button
+            [text]="true"
+            severity="secondary"
+            [icon]="icons.ELLIPSIS_H"
+            [ariaLabel]="labels.actions"
+            [pt]="{
+              root: {
+                'aria-haspopup': 'menu',
+                'aria-expanded': menuVisible() && selectedApplicationId() === rowData.id,
+                'aria-controls': rowMenu.id
+              }
+            }"
+            (onClick)="openActionsMenu($event, rowData, rowMenu)"
+          />
+        </td>
       </tr>
     </ng-template>
 
@@ -90,13 +109,26 @@
                 <p-skeleton width="75%" height="1rem" />
               </td>
             }
+            <td class="invai-table-actions-column">
+              <p-skeleton shape="circle" size="2rem" />
+            </td>
           </tr>
         }
       } @else {
         <tr>
-          <td [attr.colspan]="columns().length">{{ RESULTS_NOT_FOUND }}</td>
+          <td [attr.colspan]="columns().length + 1">{{ RESULTS_NOT_FOUND }}</td>
         </tr>
       }
     </ng-template>
   </p-table>
 </div>
+
+<p-menu
+  #rowMenu
+  [model]="rowActions()"
+  [popup]="true"
+  appendTo="body"
+  styleClass="maintenance-row-menu"
+  (onShow)="menuVisible.set(true)"
+  (onHide)="menuVisible.set(false)"
+/>

@@ -9,7 +9,7 @@ describe('ApplicationAccessibilityService', () => {
   let service: ApplicationAccessibilityService;
   let http: HttpTestingController;
   const clearCache = vi.fn();
-  const url = '/invaiapi/interna/application/accessibility';
+  const url = '/invaiback/application/accessibility';
   const payload: ApplicationAccessibilityInput = {
     applicationId: 7,
     complianceId: 29,

@@ -1,3 +1,6 @@
+import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { emptyWebContextsData } from './application-development-web-contexts.resolver';
+import { ApplicationDevelopmentWebContextsState } from './application-development-web-contexts-state';
 import { WritableSignal, signal } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -114,6 +117,7 @@ describe('ApplicationDevelopmentSection', () => {
       imports: [ApplicationDevelopmentSection],
       providers: [
         MessageService,
+        { provide: ApplicationWebContextsService, useValue: { getPage: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() } },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { data: routeData } },
@@ -143,6 +147,23 @@ describe('ApplicationDevelopmentSection', () => {
     fixture = TestBed.createComponent(ApplicationDevelopmentSection);
     fixture.detectChanges();
     await fixture.whenStable();
+  });
+
+  it('places web contexts before providers and enables management only in section edit mode', () => {
+    const contexts = fixture.debugElement.injector.get(ApplicationDevelopmentWebContextsState);
+    const titles = [...(fixture.nativeElement as HTMLElement).querySelectorAll('.application-development__resource h3')].map((h) => h.textContent?.trim());
+    expect(titles[0]).toBe('Contextos web');
+    expect(contexts.canManage()).toBe(false);
+    expect(fixture.nativeElement.querySelector('button[aria-label="Afegeix un context web"]')).toBeNull();
+    state.editing.set(true);
+    fixture.detectChanges();
+    expect(contexts.canManage()).toBe(true);
+    const add = fixture.nativeElement.querySelector('button[aria-label="Afegeix un context web"]') as HTMLButtonElement;
+    add.click();
+    fixture.detectChanges();
+    expect(contexts.mode()).toBe('create');
+    expect(contexts.visible()).toBe(true);
+    expect(TestBed.inject(ApplicationWebContextsService).getPage).not.toHaveBeenCalled();
   });
 
   it('initializes Development and its read-only resource pages', () => {
@@ -721,6 +742,9 @@ function createState() {
 
   return {
     application: signal({ id: '7' }),
+    appSecurityId: signal<number | null>(9),
+    refreshCompletenessAfterMutation: vi.fn(),
+    updateWebContextCount: vi.fn(),
     canEdit: signal(true),
     development,
     developmentForm: form,
@@ -757,6 +781,7 @@ function createState() {
 function resolvedData(): Record<string, ApplicationDevelopmentResolvedData> {
   return {
     [APPLICATION_DEVELOPMENT_RESOLVE_KEY]: {
+      webContexts: { ...emptyWebContextsData(), appSecurityId: 9 },
       applicationId: 7,
       appDevelopmentId: 9,
       development: DEVELOPMENT,

@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { AdministrativeUnitField } from '@features/administrative-units/administrative-unit-field';
+import { AdministrativeUnitSearchAction, AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { Editor } from 'primeng/editor';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { Button } from 'primeng/button';
 import type { EditorInitEvent, EditorPassThrough } from 'primeng/types/editor';
 
 import {
@@ -36,14 +37,6 @@ export interface ApplicationFormFieldLabels {
   commissionType: string;
   prefix: string;
   administrativeUnit: string;
-  conselleria: string;
-  departmentsLoading: string;
-  departmentsLoadError: string;
-  administrativeUnitsLoading: string;
-  administrativeUnitsLoadError: string;
-  administrativeUnitsEmpty: string;
-  selectConselleriaFirst: string;
-  retry: string;
   description: string;
   code?: string;
   creationDate?: string;
@@ -59,7 +52,7 @@ export type ApplicationAuditFormControls = Pick<
 @Component({
   selector: 'app-application-form-fields',
   standalone: true,
-  imports: [Button, Editor, InputText, ReactiveFormsModule, Select],
+  imports: [AdministrativeUnitField, Editor, InputText, ReactiveFormsModule, Select],
   templateUrl: './application-form-fields.html',
   styleUrl: './application-form-fields.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,15 +69,10 @@ export class ApplicationFormFields {
   isReadOnly = input(false);
   codeControl = input<FormControl<string> | null>(null);
   auditControls = input<ApplicationAuditFormControls | null>(null);
+  dir3 = input.required<AdministrativeUnitSearchState>();
+  dir3Action = output<AdministrativeUnitSearchAction>();
   options = input<Partial<ApplicationSelectOptions> | null>(null);
-  departmentsLoading = input(false);
-  departmentsLoadFailed = input(false);
-  administrativeUnitsLoading = input(false);
-  administrativeUnitsLoadFailed = input(false);
   commissionSelected = output<ApplicationCommissionOption | null>();
-  conselleriaSelected = output<string | null>();
-  departmentsRetry = output<void>();
-  administrativeUnitsRetry = output<void>();
 
   protected readonly prefixMaxLength = APPLICATION_PREFIX_MAX_LENGTH;
   protected readonly codeMaxLength = APPLICATION_CODE_MAX_LENGTH;
@@ -112,14 +100,6 @@ export class ApplicationFormFields {
 
   protected get commissionOptions() {
     return this.options()?.commissions ?? [];
-  }
-
-  protected get administrativeUnitOptions() {
-    return this.options()?.administrativeUnits ?? [];
-  }
-
-  protected get conselleriaOptions() {
-    return this.options()?.departments ?? [];
   }
 
   protected isInvalid(control: AbstractControl<unknown>): boolean {
@@ -150,48 +130,6 @@ export class ApplicationFormFields {
 
   protected commissionTypeLabel(type: CommissionType | null): string {
     return type ? APPLICATION_COMMISSION_TYPE_LABELS[type] : '';
-  }
-
-  protected selectConselleria(code: string | null): void {
-    this.conselleriaSelected.emit(code);
-  }
-
-  protected retryAdministrativeUnits(): void {
-    this.administrativeUnitsRetry.emit();
-  }
-
-  protected retryDepartments(): void {
-    this.departmentsRetry.emit();
-  }
-
-  protected administrativeUnitStatus(): string | null {
-    if (this.administrativeUnitsLoading()) return this.labels().administrativeUnitsLoading;
-    if (this.administrativeUnitsLoadFailed()) {
-      return this.labels().administrativeUnitsLoadError;
-    }
-    if (!this.controls().conselleria.value) return this.labels().selectConselleriaFirst;
-    if (!this.administrativeUnitOptions.length) return this.labels().administrativeUnitsEmpty;
-    return null;
-  }
-
-  protected administrativeUnitDescribedBy(): string | null {
-    const ids: string[] = [];
-    if (this.isInvalid(this.controls().administrativeUnit)) {
-      ids.push(this.errorId('administrative-unit'));
-    }
-    if (this.administrativeUnitStatus()) {
-      ids.push(this.fieldId('administrative-unit-status'));
-    }
-    return ids.length ? ids.join(' ') : null;
-  }
-
-  protected conselleriaDescribedBy(): string | null {
-    const ids: string[] = [];
-    if (this.isInvalid(this.controls().conselleria)) ids.push(this.errorId('conselleria'));
-    if (this.departmentsLoading() || this.departmentsLoadFailed()) {
-      ids.push(this.fieldId('conselleria-status'));
-    }
-    return ids.length ? ids.join(' ') : null;
   }
 
   protected optionLabel(

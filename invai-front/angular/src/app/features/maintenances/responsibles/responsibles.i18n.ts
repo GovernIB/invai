@@ -25,6 +25,8 @@ export const RESPONSIBLE_COMMON_COPY = {
 };
 
 export const RESPONSIBLE_COMPANY_COPY = {
+  nif: $localize`NIF`,
+  nifMaxLength: $localize`:@@companyNifMaxLength:El NIF no pot superar els 20 caràcters.`,
   title: $localize`Empreses`,
   description: $localize`Gestiona les empreses responsables de les aplicacions per empresa.`,
   name: $localize`Empresa`,

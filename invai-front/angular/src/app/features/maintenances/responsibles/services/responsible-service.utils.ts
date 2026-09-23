@@ -4,7 +4,7 @@ import { toPageHttpParams } from '@shared/utils/http-params.utils';
 
 export function responsibleHttpParams(
   params: PageParams | undefined,
-  criteria: Record<string, string | number | undefined>,
+  criteria: Record<string, string | number | boolean | undefined>,
 ): HttpParams | undefined {
   let httpParams = toPageHttpParams(params) ?? new HttpParams();
   Object.entries(criteria).forEach(([key, value]) => {
@@ -15,7 +15,7 @@ export function responsibleHttpParams(
 
 export function responsibleCacheKey(
   params: PageParams | undefined,
-  criteria: Record<string, string | number | undefined>,
+  criteria: Record<string, string | number | boolean | undefined>,
 ): string {
   return JSON.stringify({
     page: params?.page ?? null,

@@ -5,17 +5,10 @@
     [auditControls]="form().controls"
     [isReadOnly]="isReadOnly()"
     [labels]="labels"
-    [options]="options()"
-    [departmentsLoading]="departmentsLoading()"
-    [departmentsLoadFailed]="departmentsLoadFailed()"
-    [administrativeUnitsLoading]="administrativeUnitsLoading()"
-    [administrativeUnitsLoadFailed]="administrativeUnitsLoadFailed()"
+    [options]="options()" [dir3]="dir3()" (dir3Action)="dir3Action.emit($event)"
     [prefixMaxLengthError]="prefixMaxLengthError"
     [requiredError]="requiredError"
     [selectPlaceholder]="selectPlaceholder"
     (commissionSelected)="selectCommission($event)"
-    (conselleriaSelected)="selectConselleria($event)"
-    (departmentsRetry)="departmentsRetry.emit()"
-    (administrativeUnitsRetry)="administrativeUnitsRetry.emit()"
   />
 </form>

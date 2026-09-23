@@ -29,5 +29,10 @@ export class ResponsiblePersonFiltersForm {
   form = input.required<ResponsiblePersonFiltersFormGroup>();
   labels = input.required<ResponsiblePersonFilterLabels>();
   companyOptions = input.required<ResponsibleCompanyOption[]>();
+  protected readonly originLabel = $localize`:@@personOrigin:Origen`;
+  protected readonly originOptions = [
+    { label: $localize`:@@externalPeople:Persones externes`, value: false },
+    { label: $localize`Personal CAIB`, value: true },
+  ];
   protected readonly statusOptions = SOFT_DELETE_STATUS_OPTIONS;
 }

@@ -7,4 +7,4 @@ export interface AdministrativeUnit {
   level: number | null;
 }
 
-export type AdministrativeUnitPageParams = PageParams;
+export interface AdministrativeUnitPageParams extends PageParams { search?: string; }

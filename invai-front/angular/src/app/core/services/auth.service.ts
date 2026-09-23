@@ -63,7 +63,7 @@ export class OAuthService {
 
   readonly isAuthenticated = computed(() => this._currentUser() != null);
 
-  //http://10.1.8.36:30066/invaiapi/api/auth/login
+  //http://10.1.8.36:30066/invaiback/api/auth/login
   login(): Observable<void> {
     if (this._isLoading()) {
       console.log('');

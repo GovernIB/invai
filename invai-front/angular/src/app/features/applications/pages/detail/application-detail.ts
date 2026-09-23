@@ -6,10 +6,11 @@ import {
   computed,
   effect,
   inject,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { BreadcrumbService } from '@core/components/breadcrumbs';
 import { SectionContainerComponent } from '@components/section-container/section-container.component';
 import { Button } from 'primeng/button';
@@ -31,7 +32,9 @@ import {
   APPLICATION_DETAIL_DEVELOPMENT_INCOMPLETE,
   APPLICATION_DETAIL_RESPONSIBLE_AND_AUTHORIZED_INCOMPLETE,
   APPLICATION_DETAIL_RESPONSIBLE_TYPES_INCOMPLETE,
+  APPLICATION_DETAIL_RESPONSIBLE_DIR3_PENDING,
   APPLICATION_DETAIL_SECURITY_INCOMPLETE,
+  APPLICATION_DETAIL_SECURITY_UNVERIFIED_CONTEXTS,
   APPLICATION_DETAIL_SYSTEMS_AND_DATABASES_INCOMPLETE,
   APPLICATION_DETAIL_SYSTEMS_INCOMPLETE,
   APPLICATION_DETAIL_TABS,
@@ -41,6 +44,7 @@ import {
   APPLICATION_DETAIL_UNSAVED_CHANGES_TITLE,
 } from './application-detail.i18n';
 import { ApplicationDetailSection, ApplicationDetailState } from './application-detail-state';
+import { isApplicationGeneralEditNavigation } from './application-detail-navigation';
 import {
   APPLICATION_DETAIL_RESOLVE_KEY,
   ApplicationDetailResolvedData,
@@ -64,6 +68,9 @@ import {
 })
 export class ApplicationDetail implements OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private pendingInitialEdit = isApplicationGeneralEditNavigation(
+    inject(Router).currentNavigation()?.extras.info,
+  );
   private readonly sectionTabs = viewChild<ElementRef<HTMLElement>>('sectionTabs');
   private readonly breadcrumbService = inject(BreadcrumbService);
   private readonly paramMap = toSignal(this.route.paramMap, {
@@ -126,9 +133,10 @@ export class ApplicationDetail implements OnDestroy {
     {
       label: APPLICATION_DETAIL_TABS.security,
       route: 'security' as const,
-      incompleteMessage: this.detailState.application()?.missingSecurityData
-        ? APPLICATION_DETAIL_SECURITY_INCOMPLETE
-        : '',
+      incompleteMessage: [
+        this.detailState.application()?.missingSecurityData ? APPLICATION_DETAIL_SECURITY_INCOMPLETE : '',
+        this.detailState.hasUnverifiedWebContexts() ? APPLICATION_DETAIL_SECURITY_UNVERIFIED_CONTEXTS : '',
+      ].filter(Boolean).join(' '),
       warning: false,
     },
   ]);
@@ -171,7 +179,16 @@ export class ApplicationDetail implements OnDestroy {
 
   constructor() {
     effect(() => {
-      this.detailState.initialize(this.resolvedData().application);
+      const application = this.resolvedData().application;
+      untracked(() => {
+        this.detailState.initialize(application);
+        this.detailState.hasUnverifiedWebContexts.set(this.resolvedData().hasUnverifiedWebContexts);
+        this.detailState.hasPendingResponsibleDir3.set(this.resolvedData().hasPendingResponsibleDir3);
+        if (this.pendingInitialEdit) {
+          this.pendingInitialEdit = false;
+          if (application) this.detailState.startEditing('general');
+        }
+      });
     });
 
     effect(() => {
@@ -217,6 +234,13 @@ export class ApplicationDetail implements OnDestroy {
   }
 
   private responsibleIncompleteMessage(): string {
+    return [
+      this.responsibleMissingDataMessage(),
+      this.detailState.hasPendingResponsibleDir3() ? APPLICATION_DETAIL_RESPONSIBLE_DIR3_PENDING : '',
+    ].filter(Boolean).join(' ');
+  }
+
+  private responsibleMissingDataMessage(): string {
     const application = this.detailState.application();
     if (application?.missingResponsibleTypes && application.missingAuthorized) {
       return APPLICATION_DETAIL_RESPONSIBLE_AND_AUTHORIZED_INCOMPLETE;

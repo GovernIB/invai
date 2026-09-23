@@ -5,6 +5,7 @@ import {
   LOCALE_ID,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -67,6 +68,16 @@ import {
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationDetailSectionActions } from '../../components/application-detail-section-actions/application-detail-section-actions';
 import { ApplicationDetailSectionLayout } from '../../components/application-detail-section-layout/application-detail-section-layout';
+import { ApplicationDevelopmentWebContextsState } from './application-development-web-contexts-state';
+import { ApplicationSecurityResourceTable } from '../security/application-security-resource-table';
+import { ApplicationSecurityResourceDialog } from '../security/application-security-resource-dialog';
+import {
+  APPLICATION_SECURITY_WEB_CONTEXTS_TITLE,
+  APPLICATION_SECURITY_WEB_CONTEXT_COLUMNS,
+  APPLICATION_SECURITY_ADD_ARIA_LABELS,
+  APPLICATION_SECURITY_ANCHOR_REQUIRED,
+  APPLICATION_SECURITY_DELETE_DIALOG,
+} from '../security/application-security-section.i18n';
 import {
   APPLICATION_DEVELOPMENT_ADD_PROVIDER_ARIA_LABEL,
   APPLICATION_DEVELOPMENT_ADD_TECHNOLOGY_ARIA_LABEL,
@@ -125,8 +136,11 @@ import {
 
 @Component({
   selector: 'app-application-development-section',
+  providers: [ApplicationDevelopmentWebContextsState],
   standalone: true,
   imports: [
+    ApplicationSecurityResourceTable,
+    ApplicationSecurityResourceDialog,
     ApplicationDetailSectionActions,
     ApplicationDetailSectionLayout,
     ApplicationProviderDialog,
@@ -147,6 +161,13 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationDevelopmentSection implements OnInit {
+  protected readonly webContexts = inject(ApplicationDevelopmentWebContextsState);
+  protected readonly webContextsTitle = APPLICATION_SECURITY_WEB_CONTEXTS_TITLE;
+  protected readonly webContextColumns = APPLICATION_SECURITY_WEB_CONTEXT_COLUMNS;
+  protected readonly addWebContextAriaLabel = APPLICATION_SECURITY_ADD_ARIA_LABELS['web-context'];
+  protected readonly webContextAnchorRequired = APPLICATION_SECURITY_ANCHOR_REQUIRED;
+  protected readonly webContextDeleteDialog = APPLICATION_SECURITY_DELETE_DIALOG;
+
   private readonly route = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
   private readonly locale = inject(LOCALE_ID);
@@ -284,10 +305,23 @@ export class ApplicationDevelopmentSection implements OnInit {
     this.withCurrentEnvironment(this.environmentOptions()),
   );
 
+  constructor() {
+    effect(() =>
+      this.webContexts.sectionBusy.set(
+        this.isSaving() ||
+          this.isProviderSaving() ||
+          this.isTechnologySaving() ||
+          this.isProviderDeleting() ||
+          this.isTechnologyDeleting(),
+      ),
+    );
+  }
+
   ngOnInit(): void {
     const resolvedData = this.route.snapshot.data[
       APPLICATION_DEVELOPMENT_RESOLVE_KEY
     ] as ApplicationDevelopmentResolvedData;
+    this.webContexts.initialize(resolvedData.webContexts);
     this.detailState.initializeDevelopment(resolvedData.applicationId, resolvedData.development);
     this.detailState.initializeDevelopmentResources(
       {

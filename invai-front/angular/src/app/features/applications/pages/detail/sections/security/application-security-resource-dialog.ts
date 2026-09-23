@@ -4,13 +4,14 @@ import {
   CrudEntityDialog,
   CrudEntityDialogMode,
 } from '@components/crud-entity-dialog/crud-entity-dialog';
+import { InputText } from 'primeng/inputtext';
+import { Select } from 'primeng/select';
+import { Textarea } from 'primeng/textarea';
 import { SelectOption } from '../../../../applications.model';
 import {
   ApplicationSecurityResourceFormGroup,
   ApplicationSecurityResourceKind,
 } from '../../../../forms/application-security-form.factory';
-import { Select } from 'primeng/select';
-import { Textarea } from 'primeng/textarea';
 import {
   APPLICATION_SECURITY_DIALOG_ARIA_LABELS,
   APPLICATION_SECURITY_DIALOG_TITLES,
@@ -22,7 +23,7 @@ import {
 @Component({
   selector: 'app-application-security-resource-dialog',
   standalone: true,
-  imports: [CrudEntityDialog, ReactiveFormsModule, Select, Textarea],
+  imports: [InputText, CrudEntityDialog, ReactiveFormsModule, Select, Textarea],
   templateUrl: './application-security-resource-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,3 +1,8 @@
+import {
+  ApplicationDevelopmentWebContextsData,
+  emptyWebContextsData,
+  resolveDevelopmentWebContexts,
+} from './application-development-web-contexts.resolver';
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
 import { EnvironmentCatalogOption } from '@features/environments/environments.model';
@@ -30,6 +35,7 @@ import {
 export const APPLICATION_DEVELOPMENT_RESOLVE_KEY = 'applicationDevelopment';
 
 export interface ApplicationDevelopmentResolvedData {
+  webContexts: ApplicationDevelopmentWebContextsData;
   applicationId: number | null;
   appDevelopmentId: number | null;
   development: ApplicationDevelopmentOutput | null;
@@ -94,6 +100,10 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
         );
 
   return forkJoin({
+    webContexts: resolveDevelopmentWebContexts(
+      applicationId,
+      positiveId(detailData?.application?.appSecurityId),
+    ),
     developmentResult,
     providersResult,
     technologiesResult,
@@ -130,6 +140,7 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
   }).pipe(
     map(
       ({
+        webContexts,
         developmentResult,
         providersResult,
         technologiesResult,
@@ -139,6 +150,7 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
         modalityOptionsResult,
         standardAdaptionOptionsResult,
       }) => ({
+        webContexts,
         applicationId,
         appDevelopmentId,
         development: developmentResult.development,
@@ -164,6 +176,7 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
 
 function emptyResolvedData(): ApplicationDevelopmentResolvedData {
   return {
+    webContexts: emptyWebContextsData(),
     applicationId: null,
     appDevelopmentId: null,
     development: null,

@@ -1,4 +1,5 @@
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { APPLICATION_SECURITY_DEFAULT_ROLE_SYSTEM } from '../applications.constants';
 
 export interface ApplicationSecurityFormControls {
   overallGradeId: FormControl<number | null>;
@@ -19,6 +20,7 @@ export type ApplicationSecurityFormGroup = FormGroup<ApplicationSecurityFormCont
 export type ApplicationSecurityResourceKind = 'web-context' | 'risk' | 'measure';
 
 export interface ApplicationSecurityResourceFormControls {
+  url: FormControl<string>;
   webContextId: FormControl<number | null>;
   fieldId: FormControl<number | null>;
   observation: FormControl<string>;
@@ -53,6 +55,7 @@ export function createApplicationSecurityResourceForm(
   formBuilder: FormBuilder,
 ): ApplicationSecurityResourceFormGroup {
   return formBuilder.group({
+    url: formBuilder.nonNullable.control(''),
     webContextId: formBuilder.control<number | null>(null),
     fieldId: formBuilder.control<number | null>(null),
     observation: formBuilder.nonNullable.control(''),
@@ -68,12 +71,30 @@ export function configureApplicationSecurityResourceForm(
   kind: ApplicationSecurityResourceKind,
 ): void {
   form.reset();
+  form.controls.url.clearValidators();
   form.controls.webContextId.clearValidators();
   form.controls.fieldId.clearValidators();
   if (kind === 'web-context') {
+    form.controls.url.addValidators([Validators.maxLength(255), control => {
+      const value = (control.value as string).trim();
+      return !value || /^https?:\/\/.+/.test(value) ? null : { pattern: true };
+    }]);
     form.controls.webContextId.addValidators(Validators.required);
     form.controls.fieldId.addValidators(Validators.required);
   }
+  form.controls.url.updateValueAndValidity({ emitEvent: false });
   form.controls.webContextId.updateValueAndValidity({ emitEvent: false });
   form.controls.fieldId.updateValueAndValidity({ emitEvent: false });
+}
+
+export interface ApplicationSecurityRoleFiltersControls {
+  system: FormControl<string>;
+}
+
+export function createApplicationSecurityRoleFiltersForm(
+  formBuilder: FormBuilder,
+): FormGroup<ApplicationSecurityRoleFiltersControls> {
+  return formBuilder.group({
+    system: formBuilder.nonNullable.control(APPLICATION_SECURITY_DEFAULT_ROLE_SYSTEM),
+  });
 }

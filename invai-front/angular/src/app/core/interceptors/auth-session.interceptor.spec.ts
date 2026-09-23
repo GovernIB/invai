@@ -55,7 +55,7 @@ describe('authSessionInterceptor', () => {
 
   it('redirects to login and propagates the original 401 when the session has expired', () => {
     const errorHandler = vi.fn();
-    const loginUrl = 'https://invai.plexus.services/invaiapi/api/auth/login';
+    const loginUrl = 'https://invai.plexus.services/invaiback/api/auth/login';
 
     http.get(protectedUrl).subscribe({ error: errorHandler });
     flushUnauthorized(protectedUrl);
@@ -75,7 +75,7 @@ describe('authSessionInterceptor', () => {
     const firstErrorHandler = vi.fn();
     const secondErrorHandler = vi.fn();
     const secondProtectedUrl = `${environment.apiBasePath}/category`;
-    const loginUrl = 'https://invai.plexus.services/invaiapi/api/auth/login';
+    const loginUrl = 'https://invai.plexus.services/invaiback/api/auth/login';
 
     http.get(protectedUrl).subscribe({ error: firstErrorHandler });
     http.get(secondProtectedUrl).subscribe({ error: secondErrorHandler });

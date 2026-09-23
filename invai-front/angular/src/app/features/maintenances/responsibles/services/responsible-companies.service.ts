@@ -7,9 +7,9 @@ import { Observable, map, tap } from 'rxjs';
 
 import {
   ResponsibleCompany,
+  ResponsibleCompanyInput,
   ResponsibleCompanyOption,
-  ResponsibleNameInput,
-  ResponsibleNamePageParams,
+  ResponsibleCompanyPageParams,
 } from '../responsibles.model';
 import { ResponsibleDataChangesService } from './responsible-data-changes.service';
 import { responsibleCacheKey, responsibleHttpParams } from './responsible-service.utils';
@@ -20,8 +20,8 @@ export class ResponsibleCompaniesService extends BaseApiService {
   private readonly changes = inject(ResponsibleDataChangesService);
   private readonly pages = new Map<string, Observable<SpringPage<ResponsibleCompany>>>();
 
-  getPage(params?: ResponsibleNamePageParams): Observable<SpringPage<ResponsibleCompany>> {
-    const criteria = { name: params?.name, statusId: params?.statusId, search: params?.search };
+  getPage(params?: ResponsibleCompanyPageParams): Observable<SpringPage<ResponsibleCompany>> {
+    const criteria = { nif: params?.nif, name: params?.name, statusId: params?.statusId, search: params?.search };
     return cachedRequest(this.pages, responsibleCacheKey(params, criteria), () =>
       this.http.get<SpringPage<ResponsibleCompany>>(this.url(), {
         params: responsibleHttpParams(params, criteria),
@@ -42,11 +42,11 @@ export class ResponsibleCompaniesService extends BaseApiService {
     }).pipe(map((page) => page.content.map(({ id, name }) => ({ id, label: name }))));
   }
 
-  create(input: ResponsibleNameInput): Observable<ResponsibleCompany> {
+  create(input: ResponsibleCompanyInput): Observable<ResponsibleCompany> {
     return this.http.post<ResponsibleCompany>(this.url(), input).pipe(tap(() => this.changed()));
   }
 
-  update(id: number, input: ResponsibleNameInput): Observable<ResponsibleCompany> {
+  update(id: number, input: ResponsibleCompanyInput): Observable<ResponsibleCompany> {
     return this.http.put<ResponsibleCompany>(this.url(id), input).pipe(tap(() => this.changed()));
   }
 

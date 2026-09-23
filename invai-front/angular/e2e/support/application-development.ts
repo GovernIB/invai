@@ -4,13 +4,13 @@ import type { CleanupRegistry } from './cleanup-registry';
 import { apiUrl, expectApiJsonResponse } from './http';
 
 export const APPLICATION_DEVELOPMENT_API = {
-  aggregate: '/invaiapi/interna/application/development',
-  applications: '/invaiapi/interna/application',
-  environments: '/invaiapi/interna/environment',
-  providers: '/invaiapi/interna/application/development/provider',
-  roles: '/invaiapi/interna/role',
-  technologies: '/invaiapi/interna/application/development/technology',
-  technologyCatalog: '/invaiapi/interna/technology',
+  aggregate: '/invaiback/application/development',
+  applications: '/invaiback/application',
+  environments: '/invaiback/environment',
+  providers: '/invaiback/application/development/provider',
+  roles: '/invaiback/role',
+  technologies: '/invaiback/application/development/technology',
+  technologyCatalog: '/invaiback/technology',
 } as const;
 
 export interface ApplicationDevelopmentAggregate {

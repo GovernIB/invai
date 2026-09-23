@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { KeyLabel } from '@models/table.model';
+import { ApplicationStatus } from '../../applications.model';
 
-import { ApplicationsTable } from './applications-table';
+import { ApplicationTableAction, ApplicationsTable } from './applications-table';
 
 class ResizeObserverMock implements ResizeObserver {
   disconnect(): void {}
@@ -29,7 +30,7 @@ describe('ApplicationsTable', () => {
     fixture.componentRef.setInput('itemsList', { items: [], total: 0 });
   });
 
-  it('should render initial skeletons with only the selected columns', () => {
+  it('renders initial skeletons including the actions column', () => {
     fixture.componentRef.setInput('isLoading', true);
     fixture.componentRef.setInput('isInitialLoading', true);
     fixture.detectChanges();
@@ -40,18 +41,106 @@ describe('ApplicationsTable', () => {
 
     expect(skeletonRows.length).toBeGreaterThan(0);
     skeletonRows.forEach((row) => {
-      expect(row.querySelectorAll('td')).toHaveLength(COLUMNS.length);
+      expect(row.querySelectorAll('td')).toHaveLength(COLUMNS.length + 1);
     });
   });
 
-  it('should span the empty state across only the selected columns', () => {
+  it('spans the empty state across the selected columns and actions', () => {
     fixture.detectChanges();
 
     const emptyCell = fixture.nativeElement.querySelector(
       '.p-datatable-tbody > tr > td[colspan]',
     ) as HTMLTableCellElement;
 
-    expect(emptyCell.colSpan).toBe(COLUMNS.length);
+    expect(emptyCell.colSpan).toBe(COLUMNS.length + 1);
+  });
+
+  function renderRows(): HTMLButtonElement[] {
+    fixture.componentRef.setInput('itemsList', {
+      items: [
+        { id: '1', name: 'First', status: ApplicationStatus.ACTIVE },
+        { id: '2', name: 'Second', status: ApplicationStatus.ACTIVE },
+        { id: '3', name: 'Inactive', status: ApplicationStatus.INACTIVE },
+      ],
+      total: 3,
+    });
+    fixture.detectChanges();
+    return [...fixture.nativeElement.querySelectorAll('tbody .invai-table-actions-column button')];
+  }
+
+  async function openMenu(button: HTMLButtonElement): Promise<HTMLElement[]> {
+    button.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(button.getAttribute('aria-expanded')).toBe('true');
+    });
+    return [...document.querySelectorAll<HTMLElement>('.maintenance-row-menu [role="menuitem"]')];
+  }
+
+  it('emits consultation and editing for the row whose menu was opened', async () => {
+    const buttons = renderRows();
+    const emit = vi.spyOn(fixture.componentInstance.onSelectAction, 'emit');
+    let items = await openMenu(buttons[0]);
+    expect(items.map((item) => item.textContent?.trim())).toEqual(['Consulta', 'Edita']);
+    expect(buttons[0].querySelector('.pi-ellipsis-h')).not.toBeNull();
+    expect(buttons[0].getAttribute('aria-haspopup')).toBe('menu');
+    expect(buttons[0].getAttribute('aria-expanded')).toBe('true');
+    expect(document.getElementById(buttons[0].getAttribute('aria-controls')!)).not.toBeNull();
+    items[0].querySelector<HTMLElement>('a')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(emit).toHaveBeenLastCalledWith({ action: ApplicationTableAction.Detail, params: expect.objectContaining({ id: '1' }) });
+
+    items = await openMenu(buttons[1]);
+    items[1].querySelector<HTMLElement>('a')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(emit).toHaveBeenLastCalledWith({ action: ApplicationTableAction.Edit, params: expect.objectContaining({ id: '2' }) });
+    expect(emit).toHaveBeenCalledTimes(2);
+  });
+
+  it('disables editing inactive applications while retaining consultation', async () => {
+    const buttons = renderRows();
+    const emit = vi.spyOn(fixture.componentInstance.onSelectAction, 'emit');
+    const items = await openMenu(buttons[2]);
+    expect(items[1].getAttribute('aria-disabled')).toBe('true');
+    items[1].querySelector<HTMLElement>('a')!.click();
+    expect(emit).not.toHaveBeenCalled();
+    items[0].querySelector<HTMLElement>('a')!.click();
+    expect(emit).toHaveBeenCalledWith({ action: ApplicationTableAction.Detail, params: expect.objectContaining({ id: '3' }) });
+  });
+
+  it('ignores row activation from the menu button and its icon', () => {
+    const buttons = renderRows();
+    const emit = vi.spyOn(fixture.componentInstance.onSelectAction, 'emit');
+    buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    buttons[0].querySelector('.pi')!.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    expect(emit).not.toHaveBeenCalled();
+    buttons[0].closest('tr')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(emit).toHaveBeenCalledOnce();
+  });
+
+  it('supports menu keyboard navigation and returns focus on Escape', async () => {
+    const buttons = renderRows();
+    await openMenu(buttons[0]);
+    const menu = document.querySelector<HTMLElement>('.maintenance-row-menu [role="menu"]')!;
+    expect(document.activeElement).toBe(menu);
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.getElementById(menu.getAttribute('aria-activedescendant')!)?.textContent?.trim()).toBe('Consulta');
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.getElementById(menu.getAttribute('aria-activedescendant')!)?.textContent?.trim()).toBe('Edita');
+    menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(buttons[0]);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(buttons[0].getAttribute('aria-expanded')).toBe('false');
+    });
   });
 
   it('wraps only descriptive columns and keeps complete text and status labels', () => {

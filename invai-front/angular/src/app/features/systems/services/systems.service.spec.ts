@@ -10,7 +10,7 @@ import {
 } from '../systems.model';
 import { SystemsService } from './systems.service';
 
-const URL = '/invaiapi/interna/system';
+const URL = '/invaiback/system';
 const SERVER: InfrastructureServer = {
   id: 3,
   name: 'app01.caib.es',

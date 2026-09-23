@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   computed,
   Directive,
   LOCALE_ID,
@@ -25,6 +26,7 @@ import {
   ApplicationAssignedResponsibleOutput,
   ApplicationAuthorizedOutput,
 } from '../../../../applications.model';
+import { DIR3_COPY } from './application-dir3.i18n';
 import { APPLICATION_RESPONSIBLE_COPY } from './application-responsible-section.i18n';
 
 export interface ApplicationResponsibleTableRow {
@@ -39,36 +41,75 @@ export enum ApplicationAssignmentTableAction {
   Add = 1,
   Edit,
   Deactivate,
+  View,
+  ValidateManually,
 }
 
 @Directive()
 abstract class ApplicationAssignmentTableBase<
   TItem extends Assignment,
 > extends TableComponentBase<TItem> {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  focusResponsibleAction(typeId: number): void {
+    this.host.nativeElement
+      .querySelector<HTMLButtonElement>(`tr[data-responsibility-id="${typeId}"] button`)
+      ?.focus();
+  }
+
+  protected responsibilityId(row: TItem): number | null {
+    return 'assignment' in row ? row.responsibleType.id : null;
+  }
+
   first = input(0);
   isEditing = input(false);
 
   protected readonly copy = APPLICATION_RESPONSIBLE_COPY;
+  protected readonly dir3Copy = DIR3_COPY;
   protected readonly icons = PrimeIcons;
   protected readonly tableDataKey: string = 'id';
   private readonly locale = inject(LOCALE_ID);
-  private readonly selectedRow = signal<TItem | null>(null);
+  protected readonly selectedRow = signal<TItem | null>(null);
+  protected readonly menuVisible = signal(false);
+  protected readonly TableAction = ApplicationAssignmentTableAction;
+  protected readonly hasRowActions = computed(() =>
+    this.value().some((row) => this.rowHasActions(row)),
+  );
+  private menuTrigger: HTMLElement | null = null;
   private readonly rowMenu = viewChild<Menu>('rowMenu');
   private readonly table = viewChild.required<Table>('table');
   protected readonly rowActions = computed<MenuItem[]>(() => {
     const row = this.selectedRow();
     if (!row) return [];
-    const isVacant = 'assignment' in row && row.assignment === null;
-    if (isVacant) return [];
-    const primaryAction: MenuItem = {
-      label: this.copy.rowEdit,
-      icon: PrimeIcons.PENCIL,
-      command: () => this.onSelectedAction(ApplicationAssignmentTableAction.Edit, row),
-    };
+    if (!this.rowHasActions(row)) return [];
     return [
-      primaryAction,
-      ...(!isVacant
+      {
+        label: this.copy.rowView,
+        icon: PrimeIcons.EYE,
+        command: () => {
+          this.menuTrigger?.focus();
+          this.onSelectedAction(ApplicationAssignmentTableAction.View, row);
+        },
+      },
+      ...(this.isEditing() && this.responsibleDir3Status(row) === 'NOT_VALIDATED'
         ? [
+            {
+              label: this.dir3Copy.confirmDiscrepancy,
+              icon: PrimeIcons.CHECK,
+              command: () => {
+                this.menuTrigger?.focus();
+                this.onSelectedAction(ApplicationAssignmentTableAction.ValidateManually, row);
+              },
+            },
+          ]
+        : []),
+      ...(this.isEditing()
+        ? [
+            {
+              label: this.copy.rowEdit,
+              icon: PrimeIcons.PENCIL,
+              command: () => this.onSelectedAction(ApplicationAssignmentTableAction.Edit, row),
+            },
             {
               label: this.copy.rowDeactivate,
               icon: PrimeIcons.TRASH,
@@ -79,6 +120,13 @@ abstract class ApplicationAssignmentTableBase<
         : []),
     ];
   });
+
+  protected responsibleDir3Status(row: TItem): 'NOT_VALIDATED' | 'MANUAL' | null {
+    if (!('assignment' in row) || !row.assignment?.person.personalCaib || row.assignment.deletedAt)
+      return null;
+    const status = row.assignment.dir3Validation?.dir3Status;
+    return status === 'NOT_VALIDATED' || status === 'MANUAL' ? status : null;
+  }
 
   protected cellValue(row: TItem, key: string): string {
     return applicationAssignmentCellValue(row, key, this.locale, this.copy.caibRole);
@@ -103,6 +151,7 @@ abstract class ApplicationAssignmentTableBase<
   }
 
   protected openActionsMenu(event: Event, row: TItem, menu = this.rowMenu()): void {
+    this.menuTrigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
     this.selectedRow.set(row);
     menu?.toggle(event);
   }

@@ -9,7 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { ServerTypeOutput } from '../systems.model';
 import { ServerTypesService } from './server-types.service';
 
-const URL = '/invaiapi/interna/server-type';
+const URL = '/invaiback/server-type';
 const SERVER_TYPES: ServerTypeOutput[] = [
   {
     id: 101,

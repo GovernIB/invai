@@ -102,10 +102,12 @@
           />
           <p-button
             type="button"
-            [ariaLabel]="mode() === 'create' ? ariaLabels().add : ariaLabels().save"
-            [disabled]="isBusy()"
-            [icon]="mode() === 'create' ? icons.PLUS : icons.SAVE"
-            [label]="mode() === 'create' ? labels.add : labels.save"
+            [ariaLabel]="
+              submitLabel() ?? (mode() === 'create' ? ariaLabels().add : ariaLabels().save)
+            "
+            [disabled]="isBusy() || submitDisabled()"
+            [icon]="submitIcon() ?? (mode() === 'create' ? icons.PLUS : icons.SAVE)"
+            [label]="submitLabel() ?? (mode() === 'create' ? labels.add : labels.save)"
             [loading]="isSaving()"
             (onClick)="onSubmit()"
           />

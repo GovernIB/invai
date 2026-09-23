@@ -1,3 +1,4 @@
+import { PersonDir3Check } from '@features/applications/application-dir3.model';
 import { Injectable, inject } from '@angular/core';
 import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
@@ -20,7 +21,10 @@ export class ResponsiblePeopleService extends BaseApiService {
   protected override readonly ENTITY_URI = 'person';
   private readonly changes = inject(ResponsibleDataChangesService);
   private readonly pages = new Map<string, Observable<SpringPage<ResponsiblePerson>>>();
-  private readonly combinedPages = new Map<string, Observable<ResponsiblePersonCombinedSearchOutput>>();
+  private readonly combinedPages = new Map<
+    string,
+    Observable<ResponsiblePersonCombinedSearchOutput>
+  >();
 
   constructor() {
     super();
@@ -33,6 +37,7 @@ export class ResponsiblePeopleService extends BaseApiService {
       ? { ...params, search: params.search.trim() || undefined }
       : params;
     const criteria = {
+      personalCaib: normalizedParams?.personalCaib,
       companyId: normalizedParams?.companyId,
       excludeId: normalizedParams?.excludeId,
       firstName: normalizedParams?.firstName,
@@ -69,13 +74,19 @@ export class ResponsiblePeopleService extends BaseApiService {
     return cachedRequest(this.combinedPages, pageParamsCacheKey(params), requestFactory);
   }
 
+  checkDir3(emailAddress: string, admUnitCode: string): Observable<PersonDir3Check> {
+    return this.http.get<PersonDir3Check>(this.url('dir3-check'), {
+      params: { emailAddress, admUnitCode },
+    });
+  }
+
   getById(id: number): Observable<ResponsiblePerson> {
     return this.http.get<ResponsiblePerson>(this.url(id));
   }
 
-  searchSoffid(fullName: string): Observable<SpringPage<SoffidPersonCandidate>> {
+  searchSoffid(search: string): Observable<SpringPage<SoffidPersonCandidate>> {
     return this.http.get<SpringPage<SoffidPersonCandidate>>(this.url('soffid-search'), {
-      params: { fullName: fullName.trim(), page: 0, size: 20 },
+      params: { search: search.trim(), page: 0, size: 20 },
     });
   }
 

@@ -39,8 +39,11 @@
             </div>
           </th>
         }
-        @if (showActions()) {
-          <th class="invai-table-actions-column">
+        @if (showActions() || showVerify()) {
+          <th
+            class="invai-table-actions-column"
+            [class.application-security-verification-column]="showVerify()"
+          >
             <span class="sr-only">{{ actions.header }}</span>
           </th>
         }
@@ -59,26 +62,63 @@
               class="invai-table-cell-content"
               [class.invai-table-cell-content--wrap]="column.wrap"
               [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
-            >{{ cellValue(rowData, column.key) }}</span>
+              >{{ cellValue(rowData, column.key) }}
+              @if (
+                showVerificationWarnings() &&
+                kind() === 'web-context' &&
+                column.key === 'webContext' &&
+                !rowData.deletedAt
+              ) {
+                <span
+                  class="application-web-context-pending"
+                  tabindex="0"
+                  [pTooltip]="pendingVerificationLabel"
+                  [autoHide]="false"
+                  tooltipEvent="both"
+                  tooltipPosition="top"
+                >
+                  <i class="pi pi-exclamation-circle text-red-500" aria-hidden="true"></i>
+                  <span class="sr-only">{{ pendingVerificationLabel }}</span>
+                </span>
+              }
+            </span>
           </td>
         }
-        @if (showActions()) {
-          <td class="invai-table-actions-column">
-            <p-button
-              severity="secondary"
-              [ariaLabel]="actions.ariaLabel"
-              [disabled]="isReadOnly()"
-              [icon]="icons.ELLIPSIS_H"
-              [text]="true"
-              (onClick)="openActionsMenu($event, rowData)"
-            />
+        @if (showActions() || showVerify()) {
+          <td
+            class="invai-table-actions-column"
+            [class.application-security-verification-column]="showVerify()"
+          >
+            @if (showVerify()) {
+              <!-- Direct verification is an explicit product exception to the row menu standard. -->
+              <p-button
+                type="button"
+                severity="secondary"
+                [ariaLabel]="actions.verify"
+                [label]="actions.verify"
+                [icon]="icons.CHECK"
+                [outlined]="true"
+                (onClick)="onSelectedAction(ApplicationSecurityTableAction.Verify, rowData)"
+              />
+            } @else {
+              <p-button
+                severity="secondary"
+                [ariaLabel]="actions.ariaLabel"
+                [disabled]="isReadOnly()"
+                [icon]="icons.ELLIPSIS_H"
+                [text]="true"
+                (onClick)="openActionsMenu($event, rowData)"
+              />
+            }
           </td>
         }
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td [attr.colspan]="columns().length + (showActions() ? 1 : 0)">{{ RESULTS_NOT_FOUND }}</td>
+        <td [attr.colspan]="columns().length + (showActions() || showVerify() ? 1 : 0)">
+          {{ RESULTS_NOT_FOUND }}
+        </td>
       </tr>
     </ng-template>
   </p-table>

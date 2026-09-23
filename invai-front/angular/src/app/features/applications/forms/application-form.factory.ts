@@ -18,7 +18,6 @@ export interface ApplicationCommonFormControls {
   commissionApprovalDate: FormControl<string>;
   commissionType: FormControl<CommissionType | null>;
   prefix: FormControl<string>;
-  conselleria: FormControl<string | null>;
   administrativeUnit: FormControl<string | null>;
   description: FormControl<string>;
 }
@@ -39,8 +38,6 @@ export interface ApplicationFiltersFormControls {
   category: FormControl<number | null>;
   informationSystem: FormControl<number | null>;
   scope: FormControl<number | null>;
-  commission: FormControl<number | null>;
-  conselleria: FormControl<string | null>;
   administrativeUnit: FormControl<string | null>;
   status: FormControl<ApplicationStatus | null>;
   responsible: FormControl<ResponsiblePersonOption | null>;
@@ -70,7 +67,6 @@ export interface ApplicationDetailFormValue {
   commissionApprovalDate: string;
   commissionType: CommissionType | null;
   prefix: string;
-  conselleria: string | null;
   administrativeUnit: string | null;
   description: string;
   creationDate: string;
@@ -108,9 +104,7 @@ export function createApplicationFiltersForm(formBuilder: FormBuilder): Applicat
     category: formBuilder.control<number | null>(null),
     informationSystem: formBuilder.control<number | null>(null),
     scope: formBuilder.control<number | null>(null),
-    commission: formBuilder.control<number | null>(null),
-    conselleria: formBuilder.control<string | null>(null),
-    administrativeUnit: formBuilder.control<string | null>({ value: null, disabled: true }),
+    administrativeUnit: formBuilder.control<string | null>(null),
     status: formBuilder.control<ApplicationStatus | null>(ApplicationStatus.ACTIVE, {
       initialValueIsDefault: true,
     }),
@@ -147,9 +141,8 @@ function createCommonControls(formBuilder: FormBuilder): ApplicationCommonFormCo
       Validators.required,
       Validators.maxLength(APPLICATION_PREFIX_MAX_LENGTH),
     ]),
-    conselleria: formBuilder.control<string | null>(null, Validators.required),
     administrativeUnit: formBuilder.control<string | null>(
-      { value: null, disabled: true },
+      null,
       Validators.required,
     ),
     description: formBuilder.nonNullable.control(''),

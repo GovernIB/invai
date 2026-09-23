@@ -13,6 +13,7 @@ export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
 };
 
 export const APPLICATION_STATUS_ACTIVE_ID = ApplicationStatus.ACTIVE;
+export const APPLICATION_SECURITY_DEFAULT_ROLE_SYSTEM = 'weblogic';
 
 export const APPLICATION_COMMISSION_TYPE_LABELS: Record<CommissionType, string> = {
   [CommissionType.TECNICA]: $localize`Tècnica`,
@@ -82,34 +83,6 @@ export const APPLICATIONS_TABLE_COLUMNS: KeyLabel[] = [
     minWidth: '10.5rem',
   },
   { key: 'status', label: $localize`Estat`, sortBy: 'status.name', minWidth: '7rem' },
-  {
-    key: 'environment',
-    wrap: true,
-    maxWidth: '24rem',
-    label: $localize`Entorn`,
-    minWidth: '8rem',
-  },
-  {
-    key: 'database',
-    wrap: true,
-    maxWidth: '24rem',
-    label: $localize`Bases de dades`,
-    minWidth: '11rem',
-  },
-  {
-    key: 'server',
-    wrap: true,
-    maxWidth: '24rem',
-    label: $localize`Servidor`,
-    minWidth: '11rem',
-  },
-  {
-    key: 'responsible',
-    wrap: true,
-    maxWidth: '24rem',
-    label: $localize`Responsables`,
-    minWidth: '11rem',
-  },
 ];
 
 export const APPLICATION_SERVERS_TABLE_COLUMNS: KeyLabel[] = [

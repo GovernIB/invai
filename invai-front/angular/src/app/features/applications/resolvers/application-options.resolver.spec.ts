@@ -10,8 +10,7 @@ import {
 import {
   APPLICATION_OPTIONS_RESOLVE_KEY,
   ApplicationOptionsResolvedData,
-  applicationOptionsResolver,
-  resolveApplicationOptions,
+  applicationOptionsResolver
 } from './application-options.resolver';
 
 const OPTIONS: ApplicationSelectOptions = {
@@ -19,8 +18,7 @@ const OPTIONS: ApplicationSelectOptions = {
   informationSystems: [],
   scopes: [],
   commissions: [],
-  departments: [{ label: 'Conselleria', value: 'GVA01' }],
-  administrativeUnits: [],
+
 };
 
 describe('applicationOptionsResolver', () => {
@@ -37,7 +35,7 @@ describe('applicationOptionsResolver', () => {
         commissions: OPTIONS.commissions,
       }),
     );
-    getDepartmentOptions = vi.fn(() => of(OPTIONS.departments));
+    getDepartmentOptions = vi.fn(() => of([]));
     getAdministrativeUnitOptions = vi.fn(() =>
       of([{ label: 'Direcció General', value: 'UA01' }]),
     );
@@ -55,26 +53,20 @@ describe('applicationOptionsResolver', () => {
     });
   });
 
-  it('preloads the units for the department resolved by the detail route', async () => {
-    const service = TestBed.inject(ApplicationOptionsService);
-    const result = await firstValueFrom(resolveApplicationOptions(service, 'GVA01'));
-
-    expect(getAdministrativeUnitOptions).toHaveBeenCalledWith('GVA01');
-    expect(result.options.administrativeUnits).toEqual([
-      { label: 'Direcció General', value: 'UA01' },
-    ]);
-    expect(result.administrativeUnitsLoadFailed).toBe(false);
+  it('does not preload the interaction-driven DIR3 catalog', async () => {
+    await resolveOptions();
+    expect(getDepartmentOptions).not.toHaveBeenCalled();
+    expect(getAdministrativeUnitOptions).not.toHaveBeenCalled();
   });
 
   it('should resolve application form options', async () => {
     await expect(resolveOptions()).resolves.toEqual({
       options: OPTIONS,
       loadFailed: false,
-      departmentsLoadFailed: false,
-      administrativeUnitsLoadFailed: false,
+
     });
     expect(getStaticOptions).toHaveBeenCalledOnce();
-    expect(getDepartmentOptions).toHaveBeenCalledOnce();
+    expect(getDepartmentOptions).not.toHaveBeenCalled();
   });
 
   it('should complete with empty options when orchestration fails', async () => {
@@ -86,12 +78,10 @@ describe('applicationOptionsResolver', () => {
         informationSystems: [],
         scopes: [],
         commissions: [],
-        departments: OPTIONS.departments,
-        administrativeUnits: [],
+
       },
       loadFailed: true,
-      departmentsLoadFailed: false,
-      administrativeUnitsLoadFailed: false,
+
     });
   });
 

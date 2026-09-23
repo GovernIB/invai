@@ -22,10 +22,29 @@
       <div class="application-security__resource-header">
         <h3 id="application-security-roles-title">{{ rolesTitle }}</h3>
       </div>
-      <p class="application-security__notice" role="note">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
-        <span>{{ roleTemporaryNote }}</span>
-      </p>
+      <form
+        class="application-security__role-filter"
+        [formGroup]="roleFilters"
+        (ngSubmit)="applyRoleFilters()"
+      >
+        <div class="application-security__field">
+          <label for="application-security-role-system">{{ labels.system }}</label>
+          <input
+            pInputText
+            id="application-security-role-system"
+            class="w-full"
+            type="text"
+            formControlName="system"
+          />
+        </div>
+        <p-button
+          type="submit"
+          [icon]="icons.SEARCH"
+          [ariaLabel]="labels.applyRoleFilters"
+          [pTooltip]="labels.applyRoleFilters"
+          tooltipPosition="top"
+        />
+      </form>
       <app-application-security-resource-table
         kind="role"
         [columns]="roleColumns"
@@ -42,27 +61,16 @@
     >
       <div class="application-security__resource-header">
         <h3 id="application-security-web-contexts-title">{{ webContextsTitle }}</h3>
-        @if (showResourceActions()) {
-          <p-button
-            type="button"
-            tooltipPosition="top"
-            [ariaLabel]="addAriaLabels['web-context']"
-            [disabled]="!canManageResources()"
-            [icon]="icons.PLUS"
-            [pTooltip]="canManageResources() ? addAriaLabels['web-context'] : anchorRequired"
-            styleClass="invai-table-toolbar-button"
-            (onClick)="openCreateDialog('web-context')"
-          />
-        }
       </div>
       <app-application-security-resource-table
         kind="web-context"
         [columns]="webContextColumns"
         [first]="webContextFirst()"
         [isLoading]="webContextsLoading()"
-        [isReadOnly]="!canManageResources()"
+        [isReadOnly]="true"
         [itemsList]="webContexts()"
-        [showActions]="showResourceActions()"
+        [showVerify]="showResourceActions()"
+        [showVerificationWarnings]="true"
         (onPageChange)="onPageChange('web-context', $event)"
         (onSelectAction)="onTableAction('web-context', $event)"
       />

@@ -1,21 +1,22 @@
-import { AccessibilityResource } from '@features/maintenances/accessibility/accessibility.model';
+import type { Dir3Validation } from './application-dir3.model';
 import { AdministrativeUnit } from '@features/administrative-units/administrative-units.model';
 import { Category } from '@features/categories/categories.model';
 import { Commission } from '@features/commissions/commissions.model';
 import { Field } from '@features/fields/fields.model';
 import { Layer } from '@features/layers/layers.model';
-import { Role } from '@features/roles/roles.model';
-import { DatabaseRecord, InfrastructureSystem } from '@features/systems/systems.model';
-import { SystemType } from '@features/system-types/system-types.model';
-import { Technology } from '@features/technologies/technologies.model';
+import { AccessibilityResource } from '@features/maintenances/accessibility/accessibility.model';
 import {
   ResponsibleAuthorization,
   ResponsiblePerson,
   ResponsiblePersonOption,
   ResponsibleType,
 } from '@features/maintenances/responsibles/responsibles.model';
-import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+import { Role } from '@features/roles/roles.model';
+import { SystemType } from '@features/system-types/system-types.model';
+import { DatabaseRecord, InfrastructureSystem } from '@features/systems/systems.model';
+import { Technology } from '@features/technologies/technologies.model';
 import { PageParams } from '@models/page.model';
+import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 
 export interface Application {
   id: string;
@@ -141,8 +142,6 @@ export interface ApplicationFilters {
   category: number | null;
   informationSystem: number | null;
   scope: number | null;
-  commission: number | null;
-  conselleria: string | null;
   administrativeUnit: string | null;
   status: ApplicationStatus | null;
   responsible: ResponsiblePersonOption | null;
@@ -385,6 +384,7 @@ export interface ApplicationDevelopmentResourcePageParams extends PageParams {
 }
 
 interface ApplicationResponsibleOutputBase {
+  dir3Validation?: Dir3Validation | null;
   appResponsibleAuthorizedId: number;
   responsibleType: ResponsibleType;
   jobTitle: string | null;
@@ -420,6 +420,7 @@ export type ApplicationPersonReferenceInput =
     };
 
 export type ApplicationResponsibleInput = ApplicationPersonReferenceInput & {
+  dir3Status?: boolean | null;
   appResponsibleAuthorizedId: number;
   responsibleTypeId: number;
   jobTitle: string | null;
@@ -427,6 +428,7 @@ export type ApplicationResponsibleInput = ApplicationPersonReferenceInput & {
 };
 
 export interface ApplicationAuthorizedOutput {
+  dir3Validation?: Dir3Validation | null;
   id: number;
   appResponsibleAuthorizedId: number;
   person: ResponsiblePerson;
@@ -436,6 +438,7 @@ export interface ApplicationAuthorizedOutput {
 }
 
 export type ApplicationAuthorizedInput = ApplicationPersonReferenceInput & {
+  dir3Status?: boolean | null;
   appResponsibleAuthorizedId: number;
   authorizationTypeIds: number[];
   observation: string | null;
@@ -495,6 +498,7 @@ export interface ApplicationSecurityRoleOutput {
 }
 
 export interface ApplicationWebContextOutput {
+  url: string | null;
   id: number;
   appSecurity: ApplicationSecurityOutput;
   webContext: SecurityCatalogItem;
@@ -504,6 +508,7 @@ export interface ApplicationWebContextOutput {
 }
 
 export interface ApplicationWebContextInput {
+  url: string | null;
   appSecurityId: number;
   webContextId: number;
   fieldId: number;
@@ -570,6 +575,10 @@ export interface ApplicationSecurityMeasureInput {
   typeId: number | null;
   ensRequirementId: number | null;
   description: string | null;
+}
+
+export interface ApplicationSecurityRolePageParams extends ApplicationSecurityPageParams {
+  system?: string;
 }
 
 export interface ApplicationSecurityPageParams extends PageParams {

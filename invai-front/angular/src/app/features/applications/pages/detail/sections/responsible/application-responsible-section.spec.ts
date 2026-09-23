@@ -1,5 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ApplicationDir3ValidationService } from '../../../../services/application-dir3-validation.service';
+import { ApplicationDir3ManualForm } from '../../../../forms/application-dir3-manual-form.factory';
+import { Dir3Validation, PersonDir3Check } from '../../../../application-dir3.model';
+import { ApplicationDir3CheckState } from './application-dir3-check.state';
+import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -9,20 +14,20 @@ import { of, Subject, throwError } from 'rxjs';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
 import { CrudEntityDialog } from '@components/crud-entity-dialog/crud-entity-dialog';
 
+import { ResponsiblePeopleService } from '../../../../../maintenances/responsibles/services/responsible-people.service';
 import {
-  ApplicationAuthorizedOutput,
   ApplicationAssignedResponsibleOutput,
+  ApplicationAuthorizedOutput,
   ApplicationResponsibleOutput,
   ApplicationStatus,
 } from '../../../../applications.model';
-import { ApplicationAuthorizedService } from '../../../../services/application-authorized.service';
-import { ApplicationAuthorizedFormGroup } from '../../../../forms/application-authorized-form.factory';
 import { ApplicationAssignmentDeactivateFormGroup } from '../../../../forms/application-assignment-deactivate-form.factory';
+import { ApplicationAuthorizedFormGroup } from '../../../../forms/application-authorized-form.factory';
 import { ApplicationResponsibleFormGroup } from '../../../../forms/application-responsible-form.factory';
+import { ApplicationAuthorizedService } from '../../../../services/application-authorized.service';
 import { ApplicationDevelopmentService } from '../../../../services/application-development.service';
 import { ApplicationResponsiblesService } from '../../../../services/application-responsibles.service';
 import { ApplicationsService } from '../../../../services/applications.service';
-import { ResponsiblePeopleService } from '../../../../../maintenances/responsibles/services/responsible-people.service';
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationAssignmentClipboardService } from './application-assignment-clipboard.service';
 import {
@@ -34,7 +39,7 @@ import { APPLICATION_RESPONSIBLE_RESOLVE_KEY } from './application-responsible-s
 
 const EXTERNAL_PERSON = {
   id: 11,
-  company: { id: 3, name: 'Plexus', deletedAt: null },
+  company: { nif: null, id: 3, name: 'Plexus', deletedAt: null },
   firstName: 'Maria',
   lastName: 'Tur Roig',
   email: 'maria@example.org',
@@ -132,7 +137,22 @@ describe('ApplicationResponsibleSection', () => {
     update: vi.fn(() => of(AUTHORIZED[0])),
     deactivate: vi.fn(() => of(undefined)),
   };
+  const dir3Validation: Dir3Validation = {
+    id: 501,
+    dir3Status: 'MANUAL',
+    reason: 'Motiu',
+    manualValidatedAt: null,
+    manualValidatedBy: null,
+  };
+  const dir3Service = {
+    validateManually: vi.fn<(id: number, reason: string) => Observable<Dir3Validation>>(() =>
+      of(dir3Validation),
+    ),
+  };
   const peopleService = {
+    checkDir3: vi.fn<(email: string, unit: string) => Observable<PersonDir3Check>>(() =>
+      of({ personGroup: 'group', groupDir3: 'A1', admUnitCode: 'A1', matches: true }),
+    ),
     searchSoffid: vi.fn(() => of({ content: [SOFFID_PERSON], totalElements: 1 })),
   };
 
@@ -143,6 +163,7 @@ describe('ApplicationResponsibleSection', () => {
       providers: [
         ApplicationDetailState,
         MessageService,
+        { provide: ApplicationDir3ValidationService, useValue: dir3Service },
         { provide: ApplicationsService, useValue: {} },
         { provide: ApplicationDevelopmentService, useValue: {} },
         { provide: ApplicationResponsiblesService, useValue: responsiblesService },
@@ -200,10 +221,12 @@ describe('ApplicationResponsibleSection', () => {
     expect(divider.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('only renders add controls and action columns while editing the section', () => {
+  it('shows consultation columns in view mode and add controls only while editing', () => {
     expect(findButton('Afegeix un responsable')).toBeNull();
     expect(findButton('Afegeix una persona autoritzada')).toBeNull();
-    expect(fixture.nativeElement.querySelectorAll('.invai-table-actions-column')).toHaveLength(0);
+    expect(
+      fixture.nativeElement.querySelectorAll('.invai-table-actions-column').length,
+    ).toBeGreaterThan(0);
 
     startEditing();
 
@@ -212,6 +235,53 @@ describe('ApplicationResponsibleSection', () => {
     expect(
       fixture.nativeElement.querySelectorAll('.invai-table-actions-column').length,
     ).toBeGreaterThan(0);
+  });
+
+  it('consults either assignment on inactive applications without touching forms or fetching data', () => {
+    detailState.application.update((application) =>
+      application ? { ...application, status: ApplicationStatus.INACTIVE } : application,
+    );
+    const component = harness(fixture);
+    const originalForm = component.responsibleForm.getRawValue();
+    component.responsibleForm.markAsDirty();
+    component.onResponsibleTableAction({
+      action: ApplicationAssignmentTableAction.View,
+      params: row(RESPONSIBLES[0] as ApplicationAssignedResponsibleOutput),
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('app-application-assignment-detail-dialog'),
+    ).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('input[id$="-email"]').value).toBe(
+      RESPONSIBLES[0].person!.email,
+    );
+    button("Tanca la consulta de l'assignació").click();
+    fixture.detectChanges();
+    component.onAuthorizedTableAction({
+      action: ApplicationAssignmentTableAction.View,
+      params: AUTHORIZED[0],
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('input[id$="-email"]').value).toBe(
+      AUTHORIZED[0].person.email,
+    );
+    expect(component.responsibleForm.getRawValue()).toEqual(originalForm);
+    expect(component.responsibleForm.dirty).toBe(true);
+    expect(component.responsibleDialogVisible()).toBe(false);
+    expect(component.authorizedDialogVisible()).toBe(false);
+    expect(responsiblesService.getPage).not.toHaveBeenCalled();
+    expect(authorizedService.getPage).not.toHaveBeenCalled();
+  });
+
+  it('does not open a consultation for a vacant responsibility', () => {
+    harness(fixture).onResponsibleTableAction({
+      action: ApplicationAssignmentTableAction.View,
+      params: { rowKey: 'vacant', responsibleType: RESPONSIBLE_TYPES[0], assignment: null },
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('app-application-assignment-detail-dialog'),
+    ).toBeNull();
   });
 
   it('uses the shared primary outlined style for table toolbar actions', () => {
@@ -259,6 +329,7 @@ describe('ApplicationResponsibleSection', () => {
     component.submitResponsible();
 
     expect(responsiblesService.create).toHaveBeenCalledWith({
+      dir3Status: null,
       appResponsibleAuthorizedId: 91,
       personId: 11,
       responsibleTypeId: 3,
@@ -308,6 +379,7 @@ describe('ApplicationResponsibleSection', () => {
     component.submitAuthorized();
 
     expect(authorizedService.create).toHaveBeenCalledWith({
+      dir3Status: null,
       appResponsibleAuthorizedId: 91,
       personId: 11,
       authorizationTypeIds: [1, 2],
@@ -340,6 +412,7 @@ describe('ApplicationResponsibleSection', () => {
     component.submitResponsible();
 
     expect(responsiblesService.create).toHaveBeenCalledWith({
+      dir3Status: null,
       appResponsibleAuthorizedId: 91,
       personId: 11,
       responsibleTypeId: 3,
@@ -359,6 +432,7 @@ describe('ApplicationResponsibleSection', () => {
     component.submitAuthorized();
 
     expect(authorizedService.create).toHaveBeenCalledWith({
+      dir3Status: null,
       appResponsibleAuthorizedId: 91,
       personId: 11,
       authorizationTypeIds: [1],
@@ -845,9 +919,7 @@ describe('ApplicationResponsibleSection', () => {
     const form = fixture.nativeElement.querySelector(
       'app-application-authorized-dialog form',
     ) as HTMLFormElement;
-    const personField = form.querySelector(
-      'app-application-soffid-person-field',
-    ) as HTMLElement;
+    const personField = form.querySelector('app-application-soffid-person-field') as HTMLElement;
     const emailWrapper = form
       .querySelector('#application-authorized-dialog-email')
       ?.closest('div') as HTMLElement;
@@ -862,9 +934,8 @@ describe('ApplicationResponsibleSection', () => {
     expect(peopleService.searchSoffid).toHaveBeenCalledWith('Aina');
     expect(component.soffidOptions()).toEqual([SOFFID_PERSON]);
 
-    const personAutoComplete = fixture.debugElement.query(
-      By.directive(AutoComplete),
-    ).componentInstance as AutoComplete;
+    const personAutoComplete = fixture.debugElement.query(By.directive(AutoComplete))
+      .componentInstance as AutoComplete;
     const personInput = form.querySelector(
       '#application-authorized-dialog-soffid-person',
     ) as HTMLInputElement;
@@ -886,6 +957,7 @@ describe('ApplicationResponsibleSection', () => {
 
     component.submitAuthorized();
     expect(authorizedService.create).toHaveBeenCalledWith({
+      dir3Status: null,
       appResponsibleAuthorizedId: 91,
       personId: null,
       personFirstName: 'Aina',
@@ -988,6 +1060,7 @@ describe('ApplicationResponsibleSection', () => {
     ).toContain('requereix personal CAIB');
     component.submitResponsible();
     expect(responsiblesService.create).toHaveBeenCalledWith({
+      dir3Status: null,
       appResponsibleAuthorizedId: 91,
       personId: null,
       personFirstName: 'Aina',
@@ -1098,16 +1171,9 @@ describe('ApplicationResponsibleSection', () => {
     expect(form.classList).toContain('md:grid-cols-2');
     expect(personField.classList).not.toContain('md:col-span-2');
     expect(personField.querySelector('p-floatlabel')).not.toBeNull();
-    for (const assistiveText of [
-      personInstruction,
-      personStatus,
-      personSearchError,
-      personError,
-    ]) {
+    for (const assistiveText of [personInstruction, personStatus, personSearchError, personError]) {
       expect(assistiveText.classList).toContain('sr-only');
-      expect(personInput.getAttribute('aria-describedby')?.split(' ')).toContain(
-        assistiveText.id,
-      );
+      expect(personInput.getAttribute('aria-describedby')?.split(' ')).toContain(assistiveText.id);
     }
     expect(
       Array.from(fieldRoot.children).filter((element) => !element.classList.contains('sr-only')),
@@ -1163,6 +1229,348 @@ describe('ApplicationResponsibleSection', () => {
     });
   });
 
+  function openCaibResponsible(matches: boolean) {
+    detailState.application.update((application) => ({ ...application!, admUnitCode: 'A1' }));
+    peopleService.checkDir3.mockReturnValueOnce(
+      of({ personGroup: 'group', groupDir3: matches ? 'A1' : 'A2', admUnitCode: 'A1', matches }),
+    );
+    startEditing();
+    button('Afegeix un responsable').click();
+    const component = harness(fixture);
+    component.responsibleForm.patchValue({
+      personalCaib: true,
+      responsibleTypeId: 3,
+      soffidPerson: SOFFID_PERSON,
+    });
+    fixture.detectChanges();
+    return component;
+  }
+
+  it('checks a candidate without a local id and saves the negative result without manual validation', () => {
+    const component = openCaibResponsible(false);
+    expect(peopleService.checkDir3).toHaveBeenCalledWith(SOFFID_PERSON.email, 'A1');
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dir3-validate'),
+    ).not.toBeNull();
+    component.submitResponsible();
+    expect(responsiblesService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ personId: null, dir3Status: false }),
+    );
+    expect(dir3Service.validateManually).not.toHaveBeenCalled();
+  });
+
+  it('blocks a pending or failed check, then retries and sends a positive flag', () => {
+    const pending = new Subject<PersonDir3Check>();
+    const component = openCaibResponsible(true);
+    peopleService.checkDir3.mockReturnValueOnce(pending);
+    component.updateDir3Check('responsible', true);
+    component.submitResponsible();
+    expect(responsiblesService.create).not.toHaveBeenCalled();
+    pending.error(new HttpErrorResponse({ status: 504 }));
+    fixture.detectChanges();
+    component.submitResponsible();
+    expect(responsiblesService.create).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('No s’ha pogut'.replace('’', "'"));
+    component.updateDir3Check('responsible', true);
+    component.submitResponsible();
+    expect(responsiblesService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ dir3Status: true }),
+    );
+  });
+
+  it('shows the Soffid missing-DIR3 notice and allows an unvalidated assignment', () => {
+    const component = openCaibResponsible(false);
+    peopleService.checkDir3.mockReturnValueOnce(
+      of({ personGroup: 'group', groupDir3: null, admUnitCode: 'A1', matches: false }),
+    );
+    component.updateDir3Check('responsible', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(
+      "No s'ha trobat un DIR3 associat a aquesta persona a Soffid.",
+    );
+    expect(component.manualForm.controls.validate.value).toBe(false);
+    component.submitResponsible();
+    expect(responsiblesService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ dir3Status: false }),
+    );
+    expect(dir3Service.validateManually).not.toHaveBeenCalled();
+  });
+
+  it('does not offer manual validation for a matching person', () => {
+    const component = openCaibResponsible(true);
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dir3-validate'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('app-application-dir3-feedback')?.textContent.trim(),
+    ).toBe('');
+    component.submitResponsible();
+    expect(responsiblesService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ dir3Status: true }),
+    );
+    expect(dir3Service.validateManually).not.toHaveBeenCalled();
+  });
+
+  it('clears manual consent and reason when the selected person or application unit changes', async () => {
+    const component = openCaibResponsible(false);
+    component.manualForm.patchValue({ validate: true, reason: 'Motiu anterior' });
+    component.responsibleForm.controls.soffidPerson.setValue({
+      ...SOFFID_PERSON,
+      email: 'another@caib.es',
+    });
+    expect(component.manualForm.getRawValue()).toEqual({ validate: false, reason: '' });
+    expect(peopleService.checkDir3).toHaveBeenLastCalledWith('another@caib.es', 'A1');
+    component.manualForm.patchValue({ validate: true, reason: 'Un altre motiu' });
+    detailState.application.update((application) => ({ ...application!, admUnitCode: 'A2' }));
+    await fixture.whenStable();
+    expect(component.manualForm.getRawValue()).toEqual({ validate: false, reason: '' });
+    expect(peopleService.checkDir3).toHaveBeenLastCalledWith('another@caib.es', 'A2');
+  });
+
+  it('requires a nonblank manual reason and retries only PUT after a committed POST', () => {
+    const component = openCaibResponsible(false);
+    const pendingAssignment: ApplicationAssignedResponsibleOutput = {
+      ...RESPONSIBLES[1],
+      id: 99,
+      dir3Validation: { ...dir3Validation, dir3Status: 'NOT_VALIDATED' },
+    };
+    component.manualForm.patchValue({ validate: true, reason: '  ' });
+    component.submitResponsible();
+    expect(responsiblesService.create).not.toHaveBeenCalled();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement
+        .querySelector('#application-responsible-dir3-reason')
+        .getAttribute('aria-invalid'),
+    ).toBe('true');
+    component.manualForm.controls.reason.setValue('  Motiu  ');
+    responsiblesService.create.mockReturnValueOnce(of(pendingAssignment));
+    responsiblesService.getPage.mockReturnValueOnce(of(page([pendingAssignment])));
+    dir3Service.validateManually.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 500 })),
+    );
+    component.submitResponsible();
+    fixture.detectChanges();
+    expect(component.manualTarget()?.id).toBe(99);
+    expect(component.responsibleDialogVisible()).toBe(true);
+    expect(component.manualForm.controls.reason.value).toBe('  Motiu  ');
+    expect(component.responsibleDialogSaving()).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain('El responsable ja');
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dialog-person'),
+    ).toBeNull();
+    component.submitResponsible();
+    expect(responsiblesService.create).toHaveBeenCalledOnce();
+    expect(dir3Service.validateManually).toHaveBeenCalledTimes(2);
+    expect(dir3Service.validateManually).toHaveBeenLastCalledWith(501, 'Motiu');
+    expect(component.responsibleDialogVisible()).toBe(false);
+    expect(authorizedService.getPage).toHaveBeenCalled();
+  });
+
+  it.each(['VALIDATED', 'MANUAL'] as const)(
+    'respects a shared %s result instead of repeating manual validation',
+    (status) => {
+      const component = openCaibResponsible(false);
+      component.manualForm.patchValue({ validate: true, reason: 'Motiu' });
+      responsiblesService.create.mockReturnValueOnce(
+        of({
+          ...RESPONSIBLES[1],
+          id: 99,
+          dir3Validation: { ...dir3Validation, dir3Status: status },
+        }),
+      );
+      component.submitResponsible();
+      expect(dir3Service.validateManually).not.toHaveBeenCalled();
+      expect(component.responsibleDialogVisible()).toBe(false);
+    },
+  );
+
+  it('opens manual-only mode from the menu and blocks further writes after a concurrent state change', () => {
+    detailState.application.update((application) => ({ ...application!, admUnitCode: 'A1' }));
+    peopleService.checkDir3.mockReturnValueOnce(
+      of({ personGroup: 'group', groupDir3: 'A2', admUnitCode: 'A1', matches: false }),
+    );
+    startEditing();
+    const component = harness(fixture);
+    const assignment = {
+      ...RESPONSIBLES[1],
+      dir3Validation: { ...dir3Validation, dir3Status: 'NOT_VALIDATED' as const },
+    };
+    component.onResponsibleTableAction({
+      action: ApplicationAssignmentTableAction.ValidateManually,
+      params: row(assignment),
+    });
+    fixture.detectChanges();
+    expect(component.manualForm.controls.validate.value).toBe(false);
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dir3-notice').textContent,
+    ).toContain("El DIR3 de la persona no coincideix amb el de l'aplicació.");
+    expect(fixture.nativeElement.querySelectorAll('.invai-form-readonly-control')).toHaveLength(0);
+    expect(button('Confirmar').disabled).toBe(true);
+    expect(peopleService.checkDir3).toHaveBeenCalledWith(assignment.person.email, 'A1');
+    component.manualForm.controls.reason.setValue('Motiu');
+    component.submitResponsible();
+    expect(dir3Service.validateManually).not.toHaveBeenCalled();
+    component.manualForm.controls.validate.setValue(true);
+    dir3Service.validateManually.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 400 })),
+    );
+    responsiblesService.getPage.mockReturnValueOnce(of(page([{ ...assignment, dir3Validation }])));
+    component.submitResponsible();
+    expect(component.manualConflict()).toBe(true);
+    component.submitResponsible();
+    expect(dir3Service.validateManually).toHaveBeenCalledOnce();
+    expect(responsiblesService.create).not.toHaveBeenCalled();
+    expect(responsiblesService.update).not.toHaveBeenCalled();
+  });
+
+  function openManualResponsible(email = CAIB_PERSON.email, unit = 'A1') {
+    detailState.application.update((application) => ({ ...application!, admUnitCode: unit }));
+    startEditing();
+    const component = harness(fixture);
+    component.onResponsibleTableAction({
+      action: ApplicationAssignmentTableAction.ValidateManually,
+      params: row({
+        ...RESPONSIBLES[1],
+        person: { ...CAIB_PERSON, email },
+        dir3Validation: { ...dir3Validation, dir3Status: 'NOT_VALIDATED' },
+      }),
+    });
+    fixture.detectChanges();
+    return component;
+  }
+
+  it.each([null, '', '   '])(
+    'explains missing DIR3 (%s) and accepts a justified manual validation',
+    (groupDir3) => {
+      peopleService.checkDir3.mockReturnValueOnce(
+        of({ personGroup: 'group', groupDir3, admUnitCode: 'A1', matches: false }),
+      );
+      const component = openManualResponsible();
+      const notice = fixture.nativeElement.querySelector('#application-responsible-dir3-notice');
+      expect(notice.textContent).toContain(
+        "No s'ha trobat un DIR3 associat a aquesta persona a Soffid.",
+      );
+      const checkbox = fixture.nativeElement.querySelector(
+        '#application-responsible-dir3-validate',
+      );
+      expect(checkbox.getAttribute('aria-describedby')).toBe(notice.id);
+      expect(checkbox.disabled).toBe(false);
+      component.manualForm.patchValue({ validate: true, reason: '  Motiu justificat  ' });
+      fixture.detectChanges();
+      expect(button('Confirmar').disabled).toBe(false);
+      component.submitResponsible();
+      expect(dir3Service.validateManually).toHaveBeenCalledWith(501, 'Motiu justificat');
+      expect(responsiblesService.create).not.toHaveBeenCalled();
+    },
+  );
+
+  it('blocks matching DIR3 even if consent and reason are set programmatically', () => {
+    const component = openManualResponsible();
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dir3-notice').textContent,
+    ).toContain('ja coincideix');
+    component.manualForm.patchValue({ validate: true, reason: 'Motiu' });
+    fixture.detectChanges();
+    expect(button('Confirmar').disabled).toBe(true);
+    component.submitResponsible();
+    expect(dir3Service.validateManually).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['', 'A1'],
+    [CAIB_PERSON.email, ''],
+  ])('blocks incomplete check data (%s, %s)', (email, unit) => {
+    const component = openManualResponsible(email, unit);
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dir3-notice').textContent,
+    ).toContain('No es pot comprovar el DIR3 perquè falta');
+    expect(peopleService.checkDir3).not.toHaveBeenCalled();
+    component.manualForm.patchValue({ validate: true, reason: 'Motiu' });
+    fixture.detectChanges();
+    expect(button('Confirmar').disabled).toBe(true);
+    component.submitResponsible();
+    expect(dir3Service.validateManually).not.toHaveBeenCalled();
+  });
+
+  it.each([403, 500])(
+    'blocks a pending or failed check (%s) and retries without confusing errors with missing DIR3',
+    (status) => {
+      const pending = new Subject<PersonDir3Check>();
+      peopleService.checkDir3.mockReturnValueOnce(pending);
+      const component = openManualResponsible();
+      const notice = () =>
+        fixture.nativeElement.querySelector('#application-responsible-dir3-notice');
+      expect(notice().textContent).toContain('Comprovant DIR3');
+      component.manualForm.patchValue({ validate: true, reason: 'Motiu' });
+      component.submitResponsible();
+      expect(dir3Service.validateManually).not.toHaveBeenCalled();
+      pending.error(new HttpErrorResponse({ status }));
+      fixture.detectChanges();
+      expect(notice().getAttribute('role')).toBe('alert');
+      expect(notice().textContent).toContain(
+        status === 403 ? 'No tens permís' : "No s'ha pogut comprovar",
+      );
+      expect(button('Confirmar').disabled).toBe(true);
+      component.submitResponsible();
+      expect(dir3Service.validateManually).not.toHaveBeenCalled();
+      peopleService.checkDir3.mockReturnValueOnce(
+        of({ personGroup: 'group', groupDir3: 'A2', admUnitCode: 'A1', matches: false }),
+      );
+      const retry = Array.from(fixture.nativeElement.querySelectorAll('button')).find((element) =>
+        (element as HTMLButtonElement).textContent?.includes('Torna-ho a provar'),
+      ) as HTMLButtonElement;
+      retry.click();
+      fixture.detectChanges();
+      expect(peopleService.checkDir3).toHaveBeenCalledTimes(2);
+      expect(notice().textContent).toContain('no coincideix');
+      component.submitResponsible();
+      expect(dir3Service.validateManually).toHaveBeenCalledOnce();
+    },
+  );
+
+  it('cancels the menu check on close and does not reuse it for another person', () => {
+    const pending = new Subject<PersonDir3Check>();
+    peopleService.checkDir3.mockReturnValueOnce(pending);
+    const component = openManualResponsible();
+    component.closeResponsibleDialog();
+    fixture.detectChanges();
+    component.onResponsibleTableAction({
+      action: ApplicationAssignmentTableAction.ValidateManually,
+      params: row({
+        ...RESPONSIBLES[1],
+        person: { ...CAIB_PERSON, email: 'other@caib.es' },
+        dir3Validation: { ...dir3Validation, dir3Status: 'NOT_VALIDATED' },
+      }),
+    });
+    pending.next({ personGroup: 'group', groupDir3: 'A2', admUnitCode: 'A1', matches: false });
+    fixture.detectChanges();
+    expect(peopleService.checkDir3).toHaveBeenLastCalledWith('other@caib.es', 'A1');
+    expect(component.responsibleDir3.result()?.matches).toBe(true);
+    expect(component.manualForm.getRawValue()).toEqual({ validate: false, reason: '' });
+  });
+
+  it('checks authorized candidates automatically without showing manual controls', () => {
+    detailState.application.update((application) => ({ ...application!, admUnitCode: 'A1' }));
+    startEditing();
+    button('Afegeix una persona autoritzada').click();
+    const component = harness(fixture);
+    component.authorizedForm.patchValue({
+      personalCaib: true,
+      soffidPerson: SOFFID_PERSON,
+      authorizationTypeIds: [1],
+    });
+    fixture.detectChanges();
+    expect(peopleService.checkDir3).toHaveBeenCalledWith(SOFFID_PERSON.email, 'A1');
+    expect(
+      fixture.nativeElement.querySelector('#application-responsible-dir3-validate'),
+    ).toBeNull();
+    component.submitAuthorized();
+    expect(authorizedService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ dir3Status: true }),
+    );
+  });
+
   function button(ariaLabel: string): HTMLButtonElement {
     const result = findButton(ariaLabel);
     expect(result).not.toBeNull();
@@ -1190,6 +1598,14 @@ function row(assignment: ApplicationAssignedResponsibleOutput): ApplicationRespo
 }
 
 interface SectionHarness {
+  manualForm: ApplicationDir3ManualForm;
+  responsibleDir3: ApplicationDir3CheckState;
+  authorizedDir3: ApplicationDir3CheckState;
+  manualTarget: () => ApplicationAssignedResponsibleOutput | null;
+  manualError: () => string | null;
+  manualConflict: () => boolean;
+  responsibleDialogSaving: () => boolean;
+  updateDir3Check(kind: 'responsible' | 'authorized', force?: boolean): void;
   responsibleForm: ApplicationResponsibleFormGroup;
   authorizedForm: ApplicationAuthorizedFormGroup;
   deactivateForm: ApplicationAssignmentDeactivateFormGroup;

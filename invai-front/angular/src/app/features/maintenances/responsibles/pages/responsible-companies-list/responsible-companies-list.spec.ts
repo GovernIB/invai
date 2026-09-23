@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActionParams, PaginatedList } from '@models/table.model';
 import { SpringPage } from '@models/page.model';
+import { ActionParams, PaginatedList } from '@models/table.model';
 import { MessageService } from 'primeng/api';
 import { of } from 'rxjs';
 
 import { ResponsibleMaintenanceTableAction } from '../../components/responsible-maintenance-tables/responsible-maintenance-tables';
-import { ResponsibleNameFormGroup } from '../../forms/responsible-forms.factory';
+import { ResponsibleCompanyFormGroup } from '../../forms/responsible-forms.factory';
 import { RESPONSIBLE_COMPANY_COPY } from '../../responsibles.i18n';
 import { ResponsibleCompany } from '../../responsibles.model';
 import { ResponsibleCompaniesService } from '../../services/responsible-companies.service';
@@ -19,7 +19,7 @@ class ResizeObserverMock implements ResizeObserver {
 globalThis.ResizeObserver ??= ResizeObserverMock;
 
 interface CompaniesListHarness {
-  entityForm: ResponsibleNameFormGroup;
+  entityForm: ResponsibleCompanyFormGroup;
   itemsList(): PaginatedList<ResponsibleCompany>;
   dialogMode(): string;
   isDialogVisible(): boolean;
@@ -40,15 +40,15 @@ describe('ResponsibleCompaniesList', () => {
   let getPage: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    companies = [{ id: 1, name: 'Plexus', deletedAt: null }];
+    companies = [{ id: 1, name: 'Plexus', nif: 'B12345678', deletedAt: null }];
     addMessage = vi.fn();
     deactivate = vi.fn(() => of(undefined));
     getPage = vi.fn(() => of(page(companies)));
     const companiesService = {
       getPage,
       getById: vi.fn((id: number) => of(companies.find((item) => item.id === id)!)),
-      create: vi.fn((input: { name: string }) => {
-        const company = { id: 2, name: input.name, deletedAt: null };
+      create: vi.fn((input: { name: string; nif: string | null }) => {
+        const company = { id: 2, name: input.name, nif: input.nif, deletedAt: null };
         companies = [...companies, company];
         return of(company);
       }),
@@ -70,7 +70,7 @@ describe('ResponsibleCompaniesList', () => {
 
   it('creates a company and refreshes only its current list', () => {
     component.openCreateDialog();
-    component.entityForm.setValue({ name: 'Nova empresa' });
+    component.entityForm.setValue({ name: 'Nova empresa', nif: '' });
     component.submitEntity();
     expect(component.itemsList().total).toBe(2);
     expect(component.itemsList().items.some(({ name }) => name === 'Nova empresa')).toBe(true);
@@ -85,9 +85,23 @@ describe('ResponsibleCompaniesList', () => {
     component.onTableAction({ action: ResponsibleMaintenanceTableAction.View, params: company });
     component.startEntityEdit();
     component.entityForm.controls.name.setValue('Canvi temporal');
+    component.entityForm.controls.nif.setValue('CHANGED');
     component.cancelEntityEdit();
     expect(component.dialogMode()).toBe('view');
     expect(component.entityForm.controls.name.value).toBe('Plexus');
+    expect(component.entityForm.controls.nif.value).toBe('B12345678');
+  });
+
+  it('preserves NIF when saving another field and sends null when explicitly cleared', () => {
+    const service = TestBed.inject(ResponsibleCompaniesService);
+    vi.mocked(service.update).mockImplementation((id, input) => of({ id, ...input, deletedAt: null }));
+    for (const nif of ['B12345678', '']) {
+      component.onTableAction({ action: ResponsibleMaintenanceTableAction.Edit, params: companies[0] });
+      component.entityForm.controls.name.setValue('Updated');
+      component.entityForm.controls.nif.setValue(nif);
+      component.submitEntity();
+      expect(service.update).toHaveBeenLastCalledWith(1, { name: 'Updated', nif: nif || null });
+    }
   });
 
   it('delegates company deactivation to the backend and refreshes the current list', () => {

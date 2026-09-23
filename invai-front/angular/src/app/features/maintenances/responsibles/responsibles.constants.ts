@@ -1,6 +1,7 @@
 import { KeyLabel } from '@models/table.model';
 
 export const RESPONSIBLE_COMPANY_COLUMNS: KeyLabel[] = [
+  { key: 'nif', label: $localize`NIF`, sortBy: 'nif', minWidth: '10rem' },
   {
     key: 'name',
     wrap: true,

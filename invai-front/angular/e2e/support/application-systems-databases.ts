@@ -16,10 +16,10 @@ import {
 } from './systems';
 
 export const APPLICATION_INFRASTRUCTURE_API = {
-  aggregate: '/invaiapi/interna/application/system-database',
-  applications: '/invaiapi/interna/application',
-  databases: '/invaiapi/interna/application/database',
-  systems: '/invaiapi/interna/application/system',
+  aggregate: '/invaiback/application/system-database',
+  applications: '/invaiback/application',
+  databases: '/invaiback/application/database',
+  systems: '/invaiback/application/system',
 } as const;
 
 export interface ApplicationInfrastructureAggregate {

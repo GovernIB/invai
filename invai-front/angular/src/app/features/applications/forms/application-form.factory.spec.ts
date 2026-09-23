@@ -25,7 +25,6 @@ describe('application form factories', () => {
       commissionType: null,
       prefix: '',
       administrativeUnit: null,
-      conselleria: null,
       description: '',
       code: '',
     });
@@ -97,8 +96,6 @@ describe('application form factories', () => {
       category: null,
       informationSystem: null,
       scope: null,
-      commission: null,
-      conselleria: null,
       administrativeUnit: null,
       status: ApplicationStatus.ACTIVE,
       responsible: null,

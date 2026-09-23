@@ -1,10 +1,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  LOCALE_ID,
   computed,
   inject,
   input,
+  LOCALE_ID,
   signal,
   viewChild,
   ViewEncapsulation,
@@ -15,6 +15,7 @@ import { MenuItem, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Menu } from 'primeng/menu';
 import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
 
 import {
   ApplicationSecurityMeasureOutput,
@@ -27,6 +28,7 @@ import {
 import {
   APPLICATION_SECURITY_EMPTY_VALUE,
   APPLICATION_SECURITY_TABLE_ACTIONS,
+  APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION,
 } from './application-security-section.i18n';
 
 export type ApplicationSecurityTableKind = 'role' | 'web-context' | 'risk' | 'measure';
@@ -35,14 +37,18 @@ export enum ApplicationSecurityTableAction {
   View = 1,
   Edit,
   Delete,
+  Verify,
 }
 
 @Component({
   selector: 'app-application-security-resource-table',
   standalone: true,
-  imports: [Button, Menu, TableModule],
+  imports: [Button, Menu, TableModule, TooltipModule],
   templateUrl: './application-security-resource-table.html',
-  styleUrl: '../../../../../../shared/styles/development-maintenance-table.scss',
+  styleUrls: [
+    '../../../../../../shared/styles/development-maintenance-table.scss',
+    './application-security-resource-table.scss',
+  ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -51,6 +57,8 @@ export class ApplicationSecurityResourceTable extends TableComponentBase<Applica
   first = input(0);
   isReadOnly = input(false);
   showActions = input(false);
+  showVerify = input(false);
+  showVerificationWarnings = input(false);
 
   private readonly locale = inject(LOCALE_ID);
   private readonly selectedRow = signal<ApplicationSecurityResourceOutput | null>(null);
@@ -58,6 +66,7 @@ export class ApplicationSecurityResourceTable extends TableComponentBase<Applica
 
   protected readonly icons = PrimeIcons;
   protected readonly actions = APPLICATION_SECURITY_TABLE_ACTIONS;
+  protected readonly pendingVerificationLabel = APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION;
   protected readonly emptyValue = APPLICATION_SECURITY_EMPTY_VALUE;
   protected readonly ApplicationSecurityTableAction = ApplicationSecurityTableAction;
   protected readonly isConsultable = computed(() => this.kind() !== 'role');
@@ -91,6 +100,8 @@ export class ApplicationSecurityResourceTable extends TableComponentBase<Applica
           : 'description' in row
             ? row.description || this.emptyValue
             : this.emptyValue;
+      case 'url':
+        return 'url' in row ? row.url ?? '-' : '-';
       case 'observation':
         return 'observation' in row ? row.observation || this.emptyValue : this.emptyValue;
       case 'role':

@@ -1,3 +1,5 @@
+import { ApplicationDir3CheckState } from './application-dir3-check.state';
+import { ApplicationDir3Feedback } from './application-dir3-feedback';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -31,6 +33,7 @@ import { APPLICATION_RESPONSIBLE_COPY } from './application-responsible-section.
   standalone: true,
   imports: [
     CrudEntityDialog,
+    ApplicationDir3Feedback,
     ApplicationSoffidPersonField,
     FloatLabel,
     InputText,
@@ -52,6 +55,8 @@ export class ApplicationAuthorizedDialog {
   companyOptionsLoadFailed = input(false);
   people = input.required<ResponsiblePerson[]>();
   isSaving = input(false);
+  dir3Check = input<ApplicationDir3CheckState>();
+  retryDir3 = output<void>();
   soffidOptions = input.required<SoffidPersonOption[]>();
   soffidLoading = input(false);
   soffidSearched = input(false);
@@ -98,7 +103,8 @@ export class ApplicationAuthorizedDialog {
   }
 
   protected onSubmit(): void {
-    if (!this.isSaving()) this.submitForm.emit();
+    if (!this.isSaving() && (this.mode() !== 'create' || this.dir3Check()?.canSubmit() !== false))
+      this.submitForm.emit();
   }
 
   private selectPassThrough(

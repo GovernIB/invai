@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
+import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { Editor } from 'primeng/editor';
 import { Select } from 'primeng/select';
@@ -35,14 +37,6 @@ describe('ApplicationFormFields', () => {
     commissionType: 'Commission type',
     prefix: 'Prefix',
     administrativeUnit: 'Administrative unit',
-    conselleria: 'Conselleria',
-    departmentsLoading: 'Loading departments',
-    departmentsLoadError: 'Departments unavailable',
-    administrativeUnitsLoading: 'Loading units',
-    administrativeUnitsLoadError: 'Units unavailable',
-    administrativeUnitsEmpty: 'No units',
-    selectConselleriaFirst: 'Select a department',
-    retry: 'Retry',
     description: 'Description',
     code: 'Code',
     creationDate: 'Creation date',
@@ -51,7 +45,7 @@ describe('ApplicationFormFields', () => {
   };
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ApplicationFormFields] }).compileComponents();
+    await TestBed.configureTestingModule({ providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } }], imports: [ApplicationFormFields] }).compileComponents();
     fixture = TestBed.createComponent(ApplicationFormFields);
     fixture.componentRef.setInput('labels', labels);
     fixture.componentRef.setInput('idPrefix', 'test-application');
@@ -64,6 +58,7 @@ describe('ApplicationFormFields', () => {
     const form = createApplicationCreateForm(formBuilder);
     form.controls.application.markAsTouched();
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('codeControl', form.controls.code);
 
     fixture.detectChanges();
@@ -92,6 +87,7 @@ describe('ApplicationFormFields', () => {
   it('renders audit controls without the create-only code control', () => {
     const form = createApplicationDetailForm(formBuilder);
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('auditControls', form.controls);
 
     fixture.detectChanges();
@@ -105,6 +101,7 @@ describe('ApplicationFormFields', () => {
   it('assigns semantic desktop spans to fields according to their expected content', () => {
     const form = createApplicationCreateForm(formBuilder);
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('codeControl', form.controls.code);
 
     fixture.detectChanges();
@@ -116,7 +113,7 @@ describe('ApplicationFormFields', () => {
     expectDesktopSpan(fixture, 'prefix', 2);
     expectDesktopSpan(fixture, 'code', 2);
     expectDesktopSpan(fixture, 'administrative-unit', 4);
-    expectDesktopSpan(fixture, 'conselleria', 4);
+
     expectDesktopSpan(fixture, 'commission', 4);
     expectDesktopSpan(fixture, 'commission-expedient-number', 3);
     expectDesktopSpan(fixture, 'commission-approval-date', 3);
@@ -131,6 +128,7 @@ describe('ApplicationFormFields', () => {
   it('renders a full-width rich text editor and labels the Quill content element', () => {
     const form = createApplicationCreateForm(formBuilder);
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.detectChanges();
 
     const editor = fixture.debugElement.query(By.directive(Editor));
@@ -160,6 +158,7 @@ describe('ApplicationFormFields', () => {
     const form = createApplicationDetailForm(formBuilder);
     form.controls.description.setValue('<p>Legacy <strong>description</strong></p>');
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('auditControls', form.controls);
     fixture.componentRef.setInput('isReadOnly', true);
 
@@ -179,6 +178,7 @@ describe('ApplicationFormFields', () => {
   it('replaces the static rich text value with an editor in edit mode', () => {
     const form = createApplicationDetailForm(formBuilder);
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('auditControls', form.controls);
     fixture.componentRef.setInput('isReadOnly', true);
     fixture.detectChanges();
@@ -198,6 +198,7 @@ describe('ApplicationFormFields', () => {
     form.controls.code.setValue('123');
     form.controls.code.markAsTouched();
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('codeControl', form.controls.code);
     fixture.componentRef.setInput('codeMinLengthError', 'At least 4 characters');
 
@@ -220,6 +221,7 @@ describe('ApplicationFormFields', () => {
     form.controls.code.setValue('12345678901');
     form.controls.code.markAsTouched();
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('codeControl', form.controls.code);
     fixture.componentRef.setInput('codeMaxLengthError', 'At most 10 characters');
 
@@ -257,11 +259,11 @@ describe('ApplicationFormFields', () => {
           commissionType: CommissionType.TECNICA,
         },
       ],
-      departments: [{ label: 'Dynamic department', value: 'GVA01' }],
-      administrativeUnits: [{ label: 'Dynamic unit', value: 'UA01' }],
+
     };
 
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('codeControl', form.controls.code);
     fixture.componentRef.setInput('options', options);
     fixture.detectChanges();
@@ -278,12 +280,13 @@ describe('ApplicationFormFields', () => {
     expect(component.informationSystemOptions).toEqual(options.informationSystems);
     expect(component.scopeOptions).toEqual(options.scopes);
     expect(component.commissionOptions).toEqual(options.commissions);
-    expect(component.administrativeUnitOptions).toEqual(options.administrativeUnits);
+
   });
 
   it('filters every maintenance-backed selector with an accessible label', () => {
     const form = createApplicationCreateForm(formBuilder);
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('codeControl', form.controls.code);
     fixture.detectChanges();
 
@@ -291,7 +294,7 @@ describe('ApplicationFormFields', () => {
       .queryAll(By.directive(Select))
       .map(({ componentInstance }) => componentInstance as Select);
 
-    expect(selects).toHaveLength(6);
+    expect(selects).toHaveLength(5);
     expect(selects.every((select) => select.filter === true)).toBe(true);
     expect(selects.every((select) => Boolean(select.ariaFilterLabel))).toBe(
       true,
@@ -311,6 +314,7 @@ describe('ApplicationFormFields', () => {
 
     form.controls.commissionType.setValue(CommissionType.TECNICA);
     fixture.componentRef.setInput('controls', form.controls);
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(form.controls.administrativeUnit)));
     fixture.componentRef.setInput('options', { commissions: [commission] });
     fixture.componentInstance.commissionSelected.subscribe(selected);
     fixture.detectChanges();

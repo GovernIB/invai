@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { ResponsiblePerson } from '@features/maintenances/responsibles/responsibles.model';
 import { ResponsiblePeopleService } from '@features/maintenances/responsibles/services/responsible-people.service';
@@ -8,6 +10,8 @@ import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { MessageService } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { Observable, Subject, of } from 'rxjs';
+import { ApplicationTableAction, ApplicationsTable } from '../../components/applications-table/applications-table';
+import { APPLICATION_GENERAL_EDIT_NAVIGATION } from '../detail/application-detail-navigation';
 
 import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
 import {
@@ -104,8 +108,7 @@ const FILTER_OPTIONS: ApplicationSelectOptions = {
       commissionType: CommissionType.SUPERIOR,
     },
   ],
-  departments: [{ label: 'Conselleria', value: 'GVA01' }],
-  administrativeUnits: [{ label: 'Direcció General', value: 'UA01' }],
+
 };
 
 const INFRASTRUCTURE_FILTER_OPTIONS: ApplicationInfrastructureFilterOptions = {
@@ -171,14 +174,14 @@ describe('ApplicationsList', () => {
 
     await TestBed.configureTestingModule({
       imports: [ApplicationsList],
-      providers: [
+      providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } },
         MessageService,
         { provide: ApplicationsService, useValue: { getPage } },
         {
           provide: ApplicationOptionsService,
           useValue: {
-            getDepartmentOptions: vi.fn(() => of(FILTER_OPTIONS.departments)),
-            getAdministrativeUnitOptions: vi.fn(() => of(FILTER_OPTIONS.administrativeUnits)),
+            getDepartmentOptions: vi.fn(() => of([])),
+            getAdministrativeUnitOptions: vi.fn(() => of([])),
           },
         },
         { provide: ResponsiblePeopleService, useValue: { getPage: getPeoplePage } },
@@ -239,29 +242,26 @@ describe('ApplicationsList', () => {
     expect(selectableKeys).toContain('status');
   });
 
-  it('should hide the infrastructure and responsible columns by default while keeping them selectable', () => {
+  it('should exclude the infrastructure and responsible columns from the selector and table', () => {
     const infrastructureKeys = ['environment', 'database', 'server', 'responsible'];
     const visibleKeys = component.sortedSelectedColumns().map(({ key }) => key);
     const selectableKeys = component.selectableColumns().map(({ key }) => key);
 
     infrastructureKeys.forEach((key) => {
       expect(visibleKeys).not.toContain(key);
-      expect(selectableKeys).toContain(key);
+      expect(selectableKeys).not.toContain(key);
     });
   });
 
-  it('should render the infrastructure and responsible columns once selected', () => {
-    const infrastructureColumns = APPLICATIONS_TABLE_COLUMNS.filter(({ key }) =>
-      ['environment', 'database', 'server', 'responsible'].includes(key),
-    );
-    component.selectedColumns.update((columns) => [...columns, ...infrastructureColumns]);
+  it('should omit infrastructure and responsible headers when all available columns are selected', () => {
+    component.selectedColumns.set(component.selectableColumns());
     fixture.detectChanges();
 
     const headerText = fixture.nativeElement.querySelector('.p-datatable-thead').textContent;
-    expect(headerText).toContain('Entorn');
-    expect(headerText).toContain('Bases de dades');
-    expect(headerText).toContain('Servidor');
-    expect(headerText).toContain('Responsables');
+    expect(headerText).not.toContain('Entorn');
+    expect(headerText).not.toContain('Bases de dades');
+    expect(headerText).not.toContain('Servidor');
+    expect(headerText).not.toContain('Responsables');
   });
 
   it('should synchronize status only when its applied criterion changes or resets', () => {
@@ -370,8 +370,6 @@ describe('ApplicationsList', () => {
       category: 1,
       informationSystem: 2,
       scope: 3,
-      commission: 4,
-      conselleria: 'GVA01',
       administrativeUnit: 'UA01',
       status: ApplicationStatus.INACTIVE,
       responsible: { id: 11, label: 'Maria Tur' },
@@ -397,7 +395,6 @@ describe('ApplicationsList', () => {
       categoryId: 1,
       systemTypeId: 2,
       fieldId: 3,
-      commissionId: 4,
       admUnitCode: 'UA01',
       statusId: ApplicationStatus.INACTIVE,
       responsibleId: 11,
@@ -607,8 +604,7 @@ describe('ApplicationsList', () => {
       infrastructureOptions: INFRASTRUCTURE_FILTER_OPTIONS,
       pageLoadFailed: true,
       optionsLoadFailed: false,
-      departmentsLoadFailed: false,
-      administrativeUnitsLoadFailed: false,
+
     });
 
     expect(getPage).not.toHaveBeenCalled();
@@ -645,8 +641,6 @@ describe('ApplicationsList', () => {
       category: null,
       informationSystem: null,
       scope: null,
-      commission: null,
-      conselleria: null,
       administrativeUnit: null,
       status: ApplicationStatus.ACTIVE,
       responsible: null,
@@ -664,16 +658,14 @@ describe('ApplicationsList', () => {
     );
   });
 
-  it('should not expose an actions column', () => {
+  it('exposes the horizontal actions menu in its own column', () => {
     fixture.detectChanges();
     const firstRow = fixture.nativeElement.querySelector(
       '.p-datatable-tbody > tr',
     ) as HTMLTableRowElement;
 
-    expect(fixture.nativeElement.querySelector('.invai-table-actions-column')).toBeFalsy();
-    expect(firstRow.querySelectorAll('td')).toHaveLength(component.sortedSelectedColumns().length);
-    expect(firstRow.querySelector('button')).toBeFalsy();
-    expect(firstRow.querySelector('.pi-eye')).toBeFalsy();
+    expect(firstRow.querySelectorAll('td')).toHaveLength(component.sortedSelectedColumns().length + 1);
+    expect(firstRow.querySelector('.invai-table-actions-column button .pi-ellipsis-h')).not.toBeNull();
   });
 
   it('should navigate to the application detail on row double click', () => {
@@ -684,7 +676,7 @@ describe('ApplicationsList', () => {
 
     firstRow.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
 
-    expect(navigate).toHaveBeenCalledWith(['1'], { relativeTo: activatedRoute });
+    expect(navigate).toHaveBeenCalledWith(['1', 'general'], { relativeTo: activatedRoute });
   });
 
   it('should navigate to the application detail with Enter on a focused row', () => {
@@ -699,7 +691,26 @@ describe('ApplicationsList', () => {
     expect(navigate).not.toHaveBeenCalled();
 
     firstRow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(navigate).toHaveBeenCalledWith(['1'], { relativeTo: activatedRoute });
+    expect(navigate).toHaveBeenCalledWith(['1', 'general'], { relativeTo: activatedRoute });
+  });
+
+  it('routes edit actions with a transient intent and consultation without one', () => {
+    fixture.detectChanges();
+    const table = fixture.debugElement.query(By.directive(ApplicationsTable)).componentInstance as ApplicationsTable;
+    table.onSelectAction.emit({ action: ApplicationTableAction.Edit, params: APPLICATIONS[0] });
+    expect(navigate).toHaveBeenLastCalledWith(['1', 'general'], {
+      relativeTo: activatedRoute,
+      info: APPLICATION_GENERAL_EDIT_NAVIGATION,
+    });
+    table.onSelectAction.emit({ action: ApplicationTableAction.Detail, params: APPLICATIONS[0] });
+    expect(navigate).toHaveBeenLastCalledWith(['1', 'general'], { relativeTo: activatedRoute });
+  });
+
+  it('does not navigate to edit an inactive application', () => {
+    fixture.detectChanges();
+    const table = fixture.debugElement.query(By.directive(ApplicationsTable)).componentInstance as ApplicationsTable;
+    table.onSelectAction.emit({ action: ApplicationTableAction.Edit, params: { ...APPLICATIONS[0], status: ApplicationStatus.INACTIVE } });
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   function accessList(): ApplicationsListAccess {
@@ -731,8 +742,7 @@ function resolvedData(content: Application[], totalElements: number): Applicatio
     infrastructureOptions: INFRASTRUCTURE_FILTER_OPTIONS,
     pageLoadFailed: false,
     optionsLoadFailed: false,
-    departmentsLoadFailed: false,
-    administrativeUnitsLoadFailed: false,
+
   };
 }
 

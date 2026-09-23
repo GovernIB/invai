@@ -4,6 +4,7 @@
   [ariaLabels]="actionAriaLabels"
   [hasUnsavedChanges]="hasUnsavedChanges"
   [isSaving]="isSaving()"
+  [submitDisabled]="mode() === 'create' && dir3Check()?.canSubmit() === false"
   [mode]="mode()"
   [showDeactivate]="false"
   [title]="title()"
@@ -172,5 +173,14 @@
         </p>
       }
     </div>
+    @if (mode() === 'create') {
+      @if (dir3Check(); as check) {
+        <app-application-dir3-feedback
+          class="md:col-span-2"
+          [check]="check"
+          (retry)="retryDir3.emit()"
+        />
+      }
+    }
   </form>
 </app-crud-entity-dialog>

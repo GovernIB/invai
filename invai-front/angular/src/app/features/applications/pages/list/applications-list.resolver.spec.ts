@@ -3,12 +3,12 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { SpringPage } from '@models/page.model';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 
-import { APPLICATIONS_ROUTES } from '../../applications.routes';
 import {
   Application,
   ApplicationInfrastructureFilterOptions,
   ApplicationStatus,
 } from '../../applications.model';
+import { APPLICATIONS_ROUTES } from '../../applications.routes';
 import { ApplicationInfrastructureFilterOptionsService } from '../../services/application-infrastructure-filter-options.service';
 import {
   ApplicationOptionsService,
@@ -53,8 +53,7 @@ const OPTIONS: ApplicationSelectOptions = {
   informationSystems: [],
   scopes: [],
   commissions: [],
-  departments: [{ label: 'Conselleria', value: 'GVA01' }],
-  administrativeUnits: [],
+
 };
 
 const INFRASTRUCTURE_OPTIONS: ApplicationInfrastructureFilterOptions = {
@@ -81,7 +80,7 @@ describe('applicationsListResolver', () => {
         commissions: OPTIONS.commissions,
       }),
     );
-    getDepartmentOptions = vi.fn(() => of(OPTIONS.departments));
+    getDepartmentOptions = vi.fn(() => of([]));
     getPhysicalServerOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.servers));
     getDatabaseOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.databases));
     getEnvironmentOptions = vi.fn(() => of(INFRASTRUCTURE_OPTIONS.environments));
@@ -110,7 +109,7 @@ describe('applicationsListResolver', () => {
       statusId: ApplicationStatus.ACTIVE,
     });
     expect(getStaticOptions).toHaveBeenCalledOnce();
-    expect(getDepartmentOptions).toHaveBeenCalledOnce();
+    expect(getDepartmentOptions).not.toHaveBeenCalled();
     expect(getPhysicalServerOptions).toHaveBeenCalledOnce();
     expect(getDatabaseOptions).toHaveBeenCalledOnce();
     expect(getEnvironmentOptions).toHaveBeenCalledOnce();
@@ -120,8 +119,7 @@ describe('applicationsListResolver', () => {
       infrastructureOptions: INFRASTRUCTURE_OPTIONS,
       pageLoadFailed: false,
       optionsLoadFailed: false,
-      departmentsLoadFailed: false,
-      administrativeUnitsLoadFailed: false,
+
     });
   });
 
@@ -136,8 +134,7 @@ describe('applicationsListResolver', () => {
       infrastructureOptions: INFRASTRUCTURE_OPTIONS,
       pageLoadFailed: true,
       optionsLoadFailed: false,
-      departmentsLoadFailed: false,
-      administrativeUnitsLoadFailed: false,
+
     });
   });
 
@@ -153,14 +150,12 @@ describe('applicationsListResolver', () => {
         informationSystems: [],
         scopes: [],
         commissions: [],
-        departments: OPTIONS.departments,
-        administrativeUnits: [],
+
       },
       infrastructureOptions: INFRASTRUCTURE_OPTIONS,
       pageLoadFailed: false,
       optionsLoadFailed: true,
-      departmentsLoadFailed: false,
-      administrativeUnitsLoadFailed: false,
+
     });
   });
 

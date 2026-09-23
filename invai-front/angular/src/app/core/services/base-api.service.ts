@@ -17,10 +17,10 @@ export abstract class BaseApiService {
 
   /**
    * Helper que construye URLs de forma consistente:
-   * - url() -> BASE_URI --> invaiapi/interna/services
-   * - url(users) -> BASE_URI/users --> invaiapi/interna/services/users
-   * - url('users', 10) --> invaiapi/interna/services/users/10
-   * - url('/users', '10', 'expedients') -> invaiapi/interna/services/users/10/expedients
+   * - url() -> BASE_URI --> invaiback/services
+   * - url(users) -> BASE_URI/users --> invaiback/services/users
+   * - url('users', 10) --> invaiback/services/users/10
+   * - url('/users', '10', 'expedients') -> invaiback/services/users/10/expedients
    */
   protected url(...segments: UrlSeg[]): string {
     const cleaned = segments

@@ -1,31 +1,32 @@
-import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
-import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
 import { TestBed } from '@angular/core/testing';
+import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
+import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
+import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
 
 import {
   Application,
-  ApplicationEnsClassificationOutput,
-  ApplicationEnsClassificationInput,
   ApplicationDevelopmentOutput,
+  ApplicationEnsClassificationInput,
+  ApplicationEnsClassificationOutput,
   ApplicationOutput,
+  ApplicationSecurityOutput,
   ApplicationStatus,
   ApplicationStatusCode,
-  ApplicationSecurityOutput,
   ApplicationSystemDatabaseOutput,
   DevelopmentModality,
   DevelopmentStandardAdaption,
 } from '../../applications.model';
 import { ApplicationDevelopmentService } from '../../services/application-development.service';
-import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
+import { ApplicationOptionsService } from '../../services/application-options.service';
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityService,
 } from '../../services/application-security.service';
+import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
 import { ApplicationsService } from '../../services/applications.service';
-import { ApplicationOptionsService } from '../../services/application-options.service';
 import { ApplicationDetailState } from './application-detail-state';
 
 const APPLICATION_OUTPUT: ApplicationOutput = {
@@ -169,7 +170,7 @@ describe('ApplicationDetailState', () => {
     updateClassification = vi.fn((id, payload) => of({ ...classificationFromInput(payload), id }));
 
     TestBed.configureTestingModule({
-      providers: [
+      providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } },
         ApplicationDetailState,
         { provide: ApplicationAccessibilityService, useValue: accessibility },
         {
@@ -229,6 +230,32 @@ describe('ApplicationDetailState', () => {
     expect(state.isEditing('systems-databases')).toBe(false);
     expect(state.isEditing('development')).toBe(false);
     expect(state.isEditing('accessibility')).toBe(false);
+  });
+
+  it('clears the pending DIR3 tab state on a different application or a failed detail load', () => {
+    state.initialize(APPLICATION_OUTPUT);
+    state.hasPendingResponsibleDir3.set(true);
+    state.initialize({ ...APPLICATION_OUTPUT, id: 72 });
+    expect(state.hasPendingResponsibleDir3()).toBeNull();
+    state.hasPendingResponsibleDir3.set(true);
+    state.initialize(null);
+    expect(state.hasPendingResponsibleDir3()).toBeNull();
+  });
+
+  it('tracks pending contexts separately from backend completeness and resets on application change', () => {
+    state.initialize(APPLICATION_OUTPUT);
+    const original = state.application()?.incomplete;
+    state.updateWebContextCount(12);
+    expect(state.hasUnverifiedWebContexts()).toBe(true);
+    expect(state.application()?.incomplete).toBe(original);
+    state.updateWebContextCount(0);
+    expect(state.hasUnverifiedWebContexts()).toBe(false);
+    state.updateWebContextCount(1);
+    state.initialize({ ...APPLICATION_OUTPUT, id: 72 });
+    expect(state.hasUnverifiedWebContexts()).toBeNull();
+    state.updateWebContextCount(1);
+    state.initialize(null);
+    expect(state.hasUnverifiedWebContexts()).toBeNull();
   });
 
   it('initializes Accessibility empty until its data is resolved', () => {
@@ -973,12 +1000,20 @@ describe('ApplicationDetailState', () => {
     expect(deleteApplication).toHaveBeenCalledWith(1);
   });
 
+  it('restores the saved DIR3 code and label when cancelling general edits', () => {
+    initializeAll();
+    state.startEditing('general');
+    state.form.controls.administrativeUnit.setValue('NEW');
+    state.dir3.selectSnapshot({ code: 'NEW', name: 'New department', parentCode: null, level: 1 });
+    state.form.markAsDirty();
+    state.cancelEditing('general');
+    expect(state.form.controls.administrativeUnit.value).toBe('DGEDOT');
+    expect(state.dir3.selectedLabel()).toBe('Direcció General (DGEDOT)');
+    expect(state.form.controls.administrativeUnit.enabled).toBe(true);
+  });
+
   function initializeAll(response = APPLICATION_OUTPUT): void {
     state.initialize(response);
-    state.initializeAdministrativeUnitOptions(
-      [{ label: 'Direcció General', value: 'DGEDOT' }],
-      false,
-    );
     state.initializeDevelopment(1, DEVELOPMENT_OUTPUT);
   }
 });

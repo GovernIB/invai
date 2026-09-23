@@ -26,7 +26,7 @@
         <input
           class="w-full"
           type="text"
-          maxlength="100"
+          maxlength="150"
           formControlName="name"
           pInputText
           [attr.aria-describedby]="
@@ -42,6 +42,18 @@
         <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="idPrefix() + '-name-error'">
           {{ form().controls.name.hasError('maxlength') ? nameMaxLengthError : requiredError }}
         </p>
+      }
+    </div>
+    <div>
+      <p-floatlabel class="w-full">
+        <input pInputText class="w-full" type="text" maxlength="20" formControlName="nif"
+          [id]="idPrefix() + '-nif'" [readOnly]="mode() === 'view'"
+          [attr.aria-invalid]="isInvalid(form().controls.nif)"
+          [attr.aria-describedby]="isInvalid(form().controls.nif) ? idPrefix() + '-nif-error' : null" />
+        <label [for]="idPrefix() + '-nif'">{{ copy().nif }}</label>
+      </p-floatlabel>
+      @if (isInvalid(form().controls.nif)) {
+        <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="idPrefix() + '-nif-error'">{{ copy().nifMaxLength }}</p>
       }
     </div>
   </form>

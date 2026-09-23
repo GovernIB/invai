@@ -61,9 +61,9 @@ describe('httpErrorLoggingInterceptor', () => {
       message: 'El prefix ja està assignat a una altra aplicació.',
     };
 
-    http.post('/invaiapi/interna/application', {}).subscribe({ error: errorHandler });
+    http.post('/invaiback/application', {}).subscribe({ error: errorHandler });
 
-    const request = httpTesting.expectOne('/invaiapi/interna/application');
+    const request = httpTesting.expectOne('/invaiback/application');
     request.flush(payload, { status: 400, statusText: 'Bad Request' });
 
     expect(errorDialog.open).toHaveBeenCalledWith(payload);
@@ -73,7 +73,7 @@ describe('httpErrorLoggingInterceptor', () => {
   it.each([
     {
       description: 'an incomplete payload',
-      url: '/invaiapi/interna/application',
+      url: '/invaiback/application',
       payload: { message: 'Request failed' },
     },
     {

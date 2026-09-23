@@ -45,7 +45,7 @@
             </th>
           }
         }
-        @if (isEditing()) {
+        @if (hasRowActions()) {
           <th class="invai-table-actions-column">
             <span class="sr-only">{{ ACTIONS }}</span>
           </th>
@@ -53,7 +53,13 @@
       </tr>
     </ng-template>
     <ng-template let-columns="columns" let-rowData pTemplate="body">
-      <tr>
+      <tr
+        [class.invai-table-consultable-row]="rowHasActions(rowData)"
+        [attr.data-responsibility-id]="responsibilityId(rowData)"
+        [attr.tabindex]="rowHasActions(rowData) ? 0 : null"
+        (dblclick)="rowHasActions(rowData) && onRowActivate($event, TableAction.View, rowData)"
+        (keydown.enter)="rowHasActions(rowData) && onRowActivate($event, TableAction.View, rowData)"
+      >
         @for (column of columns; track column.key) {
           @if (isIncompleteResponsiblePersonCell(rowData, column.key)) {
             <td
@@ -61,7 +67,8 @@
               tabindex="0"
               [autoHide]="false"
               [pTooltip]="copy.incomplete"
-              [style.min-width]="column.minWidth" [style.width]="column.width"
+              [style.min-width]="column.minWidth"
+              [style.width]="column.width"
               tooltipEvent="both"
               tooltipPosition="top"
             >
@@ -86,11 +93,37 @@
                 [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
               >
                 {{ cellValue(rowData, column.key) }}
+                @if (column.key === 'person') {
+                  @if (responsibleDir3Status(rowData); as dir3Status) {
+                    <span
+                      class="ml-2 inline-flex"
+                      tabindex="0"
+                      role="img"
+                      (keydown.enter)="$event.stopPropagation()"
+                      (dblclick)="$event.stopPropagation()"
+                      [attr.aria-label]="
+                        dir3Status === 'MANUAL' ? dir3Copy.manual : dir3Copy.pending
+                      "
+                      [pTooltip]="dir3Status === 'MANUAL' ? dir3Copy.manual : dir3Copy.pending"
+                      tooltipEvent="both"
+                      [autoHide]="false"
+                    >
+                      <i
+                        class="pi"
+                        [class.pi-check-circle]="dir3Status === 'MANUAL'"
+                        [class.pi-exclamation-circle]="dir3Status === 'NOT_VALIDATED'"
+                        aria-hidden="true"
+                        [class.text-green-700]="dir3Status === 'MANUAL'"
+                        [style.color]="dir3Status === 'NOT_VALIDATED' ? '#FF9523' : null"
+                      ></i>
+                    </span>
+                  }
+                }
               </span>
             </td>
           }
         }
-        @if (isEditing()) {
+        @if (hasRowActions()) {
           <td class="invai-table-actions-column">
             @if (rowHasActions(rowData)) {
               <p-button
@@ -98,6 +131,13 @@
                 [ariaLabel]="rowActionLabel(rowData)"
                 [icon]="icons.ELLIPSIS_H"
                 [text]="true"
+                [pt]="{
+                  root: {
+                    'aria-haspopup': 'menu',
+                    'aria-expanded': menuVisible() && selectedRow() === rowData,
+                    'aria-controls': rowMenu.id,
+                  },
+                }"
                 (onClick)="openActionsMenu($event, rowData)"
               />
             }
@@ -107,7 +147,7 @@
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td [attr.colspan]="columns().length + (isEditing() ? 1 : 0)">
+        <td [attr.colspan]="columns().length + (hasRowActions() ? 1 : 0)">
           {{ RESULTS_NOT_FOUND }}
         </td>
       </tr>
@@ -115,12 +155,12 @@
   </p-table>
 </div>
 
-@if (isEditing()) {
-  <p-menu
-    #rowMenu
-    [model]="rowActions()"
-    [popup]="true"
-    appendTo="body"
-    styleClass="application-responsible-row-menu"
-  />
-}
+<p-menu
+  #rowMenu
+  [model]="rowActions()"
+  [popup]="true"
+  appendTo="body"
+  styleClass="application-responsible-row-menu"
+  (onShow)="menuVisible.set(true)"
+  (onHide)="menuVisible.set(false)"
+/>

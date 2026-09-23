@@ -13,7 +13,7 @@ import {
 } from '../systems.model';
 import { DatabasesService } from './databases.service';
 
-const URL = '/invaiapi/interna/database';
+const URL = '/invaiback/database';
 const SERVER: InfrastructureServer = {
   id: 4,
   name: 'db01.caib.es',

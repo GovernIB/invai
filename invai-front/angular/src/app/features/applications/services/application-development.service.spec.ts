@@ -10,7 +10,7 @@ import {
 } from '../applications.model';
 import { ApplicationDevelopmentService } from './application-development.service';
 
-const BASE_URL = '/invaiapi/interna/application/development';
+const BASE_URL = '/invaiback/application/development';
 
 describe('ApplicationDevelopmentService', () => {
   let service: ApplicationDevelopmentService;

@@ -25,6 +25,31 @@ describe('CrudEntityDialog', () => {
     await TestBed.configureTestingModule({ imports: [CrudEntityDialog] }).compileComponents();
   });
 
+  it('blocks submission independently of closing and supports an explicit action label and icon', () => {
+    const fixture = createFixture('edit');
+    fixture.componentRef.setInput('submitDisabled', true);
+    fixture.componentRef.setInput('submitLabel', 'Validar manualment');
+    fixture.componentRef.setInput('submitIcon', 'pi pi-check');
+    fixture.detectChanges();
+    const submit = vi.fn();
+    const closed = vi.fn();
+    fixture.componentInstance.submitForm.subscribe(submit);
+    fixture.componentInstance.closed.subscribe(closed);
+    const button = buttonByLabel(fixture, 'Validar manualment');
+    expect(button.disabled).toBe(true);
+    expect(button.icon).toBe('pi pi-check');
+    button.onClick.emit(new MouseEvent('click'));
+    expect(submit).not.toHaveBeenCalled();
+    const component = fixture.componentInstance as unknown as {
+      requestClose(): void;
+      saveAndClose(): void;
+    };
+    component.saveAndClose();
+    expect(submit).not.toHaveBeenCalled();
+    component.requestClose();
+    expect(closed).toHaveBeenCalledOnce();
+  });
+
   it('distinguishes save from add without changing their submission output', () => {
     const fixture = createFixture('create');
     const submit = vi.fn();

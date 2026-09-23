@@ -10,9 +10,9 @@ import {
 } from './systems';
 
 export const DEVELOPMENT_MAINTENANCE_API = {
-  roles: '/invaiapi/interna/role',
-  layers: '/invaiapi/interna/layer',
-  technologies: '/invaiapi/interna/technology',
+  roles: '/invaiback/role',
+  layers: '/invaiback/layer',
+  technologies: '/invaiback/technology',
 } as const;
 
 export interface DevelopmentRoleRecord {

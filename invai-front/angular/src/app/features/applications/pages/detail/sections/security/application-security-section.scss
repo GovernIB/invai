@@ -22,6 +22,15 @@
   gap: 1rem;
 }
 
+.application-security__role-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.5rem;
+  width: min(100%, 24rem);
+  margin-inline-start: auto;
+}
+
 .application-security h3,
 .application-security__resource-header h3 {
   margin: 0;
@@ -50,7 +59,6 @@
   font-weight: 600;
 }
 
-.application-security__notice,
 .application-security__alert {
   display: flex;
   align-items: flex-start;
@@ -58,11 +66,6 @@
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: var(--p-border-radius-md);
-}
-
-.application-security__notice {
-  color: var(--p-blue-800);
-  background: var(--p-blue-50);
 }
 
 .application-security__alert {

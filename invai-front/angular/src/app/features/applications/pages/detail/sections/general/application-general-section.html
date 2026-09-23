@@ -17,15 +17,8 @@
   <app-application-general-form
     [form]="detailState.form"
     [isReadOnly]="!detailState.isEditing('general')"
-    [options]="currentOptions()"
-    [departmentsLoading]="isDepartmentsLoading()"
-    [departmentsLoadFailed]="departmentsLoadFailed()"
-    [administrativeUnitsLoading]="detailState.administrativeUnitsLoading()"
-    [administrativeUnitsLoadFailed]="detailState.administrativeUnitsLoadFailed()"
+    [options]="options()" [dir3]="detailState.dir3" (dir3Action)="detailState.dir3.handle($event)"
     (commissionSelected)="detailState.selectCommission($event)"
-    (conselleriaSelected)="selectConselleria($event)"
-    (departmentsRetry)="retryDepartments()"
-    (administrativeUnitsRetry)="retryAdministrativeUnits()"
   />
 
   @if (

@@ -1,7 +1,7 @@
-import { FormBuilder } from '@angular/forms';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormBuilder } from '@angular/forms';
 
-import { createResponsibleNameForm } from '../../forms/responsible-forms.factory';
+import { createResponsibleCompanyForm } from '../../forms/responsible-forms.factory';
 import { RESPONSIBLE_COMPANY_COPY } from '../../responsibles.i18n';
 import { ResponsibleNameDialog } from './responsible-name-dialog';
 
@@ -11,8 +11,8 @@ describe('ResponsibleNameDialog', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [ResponsibleNameDialog] }).compileComponents();
     fixture = TestBed.createComponent(ResponsibleNameDialog);
-    const form = createResponsibleNameForm(new FormBuilder());
-    form.setValue({ name: 'Plexus' });
+    const form = createResponsibleCompanyForm(new FormBuilder());
+    form.setValue({ name: 'Plexus', nif: 'B12345678' });
     fixture.componentRef.setInput('visible', true);
     fixture.componentRef.setInput('form', form);
     fixture.componentRef.setInput('mode', 'view');

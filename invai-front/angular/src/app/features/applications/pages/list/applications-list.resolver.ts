@@ -8,15 +8,13 @@ import {
   ApplicationInfrastructureFilterOptions,
   ApplicationStatus,
 } from '../../applications.model';
+import { resolveApplicationOptions } from '../../resolvers/application-options.resolver';
+import { ApplicationInfrastructureFilterOptionsService } from '../../services/application-infrastructure-filter-options.service';
 import {
   ApplicationOptionsService,
   ApplicationSelectOptions,
 } from '../../services/application-options.service';
-import {
-  ApplicationInfrastructureFilterOptionsService,
-} from '../../services/application-infrastructure-filter-options.service';
 import { ApplicationsService } from '../../services/applications.service';
-import { resolveApplicationOptions } from '../../resolvers/application-options.resolver';
 
 export const APPLICATIONS_LIST_RESOLVE_KEY = 'applicationsList';
 
@@ -26,8 +24,6 @@ export interface ApplicationsListResolvedData {
   infrastructureOptions: ApplicationInfrastructureFilterOptions;
   pageLoadFailed: boolean;
   optionsLoadFailed: boolean;
-  departmentsLoadFailed: boolean;
-  administrativeUnitsLoadFailed: boolean;
 }
 
 const INITIAL_PAGE_PARAMS = {
@@ -74,8 +70,6 @@ export const applicationsListResolver: ResolveFn<ApplicationsListResolvedData> =
         },
         pageLoadFailed: pageResult.failed,
         optionsLoadFailed: optionsResult.loadFailed,
-        departmentsLoadFailed: optionsResult.departmentsLoadFailed,
-        administrativeUnitsLoadFailed: optionsResult.administrativeUnitsLoadFailed,
       }),
     ),
   );

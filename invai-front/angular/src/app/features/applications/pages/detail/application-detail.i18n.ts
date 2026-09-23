@@ -17,6 +17,7 @@ export const APPLICATION_DETAIL_SECTIONS_ARIA_LABEL = $localize`Seccions de l'ap
 export const APPLICATION_DETAIL_COMPLETENESS_REFRESH_ERROR = $localize`:@@applicationCompletenessRefreshError:No s'han pogut actualitzar els indicadors de dades incompletes. Es mantenen els últims valors rebuts del servidor.`;
 export const APPLICATION_DETAIL_COMPLETENESS_RETRY = $localize`:@@applicationCompletenessRetry:Torna a carregar els indicadors`;
 export const APPLICATION_DETAIL_RESPONSIBLE_TYPES_INCOMPLETE = $localize`La secció Responsables està incompleta: falten tipus de responsable per assignar.`;
+export const APPLICATION_DETAIL_RESPONSIBLE_DIR3_PENDING = $localize`:@@applicationResponsibleDir3Pending:La secció Responsables té responsables amb el DIR3 pendent de validar.`;
 export const APPLICATION_DETAIL_AUTHORIZED_INCOMPLETE = $localize`La secció Responsables està incompleta: no hi ha cap persona autoritzada.`;
 export const APPLICATION_DETAIL_RESPONSIBLE_AND_AUTHORIZED_INCOMPLETE = $localize`La secció Responsables està incompleta: falten tipus de responsable per assignar i no hi ha cap persona autoritzada.`;
 export const APPLICATION_DETAIL_DEVELOPMENT_INCOMPLETE = $localize`La secció Desenvolupament està incompleta: falten camps obligatoris.`;
@@ -27,6 +28,7 @@ export const APPLICATION_DETAIL_ACCESSIBILITY_INCOMPLETE = $localize`La secció 
 export const APPLICATION_DETAIL_SECURITY_INCOMPLETE = $localize`La secció Seguretat està incompleta: falta almenys un context web, una classificació ENS o un risc actiu.`;
 export const APPLICATION_DETAIL_SECURITY_INCONSISTENT = $localize`La secció Seguretat conté més d'una classificació ENS. Cal corregir les dades al servidor.`;
 export const APPLICATION_DETAIL_SECURITY_UNKNOWN = $localize`No s'ha pogut comprovar si la secció Seguretat està completa.`;
+export const APPLICATION_DETAIL_SECURITY_UNVERIFIED_CONTEXTS = $localize`:@@applicationSecurityUnverifiedContexts:La secció Seguretat té contextos web pendents de verificar.`;
 export const APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE = $localize`Canvis desats`;
 export const APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE = (sectionLabel: string) =>
   $localize`S'han desat correctament els canvis de ${sectionLabel}:sectionLabel:.`;

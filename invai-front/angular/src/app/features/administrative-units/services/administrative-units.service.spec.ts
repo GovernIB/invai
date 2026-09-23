@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { AdministrativeUnitsService } from './administrative-units.service';
 
-const ADMINISTRATIVE_UNITS_URL = '/invaiapi/interna/adm-unit';
+const ADMINISTRATIVE_UNITS_URL = '/invaiback/adm-unit';
 
 describe('AdministrativeUnitsService', () => {
   let service: AdministrativeUnitsService;
@@ -20,98 +20,37 @@ describe('AdministrativeUnitsService', () => {
 
   afterEach(() => httpTesting.verify());
 
-  it('loads departments with pagination params', () => {
-    const result = vi.fn();
-    service
-      .getDepartments({ page: 1, size: 10, sort: ['name,asc', 'code,desc'] })
-      .subscribe(result);
-
-    const request = httpTesting.expectOne(
-      (req) =>
-        req.method === 'GET' &&
-        req.url === `${ADMINISTRATIVE_UNITS_URL}/departments` &&
-        req.params.get('page') === '1' &&
-        req.params.get('size') === '10' &&
-        req.params.getAll('sort')?.join('|') === 'name,asc|code,desc',
-    );
-    request.flush(page([unit('GVA01', 'Conselleria')]));
-
-    expect(result).toHaveBeenCalledWith(
-      expect.objectContaining({ content: [unit('GVA01', 'Conselleria')] }),
-    );
+  it('loads the unified DIR3 page with pagination and sorting', () => {
+    service.getPage({ page: 1, size: 20, sort: ['name,asc', 'code,desc'] }).subscribe();
+    const request = httpTesting.expectOne(req => req.url === ADMINISTRATIVE_UNITS_URL);
+    expect(request.request.params.get('page')).toBe('1');
+    expect(request.request.params.get('size')).toBe('20');
+    expect(request.request.params.getAll('sort')).toEqual(['name,asc', 'code,desc']);
+    request.flush(page([unit('D1', 'Department')]));
   });
 
-  it('loads and encodes the selected department when requesting its units', () => {
-    const result = vi.fn();
-    service.getAdmUnitsByDepartment('GVA/01', { page: 0, size: 25 }).subscribe(result);
-
-    const request = httpTesting.expectOne(
-      (req) =>
-        req.method === 'GET' &&
-        req.url === `${ADMINISTRATIVE_UNITS_URL}/departments/GVA%2F01/adm-units` &&
-        req.params.get('size') === '25',
-    );
-    request.flush(page([unit('UA01', 'Unitat', 'GVA/01')]));
-
-    expect(result).toHaveBeenCalledWith(expect.objectContaining({ totalElements: 1 }));
+  it('shares only blank searches and keys pages independently', () => {
+    service.getPage({ page: 0, search: '   ' }).subscribe();
+    service.getPage({ page: 0 }).subscribe();
+    httpTesting.expectOne(`${ADMINISTRATIVE_UNITS_URL}?page=0`).flush(page([]));
+    service.getPage({ page: 1 }).subscribe();
+    httpTesting.expectOne(`${ADMINISTRATIVE_UNITS_URL}?page=1`).flush(page([]));
+    for (let index = 0; index < 2; index++) {
+      service.getPage({ page: 0, search: '  Educació  ' }).subscribe();
+      const request = httpTesting.expectOne(req => req.url === ADMINISTRATIVE_UNITS_URL);
+      expect(request.request.params.get('search')).toBe('Educació');
+      request.flush(page([]));
+    }
   });
 
-  it('shares cache entries and keeps departments and unit requests isolated', () => {
-    const departmentResult = vi.fn();
-    const cachedDepartmentResult = vi.fn();
-    const unitResult = vi.fn();
-
-    service.getDepartments({ page: 0 }).subscribe(departmentResult);
-    service.getDepartments({ page: 0 }).subscribe(cachedDepartmentResult);
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments?page=0`)
-      .flush(page([unit('GVA01', 'Conselleria')]));
-
-    service.getAdmUnitsByDepartment('GVA01', { page: 0 }).subscribe(unitResult);
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments/GVA01/adm-units?page=0`)
-      .flush(page([unit('UA01', 'Unitat', 'GVA01')]));
-
-    expect(departmentResult).toHaveBeenCalledOnce();
-    expect(cachedDepartmentResult).toHaveBeenCalledOnce();
-    expect(unitResult).toHaveBeenCalledOnce();
-  });
-
-  it('evicts failed requests so they can be retried', () => {
-    const error = vi.fn();
-    const result = vi.fn();
-
-    service.getDepartments({ page: 0 }).subscribe({ error });
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments?page=0`)
-      .flush('Request failed', { status: 500, statusText: 'Server Error' });
-
-    service.getDepartments({ page: 0 }).subscribe(result);
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments?page=0`)
-      .flush(page([unit('GVA01', 'Conselleria')]));
-
-    expect(error).toHaveBeenCalledOnce();
-    expect(result).toHaveBeenCalledWith(expect.objectContaining({ totalElements: 1 }));
-  });
-
-  it('clears both catalog caches explicitly', () => {
-    service.getDepartments().subscribe();
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments`)
-      .flush(page([unit('GVA01', 'Conselleria')]));
-    service.getAdmUnitsByDepartment('GVA01').subscribe();
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments/GVA01/adm-units`)
-      .flush(page([unit('UA01', 'Unitat', 'GVA01')]));
-
+  it('evicts failed entries and clears successful pages explicitly', () => {
+    service.getPage().subscribe({ error: () => {} });
+    httpTesting.expectOne(ADMINISTRATIVE_UNITS_URL).flush('failed', { status: 500, statusText: 'Error' });
+    service.getPage().subscribe();
+    httpTesting.expectOne(ADMINISTRATIVE_UNITS_URL).flush(page([]));
     service.clearCache();
-    service.getDepartments().subscribe();
-    httpTesting.expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments`).flush(page([]));
-    service.getAdmUnitsByDepartment('GVA01').subscribe();
-    httpTesting
-      .expectOne(`${ADMINISTRATIVE_UNITS_URL}/departments/GVA01/adm-units`)
-      .flush(page([]));
+    service.getPage().subscribe();
+    httpTesting.expectOne(ADMINISTRATIVE_UNITS_URL).flush(page([]));
   });
 });
 

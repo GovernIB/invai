@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { FieldsService } from './fields.service';
 
-const FIELDS_URL = '/invaiapi/interna/field';
+const FIELDS_URL = '/invaiback/field';
 
 describe('FieldsService', () => {
   let service: FieldsService;

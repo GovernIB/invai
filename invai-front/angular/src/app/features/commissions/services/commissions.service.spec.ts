@@ -6,7 +6,7 @@ import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { CommissionInput, CommissionType } from '../commissions.model';
 import { CommissionsService } from './commissions.service';
 
-const COMMISSIONS_URL = '/invaiapi/interna/commission';
+const COMMISSIONS_URL = '/invaiback/commission';
 
 describe('CommissionsService', () => {
   let service: CommissionsService;

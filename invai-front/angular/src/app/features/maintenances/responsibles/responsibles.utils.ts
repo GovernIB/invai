@@ -2,15 +2,15 @@ import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { TableLazyLoadEvent } from 'primeng/table';
 
 import {
-  ResponsibleNameFilters,
-  ResponsibleNamePageParams,
   ResponsibleAuthorizationFilters,
   ResponsibleAuthorizationPageParams,
-  ResponsiblePersonFilters,
+  ResponsibleNameFilters,
+  ResponsibleNamePageParams,
   ResponsiblePerson,
-  ResponsiblePersonSearchSource,
+  ResponsiblePersonFilters,
   ResponsiblePersonOption,
   ResponsiblePersonPageParams,
+  ResponsiblePersonSearchSource,
   RoleTransferDestinationOption,
   RoleTransferPersonOption,
 } from './responsibles.model';
@@ -83,6 +83,7 @@ export function toResponsiblePersonPageParams(
 ): ResponsiblePersonPageParams {
   return {
     ...pageParams(event),
+    personalCaib: filters.personalCaib ?? undefined,
     companyId: filters.companyId ?? undefined,
     firstName: filters.firstName?.trim() || undefined,
     lastName: filters.lastName?.trim() || undefined,

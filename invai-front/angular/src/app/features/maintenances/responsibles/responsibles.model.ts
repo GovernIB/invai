@@ -7,6 +7,7 @@ export interface ResponsibleMaintenanceEntity {
 }
 
 export interface ResponsibleCompany extends ResponsibleMaintenanceEntity {
+  nif: string | null;
   name: string;
 }
 
@@ -39,8 +40,17 @@ export interface ResponsibleAuthorization extends ResponsibleMaintenanceEntity {
   nameEs: string;
 }
 
-export interface ResponsibleNameInput {
+export interface ResponsibleCompanyInput {
+  nif: string | null;
   name: string;
+}
+
+export interface ResponsibleCompanyFilters extends ResponsibleNameFilters {
+  nif: string | null;
+}
+
+export interface ResponsibleCompanyPageParams extends ResponsibleNamePageParams {
+  nif?: string;
 }
 
 export interface ResponsiblePersonInput {
@@ -62,6 +72,7 @@ export interface ResponsibleNameFilters {
 }
 
 export interface ResponsiblePersonFilters {
+  personalCaib: boolean | null;
   companyId: number | null;
   firstName: string | null;
   lastName: string | null;
@@ -80,6 +91,7 @@ export interface ResponsibleNamePageParams extends PageParams {
 }
 
 export interface ResponsiblePersonPageParams extends PageParams {
+  personalCaib?: boolean;
   companyId?: number;
   excludeId?: number;
   firstName?: string;

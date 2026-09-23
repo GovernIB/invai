@@ -6,11 +6,11 @@ import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 
+import { ROLE_TRANSFER_PERSON_SEARCH_PARAMS } from '../../responsibles/responsibles.constants';
+import { ResponsiblePersonPageParams } from '../../responsibles/responsibles.model';
 import { ResponsibleAuthorizationTypesService } from '../../responsibles/services/responsible-authorization-types.service';
 import { ResponsibleCompaniesService } from '../../responsibles/services/responsible-companies.service';
 import { ResponsiblePeopleService } from '../../responsibles/services/responsible-people.service';
-import { ResponsiblePersonPageParams } from '../../responsibles/responsibles.model';
-import { ROLE_TRANSFER_PERSON_SEARCH_PARAMS } from '../../responsibles/responsibles.constants';
 import {
   ResponsiblesMaintenanceResolvedData,
   responsiblesMaintenanceResolver,
@@ -48,6 +48,7 @@ describe('responsiblesMaintenanceResolver', () => {
 
     expect(people.getPage).toHaveBeenCalledTimes(1);
     expect(people.getPage).toHaveBeenCalledWith({
+      personalCaib: false,
       page: 0,
       size: 10,
       sort: 'id,asc',
@@ -118,7 +119,7 @@ describe('responsiblesMaintenanceResolver HTTP cache', () => {
       );
     const firstEntry = resolve();
     const combined = { database: page([]), soffid: page([]) };
-    const request = http.expectOne((request) => request.url === '/invaiapi/interna/person/all');
+    const request = http.expectOne((request) => request.url === '/invaiback/person/all');
     expect(request.request.params.get('page')).toBe('0');
     expect(request.request.params.get('size')).toBe('20');
     expect(request.request.params.getAll('sort')).toEqual(['firstName,asc', 'lastName,asc']);

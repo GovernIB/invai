@@ -8,11 +8,13 @@ import {
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 
-import { ResponsibleNameFormGroup } from '../../forms/responsible-forms.factory';
+import { ResponsibleCompanyFormGroup } from '../../forms/responsible-forms.factory';
 import { RESPONSIBLE_COMMON_COPY } from '../../responsibles.i18n';
 
 export interface ResponsibleNameDialogCopy {
   name: string;
+  nif: string;
+  nifMaxLength: string;
   dialogTitles: Record<CrudEntityDialogMode, string>;
   actions: CrudEntityDialogAriaLabels;
 }
@@ -26,7 +28,7 @@ export interface ResponsibleNameDialogCopy {
 })
 export class ResponsibleNameDialog {
   visible = model(false);
-  form = input.required<ResponsibleNameFormGroup>();
+  form = input.required<ResponsibleCompanyFormGroup>();
   mode = input.required<CrudEntityDialogMode>();
   copy = input.required<ResponsibleNameDialogCopy>();
   idPrefix = input.required<string>();

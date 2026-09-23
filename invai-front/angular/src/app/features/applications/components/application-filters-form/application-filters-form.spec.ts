@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
+import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { AutoComplete } from 'primeng/autocomplete';
 import { Select } from 'primeng/select';
@@ -9,7 +11,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { ApplicationInfrastructureFilterOptions } from '../../applications.model';
 import { createApplicationFiltersForm } from '../../forms/application-form.factory';
 import { ApplicationSelectOptions } from '../../services/application-options.service';
-import { ApplicationFiltersForm, ApplicationFilterLabels } from './application-filters-form';
+import { ApplicationFilterLabels, ApplicationFiltersForm } from './application-filters-form';
 
 const LABELS: ApplicationFilterLabels = {
   prefix: 'Prefix',
@@ -17,16 +19,8 @@ const LABELS: ApplicationFilterLabels = {
   category: 'Categoria',
   informationSystem: "Sistema d'informació",
   scope: 'Àmbit',
-  commission: 'Comissió',
-  conselleria: 'Conselleria',
   administrativeUnit: 'Unitat administrativa',
-  departmentsLoading: 'Carregant conselleries…',
-  departmentsLoadError: 'No es poden carregar les conselleries.',
-  administrativeUnitsLoading: 'Carregant unitats…',
-  administrativeUnitsLoadError: 'No es poden carregar les unitats.',
-  administrativeUnitsEmpty: 'No hi ha unitats.',
-  selectConselleriaFirst: 'Selecciona una conselleria.',
-  retry: 'Torna-ho a provar',
+
   status: 'Estat',
   responsible: 'Responsable',
   database: 'Bases de dades',
@@ -50,8 +44,7 @@ const OPTIONS: ApplicationSelectOptions = {
       commissionType: CommissionType.TECNICA,
     },
   ],
-  departments: [{ label: 'Conselleria', value: 'GVA01' }],
-  administrativeUnits: [{ label: 'Unitat', value: 'UA01' }],
+
 };
 
 const INFRASTRUCTURE_OPTIONS: ApplicationInfrastructureFilterOptions = {
@@ -64,9 +57,10 @@ describe('ApplicationFiltersForm', () => {
   let fixture: ComponentFixture<ApplicationFiltersForm>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [ApplicationFiltersForm] }).compileComponents();
+    await TestBed.configureTestingModule({ providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } }], imports: [ApplicationFiltersForm] }).compileComponents();
     fixture = TestBed.createComponent(ApplicationFiltersForm);
     fixture.componentRef.setInput('form', createApplicationFiltersForm(new FormBuilder()));
+    fixture.componentRef.setInput('dir3', TestBed.runInInjectionContext(() => new AdministrativeUnitSearchState(fixture.componentInstance.form().controls.administrativeUnit)));
     fixture.componentRef.setInput('labels', LABELS);
     fixture.componentRef.setInput('options', OPTIONS);
     fixture.componentRef.setInput('infrastructureOptions', INFRASTRUCTURE_OPTIONS);
@@ -75,6 +69,7 @@ describe('ApplicationFiltersForm', () => {
 
   it('should render context-prefixed ids and the inline incomplete toggle', () => {
     expect(fixture.nativeElement.querySelector('#applications-filter-prefix')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#applications-filter-commission')).toBeNull();
     expect(fixture.nativeElement.querySelector('#applications-filter-description')).toBeNull();
     expect(fixture.nativeElement.querySelector('#applications-filter-responsible')).toBeTruthy();
 
@@ -102,9 +97,6 @@ describe('ApplicationFiltersForm', () => {
     expect(selects.find(({ inputId }) => inputId === 'applications-filter-category')?.options).toEqual(
       OPTIONS.categories,
     );
-    expect(selects.find(({ inputId }) => inputId === 'applications-filter-commission')?.options).toEqual(
-      OPTIONS.commissions,
-    );
     expect(selects.find(({ inputId }) => inputId === 'applications-filter-status')?.options).toEqual([
       { label: 'Actiu', value: 1 },
       { label: 'Inactiu', value: 2 },
@@ -129,7 +121,7 @@ describe('ApplicationFiltersForm', () => {
     );
     const catalogs = selects.filter((select) => select !== status);
 
-    expect(catalogs).toHaveLength(9);
+    expect(catalogs).toHaveLength(7);
     expect(catalogs.every((select) => select.filter === true)).toBe(true);
     expect(catalogs.every((select) => Boolean(select.ariaFilterLabel))).toBe(
       true,

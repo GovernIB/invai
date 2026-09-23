@@ -1,8 +1,8 @@
-import { expect, test } from './support/auth.fixture';
 import type { Page, TestInfo } from '@playwright/test';
+import { expect, test } from './support/auth.fixture';
 
-import { uniqueToken } from './support/data';
 import { findAvailableApplicationPrefix } from './support/application-prefix';
+import { uniqueToken } from './support/data';
 import {
   apiUrl,
   expectJsonResponse,
@@ -11,7 +11,7 @@ import {
 } from './support/http';
 import { selectOption } from './support/ui';
 
-const APPLICATION_API_PATH = '/invaiapi/interna/application';
+const APPLICATION_API_PATH = '/invaiback/application';
 const ACTIVE_STATUS_ID = 1;
 const INACTIVE_STATUS_ID = 2;
 
@@ -88,7 +88,6 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       await selectOption(page, 'create-application-scope');
       await page.locator('#create-application-prefix').fill(prefix);
       await page.locator('#create-application-code').fill(code);
-      await selectOption(page, 'create-application-conselleria');
       await selectOption(page, 'create-application-administrative-unit');
       await selectOption(page, 'create-application-commission');
       await page.locator('#create-application-description').fill(initialDescription);

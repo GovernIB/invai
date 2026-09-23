@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 
 import { apiUrl, expectApiJsonResponse } from './http';
 
-const APPLICATION_API_PATH = '/invaiapi/interna/application';
+const APPLICATION_API_PATH = '/invaiback/application';
 const ACTIVE_STATUS_ID = 1;
 const INACTIVE_STATUS_ID = 2;
 const PREFIX_RADIX = 36;

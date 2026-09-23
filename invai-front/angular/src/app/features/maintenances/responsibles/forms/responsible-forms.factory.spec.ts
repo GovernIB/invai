@@ -2,8 +2,8 @@ import { FormBuilder } from '@angular/forms';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 
 import {
-  createResponsibleNameFiltersForm,
-  createResponsibleNameForm,
+  createResponsibleCompanyFiltersForm,
+  createResponsibleCompanyForm,
   createResponsiblePersonFiltersForm,
   createResponsiblePersonForm,
   createRoleTransferForm,
@@ -13,12 +13,22 @@ describe('responsible form factories', () => {
   const formBuilder = new FormBuilder();
 
   it('requires and trims whitespace-only names through validation', () => {
-    const form = createResponsibleNameForm(formBuilder);
+    const form = createResponsibleCompanyForm(formBuilder);
 
     expect(form.invalid).toBe(true);
     form.controls.name.setValue('   ');
     expect(form.controls.name.hasError('pattern')).toBe(true);
     form.controls.name.setValue('Plexus');
+    expect(form.valid).toBe(true);
+  });
+
+  it('allows optional NIF up to 20 characters without imposing a national format', () => {
+    const form = createResponsibleCompanyForm(formBuilder);
+    form.patchValue({ name: 'Company', nif: 'x'.repeat(20) });
+    expect(form.valid).toBe(true);
+    form.controls.nif.setValue('x'.repeat(21));
+    expect(form.controls.nif.hasError('maxlength')).toBe(true);
+    form.controls.nif.setValue('');
     expect(form.valid).toBe(true);
   });
 
@@ -47,15 +57,17 @@ describe('responsible form factories', () => {
   });
 
   it('restores active status when filters are reset', () => {
-    const nameFilters = createResponsibleNameFiltersForm(formBuilder);
+    const nameFilters = createResponsibleCompanyFiltersForm(formBuilder);
     const personFilters = createResponsiblePersonFiltersForm(formBuilder);
     nameFilters.controls.status.setValue(null);
+    personFilters.controls.personalCaib.setValue(null);
     personFilters.controls.status.setValue(SoftDeleteStatus.INACTIVE);
 
     nameFilters.reset();
     personFilters.reset();
 
     expect(nameFilters.controls.status.value).toBe(SoftDeleteStatus.ACTIVE);
+    expect(personFilters.controls.personalCaib.value).toBe(false);
     expect(personFilters.controls.status.value).toBe(SoftDeleteStatus.ACTIVE);
   });
 

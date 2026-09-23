@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '@environments/environment';
 
 import { AUTH_REDIRECT, OAuthService } from './auth.service';
+import { LANGUAGE_STORAGE_KEY } from './language-preference.service';
 
 describe('OAuthService', () => {
   let service: OAuthService;
@@ -29,10 +30,11 @@ describe('OAuthService', () => {
 
   afterEach(() => {
     httpTesting.verify();
+    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
   });
 
   it('should obtain the login configuration and redirect to its URL', () => {
-    const loginUrl = 'https://invai.plexus.services/invaiapi/api/auth/login';
+    const loginUrl = 'https://invai.plexus.services/invaiback/api/auth/login';
 
     service.login().subscribe();
 
@@ -84,11 +86,12 @@ describe('OAuthService', () => {
     expect(duplicateCompleted).toHaveBeenCalledOnce();
 
     httpTesting.expectOne(environment.loginConfigUrl).flush({
-      url: 'http://localhost:8080/invaiapi/api/auth/login',
+      url: 'http://localhost:8080/invaiback/api/auth/login',
     });
   });
 
   it('should clear the current user, close the backend session, and then redirect to the IDP', () => {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, 'es');
     service.loadCurrentUser().subscribe();
     httpTesting.expectOne(authMeUrl).flush({ authenticated: true, username: 'mgarcia' });
 
@@ -105,6 +108,7 @@ describe('OAuthService', () => {
     request.flush(null, { status: 204, statusText: 'No Content' });
 
     expect(redirect).toHaveBeenCalledWith('https://idp.caib.es/logout.jsp');
+    expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('es');
   });
 
   it('should redirect to the IDP when closing the backend session fails', () => {

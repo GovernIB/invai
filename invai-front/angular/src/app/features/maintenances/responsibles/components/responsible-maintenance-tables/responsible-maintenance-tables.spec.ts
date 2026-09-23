@@ -17,7 +17,7 @@ globalThis.ResizeObserver ??= ResizeObserverMock;
 
 describe('ResponsibleCompaniesTable', () => {
   let fixture: ComponentFixture<ResponsibleCompaniesTable>;
-  const company: ResponsibleCompany = { id: 1, name: 'Plexus', deletedAt: null };
+  const company: ResponsibleCompany = { nif: null, id: 1, name: 'Plexus', deletedAt: null };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

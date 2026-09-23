@@ -1,0 +1,29 @@
+.assignment-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem 1rem;
+  margin: 0;
+
+  > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  label {
+    font-size: 0.75rem;
+    color: var(--p-text-muted-color);
+  }
+  input, textarea {
+    width: 100%;
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    > div { grid-column: span 6; }
+    .assignment-detail__caib { grid-column: span 2; }
+    .assignment-detail__job-title { grid-column: span 4; }
+    .assignment-detail__wide { grid-column: 1 / -1; }
+  }
+}

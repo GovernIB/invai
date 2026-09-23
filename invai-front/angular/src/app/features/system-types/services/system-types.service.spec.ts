@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { SystemTypesService } from './system-types.service';
 
-const SYSTEM_TYPES_URL = '/invaiapi/interna/system-type';
+const SYSTEM_TYPES_URL = '/invaiback/system-type';
 
 describe('SystemTypesService', () => {
   let service: SystemTypesService;

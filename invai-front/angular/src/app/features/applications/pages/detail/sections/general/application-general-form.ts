@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { AdministrativeUnitSearchAction, AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
 
 import { ApplicationFormFields } from '../../../../components';
 import { ApplicationDetailFormGroup } from '../../../../forms/application-form.factory';
@@ -24,15 +25,10 @@ import {
 export class ApplicationGeneralForm {
   form = input.required<ApplicationDetailFormGroup>();
   isReadOnly = input.required<boolean>();
+  dir3 = input.required<AdministrativeUnitSearchState>();
+  dir3Action = output<AdministrativeUnitSearchAction>();
   options = input.required<ApplicationSelectOptions>();
-  departmentsLoading = input(false);
-  departmentsLoadFailed = input(false);
-  administrativeUnitsLoading = input(false);
-  administrativeUnitsLoadFailed = input(false);
   commissionSelected = output<ApplicationCommissionOption | null>();
-  conselleriaSelected = output<string | null>();
-  departmentsRetry = output<void>();
-  administrativeUnitsRetry = output<void>();
 
   protected readonly labels = APPLICATION_GENERAL_LABELS;
   protected readonly requiredError = APPLICATION_GENERAL_REQUIRED_ERROR;
@@ -42,7 +38,4 @@ export class ApplicationGeneralForm {
     this.commissionSelected.emit(commission);
   }
 
-  protected selectConselleria(code: string | null): void {
-    this.conselleriaSelected.emit(code);
-  }
 }

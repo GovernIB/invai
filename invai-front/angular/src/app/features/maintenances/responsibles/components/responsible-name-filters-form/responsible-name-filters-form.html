@@ -28,4 +28,10 @@
       </label>
     </p-floatlabel>
   </div>
+  <div class="invai-filter-field--compact">
+    <p-floatlabel class="w-full">
+      <input pInputText class="w-full" type="text" formControlName="nif" [id]="idPrefix() + '-nif'" />
+      <label [for]="idPrefix() + '-nif'">{{ labels().nif }}</label>
+    </p-floatlabel>
+  </div>
 </form>

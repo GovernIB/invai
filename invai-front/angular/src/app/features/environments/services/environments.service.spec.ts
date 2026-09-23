@@ -11,7 +11,7 @@ import {
 } from '../environments.model';
 import { EnvironmentsService } from './environments.service';
 
-const ENVIRONMENTS_URL = '/invaiapi/interna/environment';
+const ENVIRONMENTS_URL = '/invaiback/environment';
 const ENVIRONMENT: Environment = {
   id: 3,
   code: 'PRO',

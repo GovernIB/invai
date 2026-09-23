@@ -91,7 +91,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     key: 'category',
     title: 'Categories',
     route: '/manteniments/categories',
-    apiPath: '/invaiapi/interna/category',
+    apiPath: '/invaiback/category',
     prefix: 'CAT',
     addButton: 'Afegeix una categoria',
     addDialogTitle: 'Afegir categoria',
@@ -112,7 +112,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     key: 'system-type',
     title: "Sistemes d'informació",
     route: '/manteniments/sistemes-informacio',
-    apiPath: '/invaiapi/interna/system-type',
+    apiPath: '/invaiback/system-type',
     prefix: 'SYS',
     addButton: "Afegeix un sistema d'informació",
     addDialogTitle: "Afegir sistema d'informació",
@@ -129,7 +129,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     key: 'environment',
     title: 'Entorns',
     route: '/manteniments/sistemes#environments',
-    apiPath: '/invaiapi/interna/environment',
+    apiPath: '/invaiback/environment',
     addButton: 'Afegeix un entorn',
     addDialogTitle: 'Afegir entorn',
     addSubmitButton: "Afegeix l'entorn",
@@ -172,7 +172,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     key: 'field',
     title: 'Àmbits',
     route: '/manteniments/ambits',
-    apiPath: '/invaiapi/interna/field',
+    apiPath: '/invaiback/field',
     prefix: 'AMB',
     addButton: 'Afegeix un àmbit',
     addDialogTitle: 'Afegir àmbit',
@@ -189,7 +189,7 @@ const SCENARIOS: MaintenanceScenario[] = [
     key: 'commission',
     title: 'Comissió informàtica',
     route: '/manteniments/comissio-informatica',
-    apiPath: '/invaiapi/interna/commission',
+    apiPath: '/invaiback/commission',
     addButton: 'Afegeix una comissió informàtica',
     addDialogTitle: 'Afegir comissió informàtica',
     addSubmitButton: 'Afegeix la comissió informàtica',
@@ -238,7 +238,7 @@ test.describe('maintenance section navigation', () => {
     await expect(tabs.getByRole('link')).toHaveText([
       'General',
       'Responsables',
-      'Sistemes',
+      'Sistemes i DB',
       'Desenvolupament',
     ]);
     await expect(tabs.getByRole('link', { name: 'General' })).toHaveAttribute(
@@ -317,14 +317,14 @@ test.describe('maintenance section navigation', () => {
       },
     ];
 
-    await page.route('**/invaiapi/interna/person*', (route) =>
+    await page.route('**/invaiback/person*', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: people, totalElements: people.length }),
       }),
     );
-    await page.route('**/invaiapi/interna/role-transfer**', async (route) => {
+    await page.route('**/invaiback/role-transfer**', async (route) => {
       if (route.request().method() === 'POST') {
         postedBatch = route.request().postDataJSON() as RoleTransferRequest;
         await route.fulfill({ status: 204 });
@@ -425,7 +425,7 @@ test.describe('systems maintenance navigation', () => {
     const servers = page.getByRole('button', { name: /^Servidors d'aplicacions/ });
     const environments = page.getByRole('button', { name: /^Entorns/ });
     await expect(
-      page.locator('.maintenances-tabs').getByRole('link', { name: 'Sistemes' }),
+      page.locator('.maintenances-tabs').getByRole('link', { name: 'Sistemes i DB' }),
     ).toHaveAttribute('aria-current', 'page');
 
     await expect(page.locator('.maintenance-panel-title')).toHaveText([

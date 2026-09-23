@@ -81,6 +81,10 @@ describe('applicationSecurityResolver', () => {
       size: 10,
       sort: 'id,asc',
       statusId: SoftDeleteStatus.ACTIVE,
+      system: 'weblogic',
+    });
+    expect(webContextsPage).toHaveBeenCalledWith({
+      appSecurityId: 8, page: 0, size: 10, sort: 'id,asc', statusId: SoftDeleteStatus.ACTIVE,
     });
     expect(result.failures.roles).toBe(false);
   });

@@ -34,7 +34,7 @@ describe('application development resource services', () => {
     httpTesting
       .expectOne(
         (request) =>
-          request.url === '/invaiapi/interna/application/development/provider/90' &&
+          request.url === '/invaiback/application/development/provider/90' &&
           request.params.get('page') === '0' &&
           request.params.get('size') === '10' &&
           request.params.get('sort') === 'id,asc',
@@ -68,7 +68,7 @@ describe('application development resource services', () => {
 
     providers.create(payload).subscribe();
     const creation = httpTesting.expectOne(
-      '/invaiapi/interna/application/development/provider',
+      '/invaiback/application/development/provider',
     );
     expect(creation.request.method).toBe('POST');
     expect(creation.request.body).toEqual(payload);
@@ -79,7 +79,7 @@ describe('application development resource services', () => {
 
     providers.update(4, payload).subscribe();
     const update = httpTesting.expectOne(
-      '/invaiapi/interna/application/development/provider/4',
+      '/invaiback/application/development/provider/4',
     );
     expect(update.request.method).toBe('PUT');
     expect(update.request.body).toEqual(payload);
@@ -87,7 +87,7 @@ describe('application development resource services', () => {
 
     providers.delete(4).subscribe();
     const deletion = httpTesting.expectOne(
-      '/invaiapi/interna/application/development/provider/4',
+      '/invaiback/application/development/provider/4',
     );
     expect(deletion.request.method).toBe('DELETE');
     deletion.flush(null);
@@ -109,7 +109,7 @@ describe('application development resource services', () => {
 
     technologies.create(payload).subscribe();
     const creation = httpTesting.expectOne(
-      '/invaiapi/interna/application/development/technology',
+      '/invaiback/application/development/technology',
     );
     expect(creation.request.method).toBe('POST');
     expect(creation.request.body).toEqual(payload);
@@ -122,7 +122,7 @@ describe('application development resource services', () => {
 
     technologies.update(5, payload).subscribe();
     const update = httpTesting.expectOne(
-      '/invaiapi/interna/application/development/technology/5',
+      '/invaiback/application/development/technology/5',
     );
     expect(update.request.method).toBe('PUT');
     expect(update.request.body).toEqual(payload);
@@ -130,7 +130,7 @@ describe('application development resource services', () => {
 
     technologies.delete(5).subscribe();
     const deletion = httpTesting.expectOne(
-      '/invaiapi/interna/application/development/technology/5',
+      '/invaiback/application/development/technology/5',
     );
     expect(deletion.request.method).toBe('DELETE');
     deletion.flush(null);

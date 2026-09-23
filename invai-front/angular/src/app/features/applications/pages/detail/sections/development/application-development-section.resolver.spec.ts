@@ -1,3 +1,7 @@
+import { FieldsService } from '@features/fields/services/fields.service';
+import { WebContextsService } from '@features/maintenances/security/services/security-resource.services';
+import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { ApplicationsService } from '../../../../services/applications.service';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, convertToParamMap, RouterStateSnapshot } from '@angular/router';
 import { EnvironmentCatalogService } from '@features/environments/services/environment-catalog.service';
@@ -81,6 +85,10 @@ describe('applicationDevelopmentResolver', () => {
     );
     TestBed.configureTestingModule({
       providers: [
+        { provide: ApplicationWebContextsService, useValue: { getPage: vi.fn(() => of(page([]))) } },
+        { provide: WebContextsService, useValue: { getAll: vi.fn(() => of(page([]))) } },
+        { provide: FieldsService, useValue: { getAll: vi.fn(() => of(page([]))) } },
+        { provide: ApplicationsService, useValue: { refreshById: vi.fn(() => of({ appSecurityId: 19 })) } },
         {
           provide: ApplicationDevelopmentService,
           useValue: { getById: getDevelopment },
@@ -126,7 +134,12 @@ describe('applicationDevelopmentResolver', () => {
     expect(getDevelopment).toHaveBeenCalledWith(90);
     expect(getProvidersPage).toHaveBeenCalledWith(expectedParams);
     expect(getTechnologiesPage).toHaveBeenCalledWith(expectedParams);
+    expect(TestBed.inject(ApplicationWebContextsService).getPage).toHaveBeenCalledWith({
+      appSecurityId: 19, page: 0, size: 10, sort: 'id,asc', statusId: 1,
+    });
+    expect(TestBed.inject(ApplicationWebContextsService).getPage).toHaveBeenCalledOnce();
     expect(result).toEqual({
+      webContexts: { appSecurityId: 19, page: page([]), webContextOptions: [], fieldOptions: [], loadFailed: false },
       applicationId: 7,
       appDevelopmentId: 90,
       development: DEVELOPMENT,

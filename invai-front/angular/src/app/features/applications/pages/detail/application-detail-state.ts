@@ -1,9 +1,7 @@
-import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
-import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
-import type { ApplicationAccessibilityLoadResult, AccessibilityLoadStatus } from './sections/accessibility/application-accessibility-section.resolver';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder } from '@angular/forms';
+import { AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
 import { Commission } from '@features/commissions/commissions.model';
 import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
 import { PaginatedList } from '@models/table.model';
@@ -24,11 +22,32 @@ import {
   throwError,
 } from 'rxjs';
 import { readApplicationCompleteness } from '../../application-completeness';
+import { hasPendingResponsibleDir3 } from '../../application-dir3.utils';
+import { ApplicationResponsibleOutput } from '../../applications.model';
+import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
+import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
+import type { AccessibilityLoadStatus, ApplicationAccessibilityLoadResult } from './sections/accessibility/application-accessibility-section.resolver';
 
 import { APPLICATION_STATUS_ACTIVE_ID } from '../../applications.constants';
 import {
-  EMPTY_APPLICATION_ACCESSIBILITY_VALUE,
+  Application,
+  ApplicationDevelopmentInput,
+  ApplicationDevelopmentOutput,
+  ApplicationEnsClassificationInput,
+  ApplicationEnsClassificationOutput,
+  ApplicationInput,
+  ApplicationOutput,
+  ApplicationProviderOutput,
+  ApplicationSecurityInput,
+  ApplicationSecurityOutput,
+  ApplicationStatus,
+  ApplicationSystemDatabaseOutput,
+  ApplicationTechnologyOutput,
+  EnsClassificationLoadState
+} from '../../applications.model';
+import {
   ApplicationAccessibilityFormValue,
+  EMPTY_APPLICATION_ACCESSIBILITY_VALUE,
   createApplicationAccessibilityForm,
 } from '../../forms/application-accessibility-form.factory';
 import {
@@ -38,41 +57,21 @@ import {
   parseLocalDateTime,
 } from '../../forms/application-development-form.factory';
 import {
-  ApplicationSecurityFormGroup,
-  createApplicationSecurityForm,
-} from '../../forms/application-security-form.factory';
-import {
   ApplicationDetailFormValue,
   createApplicationDetailForm,
   createApplicationSystemsDatabasesForm,
 } from '../../forms/application-form.factory';
 import {
-  Application,
-  ApplicationDevelopmentInput,
-  ApplicationDevelopmentOutput,
-  ApplicationInput,
-  ApplicationOutput,
-  ApplicationProviderOutput,
-  ApplicationEnsClassificationInput,
-  ApplicationEnsClassificationOutput,
-  EnsClassificationLoadState,
-  ApplicationSecurityInput,
-  ApplicationSecurityOutput,
-  ApplicationStatus,
-  SelectOption,
-  ApplicationSystemDatabaseOutput,
-  ApplicationTechnologyOutput,
-} from '../../applications.model';
+  ApplicationSecurityFormGroup,
+  createApplicationSecurityForm,
+} from '../../forms/application-security-form.factory';
 import { ApplicationDevelopmentService } from '../../services/application-development.service';
-import {
-  ApplicationCommissionOption,
-  ApplicationOptionsService,
-} from '../../services/application-options.service';
-import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
+import { ApplicationCommissionOption } from '../../services/application-options.service';
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityService,
 } from '../../services/application-security.service';
+import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
 import { ApplicationsService } from '../../services/applications.service';
 
 export type ApplicationGeneralFormValue = ApplicationDetailFormValue;
@@ -97,7 +96,6 @@ const EMPTY_GENERAL_FORM_VALUE: ApplicationDetailFormValue = {
   informationSystem: null,
   scope: null,
   administrativeUnit: null,
-  conselleria: null,
   creationDate: '',
   modificationDate: '',
   withdrawalDate: '',
@@ -158,7 +156,6 @@ function createEditingState(): Record<ApplicationDetailSection, boolean> {
 @Injectable()
 export class ApplicationDetailState {
   private readonly applicationsService = inject(ApplicationsService);
-  private readonly applicationOptionsService = inject(ApplicationOptionsService);
   private readonly developmentService = inject(ApplicationDevelopmentService);
   private readonly accessibilityService = inject(ApplicationAccessibilityService);
   private readonly systemDatabaseService = inject(ApplicationSystemDatabaseService);
@@ -171,6 +168,10 @@ export class ApplicationDetailState {
   private completenessRequestVersion = 0;
   readonly completenessRefreshFailed = signal(false);
   readonly completenessRefreshing = signal(false);
+  // UI-only pending status until the backend exposes verification results.
+  readonly hasUnverifiedWebContexts = signal<boolean | null>(null);
+  readonly hasPendingResponsibleDir3 = signal<boolean | null>(null);
+
   private developmentApplicationId: number | null = null;
   private developmentInitialized = false;
   private securityApplicationId: number | null = null;
@@ -184,8 +185,6 @@ export class ApplicationDetailState {
   );
   private savedSecurityValue = this.cloneSecurityValue(EMPTY_SECURITY_FORM_VALUE);
   private readonly editingState = signal(createEditingState());
-  private readonly administrativeUnitRequests = new Subject<string | null>();
-  private loadedAdministrativeUnitsDepartmentCode: string | null = null;
 
   readonly application = signal<Application | null>(null);
   readonly informationSystemDbId = signal<number | null>(null);
@@ -204,54 +203,19 @@ export class ApplicationDetailState {
   readonly providers = signal<PaginatedList<ApplicationProviderOutput>>(EMPTY_RESOURCES_PAGE);
   readonly technologies = signal<PaginatedList<ApplicationTechnologyOutput>>(EMPTY_RESOURCES_PAGE);
   readonly isUnsavedChangesDialogVisible = signal(false);
-  readonly administrativeUnitOptions = signal<SelectOption<string>[]>([]);
-  readonly administrativeUnitsLoading = signal(false);
-  readonly administrativeUnitsLoadFailed = signal(false);
   readonly canEdit = computed(() => {
     const application = this.application();
     return !!application && application.status !== ApplicationStatus.INACTIVE;
   });
 
   readonly form = createApplicationDetailForm(this.formBuilder);
+  readonly dir3 = new AdministrativeUnitSearchState(this.form.controls.administrativeUnit);
   readonly developmentForm = createApplicationDevelopmentForm(this.formBuilder);
   readonly systemsDatabasesForm = createApplicationSystemsDatabasesForm(this.formBuilder);
   readonly accessibilityForm = createApplicationAccessibilityForm(this.formBuilder);
   readonly securityForm = createApplicationSecurityForm(this.formBuilder);
 
   constructor() {
-    this.administrativeUnitRequests
-      .pipe(
-        tap((departmentCode) => {
-          this.administrativeUnitsLoading.set(Boolean(departmentCode));
-          this.administrativeUnitsLoadFailed.set(false);
-          this.form.controls.administrativeUnit.disable({ emitEvent: false });
-        }),
-        switchMap((departmentCode) =>
-          departmentCode
-            ? this.applicationOptionsService.getAdministrativeUnitOptions(departmentCode).pipe(
-                map((options) => ({ departmentCode, options, failed: false })),
-                catchError(() =>
-                  of({ departmentCode, options: [] as SelectOption<string>[], failed: true }),
-                ),
-              )
-            : of({
-                departmentCode: null,
-                options: [] as SelectOption<string>[],
-                failed: false,
-              }),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(({ departmentCode, options, failed }) => {
-        this.administrativeUnitsLoading.set(false);
-        this.administrativeUnitsLoadFailed.set(failed);
-        this.administrativeUnitOptions.set(options);
-        this.loadedAdministrativeUnitsDepartmentCode = failed ? null : departmentCode;
-        if (!failed && departmentCode === this.form.controls.conselleria.value) {
-          this.form.controls.administrativeUnit.enable({ emitEvent: false });
-        }
-      });
-
     this.accessibilityForm.controls.mobileApplication.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((hasMobileApp) => {
@@ -289,6 +253,14 @@ export class ApplicationDetailState {
     this.setApplication(response);
   }
 
+  updateWebContextCount(totalActive: number): void {
+    this.hasUnverifiedWebContexts.set(totalActive > 0);
+  }
+
+  updateResponsibleDir3(assignments: readonly ApplicationResponsibleOutput[]): void {
+    this.hasPendingResponsibleDir3.set(hasPendingResponsibleDir3(assignments));
+  }
+
   initializeAccessibility(result: ApplicationAccessibilityLoadResult): void {
     if (result.applicationId !== Number(this.application()?.id) || this.isEditing('accessibility')) return;
     this.appAccessibilityId.set(result.appAccessibilityId);
@@ -321,29 +293,6 @@ export class ApplicationDetailState {
     }
     if (restored) this.accessibilityClearBlocked.next();
     return restored;
-  }
-
-  initializeAdministrativeUnitOptions(
-    options: SelectOption<string>[],
-    loadFailed: boolean,
-  ): void {
-    this.administrativeUnitOptions.set(options);
-    this.administrativeUnitsLoadFailed.set(loadFailed);
-    this.loadedAdministrativeUnitsDepartmentCode = loadFailed
-      ? null
-      : this.form.controls.conselleria.value;
-    this.configureAdministrativeUnitControl();
-  }
-
-  selectConselleria(code: string | null): void {
-    this.form.controls.administrativeUnit.reset(null, { emitEvent: false });
-    this.administrativeUnitOptions.set([]);
-    this.loadedAdministrativeUnitsDepartmentCode = null;
-    this.administrativeUnitRequests.next(code);
-  }
-
-  retryAdministrativeUnits(): void {
-    this.administrativeUnitRequests.next(this.form.controls.conselleria.value);
   }
 
   initializeSecurity(
@@ -434,7 +383,6 @@ export class ApplicationDetailState {
       case 'general':
         this.form.enable({ emitEvent: false });
         this.disableGeneralReadOnlyControls();
-        this.configureAdministrativeUnitControl();
         break;
       case 'systems-databases':
         this.systemsDatabasesForm.enable({ emitEvent: false });
@@ -468,7 +416,7 @@ export class ApplicationDetailState {
       case 'general':
         this.form.reset(this.savedGeneralValue, { emitEvent: false });
         this.form.enable({ emitEvent: false });
-        this.restoreAdministrativeUnitOptions();
+        this.restoreDir3Snapshot();
         break;
       case 'systems-databases':
         this.systemsDatabasesForm.reset(this.savedSystemsDatabasesValue, {
@@ -593,7 +541,7 @@ export class ApplicationDetailState {
 
   private saveGeneral(): Observable<ApplicationDetailSaveResult> {
     const section: ApplicationDetailSection = 'general';
-    if (this.form.invalid || this.form.controls.administrativeUnit.disabled) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return of({ status: 'invalid', section });
     }
@@ -608,7 +556,12 @@ export class ApplicationDetailState {
 
     return this.applicationsService.update(id, this.toApplicationInput(current)).pipe(
       switchMap((response) => this.refreshAfterApplicationMutation(id, response)),
-      tap((response) => this.applyGeneralResponse(response)),
+      tap((response) => {
+        this.applyGeneralResponse(response);
+        if (current.admUnitCode !== this.application()?.admUnitCode) {
+          this.responsibleChanges.assignmentsChanged();
+        }
+      }),
       map(() => ({ status: 'saved', section }) as const),
     );
   }
@@ -801,7 +754,6 @@ export class ApplicationDetailState {
     switch (section) {
       case 'general':
         this.form.enable({ emitEvent: false });
-        this.configureAdministrativeUnitControl();
         break;
       case 'systems-databases':
         this.systemsDatabasesForm.enable({ emitEvent: false });
@@ -826,16 +778,15 @@ export class ApplicationDetailState {
   }
 
   private resetState(): void {
+    this.hasPendingResponsibleDir3.set(null);
+    this.hasUnverifiedWebContexts.set(null);
     this.initializedApplicationId = null;
     this.application.set(null);
+    this.dir3.selectSnapshot(null);
     this.informationSystemDbId.set(null);
     this.appSecurityId.set(null);
     this.systemDatabase.set(null);
     this.savedGeneralValue = { ...EMPTY_GENERAL_FORM_VALUE };
-    this.administrativeUnitOptions.set([]);
-    this.administrativeUnitsLoading.set(false);
-    this.administrativeUnitsLoadFailed.set(false);
-    this.loadedAdministrativeUnitsDepartmentCode = null;
     this.savedSystemsDatabasesValue = { ...EMPTY_SYSTEMS_DATABASES_VALUE };
     this.resetAccessibilityState();
     this.resetDevelopmentState();
@@ -849,6 +800,8 @@ export class ApplicationDetailState {
   }
 
   private setApplication(response: ApplicationOutput): void {
+    this.hasPendingResponsibleDir3.set(null);
+    this.hasUnverifiedWebContexts.set(null);
     this.completenessRequestVersion++;
     this.completenessRefreshing.set(false);
     this.initializedApplicationId = response.id;
@@ -856,11 +809,8 @@ export class ApplicationDetailState {
     this.informationSystemDbId.set(response.appInformationSystemDbId);
     this.appSecurityId.set(response.appSecurityId ?? null);
     this.systemDatabase.set(null);
-    this.administrativeUnitOptions.set([]);
-    this.administrativeUnitsLoading.set(false);
-    this.administrativeUnitsLoadFailed.set(false);
-    this.loadedAdministrativeUnitsDepartmentCode = null;
     this.savedGeneralValue = this.toGeneralFormValue(response);
+    this.dir3.selectSnapshot(response.admUnit);
     this.savedSystemsDatabasesValue = { ...EMPTY_SYSTEMS_DATABASES_VALUE };
     this.resetAccessibilityState();
     this.resetDevelopmentState();
@@ -880,9 +830,10 @@ export class ApplicationDetailState {
       response.appInformationSystemDbId ?? this.informationSystemDbId(),
     );
     this.savedGeneralValue = this.toGeneralFormValue(response);
+    this.dir3.selectSnapshot(response.admUnit);
     this.form.reset(this.savedGeneralValue, { emitEvent: false });
     this.form.enable({ emitEvent: false });
-    this.restoreAdministrativeUnitOptions();
+    this.restoreDir3Snapshot();
     this.setEditing('general', false);
   }
 
@@ -951,21 +902,12 @@ export class ApplicationDetailState {
         (value.administrativeUnit
           ? {
               code: value.administrativeUnit,
-              name: current?.administrativeUnit || value.administrativeUnit,
-              parentCode: value.conselleria,
-              level: null,
-            }
-          : null),
-      department:
-        enriched.department ??
-        (value.conselleria
-          ? {
-              code: value.conselleria,
-              name: current?.department || value.conselleria,
+              name: this.dir3.options().find(unit => unit.code === value.administrativeUnit)?.name || current?.administrativeUnit || value.administrativeUnit,
               parentCode: null,
               level: null,
             }
           : null),
+
     };
   }
 
@@ -1024,43 +966,14 @@ export class ApplicationDetailState {
       this.accessibilityForm.controls.mobileApplication.value,
       false,
     );
-    this.configureAdministrativeUnitControl();
   }
 
-  private configureAdministrativeUnitControl(): void {
-    const departmentCode = this.form.controls.conselleria.value;
-    const unavailable =
-      !departmentCode ||
-      this.administrativeUnitsLoading() ||
-      this.administrativeUnitsLoadFailed() ||
-      this.loadedAdministrativeUnitsDepartmentCode !== departmentCode;
-
-    if (unavailable) {
-      this.form.controls.administrativeUnit.disable({ emitEvent: false });
-    } else {
-      this.form.controls.administrativeUnit.enable({ emitEvent: false });
-    }
-  }
-
-  private restoreAdministrativeUnitOptions(): void {
-    const departmentCode = this.form.controls.conselleria.value;
-    if (!departmentCode) {
-      this.administrativeUnitOptions.set([]);
-      this.loadedAdministrativeUnitsDepartmentCode = null;
-      this.configureAdministrativeUnitControl();
-      return;
-    }
-
-    if (
-      this.loadedAdministrativeUnitsDepartmentCode === departmentCode &&
-      !this.administrativeUnitsLoadFailed()
-    ) {
-      this.configureAdministrativeUnitControl();
-      return;
-    }
-
-    this.administrativeUnitOptions.set([]);
-    this.administrativeUnitRequests.next(departmentCode);
+  private restoreDir3Snapshot(): void {
+    const application = this.application();
+    this.dir3.selectSnapshot(application?.admUnitCode ? {
+      code: application.admUnitCode, name: application.administrativeUnit,
+      parentCode: null, level: null,
+    } : null);
   }
 
   private disableGeneralReadOnlyControls(): void {
@@ -1090,7 +1003,6 @@ export class ApplicationDetailState {
       category: application.categoryId ?? null,
       informationSystem: application.informationSystemId ?? null,
       scope: application.scopeId ?? null,
-      conselleria: application.departmentCode ?? null,
       administrativeUnit: application.admUnitCode ?? null,
       creationDate: application.creationDate,
       modificationDate: application.modificationDate,

@@ -127,3 +127,6 @@ export const APPLICATION_DEVELOPMENT_TECHNOLOGY_DELETE_DIALOG_CANCEL_ARIA_LABEL 
 export const APPLICATION_DEVELOPMENT_TECHNOLOGY_DELETE_DIALOG_CONFIRM_ARIA_LABEL = $localize`Confirma la baixa de la tecnologia`;
 export const APPLICATION_DEVELOPMENT_DATE_FORMAT = 'dd/mm/yy';
 export const APPLICATION_DEVELOPMENT_DATE_PLACEHOLDER = $localize`dd/mm/aaaa`;
+
+export const APPLICATION_DEVELOPMENT_WEB_CONTEXTS_LOAD_ERROR =
+  $localize`:@@applicationDevelopmentWebContextsLoadError:No s'han pogut carregar els contextos web o els seus catàlegs.`;

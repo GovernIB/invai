@@ -3804,7 +3804,7 @@
       <trans-unit id="systemsRoute" datatype="html"><source>sistemes</source><target>sistemas</target></trans-unit>
       <trans-unit id="systemsDatabasesRoute" datatype="html"><source>bases-de-dades</source><target>bases-de-datos</target></trans-unit>
       <trans-unit id="systemsServersRoute" datatype="html"><source>servidors</source><target>servidores</target></trans-unit>
-      <trans-unit id="3231696763980156523" datatype="html"><source>Sistemes</source><target>Sistemas</target></trans-unit>
+      <trans-unit id="systemsLabel" datatype="html"><source>Sistemes i DB</source><target>Sistemas y DB</target></trans-unit>
       <trans-unit id="5311167198964631792" datatype="html"><source>Gestiona les bases de dades disponibles per a les aplicacions.</source><target>Gestiona las bases de datos disponibles para las aplicaciones.</target></trans-unit>
       <trans-unit id="5092579938664750473" datatype="html"><source>Gestiona els servidors disponibles per a les aplicacions.</source><target>Gestiona los servidores disponibles para las aplicaciones.</target></trans-unit>
       <trans-unit id="maintenanceEnvironmentsRoute" datatype="html"><source>entorns</source><target>entornos</target></trans-unit>
@@ -5479,7 +5479,7 @@
       <trans-unit id="5855501516267521817" datatype="html"><source>Personal CAIB</source><target>Personal CAIB</target></trans-unit>
       <trans-unit id="applicationAssignmentCaibRequiredByResponsibility" datatype="html"><source>Aquesta responsabilitat requereix personal CAIB.</source><target>Esta responsabilidad requiere personal CAIB.</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidPerson" datatype="html"><source>Persona CAIB</source><target>Persona CAIB</target></trans-unit>
-      <trans-unit id="applicationAssignmentSoffidPlaceholder" datatype="html"><source>Cerca per nom i llinatges</source><target>Buscar por nombre y apellidos</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidPlaceholder" datatype="html"><source>Cerca per nom o codi d’usuari</source><target>Busca por nombre o código de usuario</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidInstruction" datatype="html"><source>Escriu almenys 3 caràcters i selecciona una persona de Soffid.</source><target>Escribe al menos 3 caracteres y selecciona una persona de Soffid.</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidSearching" datatype="html"><source>Cercant persones a Soffid…</source><target>Buscando personas en Soffid…</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidEmpty" datatype="html"><source>No s&apos;han trobat persones a Soffid.</source><target>No se han encontrado personas en Soffid.</target></trans-unit>
@@ -5706,7 +5706,6 @@
       <trans-unit id="5966691695788714555" datatype="html"><source>Mesures de seguretat aplicades</source><target>Medidas de seguridad aplicadas</target></trans-unit>
       <trans-unit id="2205747184739405336" datatype="html"><source>Obre la documentació de seguretat</source><target>Abre la documentación de seguridad</target></trans-unit>
       <trans-unit id="6980269229426123094" datatype="html"><source>La documentació de seguretat encara no està disponible.</source><target>La documentación de seguridad todavía no está disponible.</target></trans-unit>
-      <trans-unit id="1898341320667416931" datatype="html"><source>La consulta de rols és temporal i de només lectura fins que estigui disponible el provider de Soffid.</source><target>La consulta de roles es temporal y de solo lectura hasta que esté disponible el proveedor de Soffid.</target></trans-unit>
       <trans-unit id="4301709945526444829" datatype="html"><source>Dades ENS inconsistents</source><target>Datos ENS inconsistentes</target></trans-unit>
       <trans-unit id="2385164672809398996" datatype="html"><source>S&apos;ha trobat més d&apos;una classificació ENS activa. L&apos;edició d&apos;aquest formulari està bloquejada fins que backend corregeixi les dades.</source><target>Se ha encontrado más de una clasificación ENS activa. La edición de este formulario está bloqueada hasta que backend corrija los datos.</target></trans-unit>
       <trans-unit id="857095664239220651" datatype="html"><source>Desa primer les dades generals de Seguretat per poder gestionar aquesta taula.</source><target>Guarda primero los datos generales de Seguridad para poder gestionar esta tabla.</target></trans-unit>
@@ -6306,6 +6305,229 @@
       <trans-unit id="applicationCompletenessRefreshError" datatype="html"><source>No s'han pogut actualitzar els indicadors de dades incompletes. Es mantenen els últims valors rebuts del servidor.</source><target>No se han podido actualizar los indicadores de datos incompletos. Se mantienen los últimos valores recibidos del servidor.</target></trans-unit>
       <trans-unit id="applicationCompletenessRetry" datatype="html"><source>Torna a carregar els indicadors</source><target>Vuelve a cargar los indicadores</target></trans-unit>
       <trans-unit id="applicationsFilterResponsible" datatype="html"><source>Responsable</source><target>Responsable</target></trans-unit>
+      <trans-unit id="applicationAssignmentResponsibleDetailTitle" datatype="html"><source>Consulta del responsable</source><target>Consulta del responsable</target></trans-unit>
+      <trans-unit id="applicationAssignmentAuthorizedDetailTitle" datatype="html"><source>Consulta de la persona autoritzada</source><target>Consulta de la persona autorizada</target></trans-unit>
+      <trans-unit id="applicationAssignmentDetailClose" datatype="html"><source>Tanca la consulta de l'assignació</source><target>Cerrar la consulta de la asignación</target></trans-unit>
+      <trans-unit id="dir3Search" datatype="html">
+        <source>Cerca unitats administratives per nom</source>
+        <target>Busca unidades administrativas por nombre</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/administrative-units/administrative-unit-field.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dir3Loading" datatype="html">
+        <source>Carregant unitats administratives.</source>
+        <target>Cargando unidades administrativas.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/administrative-units/administrative-unit-field.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dir3Error" datatype="html">
+        <source>No s&apos;han pogut carregar les unitats administratives.</source>
+        <target>No se han podido cargar las unidades administrativas.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/administrative-units/administrative-unit-field.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dir3Refine" datatype="html">
+        <source>Hi ha <x id="PH" equiv-text="total"/> resultats. Es mostren els primers 20; concreta la cerca.</source>
+        <target>Hay <x id="PH" equiv-text="total"/> resultados. Se muestran los primeros 20; concreta la búsqueda.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/administrative-units/administrative-unit-field.ts</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dir3Total" datatype="html">
+        <source>Resultats: <x id="PH" equiv-text="total"/></source>
+        <target>Resultados: <x id="PH" equiv-text="total"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/administrative-units/administrative-unit-field.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2375260419993138758" datatype="html">
+        <source>URL</source>
+        <target>URL</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleSearch" datatype="html">
+        <source>Cerca rols per sistema</source>
+        <target>Buscar roles por sistema</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="webContextUrlError" datatype="html">
+        <source>Introdueix una URL http:// o https:// de fins a 255 caràcters.</source>
+        <target>Introduce una URL http:// o https:// de hasta 255 caracteres.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="personOrigin" datatype="html">
+        <source>Origen</source>
+        <target>Origen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/responsibles/components/responsible-person-filters-form/responsible-person-filters-form.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="externalPeople" datatype="html">
+        <source>Persones externes</source>
+        <target>Personas externas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/responsibles/components/responsible-person-filters-form/responsible-person-filters-form.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3991046097602481981" datatype="html">
+        <source>NIF</source>
+        <target>NIF</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/responsibles/responsibles.constants.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/responsibles/responsibles.i18n.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="companyNifMaxLength" datatype="html">
+        <source>El NIF no pot superar els 20 caràcters.</source>
+        <target>El NIF no puede superar los 20 caracteres.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/maintenances/responsibles/responsibles.i18n.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerify" datatype="html">
+        <source>Verificar</source>
+        <target>Verificar</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationPending" datatype="html">
+        <source>La verificació de contextos web encara no està implementada.</source>
+        <target>La verificación de contextos web todavía no está implementada.</target>
+      </trans-unit>
+      <trans-unit id="applicationDevelopmentWebContextsLoadError" datatype="html">
+        <source>No s'han pogut carregar els contextos web o els seus catàlegs.</source>
+        <target>No se han podido cargar los contextos web o sus catálogos.</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextPendingVerification" datatype="html">
+        <source>Context web pendent de verificar.</source>
+        <target>Contexto web pendiente de verificar.</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityUnverifiedContexts" datatype="html">
+        <source>La secció Seguretat té contextos web pendents de verificar.</source>
+        <target>La sección Seguridad tiene contextos web pendientes de verificar.</target>
+      </trans-unit>
+      <trans-unit id="dir3Checking" datatype="html">
+        <source>Comprovant DIR3…</source>
+        <target>Comprobando DIR3…</target>
+      </trans-unit>
+      <trans-unit id="dir3CheckError" datatype="html">
+        <source>No s'ha pogut comprovar el DIR3. Torna-ho a provar abans de desar.</source>
+        <target>No se ha podido comprobar el DIR3. Reintenta antes de guardar.</target>
+      </trans-unit>
+      <trans-unit id="dir3AccessDenied" datatype="html">
+        <source>No tens permís per fer aquesta operació DIR3.</source>
+        <target>No tienes permiso para realizar esta operación DIR3.</target>
+      </trans-unit>
+      <trans-unit id="dir3Retry" datatype="html">
+        <source>Torna-ho a provar</source>
+        <target>Reintentar</target>
+      </trans-unit>
+      <trans-unit id="dir3Pending" datatype="html">
+        <source>DIR3 no validat</source>
+        <target>DIR3 no validado</target>
+      </trans-unit>
+      <trans-unit id="dir3Manual" datatype="html">
+        <source>DIR3 validat manualment</source>
+        <target>DIR3 validado manualmente</target>
+      </trans-unit>
+      <trans-unit id="dir3Validate" datatype="html">
+        <source>Validar manualment</source>
+        <target>Validar manualmente</target>
+      </trans-unit>
+      <trans-unit id="dir3Reason" datatype="html">
+        <source>Motiu</source>
+        <target>Motivo</target>
+      </trans-unit>
+      <trans-unit id="dir3ReasonRequired" datatype="html">
+        <source>Indica el motiu de la validació manual.</source>
+        <target>Indica el motivo de la validación manual.</target>
+      </trans-unit>
+      <trans-unit id="dir3Mismatch" datatype="html">
+        <source>El DIR3 de la persona no coincideix amb el de l'aplicació.</source>
+        <target>El DIR3 de la persona no coincide con el de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="dir3Unknown" datatype="html">
+        <source>No s'ha pogut determinar el DIR3 de la persona.</source>
+        <target>No se ha podido determinar el DIR3 de la persona.</target>
+      </trans-unit>
+      <trans-unit id="dir3ManualSuccess" datatype="html">
+        <source>El DIR3 s'ha validat manualment.</source>
+        <target>El DIR3 se ha validado manualmente.</target>
+      </trans-unit>
+      <trans-unit id="dir3ManualError" datatype="html">
+        <source>No s'ha pogut validar manualment. Revisa l'estat actual i torna-ho a provar.</source>
+        <target>No se ha podido validar manualmente. Revisa el estado actual y reintenta.</target>
+      </trans-unit>
+      <trans-unit id="dir3Partial" datatype="html">
+        <source>El responsable ja s'ha afegit. Només queda completar la validació manual; tornar-ho a provar no duplicarà l'alta.</source>
+        <target>El responsable ya se ha añadido. Solo falta completar la validación manual; reintentar no duplicará el alta.</target>
+      </trans-unit>
+      <trans-unit id="dir3StateChanged" datatype="html">
+        <source>L'estat DIR3 ha canviat. S'han actualitzat les dades; tanca aquest diàleg i revisa el responsable.</source>
+        <target>El estado DIR3 ha cambiado. Se han actualizado los datos; cierra este diálogo y revisa el responsable.</target>
+      </trans-unit>
+      <trans-unit id="dir3ManualCancel" datatype="html">
+        <source>Cancel·la la validació manual</source>
+        <target>Cancela la validación manual</target>
+      </trans-unit>
+      <trans-unit id="dir3ManualClose" datatype="html">
+        <source>Tanca el diàleg de validació manual</source>
+        <target>Cierra el diálogo de validación manual</target>
+      </trans-unit>
+      <trans-unit id="dir3ConfirmDiscrepancy" datatype="html">
+        <source>Confirmar discrepància DIR3</source>
+        <target>Confirmar discrepancia DIR3</target>
+      </trans-unit>
+      <trans-unit id="dir3Confirm" datatype="html">
+        <source>Confirmar</source>
+        <target>Confirmar</target>
+      </trans-unit>
+      <trans-unit id="dir3Acceptance" datatype="html">
+        <source>Confirm la validació manual d'aquesta discrepància</source>
+        <target>Confirmo la validación manual de esta discrepancia</target>
+      </trans-unit>
+      <trans-unit id="dir3Matches" datatype="html">
+        <source>El DIR3 de la persona ja coincideix amb el de l'aplicació. No cal validar cap discrepància manualment.</source>
+        <target>El DIR3 de la persona ya coincide con el de la aplicación. No es necesario validar ninguna discrepancia manualmente.</target>
+      </trans-unit>
+      <trans-unit id="dir3InsufficientData" datatype="html">
+        <source>No es pot comprovar el DIR3 perquè falta el correu electrònic de la persona o el DIR3 de l'aplicació.</source>
+        <target>No se puede comprobar el DIR3 porque falta el correo electrónico de la persona o el DIR3 de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="dir3Missing" datatype="html">
+        <source>No s'ha trobat un DIR3 associat a aquesta persona a Soffid.</source>
+        <target>No se ha encontrado un DIR3 asociado a esta persona en Soffid.</target>
+      </trans-unit>
+      <trans-unit id="applicationResponsibleDir3Pending" datatype="html">
+        <source>La secció Responsables té responsables amb el DIR3 pendent de validar.</source>
+        <target>La sección Responsables tiene responsables con el DIR3 pendiente de validar.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

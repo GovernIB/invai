@@ -6,24 +6,24 @@ import { SpringPage } from '@models/page.model';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { Observable, switchMap, throwError } from 'rxjs';
 
+import { ResponsibleCompaniesTable } from '../../components/responsible-maintenance-tables/responsible-maintenance-tables';
 import { ResponsibleNameDialog } from '../../components/responsible-name-dialog/responsible-name-dialog';
 import { ResponsibleNameFiltersForm } from '../../components/responsible-name-filters-form/responsible-name-filters-form';
-import { ResponsibleCompaniesTable } from '../../components/responsible-maintenance-tables/responsible-maintenance-tables';
 import {
-  ResponsibleNameFormGroup,
-  createResponsibleNameFiltersForm,
-  createResponsibleNameForm,
+  ResponsibleCompanyFormGroup,
+  createResponsibleCompanyFiltersForm,
+  createResponsibleCompanyForm,
 } from '../../forms/responsible-forms.factory';
 import { RESPONSIBLE_COMPANY_COLUMNS } from '../../responsibles.constants';
 import { RESPONSIBLE_COMMON_COPY, RESPONSIBLE_COMPANY_COPY } from '../../responsibles.i18n';
 import {
   ResponsibleCompany,
-  ResponsibleNameFilters,
-  ResponsibleNameInput,
-  ResponsibleNamePageParams,
+  ResponsibleCompanyFilters,
+  ResponsibleCompanyInput,
+  ResponsibleCompanyPageParams,
 } from '../../responsibles.model';
-import { ResponsibleCompaniesService } from '../../services/responsible-companies.service';
 import { toResponsibleNamePageParams } from '../../responsibles.utils';
+import { ResponsibleCompaniesService } from '../../services/responsible-companies.service';
 import { ResponsibleMaintenanceListBase } from '../responsible-maintenance-list.base';
 
 @Component({
@@ -42,17 +42,18 @@ import { ResponsibleMaintenanceListBase } from '../responsible-maintenance-list.
 })
 export class ResponsibleCompaniesList extends ResponsibleMaintenanceListBase<
   ResponsibleCompany,
-  ResponsibleNameInput,
-  ResponsibleNameFilters,
-  ResponsibleNamePageParams,
-  ResponsibleNameFormGroup
+  ResponsibleCompanyInput,
+  ResponsibleCompanyFilters,
+  ResponsibleCompanyPageParams,
+  ResponsibleCompanyFormGroup
 > {
   protected override readonly ALL_TABLE_COLUMNS = RESPONSIBLE_COMPANY_COLUMNS;
-  protected override readonly filtersForm = createResponsibleNameFiltersForm(this.fb);
-  protected override readonly entityForm = createResponsibleNameForm(this.fb);
+  protected override readonly filtersForm = createResponsibleCompanyFiltersForm(this.fb);
+  protected override readonly entityForm = createResponsibleCompanyForm(this.fb);
   protected override readonly copy = RESPONSIBLE_COMPANY_COPY;
   protected readonly commonCopy = RESPONSIBLE_COMMON_COPY;
   protected readonly filterLabels = {
+    nif: this.copy.nif,
     name: this.copy.name,
     status: this.commonCopy.status,
   };
@@ -64,23 +65,29 @@ export class ResponsibleCompaniesList extends ResponsibleMaintenanceListBase<
   }
 
   protected override prepareEntityForm(item: ResponsibleCompany | null): void {
-    this.entityForm.reset({ name: item?.name ?? '' });
+    this.entityForm.reset({ name: item?.name ?? '', nif: item?.nif ?? '' });
   }
 
-  protected override toInput(): ResponsibleNameInput {
-    return { name: this.entityForm.controls.name.value.trim() };
+  protected override toInput(): ResponsibleCompanyInput {
+    return {
+      name: this.entityForm.controls.name.value.trim(),
+      nif: this.entityForm.controls.nif.value.trim() || null,
+    };
   }
 
   protected override toPageParams(
-    filters: ResponsibleNameFilters,
+    filters: ResponsibleCompanyFilters,
     event: TableLazyLoadEvent | undefined,
     quickSearch: string,
-  ): ResponsibleNamePageParams {
-    return toResponsibleNamePageParams(filters, event, quickSearch);
+  ): ResponsibleCompanyPageParams {
+    return {
+      ...toResponsibleNamePageParams(filters, event, quickSearch),
+      nif: filters.nif?.trim() || undefined,
+    };
   }
 
   protected override listRequest(
-    params: ResponsibleNamePageParams,
+    params: ResponsibleCompanyPageParams,
   ): Observable<SpringPage<ResponsibleCompany>> {
     return this.service.getPage(params);
   }
@@ -89,13 +96,13 @@ export class ResponsibleCompaniesList extends ResponsibleMaintenanceListBase<
     return this.service.getById(id);
   }
 
-  protected override createRequest(input: ResponsibleNameInput): Observable<ResponsibleCompany> {
+  protected override createRequest(input: ResponsibleCompanyInput): Observable<ResponsibleCompany> {
     return this.service.create(input);
   }
 
   protected override updateRequest(
     id: number,
-    input: ResponsibleNameInput,
+    input: ResponsibleCompanyInput,
   ): Observable<ResponsibleCompany> {
     return this.service.update(id, input);
   }

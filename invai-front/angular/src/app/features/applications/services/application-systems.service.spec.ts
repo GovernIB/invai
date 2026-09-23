@@ -10,7 +10,7 @@ import {
 } from '../applications.model';
 import { ApplicationSystemsService } from './application-systems.service';
 
-const SYSTEMS_URL = '/invaiapi/interna/application/system';
+const SYSTEMS_URL = '/invaiback/application/system';
 const ACTIVE_RELATION = relation(10, null);
 
 describe('ApplicationSystemsService', () => {

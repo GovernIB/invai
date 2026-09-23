@@ -64,7 +64,7 @@ describe('development catalog services', () => {
     describe(scenario.name, () => {
       let service: CatalogService;
       let http: HttpTestingController;
-      const url = `/invaiapi/interna/${scenario.uri}`;
+      const url = `/invaiback/${scenario.uri}`;
 
       beforeEach(() => {
         TestBed.configureTestingModule({

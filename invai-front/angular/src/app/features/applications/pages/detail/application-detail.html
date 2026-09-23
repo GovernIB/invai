@@ -5,6 +5,8 @@
         class="application-detail-tab"
         [routerLink]="tab.route"
         [pTooltip]="tab.incompleteMessage"
+        [autoHide]="false"
+        tooltipEvent="both"
         ariaCurrentWhenActive="page"
         routerLinkActive="application-detail-tab--active"
       >

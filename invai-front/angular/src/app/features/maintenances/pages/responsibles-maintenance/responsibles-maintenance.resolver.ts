@@ -4,6 +4,7 @@ import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 
+import { ROLE_TRANSFER_PERSON_SEARCH_PARAMS } from '../../responsibles/responsibles.constants';
 import {
   ResponsibleAuthorization,
   ResponsibleCompany,
@@ -11,7 +12,6 @@ import {
   ResponsiblePerson,
   ResponsiblePersonCombinedSearchOutput,
 } from '../../responsibles/responsibles.model';
-import { ROLE_TRANSFER_PERSON_SEARCH_PARAMS } from '../../responsibles/responsibles.constants';
 import { ResponsibleAuthorizationTypesService } from '../../responsibles/services/responsible-authorization-types.service';
 import { ResponsibleCompaniesService } from '../../responsibles/services/responsible-companies.service';
 import { ResponsiblePeopleService } from '../../responsibles/services/responsible-people.service';
@@ -54,7 +54,7 @@ export const responsiblesMaintenanceResolver: ResolveFn<
   const peopleService = inject(ResponsiblePeopleService);
   return forkJoin({
     companies: result(companiesService.getPage(INITIAL_PARAMS)),
-    people: result(peopleService.getPage(INITIAL_PARAMS)),
+    people: result(peopleService.getPage({ ...INITIAL_PARAMS, personalCaib: false })),
     transferPeople: result(peopleService.searchCombined(ROLE_TRANSFER_PERSON_SEARCH_PARAMS)),
     authorizations: result(inject(ResponsibleAuthorizationTypesService).getPage(INITIAL_PARAMS)),
     activeCompanies: result(companiesService.getOptions(true)),

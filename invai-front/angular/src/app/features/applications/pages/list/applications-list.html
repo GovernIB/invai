@@ -28,17 +28,10 @@
         [form]="filtersForm"
         [infrastructureOptions]="infrastructureFilterOptions()"
         [labels]="filterLabels"
-        [options]="filterOptions()"
-        [departmentsLoading]="isDepartmentsLoading()"
-        [departmentsLoadFailed]="departmentsLoadFailed()"
-        [administrativeUnitsLoading]="isAdministrativeUnitsLoading()"
-        [administrativeUnitsLoadFailed]="administrativeUnitsLoadFailed()"
+        [options]="filterOptions()" [dir3]="dir3" (dir3Action)="dir3.handle($event)"
         [responsibleLoading]="isResponsibleSearchLoading()"
         [responsibleOptions]="responsibleOptions()"
         (responsibleSearch)="onResponsibleSearch($event)"
-        (conselleriaSelected)="selectConselleria($event)"
-        (departmentsRetry)="retryDepartments()"
-        (administrativeUnitsRetry)="retryAdministrativeUnits()"
       />
     </app-search-filters>
   }
@@ -50,6 +43,6 @@
     [isLoading]="isLoading()"
     [itemsList]="itemsList()"
     (onPageChange)="onPageChange($event)"
-    (onSelectAction)="onViewApplication($event.params)"
+    (onSelectAction)="onApplicationAction($event)"
   />
 </app-section-container>

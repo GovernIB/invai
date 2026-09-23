@@ -6,10 +6,11 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 
-import { ResponsibleNameFiltersFormGroup } from '../../forms/responsible-forms.factory';
+import { ResponsibleCompanyFiltersFormGroup } from '../../forms/responsible-forms.factory';
 
 export interface ResponsibleNameFilterLabels {
   name: string;
+  nif: string;
   status: string;
 }
 
@@ -21,7 +22,7 @@ export interface ResponsibleNameFilterLabels {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResponsibleNameFiltersForm {
-  form = input.required<ResponsibleNameFiltersFormGroup>();
+  form = input.required<ResponsibleCompanyFiltersFormGroup>();
   labels = input.required<ResponsibleNameFilterLabels>();
   idPrefix = input.required<string>();
   protected readonly statusOptions = SOFT_DELETE_STATUS_OPTIONS;

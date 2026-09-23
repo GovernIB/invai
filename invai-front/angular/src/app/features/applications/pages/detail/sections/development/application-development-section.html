@@ -234,6 +234,39 @@
       </div>
     </form>
 
+    <section
+      class="application-development__resource"
+      aria-labelledby="application-development-web-contexts-title"
+    >
+      <div class="application-development__resource-header">
+        <h3 id="application-development-web-contexts-title">{{ webContextsTitle }}</h3>
+        @if (webContexts.showActions()) {
+          <p-button
+            type="button"
+            styleClass="invai-table-toolbar-button"
+            [ariaLabel]="addWebContextAriaLabel"
+            [icon]="icons.PLUS"
+            [disabled]="!webContexts.canManage()"
+            (onClick)="webContexts.create()"
+          />
+        }
+      </div>
+      @if (!webContexts.appSecurityId()) {
+        <p>{{ webContextAnchorRequired }}</p>
+      }
+      <app-application-security-resource-table
+        kind="web-context"
+        [columns]="webContextColumns"
+        [first]="webContexts.first()"
+        [isLoading]="webContexts.loading()"
+        [isReadOnly]="!webContexts.canManage()"
+        [itemsList]="webContexts.items()"
+        [showActions]="webContexts.showActions()"
+        (onPageChange)="webContexts.onPage($event)"
+        (onSelectAction)="webContexts.onAction($event)"
+      />
+    </section>
+
     <section class="application-development__resource">
       <div class="application-development__resource-header">
         <h3>{{ providerTitle }}</h3>
@@ -391,5 +424,39 @@
     (cancel)="closeTechnologyDeleteDialog()"
     (confirm)="confirmTechnologyDelete()"
     (dismissed)="closeTechnologyDeleteDialog()"
+  />
+}
+
+@if (webContexts.visible()) {
+  <app-application-security-resource-dialog
+    kind="web-context"
+    [(visible)]="webContexts.visible"
+    [canEdit]="webContexts.canEdit()"
+    [form]="webContexts.form"
+    [mode]="webContexts.mode()"
+    [isSaving]="webContexts.saving()"
+    [isDeleting]="webContexts.deleting()"
+    [webContextOptions]="webContexts.webContextOptions()"
+    [fieldOptions]="webContexts.fieldOptions()"
+    (cancelEdit)="webContexts.cancelEdit()"
+    (closed)="webContexts.close()"
+    (deactivate)="webContexts.requestDelete()"
+    (edit)="webContexts.edit()"
+    (submitForm)="webContexts.save()"
+  />
+}
+@if (webContexts.deleteVisible()) {
+  <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
+    [(visible)]="webContexts.deleteVisible"
+    [cancelAriaLabel]="webContextDeleteDialog.cancelAriaLabel"
+    [cancelLabel]="webContextDeleteDialog.cancelLabel"
+    [confirmAriaLabel]="webContextDeleteDialog.confirmAriaLabel"
+    [confirmLabel]="webContextDeleteDialog.confirmLabel"
+    [message]="webContextDeleteDialog.message"
+    [title]="webContextDeleteDialog.title"
+    (cancel)="webContexts.closeDelete()"
+    (confirm)="webContexts.confirmDelete()"
+    (dismissed)="webContexts.closeDelete()"
   />
 }

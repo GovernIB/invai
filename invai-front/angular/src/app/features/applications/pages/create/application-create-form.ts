@@ -1,21 +1,21 @@
-import { Component, DestroyRef, computed, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
+import { AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
 import { normalizeQuillHtml } from '@shared/utils/rich-text.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { Subject, catchError, finalize, map, of, switchMap, tap } from 'rxjs';
+import { finalize } from 'rxjs';
 
-import { ApplicationFormFields } from '../../components';
 import { APPLICATION_STATUS_ACTIVE_ID } from '../../applications.constants';
 import { ApplicationInput } from '../../applications.model';
+import { ApplicationFormFields } from '../../components';
 import { createApplicationCreateForm } from '../../forms/application-form.factory';
 import {
   ApplicationCommissionOption,
-  ApplicationOptionsService,
-  ApplicationSelectOptions,
+  ApplicationSelectOptions
 } from '../../services/application-options.service';
 import { ApplicationsService } from '../../services/applications.service';
 import {
@@ -45,7 +45,6 @@ import {
 export class ApplicationCreateForm {
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _applicationsService = inject(ApplicationsService);
-  private readonly _applicationOptionsService = inject(ApplicationOptionsService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _messageService = inject(MessageService);
   private readonly _route = inject(ActivatedRoute);
@@ -66,61 +65,13 @@ export class ApplicationCreateForm {
 
   protected readonly form = createApplicationCreateForm(this._formBuilder);
   readonly options = input.required<ApplicationSelectOptions>();
-  readonly departmentsLoadFailed = input(false);
   protected readonly isSaving = signal(false);
-  protected readonly isDepartmentsLoading = signal(false);
-  protected readonly isAdministrativeUnitsLoading = signal(false);
-  private readonly departmentsOverride = signal<ApplicationSelectOptions['departments'] | null>(
-    null,
-  );
-  private readonly administrativeUnits = signal<ApplicationSelectOptions['administrativeUnits']>(
-    [],
-  );
-  private readonly departmentsFailedOverride = signal<boolean | null>(null);
-  protected readonly hasDepartmentsLoadFailed = computed(
-    () => this.departmentsFailedOverride() ?? this.departmentsLoadFailed(),
-  );
-  protected readonly hasAdministrativeUnitsLoadFailed = signal(false);
-  protected readonly currentOptions = computed<ApplicationSelectOptions>(() => ({
-    ...this.options(),
-    departments: this.departmentsOverride() ?? this.options().departments,
-    administrativeUnits: this.administrativeUnits(),
-  }));
-  private readonly administrativeUnitRequests = new Subject<string | null>();
-
-  constructor() {
-    this.administrativeUnitRequests
-      .pipe(
-        tap((code) => {
-          this.isAdministrativeUnitsLoading.set(Boolean(code));
-          this.hasAdministrativeUnitsLoadFailed.set(false);
-          this.administrativeUnits.set([]);
-          this.form.controls.administrativeUnit.disable({ emitEvent: false });
-        }),
-        switchMap((code) =>
-          code
-            ? this._applicationOptionsService.getAdministrativeUnitOptions(code).pipe(
-                map((options) => ({ options, failed: false })),
-                catchError(() => of({ options: [], failed: true })),
-              )
-            : of({ options: [], failed: false }),
-        ),
-        takeUntilDestroyed(this._destroyRef),
-      )
-      .subscribe(({ options, failed }) => {
-        this.isAdministrativeUnitsLoading.set(false);
-        this.hasAdministrativeUnitsLoadFailed.set(failed);
-        this.administrativeUnits.set(options);
-        if (!failed && this.form.controls.conselleria.value) {
-          this.form.controls.administrativeUnit.enable({ emitEvent: false });
-        }
-      });
-  }
+  protected readonly dir3 = new AdministrativeUnitSearchState(this.form.controls.administrativeUnit);
 
   protected submit(): void {
     if (this.isSaving()) return;
 
-    if (this.form.invalid || this.form.controls.administrativeUnit.disabled) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
@@ -163,34 +114,6 @@ export class ApplicationCreateForm {
       commissionApprovalDate: commission?.approvalDate ?? '',
       commissionType: commission?.commissionType ?? null,
     });
-  }
-
-  protected selectConselleria(code: string | null): void {
-    this.form.controls.administrativeUnit.reset(null, { emitEvent: false });
-    this.administrativeUnitRequests.next(code);
-  }
-
-  protected retryAdministrativeUnits(): void {
-    this.administrativeUnitRequests.next(this.form.controls.conselleria.value);
-  }
-
-  protected retryDepartments(): void {
-    if (this.isDepartmentsLoading()) return;
-
-    this.isDepartmentsLoading.set(true);
-    this._applicationOptionsService
-      .getDepartmentOptions()
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        finalize(() => this.isDepartmentsLoading.set(false)),
-      )
-      .subscribe({
-        next: (departments) => {
-          this.departmentsOverride.set(departments);
-          this.departmentsFailedOverride.set(false);
-        },
-        error: () => this.departmentsFailedOverride.set(true),
-      });
   }
 
   private toApplicationInput(): ApplicationInput {
