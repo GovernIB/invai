@@ -2,6 +2,7 @@ package es.caib.invai.back.interna.auth;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Unit tests for {@link LoginController}, verifying that the public login entry point
- * issues the expected HTTP redirect to the internal OAuth2/OIDC filter endpoint.
+ * issues the expected HTTP redirect to this deployment's own OAuth2/OIDC filter endpoint.
  */
 class LoginControllerTest {
 
@@ -22,12 +23,14 @@ class LoginControllerTest {
     }
 
     @Test
-    void redirectToSoffid_sendsRedirectToOauth2AuthorizationEndpoint() throws IOException {
+    void redirectToSoffid_sendsRedirectToOauth2AuthorizationEndpointUnderOwnContextPath() throws IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContextPath("/invaiback");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        loginController.redirectToSoffid(response);
+        loginController.redirectToSoffid(request, response);
 
-        assertEquals("/invaiapi/interna/oauth2/authorization/soffid", response.getRedirectedUrl());
+        assertEquals("/invaiback/oauth2/authorization/soffid", response.getRedirectedUrl());
         assertEquals(302, response.getStatus());
     }
 }

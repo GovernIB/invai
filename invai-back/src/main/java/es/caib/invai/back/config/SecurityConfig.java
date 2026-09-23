@@ -57,13 +57,13 @@ public class SecurityConfig {
     /**
      * Target frontend URL redirected to upon successful authentication.
      */
-    @Value("${es.caib.invai.front.url.success:http://127.0.0.1:8080/invaifront/ca/aplicacions}")
+    @Value("${es.caib.invai.front.url.success}")
     private String loginSuccessUrl;
 
     /**
      * Corporate Identity Provider (IdP) URL used to process global single logout actions.
      */
-    @Value("${es.caib.invai.idp.logout.url:https://idp.caib.es/logout}")
+    @Value("${es.caib.invai.idp.logout.url}")
     private String idpLogoutUrl;
 
 

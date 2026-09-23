@@ -18,7 +18,7 @@ import es.caib.invai.back.service.mapper.maintenance.development.technology.Tech
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {AppDevelopmentMapper.class, LayerMapper.class, TechnologyMapper.class})
+@Mapper(componentModel = "spring", uses = {es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper.class, LayerMapper.class, TechnologyMapper.class})
 public interface AppTechnologyMapper {
 
     /**

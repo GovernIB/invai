@@ -45,7 +45,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 				description = "Servei de gestió de l'inventari d'aplicacions informàtiques de les Illes Balears (INVAI).",
 				version = "1.0.4"
 		),
-		servers = @Server(url = "/invaiapi/interna")
+		servers = @Server(url = "/invaiback")
 )
 public class InvaiBackApplication extends SpringBootServletInitializer {
 

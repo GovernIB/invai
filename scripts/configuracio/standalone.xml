@@ -93,9 +93,6 @@
             <logger category="org.hibernate.type.descriptor.sql.BasicBinder">
                 <level name="TRACE"/>
             </logger>
-            <logger category="jboss.jdbc.spy">
-                <level name="TRACE"/>
-            </logger>
             <logger category="org.wildfly.security.http.oidc">
                 <level name="DEBUG"/>
             </logger>
@@ -141,7 +138,7 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:7.2">
             <datasources>
-                <datasource jndi-name="java:jboss/datasources/invaiDS" pool-name="invaiDS" enabled="true" use-java-context="true" spy="true">
+                <datasource jndi-name="java:jboss/datasources/invaiDS" pool-name="invaiDS" enabled="true" use-java-context="true" spy="false">
                     <connection-url>jdbc:oracle:thin:@10.1.8.27:30001/ORACLE19CDEV</connection-url>
                     <driver>oracle</driver>
                     <new-connection-sql>

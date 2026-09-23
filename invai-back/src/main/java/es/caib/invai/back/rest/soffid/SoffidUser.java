@@ -6,7 +6,7 @@ import lombok.Setter;
 
 /**
  * Raw wire DTO mapping a single Soffid SCIM 2.0 {@code User} resource. Only the fields needed to
- * feed the person search typeahead are modelled; every other SCIM attribute (mailServer,
+ * feed the person's search typeahead are modeled; every other SCIM attribute (mailServer,
  * homeServer, meta, links, etc.) is intentionally ignored.
  *
  * @since 1.0.4
@@ -15,6 +15,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class SoffidUser {
+
+    /** Soffid username (código de usuario), e.g. "u00629". */
+    private String userName;
 
     /** First name of the Soffid user. */
     private String firstName;

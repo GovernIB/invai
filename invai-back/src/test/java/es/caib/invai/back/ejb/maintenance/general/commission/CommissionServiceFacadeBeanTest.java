@@ -229,7 +229,7 @@ class CommissionServiceFacadeBeanTest {
 
     @Test
     void delete_alreadyInactive_throwsBusinessRuleException() {
-        activeCommission.setDeletedAt(LocalDateTime.now());
+        activeCommission.setDeletedAt(java.time.LocalDateTime.now());
         when(commissionRepository.findById(1L)).thenReturn(activeCommission);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> commissionServiceFacadeBean.delete(1L));

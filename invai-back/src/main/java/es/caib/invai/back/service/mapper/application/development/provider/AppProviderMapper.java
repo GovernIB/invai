@@ -18,7 +18,7 @@ import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {AppDevelopmentMapper.class, RoleMapper.class})
+@Mapper(componentModel = "spring", uses = {es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper.class, RoleMapper.class})
 public interface AppProviderMapper {
 
     /**

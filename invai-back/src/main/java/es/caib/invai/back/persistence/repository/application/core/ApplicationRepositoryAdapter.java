@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class ApplicationRepositoryAdapter implements ApplicationRepository {
 
-    /** Spring Data JPA repository providing raw CRUD access to {@link ApplicationEntity}. */
+    /** Spring Data JPA repository providing raw CRUD access to {@link es.caib.invai.back.persistence.model.application.core.ApplicationEntity}. */
     @Autowired
     private ApplicationJPARepository applicationJPARepository;
 

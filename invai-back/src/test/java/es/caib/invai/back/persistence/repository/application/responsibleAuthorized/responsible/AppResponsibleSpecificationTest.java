@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
  * {@code any(Predicate[].class)} instead only reliably matches a zero-length invocation in this project's
  * Mockito version.
  *
- * <p>Note: {@link CriteriaBuilder#equal} is overloaded as both
+ * <p>Note: {@link jakarta.persistence.criteria.CriteriaBuilder#equal} is overloaded as both
  * {@code equal(Expression<?>, Expression<?>)} and {@code equal(Expression<?>, Object)}. Production code
  * always calls the latter (comparing a path against a plain {@code Long}), so every stub/verification is
  * written as {@code any(), any(Object.class)} to bind to that same overload.

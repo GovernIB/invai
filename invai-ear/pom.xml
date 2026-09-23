@@ -15,12 +15,17 @@
     <dependencies>
         <dependency>
             <groupId>es.caib.invai</groupId>
-            <artifactId>invai-back-externa</artifactId>
+            <artifactId>invai-api-externa</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>es.caib.invai</groupId>
             <artifactId>invai-back</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>es.caib.invai</groupId>
+            <artifactId>invai-api-interna</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -46,14 +51,20 @@
                     <modules>
                         <webModule>
                             <groupId>es.caib.invai</groupId>
-                            <artifactId>invai-back-externa</artifactId>
-                            <bundleFileName>invai-back-externa.war</bundleFileName>
+                            <artifactId>invai-api-externa</artifactId>
+                            <bundleFileName>invai-api-externa.war</bundleFileName>
                             <contextRoot>/invaiapi/externa</contextRoot>
                         </webModule>
                         <webModule>
                             <groupId>es.caib.invai</groupId>
                             <artifactId>invai-back</artifactId>
                             <bundleFileName>invai-back.war</bundleFileName>
+                            <contextRoot>/invaiback</contextRoot>
+                        </webModule>
+                        <webModule>
+                            <groupId>es.caib.invai</groupId>
+                            <artifactId>invai-api-interna</artifactId>
+                            <bundleFileName>invai-api-interna.war</bundleFileName>
                             <contextRoot>/invaiapi/interna</contextRoot>
                         </webModule>
                         <webModule>

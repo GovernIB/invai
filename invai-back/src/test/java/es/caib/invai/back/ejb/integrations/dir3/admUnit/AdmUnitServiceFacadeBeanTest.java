@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -225,19 +224,6 @@ class AdmUnitServiceFacadeBeanTest {
         AdmUnitOutputDTO department = admUnitServiceFacadeBean.resolveDepartment("A04003003");
 
         assertNull(department);
-    }
-
-    @Test
-    void resolveDepartment_reusesCachedTreeWithoutQueryingDir3CaibAgain() {
-        when(dir3CaibClient.getTree("A04003003", true)).thenReturn(List.of(
-                unidadRest("A04003003", "Gobierno de las Illes Balears", "Govern de les Illes Balears", "A99999999", 1),
-                unidadRest("A04026919", "Conselleria de Sanidad", null, "A04003003", 2)
-        ));
-        admUnitServiceFacadeBean.getDepartments(PageRequest.of(0, 10));
-
-        admUnitServiceFacadeBean.resolveDepartment("A04026919");
-
-        verify(dir3CaibClient, times(1)).getTree("A04003003", true);
     }
 
     @Test

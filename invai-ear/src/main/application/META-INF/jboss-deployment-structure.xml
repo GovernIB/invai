@@ -32,7 +32,20 @@
         </dependencies>
     </sub-deployment>
 
-    <sub-deployment name="invai-back-externa.war">
+    <sub-deployment name="invai-api-externa.war">
+        <exclude-subsystems>
+            <subsystem name="jsf"/>
+            <subsystem name="jaxrs"/>
+        </exclude-subsystems>
+        <exclusions>
+            <module name="org.slf4j"/>
+            <module name="org.slf4j.impl"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+            <module name="org.apache.commons.lang3"/>
+        </exclusions>
+    </sub-deployment>
+
+    <sub-deployment name="invai-api-interna.war">
         <exclude-subsystems>
             <subsystem name="jsf"/>
             <subsystem name="jaxrs"/>

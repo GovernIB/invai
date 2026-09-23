@@ -44,9 +44,9 @@ import es.caib.invai.back.service.mapper.maintenance.general.commission.Commissi
 
 /**
  * Unit tests for the generated {@link AppDevelopmentMapperImpl}, exercising every conversion
- * direction declared on {@link AppDevelopmentMapper}.
+ * direction declared on {@link es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper}.
  *
- * <p>{@link AppDevelopmentMapper} declares {@code uses = {ModalityMapper.class,
+ * <p>{@link es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper} declares {@code uses = {ModalityMapper.class,
  * StandardAdaptionMapper.class, StatusMapper.class, ApplicationMapper.class}}. Since there is no Spring
  * context in a pure unit test, real {@link ModalityMapperImpl}, {@link StandardAdaptionMapperImpl} and a
  * fully wired {@link ApplicationMapperImpl} (which itself needs its own sub-mappers, including
@@ -58,7 +58,7 @@ import es.caib.invai.back.service.mapper.maintenance.general.commission.Commissi
  */
 class AppDevelopmentMapperTest {
 
-    private AppDevelopmentMapper mapper;
+    private es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper mapper;
 
     @BeforeEach
     void setUp() {

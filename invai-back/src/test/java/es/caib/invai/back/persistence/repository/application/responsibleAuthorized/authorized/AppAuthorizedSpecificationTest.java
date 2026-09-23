@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
  * a helper that binds {@code ArgumentMatchers.any()}'s type parameter to the varargs' <em>component</em>
  * type ({@code Predicate}, not {@code Predicate[]}) - mirroring {@code AppResponsibleSpecificationTest}.
  *
- * <p>Note: {@link CriteriaBuilder#equal} is overloaded as both
+ * <p>Note: {@link jakarta.persistence.criteria.CriteriaBuilder#equal} is overloaded as both
  * {@code equal(Expression<?>, Expression<?>)} and {@code equal(Expression<?>, Object)}. Production code
  * always calls the latter (comparing a path against a plain {@code Long}), so every stub/verification is
  * written as {@code any(), any(Object.class)} to bind to that same overload.

@@ -14,12 +14,13 @@ import org.springframework.data.domain.Pageable;
 public interface SoffidClient {
 
     /**
-     * Lists active Soffid users, optionally restricted to those whose full name contains every
-     * word of {@code fullName}. A blank/{@code null} {@code fullName} performs an unfiltered
-     * listing (still paginated), matching this codebase's usual {@code getAll} semantics.
+     * Lists active Soffid users, optionally restricted to those where every word of {@code
+     * fullName} appears in either the full name or the username (código de usuario). A blank/
+     * {@code null} {@code fullName} performs an unfiltered listing (still paginated), matching this
+     * codebase's usual {@code getAll} semantics.
      *
-     * @param fullName the text to search for, matched (word by word) against the full name, or
-     * {@code null}/blank to list every active user
+     * @param fullName the text to search for, matched (word by word) against the full name or the
+     * username, or {@code null}/blank to list every active user
      * @param pageable the pagination parameters; only page number and size are used, Soffid's own
      * default ordering applies
      * @return the requested page of matching Soffid users, with the total result count reported by
