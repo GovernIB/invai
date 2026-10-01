@@ -1,5 +1,6 @@
 package es.caib.invai.back.persistence.repository.application.security.webContext;
 
+import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
 import es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextAudEntity;
 import es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
@@ -67,12 +68,19 @@ class AppWebContextRepositoryAdapterTest {
         AppSecurityEntity appSecurity = new AppSecurityEntity();
         appSecurity.setId(10L);
         entity.setAppSecurity(appSecurity);
+        AppDevelopmentEntity appDevelopment = new AppDevelopmentEntity();
+        appDevelopment.setId(15L);
+        entity.setAppDevelopment(appDevelopment);
         WebContextEntity webContext = new WebContextEntity();
         webContext.setId(20L);
         entity.setWebContext(webContext);
         FieldEntity field = new FieldEntity();
         field.setId(30L);
         entity.setField(field);
+        entity.setValidated(true);
+        entity.setValidatedAt(LocalDateTime.of(2024, 1, 1, 0, 0));
+        entity.setValidatedBy("validator");
+        entity.setValidatedReason("all good");
         return entity;
     }
 
@@ -98,7 +106,7 @@ class AppWebContextRepositoryAdapterTest {
     }
 
     @Test
-    void findAll_delegatesToJPARepositoryAndMapsPage() {
+    void findAllByAppSecurityId_delegatesToJPARepositoryAndMapsPage() {
         adapter = buildAdapter();
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         Pageable pageable = Pageable.unpaged();
@@ -108,7 +116,24 @@ class AppWebContextRepositoryAdapterTest {
         when(appWebContextJPARepository.findAll(ArgumentMatchers.<Specification<AppWebContextEntity>>any(), eq(pageable))).thenReturn(entityPage);
         when(appWebContextMapper.toModel(entity)).thenReturn(model);
 
-        Page<AppWebContext> result = adapter.findAll(10L, criteria, pageable);
+        Page<AppWebContext> result = adapter.findAllByAppSecurityId(10L, criteria, pageable);
+
+        assertEquals(1, result.getTotalElements());
+        assertSame(model, result.getContent().get(0));
+    }
+
+    @Test
+    void findAllByAppDevelopmentId_delegatesToJPARepositoryAndMapsPage() {
+        adapter = buildAdapter();
+        AppWebContextCriteria criteria = new AppWebContextCriteria();
+        Pageable pageable = Pageable.unpaged();
+        AppWebContextEntity entity = entityWithRelations(1L);
+        AppWebContext model = new AppWebContext();
+        Page<AppWebContextEntity> entityPage = new PageImpl<>(List.of(entity));
+        when(appWebContextJPARepository.findAll(ArgumentMatchers.<Specification<AppWebContextEntity>>any(), eq(pageable))).thenReturn(entityPage);
+        when(appWebContextMapper.toModel(entity)).thenReturn(model);
+
+        Page<AppWebContext> result = adapter.findAllByAppDevelopmentId(15L, criteria, pageable);
 
         assertEquals(1, result.getTotalElements());
         assertSame(model, result.getContent().get(0));
@@ -133,8 +158,13 @@ class AppWebContextRepositoryAdapterTest {
         AppWebContextAudEntity aud = captor.getValue();
         assertEquals(5L, aud.getAppWebContextId());
         assertEquals(10L, aud.getAppSecurityId());
+        assertEquals(15L, aud.getAppDevelopmentId());
         assertEquals(20L, aud.getWebContextId());
         assertEquals(30L, aud.getFieldId());
+        assertEquals(Boolean.TRUE, aud.getValidated());
+        assertEquals(LocalDateTime.of(2024, 1, 1, 0, 0), aud.getValidatedAt());
+        assertEquals("validator", aud.getValidatedBy());
+        assertEquals("all good", aud.getValidatedReason());
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());

@@ -63,6 +63,18 @@ public interface Constants {
     /** Generic client-facing message for any otherwise-unhandled server-side exception. */
     String ERR_UNEXPECTED_GENERIC = "exception.unexpected.generic";
 
+    /** Client-facing message for a request whose route/path matches no controller or static resource. */
+    String ERR_RESOURCE_NOT_FOUND = "exception.resource.notfound";
+
+    /** Client-facing message (with the parameter name as {0}) for a request parameter that couldn't be converted to the expected type. */
+    String ERR_INVALID_PARAMETER_FORMAT = "exception.parameter.invalidformat";
+
+    /** Client-facing message (with the parameter name as {0}) for a missing required request parameter. */
+    String ERR_MISSING_REQUIRED_PARAMETER = "exception.parameter.missing";
+
+    /** Client-facing message for a request body that could not be parsed (malformed JSON, wrong type, etc). */
+    String ERR_MALFORMED_REQUEST_BODY = "exception.request.malformedbody";
+
     // --- 2. CATEGORY VALIDATIONS ---
     String VALIDATION_CATEGORY_NAME_ES_REQUIRED = "validation.category.nameEs.required";
     String VALIDATION_CATEGORY_NAME_ES_SIZE = "validation.category.nameEs.size";
@@ -126,6 +138,14 @@ public interface Constants {
     // --- 12. APPLICATION SECURITY / INFORMATION SYSTEM DATABASE ANCHOR VALIDATIONS ---
     String VALIDATION_APP_SECURITY_APPLICATION_ID = "validation.appsecurity.applicationId";
     String VALIDATION_APP_INFORMATION_SYSTEM_DB_APPLICATION_ID = "validation.appinformationsystemdb.applicationId";
+    String VALIDATION_APPDATA_APPLICATIONID = "validation.appdata.applicationId";
+    String VALIDATION_APPDATA_OPENDATAURL_OVERFLOW = "validation.appdata.openDataUrl.overflow";
+    String VALIDATION_APPINTEGRATION_APPLICATIONID = "validation.appintegration.applicationId";
+    String VALIDATION_APPINTEGRATIONCONNECTION_APPINTEGRATIONID = "validation.appintegrationconnection.appIntegrationId";
+    String VALIDATION_APPINTEGRATIONCONNECTION_TECHNOLOGYID = "validation.appintegrationconnection.technologyId";
+    String VALIDATION_APPINTEGRATIONCONNECTION_USERNAME = "validation.appintegrationconnection.username";
+    String VALIDATION_APPINTEGRATIONCONNECTION_REQUIREDROLES = "validation.appintegrationconnection.requiredRoles";
+    String VALIDATION_APPDATA_REUSEURL_OVERFLOW = "validation.appdata.reuseUrl.overflow";
 
     // --- 13. APPLICATION DEVELOPMENT VALIDATIONS ---
     String VALIDATION_DEVELOPMENT_APPLICATION_ID = "validation.development.applicationId";
@@ -180,6 +200,7 @@ public interface Constants {
     // --- 22. COMPANY VALIDATIONS ---
     String VALIDATION_COMPANY_NAME_REQUIRED = "validation.company.name.required";
     String VALIDATION_COMPANY_NAME_SIZE = "validation.company.name.size";
+    String VALIDATION_COMPANY_NIF_SIZE = "validation.company.nif.size";
 
     // --- 23. PERSON VALIDATIONS ---
     String VALIDATION_PERSON_FIRSTNAME_REQUIRED = "validation.person.firstname.required";
@@ -224,6 +245,17 @@ public interface Constants {
     String VALIDATION_WEBCONTEXT_NAME_ES_REQUIRED = "validation.webcontext.nameEs.required";
     String VALIDATION_WEBCONTEXT_NAME_ES_SIZE = "validation.webcontext.nameEs.size";
 
+    // --- 32. DIR3 MANUAL VALIDATION VALIDATIONS ---
+    String VALIDATION_DIR3VALIDATION_REASON_REQUIRED = "validation.dir3validation.reason.required";
+
+    // --- 33. APPLICATION WEB CONTEXT VALIDATION VALIDATIONS ---
+    String VALIDATION_APPWEBCONTEXT_VALIDATE_REASON_REQUIRED = "validation.appwebcontext.validate.reason.required";
+
+    // --- 34. EXTERNAL SYSTEM VALIDATIONS ---
+    String VALIDATION_EXTERNALSYSTEM_NAME_REQUIRED = "validation.externalsystem.name.required";
+    String VALIDATION_EXTERNALSYSTEM_NAME_SIZE = "validation.externalsystem.name.size";
+    String VALIDATION_EXTERNALSYSTEM_COMPANY_ID_REQUIRED = "validation.externalsystem.companyId.required";
+
     // =========================================================================
     // EXCEPTION TRANSLATION BUNDLE KEYS (Business Rules Exceptions)
     // =========================================================================
@@ -235,8 +267,6 @@ public interface Constants {
     String ERR_APPLICATION_CODE_SIZE = "exception.application.codesize";
     String ERR_APPLICATION_NAME_OVERFLOW = "exception.application.name.overflow";
     String ERR_APPLICATION_PREFIX_OVERFLOW = "exception.application.prefix.overflow";
-    String ERR_APPLICATION_ADMUNIT_NOT_FOUND = "exception.application.admunit.notfound";
-    String ERR_APPLICATION_ADMUNIT_MUST_BE_DEPARTMENT_CHILD = "exception.application.admunit.mustbedepartmentchild";
     String ERR_CODE_DUPLICATED = "exception.application.codeduplicated";
     String ERR_CODE_OWNED_BY_OTHER = "exception.application.codeowned";
     String ERR_PREFIX_DUPLICATED = "exception.application.prefixduplicated";
@@ -260,6 +290,8 @@ public interface Constants {
 
     // --- ADMINISTRATIVE UNIT (ADMUNIT) ERRORS ---
     String ERR_ADMUNIT_DIR3_UNAVAILABLE = "exception.admunit.dir3.unavailable";
+    String ERR_ADMUNIT_NOT_FOUND = "exception.admunit.notfound";
+    String ERR_ADMUNIT_ABOVE_DEPARTMENT_LEVEL = "exception.admunit.abovedepartmentlevel";
 
     // --- COMMISSION ERRORS ---
     String ERR_COMMISSION_ACTIVE = "exception.commission.active";
@@ -324,6 +356,24 @@ public interface Constants {
     String ERR_APP_ACCESSIBILITY_NOT_FOUND = "exception.appaccessibility.notfound";
     String ERR_APP_ACCESSIBILITY_ALREADY_EXISTS = "exception.appaccessibility.alreadyexists";
 
+    // --- APPLICATION DATA (OPEN DATA / REUSE) ERRORS ---
+    String ERR_APP_DATA_NOT_ACTIVE = "exception.appdata.notactive";
+    String ERR_APP_DATA_NOT_FOUND = "exception.appdata.notfound";
+    String ERR_APP_DATA_ALREADY_EXISTS = "exception.appdata.alreadyexists";
+    String ERR_APP_DATA_URL_REQUIRED = "exception.appdata.urlrequired";
+    String ERR_OPENDATA_UNAVAILABLE = "exception.opendata.unavailable";
+    String ERR_REUSE_UNAVAILABLE = "exception.reuse.unavailable";
+    String ERR_DATA_TIMEOUT = "exception.data.timeout";
+
+    // --- APPLICATION INTEGRATION ERRORS ---
+    String ERR_APP_INTEGRATION_NOT_FOUND = "exception.appintegration.notfound";
+    String ERR_APP_INTEGRATION_ALREADY_EXISTS = "exception.appintegration.alreadyexists";
+    String ERR_APP_INTEGRATION_CONNECTION_NOT_FOUND = "exception.appintegrationconnection.notfound";
+    String ERR_APP_INTEGRATION_CONNECTION_SYSTEM_REQUIRED = "exception.appintegrationconnection.systemrequired";
+    String ERR_APP_INTEGRATION_CONNECTION_SYSTEM_AMBIGUOUS = "exception.appintegrationconnection.systemambiguous";
+    String ERR_REQUIREDROLE_UNAVAILABLE = "exception.requiredrole.unavailable";
+    String ERR_GRANTEDROLE_UNAVAILABLE = "exception.grantedrole.unavailable";
+
     // --- APPLICATION SECURITY ROLE ERRORS ---
     String ERR_APP_ROLE_NOT_ACTIVE = "exception.approle.notactive";
     String ERR_APP_ROLE_NOT_FOUND = "exception.approle.notfound";
@@ -331,6 +381,8 @@ public interface Constants {
     // --- APPLICATION SECURITY WEB CONTEXT ERRORS ---
     String ERR_APP_WEB_CONTEXT_NOT_ACTIVE = "exception.appwebcontext.notactive";
     String ERR_APP_WEB_CONTEXT_NOT_FOUND = "exception.appwebcontext.notfound";
+    String ERR_APP_WEB_CONTEXT_ALREADY_VALIDATED = "exception.appwebcontext.alreadyvalidated";
+    String ERR_APP_WEB_CONTEXT_NO_SECURITY_ANCHOR = "exception.appwebcontext.nosecurityanchor";
 
     // --- APPLICATION SECURITY ENS CLASSIFICATION ERRORS ---
     String ERR_APP_ENS_CLASSIFICATION_NOT_ACTIVE = "exception.appensclassification.notactive";
@@ -400,6 +452,12 @@ public interface Constants {
     String ERR_COMPANY_HAS_RESPONSIBLE = "exception.company.hasresponsible";
     String ERR_COMPANY_HAS_AUTHORIZED = "exception.company.hasauthorized";
 
+    // --- EXTERNAL SYSTEM CORE ERRORS ---
+    String ERR_EXTERNALSYSTEM_ACTIVE = "exception.externalsystem.active";
+    String ERR_EXTERNALSYSTEM_DUPLICATED = "exception.externalsystem.duplicated";
+    String ERR_EXTERNALSYSTEM_NOT_ACTIVE = "exception.externalsystem.notactive";
+    String ERR_EXTERNALSYSTEM_NOT_FOUND = "exception.externalsystem.notfound";
+
     // --- PERSON CORE ERRORS ---
     String ERR_PERSON_ACTIVE = "exception.person.active";
     String ERR_PERSON_DUPLICATED = "exception.person.duplicated";
@@ -421,6 +479,7 @@ public interface Constants {
     String ERR_APPRESPONSIBLE_NOT_FOUND = "exception.appresponsible.notfound";
     String ERR_APPRESPONSIBLE_PERSON_DATA_REQUIRED = "exception.appresponsible.persondatarequired";
     String ERR_APPRESPONSIBLE_REQUIRES_PERSONAL_CAIB = "exception.appresponsible.requirespersonalcaib";
+    String ERR_APPRESPONSIBLE_PERSON_IMMUTABLE = "exception.appresponsible.personimmutable";
 
     // --- APPLICATION AUTHORIZED CORE ERRORS ---
     String ERR_APPAUTHORIZED_ACTIVE = "exception.appauthorized.active";
@@ -428,6 +487,11 @@ public interface Constants {
     String ERR_APPAUTHORIZED_NOT_ACTIVE = "exception.appauthorized.notactive";
     String ERR_APPAUTHORIZED_NOT_FOUND = "exception.appauthorized.notfound";
     String ERR_APPAUTHORIZED_PERSON_DATA_REQUIRED = "exception.appauthorized.persondatarequired";
+    String ERR_APPAUTHORIZED_PERSON_IMMUTABLE = "exception.appauthorized.personimmutable";
+
+    // --- DIR3 VALIDATION CORE ERRORS ---
+    String ERR_DIR3VALIDATION_NOT_FOUND = "exception.dir3validation.notfound";
+    String ERR_DIR3VALIDATION_MANUAL_VALIDATION_NOT_ALLOWED = "exception.dir3validation.manualvalidationnotallowed";
 
     // --- ROLE TRANSFER ERRORS ---
     String ERR_ROLETRANSFER_TARGET_REQUIRED = "exception.roletransfer.targetrequired";
@@ -477,6 +541,9 @@ public interface Constants {
 
     // --- SOFFID INTEGRATION ERRORS ---
     String ERR_SOFFID_UNAVAILABLE = "exception.soffid.unavailable";
+
+    /** Client-facing message for a Soffid call that exceeded its configured timeout. */
+    String ERR_SOFFID_TIMEOUT = "exception.soffid.timeout";
 
     // =========================================================================
     // TRACE DIAGNOSTIC LOG STRINGS & PATTERNS

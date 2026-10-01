@@ -1,7 +1,7 @@
 package es.caib.invai.back.interna.application.security.webContext;
 
-import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextInputDTO;
-import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextOutputDTO;
+import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebContextOutputDTO;
+import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextValidateInputDTO;
 import es.caib.invai.back.persistence.repository.application.security.webContext.AppWebContextCriteria;
 import es.caib.invai.back.service.facade.application.security.webContext.AppWebContextService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +23,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link AppWebContextController}, verifying that every endpoint delegates to
- * {@link AppWebContextService} and returns the expected HTTP status code.
+ * Unit tests for {@link AppWebContextController} (Security's view): a read-only listing plus the
+ * one-way validation action, verifying delegation to {@link AppWebContextService} and the expected
+ * HTTP status codes.
  */
 @ExtendWith(MockitoExtension.class)
 class AppWebContextControllerTest {
@@ -53,34 +54,12 @@ class AppWebContextControllerTest {
     }
 
     @Test
-    void create_returnsCreatedWithServiceResult() {
-        AppWebContextInputDTO inputDTO = new AppWebContextInputDTO(5L, 7L, 9L, "obs");
-        AppWebContextOutputDTO dto = new AppWebContextOutputDTO();
-        when(appWebContextService.create(inputDTO)).thenReturn(dto);
+    void validate_returnsNoContentAndDelegatesToService() {
+        AppWebContextValidateInputDTO inputDTO = new AppWebContextValidateInputDTO("looks fine");
 
-        ResponseEntity<AppWebContextOutputDTO> response = appWebContextController.create(inputDTO);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertSame(dto, response.getBody());
-    }
-
-    @Test
-    void update_returnsOkWithServiceResult() {
-        AppWebContextInputDTO inputDTO = new AppWebContextInputDTO(5L, 7L, 9L, "obs");
-        AppWebContextOutputDTO dto = new AppWebContextOutputDTO();
-        when(appWebContextService.update(1L, inputDTO)).thenReturn(dto);
-
-        ResponseEntity<AppWebContextOutputDTO> response = appWebContextController.update(1L, inputDTO);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertSame(dto, response.getBody());
-    }
-
-    @Test
-    void delete_returnsNoContentAndDelegatesToService() {
-        ResponseEntity<Void> response = appWebContextController.delete(1L);
+        ResponseEntity<Void> response = appWebContextController.validate(1L, inputDTO);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(appWebContextService).delete(1L);
+        verify(appWebContextService).validate(1L, inputDTO);
     }
 }

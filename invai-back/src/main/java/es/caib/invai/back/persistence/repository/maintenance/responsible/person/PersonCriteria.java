@@ -32,7 +32,7 @@ public class PersonCriteria {
     /** Master registry identity indicator managing active vs logical soft-deleted state lifecycles. */
     private Long statusId;
 
-    /** Global text lookup variable cross-referencing the {@code firstName}, {@code lastName} and {@code email} columns. */
+    /** Global text lookup variable cross-referencing the {@code firstName}, {@code lastName}, {@code email} and {@code userName} columns. */
     private String search;
 
     /**
@@ -41,4 +41,11 @@ public class PersonCriteria {
      * which must exclude the currently selected "persona actual").
      */
     private Long excludeId;
+
+    /**
+     * Optional CAIB-personnel flag filter. When {@code null}, no filter is applied and both
+     * external (company-managed) and CAIB personnel rows are returned; when {@code true}/{@code
+     * false}, restricts the result set to just that subset.
+     */
+    private Boolean personalCaib;
 }

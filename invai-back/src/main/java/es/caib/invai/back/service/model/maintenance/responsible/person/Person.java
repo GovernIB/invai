@@ -27,6 +27,8 @@ public class Person {
     private String email;
     /** Flags this person as CAIB internal staff, resolved via the DIR3 directory instead of a {@link Company}. */
     private boolean personalCaib;
+    /** Soffid username ("código de usuario", e.g. "u8443") of this CAIB staff member, or {@code null} for external persons or legacy records predating this field. */
+    private String userName;
 
     /** Timestamp when this record was created. */
     private LocalDateTime createdAt;

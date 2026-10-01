@@ -20,7 +20,7 @@ import java.time.Duration;
  * rather than hardcoded constants, mirroring how {@link #soffidWebClient()} itself is built from
  * the configured base URL.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Configuration
 public class SoffidConfig {
@@ -46,6 +46,20 @@ public class SoffidConfig {
     @Getter
     @Value("${es.caib.invai.soffid.role-search-path}")
     private String roleSearchPath;
+
+    /** SCIM 2.0 groups search endpoint path, relative to {@link #baseUrl}. */
+    @Getter
+    @Value("${es.caib.invai.soffid.group-search-path}")
+    private String groupSearchPath;
+
+    /**
+     * Granted-roles-by-user lookup endpoint path, relative to {@link #baseUrl} - not a real Soffid
+     * endpoint yet (pending from the Soffid team for the "Integracio" tab's live warning
+     * comparison), configured here so only this property needs to change once it is delivered.
+     */
+    @Getter
+    @Value("${es.caib.invai.soffid.granted-role-path}")
+    private String grantedRolePath;
 
     /**
      * Builds the {@link WebClient} instance used to call the Soffid SCIM 2.0 API, pre-configured

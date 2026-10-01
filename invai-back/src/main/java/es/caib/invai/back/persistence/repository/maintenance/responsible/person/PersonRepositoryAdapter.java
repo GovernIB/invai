@@ -166,6 +166,7 @@ public class PersonRepositoryAdapter implements PersonRepository {
             aud.setLastName(entity.getLastName());
             aud.setEmail(entity.getEmail());
             aud.setCompanyId(entity.getCompany() != null ? entity.getCompany().getId() : null);
+            aud.setUserName(entity.getUserName());
 
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,5 +79,55 @@ class SoffidControllerTest {
 
         assertEquals(1, result.getTotalElements());
         assertEquals("AD role", result.getContent().get(0).getName());
+    }
+
+    @Test
+    void resolveGroupDir3_found_returnsOkWithDir3Code() {
+        when(soffidClient.resolveGroupDir3("sgaip")).thenReturn("A04027054");
+
+        SoffidController controller = new SoffidController(soffidClient);
+        ResponseEntity<Map<String, String>> result = controller.resolveGroupDir3("sgaip");
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertNotNull(result.getBody());
+        assertEquals("A04027054", result.getBody().get("dir3Code"));
+    }
+
+    @Test
+    void resolveGroupDir3_notFound_returnsNoContent() {
+        when(soffidClient.resolveGroupDir3("nonexistent")).thenReturn(null);
+
+        SoffidController controller = new SoffidController(soffidClient);
+        ResponseEntity<Map<String, String>> result = controller.resolveGroupDir3("nonexistent");
+
+        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    }
+
+    @Test
+    void getUserRoles_returnsRolesFromClient() {
+        SoffidRole role = new SoffidRole();
+        role.setId(100L);
+        role.setName("AD role");
+        when(soffidClient.getUserRoles("u00629")).thenReturn(List.of(role));
+
+        SoffidController controller = new SoffidController(soffidClient);
+        List<SoffidRole> result = controller.getUserRoles("u00629");
+
+        assertEquals(1, result.size());
+        assertEquals(100L, result.get(0).getId());
+    }
+
+    @Test
+    void getRolesByIds_returnsRolesFromClient() {
+        SoffidRole role = new SoffidRole();
+        role.setId(26L);
+        role.setName("SNMPAGENT");
+        when(soffidClient.getRolesByIds(List.of(26L, 33L))).thenReturn(List.of(role));
+
+        SoffidController controller = new SoffidController(soffidClient);
+        List<SoffidRole> result = controller.getRolesByIds(List.of(26L, 33L));
+
+        assertEquals(1, result.size());
+        assertEquals(26L, result.get(0).getId());
     }
 }

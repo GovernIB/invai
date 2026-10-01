@@ -38,6 +38,7 @@ public interface PersonMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "company.id", source = "companyId")
+    @Mapping(target = "userName", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -51,6 +52,7 @@ public interface PersonMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "company.id", source = "companyId")
+    @Mapping(target = "userName", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

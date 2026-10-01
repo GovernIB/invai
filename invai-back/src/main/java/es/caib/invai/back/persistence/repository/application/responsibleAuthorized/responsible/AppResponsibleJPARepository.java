@@ -26,4 +26,7 @@ public interface AppResponsibleJPARepository extends JpaRepository<AppResponsibl
 
     /** Finds every active (not soft-deleted) assignment currently held by the given person, across all applications. */
     List<AppResponsibleEntity> findAllByPersonIdAndDeletedAtIsNull(Long personId);
+
+    /** Finds every active (not soft-deleted) assignment the given person holds on the given anchor, across every responsible type. */
+    List<AppResponsibleEntity> findAllByAppResponsibleAuthorizedIdAndPersonIdAndDeletedAtIsNull(Long appResponsibleAuthorizedId, Long personId);
 }

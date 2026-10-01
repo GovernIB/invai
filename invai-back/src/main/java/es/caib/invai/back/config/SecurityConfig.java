@@ -98,6 +98,7 @@ public class SecurityConfig {
                                 .requestMatchers("/login/oauth2/code/*").permitAll()
                                 .requestMatchers("/oauth2/**").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/", "/index.html", "/swagger-ui/**", "/swagger.json", "/v3/api-docs/**").authenticated()
                                 .requestMatchers("/auth/**").authenticated()
                                 .requestMatchers("/**").hasAnyRole("INV_SUPER")
                 )

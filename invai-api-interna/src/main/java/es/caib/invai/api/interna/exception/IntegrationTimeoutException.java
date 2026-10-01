@@ -5,7 +5,7 @@ package es.caib.invai.api.interna.exception;
  * does not respond within the configured timeout. Mapped to HTTP 504 by
  * {@link IntegrationsExceptionHandler}.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 public class IntegrationTimeoutException extends RuntimeException {
 

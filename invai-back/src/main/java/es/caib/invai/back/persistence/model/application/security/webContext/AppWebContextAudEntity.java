@@ -31,6 +31,10 @@ public class AppWebContextAudEntity {
     @Column(name = "APP_SECURITY_ID", nullable = false)
     private Long appSecurityId;
 
+    /** Identifier of the development anchor at the time of the audited change. */
+    @Column(name = "APP_DEVELOPMENT_ID")
+    private Long appDevelopmentId;
+
     /** Identifier of the associated web context at the time of the audited change. */
     @Column(name = "WEB_CONTEXT_ID", nullable = false)
     private Long webContextId;
@@ -38,6 +42,27 @@ public class AppWebContextAudEntity {
     /** Identifier of the associated functional field at the time of the audited change. */
     @Column(name = "FIELD_ID", nullable = false)
     private Long fieldId;
+
+    /** URL of the web context at the time of the audited change. */
+    @Column(name = "URL")
+    private String url;
+
+    /** Snapshot of the {@code validated} flag at the time of the audited change. */
+    @Column(name = "VALIDATED")
+    private Boolean validated;
+
+    /** Snapshot of the validation timestamp at the time of the audited change. */
+    @Column(name = "VALIDATED_AT")
+    private LocalDateTime validatedAt;
+
+    /** Snapshot of the validating user at the time of the audited change. */
+    @Column(name = "VALIDATED_BY")
+    private String validatedBy;
+
+    /** Snapshot of the validation justification at the time of the audited change. */
+    @Lob
+    @Column(name = "VALIDATED_REASON")
+    private String validatedReason;
 
     /** Timestamp at which the original record was created. */
     @Column(name = "CREATED_AT")

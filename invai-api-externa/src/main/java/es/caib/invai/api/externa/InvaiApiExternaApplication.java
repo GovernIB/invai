@@ -37,7 +37,7 @@ import org.springframework.context.annotation.PropertySource;
 		info = @Info(
 				title = "INVAI – API EXTERNA",
 				description = "Servei de gestió de l'inventari d'aplicacions informàtiques de les Illes Balears (INVAI).",
-				version = "1.0.4"
+				version = "1.0.5"
 		),
 		servers = @Server(url = "/invaiapi/externa")
 )

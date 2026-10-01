@@ -5,7 +5,7 @@
     <parent>
         <artifactId>invai</artifactId>
         <groupId>es.caib.invai</groupId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </parent>
 
     <artifactId>invai-api-interna</artifactId>

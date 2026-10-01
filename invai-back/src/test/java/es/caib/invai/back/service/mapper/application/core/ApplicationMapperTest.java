@@ -227,7 +227,7 @@ class ApplicationMapperTest {
         application.setId(1L);
         application.setStatus(StatusEnum.ACTIVE);
 
-        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null, true, false, true, true, false, true, false);
+        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null, true, false, true, true, false, true, false, true);
 
         assertTrue(response.getMissingDevelopmentFields());
         assertFalse(response.getMissingResponsibleTypes());
@@ -236,6 +236,7 @@ class ApplicationMapperTest {
         assertFalse(response.getMissingSecurityData());
         assertTrue(response.getMissingSystems());
         assertFalse(response.getMissingDatabases());
+        assertTrue(response.getMissingIntegrationData());
     }
 
     @Test

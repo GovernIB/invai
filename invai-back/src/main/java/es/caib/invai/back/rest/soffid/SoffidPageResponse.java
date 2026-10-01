@@ -13,7 +13,7 @@ import java.util.List;
  * total match count across every page.
  *
  * @param <T> the type of resource in this page ({@code SoffidUser}/{@code SoffidRole})
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Getter
 @Setter

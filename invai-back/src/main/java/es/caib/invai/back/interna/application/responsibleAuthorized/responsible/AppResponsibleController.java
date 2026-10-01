@@ -30,7 +30,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/responsible")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize ("hasRole('ROLE_INV_SUPER')")
 public class AppResponsibleController {
 
     /** Facade service handling the business logic for AppResponsible operations. */

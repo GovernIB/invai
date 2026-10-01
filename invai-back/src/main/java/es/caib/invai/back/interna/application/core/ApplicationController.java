@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.application.core;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.service.facade.application.core.ApplicationService;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
@@ -17,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.List;
 
 /**
  * REST controller exposing CRUD and soft-delete/reactivate endpoints for {@code Application}, the
@@ -141,5 +143,22 @@ public class ApplicationController {
     public ResponseEntity<ApplicationOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to update application ID: {}", id);
         return ResponseEntity.ok(applicationService.reactivate(id));
+    }
+
+    /**
+     * Audits every application in the inventory, checking each active responsible/authorized
+     * assignment's DIR3 against the owning application's administrative unit. Any assignment found
+     * to mismatch - and not already {@code MANUAL} or {@code NOT_APPLY} - is downgraded to
+     * {@code NOT_VALIDATED}. Each application's persisted {@code dir3Mismatch} flag is also refreshed
+     * to reflect its current real state ({@code true} if any active, Personal CAIB assignment
+     * mismatches now, {@code MANUAL} assignments never counting).
+     *
+     * @return a {@link ResponseEntity} wrapping every application currently mismatching (not just
+     * ones that changed in this run), identified by ID and name, HTTP 200
+     */
+    @PutMapping("dir3-check-all")
+    public ResponseEntity<List<ApplicationDir3MismatchOutputDTO>> checkDir3MismatchForAllApplications() {
+        log.info("REST: Request to audit DIR3 mismatches across every application");
+        return ResponseEntity.ok(applicationService.checkDir3MismatchForAllApplications());
     }
 }

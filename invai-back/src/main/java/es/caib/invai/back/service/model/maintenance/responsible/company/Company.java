@@ -19,6 +19,9 @@ public class Company {
     /** Company corporate name label string. */
     private String name;
 
+    /** Company tax identification number (NIF/CIF). */
+    private String nif;
+
     /** Timestamp at which the company was created. */
     private LocalDateTime createdAt;
     /** Username of the user who created the company. */

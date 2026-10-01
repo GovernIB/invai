@@ -128,7 +128,7 @@ class RoleTransferServiceFacadeBeanTest {
         when(appAuthorizedRepository.findAllActiveByPersonId(10L)).thenReturn(List.of(authorized));
 
         AppAuthorizedTypeLink link = AppAuthorizedTypeLink.builder().appAuthorizedId(2L).authorizationTypeId(5L).build();
-        when(appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(2L)).thenReturn(List.of(link));
+        when(appAuthorizedTypeLinkRepository.findAllActiveByAppAuthorizedId(2L)).thenReturn(List.of(link));
         AuthorizationType authorizationType = new AuthorizationType();
         authorizationType.setName("Firmar peticiones");
         when(authorizationTypeRepository.findById(5L)).thenReturn(authorizationType);
@@ -238,7 +238,7 @@ class RoleTransferServiceFacadeBeanTest {
         verify(appResponsibleRepository).delete(existing);
         verify(appResponsibleRepository, never()).update(any(), any());
         verify(personRepository, never()).findByEmail(any());
-        verify(soffidClient, never()).findByEmail(any());
+        verify(soffidClient, never()).searchByEmail(any());
     }
 
     // ------------------------------------------------------------------
@@ -361,7 +361,7 @@ class RoleTransferServiceFacadeBeanTest {
         soffidUser.setLastName("Fuster");
         soffidUser.setEmailAddress(TARGET_EMAIL);
         soffidUser.setActive(true);
-        when(soffidClient.findByEmail(TARGET_EMAIL)).thenReturn(soffidUser);
+        when(soffidClient.searchByEmail(TARGET_EMAIL)).thenReturn(soffidUser);
         Person created = new Person();
         created.setId(50L);
         when(personRepository.create(any(Person.class))).thenReturn(created);
@@ -387,7 +387,7 @@ class RoleTransferServiceFacadeBeanTest {
     @Test
     void transfer_targetNotFoundLocallyNorInSoffid_throwsBusinessRuleException() {
         when(personRepository.findByEmail(TARGET_EMAIL)).thenReturn(null);
-        when(soffidClient.findByEmail(TARGET_EMAIL)).thenReturn(null);
+        when(soffidClient.searchByEmail(TARGET_EMAIL)).thenReturn(null);
 
         RoleTransferInputDTO inputDTO = new RoleTransferInputDTO(
                 List.of(new RoleTransferItemDTO(1L, RoleAssignmentType.RESPONSIBLE)), TARGET_EMAIL, false);

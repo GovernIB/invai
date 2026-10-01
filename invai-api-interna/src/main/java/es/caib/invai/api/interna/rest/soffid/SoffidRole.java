@@ -9,7 +9,7 @@ import lombok.Setter;
  * feed the security role search typeahead are modelled; every other SCIM attribute
  * ({@code informationSystemName}, {@code ownerRoles}, {@code meta}, etc.) is intentionally ignored.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Getter
 @Setter

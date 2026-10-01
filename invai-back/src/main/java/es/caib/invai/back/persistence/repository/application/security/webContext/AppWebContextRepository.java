@@ -46,12 +46,23 @@ public interface AppWebContextRepository {
 
     /**
      * Resolves a paginated, filtered list of application-web context links scoped to a
-     * single parent security anchor.
+     * single parent security anchor. Used by Security's read-only listing endpoint.
      *
      * @param appSecurityId mandatory parent security anchor identifier scoping the result set
      * @param criteria      additional filter criteria
      * @param pageable      pagination and sorting instructions
      * @return the paginated page of matching models
      */
-    Page<AppWebContext> findAll(Long appSecurityId, AppWebContextCriteria criteria, Pageable pageable);
+    Page<AppWebContext> findAllByAppSecurityId(Long appSecurityId, AppWebContextCriteria criteria, Pageable pageable);
+
+    /**
+     * Resolves a paginated, filtered list of application-web context links scoped to a
+     * single parent development anchor. Used by Development's CRUD listing endpoint.
+     *
+     * @param appDevelopmentId mandatory parent development anchor identifier scoping the result set
+     * @param criteria         additional filter criteria
+     * @param pageable         pagination and sorting instructions
+     * @return the paginated page of matching models
+     */
+    Page<AppWebContext> findAllByAppDevelopmentId(Long appDevelopmentId, AppWebContextCriteria criteria, Pageable pageable);
 }

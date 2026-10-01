@@ -32,6 +32,10 @@ public class CompanyAudEntity {
     @Column(name = "NAME", length = 150, nullable = false)
     private String name;
 
+    /** Company tax identification number (NIF/CIF) captured at the time of the audited change. */
+    @Column(name = "NIF", length = 20)
+    private String nif;
+
     /** Timestamp at which the company record was originally created. */
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;

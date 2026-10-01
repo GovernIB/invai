@@ -55,13 +55,30 @@ public class AppResponsibleInputDTO {
     /** Free-text job title/position held by the responsible person for this assignment. */
     private String jobTitle;
 
-    /** Free-text remarks about this responsible assignment. Optional; editable both on create and on update. */
+    /** Free-text remarks about this responsible assignment. Optional; editable both on creation and on update. */
     private String observation;
 
     /**
      * Whether the linked person is CAIB internal staff. Kept in sync with the linked
      * {@code Person} record on both create and update: if it differs from what is currently
-     * stored, the person's own {@code isPersonalCaib} flag is updated to match.
+     * stored, the person's own {@code isPersonalCaib} flag is updated to match. Optional; the
+     * facade treats an omitted/null value as {@code false}, exactly as the previous primitive
+     * {@code boolean} field did.
      */
-    private boolean personalCaib;
+    private Boolean personalCaib;
+
+    /**
+     * The DIR3 validation status to record for this assignment on creation, as already computed by
+     * the caller (typically the front end, from a prior call to the DIR3 check endpoint) - the
+     * facade persists this value as-is rather than recomputing it via a live Soffid call. Not
+     * consulted on update: the DIR3 validation state only ever changes via manual validation or the
+     * owning application's administrative unit changing.
+     */
+    private Boolean dir3Status;
+
+    /**
+     * Person's Soffid username ("código de usuario", e.g. "u8443"), used only when {@link
+     * #personId} is {@code null} to create a new person; {@code null} when not CAIB personnel.
+     */
+    private String personUserName;
 }

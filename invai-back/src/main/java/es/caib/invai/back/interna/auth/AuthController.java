@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,7 +49,7 @@ public class AuthController {
         UserAuthDTO userAuth = new UserAuthDTO();
         userAuth.setAuthenticated(true);
         userAuth.setUsername(principal.getName());
-
+        userAuth.setFullName(((DefaultOidcUser) ((OAuth2AuthenticationToken) principal).getPrincipal()).getFullName());
         return ResponseEntity.ok(userAuth);
     }
 

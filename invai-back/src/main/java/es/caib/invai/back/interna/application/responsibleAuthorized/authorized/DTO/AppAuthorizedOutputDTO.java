@@ -2,6 +2,7 @@ package es.caib.invai.back.interna.application.responsibleAuthorized.authorized.
 
 import es.caib.invai.back.interna.maintenance.responsible.authorizationType.DTO.AuthorizationTypeOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
+import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +35,8 @@ public class AppAuthorizedOutputDTO {
     private List<AuthorizationTypeOutputDTO> authorizationTypes;
     /** Free-text remarks about this authorization. */
     private String observation;
+    /** DIR3 validation state of this assignment against the application's administrative unit. */
+    private Dir3Validation dir3Validation;
     /** Timestamp when this record was soft-deleted, or {@code null} if still active. */
     private LocalDateTime deletedAt;
 }

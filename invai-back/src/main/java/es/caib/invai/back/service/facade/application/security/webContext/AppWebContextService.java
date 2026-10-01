@@ -1,13 +1,16 @@
 package es.caib.invai.back.service.facade.application.security.webContext;
 
-import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextInputDTO;
-import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextOutputDTO;
+import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebContextOutputDTO;
+import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextValidateInputDTO;
 import es.caib.invai.back.persistence.repository.application.security.webContext.AppWebContextCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
- * Domain Boundary Outbound Port interfacing the internal transactional domain operations.
+ * Domain Boundary Outbound Port interfacing the internal transactional domain operations exposed
+ * to Security: a read-only listing plus the one-way validation action. Creating, editing, and
+ * deleting web context assignments is only exposed from Development - see
+ * {@code service.facade.application.development.webContext.AppWebContextService}.
  *
  * @since 1.0.4
  */
@@ -24,27 +27,11 @@ public interface AppWebContextService {
     Page<AppWebContextOutputDTO> getAll(Long appSecurityId, AppWebContextCriteria criteria, Pageable pageable);
 
     /**
-     * Creates a new application-web context link from the given input payload.
+     * Marks the application-web context link identified by {@code id} as validated. One-way:
+     * refuses if the record is already validated.
      *
-     * @param inputDTO the creation payload
-     * @return the created link, mapped to its output transfer representation
+     * @param id       identifier of the link to validate
+     * @param inputDTO payload carrying the mandatory free-text validation justification
      */
-    AppWebContextOutputDTO create(AppWebContextInputDTO inputDTO);
-
-    /**
-     * Updates the application-web context link identified by {@code id} with the given
-     * input payload.
-     *
-     * @param id       identifier of the link to update
-     * @param inputDTO the update payload
-     * @return the updated link, mapped to its output transfer representation
-     */
-    AppWebContextOutputDTO update(Long id, AppWebContextInputDTO inputDTO);
-
-    /**
-     * Deletes (logically) the application-web context link identified by {@code id}.
-     *
-     * @param id identifier of the link to delete
-     */
-    void delete(Long id);
+    void validate(Long id, AppWebContextValidateInputDTO inputDTO);
 }

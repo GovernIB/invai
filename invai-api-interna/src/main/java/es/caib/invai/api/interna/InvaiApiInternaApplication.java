@@ -14,14 +14,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Main application entry point and configuration bootstrap configuration for the INVAI
- * Integrations API (Soffid, DIR3CAIB), called server-to-server by {@code invai-back}.
+ * Integrations API (Soffid, DIR3CAIB, Open Data), called server-to-server by {@code invai-back}.
  * <p>
  * Extends {@link SpringBootServletInitializer} to enable traditional web archive (WAR) deployment
  * topology inside external servlet containers (e.g., JBoss EAP, WildFly, Apache Tomcat), whilst
  * preserving standard embedded standalone execution pathways.
  * </p>
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @SpringBootApplication
 @EnableScheduling
@@ -29,8 +29,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @OpenAPIDefinition(
 		info = @Info(
 				title = "INVAI – API INTERNA (Integracions)",
-				description = "Servei d'integracions externes (Soffid, DIR3CAIB) de l'inventari d'aplicacions informàtiques de les Illes Balears (INVAI).",
-				version = "1.0.4"
+				description = "Servei d'integracions externes (Soffid, DIR3CAIB, Open Data) de l'inventari d'aplicacions informàtiques de les Illes Balears (INVAI).",
+				version = "1.0.5"
 		),
 		servers = @Server(url = "/invaiapi/interna")
 )

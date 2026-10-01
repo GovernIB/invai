@@ -1,6 +1,7 @@
 package es.caib.invai.back.persistence.repository.application.core;
 
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
+import es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity;
 import es.caib.invai.back.persistence.model.application.system_database.database.AppDatabaseEntity;
 import es.caib.invai.back.persistence.model.application.system_database.system.AppSystemEntity;
@@ -61,6 +62,9 @@ class ApplicationSpecificationTest {
     @Mock
     private Root<AppSystemEntity> appSystemRoot;
 
+    @Mock
+    private Root<AppAuthorizedEntity> appAuthorizedRoot;
+
     @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
@@ -73,6 +77,9 @@ class ApplicationSpecificationTest {
         lenient().when(cb.isNull(any())).thenReturn(predicate);
         lenient().when(cb.not(any())).thenReturn(predicate);
         lenient().when(cb.or(any(Predicate[].class))).thenReturn(predicate);
+        // CriteriaBuilder#or has a fixed-arity 2-param overload (Expression<Boolean>, Expression<Boolean>)
+        // distinct from the vararg one above - a 2-argument call resolves to it, so it needs its own stub.
+        lenient().when(cb.or(any(Predicate.class), any(Predicate.class))).thenReturn(predicate);
         lenient().when(cb.and(any(Predicate[].class))).thenReturn(predicate);
         lenient().when(cb.disjunction()).thenReturn(predicate);
         lenient().when(cb.conjunction()).thenReturn(predicate);
@@ -82,12 +89,14 @@ class ApplicationSpecificationTest {
         lenient().when(subquery.from(AppResponsibleEntity.class)).thenReturn(appResponsibleRoot);
         lenient().when(subquery.from(AppDatabaseEntity.class)).thenReturn(appDatabaseRoot);
         lenient().when(subquery.from(AppSystemEntity.class)).thenReturn(appSystemRoot);
+        lenient().when(subquery.from(AppAuthorizedEntity.class)).thenReturn(appAuthorizedRoot);
         lenient().when(subquery.select(any())).thenReturn(subquery);
         lenient().when(subquery.where(any(Predicate.class))).thenReturn(subquery);
         lenient().when(cb.exists(any())).thenReturn(predicate);
         lenient().when(appResponsibleRoot.<String>get(anyString())).thenReturn(path);
         lenient().when(appDatabaseRoot.<String>get(anyString())).thenReturn(path);
         lenient().when(appSystemRoot.<String>get(anyString())).thenReturn(path);
+        lenient().when(appAuthorizedRoot.<String>get(anyString())).thenReturn(path);
     }
 
     @Test
@@ -421,11 +430,32 @@ class ApplicationSpecificationTest {
 
         ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb, times(12)).like(eq(path), eq("%lead%"));
+        verify(cb, times(23)).like(eq(path), eq("%lead%"));
         verify(cb).ilike(eq(path), eq("%lead%"));
+        // 7 two-way ORs: server name (system vs database path), responsible person name
+        // (firstName vs lastName), authorized person name (firstName vs lastName), the
+        // responsible/authorized EXISTS group itself (responsible vs authorized), environment name
+        // via system path (name vs nameEs), environment name via database path (name vs nameEs),
+        // and the environment EXISTS group itself (system vs database path).
+        verify(cb, times(7)).or(predicate, predicate);
         verify(cb).or(predicate, predicate, predicate, predicate, predicate,
                 predicate, predicate, predicate, predicate, predicate,
-                predicate, predicate, predicate, predicate);
+                predicate, predicate, predicate, predicate, predicate,
+                predicate, predicate, predicate);
+    }
+
+    @Test
+    void filterByCriteria_withQuickSearch_addsExistsPredicatesForServerDatabaseResponsibleAuthorizedAndEnvironmentNames() {
+        ApplicationCriteria criteria = new ApplicationCriteria();
+        criteria.setQuickSearch("lead");
+
+        ApplicationSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(subquery, times(2)).from(AppSystemEntity.class);
+        verify(subquery, times(3)).from(AppDatabaseEntity.class);
+        verify(subquery).from(AppResponsibleEntity.class);
+        verify(subquery).from(AppAuthorizedEntity.class);
+        verify(cb, times(7)).exists(subquery);
     }
 
     @Test

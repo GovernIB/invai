@@ -16,16 +16,6 @@ import java.util.Optional;
 public interface AppAuthorizedJPARepository extends JpaRepository<AppAuthorizedEntity, Long>, JpaSpecificationExecutor<AppAuthorizedEntity> {
 
     /**
-     * Checks whether an active (not soft-deleted) authorization already exists for the given
-     * anchor/person pair.
-     *
-     * @param appResponsibleAuthorizedId the parent anchor identifier
-     * @param personId the person identifier
-     * @return {@code true} if a matching active authorization exists
-     */
-    boolean existsByAppResponsibleAuthorizedIdAndPersonIdAndDeletedAtIsNull(Long appResponsibleAuthorizedId, Long personId);
-
-    /**
      * Checks whether another active (not soft-deleted) authorization already exists for the given
      * anchor/person pair, excluding a specific row identifier.
      *

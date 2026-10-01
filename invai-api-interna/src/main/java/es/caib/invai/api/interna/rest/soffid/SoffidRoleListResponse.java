@@ -11,7 +11,7 @@ import java.util.List;
  * Raw wire DTO mapping the SCIM 2.0 {@code ListResponse} envelope returned by the Soffid
  * {@code GET /scim2/v1/Role/} search endpoint.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Getter
 @Setter

@@ -37,6 +37,12 @@ public class PersonOutputDTO {
     /** Whether this person is CAIB staff (sourced via the future DIR3 integration), rather than an external company contact. */
     private boolean personalCaib;
 
+    /**
+     * Soffid username ("código de usuario", e.g. "u8443") of this CAIB staff member. {@code null}
+     * for external persons, or for a CAIB person whose local record predates this field.
+     */
+    private String userName;
+
     /** Timestamp at which the person was logically deleted, or {@code null} if still active. */
     private LocalDateTime deletedAt;
 }

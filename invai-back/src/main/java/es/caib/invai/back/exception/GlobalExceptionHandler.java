@@ -6,10 +6,15 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import es.caib.invai.back.utils.Constants;
 
@@ -110,6 +115,88 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Intercepts requests whose path matches no controller mapping and no static resource - e.g. a
+     * malformed/truncated frontend URL, or a stale bookmark. Without this, such a request would
+     * otherwise fall through to the generic catch-all below and be reported as a confusing 500,
+     * when it is really just a 404.
+     *
+     * @param ex the intercepted routing exception
+     * @return a localized HTTP 404 (Not Found) response
+     */
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    public ResponseEntity<ValidationErrorResponse> handleResourceNotFoundExceptions(Exception ex) {
+        log.warn("No controller mapping or static resource found: {}", ex.getMessage());
+        return buildLocalizedErrorResponse(Constants.ERR_RESOURCE_NOT_FOUND, null, HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Intercepts a request parameter (path variable or query param) that couldn't be converted to
+     * the type expected by the controller method (e.g. a non-numeric value for a {@code Long} id).
+     *
+     * @param ex the intercepted type conversion exception
+     * @return a localized HTTP 400 (Bad Request) response naming the offending parameter
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ValidationErrorResponse> handleTypeMismatchExceptions(MethodArgumentTypeMismatchException ex) {
+        return buildLocalizedErrorResponse(Constants.ERR_INVALID_PARAMETER_FORMAT, new Object[]{ex.getName()}, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Intercepts a request missing a required query/form parameter declared on the controller
+     * method (e.g. {@code @RequestParam} without {@code required = false}).
+     *
+     * @param ex the intercepted missing-parameter exception
+     * @return a localized HTTP 400 (Bad Request) response naming the missing parameter
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMissingParameterExceptions(MissingServletRequestParameterException ex) {
+        return buildLocalizedErrorResponse(Constants.ERR_MISSING_REQUIRED_PARAMETER, new Object[]{ex.getParameterName()}, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Intercepts a request body that Spring couldn't deserialize (malformed JSON, wrong type for a
+     * field, empty body where one was required, etc). The raw parser error is logged server-side
+     * only, since it can echo back fragments of the submitted payload.
+     *
+     * @param ex the intercepted deserialization exception
+     * @return a generic localized HTTP 400 (Bad Request) response, never containing the raw parser error
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMalformedRequestBodyExceptions(HttpMessageNotReadableException ex) {
+        log.warn("Malformed or unreadable request body: {}", ex.getMessage());
+        return buildLocalizedErrorResponse(Constants.ERR_MALFORMED_REQUEST_BODY, null, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Intercepts a Soffid SCIM call that exceeded its configured timeout (see
+     * {@code SoffidClient}). Kept distinct from every other Soffid failure - handled via
+     * {@link BusinessRuleException}/{@code SoffidClientException} and reported as a generic 400 -
+     * so a caller can tell "Soffid is unreachable/erroring" apart from "Soffid is just slow right
+     * now, try again".
+     *
+     * @return a localized HTTP 504 (Gateway Timeout) response
+     */
+    @ExceptionHandler(SoffidTimeoutException.class)
+    public ResponseEntity<ValidationErrorResponse> handleSoffidTimeoutExceptions() {
+        log.warn("Soffid call timed out");
+        return buildLocalizedErrorResponse(Constants.ERR_SOFFID_TIMEOUT, null, HttpStatus.GATEWAY_TIMEOUT);
+    }
+
+    /**
+     * Intercepts an Open Data/Reutilització document fetch that exceeded its configured timeout
+     * (see {@code DataApiClient}). Kept distinct from every other fetch failure - handled via
+     * {@link BusinessRuleException} and reported as a generic 400 - so a caller can tell "the
+     * application's API is unreachable/erroring" apart from "it's just slow right now, try again".
+     *
+     * @return a localized HTTP 504 (Gateway Timeout) response
+     */
+    @ExceptionHandler(DataTimeoutException.class)
+    public ResponseEntity<ValidationErrorResponse> handleDataTimeoutExceptions() {
+        log.warn("Open Data/Reutilització document fetch timed out");
+        return buildLocalizedErrorResponse(Constants.ERR_DATA_TIMEOUT, null, HttpStatus.GATEWAY_TIMEOUT);
+    }
+
+    /**
      * Catch-all for any exception not handled by a more specific {@code @ExceptionHandler} above
      * (a genuine programming error, an unexpected runtime failure, etc). Without this, such an
      * exception would fall through to the servlet container/Spring Boot's default error handling
@@ -160,6 +247,27 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Overload of {@link #buildLocalizedErrorResponse(String, Object[], boolean)} for handlers
+     * whose HTTP status isn't always {@link HttpStatus#BAD_REQUEST} - {@code messageOrKey} is
+     * always treated as a resource bundle translation key.
+     *
+     * @param key    the resource bundle property entry key
+     * @param args   optional substitution parameters passed to the message formatter
+     * @param status the HTTP status to respond with
+     * @return the assembled response entity wrapper containing localized title and text payloads
+     */
+    private ResponseEntity<ValidationErrorResponse> buildLocalizedErrorResponse(String key, Object[] args, HttpStatus status) {
+        Locale currentLocale = LocaleContextHolder.getLocale();
+
+        ValidationErrorResponse response = new ValidationErrorResponse(
+                messageSource.getMessage(Constants.VALIDATION_APPLICATION_TITLE, null, currentLocale),
+                messageSource.getMessage(key, args, currentLocale)
+        );
+
+        return new ResponseEntity<>(response, status);
     }
 
 }

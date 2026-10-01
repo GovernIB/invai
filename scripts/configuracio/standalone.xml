@@ -74,7 +74,7 @@
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:8.0">
             <console-handler name="CONSOLE">
-                <level name="INFO"/>
+                <level name="DEBUG"/>
                 <formatter>
                     <named-formatter name="COLOR-PATTERN"/>
                 </formatter>
@@ -107,6 +107,9 @@
             </logger>
             <logger category="sun.rmi">
                 <level name="WARN"/>
+            </logger>
+            <logger category="es.caib.invai.back">
+                <level name="INFO"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>
@@ -369,10 +372,6 @@
                 </server-ssl-contexts>
             </tls>
         </subsystem>
-        <!-- No container-managed OIDC deployment is configured: authentication is handled entirely
-             by Spring Security's own oauth2Login in invai-back/invai-back-externa's SecurityConfig.
-             Subsystem kept bare (extension present, nothing configured) in case a future deployment
-             needs container-level OIDC. -->
         <subsystem xmlns="urn:wildfly:elytron-oidc-client:2.0"/>
         <subsystem xmlns="urn:wildfly:health:1.0" security-enabled="false"/>
         <subsystem xmlns="urn:jboss:domain:infinispan:14.0">

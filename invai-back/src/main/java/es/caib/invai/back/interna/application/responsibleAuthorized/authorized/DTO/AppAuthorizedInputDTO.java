@@ -57,13 +57,28 @@ public class AppAuthorizedInputDTO {
     @NotEmpty(message = "{" + Constants.VALIDATION_APPAUTHORIZED_AUTHORIZATION_TYPE_IDS + "}")
     private List<Long> authorizationTypeIds;
 
-    /** Free-text remarks about this authorization. Optional; editable both on create and on update. */
+    /** Free-text remarks about this authorization. Optional; editable both on creation and on update. */
     private String observation;
 
     /**
-     * Whether the linked person is CAIB internal staff. Only consulted on create: if it differs
+     * Whether the linked person is CAIB internal staff. Only consulted on creation: if it differs
      * from what is currently stored on the linked {@code Person} record, that record is updated
      * to match. Not editable via update (see the class-level restriction on mutable fields).
+     * Optional; the facade treats an omitted/null value as {@code false}, exactly as the previous
+     * primitive {@code boolean} field did.
      */
-    private boolean personalCaib;
+    private Boolean personalCaib;
+
+    /**
+     * The DIR3 validation status to record for this assignment on create, as already computed by
+     * the caller (typically the front end, from a prior call to the DIR3 check endpoint) - the
+     * facade persists this value as-is rather than recomputing it via a live Soffid call.
+     */
+    private Boolean dir3Status;
+
+    /**
+     * Person's Soffid username ("código de usuario", e.g. "u8443"), used only when {@link
+     * #personId} is {@code null} to create a new person; {@code null} when not CAIB personnel.
+     */
+    private String personUserName;
 }

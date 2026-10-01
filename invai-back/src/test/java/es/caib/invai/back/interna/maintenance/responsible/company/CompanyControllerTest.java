@@ -65,7 +65,7 @@ class CompanyControllerTest {
 
     @Test
     void create_returnsCreatedWithServiceResult() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("Name");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("Name", null);
         CompanyOutputDTO dto = new CompanyOutputDTO();
         when(companyService.create(inputDTO)).thenReturn(dto);
 
@@ -77,7 +77,7 @@ class CompanyControllerTest {
 
     @Test
     void update_returnsOkWithServiceResult() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("Name");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("Name", null);
         CompanyOutputDTO dto = new CompanyOutputDTO();
         when(companyService.update(1L, inputDTO)).thenReturn(dto);
 

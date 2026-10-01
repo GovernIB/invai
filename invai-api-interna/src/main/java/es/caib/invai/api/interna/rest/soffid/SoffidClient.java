@@ -1,6 +1,7 @@
 package es.caib.invai.api.interna.rest.soffid;
 
 import es.caib.invai.api.interna.config.SoffidConfig;
+import es.caib.invai.api.interna.controller.soffid.SoffidController;
 import es.caib.invai.api.interna.exception.IntegrationTimeoutException;
 import es.caib.invai.api.interna.exception.IntegrationUnavailableException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClientException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
  * the username (código de usuario) — so a single search box finds someone by name or by user code
  * without the caller needing to know which one they typed, and without a second round trip.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Component
 @Slf4j
@@ -156,32 +158,152 @@ public class SoffidClient {
     }
 
     /**
-     * Builds the SCIM filter restricting Soffid roles to those belonging to this project's
-     * namespace, always requiring {@code name} to start with {@code "INV_"} - the shared Soffid
-     * instance hosts roles for many unrelated applications, so this base clause is never omitted.
-     * On top of that base clause, every whitespace-separated word of the given {@code name} search
-     * text must additionally appear somewhere in the role's {@code name} field. A blank/{@code
-     * null} {@code name} yields just the base {@code "INV_"} clause.
+     * Resolves the current Soffid role details for a given set of role ids - used to build/refresh
+     * the persisted snapshot of an integration entry's required roles from just the ids the
+     * frontend sends (see {@code AppIntegrationConnectionServiceFacadeBean#getRequiredRoles} in
+     * {@code invai-back}), rather than trusting client-supplied name/system/description.
      *
-     * @param name the raw search text, one or more words, or {@code null}/blank to list every
-     * {@code INV_} role
-     * @return the SCIM {@code filter} expression, always scoped to the {@code INV_} namespace
+     * @param ids the Soffid role ids to resolve, never empty
+     * @return every role Soffid currently has for the given ids - fewer than requested if some id
+     * no longer exists
+     */
+    public List<SoffidRole> getRolesByIds(List<Long> ids) {
+        String filter = ids.stream().map(id -> "id eq " + id).collect(Collectors.joining(" or "));
+        try {
+            ResponseEntity<SoffidRoleListResponse> response = soffidWebClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(soffidConfig.getRoleSearchPath())
+                            .queryParam("filter", filter)
+                            .queryParam("count", ids.size())
+                            .build())
+                    .retrieve()
+                    .toEntity(SoffidRoleListResponse.class)
+                    .block(REQUEST_TIMEOUT);
+
+            SoffidRoleListResponse body = response != null ? response.getBody() : null;
+            return body != null && body.getResources() != null ? body.getResources() : List.of();
+        } catch (IllegalStateException ex) {
+            log.error("Timed out fetching Soffid roles by id (ids={})", ids, ex);
+            throw new IntegrationTimeoutException("Soffid timed out", ex);
+        } catch (WebClientException ex) {
+            log.error("Failed to fetch Soffid roles by id (ids={})", ids, ex);
+            throw new IntegrationUnavailableException("Soffid unavailable", ex);
+        }
+    }
+
+    /**
+     * Resolves the DIR3CAIB code registered on a Soffid group.
+     *
+     * @param groupName the Soffid group's short internal name to look up (e.g. {@code "sgaip"})
+     * @return the group's DIR3CAIB code (trimmed), or {@code null} if no such group exists, or it
+     * carries no {@code "DIR3"} attribute
+     */
+    public String resolveGroupDir3(String groupName) {
+        String filter = "name eq '" + escape(groupName) + "'";
+        try {
+            ResponseEntity<SoffidGroupListResponse> response = soffidWebClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(soffidConfig.getGroupSearchPath())
+                            .queryParam("filter", filter)
+                            .queryParam("startIndex", 1)
+                            .queryParam("count", 1)
+                            .build())
+                    .retrieve()
+                    .toEntity(SoffidGroupListResponse.class)
+                    .block(REQUEST_TIMEOUT);
+
+            SoffidGroupListResponse body = response != null ? response.getBody() : null;
+            List<SoffidGroup> resources = body != null ? body.getResources() : null;
+            if (resources == null || resources.isEmpty()) {
+                return null;
+            }
+            Map<String, Object> attributes = resources.get(0).getAttributes();
+            Object dir3 = attributes != null ? attributes.get("DIR3") : null;
+            return dir3 != null ? dir3.toString().trim() : null;
+        } catch (IllegalStateException ex) {
+            log.error("Timed out resolving DIR3 for Soffid group (groupName='{}')", groupName, ex);
+            throw new IntegrationTimeoutException("Soffid timed out", ex);
+        } catch (WebClientException ex) {
+            log.error("Failed to resolve DIR3 for Soffid group (groupName='{}')", groupName, ex);
+            throw new IntegrationUnavailableException("Soffid unavailable", ex);
+        }
+    }
+
+    /**
+     * Fetches the roles Soffid currently reports as granted to the given account - used to compare
+     * against an integration entry's persisted required roles and flag a live warning when they
+     * differ (see {@code
+     * es.caib.invai.back.ejb.application.integration.connection.AppIntegrationConnectionServiceFacadeBean}).
+     * The {@code tothom} ("everyone") base role every account holds is excluded, since it's never a
+     * meaningful required role.
+     *
+     * @param username the Soffid account name to look up granted roles for
+     * @return every role currently granted to {@code username} (excluding {@code tothom}), or an
+     * empty list if none
+     */
+    public List<SoffidRole> getUserRoles(String username) {
+        String filter = "accountName eq '" + escape(username) + "' and roleName ne 'tothom'";
+        try {
+            ResponseEntity<SoffidUserRoleListResponse> response = soffidWebClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path(soffidConfig.getGrantedRolePath())
+                            .queryParam("filter", filter)
+                            .build())
+                    .retrieve()
+                    .toEntity(SoffidUserRoleListResponse.class)
+                    .block(REQUEST_TIMEOUT);
+
+            SoffidUserRoleListResponse body = response != null ? response.getBody() : null;
+            List<SoffidUserRole> resources = body != null ? body.getResources() : null;
+            return resources != null ? resources.stream().map(SoffidClient::toSoffidRole).toList() : List.of();
+        } catch (IllegalStateException ex) {
+            log.error("Timed out fetching granted roles for Soffid account (username='{}')", username, ex);
+            throw new IntegrationTimeoutException("Soffid timed out", ex);
+        } catch (WebClientException ex) {
+            log.error("Failed to fetch granted roles for Soffid account (username='{}')", username, ex);
+            throw new IntegrationUnavailableException("Soffid unavailable", ex);
+        }
+    }
+
+    /**
+     * Converts a {@code UserRole} resource into the same {@link SoffidRole} shape used
+     * elsewhere, so callers compare/display granted and required roles identically.
+     *
+     * @param userRole the granted-role resource to convert
+     * @return the equivalent {@link SoffidRole}
+     */
+    private static SoffidRole toSoffidRole(SoffidUserRole userRole) {
+        SoffidRole role = new SoffidRole();
+        role.setId(userRole.getRoleId());
+        role.setName(userRole.getRoleName());
+        role.setSystem(userRole.getSystem());
+        role.setDescription(userRole.getRoleDescription());
+        return role;
+    }
+
+    /**
+     * Builds the SCIM filter for role search: every whitespace-separated word of {@code name}
+     * must appear somewhere in the role's {@code name} field.
+     *
+     * @param name the raw search text, one or more words, or {@code null}/blank for no filter
+     * @return the SCIM {@code filter} expression, or {@code null} if {@code name} is blank
      */
     private static String buildRoleFilter(String name) {
-        String baseFilter = "name sw 'INV_'";
         if (StringUtils.isBlank(name)) {
-            return baseFilter;
+            return null;
         }
-        String wordClauses = Arrays.stream(name.trim().split("\\s+"))
+        return Arrays.stream(name.trim().split("\\s+"))
                 .map(word -> "name co '" + escape(word) + "'")
                 .collect(Collectors.joining(" and "));
-        return baseFilter + " and " + wordClauses;
     }
 
     /**
      * Builds the SCIM filter: always restricted to active accounts, additionally requiring every
-     * whitespace-separated word of {@code search} to appear somewhere in either the user's
-     * {@code fullName} or their {@code userName} (código de usuario).
+     * whitespace-separated word of {@code search} to appear somewhere in the user's {@code
+     * fullName}, their {@code userName} (código de usuario) or their {@code emailAddress} - the
+     * same three fields the local {@code Person} catalog search matches against (see {@code
+     * PersonSpecification} in {@code invai-back}), so both sources behave consistently from the
+     * caller's point of view.
      *
      * @param search the raw search text, one or more words, or {@code null}/blank for no filter
      * @return the SCIM {@code filter} expression, restricted to active accounts
@@ -191,7 +313,8 @@ public class SoffidClient {
             return "active eq true";
         }
         String perWordClauses = Arrays.stream(search.trim().split("\\s+"))
-                .map(word -> "(fullName co '" + escape(word) + "' or userName co '" + escape(word) + "')")
+                .map(word -> "(fullName co '" + escape(word) + "' or userName co '" + escape(word)
+                        + "' or emailAddress co '" + escape(word) + "')")
                 .collect(Collectors.joining(" and "));
         return perWordClauses + " and active eq true";
     }

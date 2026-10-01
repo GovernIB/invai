@@ -13,7 +13,7 @@ import java.util.Map;
  * i18n/{@code MessageSource} machinery {@code invai-back}'s own {@code GlobalExceptionHandler}
  * uses - this module is a technical proxy, not a user-facing application.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @RestControllerAdvice
 @Slf4j

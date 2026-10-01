@@ -45,6 +45,8 @@ class SecurityConfigTest {
 
     private static final String CLIENT_ID = "soffid-client";
 
+    private static final String LOGIN_SUCCESS_URL = "https://invai.example.com/invaifront/ca/aplicacions";
+
     @Mock
     private JwtDecoder jwtDecoder;
 
@@ -53,6 +55,7 @@ class SecurityConfigTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(securityConfig, "clientId", CLIENT_ID);
+        ReflectionTestUtils.setField(securityConfig, "loginSuccessUrl", LOGIN_SUCCESS_URL);
     }
 
     private ClientRegistration clientRegistration() {

@@ -25,9 +25,12 @@ import java.util.stream.Collectors;
 /**
  * Web Security Configuration for the integrations module, acting as an OAuth2 Resource Server:
  * it validates the Bearer JWT that {@code invai-back} forwards from its own authenticated OIDC
- * session, without running any login flow of its own.
+ * session, without running any login flow of its own. The Swagger UI/OpenAPI document endpoints
+ * are the sole exception, left {@code permitAll} so the API's own documentation can be browsed
+ * directly - this module has no session-based authentication mechanism at all, so nothing else
+ * short of a valid Bearer JWT could ever reach them anyway.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Configuration
 @EnableWebSecurity
@@ -54,7 +57,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().hasAnyRole("INV_SUPER"))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/index.html", "/swagger-ui/**", "/swagger.json", "/v3/api-docs/**").permitAll()
+                        .anyRequest().hasAnyRole("INV_SUPER"))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
         return http.build();
     }

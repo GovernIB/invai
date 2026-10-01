@@ -72,4 +72,11 @@ public class Application {
 
     /** Identity auditing identifier tracing who performed the application record deactivation. */
     private String deletedBy;
+
+    /**
+     * Whether at least one active, Personal CAIB responsible/authorized assignment's DIR3 currently
+     * doesn't match {@link #admUnitCode}, as of the last run of the bulk DIR3 audit. A
+     * {@code MANUAL} assignment never counts toward this flag.
+     */
+    private boolean     dir3Mismatch;
 }

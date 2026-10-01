@@ -67,24 +67,44 @@ class PersonSpecificationTest {
     }
 
     @Test
-    void filterByCriteria_nullCriteria_stillExcludesPersonalCaib() {
+    void filterByCriteria_nullCriteria_buildsEmptyPredicate() {
         Specification<PersonEntity> spec = PersonSpecification.filterByCriteria(null);
 
         Predicate result = spec.toPredicate(root, query, cb);
 
         assertNotNull(result);
-        verify(cb).isFalse(any());
-        verify(cb).and(predicate);
+        verify(cb, never()).equal(eq(path), any(Boolean.class));
+        verify(cb).and();
     }
 
     @Test
-    void filterByCriteria_anyCriteria_alwaysExcludesPersonalCaib() {
+    void filterByCriteria_noPersonalCaibFilter_returnsBothExternalAndCaibPersons() {
         PersonCriteria criteria = new PersonCriteria();
         criteria.setFirstName("Joan");
 
         PersonSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb).isFalse(any());
+        verify(cb, never()).equal(eq(path), any(Boolean.class));
+    }
+
+    @Test
+    void filterByCriteria_withPersonalCaibTrue_addsEqualPredicate() {
+        PersonCriteria criteria = new PersonCriteria();
+        criteria.setPersonalCaib(true);
+
+        PersonSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).equal(eq(path), eq(true));
+    }
+
+    @Test
+    void filterByCriteria_withPersonalCaibFalse_addsEqualPredicate() {
+        PersonCriteria criteria = new PersonCriteria();
+        criteria.setPersonalCaib(false);
+
+        PersonSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).equal(eq(path), eq(false));
     }
 
     @Test
@@ -186,9 +206,9 @@ class PersonSpecificationTest {
 
         PersonSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb, times(4)).like(eq(path), eq("%lead%"));
+        verify(cb, times(5)).like(eq(path), eq("%lead%"));
         verify(cb).concat(root.get("firstName"), " ");
-        verify(cb).or(predicate, predicate, predicate, predicate);
+        verify(cb).or(predicate, predicate, predicate, predicate, predicate);
     }
 
     @Test
@@ -198,7 +218,7 @@ class PersonSpecificationTest {
 
         PersonSpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb, times(4)).like(eq(path), eq("%miguel angel muñoz%"));
+        verify(cb, times(5)).like(eq(path), eq("%miguel angel muñoz%"));
     }
 
     @Test

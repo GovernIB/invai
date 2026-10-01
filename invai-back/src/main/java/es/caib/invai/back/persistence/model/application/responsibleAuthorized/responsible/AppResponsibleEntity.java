@@ -4,6 +4,7 @@ import lombok.*;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedEntity;
+import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonEntity;
 import es.caib.invai.back.persistence.model.catalog.responsibleType.LkupResponsibleTypeEntity;
 
@@ -54,4 +55,9 @@ public class AppResponsibleEntity extends BaseEntity {
     @Lob
     @Column(name = "OBSERVATION")
     private String observation;
+
+    /** DIR3 validation state of this assignment against the application's administrative unit. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DIR3_VALIDATION_ID", nullable = false)
+    private Dir3ValidationEntity dir3Validation;
 }

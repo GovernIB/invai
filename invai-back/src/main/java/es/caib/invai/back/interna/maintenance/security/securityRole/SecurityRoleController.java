@@ -39,11 +39,13 @@ public class SecurityRoleController {
      * Lists roles that can be assigned to an application (feeding {@code INV_APP_ROLE}) against
      * the Soffid SCIM API - a {@code getAll} when {@code name} is omitted, or restricted to matches when
      * given - feeding the security role typeahead. Does not touch the local {@code SecurityRole}
-     * catalog.
+     * catalog. There is no built-in namespace restriction: the shared Soffid instance also hosts
+     * roles for many unrelated applications, so the caller must include a prefix such as
+     * {@code "INV_"} as one of the words in {@code name} to scope the search to this project's
+     * roles.
      *
-     * @param name the text to search for, matched (word by word) against the role's name, or
-     * omitted to list every Soffid role in this project's namespace (name starting with
-     * {@code "INV_"})
+     * @param name the text to search for, matched (word by word, contains) against the role's
+     * name, or omitted to list every Soffid role
      * @param pageable the pagination parameters
      * @return the requested page of matching Soffid role candidates, mapped into
      * {@link SecurityRoleOutputDTO} with a {@code null} id

@@ -41,6 +41,10 @@ public class AppAuthorizedAudEntity {
     @Column(name = "OBSERVATION")
     private String observation;
 
+    /** Identifier of the linked DIR3 validation record at the time of the change. */
+    @Column(name = "DIR3_VALIDATION_ID", nullable = false)
+    private Long dir3ValidationId;
+
     /** Timestamp when the mirrored row was created. */
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;

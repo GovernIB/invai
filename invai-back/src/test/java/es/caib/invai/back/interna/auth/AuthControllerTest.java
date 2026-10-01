@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,16 +12,22 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link AuthController}, verifying identity resolution from the current
@@ -30,9 +35,6 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
-
-    @Mock
-    private Principal principal;
 
     private AuthController authController;
 
@@ -56,7 +58,11 @@ class AuthControllerTest {
 
     @Test
     void getAuthInformation_authenticatedPrincipal_returnsOkWithUserAuthDTO() {
-        when(principal.getName()).thenReturn("jdoe");
+        OidcIdToken idToken = new OidcIdToken("token-value", Instant.now(), Instant.now().plusSeconds(60),
+                Map.of("sub", "jdoe", "name", "John Doe"));
+        OidcUserInfo userInfo = new OidcUserInfo(Map.of("sub", "jdoe", "name", "John Doe"));
+        DefaultOidcUser oidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority("ROLE_INV_SUPER")), idToken, userInfo);
+        OAuth2AuthenticationToken principal = new OAuth2AuthenticationToken(oidcUser, oidcUser.getAuthorities(), "soffid");
 
         ResponseEntity<?> response = authController.getAuthInformation(principal);
 
@@ -67,6 +73,7 @@ class AuthControllerTest {
         UserAuthDTO body = (UserAuthDTO) response.getBody();
         assertTrue(body.isAuthenticated());
         assertEquals("jdoe", body.getUsername());
+        assertEquals("John Doe", body.getFullName());
     }
 
     @Test

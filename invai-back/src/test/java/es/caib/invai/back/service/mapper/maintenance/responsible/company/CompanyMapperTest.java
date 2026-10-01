@@ -66,7 +66,7 @@ class CompanyMapperTest {
 
     @Test
     void toModelFromInput_ignoresAuditFieldsAndId() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("Initech");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("Initech", null);
 
         Company model = mapper.toModelFromInput(inputDTO);
 
@@ -81,7 +81,7 @@ class CompanyMapperTest {
         Company existing = new Company();
         existing.setId(4L);
         existing.setName("Old Name");
-        CompanyInputDTO inputDTO = new CompanyInputDTO("New Name");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("New Name", null);
 
         mapper.updateModelFromInput(inputDTO, existing);
 

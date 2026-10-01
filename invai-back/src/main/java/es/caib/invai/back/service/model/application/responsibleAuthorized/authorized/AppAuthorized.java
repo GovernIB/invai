@@ -3,6 +3,7 @@ package es.caib.invai.back.service.model.application.responsibleAuthorized.autho
 import lombok.*;
 import java.time.LocalDateTime;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
+import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 
 /**
@@ -25,6 +26,8 @@ public class AppAuthorized {
     private Person person;
     /** Free-text remarks about this authorization. */
     private String observation;
+    /** DIR3 validation state of this assignment against the application's administrative unit. */
+    private Dir3Validation dir3Validation;
     /** Timestamp when this record was created. */
     private LocalDateTime createdAt;
     /** User who created this record. */

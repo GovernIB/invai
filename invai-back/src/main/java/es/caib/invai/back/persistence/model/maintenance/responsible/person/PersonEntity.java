@@ -59,4 +59,8 @@ public class PersonEntity extends BaseEntity {
     /** Whether this person is CAIB staff (sourced via the future DIR3 integration), rather than an external company contact. */
     @Column(name = "IS_PERSONAL_CAIB", nullable = false)
     private boolean personalCaib;
+
+    /** Soffid username ("código de usuario", e.g. "u8443") of this CAIB staff member, or {@code null} for external persons or legacy records predating this field. */
+    @Column(name = "USER_NAME", length = 64)
+    private String userName;
 }

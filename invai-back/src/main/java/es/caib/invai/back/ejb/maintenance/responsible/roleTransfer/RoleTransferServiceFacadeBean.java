@@ -156,7 +156,7 @@ public class RoleTransferServiceFacadeBean implements RoleTransferService {
         if (existing != null) {
             return existing.getId();
         }
-        SoffidUser soffidUser = soffidClient.findByEmail(email);
+        SoffidUser soffidUser = soffidClient.searchByEmail(email);
         if (soffidUser == null) {
             throw new BusinessRuleException(Constants.ERR_ROLETRANSFER_TARGET_NOT_FOUND);
         }
@@ -235,7 +235,7 @@ public class RoleTransferServiceFacadeBean implements RoleTransferService {
      * @return the output DTOs of the attached authorization types
      */
     private List<AuthorizationTypeOutputDTO> resolveAuthorizationTypes(Long appAuthorizedId) {
-        return appAuthorizedTypeLinkRepository.findAllByAppAuthorizedId(appAuthorizedId).stream()
+        return appAuthorizedTypeLinkRepository.findAllActiveByAppAuthorizedId(appAuthorizedId).stream()
                 .map(link -> authorizationTypeRepository.findById(link.getAuthorizationTypeId()))
                 .filter(Objects::nonNull)
                 .map(authorizationTypeMapper::toResponse)

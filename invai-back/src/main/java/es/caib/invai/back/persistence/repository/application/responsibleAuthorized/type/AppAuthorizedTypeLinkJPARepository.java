@@ -13,10 +13,11 @@ import java.util.List;
 public interface AppAuthorizedTypeLinkJPARepository extends JpaRepository<AppAuthorizedTypeLinkEntity, Long> {
 
     /**
-     * Resolves all authorization type join rows attached to a given authorized person anchor.
+     * Resolves all active (non soft-deleted) authorization type join rows attached to a given
+     * authorized person anchor.
      *
      * @param appAuthorizedId the authorized person anchor identifier
      * @return the matching join rows
      */
-    List<AppAuthorizedTypeLinkEntity> findAllByAppAuthorizedId(Long appAuthorizedId);
+    List<AppAuthorizedTypeLinkEntity> findAllByAppAuthorizedIdAndDeletedAtIsNull(Long appAuthorizedId);
 }

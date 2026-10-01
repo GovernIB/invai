@@ -1,6 +1,7 @@
 package es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible;
 
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedEntity;
+import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleAudEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity;
 import es.caib.invai.back.persistence.model.catalog.responsibleType.LkupResponsibleTypeEntity;
@@ -77,6 +78,12 @@ class AppResponsibleRepositoryAdapterTest {
         LkupResponsibleTypeEntity responsibleType = new LkupResponsibleTypeEntity();
         responsibleType.setId(id);
         return responsibleType;
+    }
+
+    private Dir3ValidationEntity dir3ValidationEntity(Long id) {
+        Dir3ValidationEntity dir3Validation = new Dir3ValidationEntity();
+        dir3Validation.setId(id);
+        return dir3Validation;
     }
 
     @Test
@@ -174,6 +181,7 @@ class AppResponsibleRepositoryAdapterTest {
         saved.setAppResponsibleAuthorized(anchorEntity(40L));
         saved.setPerson(personEntity(10L));
         saved.setResponsibleType(responsibleTypeEntity(20L));
+        saved.setDir3Validation(dir3ValidationEntity(500L));
         saved.setObservation("Nova incorporacio");
         AppResponsible response = new AppResponsible();
         when(appResponsibleMapper.toEntity(model)).thenReturn(toSave);
@@ -190,6 +198,7 @@ class AppResponsibleRepositoryAdapterTest {
         assertEquals(40L, aud.getAppResponsibleAuthorizedId());
         assertEquals(10L, aud.getPersonId());
         assertEquals(20L, aud.getResponsibleTypeId());
+        assertEquals(500L, aud.getDir3ValidationId());
         assertEquals("Nova incorporacio", aud.getObservation());
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
@@ -210,6 +219,7 @@ class AppResponsibleRepositoryAdapterTest {
         saved.setAppResponsibleAuthorized(anchorEntity(41L));
         saved.setPerson(personEntity(11L));
         saved.setResponsibleType(responsibleTypeEntity(21L));
+        saved.setDir3Validation(dir3ValidationEntity(501L));
         LocalDateTime existingCreatedAt = LocalDateTime.of(2025, 1, 1, 0, 0);
         saved.setCreatedAt(existingCreatedAt);
         saved.setCreatedBy("jdoe");
@@ -240,6 +250,7 @@ class AppResponsibleRepositoryAdapterTest {
         saved.setAppResponsibleAuthorized(anchorEntity(42L));
         saved.setPerson(personEntity(12L));
         saved.setResponsibleType(responsibleTypeEntity(22L));
+        saved.setDir3Validation(dir3ValidationEntity(502L));
         AppResponsible response = new AppResponsible();
         when(appResponsibleMapper.toEntity(model)).thenReturn(toSave);
         when(appResponsibleJPARepository.save(toSave)).thenReturn(saved);
@@ -265,6 +276,7 @@ class AppResponsibleRepositoryAdapterTest {
         saved.setAppResponsibleAuthorized(anchorEntity(43L));
         saved.setPerson(personEntity(13L));
         saved.setResponsibleType(responsibleTypeEntity(23L));
+        saved.setDir3Validation(dir3ValidationEntity(503L));
         saved.setDeletedAt(LocalDateTime.now());
         saved.setDeletedBy("jdoe");
         saved.setObservation("Deixa l'empresa");

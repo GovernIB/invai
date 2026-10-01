@@ -24,11 +24,12 @@ public interface SecurityRoleService {
      * {@code SecurityRole} catalog: results are unpersisted Soffid candidates, mapped into
      * {@link SecurityRoleOutputDTO} with {@code id} left {@code null} (no local row exists yet) -
      * the same "null id means not yet cached locally" convention already used elsewhere in this
-     * codebase for external-source search results (see {@code Person.searchSoffid}).
+     * codebase for external-source search results (see {@code Person.searchSoffid}). There is no
+     * built-in namespace restriction: include a prefix such as {@code "INV_"} as one of the words
+     * in {@code name} to scope the search to this project's roles.
      *
-     * @param name the text to search for, matched (word by word) against the role's name, or
-     * {@code null}/blank to list every Soffid role in this project's namespace (name starting
-     * with {@code "INV_"})
+     * @param name the text to search for, matched (word by word, contains) against the role's
+     * name, or {@code null}/blank to list every Soffid role
      * @param pageable the pagination parameters
      * @return the requested page of matching Soffid role candidates, mapped into
      * {@link SecurityRoleOutputDTO}

@@ -16,8 +16,8 @@ import reactor.netty.http.client.HttpClient;
 import java.time.Duration;
 
 /**
- * Configures the {@link WebClient} used by this module's {@code rest.*} clients (Soffid,
- * DIR3CAIB) to call the {@code invai-api-interna} module, forwarding the current session's OIDC
+ * Configures the {@link WebClient} used by this module's {@code rest.*} clients (Soffid, DIR3CAIB,
+ * Open Data) to call the {@code invai-api-interna} module, forwarding the current session's OIDC
  * ID token as a Bearer token so the callee's OAuth2 Resource Server can authorize the request.
  * <p>
  * Depends on there being an authenticated OIDC session on the calling thread: every current caller
@@ -25,7 +25,7 @@ import java.time.Duration;
  * context, so this is not a practical restriction today.
  * </p>
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Configuration
 public class IntegracionsClientConfig {
@@ -35,9 +35,9 @@ public class IntegracionsClientConfig {
     private String baseUrl;
 
     /**
-     * Builds the {@link WebClient} used by {@code SoffidClient}/{@code Dir3CaibClient},
-     * pre-configured with the {@code invai-api-interna} base URL, explicit connect/read timeouts,
-     * and automatic Bearer token forwarding.
+     * Builds the {@link WebClient} used by {@code SoffidClient}/{@code Dir3CaibClient}/
+     * {@code OpenApiClient}, pre-configured with the {@code invai-api-interna} base URL, explicit
+     * connect/read timeouts, and automatic Bearer token forwarding.
      *
      * @return the configured {@link WebClient}
      */

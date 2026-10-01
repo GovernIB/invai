@@ -82,6 +82,11 @@
 
         <class>es.caib.invai.back.persistence.model.catalog.responsibleType.LkupResponsibleTypeEntity</class>
 
+        <class>es.caib.invai.back.persistence.model.catalog.dir3Status.LkupDir3StatusEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationAudEntity</class>
+
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedEntity</class>
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedAudEntity</class>
 
@@ -92,6 +97,7 @@
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedAudEntity</class>
 
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.type.AppAuthorizedTypeLinkEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.type.AppAuthorizedTypeLinkAudEntity</class>
 
         <class>es.caib.invai.back.persistence.model.maintenance.security.identityProvider.IdentityProviderEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.security.identityProvider.IdentityProviderAudEntity</class>
@@ -130,10 +136,25 @@
         <class>es.caib.invai.back.persistence.model.application.accessibility.AppAccessibilityEntity</class>
         <class>es.caib.invai.back.persistence.model.application.accessibility.AppAccessibilityAudEntity</class>
 
+        <class>es.caib.invai.back.persistence.model.application.data.AppDataEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.data.AppDataAudEntity</class>
+
         <class>es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationAudEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.maintenance.integration.externalSystem.ExternalSystemEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.integration.externalSystem.ExternalSystemAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.integration.core.AppIntegrationEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.integration.core.AppIntegrationAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.integration.connection.AppIntegrationConnectionEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.integration.connection.AppIntegrationConnectionAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.integration.requiredRole.AppIntegrationRequiredRoleEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.integration.requiredRole.AppIntegrationRequiredRoleAudEntity</class>
 
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <validation-mode>CALLBACK</validation-mode>
