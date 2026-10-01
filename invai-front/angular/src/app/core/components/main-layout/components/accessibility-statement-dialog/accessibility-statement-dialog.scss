@@ -1,0 +1,18 @@
+.accessibility-statement {
+  color: var(--p-text-color);
+  line-height: 1.6;
+  overflow-wrap: break-word;
+
+  p {
+    margin: 0;
+  }
+}
+
+.accessibility-statement__start {
+  border-radius: 2px;
+
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 4px;
+  }
+}

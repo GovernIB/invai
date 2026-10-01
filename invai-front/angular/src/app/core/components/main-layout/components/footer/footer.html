@@ -1,0 +1,18 @@
+<footer class="app-footer">
+  <p class="app-footer__item">&copy; Govern Illes Balears</p>
+  <p class="app-footer__item">{{ labels.version }} {{ appVersion }}</p>
+  <button
+    #statementTrigger
+    type="button"
+    class="app-footer__link"
+    aria-haspopup="dialog"
+    (click)="openStatement()"
+  >
+    {{ labels.accessibilityStatement }}
+  </button>
+</footer>
+
+<app-accessibility-statement-dialog
+  [(visible)]="isStatementVisible"
+  (hidden)="restoreFocus()"
+/>

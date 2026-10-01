@@ -28,6 +28,7 @@ export const APPLICATION_DETAIL_ACCESSIBILITY_INCOMPLETE = $localize`La secció 
 export const APPLICATION_DETAIL_SECURITY_INCOMPLETE = $localize`La secció Seguretat està incompleta: falta almenys un context web, una classificació ENS o un risc actiu.`;
 export const APPLICATION_DETAIL_SECURITY_INCONSISTENT = $localize`La secció Seguretat conté més d'una classificació ENS. Cal corregir les dades al servidor.`;
 export const APPLICATION_DETAIL_SECURITY_UNKNOWN = $localize`No s'ha pogut comprovar si la secció Seguretat està completa.`;
+export const APPLICATION_DETAIL_INTEGRATIONS_INCOMPLETE = $localize`:@@applicationIntegrationsIncomplete:La secció Integracions està incompleta: no hi ha cap connexió activa.`;
 export const APPLICATION_DETAIL_SECURITY_UNVERIFIED_CONTEXTS = $localize`:@@applicationSecurityUnverifiedContexts:La secció Seguretat té contextos web pendents de verificar.`;
 export const APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE = $localize`Canvis desats`;
 export const APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE = (sectionLabel: string) =>
@@ -64,4 +65,6 @@ export const APPLICATION_DETAIL_TABS = {
   development: $localize`Desenvolupament`,
   accessibility: $localize`Accessibilitat`,
   security: $localize`Seguretat`,
+  data: $localize`:@@applicationDataTitle:Dades`,
+  integrations: $localize`:@@applicationIntegrationsTitle:Integracions`,
 };

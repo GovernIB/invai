@@ -159,6 +159,7 @@ export const APPLICATION_SECURITY_MEASURE_COLUMNS: Partial<KeyLabel>[] = [
 
 export const APPLICATION_SECURITY_TABLE_ACTIONS = {
   verify: $localize`:@@applicationWebContextVerify:Verificar`,
+  verified: $localize`:@@applicationWebContextVerified:Verificat`,
   header: $localize`Accions`,
   ariaLabel: $localize`Obre les accions del registre`,
   view: $localize`Consulta`,
@@ -166,8 +167,16 @@ export const APPLICATION_SECURITY_TABLE_ACTIONS = {
   delete: $localize`Dona de baixa`,
 };
 
-export const APPLICATION_WEB_CONTEXT_VERIFICATION_PENDING =
-  $localize`:@@applicationWebContextVerificationPending:La verificació de contextos web encara no està implementada.`;
+export const APPLICATION_WEB_CONTEXT_VERIFICATION = {
+  title: $localize`:@@applicationWebContextVerificationTitle:Verifica el context web`,
+  context: $localize`:@@applicationWebContextVerificationContext:Context web`,
+  reason: $localize`:@@applicationWebContextVerificationReason:Motiu de la verificació`,
+  reasonRequired: $localize`:@@applicationWebContextVerificationReasonRequired:Indica el motiu de la verificació.`,
+  cancel: $localize`:@@applicationWebContextVerificationCancel:Cancel·la la verificació`,
+  close: $localize`:@@applicationWebContextVerificationClose:Tanca el diàleg de verificació`,
+  success: $localize`:@@applicationWebContextVerificationSuccess:El context web s'ha verificat correctament.`,
+  error: $localize`:@@applicationWebContextVerificationError:No s'ha pogut verificar el context web. Revisa el seu estat i torna-ho a provar.`,
+};
 
 export const APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION =
   $localize`:@@applicationWebContextPendingVerification:Context web pendent de verificar.`;

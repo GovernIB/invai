@@ -46,6 +46,7 @@ const APPLICATION: Application = {
   missingDatabases: false,
   missingAccessibilityFields: false,
   missingSecurityData: false,
+  missingIntegrationData: false,
 };
 
 const OPTIONS: ApplicationSelectOptions = {

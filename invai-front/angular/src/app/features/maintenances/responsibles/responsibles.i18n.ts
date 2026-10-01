@@ -63,7 +63,7 @@ export const RESPONSIBLE_COMPANY_COPY = {
 };
 
 export const RESPONSIBLE_PERSON_COPY = {
-  title: $localize`Persones`,
+  title: $localize`:@@responsibleExternalPeopleTitle:Personal extern`,
   description: $localize`Gestiona les persones responsables de les aplicacions per empresa.`,
   company: $localize`Empresa`,
   firstName: $localize`Nom`,

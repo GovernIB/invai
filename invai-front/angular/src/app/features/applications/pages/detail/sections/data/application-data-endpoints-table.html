@@ -1,0 +1,105 @@
+<div class="invai-table-loading-container" [attr.aria-busy]="isLoading()">
+  @if (isLoading()) {
+    <div class="invai-table-loading-shield" aria-hidden="true">
+      <span class="invai-table-refresh-indicator"></span>
+    </div>
+  }
+  <p-table
+    dataKey="path"
+    styleClass="invai-scrollable-table"
+    [columns]="columns"
+    [pt]="tablePassThrough()"
+    [scrollable]="true"
+    [stripedRows]="true"
+    [value]="endpoints()"
+  >
+    <ng-template let-columns pTemplate="header">
+      <tr>
+        <th class="application-data-endpoints__toggle-column">
+          <span class="sr-only">{{ texts.toggleHeader }}</span>
+        </th>
+        @for (column of columns; track column.key) {
+          <th [style.min-width]="column.minWidth" [style.width]="column.width">
+            <div class="invai-table-header-content">
+              <span class="invai-table-header-label">{{ column.label }}</span>
+            </div>
+          </th>
+        }
+      </tr>
+    </ng-template>
+    <ng-template let-columns="columns" let-endpoint let-expanded="expanded" pTemplate="body">
+      <tr>
+        <td class="application-data-endpoints__toggle-column">
+          @if (parameters(endpoint).length) {
+            <button
+              type="button"
+              class="application-data-endpoints__toggle"
+              [attr.aria-controls]="expanded ? expansionId(endpoint) : null"
+              [attr.aria-expanded]="expanded"
+              [attr.aria-label]="texts.parametersOf(endpoint.path)"
+              [pRowToggler]="endpoint"
+            >
+              <i [class]="expanded ? icons.CHEVRON_DOWN : icons.CHEVRON_RIGHT" aria-hidden="true"></i>
+            </button>
+          }
+        </td>
+        @for (column of columns; track column.key) {
+          <td [style.min-width]="column.minWidth" [style.width]="column.width">
+            <span
+              class="invai-table-cell-content"
+              [class.application-data-endpoints__path]="column.key === 'path'"
+              [class.invai-table-cell-content--wrap]="column.wrap"
+              [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+              >{{ cellValue(endpoint, column.key) }}</span
+            >
+          </td>
+        }
+      </tr>
+    </ng-template>
+    <ng-template let-endpoint pTemplate="expandedrow">
+      <tr class="application-data-endpoints__expansion" [id]="expansionId(endpoint)">
+        <td [attr.colspan]="columnCount()">
+          <p-table
+            styleClass="invai-scrollable-table application-data-endpoints__parameters"
+            [columns]="parameterColumns"
+            [pt]="parametersPassThrough(endpoint)"
+            [scrollable]="true"
+            [stripedRows]="true"
+            [value]="parameters(endpoint)"
+          >
+            <ng-template let-columns pTemplate="header">
+              <tr>
+                @for (column of columns; track column.key) {
+                  <th [style.min-width]="column.minWidth">
+                    <div class="invai-table-header-content">
+                      <span class="invai-table-header-label">{{ column.label }}</span>
+                    </div>
+                  </th>
+                }
+              </tr>
+            </ng-template>
+            <ng-template let-columns="columns" let-parameter pTemplate="body">
+              <tr>
+                @for (column of columns; track column.key) {
+                  <td [style.min-width]="column.minWidth">
+                    <span
+                      class="invai-table-cell-content"
+                      [class.invai-table-cell-content--wrap]="column.wrap"
+                      [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+                      >{{ parameterValue(parameter, column.key) }}</span
+                    >
+                  </td>
+                }
+              </tr>
+            </ng-template>
+          </p-table>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="columnCount()">{{ texts.empty }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

@@ -102,7 +102,7 @@ export const applicationDevelopmentResolver: ResolveFn<ApplicationDevelopmentRes
   return forkJoin({
     webContexts: resolveDevelopmentWebContexts(
       applicationId,
-      positiveId(detailData?.application?.appSecurityId),
+      appDevelopmentId,
     ),
     developmentResult,
     providersResult,

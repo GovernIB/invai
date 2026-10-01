@@ -251,7 +251,9 @@
           />
         }
       </div>
-      @if (!webContexts.appSecurityId()) {
+      @if (!webContexts.appDevelopmentId()) {
+        <p>{{ webContextDevelopmentAnchorRequired }}</p>
+      } @else if (!detailState.appSecurityId()) {
         <p>{{ webContextAnchorRequired }}</p>
       }
       <app-application-security-resource-table

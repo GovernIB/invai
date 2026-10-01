@@ -4,7 +4,7 @@ import { MessageService } from 'primeng/api';
 import { Subject, of, throwError } from 'rxjs';
 import { SpringPage } from '@models/page.model';
 import { ApplicationWebContextOutput } from '../../../../applications.model';
-import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationSecurityTableAction as Action } from '../security/application-security-resource-table';
 import { ApplicationDevelopmentWebContextsState } from './application-development-web-contexts-state';
@@ -27,8 +27,9 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     canEdit: ReturnType<typeof signal<boolean>>;
     isEditing: ReturnType<typeof signal<boolean>>;
     appSecurityId: ReturnType<typeof signal<number | null>>;
+    development: ReturnType<typeof signal<{ id: number } | null>>;
     refreshCompletenessAfterMutation: ReturnType<typeof vi.fn>;
-    updateWebContextCount: ReturnType<typeof vi.fn>;
+    refreshWebContextVerification: ReturnType<typeof vi.fn>;
   };
   let api: {
     getPage: ReturnType<typeof vi.fn>;
@@ -42,8 +43,9 @@ describe('ApplicationDevelopmentWebContextsState', () => {
       canEdit: signal(true),
       isEditing: signal(true),
       appSecurityId: signal<number | null>(9),
+      development: signal<{ id: number } | null>({ id: 19 }),
       refreshCompletenessAfterMutation: vi.fn(),
-      updateWebContextCount: vi.fn(),
+      refreshWebContextVerification: vi.fn(),
     };
     api = {
       getPage: vi.fn(() => of(page([row]))),
@@ -56,12 +58,12 @@ describe('ApplicationDevelopmentWebContextsState', () => {
         ApplicationDevelopmentWebContextsState,
         MessageService,
         { provide: ApplicationDetailState, useValue: detail },
-        { provide: ApplicationWebContextsService, useValue: api },
+        { provide: ApplicationDevelopmentWebContextsService, useValue: api },
       ],
     });
     state = TestBed.inject(ApplicationDevelopmentWebContextsState);
     state.initialize({
-      appSecurityId: 9,
+      appDevelopmentId: 19,
       page: page([row]),
       webContextOptions: [],
       fieldOptions: [],
@@ -73,7 +75,6 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     expect(api.getPage).not.toHaveBeenCalled();
     state.onAction({ action: Action.View, params: row });
     expect(state.items().items).toEqual([row]);
-    expect(detail.updateWebContextCount).toHaveBeenCalledWith(1);
     expect(state.webContextOptions()).toEqual([{ value: 1, label: 'Web' }]);
     expect(state.fieldOptions()).toEqual([{ value: 2, label: 'Intern' }]);
   });
@@ -102,14 +103,18 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     expect(api.delete).not.toHaveBeenCalled();
   });
 
-  it('prevents mutations without the security anchor and for inactive rows', () => {
+  it('prevents mutations without both anchors and for inactive rows', () => {
     state.initialize({
-      appSecurityId: null,
+      appDevelopmentId: null,
       page: null,
       webContextOptions: [],
       fieldOptions: [],
       loadFailed: false,
     });
+    detail.development.set(null);
+    state.create();
+    expect(state.visible()).toBe(false);
+    detail.development.set({ id: 19 });
     detail.appSecurityId.set(null);
     state.create();
     expect(state.visible()).toBe(false);
@@ -121,7 +126,7 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     expect(state.deleteVisible()).toBe(false);
   });
 
-  it('validates before creating and saves immediately with the security identifier', () => {
+  it('validates before creating and saves immediately with the development identifier', () => {
     state.create();
     state.save();
     expect(state.form.controls.webContextId.touched).toBe(true);
@@ -134,7 +139,7 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     });
     state.save();
     expect(api.create).toHaveBeenCalledExactlyOnceWith({
-      appSecurityId: 9,
+      appDevelopmentId: 19,
       webContextId: 1,
       fieldId: 2,
       url: 'https://example.test',
@@ -157,7 +162,7 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     state.form.patchValue({ url: ' ', observation: ' ' });
     state.save();
     expect(api.update).toHaveBeenCalledWith(3, {
-      appSecurityId: 9,
+      appDevelopmentId: 19,
       webContextId: 1,
       fieldId: 2,
       url: null,
@@ -193,7 +198,7 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     expect(state.deleteVisible()).toBe(false);
     expect(state.first()).toBe(0);
     expect(api.getPage).toHaveBeenLastCalledWith({
-      appSecurityId: 9,
+      appDevelopmentId: 19,
       page: 0,
       size: 10,
       sort: 'id,asc',
@@ -220,7 +225,7 @@ describe('ApplicationDevelopmentWebContextsState', () => {
     expect(state.loading()).toBe(true);
     expect(state.items().items).toEqual([row]);
     expect(api.getPage).toHaveBeenLastCalledWith({
-      appSecurityId: 9,
+      appDevelopmentId: 19,
       page: 2,
       size: 10,
       sort: 'webContext.name,desc',

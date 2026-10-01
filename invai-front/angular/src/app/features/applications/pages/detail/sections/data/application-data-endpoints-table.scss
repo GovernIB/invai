@@ -1,0 +1,42 @@
+app-application-data-endpoints-table {
+  display: block;
+  min-width: 0;
+
+  .application-data-endpoints__toggle-column {
+    width: 3rem;
+    min-width: 3rem;
+    max-width: 3rem;
+    text-align: center;
+  }
+
+  .application-data-endpoints__toggle {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--p-primary-color);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: var(--p-border-radius-md, 0.375rem);
+  }
+
+  .application-data-endpoints__toggle:hover {
+    background: var(--p-surface-100);
+  }
+
+  .application-data-endpoints__toggle:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+  }
+
+  .application-data-endpoints__path {
+    font-family: var(--invai-font-monospace, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  }
+
+  .application-data-endpoints__expansion > td {
+    padding: 0.75rem 1rem 1rem 3rem;
+  }
+}

@@ -130,3 +130,5 @@ export const APPLICATION_DEVELOPMENT_DATE_PLACEHOLDER = $localize`dd/mm/aaaa`;
 
 export const APPLICATION_DEVELOPMENT_WEB_CONTEXTS_LOAD_ERROR =
   $localize`:@@applicationDevelopmentWebContextsLoadError:No s'han pogut carregar els contextos web o els seus catàlegs.`;
+export const APPLICATION_DEVELOPMENT_WEB_CONTEXT_ANCHOR_REQUIRED =
+  $localize`:@@applicationDevelopmentWebContextAnchorRequired:Desa primer les dades generals de Desenvolupament per poder gestionar els contextos web.`;

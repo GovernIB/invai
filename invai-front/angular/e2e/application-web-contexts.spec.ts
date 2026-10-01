@@ -16,6 +16,7 @@ test('manages web contexts in Development and only consults or verifies them in 
   expect(detailResponse.ok()).toBeTruthy();
   const application = await detailResponse.json();
   expect(application.appSecurityId).toBeTruthy();
+  expect(application.appDevelopmentId).toBeTruthy();
 
   const catalog = { id: 901, name: 'Context E2E', nameEs: 'Contexto E2E', deletedAt: null };
   const field = { id: 902, name: 'Àmbit E2E', nameEs: 'Ámbito E2E', deletedAt: null };
@@ -38,7 +39,11 @@ test('manages web contexts in Development and only consults or verifies them in 
   await page.route(/\/invaiback\/field(?:\?.*)?$/, (route) =>
     route.fulfill({ json: envelope([field]) }),
   );
-  await page.route(/\/application\/security\/web-context(?:\/\d+)?(?:\?.*)?$/, async (route) => {
+  await page.route(/\/application\/security\/web-context\/\d+(?:\?.*)?$/, async (route) => {
+    expect(route.request().method()).toBe('GET');
+    await route.fulfill({ json: envelope(records) });
+  });
+  await page.route(/\/application\/development\/web-context(?:\/\d+)?(?:\?.*)?$/, async (route) => {
     const method = route.request().method();
     if (method === 'GET') {
       await route.fulfill({ json: envelope(records) });
@@ -51,19 +56,39 @@ test('manages web contexts in Development and only consults or verifies them in 
       return;
     }
     const payload = route.request().postDataJSON();
-    expect(payload.appSecurityId).toBe(application.appSecurityId);
+    expect(payload.appDevelopmentId).toBe(application.appDevelopmentId);
+    expect(payload.appSecurityId).toBeUndefined();
     records = [
       {
         id: 903,
         appSecurity: { id: application.appSecurityId },
+        appDevelopment: { id: application.appDevelopmentId },
         webContext: catalog,
         field,
         url: payload.url,
         observation: payload.observation,
+        validated: false,
+        validatedAt: null,
+        validatedBy: null,
+        validatedReason: null,
         deletedAt: null,
       },
     ];
     await route.fulfill({ json: records[0] });
+  });
+  await page.route(/\/application\/security\/web-context\/validate\/903$/, async (route) => {
+    expect(route.request().method()).toBe('PUT');
+    const payload = route.request().postDataJSON();
+    expect(payload).toEqual({ reason: 'Context comprovat' });
+    mutations.push('VALIDATE');
+    records = records.map((record) => ({
+      ...record,
+      validated: true,
+      validatedAt: '2026-09-23T09:00:00',
+      validatedBy: 'e2e',
+      validatedReason: payload.reason,
+    }));
+    await route.fulfill({ status: 204 });
   });
 
   await page.goto(`/aplicacions/${applicationId}/development`);
@@ -134,36 +159,33 @@ test('manages web contexts in Development and only consults or verifies them in 
   await expect(dialog.getByRole('button', { name: 'Edita el registre' })).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Accepta i tanca el diàleg', exact: true }).click();
   await page.getByRole('button', { name: 'Editar Seguretat', exact: true }).click();
-  const requests: string[] = [];
-  const captureRequest = (request: { url(): string }) => requests.push(request.url());
-  page.on('request', captureRequest);
   const verify = row.getByRole('button', { name: 'Verificar', exact: true });
   await expect(verify).toBeVisible();
   await verify.focus();
   await verify.press('Enter');
-  await expect(
-    page.getByText('La verificació de contextos web encara no està implementada.'),
-  ).toBeVisible();
-  await expect(verify).toBeFocused();
+  await expect(dialog.getByRole('heading', { name: 'Verifica el context web' })).toBeVisible();
+  const reason = dialog.getByLabel('Motiu de la verificació');
+  await expect(reason).toBeFocused();
+  await dialog.getByRole('button', { name: 'Verificar', exact: true }).click();
+  await expect(dialog.getByText('Indica el motiu de la verificació.')).toBeVisible();
+  await reason.fill('Context comprovat');
+  await dialog.getByRole('button', { name: 'Verificar', exact: true }).click();
   await expect(dialog).toHaveCount(0);
-  expect(requests).toEqual([]);
-  await expect(pendingIcon).toBeVisible();
-  await expect(securityTab).toContainText('contextos web pendents de verificar');
-  page.off('request', captureRequest);
+  await expect(row.getByText('Verificat')).toBeVisible();
+  await expect(verify).toHaveCount(0);
+  await expect(pendingIcon).toHaveCount(0);
+  await expect(securityTab).not.toContainText('contextos web pendents de verificar');
   for (const width of [320, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    await expect(verify).toBeVisible();
-    const bounds = await verify.boundingBox();
-    expect(bounds!.width).toBeGreaterThan(70);
-    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+    await expect(row.getByText('Verificat')).toBeVisible();
   }
   await page.screenshot({ path: 'test-results/web-context-security.png', fullPage: true });
-  expect(mutations).toEqual(['POST', 'PUT']);
+  expect(mutations).toEqual(['POST', 'PUT', 'VALIDATE']);
   await page
     .getByRole('button', { name: 'Cancel·lar els canvis de Seguretat', exact: true })
     .click();
   await expect(security.locator('.application-security-verification-column')).toHaveCount(0);
-  await expect(pendingIcon).toBeVisible();
+  await expect(row.getByText('Verificat')).toBeVisible();
   await page.getByRole('link', { name: 'Desenvolupament', exact: true }).click();
   await page
     .getByRole('button', { name: 'Editar Configuració del desenvolupament', exact: true })
@@ -177,6 +199,6 @@ test('manages web contexts in Development and only consults or verifies them in 
   await dialog.getByRole('button', { name: 'Confirma la baixa del registre', exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await expect(panel.getByText('Updated in Development')).toHaveCount(0);
-  expect(mutations).toEqual(['POST', 'PUT', 'DELETE']);
+  expect(mutations).toEqual(['POST', 'PUT', 'VALIDATE', 'DELETE']);
   await expect(securityTab).not.toContainText('contextos web pendents de verificar');
 });

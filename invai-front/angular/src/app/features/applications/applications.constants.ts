@@ -311,6 +311,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     missingDatabases: false,
     missingAccessibilityFields: false,
     missingSecurityData: false,
+    missingIntegrationData: false,
   },
   {
     id: '2',
@@ -337,6 +338,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     missingDatabases: false,
     missingAccessibilityFields: false,
     missingSecurityData: false,
+    missingIntegrationData: false,
   },
   {
     id: '3',
@@ -363,6 +365,7 @@ export const APPLICATIONS_SEED_DATA: Application[] = [
     missingDatabases: false,
     missingAccessibilityFields: false,
     missingSecurityData: false,
+    missingIntegrationData: false,
   },
 ];
 

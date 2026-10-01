@@ -18,6 +18,7 @@ import {
 export interface AuthUser {
   id: string | number;
   username: string;
+  fullName?: string;
   email?: string;
   roles?: string[];
   permissions?: string[];
@@ -35,6 +36,7 @@ export interface AuthSession {
 interface UserAuthResponse {
   authenticated: boolean;
   username?: string | null;
+  fullName?: string | null;
 }
 
 class UnauthenticatedSessionError extends Error {}
@@ -177,9 +179,12 @@ export class OAuthService {
       throw new Error('The authenticated user response does not contain a username');
     }
 
+    const fullName = response.fullName?.trim();
+
     return {
       id: response.username,
       username: response.username,
+      ...(fullName ? { fullName } : {}),
     };
   }
 

@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder } from '@angular/forms';
+import { readApiErrorMessage } from '@core/models/api-error.model';
 import { AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
 import { Commission } from '@features/commissions/commissions.model';
 import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
@@ -27,6 +28,28 @@ import { ApplicationResponsibleOutput } from '../../applications.model';
 import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
 import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
 import type { AccessibilityLoadStatus, ApplicationAccessibilityLoadResult } from './sections/accessibility/application-accessibility-section.resolver';
+import { ApplicationDataInput, ApplicationDataOutput } from '../../applications.model';
+import { ApplicationDataService } from '../../services/application-data.service';
+import {
+  ApplicationIntegrationInput,
+  ApplicationIntegrationOutput,
+} from '../../applications.model';
+import { ApplicationIntegrationService } from '../../services/application-integration.service';
+import type {
+  ApplicationIntegrationLoadStatus,
+  ApplicationIntegrationsLoadResult,
+} from './sections/integrations/application-integrations-section.resolver';
+import type {
+  ApplicationDataLoadResult,
+  ApplicationDataLoadStatus,
+} from './sections/data/application-data-section.resolver';
+import {
+  APPLICATION_DATA_SOURCE_CONTROLS,
+  ApplicationDataFormValue,
+  ApplicationDataSource,
+  EMPTY_APPLICATION_DATA_VALUE,
+  createApplicationDataForm,
+} from '../../forms/application-data-form.factory';
 
 import { APPLICATION_STATUS_ACTIVE_ID } from '../../applications.constants';
 import {
@@ -59,6 +82,7 @@ import {
 import {
   ApplicationDetailFormValue,
   createApplicationDetailForm,
+  createApplicationIntegrationsForm,
   createApplicationSystemsDatabasesForm,
 } from '../../forms/application-form.factory';
 import {
@@ -70,13 +94,21 @@ import { ApplicationCommissionOption } from '../../services/application-options.
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityService,
+  ApplicationWebContextsService,
 } from '../../services/application-security.service';
 import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
 import { ApplicationsService } from '../../services/applications.service';
 
 export type ApplicationGeneralFormValue = ApplicationDetailFormValue;
 export type ApplicationDetailSection =
-  'general' | 'responsible' | 'systems-databases' | 'development' | 'accessibility' | 'security';
+  | 'general'
+  | 'responsible'
+  | 'systems-databases'
+  | 'development'
+  | 'accessibility'
+  | 'security'
+  | 'data'
+  | 'integrations';
 
 export type ApplicationDetailSaveResult =
   | { status: 'saved'; section: ApplicationDetailSection }
@@ -89,6 +121,9 @@ type ApplicationSystemsDatabasesFormValue = ReturnType<
   ReturnType<typeof createApplicationSystemsDatabasesForm>['getRawValue']
 >;
 type ApplicationSecurityFormValue = ReturnType<ApplicationSecurityFormGroup['getRawValue']>;
+type ApplicationIntegrationsFormValue = ReturnType<
+  ReturnType<typeof createApplicationIntegrationsForm>['getRawValue']
+>;
 
 const EMPTY_GENERAL_FORM_VALUE: ApplicationDetailFormValue = {
   application: '',
@@ -119,6 +154,9 @@ const EMPTY_DEVELOPMENT_FORM_VALUE: ApplicationDevelopmentFormValue = {
 const EMPTY_SYSTEMS_DATABASES_VALUE: ApplicationSystemsDatabasesFormValue = {
   observations: '',
 };
+const EMPTY_INTEGRATIONS_VALUE: ApplicationIntegrationsFormValue = {
+  observations: '',
+};
 const EMPTY_SECURITY_FORM_VALUE: ApplicationSecurityFormValue = {
   overallGradeId: null,
   identityProviderId: null,
@@ -140,6 +178,8 @@ const DETAIL_SECTIONS: ApplicationDetailSection[] = [
   'development',
   'accessibility',
   'security',
+  'data',
+  'integrations',
 ];
 
 function createEditingState(): Record<ApplicationDetailSection, boolean> {
@@ -150,6 +190,8 @@ function createEditingState(): Record<ApplicationDetailSection, boolean> {
     development: false,
     accessibility: false,
     security: false,
+    data: false,
+    integrations: false,
   };
 }
 
@@ -158,17 +200,21 @@ export class ApplicationDetailState {
   private readonly applicationsService = inject(ApplicationsService);
   private readonly developmentService = inject(ApplicationDevelopmentService);
   private readonly accessibilityService = inject(ApplicationAccessibilityService);
+  private readonly dataService = inject(ApplicationDataService);
+  private readonly integrationService = inject(ApplicationIntegrationService);
   private readonly systemDatabaseService = inject(ApplicationSystemDatabaseService);
   private readonly securityService = inject(ApplicationSecurityService);
+  private readonly webContextsService = inject(ApplicationWebContextsService);
   private readonly ensClassificationsService = inject(ApplicationEnsClassificationsService);
   private readonly responsibleChanges = inject(ResponsibleDataChangesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private initializedApplicationId: number | null = null;
   private completenessRequestVersion = 0;
+  private webContextVerificationRequestVersion = 0;
   readonly completenessRefreshFailed = signal(false);
   readonly completenessRefreshing = signal(false);
-  // UI-only pending status until the backend exposes verification results.
+  // Derived from the validation state of active web contexts.
   readonly hasUnverifiedWebContexts = signal<boolean | null>(null);
   readonly hasPendingResponsibleDir3 = signal<boolean | null>(null);
 
@@ -184,6 +230,8 @@ export class ApplicationDetailState {
     EMPTY_APPLICATION_ACCESSIBILITY_VALUE,
   );
   private savedSecurityValue = this.cloneSecurityValue(EMPTY_SECURITY_FORM_VALUE);
+  private savedIntegrationsValue: ApplicationIntegrationsFormValue = EMPTY_INTEGRATIONS_VALUE;
+  private savedDataValue: ApplicationDataFormValue = { ...EMPTY_APPLICATION_DATA_VALUE };
   private readonly editingState = signal(createEditingState());
 
   readonly application = signal<Application | null>(null);
@@ -196,6 +244,19 @@ export class ApplicationDetailState {
   readonly accessibilityClearBlocked = new Subject<void>();
   readonly canEditAccessibility = computed(() => this.canEdit() &&
     (this.accessibilityStatus() === 'loaded' || this.accessibilityStatus() === 'absent'));
+  readonly appDataId = signal<number | null>(null);
+  readonly data = signal<ApplicationDataOutput | null>(null);
+  readonly dataStatus = signal<ApplicationDataLoadStatus>('unavailable');
+  readonly dataErrorMessage = signal<string | null>(null);
+  readonly dataActiveSource = signal<ApplicationDataSource>('openData');
+  readonly canEditData = computed(() => this.canEdit() &&
+    (this.dataStatus() === 'loaded' || this.dataStatus() === 'absent'));
+  readonly appIntegrationId = signal<number | null>(null);
+  readonly integration = signal<ApplicationIntegrationOutput | null>(null);
+  readonly integrationStatus = signal<ApplicationIntegrationLoadStatus>('unavailable');
+  readonly integrationErrorMessage = signal<string | null>(null);
+  readonly canEditIntegrations = computed(() => this.canEdit() &&
+    (this.integrationStatus() === 'loaded' || this.integrationStatus() === 'absent'));
   readonly appSecurityId = signal<number | null>(null);
   readonly security = signal<ApplicationSecurityOutput | null>(null);
   readonly ensClassification = signal<ApplicationEnsClassificationOutput | null>(null);
@@ -214,8 +275,17 @@ export class ApplicationDetailState {
   readonly systemsDatabasesForm = createApplicationSystemsDatabasesForm(this.formBuilder);
   readonly accessibilityForm = createApplicationAccessibilityForm(this.formBuilder);
   readonly securityForm = createApplicationSecurityForm(this.formBuilder);
+  readonly integrationsForm = createApplicationIntegrationsForm(this.formBuilder);
+  readonly dataForm = createApplicationDataForm(this.formBuilder);
 
   constructor() {
+    for (const source of ['openData', 'reuse'] as const) {
+      const { useUrl } = APPLICATION_DATA_SOURCE_CONTROLS[source];
+      this.dataForm.controls[useUrl].valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.configureDataUrl(source));
+    }
+
     this.accessibilityForm.controls.mobileApplication.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((hasMobileApp) => {
@@ -253,8 +323,36 @@ export class ApplicationDetailState {
     this.setApplication(response);
   }
 
-  updateWebContextCount(totalActive: number): void {
-    this.hasUnverifiedWebContexts.set(totalActive > 0);
+  refreshWebContextVerification(): void {
+    const securityId = this.appSecurityId();
+    const applicationId = this.application()?.id;
+    const version = ++this.webContextVerificationRequestVersion;
+    if (securityId == null) {
+      this.hasUnverifiedWebContexts.set(false);
+      return;
+    }
+    this.hasUnverifiedWebContexts.set(null);
+    this.webContextsService
+      .hasUnverified(securityId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (pending) => {
+          if (
+            version === this.webContextVerificationRequestVersion &&
+            this.application()?.id === applicationId
+          ) {
+            this.hasUnverifiedWebContexts.set(pending);
+          }
+        },
+        error: () => {
+          if (
+            version === this.webContextVerificationRequestVersion &&
+            this.application()?.id === applicationId
+          ) {
+            this.hasUnverifiedWebContexts.set(null);
+          }
+        },
+      });
   }
 
   updateResponsibleDir3(assignments: readonly ApplicationResponsibleOutput[]): void {
@@ -279,6 +377,50 @@ export class ApplicationDetailState {
     } : { ...EMPTY_APPLICATION_ACCESSIBILITY_VALUE };
     this.accessibilityForm.reset(this.cloneAccessibilityValue(this.savedAccessibilityValue), { emitEvent: false });
     this.configureMobileApplicationName(this.savedAccessibilityValue.mobileApplication, false);
+  }
+
+  initializeData(result: ApplicationDataLoadResult): void {
+    if (result.applicationId !== Number(this.application()?.id) || this.isEditing('data')) return;
+    this.appDataId.set(result.appDataId);
+    this.dataStatus.set(result.status);
+    this.dataErrorMessage.set(result.errorMessage);
+    this.data.set(result.record);
+    this.application.update((current) =>
+      current ? { ...current, appDataId: result.appDataId } : current,
+    );
+    this.savedDataValue = result.record
+      ? {
+          useOpenDataUrl: result.record.useOpenDataUrl,
+          openDataUrl: result.record.openDataUrl ?? '',
+          useReuseUrl: result.record.useReuseUrl,
+          reuseUrl: result.record.reuseUrl ?? '',
+          observations: result.record.observation ?? '',
+        }
+      : { ...EMPTY_APPLICATION_DATA_VALUE };
+    this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
+  }
+
+  initializeIntegrations(result: ApplicationIntegrationsLoadResult): void {
+    if (result.applicationId !== Number(this.application()?.id) || this.isEditing('integrations')) {
+      return;
+    }
+    this.applyIntegration(result.appIntegrationId, result.record, result.status);
+    this.integrationErrorMessage.set(result.errorMessage);
+  }
+
+  private applyIntegration(
+    appIntegrationId: number | null,
+    record: ApplicationIntegrationOutput | null,
+    status: ApplicationIntegrationLoadStatus,
+  ): void {
+    this.appIntegrationId.set(appIntegrationId);
+    this.integration.set(record);
+    this.integrationStatus.set(status);
+    this.application.update((current) =>
+      current ? { ...current, appIntegrationId } : current,
+    );
+    this.savedIntegrationsValue = { observations: record?.observation ?? '' };
+    this.integrationsForm.reset({ ...this.savedIntegrationsValue }, { emitEvent: false });
   }
 
   private restoreAccessibilityReferences(): boolean {
@@ -406,6 +548,14 @@ export class ApplicationDetailState {
         this.securityForm.enable({ emitEvent: false });
         this.configureEnsControls();
         break;
+      case 'data':
+        if (!this.canEditData()) return;
+        this.dataForm.enable({ emitEvent: false });
+        break;
+      case 'integrations':
+        if (!this.canEditIntegrations()) return;
+        this.integrationsForm.enable({ emitEvent: false });
+        break;
     }
 
     this.setEditing(section, true);
@@ -444,6 +594,14 @@ export class ApplicationDetailState {
         });
         this.configureEnsControls();
         break;
+      case 'data':
+        this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
+        this.dataForm.enable({ emitEvent: false });
+        break;
+      case 'integrations':
+        this.integrationsForm.reset(this.savedIntegrationsValue, { emitEvent: false });
+        this.integrationsForm.enable({ emitEvent: false });
+        break;
     }
 
     this.setEditing(section, false);
@@ -463,6 +621,10 @@ export class ApplicationDetailState {
         return this.saveAccessibility();
       case 'security':
         return this.saveSecurity();
+      case 'data':
+        return this.saveData();
+      case 'integrations':
+        return this.saveIntegrations();
     }
   }
 
@@ -507,6 +669,10 @@ export class ApplicationDetailState {
         return this.accessibilityForm.dirty;
       case 'security':
         return this.securityForm.dirty;
+      case 'data':
+        return this.dataForm.dirty;
+      case 'integrations':
+        return this.integrationsForm.dirty;
     }
   }
 
@@ -750,6 +916,131 @@ export class ApplicationDetailState {
     );
   }
 
+  private saveData(): Observable<ApplicationDetailSaveResult> {
+    const section: ApplicationDetailSection = 'data';
+    if (!this.canEditData()) return of({ status: 'invalid', section });
+    if (this.dataForm.invalid) {
+      this.dataForm.markAllAsTouched();
+      this.dataActiveSource.set(this.firstInvalidDataSource());
+      return of({ status: 'invalid', section });
+    }
+    if (this.dataForm.pristine) {
+      this.finishUnchanged(section);
+      return of({ status: 'unchanged', section });
+    }
+    const applicationId = Number(this.application()?.id);
+    if (!Number.isInteger(applicationId) || applicationId <= 0) {
+      return of({ status: 'invalid', section });
+    }
+    const value = this.dataForm.getRawValue();
+    const payload: ApplicationDataInput = {
+      applicationId,
+      observation: normalizeQuillHtml(value.observations) || null,
+      openDataUrl: value.openDataUrl.trim() || null,
+      useOpenDataUrl: value.useOpenDataUrl,
+      reuseUrl: value.reuseUrl.trim() || null,
+      useReuseUrl: value.useReuseUrl,
+    };
+    const id = this.appDataId();
+    const request = id == null
+      ? this.dataService.create(payload)
+      : this.dataService.update(id, payload);
+    return defer(() => {
+      this.dataForm.disable({ emitEvent: false });
+      return request;
+    }).pipe(
+      tap((record) => {
+        if (!record || record.application?.id !== applicationId || !Number.isInteger(record.id) ||
+          record.id <= 0 || (id != null && record.id !== id) || record.deletedAt) {
+          throw new Error('Invalid data response');
+        }
+        this.setEditing(section, false);
+      }),
+      // Write responses omit the published endpoints and the URLs may have changed.
+      switchMap((record) => this.reloadData(applicationId, record.id)),
+      tap((result) => this.initializeData(result)),
+      map(() => ({ status: 'saved', section }) as const),
+      finalize(() => this.dataForm.enable({ emitEvent: false })),
+    );
+  }
+
+  private reloadData(applicationId: number, appDataId: number): Observable<ApplicationDataLoadResult> {
+    const failed = (errorMessage: string | null): ApplicationDataLoadResult => ({
+      applicationId,
+      appDataId,
+      record: null,
+      status: 'failed',
+      errorMessage,
+    });
+    return this.dataService.refreshById(appDataId).pipe(
+      map((record): ApplicationDataLoadResult =>
+        record && record.id === appDataId && record.application?.id === applicationId
+          ? { applicationId, appDataId, record, status: record.deletedAt ? 'deleted' : 'loaded', errorMessage: null }
+          : failed(null),
+      ),
+      defaultIfEmpty(failed(null)),
+      catchError((error: unknown) =>
+        of(failed(readApiErrorMessage(error))),
+      ),
+    );
+  }
+
+  private firstInvalidDataSource(): ApplicationDataSource {
+    const invalid = (['openData', 'reuse'] as const).find(
+      (source) => this.dataForm.controls[APPLICATION_DATA_SOURCE_CONTROLS[source].url].invalid,
+    );
+    return invalid ?? this.dataActiveSource();
+  }
+
+  // With its flag off an URL only shows the backend-detected value, so edits are discarded.
+  private configureDataUrl(source: ApplicationDataSource): void {
+    const { useUrl, url } = APPLICATION_DATA_SOURCE_CONTROLS[source];
+    const control = this.dataForm.controls[url];
+    if (!this.dataForm.controls[useUrl].value) {
+      control.setValue(this.savedDataValue[url], { emitEvent: false });
+    }
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  // The anchor response carries every persisted field, so it replaces the snapshot directly.
+  private saveIntegrations(): Observable<ApplicationDetailSaveResult> {
+    const section: ApplicationDetailSection = 'integrations';
+    if (!this.canEditIntegrations()) return of({ status: 'invalid', section });
+    if (this.integrationsForm.pristine) {
+      this.finishUnchanged(section);
+      return of({ status: 'unchanged', section });
+    }
+    const applicationId = Number(this.application()?.id);
+    if (!Number.isInteger(applicationId) || applicationId <= 0) {
+      return of({ status: 'invalid', section });
+    }
+    const payload: ApplicationIntegrationInput = {
+      applicationId,
+      observation:
+        normalizeQuillHtml(this.integrationsForm.getRawValue().observations) || null,
+    };
+    const id = this.appIntegrationId();
+    const request = id == null
+      ? this.integrationService.create(payload)
+      : this.integrationService.update(id, payload);
+    return defer(() => {
+      this.integrationsForm.disable({ emitEvent: false });
+      return request;
+    }).pipe(
+      tap((record) => {
+        if (!record || record.applicationId !== applicationId || !Number.isInteger(record.id) ||
+          record.id <= 0 || (id != null && record.id !== id) || record.deletedAt) {
+          throw new Error('Invalid integration response');
+        }
+        this.setEditing(section, false);
+        this.applyIntegration(record.id, record, 'loaded');
+        this.integrationErrorMessage.set(null);
+      }),
+      map(() => ({ status: 'saved', section }) as const),
+      finalize(() => this.integrationsForm.enable({ emitEvent: false })),
+    );
+  }
+
   private finishUnchanged(section: ApplicationDetailSection): void {
     switch (section) {
       case 'general':
@@ -773,6 +1064,12 @@ export class ApplicationDetailState {
         this.securityForm.enable({ emitEvent: false });
         this.configureEnsControls();
         break;
+      case 'data':
+        this.dataForm.enable({ emitEvent: false });
+        break;
+      case 'integrations':
+        this.integrationsForm.enable({ emitEvent: false });
+        break;
     }
     this.setEditing(section, false);
   }
@@ -780,6 +1077,7 @@ export class ApplicationDetailState {
   private resetState(): void {
     this.hasPendingResponsibleDir3.set(null);
     this.hasUnverifiedWebContexts.set(null);
+    this.webContextVerificationRequestVersion++;
     this.initializedApplicationId = null;
     this.application.set(null);
     this.dir3.selectSnapshot(null);
@@ -791,6 +1089,8 @@ export class ApplicationDetailState {
     this.resetAccessibilityState();
     this.resetDevelopmentState();
     this.resetSecurityState();
+    this.resetDataState();
+    this.resetIntegrationsState();
     this.form.reset(this.savedGeneralValue, { emitEvent: false });
     this.systemsDatabasesForm.reset(this.savedSystemsDatabasesValue, {
       emitEvent: false,
@@ -802,6 +1102,7 @@ export class ApplicationDetailState {
   private setApplication(response: ApplicationOutput): void {
     this.hasPendingResponsibleDir3.set(null);
     this.hasUnverifiedWebContexts.set(null);
+    this.webContextVerificationRequestVersion++;
     this.completenessRequestVersion++;
     this.completenessRefreshing.set(false);
     this.initializedApplicationId = response.id;
@@ -815,6 +1116,8 @@ export class ApplicationDetailState {
     this.resetAccessibilityState();
     this.resetDevelopmentState();
     this.resetSecurityState();
+    this.resetDataState();
+    this.resetIntegrationsState();
     this.form.reset(this.savedGeneralValue, { emitEvent: false });
     this.systemsDatabasesForm.reset(this.savedSystemsDatabasesValue, {
       emitEvent: false,
@@ -961,6 +1264,8 @@ export class ApplicationDetailState {
     this.developmentForm.enable({ emitEvent: false });
     this.accessibilityForm.enable({ emitEvent: false });
     this.securityForm.enable({ emitEvent: false });
+    this.dataForm.enable({ emitEvent: false });
+    this.integrationsForm.enable({ emitEvent: false });
     this.configureEnsControls();
     this.configureMobileApplicationName(
       this.accessibilityForm.controls.mobileApplication.value,
@@ -1090,6 +1395,25 @@ export class ApplicationDetailState {
       emitEvent: false,
     });
     this.configureEnsControls();
+  }
+
+  private resetDataState(): void {
+    this.appDataId.set(this.application()?.appDataId ?? null);
+    this.data.set(null);
+    this.dataStatus.set('unavailable');
+    this.dataErrorMessage.set(null);
+    this.dataActiveSource.set('openData');
+    this.savedDataValue = { ...EMPTY_APPLICATION_DATA_VALUE };
+    this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
+  }
+
+  private resetIntegrationsState(): void {
+    this.appIntegrationId.set(this.application()?.appIntegrationId ?? null);
+    this.integration.set(null);
+    this.integrationStatus.set('unavailable');
+    this.integrationErrorMessage.set(null);
+    this.savedIntegrationsValue = { ...EMPTY_INTEGRATIONS_VALUE };
+    this.integrationsForm.reset(this.savedIntegrationsValue, { emitEvent: false });
   }
 
   private toSecurityFormValue(

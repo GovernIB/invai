@@ -52,6 +52,7 @@
     <ng-template let-columns="columns" let-rowData pTemplate="body">
       <tr
         [class.invai-table-consultable-row]="isConsultable()"
+        [attr.data-web-context-id]="kind() === 'web-context' ? rowData.id : null"
         [attr.tabindex]="isConsultable() ? 0 : null"
         (dblclick)="activateRow($event, rowData)"
         (keydown.enter)="activateRow($event, rowData)"
@@ -63,11 +64,36 @@
               [class.invai-table-cell-content--wrap]="column.wrap"
               [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
               >{{ cellValue(rowData, column.key) }}
+              @if (kind() === 'web-context' && column.key === 'webContext' && rowData.validated) {
+                @if (showVerifiedReason()) {
+                  <span
+                    class="application-web-context-verified-icon"
+                    role="img"
+                    tabindex="0"
+                    [attr.aria-label]="
+                      rowData.validatedReason?.trim()
+                        ? actions.verified + ': ' + rowData.validatedReason.trim()
+                        : actions.verified
+                    "
+                    [pTooltip]="rowData.validatedReason?.trim() || actions.verified"
+                    [autoHide]="false"
+                    tooltipEvent="both"
+                    tooltipPosition="top"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (dblclick)="$event.stopPropagation()"
+                  >
+                    <i class="pi pi-check-circle text-green-700" aria-hidden="true"></i>
+                  </span>
+                } @else {
+                  <span class="application-web-context-verified">{{ actions.verified }}</span>
+                }
+              }
               @if (
                 showVerificationWarnings() &&
                 kind() === 'web-context' &&
                 column.key === 'webContext' &&
-                !rowData.deletedAt
+                !rowData.deletedAt &&
+                !rowData.validated
               ) {
                 <span
                   class="application-web-context-pending"
@@ -90,16 +116,19 @@
             [class.application-security-verification-column]="showVerify()"
           >
             @if (showVerify()) {
-              <!-- Direct verification is an explicit product exception to the row menu standard. -->
-              <p-button
-                type="button"
-                severity="secondary"
-                [ariaLabel]="actions.verify"
-                [label]="actions.verify"
-                [icon]="icons.CHECK"
-                [outlined]="true"
-                (onClick)="onSelectedAction(ApplicationSecurityTableAction.Verify, rowData)"
-              />
+              @if (!rowData.validated && !rowData.deletedAt) {
+                <!-- Direct verification is an explicit product exception to the row menu standard. -->
+                <p-button
+                  type="button"
+                  severity="secondary"
+                  [ariaLabel]="actions.verify"
+                  [label]="actions.verify"
+                  [icon]="icons.CHECK"
+                  [outlined]="true"
+                  [disabled]="verifyDisabled()"
+                  (onClick)="onSelectedAction(ApplicationSecurityTableAction.Verify, rowData)"
+                />
+              }
             } @else {
               <p-button
                 severity="secondary"

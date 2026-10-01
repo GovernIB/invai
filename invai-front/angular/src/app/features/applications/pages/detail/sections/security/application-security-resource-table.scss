@@ -2,6 +2,26 @@ app-application-security-resource-table {
   display: block;
   min-width: 0;
 
+  .application-web-context-verified {
+    display: inline-block;
+    margin-inline-start: 0.5rem;
+    font-weight: 600;
+  }
+
+  .application-web-context-verified-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    margin-inline-start: 0.5rem;
+
+    &:focus-visible {
+      outline: 2px solid var(--p-primary-color);
+      outline-offset: 2px;
+    }
+  }
+
   .application-web-context-pending {
     display: inline-flex;
     margin-inline-start: 0.5rem;

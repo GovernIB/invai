@@ -1,4 +1,4 @@
-import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import { emptyWebContextsData } from './application-development-web-contexts.resolver';
 import { ApplicationDevelopmentWebContextsState } from './application-development-web-contexts-state';
 import { WritableSignal, signal } from '@angular/core';
@@ -117,7 +117,7 @@ describe('ApplicationDevelopmentSection', () => {
       imports: [ApplicationDevelopmentSection],
       providers: [
         MessageService,
-        { provide: ApplicationWebContextsService, useValue: { getPage: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() } },
+        { provide: ApplicationDevelopmentWebContextsService, useValue: { getPage: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() } },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { data: routeData } },
@@ -163,7 +163,7 @@ describe('ApplicationDevelopmentSection', () => {
     fixture.detectChanges();
     expect(contexts.mode()).toBe('create');
     expect(contexts.visible()).toBe(true);
-    expect(TestBed.inject(ApplicationWebContextsService).getPage).not.toHaveBeenCalled();
+    expect(TestBed.inject(ApplicationDevelopmentWebContextsService).getPage).not.toHaveBeenCalled();
   });
 
   it('initializes Development and its read-only resource pages', () => {
@@ -744,7 +744,7 @@ function createState() {
     application: signal({ id: '7' }),
     appSecurityId: signal<number | null>(9),
     refreshCompletenessAfterMutation: vi.fn(),
-    updateWebContextCount: vi.fn(),
+    refreshWebContextVerification: vi.fn(),
     canEdit: signal(true),
     development,
     developmentForm: form,
@@ -781,7 +781,7 @@ function createState() {
 function resolvedData(): Record<string, ApplicationDevelopmentResolvedData> {
   return {
     [APPLICATION_DEVELOPMENT_RESOLVE_KEY]: {
-      webContexts: { ...emptyWebContextsData(), appSecurityId: 9 },
+      webContexts: { ...emptyWebContextsData(), appDevelopmentId: 9 },
       applicationId: 7,
       appDevelopmentId: 9,
       development: DEVELOPMENT,

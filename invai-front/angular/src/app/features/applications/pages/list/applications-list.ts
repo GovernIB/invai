@@ -12,6 +12,7 @@ import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { ActionParams } from '@models/table.model';
 import { SearchComponentBase } from '@shared/classes/search-component-base';
 import { TableLazyLoadEvent } from 'primeng/table';
+import { Button } from 'primeng/button';
 import {
   catchError,
   debounce,
@@ -43,6 +44,11 @@ import { ApplicationsService } from '../../services/applications.service';
 import { APPLICATION_GENERAL_EDIT_NAVIGATION } from '../detail/application-detail-navigation';
 import {
   APPLICATIONS_ADD_ARIA_LABEL,
+  APPLICATIONS_DIR3_CHECK_ERROR,
+  APPLICATIONS_DIR3_CHECK_LABEL,
+  APPLICATIONS_DIR3_CHECK_MISMATCHES,
+  APPLICATIONS_DIR3_CHECK_PROGRESS,
+  APPLICATIONS_DIR3_CHECK_SUCCESS,
   APPLICATIONS_EXPORT_ARIA_LABEL,
   APPLICATIONS_FILTER_ADMINISTRATIVE_UNIT,
   APPLICATIONS_FILTER_APPLICATION,
@@ -87,6 +93,7 @@ const RESPONSIBLE_FILTER_PAGE_SIZE = 20;
     SearchFiltersComponent,
     SectionActionsComponent,
     SectionContainerComponent,
+    Button,
   ],
   templateUrl: './applications-list.html',
   styleUrl: './applications-list.scss',
@@ -121,6 +128,9 @@ export class ApplicationsList
   protected readonly quickSearchAriaLabel = APPLICATIONS_QUICK_SEARCH_ARIA_LABEL;
   protected readonly exportAriaLabel = APPLICATIONS_EXPORT_ARIA_LABEL;
   protected readonly addAriaLabel = APPLICATIONS_ADD_ARIA_LABEL;
+  protected readonly dir3CheckLabel = APPLICATIONS_DIR3_CHECK_LABEL;
+  protected readonly dir3CheckProgress = APPLICATIONS_DIR3_CHECK_PROGRESS;
+  protected readonly isDir3Checking = signal(false);
 
   quickSearchTerm = '';
   private readonly isQuickSearchPending = signal(false);
@@ -140,6 +150,11 @@ export class ApplicationsList
   private readonly quickSearchChanges = new Subject<string>();
   private readonly responsibleSearchChanges = new Subject<string>();
   private readonly searchRequests = new Subject<ApplicationSearchRequest>();
+  private lastPageParams: ApplicationPageParams = {
+    page: 0,
+    size: DEFAULT_PAGE_SIZE,
+    statusId: ApplicationStatus.ACTIVE,
+  };
   private responsibleSearchTerm = '';
 
   protected override filtersForm = createApplicationFiltersForm(this.fb);
@@ -161,9 +176,38 @@ export class ApplicationsList
     filters: ApplicationFilters,
     $event?: TableLazyLoadEvent,
   ): void {
-    this.searchRequests.next({
-      params: this.toPageParams(filters, $event),
-    });
+    const params = this.toPageParams(filters, $event);
+    this.lastPageParams = params;
+    this.searchRequests.next({ params });
+  }
+
+  protected checkAllApplicationDir3(): void {
+    if (this.isDir3Checking()) return;
+
+    this.isDir3Checking.set(true);
+    this.applicationsService
+      .checkDir3MismatchForAllApplications()
+      .pipe(
+        finalize(() => this.isDir3Checking.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (mismatches) => {
+          this.messageService.add({
+            severity: mismatches.length ? 'warn' : 'success',
+            summary: APPLICATIONS_DIR3_CHECK_SUCCESS,
+            detail: APPLICATIONS_DIR3_CHECK_MISMATCHES(mismatches.length),
+          });
+          this.searchRequests.next({ params: this.lastPageParams });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: APPLICATIONS_LOAD_ERROR_SUMMARY,
+            detail: APPLICATIONS_DIR3_CHECK_ERROR,
+          });
+        },
+      });
   }
 
   protected override initializeResults(): void {

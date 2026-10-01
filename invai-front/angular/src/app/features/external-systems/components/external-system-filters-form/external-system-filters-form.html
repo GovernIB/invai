@@ -1,0 +1,50 @@
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
+    <p-floatlabel class="w-full">
+      <input
+        id="external-systems-filter-name"
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+      />
+      <label for="external-systems-filter-name">{{ labels().name }}</label>
+    </p-floatlabel>
+  </div>
+  <div class="invai-filter-field--standard">
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="external-systems-filter-company"
+        styleClass="w-full"
+        formControlName="companyId"
+        ariaLabelledBy="external-systems-filter-company-label"
+        [ariaFilterLabel]="labels().company"
+        [filter]="true"
+        [options]="companyOptions()"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="id"
+      />
+      <label id="external-systems-filter-company-label" for="external-systems-filter-company">
+        {{ labels().company }}
+      </label>
+    </p-floatlabel>
+  </div>
+  <div class="invai-filter-field--compact">
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="external-systems-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="external-systems-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="external-systems-filter-status-label" for="external-systems-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

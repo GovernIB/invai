@@ -1,0 +1,27 @@
+<p-dialog
+  styleClass="invai-dialog"
+  [(visible)]="visible"
+  [blockScroll]="true"
+  [closable]="true"
+  [closeAriaLabel]="closeAriaLabel"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [focusOnShow]="false"
+  [modal]="true"
+  [resizable]="false"
+  [style]="{ width: '32rem', maxWidth: 'calc(100vw - 2rem)' }"
+  (onShow)="focusStart()"
+  (onHide)="hidden.emit()"
+>
+  <ng-template #header let-titleId="ariaLabelledBy">
+    <h2 class="m-0 min-w-0 text-base font-semibold" [id]="titleId">{{ title }}</h2>
+  </ng-template>
+
+  <div class="accessibility-statement">
+    <p #statementStart class="accessibility-statement__start" tabindex="-1" i18n="@@accessibilityStatementPendingAudit">
+      La primera auditoria d'accessibilitat d'aquesta aplicació encara està pendent de realitzar.
+      La declaració d'accessibilitat es publicarà en aquest apartat un cop finalitzada.
+    </p>
+  </div>
+</p-dialog>

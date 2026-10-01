@@ -101,10 +101,8 @@
                       role="img"
                       (keydown.enter)="$event.stopPropagation()"
                       (dblclick)="$event.stopPropagation()"
-                      [attr.aria-label]="
-                        dir3Status === 'MANUAL' ? dir3Copy.manual : dir3Copy.pending
-                      "
-                      [pTooltip]="dir3Status === 'MANUAL' ? dir3Copy.manual : dir3Copy.pending"
+                      [attr.aria-label]="responsibleDir3Label(rowData)"
+                      [pTooltip]="responsibleDir3Label(rowData)"
                       tooltipEvent="both"
                       [autoHide]="false"
                     >
@@ -116,6 +114,13 @@
                         [class.text-green-700]="dir3Status === 'MANUAL'"
                         [style.color]="dir3Status === 'NOT_VALIDATED' ? '#FF9523' : null"
                       ></i>
+                    </span>
+                  }
+                  @if (personUserName(rowData); as userName) {
+                    <span
+                      class="application-assignment-person-username mt-1 block text-sm text-color-secondary"
+                    >
+                      {{ userName }}
                     </span>
                   }
                 }

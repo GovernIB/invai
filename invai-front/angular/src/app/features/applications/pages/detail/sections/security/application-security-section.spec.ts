@@ -11,6 +11,7 @@ import { ApplicationSecurityRoleOutput, ApplicationWebContextOutput } from '../.
 import { ApplicationSecurityTableAction } from './application-security-resource-table';
 
 import { createApplicationSecurityForm } from '../../../../forms/application-security-form.factory';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import {
   ApplicationSecurityMeasuresService,
   ApplicationSecurityRisksService,
@@ -54,6 +55,7 @@ describe('ApplicationSecuritySection', () => {
         { provide: ApplicationDetailState, useValue: state },
         { provide: ApplicationSecurityRolesService, useValue: resourceServiceStub() },
         { provide: ApplicationWebContextsService, useValue: resourceServiceStub() },
+        { provide: ApplicationDevelopmentWebContextsService, useValue: { clearCache: vi.fn() } },
         { provide: ApplicationSecurityRisksService, useValue: resourceServiceStub() },
         { provide: ApplicationSecurityMeasuresService, useValue: resourceServiceStub() },
       ],
@@ -187,7 +189,6 @@ describe('ApplicationSecuritySection', () => {
       deleteDialogVisible(): boolean;
     };
     const row = { id: 3, url: 'https://original', webContext: { id: 1, name: 'Web' }, field: { id: 2, name: 'Intern' }, observation: '', deletedAt: null };
-    const service = TestBed.inject(ApplicationWebContextsService);
     component.openCreateDialog('web-context');
     expect(component.resourceDialogVisible()).toBe(false);
     component.onTableAction('web-context', { action: ApplicationSecurityTableAction.Edit, params: row });
@@ -203,34 +204,106 @@ describe('ApplicationSecuritySection', () => {
     component.confirmDelete();
     fixture.detectChanges();
     expect(component.deleteDialogVisible()).toBe(false);
-    expect(service.create).not.toHaveBeenCalled();
-    expect(service.update).not.toHaveBeenCalled();
-    expect(service.delete).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelector('button[aria-label="Afegeix un context web"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('button[aria-label="Edita el registre"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('#application-security-dialog-url').readOnly).toBe(true);
   });
 
-  it('only exposes verification in edit mode and keeps it informational', () => {
-    const messages = vi.spyOn(TestBed.inject(MessageService), 'add');
+  it('requires edit mode and a nonblank reason before validating a web context', () => {
     const service = TestBed.inject(ApplicationWebContextsService);
-    const component = fixture.componentInstance as unknown as { onTableAction(kind: string, event: object): void };
+    const developmentCache = TestBed.inject(ApplicationDevelopmentWebContextsService);
+    const refresh = new Subject<SpringPage<ApplicationWebContextOutput>>();
+    vi.mocked(service.getPage).mockReturnValueOnce(refresh);
+    const component = fixture.componentInstance as unknown as {
+      onTableAction(kind: string, event: object): void;
+      verifyWebContext(): void;
+      verificationForm: FormGroup;
+      webContexts: {
+        set(value: { items: ApplicationWebContextOutput[]; total: number }): void;
+        (): { items: ApplicationWebContextOutput[]; total: number };
+      };
+    };
     const table = fixture.nativeElement.querySelector('app-application-security-resource-table[kind="web-context"]') as HTMLElement;
     expect(table.querySelector('.application-security-verification-column')).toBeNull();
-    component.onTableAction('web-context', { action: ApplicationSecurityTableAction.Verify, params: { id: 3 } });
-    expect(messages).not.toHaveBeenCalled();
+    const row = { id: 3, validated: false, deletedAt: null, webContext: { id: 1, name: 'Web' } } as ApplicationWebContextOutput;
+    component.webContexts.set({ items: [row], total: 1 });
+    component.onTableAction('web-context', { action: ApplicationSecurityTableAction.Verify, params: row });
+    expect(fixture.nativeElement.querySelector('app-application-web-context-verification-dialog')).toBeNull();
     state.editing.set(true);
     fixture.detectChanges();
     expect(table.querySelector('.application-security-verification-column')).not.toBeNull();
-    component.onTableAction('web-context', { action: ApplicationSecurityTableAction.Verify, params: { id: 3 } });
-    expect(messages).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ severity: 'info', detail: 'La verificació de contextos web encara no està implementada.' }));
-    expect(service.getPage).not.toHaveBeenCalled();
-    expect(service.create).not.toHaveBeenCalled();
-    expect(service.update).not.toHaveBeenCalled();
-    expect(service.delete).not.toHaveBeenCalled();
+    component.onTableAction('web-context', { action: ApplicationSecurityTableAction.Verify, params: row });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-application-web-context-verification-dialog')).not.toBeNull();
+    component.verifyWebContext();
+    expect(service.validate).not.toHaveBeenCalled();
+    fixture.detectChanges();
+    expect(document.querySelector('#application-web-context-verification-reason-error')?.textContent)
+      .toContain('Indica el motiu');
+    expect(document.querySelector('#application-web-context-verification-reason')?.getAttribute('aria-invalid'))
+      .toBe('true');
+    component.verificationForm.controls['reason'].setValue('  Motiu  ');
+    component.verifyWebContext();
+    expect(service.validate).toHaveBeenCalledExactlyOnceWith(3, 'Motiu');
+    expect(component.webContexts().items[0]).toMatchObject({ validated: true, validatedReason: 'Motiu' });
+    expect(developmentCache.clearCache).toHaveBeenCalledOnce();
+    expect(state.refreshWebContextVerification).toHaveBeenCalledOnce();
+    expect(service.getPage).toHaveBeenCalledOnce();
     state.editing.set(false);
     fixture.detectChanges();
     expect(table.querySelector('.application-security-verification-column')).toBeNull();
+  });
+
+  it('keeps the verification dialog open on failure and prevents duplicate requests', () => {
+    const service = TestBed.inject(ApplicationWebContextsService);
+    const developmentCache = TestBed.inject(ApplicationDevelopmentWebContextsService);
+    const request = new Subject<void>();
+    vi.mocked(service.validate).mockReturnValueOnce(request);
+    const component = fixture.componentInstance as unknown as {
+      onTableAction(kind: string, event: object): void;
+      verifyWebContext(): void;
+      verificationForm: FormGroup;
+      verificationDialogVisible: () => boolean;
+    };
+    state.editing.set(true);
+    fixture.detectChanges();
+    component.onTableAction('web-context', {
+      action: ApplicationSecurityTableAction.Verify,
+      params: { id: 3, validated: false, deletedAt: null, webContext: { id: 1, name: 'Web' } },
+    });
+    component.verificationForm.controls['reason'].setValue('Motiu');
+    component.verifyWebContext();
+    component.verifyWebContext();
+    expect(service.validate).toHaveBeenCalledOnce();
+    request.error(new Error('Unavailable'));
+    expect(component.verificationDialogVisible()).toBe(true);
+    expect(state.refreshWebContextVerification).not.toHaveBeenCalled();
+    expect(developmentCache.clearCache).not.toHaveBeenCalled();
+    component.verifyWebContext();
+    expect(service.validate).toHaveBeenCalledTimes(2);
+    expect(component.verificationDialogVisible()).toBe(false);
+    expect(developmentCache.clearCache).toHaveBeenCalledOnce();
+  });
+
+  it('moves focus into the reason field and returns it to the action on cancel', async () => {
+    const row = { id: 3, validated: false, deletedAt: null, webContext: { id: 1, name: 'Web' } } as ApplicationWebContextOutput;
+    const component = fixture.componentInstance as unknown as {
+      webContexts: { set(value: { items: ApplicationWebContextOutput[]; total: number }): void };
+      closeVerificationDialog(): void;
+    };
+    component.webContexts.set({ items: [row], total: 1 });
+    state.editing.set(true);
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('app-application-security-resource-table[kind="web-context"] tbody button') as HTMLButtonElement;
+    button.focus();
+    button.click();
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.activeElement?.id).toBe('application-web-context-verification-reason');
+    component.closeVerificationDialog();
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.activeElement).toBe(button);
   });
 
   function selectById(inputId: string): Select {
@@ -268,7 +341,7 @@ function createState() {
     save: vi.fn(() => of({ status: 'saved', section: 'security' as const })),
     initializeSecurity: vi.fn(),
     refreshCompletenessAfterMutation: vi.fn(),
-    updateWebContextCount: vi.fn(),
+    refreshWebContextVerification: vi.fn(),
   };
 }
 
@@ -318,7 +391,8 @@ function resourceServiceStub() {
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    getPage: vi.fn(),
+    validate: vi.fn(() => of(void 0)),
+    getPage: vi.fn(() => of(emptyWebContextPage())),
   };
 }
 

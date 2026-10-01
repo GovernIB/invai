@@ -24,6 +24,7 @@ const ROW: ApplicationAssignedResponsibleOutput = {
     lastName: 'Tur',
     email: 'maria@caib.es',
     personalCaib: true,
+    userName: 'u00002',
     deletedAt: null,
   },
   responsibleType: {
@@ -55,6 +56,33 @@ describe('ApplicationResponsiblesTable', () => {
     ]);
     fixture.componentRef.setInput('itemsList', { items: [TABLE_ROW], total: 1 });
     fixture.detectChanges();
+  });
+
+  it('shows the user code below the responsible name as plain text instead of the email', () => {
+    const personCell = fixture.nativeElement.querySelector('tbody td') as HTMLTableCellElement;
+    const userName = personCell.querySelector(
+      '.application-assignment-person-username',
+    ) as HTMLElement;
+    expect(personCell.textContent).toContain('Maria Tur');
+    expect(personCell.textContent).not.toContain('maria@caib.es');
+    expect(userName.textContent?.trim()).toBe('u00002');
+    expect(userName.tagName).toBe('SPAN');
+    expect(userName.classList).toContain('block');
+  });
+
+  it.each([
+    ['external person', { personalCaib: false, userName: null }],
+    ['legacy CAIB record', { userName: undefined }],
+    ['blank user code', { userName: '  ' }],
+  ])('shows nothing below the name for a %s', (_case, person) => {
+    fixture.componentRef.setInput('itemsList', {
+      items: [{ ...TABLE_ROW, assignment: { ...ROW, person: { ...ROW.person, ...person } } }],
+      total: 1,
+    });
+    fixture.detectChanges();
+    const personCell = fixture.nativeElement.querySelector('tbody td') as HTMLTableCellElement;
+    expect(personCell.querySelector('.application-assignment-person-username')).toBeNull();
+    expect(personCell.textContent).not.toContain('maria@caib.es');
   });
 
   it.each([
@@ -92,6 +120,28 @@ describe('ApplicationResponsiblesTable', () => {
     } else {
       expect(icon).toBeNull();
     }
+  });
+
+  it.each([
+    ['Validat per telèfon', 'DIR3 validat manualment\nMotiu: Validat per telèfon'],
+    ['  ', 'DIR3 validat manualment'],
+    [null, 'DIR3 validat manualment'],
+  ])('shows the manual DIR3 reason %j in the tooltip', (reason, expected) => {
+    const assignment = {
+      ...ROW,
+      dir3Validation: {
+        id: 501,
+        dir3Status: 'MANUAL' as const,
+        reason,
+        manualValidatedAt: null,
+        manualValidatedBy: null,
+      },
+    };
+    fixture.componentRef.setInput('itemsList', { items: [{ ...TABLE_ROW, assignment }], total: 1 });
+    fixture.detectChanges();
+    const badge = fixture.debugElement.query(By.css('[role="img"]'));
+    expect(badge.injector.get(Tooltip).content).toBe(expected);
+    expect(badge.nativeElement.getAttribute('aria-label')).toBe(expected);
   });
 
   it('offers manual validation only for pending CAIB responsibles in edit mode', () => {
@@ -311,6 +361,9 @@ describe('ApplicationAuthorizedTable', () => {
     fixture.detectChanges();
     const emit = vi.spyOn(fixture.componentInstance.onSelectAction, 'emit');
     const row = fixture.nativeElement.querySelector('tbody tr') as HTMLTableRowElement;
+    const userName = row.querySelector('.application-assignment-person-username') as HTMLElement;
+    expect(userName.textContent?.trim()).toBe('u00002');
+    expect(userName.tagName).toBe('SPAN');
     row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(emit).toHaveBeenLastCalledWith({
       action: ApplicationAssignmentTableAction.View,

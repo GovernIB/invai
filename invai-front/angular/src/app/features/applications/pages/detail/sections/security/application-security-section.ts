@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -44,6 +45,7 @@ import {
 import {
   ApplicationSecurityResourceFormGroup,
   ApplicationSecurityResourceKind,
+  createApplicationWebContextVerificationForm,
   configureApplicationSecurityResourceForm,
   createApplicationSecurityResourceForm,
   createApplicationSecurityRoleFiltersForm,
@@ -54,6 +56,7 @@ import {
   ApplicationSecurityRolesService,
   ApplicationWebContextsService,
 } from '../../../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import { ApplicationDetailState } from '../../application-detail-state';
 import {
   APPLICATION_DETAIL_SAVE_ERROR_MESSAGE,
@@ -64,13 +67,14 @@ import {
 import { ApplicationDetailSectionActions } from '../../components/application-detail-section-actions/application-detail-section-actions';
 import { ApplicationDetailSectionLayout } from '../../components/application-detail-section-layout/application-detail-section-layout';
 import { ApplicationSecurityResourceDialog } from './application-security-resource-dialog';
+import { ApplicationWebContextVerificationDialog } from './application-web-context-verification-dialog';
 import {
   ApplicationSecurityResourceTable,
   ApplicationSecurityTableAction,
   ApplicationSecurityTableKind,
 } from './application-security-resource-table';
 import {
-  APPLICATION_WEB_CONTEXT_VERIFICATION_PENDING,
+  APPLICATION_WEB_CONTEXT_VERIFICATION,
   APPLICATION_SECURITY_ADD_ARIA_LABELS,
   APPLICATION_SECURITY_ANCHOR_REQUIRED,
   APPLICATION_SECURITY_DATE_FORMAT,
@@ -117,6 +121,7 @@ type MutableSecurityResource =
     ApplicationDetailSectionActions,
     ApplicationDetailSectionLayout,
     ApplicationSecurityResourceDialog,
+    ApplicationWebContextVerificationDialog,
     ApplicationSecurityResourceTable,
     Button,
     ConfirmationDialogComponent,
@@ -132,12 +137,14 @@ type MutableSecurityResource =
 })
 export class ApplicationSecuritySection implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly document = inject(DOCUMENT);
   private readonly formBuilder = inject(FormBuilder);
   private readonly locale = inject(LOCALE_ID);
   private readonly destroyRef = inject(DestroyRef);
   private readonly messageService = inject(MessageService);
   private readonly rolesService = inject(ApplicationSecurityRolesService);
   private readonly webContextsService = inject(ApplicationWebContextsService);
+  private readonly developmentWebContextsService = inject(ApplicationDevelopmentWebContextsService);
   private readonly risksService = inject(ApplicationSecurityRisksService);
   private readonly measuresService = inject(ApplicationSecurityMeasuresService);
   private readonly tableStates: Record<ApplicationSecurityTableKind, TableLazyLoadEvent> = {
@@ -198,6 +205,15 @@ export class ApplicationSecuritySection implements OnInit {
   protected readonly isSaving = signal(false);
   protected readonly isResourceSaving = signal(false);
   protected readonly isResourceDeleting = signal(false);
+  protected readonly isVerifyingWebContext = signal(false);
+  protected readonly verificationDialogVisible = signal(false);
+  protected readonly selectedVerification = signal<ApplicationWebContextOutput | null>(null);
+  protected readonly verificationForm = createApplicationWebContextVerificationForm(this.formBuilder);
+  protected readonly verificationCopy = APPLICATION_WEB_CONTEXT_VERIFICATION;
+  protected readonly verificationContextName = computed(() => {
+    const context = this.selectedVerification()?.webContext;
+    return context ? localizedName(context, this.locale, `#${context.id}`) : '';
+  });
 
   private readonly securityLevelCatalog = signal<SecurityCatalogItem[]>([]);
   private readonly identityProviderCatalog = signal<SecurityCatalogItem[]>([]);
@@ -254,7 +270,8 @@ export class ApplicationSecuritySection implements OnInit {
       this.detailState.appSecurityId() != null &&
       !this.isSaving() &&
       !this.isResourceSaving() &&
-      !this.isResourceDeleting(),
+      !this.isResourceDeleting() &&
+      !this.isVerifyingWebContext(),
   );
   protected readonly showResourceActions = computed(
     () => this.detailState.canEdit() && this.detailState.isEditing('security'),
@@ -276,7 +293,6 @@ export class ApplicationSecuritySection implements OnInit {
     );
     this.roles.set(this.toList(resolved.rolesPage));
     this.webContexts.set(this.toList(resolved.webContextsPage));
-    if (resolved.webContextsPage) this.detailState.updateWebContextCount(resolved.webContextsPage.totalElements);
     this.risks.set(this.toList(resolved.risksPage));
     this.measures.set(this.toList(resolved.measuresPage));
     this.securityLevelCatalog.set(resolved.options.securityLevels);
@@ -366,12 +382,11 @@ export class ApplicationSecuritySection implements OnInit {
     event: ActionParams<ApplicationSecurityResourceOutput>,
   ): void {
     if (kind === 'web-context' && event.action === ApplicationSecurityTableAction.Verify) {
-      if (!this.showResourceActions()) return;
-      this.messageService.add({
-        severity: 'info',
-        summary: APPLICATION_SECURITY_PENDING_TITLE,
-        detail: APPLICATION_WEB_CONTEXT_VERIFICATION_PENDING,
-      });
+      const context = event.params as ApplicationWebContextOutput;
+      if (!this.canManageResources() || context.validated || context.deletedAt) return;
+      this.selectedVerification.set(context);
+      this.verificationForm.reset({ reason: '' });
+      this.verificationDialogVisible.set(true);
       return;
     }
     if (kind === 'web-context' && event.action !== ApplicationSecurityTableAction.View) return;
@@ -388,6 +403,55 @@ export class ApplicationSecuritySection implements OnInit {
         this.requestDelete(resource);
         break;
     }
+  }
+
+  protected closeVerificationDialog(): void {
+    if (this.isVerifyingWebContext()) return;
+    this.verificationDialogVisible.set(false);
+    this.selectedVerification.set(null);
+    this.verificationForm.reset({ reason: '' });
+  }
+
+  protected verifyWebContext(): void {
+    const context = this.selectedVerification();
+    if (!context || !this.canManageResources() || this.isVerifyingWebContext()) return;
+    if (this.verificationForm.invalid) {
+      this.verificationForm.markAllAsTouched();
+      return;
+    }
+    const reason = this.verificationForm.controls.reason.value.trim();
+    this.isVerifyingWebContext.set(true);
+    this.webContextsService
+      .validate(context.id, reason)
+      .pipe(
+        finalize(() => this.isVerifyingWebContext.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.developmentWebContextsService.clearCache();
+          this.webContexts.update((page) => ({
+            ...page,
+            items: page.items.map((item) =>
+              item.id === context.id ? { ...item, validated: true, validatedReason: reason } : item,
+            ),
+          }));
+          this.verificationDialogVisible.set(false);
+          this.selectedVerification.set(null);
+          this.verificationForm.reset({ reason: '' });
+          this.loadPage('web-context');
+          this.detailState.refreshWebContextVerification();
+          this.messageService.add({
+            severity: 'success',
+            summary: APPLICATION_SECURITY_SUCCESS_TITLE,
+            detail: this.verificationCopy.success,
+          });
+          setTimeout(() => {
+            this.document.querySelector<HTMLElement>(`[data-web-context-id="${context.id}"]`)?.focus();
+          });
+        },
+        error: () => this.showError(this.verificationCopy.error),
+      });
   }
 
   protected openCreateDialog(kind: ApplicationSecurityResourceKind): void {
@@ -608,7 +672,6 @@ export class ApplicationSecuritySection implements OnInit {
     } else if (kind === 'web-context') {
       this.subscribePage(kind, this.webContextsService.getPage(params), (page) => {
         this.webContexts.set(page);
-        this.detailState.updateWebContextCount(page.total);
       });
     } else if (kind === 'risk') {
       this.subscribePage(kind, this.risksService.getPage(params), (page) => this.risks.set(page));

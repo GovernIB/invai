@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { KeyLabel, PaginatedList } from '@models/table.model';
+import { Tooltip } from 'primeng/tooltip';
 
 import {
   ApplicationSecurityResourceOutput,
@@ -126,6 +128,48 @@ describe('ApplicationSecurityResourceTable', () => {
     fixture.componentRef.setInput('showVerificationWarnings', false);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.application-web-context-pending')).toBeNull();
+  });
+
+  it('shows the verified reason on an accessible green icon in Security', () => {
+    const row = { id: 3, appSecurity: { id: 9 }, webContext: { id: 1, name: 'Web' }, field: { id: 2, name: 'Intern' }, validated: true, validatedReason: 'Validat per auditoria', deletedAt: null } as ApplicationWebContextOutput;
+    fixture.componentRef.setInput('showVerificationWarnings', true);
+    fixture.componentRef.setInput('showVerifiedReason', true);
+    fixture.componentRef.setInput('showVerify', true);
+    setInputs('web-context', { items: [row], total: 1 });
+    fixture.componentRef.setInput('columns', [{ key: 'webContext', label: 'Context web' }]);
+    fixture.detectChanges();
+    const icon = fixture.nativeElement.querySelector('.application-web-context-verified-icon') as HTMLElement;
+    expect(icon.querySelector('.pi-check-circle.text-green-700')?.getAttribute('aria-hidden')).toBe('true');
+    expect(icon.getAttribute('aria-label')).toBe('Verificat: Validat per auditoria');
+    expect(icon.tabIndex).toBe(0);
+    expect(fixture.debugElement.query(By.css('.application-web-context-verified-icon')).injector.get(Tooltip).content).toBe('Validat per auditoria');
+    const action = vi.fn();
+    component.onSelectAction.subscribe(action);
+    icon.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(action).not.toHaveBeenCalled();
+    icon.dispatchEvent(new FocusEvent('focus'));
+    expect(document.querySelector('.p-tooltip-text')?.textContent).toBe('Validat per auditoria');
+    icon.dispatchEvent(new FocusEvent('blur'));
+    icon.dispatchEvent(new MouseEvent('mouseenter'));
+    expect(document.querySelector('.p-tooltip-text')?.textContent).toBe('Validat per auditoria');
+    expect(fixture.nativeElement.querySelector('.application-web-context-verified')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.application-web-context-pending')).toBeNull();
+    expect(fixture.nativeElement.querySelector('tbody button')).toBeNull();
+  });
+
+  it('falls back to the verified label when the reason is absent and keeps Development unchanged', () => {
+    const row = { id: 3, webContext: { id: 1, name: 'Web' }, validated: true, validatedReason: null } as ApplicationWebContextOutput;
+    fixture.componentRef.setInput('showVerifiedReason', true);
+    setInputs('web-context', { items: [row], total: 1 });
+    fixture.componentRef.setInput('columns', [{ key: 'webContext', label: 'Context web' }]);
+    fixture.detectChanges();
+    const icon = fixture.nativeElement.querySelector('.application-web-context-verified-icon') as HTMLElement;
+    expect(icon.getAttribute('aria-label')).toBe('Verificat');
+    expect(fixture.debugElement.query(By.css('.application-web-context-verified-icon')).injector.get(Tooltip).content).toBe('Verificat');
+    fixture.componentRef.setInput('showVerifiedReason', false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.application-web-context-verified')?.textContent).toBe('Verificat');
+    expect(fixture.nativeElement.querySelector('.application-web-context-verified-icon')).toBeNull();
   });
 
   function setInputs(

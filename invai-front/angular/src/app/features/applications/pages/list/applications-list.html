@@ -14,7 +14,17 @@
     (onExport)="onExport()"
     (onQuickSearchChange)="onQuickSearchChange($event)"
     right-top
-  />
+  >
+    <p-button
+      before-search
+      [label]="dir3CheckLabel"
+      [loading]="isDir3Checking()"
+      [disabled]="isDir3Checking()"
+      styleClass="section-actions__text-button"
+      (onClick)="checkAllApplicationDir3()"
+    />
+  </app-section-actions>
+  <span class="sr-only" role="status">{{ isDir3Checking() ? dir3CheckProgress : '' }}</span>
 
   @if (!isFiltersCollapsed()) {
     <app-search-filters

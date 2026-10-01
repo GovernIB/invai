@@ -1,0 +1,89 @@
+<app-application-detail-section-layout
+  titleId="application-data-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('data')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
+  @if (problem(); as problem) {
+    <div class="application-data__problem" [attr.aria-busy]="dataLoading()">
+      <p role="alert">{{ problem }}</p>
+      @if (detailState.dataStatus() !== 'deleted') {
+        <p-button
+          [ariaLabel]="messages.retry"
+          [icon]="icons.REFRESH"
+          [label]="messages.retry"
+          [loading]="dataLoading()"
+          (onClick)="retry()"
+        />
+      }
+    </div>
+  }
+
+  @if (showContent()) {
+    <form class="application-data" novalidate [formGroup]="detailState.dataForm">
+      <p-tabs [value]="detailState.dataActiveSource()" (valueChange)="onSourceChange($event)">
+        <p-tablist [pt]="tabListPassThrough">
+          <p-tab value="openData">{{ labels.openData }}</p-tab>
+          <p-tab value="reuse">{{ labels.reuse }}</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="openData">
+            <app-application-data-source
+              idPrefix="application-data-open-data"
+              [endpoints]="detailState.data()?.openData ?? null"
+              [isEditing]="detailState.isEditing('data')"
+              [isLoading]="dataLoading()"
+              [showEndpoints]="detailState.dataStatus() !== 'absent'"
+              [title]="labels.openData"
+              [unavailable]="sourceUnavailable('openData')"
+              [urlControl]="detailState.dataForm.controls.openDataUrl"
+              [useUrlControl]="detailState.dataForm.controls.useOpenDataUrl"
+              (retry)="retry()"
+            />
+          </p-tabpanel>
+          <p-tabpanel value="reuse">
+            <app-application-data-source
+              idPrefix="application-data-reuse"
+              [endpoints]="detailState.data()?.reuse ?? null"
+              [isEditing]="detailState.isEditing('data')"
+              [isLoading]="dataLoading()"
+              [showEndpoints]="detailState.dataStatus() !== 'absent'"
+              [title]="labels.reuse"
+              [unavailable]="sourceUnavailable('reuse')"
+              [urlControl]="detailState.dataForm.controls.reuseUrl"
+              [useUrlControl]="detailState.dataForm.controls.useReuseUrl"
+              (retry)="retry()"
+            />
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+
+      <section class="application-data__observations" [attr.aria-labelledby]="observationsLabelId">
+        <h4 [id]="observationsLabelId">{{ labels.observations }}</h4>
+        @if (detailState.isEditing('data')) {
+          <p-editor
+            [formControl]="detailState.dataForm.controls.observations"
+            [style]="{ height: '10rem' }"
+            (onInit)="labelEditor($event)"
+          />
+        } @else {
+          <div
+            class="invai-form-static-value invai-form-static-value--rich"
+            [attr.aria-labelledby]="observationsLabelId"
+            [innerHTML]="richTextValue(detailState.dataForm.controls.observations.value)"
+          ></div>
+        }
+      </section>
+    </form>
+  }
+</app-application-detail-section-layout>

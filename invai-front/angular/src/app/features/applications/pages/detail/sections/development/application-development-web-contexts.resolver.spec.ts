@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { FieldsService } from '@features/fields/services/fields.service';
 import { WebContextsService } from '@features/maintenances/security/services/security-resource.services';
 import { EMPTY, firstValueFrom, of, throwError } from 'rxjs';
-import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import { ApplicationsService } from '../../../../services/applications.service';
 import { resolveDevelopmentWebContexts } from './application-development-web-contexts.resolver';
 
@@ -16,10 +16,10 @@ describe('resolveDevelopmentWebContexts', () => {
     getPage = vi.fn(() => of(empty));
     getCatalog = vi.fn(() => of(empty));
     getFields = vi.fn(() => of(empty));
-    refresh = vi.fn(() => of({ appSecurityId: 9 }));
+    refresh = vi.fn(() => of({ appDevelopmentId: 9 }));
     TestBed.configureTestingModule({
       providers: [
-        { provide: ApplicationWebContextsService, useValue: { getPage } },
+        { provide: ApplicationDevelopmentWebContextsService, useValue: { getPage } },
         { provide: WebContextsService, useValue: { getAll: getCatalog } },
         { provide: FieldsService, useValue: { getAll: getFields } },
         { provide: ApplicationsService, useValue: { refreshById: refresh } },
@@ -29,31 +29,31 @@ describe('resolveDevelopmentWebContexts', () => {
   const resolve = (anchor: number | null) =>
     firstValueFrom(TestBed.runInInjectionContext(() => resolveDevelopmentWebContexts(7, anchor)));
 
-  it('uses the security anchor for the first page and does not refresh known identities', async () => {
+  it('uses the development anchor for the first page and does not refresh known identities', async () => {
     const result = await resolve(9);
     expect(refresh).not.toHaveBeenCalled();
     expect(getPage).toHaveBeenCalledExactlyOnceWith({
-      appSecurityId: 9,
+      appDevelopmentId: 9,
       page: 0,
       size: 10,
       sort: 'id,asc',
       statusId: 1,
     });
-    expect(result.appSecurityId).toBe(9);
+    expect(result.appDevelopmentId).toBe(9);
     expect(result.loadFailed).toBe(false);
   });
 
-  it('recovers a missing security anchor when entering Development directly', async () => {
+  it('recovers a missing development anchor when entering Development directly', async () => {
     const result = await resolve(null);
     expect(refresh).toHaveBeenCalledExactlyOnceWith(7);
-    expect(result.appSecurityId).toBe(9);
+    expect(result.appDevelopmentId).toBe(9);
     expect(getPage).toHaveBeenCalledOnce();
   });
 
   it('avoids requests without an anchor if the refresh fails', async () => {
     refresh.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
     const result = await resolve(null);
-    expect(result.appSecurityId).toBeNull();
+    expect(result.appDevelopmentId).toBeNull();
     expect(result.page).toBeNull();
     expect(getPage).not.toHaveBeenCalled();
   });
@@ -84,6 +84,6 @@ describe('resolveDevelopmentWebContexts', () => {
     expect(result.loadFailed).toBe(true);
     expect(result.page).toBeNull();
     expect(result.webContextOptions).toEqual([]);
-    expect(result.appSecurityId).toBe(9);
+    expect(result.appDevelopmentId).toBe(9);
   });
 });

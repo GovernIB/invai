@@ -87,7 +87,7 @@ import {
   ApplicationAuthorizedTable,
   ApplicationResponsibleTableRow,
   ApplicationResponsiblesTable,
-  applicationAssignmentCellValue,
+  applicationAssignmentCsvCellValue,
   assignmentRowsToCsv,
 } from './application-assignment-tables';
 import {
@@ -840,13 +840,13 @@ export class ApplicationResponsibleSection implements OnInit {
 
   protected copyResponsibles(): void {
     this.copyPage('responsible', this.responsibleColumns, this.responsibles().items, (row, key) =>
-      applicationAssignmentCellValue(row, key, this.locale, this.copy.caibRole),
+      applicationAssignmentCsvCellValue(row, key, this.locale, this.copy.caibRole),
     );
   }
 
   protected copyAuthorized(): void {
     this.copyPage('authorized', this.authorizedColumns, this.authorized().items, (row, key) =>
-      applicationAssignmentCellValue(row, key, this.locale, this.copy.caibRole),
+      applicationAssignmentCsvCellValue(row, key, this.locale, this.copy.caibRole),
     );
   }
 
@@ -1099,6 +1099,7 @@ export class ApplicationResponsibleSection implements OnInit {
       personFirstName: firstName,
       personLastName: lastName,
       personEmail: email,
+      personUserName: soffidPerson.userName?.trim() || null,
       companyId: null,
       personalCaib: true,
     };

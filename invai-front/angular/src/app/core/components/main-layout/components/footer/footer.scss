@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 1.5rem;
+  row-gap: 0.25rem;
+  padding: 0.75rem var(--invai-layout-inline-space);
+  color: var(--p-text-color, var(--text-color));
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: center;
+  border-top: 1px solid var(--p-surface-200, var(--surface-200));
+}
+
+.app-footer__item {
+  margin: 0;
+}
+
+.app-footer__link {
+  min-height: 24px;
+  padding: 0.125rem 0.25rem;
+  color: var(--p-primary-color);
+  font: inherit;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--p-primary-hover-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+  }
+}

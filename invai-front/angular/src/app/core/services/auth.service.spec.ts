@@ -147,6 +147,33 @@ describe('OAuthService', () => {
     expect(service.isAuthenticated()).toBe(true);
   });
 
+  it('should include the full name returned by /auth/me', () => {
+    service.loadCurrentUser().subscribe();
+
+    httpTesting
+      .expectOne(authMeUrl)
+      .flush({ authenticated: true, username: 'mgarcia', fullName: ' Mario García ' });
+
+    expect(service.currentUser()).toEqual({
+      id: 'mgarcia',
+      username: 'mgarcia',
+      fullName: 'Mario García',
+    });
+  });
+
+  it('should omit a blank full name returned by /auth/me', () => {
+    service.loadCurrentUser().subscribe();
+
+    httpTesting
+      .expectOne(authMeUrl)
+      .flush({ authenticated: true, username: 'mgarcia', fullName: '   ' });
+
+    expect(service.currentUser()).toEqual({
+      id: 'mgarcia',
+      username: 'mgarcia',
+    });
+  });
+
   it('should report an authenticated session when /auth/me returns a user', () => {
     const result = vi.fn();
 

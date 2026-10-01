@@ -3804,7 +3804,7 @@
       <trans-unit id="systemsRoute" datatype="html"><source>sistemes</source><target>sistemas</target></trans-unit>
       <trans-unit id="systemsDatabasesRoute" datatype="html"><source>bases-de-dades</source><target>bases-de-datos</target></trans-unit>
       <trans-unit id="systemsServersRoute" datatype="html"><source>servidors</source><target>servidores</target></trans-unit>
-      <trans-unit id="systemsLabel" datatype="html"><source>Sistemes i DB</source><target>Sistemas y DB</target></trans-unit>
+      <trans-unit id="systemsLabel" datatype="html"><source>Sistemes i DB</source><target>Sistemas y BD</target></trans-unit>
       <trans-unit id="5311167198964631792" datatype="html"><source>Gestiona les bases de dades disponibles per a les aplicacions.</source><target>Gestiona las bases de datos disponibles para las aplicaciones.</target></trans-unit>
       <trans-unit id="5092579938664750473" datatype="html"><source>Gestiona els servidors disponibles per a les aplicacions.</source><target>Gestiona los servidores disponibles para las aplicaciones.</target></trans-unit>
       <trans-unit id="maintenanceEnvironmentsRoute" datatype="html"><source>entorns</source><target>entornos</target></trans-unit>
@@ -5415,7 +5415,7 @@
       <trans-unit id="5800047601101114407" datatype="html"><source>L&apos;empresa s&apos;ha actualitzat correctament.</source><target>La empresa se ha actualizado correctamente.</target></trans-unit>
       <trans-unit id="6689428004675165755" datatype="html"><source>L&apos;empresa s&apos;ha donat de baixa correctament.</source><target>La empresa se ha dado de baja correctamente.</target></trans-unit>
       <trans-unit id="719339456242814068" datatype="html"><source>L&apos;empresa s&apos;ha restaurat correctament.</source><target>La empresa se ha restaurado correctamente.</target></trans-unit>
-      <trans-unit id="8664369639130489188" datatype="html"><source>Persones</source><target>Personas</target></trans-unit>
+      <trans-unit id="responsibleExternalPeopleTitle" datatype="html"><source>Personal extern</source><target>Personal externo</target></trans-unit>
       <trans-unit id="8444069075180238396" datatype="html"><source>Gestiona les persones responsables de les aplicacions per empresa.</source><target>Gestiona las personas responsables de las aplicaciones por empresa.</target></trans-unit>
       <trans-unit id="7378262360724290449" datatype="html"><source>Cerca persones</source><target>Buscar personas</target></trans-unit>
       <trans-unit id="6746949165791107983" datatype="html"><source>Cerca ràpida de persones</source><target>Búsqueda rápida de personas</target></trans-unit>
@@ -6305,6 +6305,11 @@
       <trans-unit id="applicationCompletenessRefreshError" datatype="html"><source>No s'han pogut actualitzar els indicadors de dades incompletes. Es mantenen els últims valors rebuts del servidor.</source><target>No se han podido actualizar los indicadores de datos incompletos. Se mantienen los últimos valores recibidos del servidor.</target></trans-unit>
       <trans-unit id="applicationCompletenessRetry" datatype="html"><source>Torna a carregar els indicadors</source><target>Vuelve a cargar los indicadores</target></trans-unit>
       <trans-unit id="applicationsFilterResponsible" datatype="html"><source>Responsable</source><target>Responsable</target></trans-unit>
+      <trans-unit id="applicationsDir3CheckLabel" datatype="html"><source>Validar DIR3 de totes</source><target>Validar DIR3 de todas</target></trans-unit>
+      <trans-unit id="applicationsDir3CheckProgress" datatype="html"><source>Validant el DIR3 de totes les aplicacions…</source><target>Validando el DIR3 de todas las aplicaciones…</target></trans-unit>
+      <trans-unit id="applicationsDir3CheckSuccess" datatype="html"><source>Validació DIR3 completada</source><target>Validación DIR3 completada</target></trans-unit>
+      <trans-unit id="applicationsDir3CheckMismatches" datatype="html"><source>Aplicacions amb discrepàncies DIR3: <x id="PH" equiv-text="count"/>.</source><target>Aplicaciones con discrepancias DIR3: <x id="PH" equiv-text="count"/>.</target></trans-unit>
+      <trans-unit id="applicationsDir3CheckError" datatype="html"><source>No s&apos;ha pogut completar la validació DIR3.</source><target>No se ha podido completar la validación DIR3.</target></trans-unit>
       <trans-unit id="applicationAssignmentResponsibleDetailTitle" datatype="html"><source>Consulta del responsable</source><target>Consulta del responsable</target></trans-unit>
       <trans-unit id="applicationAssignmentAuthorizedDetailTitle" datatype="html"><source>Consulta de la persona autoritzada</source><target>Consulta de la persona autorizada</target></trans-unit>
       <trans-unit id="applicationAssignmentDetailClose" datatype="html"><source>Tanca la consulta de l'assignació</source><target>Cerrar la consulta de la asignación</target></trans-unit>
@@ -6416,13 +6421,49 @@
         <source>Verificar</source>
         <target>Verificar</target>
       </trans-unit>
-      <trans-unit id="applicationWebContextVerificationPending" datatype="html">
-        <source>La verificació de contextos web encara no està implementada.</source>
-        <target>La verificación de contextos web todavía no está implementada.</target>
+      <trans-unit id="applicationWebContextVerified" datatype="html">
+        <source>Verificat</source>
+        <target>Verificado</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationTitle" datatype="html">
+        <source>Verifica el context web</source>
+        <target>Verificar el contexto web</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationContext" datatype="html">
+        <source>Context web</source>
+        <target>Contexto web</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationReason" datatype="html">
+        <source>Motiu de la verificació</source>
+        <target>Motivo de la verificación</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationReasonRequired" datatype="html">
+        <source>Indica el motiu de la verificació.</source>
+        <target>Indica el motivo de la verificación.</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationCancel" datatype="html">
+        <source>Cancel·la la verificació</source>
+        <target>Cancela la verificación</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationClose" datatype="html">
+        <source>Tanca el diàleg de verificació</source>
+        <target>Cierra el diálogo de verificación</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationSuccess" datatype="html">
+        <source>El context web s'ha verificat correctament.</source>
+        <target>El contexto web se ha verificado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationError" datatype="html">
+        <source>No s'ha pogut verificar el context web. Revisa el seu estat i torna-ho a provar.</source>
+        <target>No se ha podido verificar el contexto web. Revisa su estado y vuelve a intentarlo.</target>
       </trans-unit>
       <trans-unit id="applicationDevelopmentWebContextsLoadError" datatype="html">
         <source>No s'han pogut carregar els contextos web o els seus catàlegs.</source>
         <target>No se han podido cargar los contextos web o sus catálogos.</target>
+      </trans-unit>
+      <trans-unit id="applicationDevelopmentWebContextAnchorRequired" datatype="html">
+        <source>Desa primer les dades generals de Desenvolupament per poder gestionar els contextos web.</source>
+        <target>Guarda primero los datos generales de Desarrollo para poder gestionar los contextos web.</target>
       </trans-unit>
       <trans-unit id="applicationWebContextPendingVerification" datatype="html">
         <source>Context web pendent de verificar.</source>
@@ -6527,6 +6568,598 @@
       <trans-unit id="applicationResponsibleDir3Pending" datatype="html">
         <source>La secció Responsables té responsables amb el DIR3 pendent de validar.</source>
         <target>La sección Responsables tiene responsables con el DIR3 pendiente de validar.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataTitle" datatype="html">
+        <source>Dades</source>
+        <target>Datos</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsTitle" datatype="html">
+        <source>Integracions</source>
+        <target>Integraciones</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsLoadError" datatype="html">
+        <source>No s'han pogut carregar les integracions.</source>
+        <target>No se han podido cargar las integraciones.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsActionPending" datatype="html">
+        <source>Funcionalitat pendent d'implementar.</source>
+        <target>Funcionalidad pendiente de implementar.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsGrantedRolesColumn" datatype="html">
+        <source>Rols atorgats</source>
+        <target>Roles otorgados</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesColumn" datatype="html">
+        <source>Rols</source>
+        <target>Roles</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsCriticalityColumn" datatype="html">
+        <source>Criticitat</source>
+        <target>Criticidad</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsUserColumn" datatype="html">
+        <source>Usuari d'integració</source>
+        <target>Usuario de integración</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsIncomplete" datatype="html">
+        <source>La secció Integracions està incompleta: no hi ha cap connexió activa.</source>
+        <target>La sección Integraciones está incompleta: no hay ninguna conexión activa.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataSourceUnavailable" datatype="html">
+        <source>No s&apos;ha pogut consultar el catàleg d&apos;aquesta font en aquest moment. Torna-ho a provar.</source>
+        <target>No se ha podido consultar el catálogo de esta fuente en este momento. Inténtalo de nuevo.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsConnectionsTitle" datatype="html">
+        <source>Connexions</source>
+        <target>Conexiones</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsAddConnection" datatype="html">
+        <source>Afegeix una connexió</source>
+        <target>Añade una conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsSuccessTitle" datatype="html">
+        <source>Canvis desats</source>
+        <target>Cambios guardados</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsFailed" datatype="html">
+        <source>No s&apos;han pogut carregar les dades d&apos;integració de l&apos;aplicació. Torna-ho a provar.</source>
+        <target>No se han podido cargar los datos de integración de la aplicación. Inténtalo de nuevo.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsUnavailable" datatype="html">
+        <source>No es pot identificar el registre d&apos;integració d&apos;aquesta aplicació. Torna a carregar les dades.</source>
+        <target>No se puede identificar el registro de integración de esta aplicación. Vuelve a cargar los datos.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsForbidden" datatype="html">
+        <source>El teu perfil no té permisos per fer aquesta operació d&apos;integracions.</source>
+        <target>Tu perfil no tiene permisos para realizar esta operación de integraciones.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsDeleted" datatype="html">
+        <source>El registre d&apos;integració està donat de baixa i no es pot modificar.</source>
+        <target>El registro de integración está dado de baja y no se puede modificar.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRetry" datatype="html">
+        <source>Torna a carregar les integracions</source>
+        <target>Vuelve a cargar las integraciones</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsInfoTitle" datatype="html">
+        <source>Informació</source>
+        <target>Información</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsAnchorRequired" datatype="html">
+        <source>Desa les observacions de la pestanya per crear el registre d&apos;integració abans d&apos;afegir connexions.</source>
+        <target>Guarda las observaciones de la pestaña para crear el registro de integración antes de añadir conexiones.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsCatalogsError" datatype="html">
+        <source>No s&apos;han pogut carregar les tecnologies o els sistemes externs. Torna a obrir el formulari.</source>
+        <target>No se han podido cargar las tecnologías o los sistemas externos. Vuelve a abrir el formulario.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsConnectionSaved" datatype="html">
+        <source>La connexió s&apos;ha desat correctament.</source>
+        <target>La conexión se ha guardado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsConnectionSaveError" datatype="html">
+        <source>No s&apos;ha pogut desar la connexió.</source>
+        <target>No se ha podido guardar la conexión.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsConnectionDeleted" datatype="html">
+        <source>La connexió s&apos;ha donat de baixa correctament.</source>
+        <target>La conexión se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsConnectionDeleteError" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa la connexió.</source>
+        <target>No se ha podido dar de baja la conexión.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsKindApplication" datatype="html">
+        <source>Aplicació de l&apos;inventari</source>
+        <target>Aplicación del inventario</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsKindExternal" datatype="html">
+        <source>Sistema extern</source>
+        <target>Sistema externo</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesMismatch" datatype="html">
+        <source>No coincideixen</source>
+        <target>No coinciden</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesMismatchDetail" datatype="html">
+        <source>Els rols atorgats a Soffid no coincideixen amb els rols requerits.</source>
+        <target>Los roles otorgados en Soffid no coinciden con los roles requeridos.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesMatch" datatype="html">
+        <source>Coincideixen</source>
+        <target>Coinciden</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesUnknown" datatype="html">
+        <source>No s&apos;ha pogut comprovar</source>
+        <target>No se ha podido comprobar</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsGrantedUnavailable" datatype="html">
+        <source>No disponible</source>
+        <target>No disponible</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRequiredRolesColumn" datatype="html">
+        <source>Rols requerits</source>
+        <target>Roles requeridos</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesMatchColumn" datatype="html">
+        <source>Coincidència de rols</source>
+        <target>Coincidencia de roles</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsDeleteTitle" datatype="html">
+        <source>Dona de baixa la connexió?</source>
+        <target>¿Dar de baja la conexión?</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsDeleteMessage" datatype="html">
+        <source>La connexió deixarà d&apos;aparèixer a la taula de connexions actives.</source>
+        <target>La conexión dejará de aparecer en la tabla de conexiones activas.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsDeleteCancelAria" datatype="html">
+        <source>Cancel·la la baixa de la connexió</source>
+        <target>Cancela la baja de la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsDeleteConfirmAria" datatype="html">
+        <source>Confirma la baixa de la connexió</source>
+        <target>Confirma la baja de la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogCreateTitle" datatype="html">
+        <source>Afegir connexió</source>
+        <target>Añadir conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogViewTitle" datatype="html">
+        <source>Consultar connexió</source>
+        <target>Consultar conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogEditTitle" datatype="html">
+        <source>Editar connexió</source>
+        <target>Editar conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogSystemKind" datatype="html">
+        <source>Tipus de sistema</source>
+        <target>Tipo de sistema</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogApplication" datatype="html">
+        <source>Aplicació</source>
+        <target>Aplicación</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogExternalSystem" datatype="html">
+        <source>Sistema extern</source>
+        <target>Sistema externo</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogUser" datatype="html">
+        <source>Usuari d&apos;integració</source>
+        <target>Usuario de integración</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRequired" datatype="html">
+        <source>Camp obligatori</source>
+        <target>Campo obligatorio</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRolesRequired" datatype="html">
+        <source>Selecciona almenys un rol requerit.</source>
+        <target>Selecciona al menos un rol requerido.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogUserRequired" datatype="html">
+        <source>Selecciona un usuari de Soffid.</source>
+        <target>Selecciona un usuario de Soffid.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogUserInvalid" datatype="html">
+        <source>Selecciona un usuari de la llista de Soffid que tingui codi d&apos;usuari.</source>
+        <target>Selecciona un usuario de la lista de Soffid que tenga código de usuario.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogApplicationPlaceholder" datatype="html">
+        <source>Cerca per nom o codi</source>
+        <target>Busca por nombre o código</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogApplicationInstruction" datatype="html">
+        <source>Obre la llista i escriu per cercar aplicacions de l&apos;inventari.</source>
+        <target>Abre la lista y escribe para buscar aplicaciones del inventario.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogApplicationsSearching" datatype="html">
+        <source>Cercant aplicacions…</source>
+        <target>Buscando aplicaciones…</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogApplicationsEmpty" datatype="html">
+        <source>No s&apos;han trobat aplicacions.</source>
+        <target>No se han encontrado aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogApplicationsError" datatype="html">
+        <source>No s&apos;han pogut cercar aplicacions. Torna-ho a provar.</source>
+        <target>No se han podido buscar aplicaciones. Inténtalo de nuevo.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRolesPlaceholder" datatype="html">
+        <source>Cerca rols de Soffid</source>
+        <target>Busca roles de Soffid</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRolesInstruction" datatype="html">
+        <source>Obre la llista i escriu el nom del rol, per exemple amb el prefix INV_.</source>
+        <target>Abre la lista y escribe el nombre del rol, por ejemplo con el prefijo INV_.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRolesSearching" datatype="html">
+        <source>Cercant rols a Soffid…</source>
+        <target>Buscando roles en Soffid…</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRolesEmpty" datatype="html">
+        <source>No s&apos;han trobat rols a Soffid.</source>
+        <target>No se han encontrado roles en Soffid.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRolesError" datatype="html">
+        <source>No s&apos;ha pogut consultar Soffid. Torna-ho a provar.</source>
+        <target>No se ha podido consultar Soffid. Inténtalo de nuevo.</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogCatalogLoading" datatype="html">
+        <source>Carregant opcions…</source>
+        <target>Cargando opciones…</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogAcceptAria" datatype="html">
+        <source>Accepta la consulta de la connexió</source>
+        <target>Acepta la consulta de la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogAddAria" datatype="html">
+        <source>Afegeix la connexió</source>
+        <target>Añade la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogCancelAria" datatype="html">
+        <source>Cancel·la els canvis de la connexió</source>
+        <target>Cancela los cambios de la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogCloseAria" datatype="html">
+        <source>Tanca el formulari de la connexió</source>
+        <target>Cierra el formulario de la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogDeactivateAria" datatype="html">
+        <source>Dona de baixa la connexió</source>
+        <target>Da de baja la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogEditAria" datatype="html">
+        <source>Edita la connexió</source>
+        <target>Edita la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogRestoreAria" datatype="html">
+        <source>Restaura la connexió</source>
+        <target>Restaura la conexión</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationDialogSaveAria" datatype="html">
+        <source>Desa els canvis de la connexió</source>
+        <target>Guarda los cambios de la conexión</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogCreateTitle" datatype="html">
+        <source>Afegir sistema extern</source>
+        <target>Añadir sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogViewTitle" datatype="html">
+        <source>Consultar sistema extern</source>
+        <target>Consultar sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogEditTitle" datatype="html">
+        <source>Editar sistema extern</source>
+        <target>Editar sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogNameMaxLength" datatype="html">
+        <source>El nom ha de tenir com a màxim 150 caràcters</source>
+        <target>El nombre debe tener como máximo 150 caracteres</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogCancelAria" datatype="html">
+        <source>Cancel·la els canvis del sistema extern</source>
+        <target>Cancela los cambios del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogAcceptAria" datatype="html">
+        <source>Accepta la consulta del sistema extern</source>
+        <target>Acepta la consulta del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogRestoreAria" datatype="html">
+        <source>Restaura el sistema extern</source>
+        <target>Restaura el sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogAddAria" datatype="html">
+        <source>Afegeix el sistema extern</source>
+        <target>Añade el sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogSaveAria" datatype="html">
+        <source>Desa els canvis del sistema extern</source>
+        <target>Guarda los cambios del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogEditAria" datatype="html">
+        <source>Edita el sistema extern</source>
+        <target>Edita el sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogDeactivateAria" datatype="html">
+        <source>Dona de baixa el sistema extern</source>
+        <target>Da de baja el sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogCloseAria" datatype="html">
+        <source>Tanca el formulari del sistema extern</source>
+        <target>Cierra el formulario del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDialogLoading" datatype="html">
+        <source>Carregant el sistema extern</source>
+        <target>Cargando el sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemsTableActionsAria" datatype="html">
+        <source>Obrir les accions del sistema extern</source>
+        <target>Abrir las acciones del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemsTitle" datatype="html">
+        <source>Sistemes externs</source>
+        <target>Sistemas externos</target>
+      </trans-unit>
+      <trans-unit id="externalSystemsQuickSearchAria" datatype="html">
+        <source>Cerca ràpida de sistemes externs</source>
+        <target>Búsqueda rápida de sistemas externos</target>
+      </trans-unit>
+      <trans-unit id="externalSystemsAddAria" datatype="html">
+        <source>Afegeix un sistema extern</source>
+        <target>Añade un sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar els sistemes externs.</source>
+        <target>No se han podido cargar los sistemas externos.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemLoadError" datatype="html">
+        <source>No s&apos;ha pogut carregar el sistema extern.</source>
+        <target>No se ha podido cargar el sistema externo.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemCreatedTitle" datatype="html">
+        <source>Sistema extern afegit</source>
+        <target>Sistema externo añadido</target>
+      </trans-unit>
+      <trans-unit id="externalSystemCreatedDetail" datatype="html">
+        <source>El sistema extern s&apos;ha afegit correctament.</source>
+        <target>El sistema externo se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemUpdatedTitle" datatype="html">
+        <source>Sistema extern actualitzat</source>
+        <target>Sistema externo actualizado</target>
+      </trans-unit>
+      <trans-unit id="externalSystemUpdatedDetail" datatype="html">
+        <source>El sistema extern s&apos;ha actualitzat correctament.</source>
+        <target>El sistema externo se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeletedTitle" datatype="html">
+        <source>Sistema extern donat de baixa</source>
+        <target>Sistema externo dado de baja</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeletedDetail" datatype="html">
+        <source>El sistema extern s&apos;ha donat de baixa correctament.</source>
+        <target>El sistema externo se ha dado de baja correctamente.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemRestoredTitle" datatype="html">
+        <source>Sistema extern restaurat</source>
+        <target>Sistema externo restaurado</target>
+      </trans-unit>
+      <trans-unit id="externalSystemRestoredDetail" datatype="html">
+        <source>El sistema extern s&apos;ha restaurat correctament.</source>
+        <target>El sistema externo se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemSaveError" datatype="html">
+        <source>No s&apos;ha pogut desar el sistema extern.</source>
+        <target>No se ha podido guardar el sistema externo.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeleteError" datatype="html">
+        <source>No s&apos;ha pogut donar de baixa el sistema extern.</source>
+        <target>No se ha podido dar de baja el sistema externo.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemRestoreError" datatype="html">
+        <source>No s&apos;ha pogut restaurar el sistema extern.</source>
+        <target>No se ha podido restaurar el sistema externo.</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeleteDialogTitle" datatype="html">
+        <source>Donar de baixa el sistema extern?</source>
+        <target>¿Dar de baja el sistema externo?</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeleteDialogMessage" datatype="html">
+        <source>Estàs a punt de donar de baixa «<x id="externalSystemName" equiv-text="name"/>».</source>
+        <target>Estás a punto de dar de baja «<x id="externalSystemName" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeleteCancelAria" datatype="html">
+        <source>Cancel·la la baixa del sistema extern</source>
+        <target>Cancela la baja del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="externalSystemDeleteConfirmAria" datatype="html">
+        <source>Confirma la baixa del sistema extern</source>
+        <target>Confirma la baja del sistema externo</target>
+      </trans-unit>
+      <trans-unit id="maintenanceExternalSystemsDescription" datatype="html">
+        <source>Gestiona els sistemes aliens a l&apos;inventari amb què s&apos;integren les aplicacions i l&apos;empresa responsable de cadascun.</source>
+        <target>Gestiona los sistemas ajenos al inventario con los que se integran las aplicaciones y la empresa responsable de cada uno.</target>
+      </trans-unit>
+      <trans-unit id="maintenanceIntegrationsCompaniesError" datatype="html">
+        <source>No s&apos;han pogut carregar les empreses disponibles per als sistemes externs.</source>
+        <target>No se han podido cargar las empresas disponibles para los sistemas externos.</target>
+      </trans-unit>
+      <trans-unit id="maintenanceIntegrationsRoute" datatype="html">
+        <source>integracions</source>
+        <target>integraciones</target>
+      </trans-unit>
+      <trans-unit id="maintenanceIntegrationsLabel" datatype="html">
+        <source>Integracions</source>
+        <target>Integraciones</target>
+      </trans-unit>
+      <trans-unit id="applicationDataSources" datatype="html">
+        <source>Fonts de dades</source>
+        <target>Fuentes de datos</target>
+      </trans-unit>
+      <trans-unit id="applicationDataOpenData" datatype="html">
+        <source>Open Data</source>
+        <target>Open Data</target>
+      </trans-unit>
+      <trans-unit id="applicationDataReuse" datatype="html">
+        <source>Reutilització</source>
+        <target>Reutilización</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUseCustomUrl" datatype="html">
+        <source>Utilitza una URL pròpia</source>
+        <target>Utiliza una URL propia</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrl" datatype="html">
+        <source>URL de consulta</source>
+        <target>URL de consulta</target>
+      </trans-unit>
+      <trans-unit id="applicationDataEndpoints" datatype="html">
+        <source>Endpoints GET publicats</source>
+        <target>Endpoints GET publicados</target>
+      </trans-unit>
+      <trans-unit id="applicationDataObservations" datatype="html">
+        <source>Observacions</source>
+        <target>Observaciones</target>
+      </trans-unit>
+      <trans-unit id="applicationDataYes" datatype="html">
+        <source>Sí</source>
+        <target>Sí</target>
+      </trans-unit>
+      <trans-unit id="applicationDataNo" datatype="html">
+        <source>No</source>
+        <target>No</target>
+      </trans-unit>
+      <trans-unit id="applicationDataNoValue" datatype="html">
+        <source>No informat</source>
+        <target>No informado</target>
+      </trans-unit>
+      <trans-unit id="applicationDataDetectedUrlHelp" datatype="html">
+        <source>URL detectada automàticament a partir del codi de l'aplicació. Activa «Utilitza una URL pròpia» per indicar-ne una altra.</source>
+        <target>URL detectada automáticamente a partir del código de la aplicación. Activa «Utiliza una URL propia» para indicar otra.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlRequired" datatype="html">
+        <source>Indica la URL de consulta quan utilitzes una URL pròpia.</source>
+        <target>Indica la URL de consulta cuando utilices una URL propia.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlMaxLength" datatype="html">
+        <source>La URL no pot superar els 500 caràcters.</source>
+        <target>La URL no puede superar los 500 caracteres.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlPattern" datatype="html">
+        <source>Introdueix una URL HTTP o HTTPS vàlida.</source>
+        <target>Introduce una URL HTTP o HTTPS válida.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataLoadFailed" datatype="html">
+        <source>No s'han pogut carregar les dades de l'aplicació. Torna-ho a provar.</source>
+        <target>No se han podido cargar los datos de la aplicación. Vuelve a intentarlo.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUnavailable" datatype="html">
+        <source>No es pot identificar el registre de dades d'aquesta aplicació. Torna a carregar les dades.</source>
+        <target>No se puede identificar el registro de datos de esta aplicación. Vuelve a cargar los datos.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataForbidden" datatype="html">
+        <source>El teu perfil no té permisos per fer aquesta operació de dades.</source>
+        <target>Tu perfil no tiene permisos para realizar esta operación de datos.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataDeleted" datatype="html">
+        <source>El registre de dades està donat de baixa i no es pot modificar.</source>
+        <target>El registro de datos está dado de baja y no se puede modificar.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataAbsentEndpoints" datatype="html">
+        <source>Els endpoints publicats es consultaran quan es desin les dades de la pestanya.</source>
+        <target>Los endpoints publicados se consultarán cuando se guarden los datos de la pestaña.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataRetry" datatype="html">
+        <source>Torna a carregar les dades</source>
+        <target>Vuelve a cargar los datos</target>
+      </trans-unit>
+      <trans-unit id="applicationDataInfoTitle" datatype="html">
+        <source>Informació</source>
+        <target>Información</target>
+      </trans-unit>
+      <trans-unit id="applicationDataToggleHeader" datatype="html">
+        <source>Paràmetres de l'endpoint</source>
+        <target>Parámetros del endpoint</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParametersOf" datatype="html">
+        <source>Paràmetres de <x id="path" equiv-text="path"/></source>
+        <target>Parámetros de <x id="path" equiv-text="path"/></target>
+      </trans-unit>
+      <trans-unit id="applicationDataNoParameters" datatype="html">
+        <source>Sense paràmetres</source>
+        <target>Sin parámetros</target>
+      </trans-unit>
+      <trans-unit id="applicationDataEndpointsEmpty" datatype="html">
+        <source>L'aplicació no publica cap endpoint GET.</source>
+        <target>La aplicación no publica ningún endpoint GET.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataColumnPath" datatype="html">
+        <source>Ruta</source>
+        <target>Ruta</target>
+      </trans-unit>
+      <trans-unit id="applicationDataColumnSummary" datatype="html">
+        <source>Resum</source>
+        <target>Resumen</target>
+      </trans-unit>
+      <trans-unit id="applicationDataColumnDescription" datatype="html">
+        <source>Descripció</source>
+        <target>Descripción</target>
+      </trans-unit>
+      <trans-unit id="applicationDataColumnParameters" datatype="html">
+        <source>Paràmetres</source>
+        <target>Parámetros</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterName" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterIn" datatype="html">
+        <source>Ubicació</source>
+        <target>Ubicación</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterRequired" datatype="html">
+        <source>Obligatori</source>
+        <target>Obligatorio</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterType" datatype="html">
+        <source>Tipus</source>
+        <target>Tipo</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterFormat" datatype="html">
+        <source>Format</source>
+        <target>Formato</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterDefault" datatype="html">
+        <source>Valor per defecte</source>
+        <target>Valor por defecto</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterEnum" datatype="html">
+        <source>Valors permesos</source>
+        <target>Valores permitidos</target>
+      </trans-unit>
+      <trans-unit id="applicationDataParameterDescription" datatype="html">
+        <source>Descripció</source>
+        <target>Descripción</target>
+      </trans-unit>
+      <trans-unit id="appFooterVersion" datatype="html">
+        <source>Versió</source>
+        <target>Versión</target>
+      </trans-unit>
+      <trans-unit id="appFooterAccessibilityStatement" datatype="html">
+        <source>Declaració d'accessibilitat</source>
+        <target>Declaración de accesibilidad</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementTitle" datatype="html">
+        <source>Declaració d'accessibilitat</source>
+        <target>Declaración de accesibilidad</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementCloseAriaLabel" datatype="html">
+        <source>Tanca la declaració d'accessibilitat</source>
+        <target>Cierra la declaración de accesibilidad</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementPendingAudit" datatype="html">
+        <source>La primera auditoria d'accessibilitat d'aquesta aplicació encara està pendent de realitzar. La declaració d'accessibilitat es publicarà en aquest apartat un cop finalitzada.</source>
+        <target>La primera auditoría de accesibilidad de esta aplicación todavía está pendiente de realizar. La declaración de accesibilidad se publicará en este apartado una vez finalizada.</target>
       </trans-unit>
     </body>
   </file>

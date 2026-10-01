@@ -1,0 +1,76 @@
+<div class="application-data-source">
+  <div class="application-data-source__fields invai-grid grid-cols-1 gap-4 md:grid-cols-12">
+    <div class="application-data-source__field md:col-span-4 xl:col-span-3">
+      <span class="application-data-source__label" [id]="ids().useUrlLabel">
+        {{ labels.useCustomUrl }}
+      </span>
+      @if (isEditing()) {
+        <div class="application-data-source__toggle">
+          <p-toggleswitch
+            [ariaLabelledBy]="ids().useUrlLabel"
+            [formControl]="useUrlControl()"
+            [inputId]="ids().useUrl"
+          />
+        </div>
+      } @else {
+        <p class="invai-form-static-value" [attr.aria-labelledby]="ids().useUrlLabel">
+          {{ useUrlControl().value ? labels.yes : labels.no }}
+        </p>
+      }
+    </div>
+
+    <div class="application-data-source__field md:col-span-8 xl:col-span-9">
+      <label [for]="ids().url">{{ labels.url }}</label>
+      <input
+        pInputText
+        class="w-full"
+        type="url"
+        [attr.aria-describedby]="urlDescribedBy()"
+        [attr.aria-invalid]="urlError() ? true : null"
+        [attr.maxlength]="urlMaxLength"
+        [class.invai-form-readonly-control]="isUrlReadonly()"
+        [formControl]="urlControl()"
+        [id]="ids().url"
+        [readOnly]="isUrlReadonly()"
+      />
+      @if (urlError(); as message) {
+        <p class="application-data-source__error" role="alert" [id]="ids().urlError">
+          {{ message }}
+        </p>
+      }
+      @if (showDetectedHelp()) {
+        <p class="application-data-source__help" [id]="ids().urlHelp">
+          {{ urlMessages.detectedHelp }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <section class="application-data-source__endpoints" [attr.aria-labelledby]="ids().endpointsTitle">
+    <h4 [id]="ids().endpointsTitle">{{ labels.endpoints }}</h4>
+    @if (showEndpoints() && unavailable()) {
+      <div class="application-data-source__unavailable" [attr.aria-busy]="isLoading()">
+        <p role="status" [id]="ids().unavailable">{{ unavailableMessage }}</p>
+        <p-button
+          severity="secondary"
+          [ariaLabel]="retryLabel"
+          [disabled]="isEditing()"
+          [icon]="icons.REFRESH"
+          [label]="retryLabel"
+          [loading]="isLoading()"
+          [outlined]="true"
+          (onClick)="retry.emit()"
+        />
+      </div>
+    } @else if (showEndpoints()) {
+      <app-application-data-endpoints-table
+        [endpoints]="endpoints() ?? []"
+        [idPrefix]="idPrefix()"
+        [isLoading]="isLoading()"
+        [label]="endpointsLabel()"
+      />
+    } @else {
+      <p class="application-data-source__help">{{ absentEndpoints }}</p>
+    }
+  </section>
+</div>

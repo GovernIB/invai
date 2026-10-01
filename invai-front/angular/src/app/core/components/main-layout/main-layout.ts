@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ResolverNavigationLoadingService } from '@core/services/resolver-navigation-loading.service';
 import { ButtonModule } from 'primeng/button';
 import { Drawer } from 'primeng/drawer';
+import { Footer } from './components/footer/footer';
 import { Sidebar } from './components/sidebar/sidebar';
 import {
   SIDEBAR_COLLAPSE_CLOSE,
@@ -14,7 +15,7 @@ import { TopMenu } from './components/top-menu/top-menu';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-main-layout',
-  imports: [ButtonModule, Drawer, Sidebar, TopMenu],
+  imports: [ButtonModule, Drawer, Footer, Sidebar, TopMenu],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
 })

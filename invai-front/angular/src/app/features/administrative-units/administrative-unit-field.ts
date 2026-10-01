@@ -9,7 +9,7 @@ import { AdministrativeUnitSearchAction, AdministrativeUnitSearchState } from '.
   selector: 'app-administrative-unit-field',
   imports: [ReactiveFormsModule, Select, InputText, Button],
   template: `
-    <div class="flex flex-col gap-2 min-w-0">
+    <div class="flex flex-col gap-1.5 min-w-0">
       <label class="text-xs text-muted-color" [id]="inputId() + '-label'" [for]="inputId()">{{ label() }}</label>
       @if (readOnly()) {
         <p class="invai-form-static-value" [attr.aria-labelledby]="inputId() + '-label'">{{ state().selectedLabel() }}</p>

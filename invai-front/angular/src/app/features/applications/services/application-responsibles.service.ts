@@ -65,12 +65,9 @@ export class ApplicationResponsiblesService extends BaseApiService {
       .pipe(tap(() => this.changed()));
   }
 
-  deactivate(
-    id: number,
-    input: ApplicationAssignmentDeactivateInput,
-  ): Observable<ApplicationResponsibleOutput> {
+  deactivate(id: number, input: ApplicationAssignmentDeactivateInput): Observable<void> {
     return this.http
-      .put<ApplicationResponsibleOutput>(this.url('deactivate', id), input)
+      .delete<void>(this.url(id), { body: input })
       .pipe(tap(() => this.changed()));
   }
 

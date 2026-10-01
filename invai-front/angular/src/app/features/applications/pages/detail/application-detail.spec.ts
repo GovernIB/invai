@@ -56,6 +56,7 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   missingDatabases: false,
   missingAccessibilityFields: false,
   missingSecurityData: true,
+  missingIntegrationData: false,
 };
 
 describe('ApplicationDetail', () => {
@@ -185,7 +186,7 @@ describe('ApplicationDetail', () => {
     expect(recreateWithNavigation({ mode: 'edit', section: 'security' }).isEditing('general')).toBe(false);
   });
 
-  it('renders the six tabs without a global edit toolbar', () => {
+  it('renders the eight tabs without a global edit toolbar', () => {
     const tabs = [
       ...fixture.nativeElement.querySelectorAll('.application-detail-tab'),
     ] as HTMLAnchorElement[];
@@ -197,6 +198,8 @@ describe('ApplicationDetail', () => {
       'Desenvolupament',
       'Accessibilitat',
       'SeguretatLa secció Seguretat està incompleta: falta almenys un context web, una classificació ENS o un risc actiu.',
+      'Dades',
+      'Integracions',
     ]);
     expect(fixture.nativeElement.querySelector('.application-detail-toolbar')).toBeNull();
   });
@@ -241,10 +244,29 @@ describe('ApplicationDetail', () => {
     expect(tabs[0].querySelector('.pi-exclamation-circle')).toBeNull();
   });
 
+  it('marks Integracions while the backend reports no active connection', () => {
+    const state = fixture.debugElement.injector.get(ApplicationDetailState);
+    const tab = () =>
+      [...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.application-detail-tab')]
+        .find((link) => link.textContent?.trim().startsWith('Integracions'))!;
+    expect(tab().querySelector('.pi-exclamation-circle')).toBeNull();
+
+    state.application.update((app) => app ? { ...app, missingIntegrationData: true } : app);
+    fixture.detectChanges();
+    expect(tab().querySelector('.pi-exclamation-circle.text-red-500')).not.toBeNull();
+    expect(tab().querySelector('.sr-only')?.textContent).toContain(
+      'La secció Integracions està incompleta: no hi ha cap connexió activa.',
+    );
+
+    state.application.update((app) => app ? { ...app, missingIntegrationData: false } : app);
+    fixture.detectChanges();
+    expect(tab().querySelector('.pi-exclamation-circle')).toBeNull();
+  });
+
   it('marks Security when contexts are pending, preserves other warnings and clears only the pending message', () => {
     const state = fixture.debugElement.injector.get(ApplicationDetailState);
     state.application.update((app) => app ? { ...app, missingSecurityData: false } : app);
-    state.updateWebContextCount(21);
+    state.hasUnverifiedWebContexts.set(true);
     fixture.detectChanges();
     const tab = [...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.application-detail-tab')]
       .find((link) => link.textContent?.trim().startsWith('Seguretat'))!;
@@ -255,7 +277,7 @@ describe('ApplicationDetail', () => {
     expect(tab.textContent).toContain('falta almenys un context web');
     expect(tab.textContent).toContain('contextos web pendents de verificar');
     expect(tab.querySelectorAll('.pi-exclamation-circle')).toHaveLength(1);
-    state.updateWebContextCount(0);
+    state.hasUnverifiedWebContexts.set(false);
     fixture.detectChanges();
     expect(tab.textContent).not.toContain('contextos web pendents de verificar');
     expect(tab.querySelector('.pi-exclamation-circle')).not.toBeNull();
@@ -399,6 +421,7 @@ function toApplication(response: ApplicationOutput): Application {
     appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
     appSecurityId: response.appSecurityId ?? null,
     appAccessibilityId: response.appAccessibilityId ?? null,
+    appDataId: response.appDataId ?? null,
     incomplete: response.incomplete,
     missingResponsibleTypes: response.missingResponsibleTypes,
     missingAuthorized: response.missingAuthorized,
@@ -407,5 +430,6 @@ function toApplication(response: ApplicationOutput): Application {
     missingDatabases: response.missingDatabases,
     missingAccessibilityFields: response.missingAccessibilityFields,
     missingSecurityData: response.missingSecurityData,
+    missingIntegrationData: response.missingIntegrationData,
   };
 }

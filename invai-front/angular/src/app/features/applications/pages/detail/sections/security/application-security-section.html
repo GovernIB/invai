@@ -71,6 +71,8 @@
         [itemsList]="webContexts()"
         [showVerify]="showResourceActions()"
         [showVerificationWarnings]="true"
+        [showVerifiedReason]="true"
+        [verifyDisabled]="!canManageResources()"
         (onPageChange)="onPageChange('web-context', $event)"
         (onSelectAction)="onTableAction('web-context', $event)"
       />
@@ -523,6 +525,17 @@
     </div>
   </section>
 </app-application-detail-section-layout>
+
+@if (verificationDialogVisible()) {
+  <app-application-web-context-verification-dialog
+    [(visible)]="verificationDialogVisible"
+    [contextName]="verificationContextName()"
+    [form]="verificationForm"
+    [isSaving]="isVerifyingWebContext()"
+    (closed)="closeVerificationDialog()"
+    (submitForm)="verifyWebContext()"
+  />
+}
 
 @if (resourceDialogVisible()) {
   <app-application-security-resource-dialog

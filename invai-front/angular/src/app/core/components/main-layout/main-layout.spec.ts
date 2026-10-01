@@ -60,6 +60,16 @@ describe('MainLayout', () => {
     fixture.detectChanges();
   });
 
+  it('should render the footer after the main content, outside any sectioning element', () => {
+    const main = fixture.nativeElement.querySelector('main') as HTMLElement;
+    const footer = fixture.nativeElement.querySelector('footer') as HTMLElement;
+
+    expect(footer).toBeTruthy();
+    expect(main.contains(footer)).toBe(false);
+    expect(footer.closest('article, aside, main, nav, section')).toBeNull();
+    expect(main.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('should not render resolver progress while no resolver is pending', () => {
     expect(fixture.nativeElement.querySelector('.invai-resolver-progress')).toBeNull();
   });

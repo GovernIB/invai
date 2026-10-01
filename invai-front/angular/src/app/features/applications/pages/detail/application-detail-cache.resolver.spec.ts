@@ -12,6 +12,7 @@ import { ApplicationAccessibilityService } from '../../services/application-acce
 import { ApplicationsService } from '../../services/applications.service';
 import { ApplicationResponsiblesService } from '../../services/application-responsibles.service';
 import { ApplicationWebContextsService } from '../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../services/application-development-web-contexts.service';
 import { ApplicationDetailResolvedData, applicationDetailResolver } from './application-detail.resolver';
 import {
   ApplicationAccessibilityResolvedData,
@@ -170,18 +171,18 @@ describe('application detail and accessibility resolver caches', () => {
     const first = resolveDetail();
     http.expectOne(applicationUrl).flush({ ...application, appSecurityId: 8 });
     http.expectOne((request) => request.url === '/invaiback/application/security/web-context/8')
-      .flush({ content: [], totalElements: 25 });
+      .flush({ content: [{ id: 1, validated: false }], number: 0, totalPages: 3, totalElements: 25 });
     expect((await first).hasUnverifiedWebContexts).toBe(true);
     const service = TestBed.inject(ApplicationWebContextsService);
     const sectionPage = firstValueFrom(service.getPage({ appSecurityId: 8, page: 0, size: 10, sort: 'id,asc', statusId: 1 }));
     http.expectNone((request) => request.method === 'GET');
     expect((await sectionPage).totalElements).toBe(25);
-    service.delete(903).subscribe();
-    http.expectOne('/invaiback/application/security/web-context/903').flush(null);
+    TestBed.inject(ApplicationDevelopmentWebContextsService).delete(903).subscribe();
+    http.expectOne('/invaiback/application/development/web-context/903').flush(null);
     const refreshed = resolveDetail();
     http.expectOne(applicationUrl).flush({ ...application, appSecurityId: 8 });
     http.expectOne((request) => request.url === '/invaiback/application/security/web-context/8')
-      .flush({ content: [], totalElements: 0 });
+      .flush({ content: [], number: 0, totalPages: 0, totalElements: 0 });
     expect((await refreshed).hasUnverifiedWebContexts).toBe(false);
   });
 
