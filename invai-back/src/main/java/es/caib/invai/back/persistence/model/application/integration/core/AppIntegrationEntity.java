@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -48,7 +47,6 @@ public class AppIntegrationEntity extends BaseEntity {
     private ApplicationEntity application;
 
     /** Free-text observations about this application's integrations. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 }

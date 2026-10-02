@@ -44,8 +44,7 @@ public class AppAuthorizedEntity extends BaseEntity {
     private PersonEntity person;
 
     /** Free-text remarks about this authorization. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 
     /** DIR3 validation state of this assignment against the application's administrative unit. */

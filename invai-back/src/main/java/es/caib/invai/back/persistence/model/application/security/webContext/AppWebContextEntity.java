@@ -57,8 +57,7 @@ public class AppWebContextEntity extends BaseEntity {
     private FieldEntity field;
 
     /** Free-text observation notes attached to this association. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 
     /** URL of the web context. */
@@ -78,7 +77,6 @@ public class AppWebContextEntity extends BaseEntity {
     private String validatedBy;
 
     /** Free-text justification given by Security at validation time, or {@code null} if not yet validated. */
-    @Lob
-    @Column(name = "VALIDATED_REASON")
+    @Column(name = "VALIDATED_REASON", length = 4000)
     private String validatedReason;
 }

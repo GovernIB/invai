@@ -18,13 +18,7 @@ SELECT INV_LKUP_DIR3_STATUS_SEQ.nextval, 'NA', 'No aplica', 'No aplica'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_LKUP_DIR3_STATUS WHERE CODE = 'NA');
 
--- --- Catalogos base de V.1.0.1-V.1.0.4 referenciados mas abajo (INV_LKUP_STATUS, INV_SYSTEM_TYPE
--- 'Aplicacio Web', INV_COMMISSION, INV_ENVIRONMENT, INV_LAYER/INV_TECHNOLOGY, INV_COMPANY,
--- INV_LKUP_RESPONSIBLE_TYPE preexistentes, INV_LKUP_MODALITY, INV_LKUP_STANDARD_ADAPTION,
--- INV_LKUP_SECURITY_LEVEL). Se incluyen aqui mismo (idempotentes, WHERE NOT EXISTS) para que este
--- script sea autosuficiente si el entorno de destino ejecuta solo V.1.0.5 y no la secuencia
--- completa V.1.0.1-V.1.0.5 - si esas versiones ya se aplicaron antes, estos INSERT simplemente no
--- hacen nada (las filas ya existen). ---
+-- --- Catalogos base V.1.0.1-V.1.0.4 ---
 INSERT INTO INV_LKUP_STATUS (STATUS_ID, CODE, NAME, NAME_ES)
 SELECT INV_LKUP_STATUS_SEQ.nextval, 'ACTIVE', 'Activo', 'Activo' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE');
@@ -112,7 +106,6 @@ SELECT INV_COMPANY_AUD_SEQ.nextval, (SELECT ID FROM INV_COMPANY WHERE NAME = 'Pl
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_COMPANY_AUD WHERE NAME = 'Plexus Tech' AND AUD_ACTION = 'INSERT');
 
--- ResponsibleType: no tiene tabla de auditoria (catalogo estatico sin AUD)
 INSERT INTO INV_LKUP_RESPONSIBLE_TYPE (ID, NAME, NAME_ES, REQUIRES_PERSONAL_CAIB)
 SELECT INV_LKUP_RESPONSIBLE_TYPE_SEQ.nextval, 'Responsable de la informació', 'Responsable de la información', 1
 FROM DUAL
@@ -138,7 +131,6 @@ SELECT INV_LKUP_RESPONSIBLE_TYPE_SEQ.nextval, 'Responsable manteniment', 'Respon
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_LKUP_RESPONSIBLE_TYPE WHERE NAME = 'Responsable manteniment');
 
--- Modality: no tiene tabla de auditoria
 INSERT INTO INV_LKUP_MODALITY (ID, NAME, NAME_ES)
 SELECT INV_LKUP_MODALITY_SEQ.nextval, 'Desenvolupament Intern', 'Desarrollo Interno'
 FROM DUAL
@@ -154,7 +146,6 @@ SELECT INV_LKUP_MODALITY_SEQ.nextval, 'Desenvolupament Mixt', 'Desarrollo Mixto'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_LKUP_MODALITY WHERE NAME = 'Desenvolupament Mixt');
 
--- StandardAdaption: no tiene tabla de auditoria
 INSERT INTO INV_LKUP_STANDARD_ADAPTION (ID, NAME, NAME_ES)
 SELECT INV_LKUP_STANDARD_ADAPTION_SEQ.nextval, 'Conforme', 'Conforme'
 FROM DUAL
@@ -170,7 +161,6 @@ SELECT INV_LKUP_STANDARD_ADAPTION_SEQ.nextval, 'No Conforme', 'No Conforme'
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_LKUP_STANDARD_ADAPTION WHERE NAME = 'No Conforme');
 
--- SecurityLevel: no tiene tabla de auditoria
 INSERT INTO INV_LKUP_SECURITY_LEVEL (ID, NAME, NAME_ES)
 SELECT INV_LKUP_SECURITY_LEVEL_SEQ.nextval, 'Alt', 'Alto'
 FROM DUAL
@@ -241,7 +231,6 @@ INSERT INTO INV_CLASSIFICATION_SEGMENT_AUD (AUDIT_ID, CLASSIFICATION_SEGMENT_ID,
 SELECT INV_CLASSIFICATION_SEGMENT_AUD_SEQ.nextval, (SELECT ID FROM INV_CLASSIFICATION_SEGMENT WHERE NAME = 'Segment III'), 'Segment III', 'Segmento III', SYSTIMESTAMP, 'ADMIN', 'INSERT', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_CLASSIFICATION_SEGMENT_AUD WHERE NAME = 'Segment III' AND AUD_ACTION = 'INSERT');
 
--- EnsSubject: no tiene tabla de auditoria (catalogo estatico, igual que ResponsibleType/Modality)
 INSERT INTO INV_LKUP_ENS_SUBJECT (ID, NAME, NAME_ES)
 SELECT INV_LKUP_ENS_SUBJECT_SEQ.nextval, 'Sí', 'Sí'
 FROM DUAL
@@ -257,8 +246,6 @@ SELECT INV_LKUP_ENS_SUBJECT_SEQ.nextval, 'Pendent d''anàlisi', 'Pendiente de an
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_LKUP_ENS_SUBJECT WHERE NAME = 'Pendent d''anàlisi');
 
--- SecurityRole: no tiene tabla de auditoria. 3 roles de ejemplo (uno por app que los usara mas
--- abajo: PACES y SIVAP), con ROLE_ID ficticio (no se resuelve contra Soffid en este script).
 INSERT INTO INV_SECURITY_ROLE (ID, ROLE_ID, NAME, SYSTEM, DESCRIPTION, CREATED_AT, CREATED_BY)
 SELECT INV_SECURITY_ROLE_SEQ.nextval, 100, 'INVAI_ADMIN_ROLE', 'INVAI', 'Rol administrador de l''aplicació', SYSTIMESTAMP, 'ADMIN'
 FROM DUAL
@@ -274,9 +261,7 @@ SELECT INV_SECURITY_ROLE_SEQ.nextval, 102, 'SIVAP_USER_ROLE', 'SIVAP', 'Rol d''u
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_SECURITY_ROLE WHERE ROLE_ID = 102);
 
--- --- Role (catalogo de V.1.0.2 para el rol de un AppProvider dins la pestanya "Desenvolupament";
--- no es el mateix catalog que INV_SECURITY_ROLE ni INV_APP_ROLE). 2 files, mateix contingut que
--- l'exemple original de V.1.0.2. ---
+-- --- Role (2 new) ---
 INSERT INTO INV_ROLE (ID, NAME, NAME_ES, CREATED_AT, CREATED_BY)
 SELECT INV_ROLE_SEQ.nextval, 'Proveïdor principal', 'Proveedor principal', SYSTIMESTAMP, 'ADMIN'
 FROM DUAL
@@ -295,9 +280,7 @@ SELECT INV_ROLE_AUD_SEQ.nextval, (SELECT ID FROM INV_ROLE WHERE NAME = 'Proveïd
        SYSTIMESTAMP, 'ADMIN', 'INSERT', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_ROLE_AUD WHERE NAME = 'Proveïdor secundari' AND AUD_ACTION = 'INSERT');
 
--- --- ServerType/Server/System/DatabaseVendor/Database (catalogo de V.1.0.2, no mergeado hasta
--- ahora porque nada de este fichero necesitaba la pestanya "Sistemes i BD"). ServerType no tiene
--- tabla de auditoria (catalogo estatico); el resto si. ---
+-- --- ServerType/Server/System/DatabaseVendor/Database ---
 INSERT INTO INV_LKUP_SERVER_TYPE (ID, CODE, NAME, NAME_ES)
 SELECT INV_LKUP_SERVER_TYPE_SEQ.nextval, 'APPLICATION', 'Aplicació', 'Aplicación'
 FROM DUAL
@@ -339,9 +322,6 @@ SELECT INV_DATABASE_VENDOR_AUD_SEQ.nextval, (SELECT ID FROM INV_DATABASE_VENDOR 
        SYSTIMESTAMP, 'ADMIN', 'INSERT', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_DATABASE_VENDOR_AUD WHERE NAME = 'Oracle' AND AUD_ACTION = 'INSERT');
 
--- Dos filas de INV_SYSTEM (servidor d'aplicacions), una per SIVAP i una altra per PACES, totes
--- dues contra el mateix servidor catalogat SRV-APP-01. Nomes SIVAP te tambe una fila de
--- INV_DATABASE (servidor SRV-BD-01) - PACES es deliberadament "sistema sense BD".
 INSERT INTO INV_SYSTEM (ID, SERVER_ID, INSTANCE, PORT, VERSION, DESCRIPTION, CREATED_AT, CREATED_BY)
 SELECT INV_SYSTEM_SEQ.nextval, (SELECT ID FROM INV_SERVER WHERE NAME = 'SRV-APP-01'),
        'sivap-prod-01', 8080, 'Spring Boot 3.2.5', 'Servidor d''aplicacions principal de SIVAP', SYSTIMESTAMP, 'ADMIN'
@@ -372,13 +352,6 @@ SELECT INV_DATABASE_AUD_SEQ.nextval, (SELECT ID FROM INV_DATABASE WHERE SERVICE 
        'SIVAP_PROD', 1521, (SELECT ID FROM INV_DATABASE_VENDOR WHERE NAME = 'Oracle'), 'Base de dades Oracle dedicada de SIVAP', SYSTIMESTAMP, 'ADMIN', 'INSERT', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_DATABASE_AUD WHERE SERVICE = 'SIVAP_PROD' AND AUD_ACTION = 'INSERT');
 
--- Este fichero carga datos desde cero (sin filas legadas de antes de que existieran las columnas
--- DIR3_VALIDATION_ID/APP_DEVELOPMENT_ID), asi que no hace falta ningun backfill: cada INSERT de
--- INV_APP_RESPONSIBLE/INV_APP_AUTHORIZED mas abajo ya fija su propio DIR3_VALIDATION_ID (via
--- INV_DIR3_VALIDATION_SEQ) en el mismo INSERT, y el de INV_APP_WEB_CONTEXT fija su propio
--- APP_DEVELOPMENT_ID igual (join directo con INV_APP_DEVELOPMENT). El endurecimiento a NOT NULL de
--- ambas columnas vive en 35_invai_1.0.5_harden_not_null_ddl.sql (es DDL, no DML) y puede ejecutarse
--- directamente despues de este fichero sin ningun paso previo.
 
 INSERT INTO INV_APP_DATA (ID, APPLICATION_ID, USE_OPEN_DATA_URL, USE_REUSE_URL, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DATA_SEQ.nextval, a.APP_APPLICATION_ID, 0, 0, SYSTIMESTAMP, 'MIGRATION'
@@ -390,11 +363,6 @@ SELECT INV_APP_INTEGRATION_SEQ.nextval, a.APP_APPLICATION_ID, NULL, SYSTIMESTAMP
 FROM INV_APPLICATION a
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_INTEGRATION ai WHERE ai.APPLICATION_ID = a.APP_APPLICATION_ID);
 
--- Example "Integracio" connection for APP-001, demoing the External System side (Soffid) rather than
--- another inventory application. soffidUserId/username/roleId below are real-shaped example values
--- (matching what a genuine Soffid SCIM response looks like) but are NOT guaranteed to resolve
--- against any given environment's real Soffid instance - the point is to have a persisted row to
--- exercise the read path, not a working live account.
 INSERT INTO INV_EXTERNAL_SYSTEM (ID, NAME, COMPANY_ID, CREATED_AT, CREATED_BY)
 SELECT INV_EXTERNAL_SYSTEM_SEQ.nextval, 'Soffid', (SELECT ID FROM INV_COMPANY WHERE NAME = 'Plexus Tech'), SYSTIMESTAMP, 'ADMIN'
 FROM DUAL
@@ -442,6 +410,8 @@ SELECT INV_APP_INTEGR_REQ_RL_AUD_SEQ.nextval, r.ID, r.APP_INTEGRATION_CONN_ID, r
 FROM INV_APP_INTEGR_REQ_RL r
 WHERE r.ROLE_ID IN (26, 33)
   AND NOT EXISTS (SELECT 1 FROM INV_APP_INTEGR_REQ_RL_AUD ra WHERE ra.APP_INTEGRATION_REQ_RL_ID = r.ID AND ra.AUD_ACTION = 'INSERT');
+
+-- --- Applications (8) ---
 
 -- --- Category (9 new) ---
 INSERT INTO INV_CATEGORY (CATEGORY_ID, NAME, NAME_ES, CREATED_AT, CREATED_BY)
@@ -579,8 +549,7 @@ INSERT INTO INV_FIELD_AUD (AUDIT_ID, FIELD_ID, NAME, NAME_ES, CREATED_AT, CREATE
 SELECT INV_FIELD_AUD_SEQ.nextval, (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Energia i Canvi Climàtic'), 'Energia i Canvi Climàtic', 'Energía y Cambio Climático', SYSTIMESTAMP, 'ADMIN', 'INSERT', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_FIELD_AUD WHERE NAME = 'Energia i Canvi Climàtic' AND AUD_ACTION = 'INSERT');
 
--- --- Company (9 new, no NIF - none of the CSV companies had a real one except Plexus Tech,
--- already seeded, so its "Grupo Plexus Tech SL" mention is intentionally not re-inserted here) ---
+-- --- Company (9 new) ---
 INSERT INTO INV_COMPANY (ID, NAME, CREATED_AT, CREATED_BY)
 SELECT INV_COMPANY_SEQ.nextval, 'Fundació d''Atenció i Suport a la Dependència', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_COMPANY WHERE NAME = 'Fundació d''Atenció i Suport a la Dependència');
@@ -644,6 +613,7 @@ INSERT INTO INV_COMPANY_AUD (AUDIT_ID, COMPANY_ID, NAME, CREATED_AT, CREATED_BY,
 SELECT INV_COMPANY_AUD_SEQ.nextval, (SELECT ID FROM INV_COMPANY WHERE NAME = 'TAO'), 'TAO', SYSTIMESTAMP, 'ADMIN', 'INSERT', SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_COMPANY_AUD WHERE NAME = 'TAO' AND AUD_ACTION = 'INSERT');
 
+-- --- Person (2 new) ---
 INSERT INTO INV_PERSON (ID, COMPANY_ID, FIRST_NAME, LAST_NAME, EMAIL, IS_PERSONAL_CAIB, CREATED_AT, CREATED_BY)
 SELECT INV_PERSON_SEQ.nextval, (SELECT ID FROM INV_COMPANY WHERE NAME = 'Fundació d''Atenció i Suport a la Dependència'), 'Miguel', 'Canet Cortés', 'miguel.canet@fasd-example.org', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_PERSON WHERE EMAIL = 'miguel.canet@fasd-example.org' AND DELETED_AT IS NULL);
@@ -876,7 +846,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'INVAI', 'INV', 'Inventari d''Aplicacions In
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Administració Electrònica'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comitè de Seguretat de la Informació'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Inventari d''aplicacions informàtiques (predecessor Lotus Notes d''aquest mateix sistema). [Cas prova: únic responsable (1 de 8 tipus), ADM_UNIT_CODE forçat + responsable (Juan Ferra) amb DIR3 validat contra Soffid real -> sense mismatch]'),
+       'Inventari d''aplicacions informàtiques (predecessor Lotus Notes d''aquest mateix sistema). [Cas prova: únic responsable (1 de 8 tipus), ADM_UNIT_CODE forçat + responsable (Juan Ferra) amb DIR3 validat contra Soffid real -> sense mismatch]',
        'A04027006', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'INVAI');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -891,10 +861,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'PORTAFIB', 'PFI', 'Porta Firmes',
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Administració Electrònica'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comissió d''Arquitectura TI'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Portafirmes: permet enviar documents per a que siguin signats per una o diverses persones. [Cas prova: únic responsable (1 de 8 tipus), ADM_UNIT_CODE forçat + responsable (Gabriel Gelabert) amb DIR3 validat contra Soffid real -> sense mismatch]'),
-       -- ADM_UNIT_CODE forzado a 'A04027054' (DIR3 real del grupo Soffid 'sgaip' en proves.caib.es),
-       -- en vez del A04027005 real derivado del CSV - para poder demostrar el escenario de
-       -- validacion DIR3 "coincide" contra un usuario real de Soffid (Gabriel Gelabert, mas abajo).
+       'Portafirmes: permet enviar documents per a que siguin signats per una o diverses persones. [Cas prova: únic responsable (1 de 8 tipus), ADM_UNIT_CODE forçat + responsable (Gabriel Gelabert) amb DIR3 validat contra Soffid real -> sense mismatch]',
        'A04027054', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'PORTAFIB');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -909,7 +876,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'SEDEIB', 'SED', 'Sistema d''Explotació de 
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Educació i Formació'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comissió d''Arquitectura TI'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Sistema d''explotació de dades d''educació de les Illes Balears. [Cas prova: pestanya de responsables incompleta (2 de 8 tipus), Juan Ferra (real, DIR3 no coincideix) + DIR3_MISMATCH marcat des de l''alta]'),
+       'Sistema d''explotació de dades d''educació de les Illes Balears. [Cas prova: pestanya de responsables incompleta (2 de 8 tipus), Juan Ferra (real, DIR3 no coincideix) + DIR3_MISMATCH marcat des de l''alta]',
        'A04013522', 1, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'SEDEIB');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -924,7 +891,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'ADIS', 'ADS', 'ADIS',
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Serveis Socials i Dependència'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comissió d''Arquitectura TI'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Gestor dels expedients d''accés als serveis d''atenció a les persones amb discapacitat. [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED)]'),
+       'Gestor dels expedients d''accés als serveis d''atenció a les persones amb discapacitat. [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED)]',
        'A04027006', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'ADIS');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -939,9 +906,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'RIPEA', 'IPA', 'Repositori per a la Interop
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Administració Electrònica'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comitè de Seguretat de la Informació'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Repositori per a la interoperabilitat de procediments administratius electrònics. [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED); introdueix la pestanya "Sistemes i BD"]'),
-       -- ADM_UNIT_CODE forçat a 'A04027006' (DIR3 real del grup Soffid 'dgagric'), coincidint amb
-       -- Juan Ferra - igual que es fa amb INVAI/SIVAP/ADIS.
+       'Repositori per a la interoperabilitat de procediments administratius electrònics. [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED); introdueix la pestanya "Sistemes i BD"]',
        'A04027006', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'RIPEA');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -956,7 +921,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'NOTIB', 'NOT', 'Gestor de Notificacions de 
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Administració Electrònica'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comissió d''Arquitectura TI'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Aplicació passarel·la entre les aplicacions de gestió d''expedients electrònics, com RIPEA, i les plataformes que realitzen les notificacions. [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED); introdueix la pestanya "Desenvolupament"]'),
+       'Aplicació passarel·la entre les aplicacions de gestió d''expedients electrònics, com RIPEA, i les plataformes que realitzen les notificacions. [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED); introdueix la pestanya "Desenvolupament"]',
        'A04027006', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'NOTIB');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -971,7 +936,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'PACES', 'PAC', 'Registre del Pla d''Acció 
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Energia i Canvi Climàtic'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comitè de Seguretat de la Informació'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Registre per al seguiment dels Plans d''Acció per al Clima i l''Energia Sostenible (Pacte de les Batlies). [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED); introdueix la pestanya "Accessibilitat"]'),
+       'Registre per al seguiment dels Plans d''Acció per al Clima i l''Energia Sostenible (Pacte de les Batlies). [Cas prova: 5 de 5 tipus de responsable, Juan Ferra (DIR3 coincideix -> VALIDATED); introdueix la pestanya "Accessibilitat"]',
        'A04027006', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'PACES');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -986,7 +951,7 @@ SELECT INV_APPLICATION_SEQ.nextval, 'SIVAP', 'SVP', 'SIVAP',
        (SELECT FIELD_ID FROM INV_FIELD WHERE NAME = 'Serveis Socials i Dependència'),
        (SELECT COMMISSION_ID FROM INV_COMMISSION WHERE NAME = 'Comitè de Seguretat de la Informació'),
        (SELECT STATUS_ID FROM INV_LKUP_STATUS WHERE CODE = 'ACTIVE'),
-       TO_CLOB('Gestionar els expedients del Servei de Desenvolupament Infantil i Atenció Primerenca. [Cas prova: 8 tipus de responsable complets; Juan Ferra (DIR3 coincideix -> VALIDATED) + Gabriel Gelabert (DIR3 diferent, validat manualment -> MANUAL) -> sense mismatch]'),
+       'Gestionar els expedients del Servei de Desenvolupament Infantil i Atenció Primerenca. [Cas prova: 8 tipus de responsable complets; Juan Ferra (DIR3 coincideix -> VALIDATED) + Gabriel Gelabert (DIR3 diferent, validat manualment -> MANUAL) -> sense mismatch]',
        'A04027006', 0, SYSTIMESTAMP, 'ADMIN' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM INV_APPLICATION WHERE CODE = 'SIVAP');
 INSERT INTO INV_APPLICATION_AUD (AUDIT_ID, APP_APPLICATION_ID, CODE, PREFIX, NAME, CATEGORY_ID, SYSTEM_TYPE_ID, FIELD_ID, COMMISSION_ID, STATUS_ID, DESCRIPTION, ADM_UNIT_CODE, DIR3_MISMATCH, CREATED_AT, CREATED_BY, AUD_ACTION, AUDIT_DATE, AUDIT_USER)
@@ -994,11 +959,8 @@ SELECT INV_APPLICATION_AUD_SEQ.nextval, a.APP_APPLICATION_ID, a.CODE, a.PREFIX, 
 FROM INV_APPLICATION a WHERE a.CODE = 'SIVAP'
   AND NOT EXISTS (SELECT 1 FROM INV_APPLICATION_AUD WHERE CODE = 'SIVAP' AND AUD_ACTION = 'INSERT');
 
--- --- Anchor rows (one per new Application) for AppResponsibleAuthorized, AppInformationSystemDb,
--- AppSecurity, AppAccessibility, AppData and AppIntegration. These reuse the exact bulk
--- "for every Application not yet covered" pattern already established for these same tables in
--- V.1.0.3/V.1.0.4/V.1.0.5 - it is re-run here (idempotently) so it also covers the 10 Application
--- rows just inserted above, which did not exist yet when those earlier bulk passes ran. ---
+-- --- Anchor rows (AppResponsibleAuthorized, AppInformationSystemDb, AppSecurity, AppAccessibility,
+-- AppData, AppIntegration) ---
 INSERT INTO INV_APP_RESPONSIBLE_AUTHORIZED (ID, APPLICATION_ID, CREATED_AT, CREATED_BY)
 SELECT INV_APP_RESPONSIBLE_AUTHORIZED_SEQ.nextval, a.APP_APPLICATION_ID, SYSTIMESTAMP, 'ADMIN'
 FROM INV_APPLICATION a
@@ -1009,15 +971,14 @@ SELECT INV_APP_RESPONSIBLE_AUTHORIZED_AUD_SEQ.nextval, r.ID, r.APPLICATION_ID, r
 FROM INV_APP_RESPONSIBLE_AUTHORIZED r
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_RESPONSIBLE_AUTHORIZED_AUD ra WHERE ra.APP_RESPONSIBLE_AUTHORIZED_ID = r.ID AND ra.AUD_ACTION = 'INSERT');
 
--- Pestanya "Sistemes i BD": columna 2 de la matriu, introduida a RIPEA (NULL per a
--- INVAI/PORTAFIB/SEDEIB/ADIS, text a partir de RIPEA i heretat per NOTIB/PACES/SIVAP).
+-- --- Pestanya "Sistemes i BD" ---
 INSERT INTO INV_APP_INFORMATION_SYSTEM_DB (ID, APPLICATION_ID, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_INF_SYS_DB_SEQ.nextval, a.APP_APPLICATION_ID,
        CASE a.CODE
-           WHEN 'RIPEA' THEN TO_CLOB('Repositori documental sobre Oracle amb integració directa amb el gestor d''expedients.')
-           WHEN 'NOTIB' THEN TO_CLOB('Base de dades Oracle compartida amb altres aplicacions d''Administració Electrònica.')
-           WHEN 'PACES' THEN TO_CLOB('Base de dades PostgreSQL dedicada al seguiment dels plans d''acció climàtica.')
-           WHEN 'SIVAP' THEN TO_CLOB('Base de dades Oracle dedicada, amb rèplica síncrona i monitoratge 24x7.')
+           WHEN 'RIPEA' THEN 'Repositori documental sobre Oracle amb integració directa amb el gestor d''expedients.'
+           WHEN 'NOTIB' THEN 'Base de dades Oracle compartida amb altres aplicacions d''Administració Electrònica.'
+           WHEN 'PACES' THEN 'Base de dades PostgreSQL dedicada al seguiment dels plans d''acció climàtica.'
+           WHEN 'SIVAP' THEN 'Base de dades Oracle dedicada, amb rèplica síncrona i monitoratge 24x7.'
            ELSE NULL
        END,
        SYSTIMESTAMP, 'ADMIN'
@@ -1029,9 +990,6 @@ SELECT INV_APP_INF_SYS_DB_AUD_SEQ.nextval, s.ID, s.APPLICATION_ID, s.OBSERVATION
 FROM INV_APP_INFORMATION_SYSTEM_DB s
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_INFORMATION_SYSTEM_DB_AUD sa WHERE sa.ID = s.ID AND sa.AUD_ACTION = 'INSERT');
 
--- Pestanya "Sistemes i BD": SIVAP demuestra el caso "sistema + base de dades" (ambas listas,
--- independientes entre si, con al menos 1 fila); PACES demuestra el caso "sistema sense BD"
--- (tiene fila en Servidores pero ninguna en Bases de datos).
 INSERT INTO INV_APP_SYSTEM (ID, INFORMATION_SYSTEM_DB, SYSTEM_ID, CREATED_AT, CREATED_BY)
 SELECT INV_APP_SYSTEM_SEQ.nextval, s.ID, (SELECT ID FROM INV_SYSTEM WHERE INSTANCE = 'sivap-prod-01'), SYSTIMESTAMP, 'ADMIN'
 FROM INV_APPLICATION a
@@ -1065,13 +1023,11 @@ SELECT INV_APP_DATABASE_AUD_SEQ.nextval, apd.ID, apd.INFORMATION_SYSTEM_DB, apd.
 FROM INV_APP_DATABASE apd
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_DATABASE_AUD apda WHERE apda.APP_DATABASE_ID = apd.ID AND apda.AUD_ACTION = 'INSERT');
 
--- Pestanya "Seguretat": columna 5 de la matriu, introduida unicament a SIVAP (OBSERVATION y las
--- filas hijas INV_APP_SECURITY_RISK/MEASURE/WEB_CONTEXT/ROLE/ENS_CLASSIFICATION, ver seccion
--- dedicada mas abajo); el resto de aplicaciones se dejan sin cap dada en aquesta pestanya.
+-- --- Pestanya "Seguretat" ---
 INSERT INTO INV_APP_SECURITY (ID, APPLICATION_ID, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_SECURITY_SEQ.nextval, a.APP_APPLICATION_ID,
        CASE a.CODE
-           WHEN 'SIVAP' THEN TO_CLOB('Aplicació amb dades de caràcter personal sensible; classificació ENS categoria alta.')
+           WHEN 'SIVAP' THEN 'Aplicació amb dades de caràcter personal sensible; classificació ENS categoria alta.'
            ELSE NULL
        END,
        SYSTIMESTAMP, 'ADMIN'
@@ -1083,8 +1039,7 @@ SELECT INV_APP_SECURITY_AUD_SEQ.nextval, s.ID, s.APPLICATION_ID, s.OBSERVATION, 
 FROM INV_APP_SECURITY s
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_SECURITY_AUD sa WHERE sa.ID = s.ID AND sa.AUD_ACTION = 'INSERT');
 
--- Pestanya "Accessibilitat": columna 4 de la matriu, introduida a PACES (8/8 complet) i heretada
--- per SIVAP; sense cap dada per a la resta (INVAI/PORTAFIB/SEDEIB/ADIS/RIPEA/NOTIB).
+-- --- Pestanya "Accessibilitat" ---
 INSERT INTO INV_APP_ACCESSIBILITY (ID, APPLICATION_ID, COMPLIANCE_ID, CLASSIFICATION_SEGMENT_ID, PUBLIC_URL, MOBILE_APPLICATION, MOBILE_APPLICATION_NAME, NON_ACCESSIBLE_CONTENT, OBSERVATIONS, EXPIRE_DATE, CREATED_AT, CREATED_BY)
 SELECT INV_APP_ACCESSIBILITY_SEQ.nextval, a.APP_APPLICATION_ID,
        CASE a.CODE WHEN 'PACES' THEN (SELECT ID FROM INV_COMPLIANCE_SITUATION WHERE NAME = 'Parcialment')
@@ -1098,11 +1053,11 @@ SELECT INV_APP_ACCESSIBILITY_SEQ.nextval, a.APP_APPLICATION_ID,
                    ELSE NULL END,
        CASE a.CODE WHEN 'PACES' THEN 1 WHEN 'SIVAP' THEN 1 ELSE NULL END,
        CASE a.CODE WHEN 'PACES' THEN 'PACES App' WHEN 'SIVAP' THEN 'SIVAP Mòbil' ELSE NULL END,
-       CASE a.CODE WHEN 'PACES' THEN TO_CLOB('Mapes interactius amb accessibilitat parcial.')
-                   WHEN 'SIVAP' THEN TO_CLOB('Cap contingut no accessible identificat.')
+       CASE a.CODE WHEN 'PACES' THEN 'Mapes interactius amb accessibilitat parcial.'
+                   WHEN 'SIVAP' THEN 'Cap contingut no accessible identificat.'
                    ELSE NULL END,
-       CASE a.CODE WHEN 'PACES' THEN TO_CLOB('Auditoria WCAG 2.1 AA realitzada el 2026.')
-                   WHEN 'SIVAP' THEN TO_CLOB('Compleix íntegrament amb UNE-EN 301549.')
+       CASE a.CODE WHEN 'PACES' THEN 'Auditoria WCAG 2.1 AA realitzada el 2026.'
+                   WHEN 'SIVAP' THEN 'Compleix íntegrament amb UNE-EN 301549.'
                    ELSE NULL END,
        CASE a.CODE WHEN 'PACES' THEN TO_DATE('2027-06-30', 'YYYY-MM-DD')
                    WHEN 'SIVAP' THEN TO_DATE('2027-06-30', 'YYYY-MM-DD')
@@ -1116,9 +1071,7 @@ SELECT INV_APP_ACCESSIBILITY_AUD_SEQ.nextval, ac.ID, ac.APPLICATION_ID, ac.CLASS
 FROM INV_APP_ACCESSIBILITY ac
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_ACCESSIBILITY_AUD aca WHERE aca.APP_ACCESSIBILITY_ID = ac.ID AND aca.AUD_ACTION = 'INSERT');
 
--- La pestanya "Dades" no se publica en este sprint, asi que NO lleva ninguna incrementalidad
--- id1->id10 (a diferencia del resto de pestanyas): mismo contenido vacio/por defecto para las 10
--- aplicaciones. La fila ancla si se crea igualmente (ver "no quede tabla sin datos").
+-- --- Pestanya "Dades" ---
 INSERT INTO INV_APP_DATA (ID, APPLICATION_ID, OBSERVATION, OPEN_DATA_URL, USE_OPEN_DATA_URL, REUSE_URL, USE_REUSE_URL, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DATA_SEQ.nextval, a.APP_APPLICATION_ID, NULL, NULL, 0, NULL, 0, SYSTIMESTAMP, 'ADMIN'
 FROM INV_APPLICATION a
@@ -1139,8 +1092,7 @@ SELECT INV_APP_INTEGRATION_AUD_SEQ.nextval, ai.ID, ai.APPLICATION_ID, ai.OBSERVA
 FROM INV_APP_INTEGRATION ai
 WHERE NOT EXISTS (SELECT 1 FROM INV_APP_INTEGRATION_AUD aia WHERE aia.APP_INTEGRATION_ID = ai.ID AND aia.AUD_ACTION = 'INSERT');
 
--- ADIS no te la pestanya "Desenvolupament" (columna 3 de la matriu: NULL igual que INVAI, nomes
--- introduida a partir de NOTIB).
+-- --- Pestanya "Desenvolupament" ---
 INSERT INTO INV_APP_DEVELOPMENT (ID, APPLICATION_ID, ENVIRONMENT_ID, MODALITY_ID, CODE, STANDARD_ADAPTION, REVISION_DATE, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DEVELOPMENT_SEQ.nextval, a.APP_APPLICATION_ID,
        NULL, NULL, NULL, NULL, NULL, NULL, SYSTIMESTAMP, 'ADMIN'
@@ -1155,10 +1107,6 @@ FROM INV_APP_DEVELOPMENT d
 WHERE a.CODE = 'ADIS'
   AND NOT EXISTS (SELECT 1 FROM INV_APP_DEVELOPMENT_AUD da WHERE da.APP_DEVELOPMENT_ID = d.ID AND da.AUD_ACTION = 'INSERT');
 
--- INVAI (columna 3 de la matriu encara buida) se deja con la pestanya "Desenvolupament" 100%
--- vacia (todos los campos NULL, incluido ENVIRONMENT_ID - nullable en BD) para que el icono de
--- incompleto se dispare siempre (ApplicationServiceFacadeBean.isDevelopmentIncomplete exige
--- environment/modality/code/standardAdaption/revisionDate no nulos; observation no cuenta).
 INSERT INTO INV_APP_DEVELOPMENT (ID, APPLICATION_ID, ENVIRONMENT_ID, MODALITY_ID, CODE, STANDARD_ADAPTION, REVISION_DATE, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DEVELOPMENT_SEQ.nextval, a.APP_APPLICATION_ID,
        NULL, NULL, NULL, NULL, NULL, NULL, SYSTIMESTAMP, 'ADMIN'
@@ -1173,7 +1121,6 @@ FROM INV_APP_DEVELOPMENT d
 WHERE a.CODE = 'INVAI'
   AND NOT EXISTS (SELECT 1 FROM INV_APP_DEVELOPMENT_AUD da WHERE da.APP_DEVELOPMENT_ID = d.ID AND da.AUD_ACTION = 'INSERT');
 
--- NOTIB introdueix la columna 3 de la matriu (Desenvolupament), heretada per PACES i SIVAP.
 INSERT INTO INV_APP_DEVELOPMENT (ID, APPLICATION_ID, ENVIRONMENT_ID, MODALITY_ID, CODE, STANDARD_ADAPTION, REVISION_DATE, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DEVELOPMENT_SEQ.nextval, a.APP_APPLICATION_ID,
        (SELECT ID FROM INV_ENVIRONMENT WHERE CODE = 'PRO'),
@@ -1210,7 +1157,6 @@ FROM INV_APP_DEVELOPMENT d
 WHERE a.CODE = 'PACES'
   AND NOT EXISTS (SELECT 1 FROM INV_APP_DEVELOPMENT_AUD da WHERE da.APP_DEVELOPMENT_ID = d.ID AND da.AUD_ACTION = 'INSERT');
 
--- PORTAFIB no te la pestanya "Desenvolupament" (igual que INVAI): columna 3 encara no introduida.
 INSERT INTO INV_APP_DEVELOPMENT (ID, APPLICATION_ID, ENVIRONMENT_ID, MODALITY_ID, CODE, STANDARD_ADAPTION, REVISION_DATE, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DEVELOPMENT_SEQ.nextval, a.APP_APPLICATION_ID,
        NULL, NULL, NULL, NULL, NULL, NULL, SYSTIMESTAMP, 'ADMIN'
@@ -1225,7 +1171,6 @@ FROM INV_APP_DEVELOPMENT d
 WHERE a.CODE = 'PORTAFIB'
   AND NOT EXISTS (SELECT 1 FROM INV_APP_DEVELOPMENT_AUD da WHERE da.APP_DEVELOPMENT_ID = d.ID AND da.AUD_ACTION = 'INSERT');
 
--- RIPEA no te la pestanya "Desenvolupament" (columna 3 encara no introduida; la introdueix NOTIB).
 INSERT INTO INV_APP_DEVELOPMENT (ID, APPLICATION_ID, ENVIRONMENT_ID, MODALITY_ID, CODE, STANDARD_ADAPTION, REVISION_DATE, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DEVELOPMENT_SEQ.nextval, a.APP_APPLICATION_ID,
        NULL, NULL, NULL, NULL, NULL, NULL, SYSTIMESTAMP, 'ADMIN'
@@ -1240,7 +1185,6 @@ FROM INV_APP_DEVELOPMENT d
 WHERE a.CODE = 'RIPEA'
   AND NOT EXISTS (SELECT 1 FROM INV_APP_DEVELOPMENT_AUD da WHERE da.APP_DEVELOPMENT_ID = d.ID AND da.AUD_ACTION = 'INSERT');
 
--- SEDEIB no te la pestanya "Desenvolupament" (columna 3 encara no introduida; la introdueix NOTIB).
 INSERT INTO INV_APP_DEVELOPMENT (ID, APPLICATION_ID, ENVIRONMENT_ID, MODALITY_ID, CODE, STANDARD_ADAPTION, REVISION_DATE, OBSERVATION, CREATED_AT, CREATED_BY)
 SELECT INV_APP_DEVELOPMENT_SEQ.nextval, a.APP_APPLICATION_ID,
        NULL, NULL, NULL, NULL, NULL, NULL, SYSTIMESTAMP, 'ADMIN'
@@ -1273,9 +1217,7 @@ FROM INV_APP_DEVELOPMENT d
 WHERE a.CODE = 'SIVAP'
   AND NOT EXISTS (SELECT 1 FROM INV_APP_DEVELOPMENT_AUD da WHERE da.APP_DEVELOPMENT_ID = d.ID AND da.AUD_ACTION = 'INSERT');
 
--- --- AppProvider + AppTechnology (filas hijas de INV_APP_DEVELOPMENT): columna 3 de la matriu
--- (Desenvolupament), asi que solo existen para las mismas 3 aplicaciones que tienen
--- INV_APP_DEVELOPMENT relleno (NOTIB la introduce, PACES/SIVAP la heredan). ---
+-- --- AppProvider + AppTechnology ---
 INSERT INTO INV_APP_PROVIDER (ID, APP_DEVELOPMENT_ID, COMPANY_NAME, ROLE, START_DATE, EXPIRE_DATE, CREATED_AT, CREATED_BY)
 SELECT INV_APP_PROVIDER_SEQ.nextval, d.ID, 'Plexus Tech', (SELECT ID FROM INV_ROLE WHERE NAME = 'Proveïdor principal'),
        SYSTIMESTAMP, ADD_MONTHS(SYSTIMESTAMP, 12), SYSTIMESTAMP, 'ADMIN'
@@ -2743,7 +2685,7 @@ INSERT INTO INV_APP_SECURITY_MEASURE (ID, APP_SECURITY_ID, TYPE_ID, ENS_REQUIREM
 SELECT INV_APP_SECURITY_MEASURE_SEQ.nextval, s.ID,
        (SELECT ID FROM INV_SECURITY_MEASURE_TYPE WHERE NAME = 'Xifratge'),
        (SELECT ID FROM INV_ENS_REQUIREMENT WHERE NAME = 'Categoria Alta'),
-       TO_CLOB('Xifratge de les dades de caràcter personal en repòs.'),
+       'Xifratge de les dades de caràcter personal en repòs.',
        SYSTIMESTAMP, 'ADMIN'
 FROM INV_APPLICATION a
          JOIN INV_APP_SECURITY s ON s.APPLICATION_ID = a.APP_APPLICATION_ID
@@ -2764,12 +2706,12 @@ INSERT INTO INV_APP_WEB_CONTEXT (ID, APP_SECURITY_ID, APP_DEVELOPMENT_ID, WEB_CO
 SELECT INV_APP_WEB_CONTEXT_SEQ.nextval, s.ID, d.ID,
        (SELECT ID FROM INV_WEB_CONTEXT WHERE NAME = 'Intranet'),
        a.FIELD_ID,
-       TO_CLOB('Accés restringit al personal del Servei de Desenvolupament Infantil.'),
+       'Accés restringit al personal del Servei de Desenvolupament Infantil.',
        'https://intranet.caib.es/sivap',
        1,
        TO_DATE('2026-02-10', 'YYYY-MM-DD'),
        'ADMIN',
-       TO_CLOB('Context revisat i validat pel responsable de sistemes.'),
+       'Context revisat i validat pel responsable de sistemes.',
        SYSTIMESTAMP, 'ADMIN'
 FROM INV_APPLICATION a
          JOIN INV_APP_SECURITY s ON s.APPLICATION_ID = a.APP_APPLICATION_ID
@@ -3369,7 +3311,7 @@ INSERT INTO INV_APP_SECURITY_RISK (ID, APP_SECURITY_ID, LEVEL_ID, DESCRIPTION, F
 SELECT INV_APP_SECURITY_RISK_SEQ.nextval,
        (SELECT ID FROM INV_APP_SECURITY WHERE APPLICATION_ID = (SELECT APP_APPLICATION_ID FROM INV_APPLICATION WHERE CODE = 'SIVAP')),
        (SELECT ID FROM INV_LKUP_SECURITY_LEVEL WHERE NAME = 'Alt'),
-       TO_CLOB('Risc de tractament indegut de dades de salut i desenvolupament infantil de menors.'),
+       'Risc de tractament indegut de dades de salut i desenvolupament infantil de menors.',
        (SELECT FIELD_ID FROM INV_APPLICATION WHERE CODE = 'SIVAP'),
        SYSTIMESTAMP, 'ADMIN'
 FROM DUAL

@@ -28,8 +28,8 @@ ALTER TABLE INV_APP_WEB_CONTEXT_AUD ADD (VALIDATED_AT TIMESTAMP(6));
 ALTER TABLE INV_APP_WEB_CONTEXT ADD (VALIDATED_BY VARCHAR2(64 CHAR));
 ALTER TABLE INV_APP_WEB_CONTEXT_AUD ADD (VALIDATED_BY VARCHAR2(64 CHAR));
 
-ALTER TABLE INV_APP_WEB_CONTEXT ADD (VALIDATED_REASON CLOB);
-ALTER TABLE INV_APP_WEB_CONTEXT_AUD ADD (VALIDATED_REASON CLOB);
+ALTER TABLE INV_APP_WEB_CONTEXT ADD (VALIDATED_REASON VARCHAR2(4000 CHAR));
+ALTER TABLE INV_APP_WEB_CONTEXT_AUD ADD (VALIDATED_REASON VARCHAR2(4000 CHAR));
 
 -- Retrofits an audit trail onto INV_APP_AUTHORIZED_TYPE_LINK, previously hard-deleted/no-audit since 1.0.3
 ALTER TABLE INV_APP_AUTHORIZED_TYPE_LINK ADD (CREATED_AT TIMESTAMP(6) DEFAULT SYSTIMESTAMP NOT NULL);
@@ -38,3 +38,29 @@ ALTER TABLE INV_APP_AUTHORIZED_TYPE_LINK ADD (UPDATED_AT TIMESTAMP(6));
 ALTER TABLE INV_APP_AUTHORIZED_TYPE_LINK ADD (UPDATED_BY VARCHAR2(64 CHAR));
 ALTER TABLE INV_APP_AUTHORIZED_TYPE_LINK ADD (DELETED_AT TIMESTAMP(6));
 ALTER TABLE INV_APP_AUTHORIZED_TYPE_LINK ADD (DELETED_BY VARCHAR2(64 CHAR));
+
+DECLARE
+    v_comment user_col_comments.comments%TYPE;
+BEGIN
+    FOR c IN (SELECT tc.table_name, tc.column_name, tc.nullable
+              FROM user_tab_columns tc
+                       JOIN user_tables t ON t.table_name = tc.table_name
+              WHERE tc.data_type = 'CLOB'
+                AND t.dropped = 'NO'
+              ORDER BY tc.table_name, tc.column_name)
+    LOOP
+        SELECT comments INTO v_comment
+        FROM user_col_comments
+        WHERE table_name = c.table_name AND column_name = c.column_name;
+
+        EXECUTE IMMEDIATE 'ALTER TABLE "' || c.table_name || '" DROP COLUMN "' || c.column_name || '"';
+        EXECUTE IMMEDIATE 'ALTER TABLE "' || c.table_name || '" ADD ("' || c.column_name || '" VARCHAR2(4000 CHAR)'
+                          || CASE WHEN c.nullable = 'N' THEN ' NOT NULL' END || ')';
+
+        IF v_comment IS NOT NULL THEN
+            EXECUTE IMMEDIATE 'COMMENT ON COLUMN "' || c.table_name || '"."' || c.column_name || '" IS '''
+                              || REPLACE(v_comment, '''', '''''') || '''';
+        END IF;
+    END LOOP;
+END;
+/

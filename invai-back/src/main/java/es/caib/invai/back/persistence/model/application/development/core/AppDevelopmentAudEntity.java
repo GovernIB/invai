@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -61,8 +60,7 @@ public class AppDevelopmentAudEntity {
     private LocalDateTime revisionDate;
 
     /** Snapshot of the general observation text. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 
     /** Timestamp when the original record was created. */

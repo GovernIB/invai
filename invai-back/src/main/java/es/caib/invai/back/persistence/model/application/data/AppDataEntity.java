@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -53,8 +52,7 @@ public class AppDataEntity extends BaseEntity {
     private ApplicationEntity application;
 
     /** Free-text observations about this application's open data / external REST API. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 
     /** Explicit OpenAPI document URL to query instead of the application-name-derived one, used only when {@link #useOpenDataUrl} is {@code true}. */

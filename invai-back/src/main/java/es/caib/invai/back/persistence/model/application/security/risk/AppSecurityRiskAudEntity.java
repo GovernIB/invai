@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -45,8 +44,7 @@ public class AppSecurityRiskAudEntity {
     private Long levelId;
 
     /** Free-text description at the time of the audited change. */
-    @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 4000)
     private String description;
 
     /** Identifier of the functional business field at the time of the audited change. */

@@ -80,8 +80,7 @@ public class ApplicationEntity extends BaseEntity {
     private LkupStatusEntity status;
 
     /** Free-text description of the application's scope and purpose. */
-    @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 4000)
     private String description;
 
     /** Date on which the application's lifecycle is scheduled to expire. */

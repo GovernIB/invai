@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -72,13 +71,11 @@ public class AppAccessibilityEntity extends BaseEntity {
     private String mobileApplicationName;
 
     /** Non-accessible content and the justification for why it hasn't been fixed. */
-    @Lob
-    @Column(name = "NON_ACCESSIBLE_CONTENT")
+    @Column(name = "NON_ACCESSIBLE_CONTENT", length = 4000)
     private String nonAccessibleContent;
 
     /** Relevant observations regarding accessibility. */
-    @Lob
-    @Column(name = "OBSERVATIONS")
+    @Column(name = "OBSERVATIONS", length = 4000)
     private String observations;
 
     /** End-of-validity date for this accessibility evaluation. */

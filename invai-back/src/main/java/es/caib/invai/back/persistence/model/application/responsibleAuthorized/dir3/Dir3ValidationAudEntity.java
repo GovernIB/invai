@@ -41,8 +41,7 @@ public class Dir3ValidationAudEntity {
     private String manualValidatedBy;
 
     /** Free-text reason given when manually validating, if any. */
-    @Lob
-    @Column(name = "REASON")
+    @Column(name = "REASON", length = 4000)
     private String reason;
 
     /** Timestamp when the mirrored row was created. */

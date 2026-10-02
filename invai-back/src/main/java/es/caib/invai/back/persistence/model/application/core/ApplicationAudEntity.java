@@ -71,8 +71,7 @@ public class ApplicationAudEntity {
     private Long statusId;
 
     /** Snapshot of the application's description at the time of the audited change. */
-    @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 4000)
     private String description;
 
     /** Snapshot of the application's creation timestamp at the time of the audited change. */

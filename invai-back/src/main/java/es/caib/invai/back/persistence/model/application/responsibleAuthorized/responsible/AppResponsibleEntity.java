@@ -52,8 +52,7 @@ public class AppResponsibleEntity extends BaseEntity {
     private String jobTitle;
 
     /** Free-text remarks about this responsible assignment. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 
     /** DIR3 validation state of this assignment against the application's administrative unit. */

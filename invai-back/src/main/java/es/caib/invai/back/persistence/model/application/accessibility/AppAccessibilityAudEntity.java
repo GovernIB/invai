@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -61,13 +60,11 @@ public class AppAccessibilityAudEntity {
     private String mobileApplicationName;
 
     /** Non-accessible content and justification at the time of the audited change. */
-    @Lob
-    @Column(name = "NON_ACCESSIBLE_CONTENT")
+    @Column(name = "NON_ACCESSIBLE_CONTENT", length = 4000)
     private String nonAccessibleContent;
 
     /** Observations at the time of the audited change. */
-    @Lob
-    @Column(name = "OBSERVATIONS")
+    @Column(name = "OBSERVATIONS", length = 4000)
     private String observations;
 
     /** End-of-validity date at the time of the audited change. */

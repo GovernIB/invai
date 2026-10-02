@@ -60,8 +60,7 @@ public class AppWebContextAudEntity {
     private String validatedBy;
 
     /** Snapshot of the validation justification at the time of the audited change. */
-    @Lob
-    @Column(name = "VALIDATED_REASON")
+    @Column(name = "VALIDATED_REASON", length = 4000)
     private String validatedReason;
 
     /** Timestamp at which the original record was created. */

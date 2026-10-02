@@ -48,7 +48,6 @@ public class Dir3ValidationEntity extends BaseEntity {
     private String manualValidatedBy;
 
     /** Free-text reason given when manually validating, populated only when {@link #dir3Status} is MANUAL. */
-    @Lob
-    @Column(name = "REASON")
+    @Column(name = "REASON", length = 4000)
     private String reason;
 }
