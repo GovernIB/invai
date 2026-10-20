@@ -27,9 +27,9 @@ import static org.mockito.Mockito.verify;
 /**
  * Unit tests for {@link AppWebContextSpecification}, verifying that each {@link AppWebContextCriteria}
  * field builds the expected JPA Criteria predicate against a fully mocked {@link CriteriaBuilder},
- * always scoped by the mandatory parent security anchor identifier. Locks in the current free-text
- * search behavior which navigates the web context's name and the field's name, both wrapped
- * with {@code cb.lower(...)}.
+ * for both the security-anchor-scoped and the development-anchor-scoped entry points. Locks in the
+ * current free-text search behavior which navigates the web context's name, the field's name, and
+ * this entity's own {@code url}, all wrapped with {@code cb.lower(...)}.
  */
 @ExtendWith(MockitoExtension.class)
 class AppWebContextSpecificationTest {
@@ -62,13 +62,13 @@ class AppWebContextSpecificationTest {
         lenient().when(cb.equal(any(), any(Object.class))).thenReturn(predicate);
         lenient().when(cb.isNull(any())).thenReturn(predicate);
         lenient().when(cb.isNotNull(any())).thenReturn(predicate);
-        lenient().when(cb.or(any(), any())).thenReturn(predicate);
+        lenient().when(cb.or(any(Predicate[].class))).thenReturn(predicate);
         lenient().when(cb.and(any())).thenReturn(predicate);
     }
 
     @Test
-    void filterByCriteria_nullCriteria_scopesByAppSecurityOnly() {
-        Specification<AppWebContextEntity> spec = AppWebContextSpecification.filterByCriteria(10L, null);
+    void filterByAppSecurityId_nullCriteria_scopesByAppSecurityOnly() {
+        Specification<AppWebContextEntity> spec = AppWebContextSpecification.filterByAppSecurityId(10L, null);
 
         Predicate result = spec.toPredicate(root, query, cb);
 
@@ -78,80 +78,122 @@ class AppWebContextSpecificationTest {
     }
 
     @Test
-    void filterByCriteria_activeStatus_addsIsNullDeletedAtPredicate() {
+    void filterByAppDevelopmentId_nullCriteria_scopesByAppDevelopmentOnly() {
+        Specification<AppWebContextEntity> spec = AppWebContextSpecification.filterByAppDevelopmentId(15L, null);
+
+        Predicate result = spec.toPredicate(root, query, cb);
+
+        assertNotNull(result);
+        verify(cb).equal(path, 15L);
+        verify(cb).and(predicate);
+    }
+
+    @Test
+    void filterByAppSecurityId_activeStatus_addsIsNullDeletedAtPredicate() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         criteria.setStatusId(StatusEnum.ACTIVE.getId());
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb).isNull(path);
         verify(cb, never()).isNotNull(any());
     }
 
     @Test
-    void filterByCriteria_inactiveStatus_addsIsNotNullDeletedAtPredicate() {
+    void filterByAppSecurityId_inactiveStatus_addsIsNotNullDeletedAtPredicate() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         criteria.setStatusId(StatusEnum.ACTIVE.getId() + 1);
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb).isNotNull(path);
         verify(cb, never()).isNull(any());
     }
 
     @Test
-    void filterByCriteria_withAppSecurityId_addsSecondEqualPredicate() {
+    void filterByAppSecurityId_withAppSecurityId_addsSecondEqualPredicate() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         criteria.setAppSecurityId(99L);
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb).equal(path, 10L);
         verify(cb).equal(path, 99L);
     }
 
     @Test
-    void filterByCriteria_withWebContextId_addsEqualPredicate() {
+    void filterByAppDevelopmentId_withAppDevelopmentId_addsSecondEqualPredicate() {
+        AppWebContextCriteria criteria = new AppWebContextCriteria();
+        criteria.setAppDevelopmentId(88L);
+
+        AppWebContextSpecification.filterByAppDevelopmentId(15L, criteria).toPredicate(root, query, cb);
+
+        verify(cb).equal(path, 15L);
+        verify(cb).equal(path, 88L);
+    }
+
+    @Test
+    void filterByAppSecurityId_withWebContextId_addsEqualPredicate() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         criteria.setWebContextId(55L);
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb).equal(path, 10L);
         verify(cb).equal(path, 55L);
     }
 
     @Test
-    void filterByCriteria_withFieldId_addsEqualPredicate() {
+    void filterByAppSecurityId_withFieldId_addsEqualPredicate() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         criteria.setFieldId(66L);
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb).equal(path, 10L);
         verify(cb).equal(path, 66L);
     }
 
     @Test
-    void filterByCriteria_withSearch_orsWebContextAndFieldNamePredicatesOnLoweredPaths() {
+    void filterByAppSecurityId_withUrl_addsLikePredicateOnLoweredPath() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
-        criteria.setSearch("Prod");
+        criteria.setUrl("example.com");
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
-        // 2 free-text predicates: web context name and field name, each wrapped in cb.lower(...)
-        // before the like comparison.
-        verify(cb, times(2)).lower(path);
-        verify(cb, times(2)).like(eq(path), eq("%prod%"));
-        verify(cb).or(predicate, predicate);
+        verify(cb).like(eq(path), eq("%example.com%"));
     }
 
     @Test
-    void filterByCriteria_blankSearch_isIgnored() {
+    void filterByAppSecurityId_blankUrl_isIgnored() {
+        AppWebContextCriteria criteria = new AppWebContextCriteria();
+        criteria.setUrl("   ");
+
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
+
+        verify(cb, never()).like(any(), anyString());
+    }
+
+    @Test
+    void filterByAppSecurityId_withSearch_orsWebContextNameFieldNameAndUrlPredicatesOnLoweredPaths() {
+        AppWebContextCriteria criteria = new AppWebContextCriteria();
+        criteria.setSearch("Prod");
+
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
+
+        // 3 free-text predicates: web context name, field name, and url, each wrapped in
+        // cb.lower(...) before the like comparison.
+        verify(cb, times(3)).lower(path);
+        verify(cb, times(3)).like(eq(path), eq("%prod%"));
+        verify(cb).or(predicate, predicate, predicate);
+    }
+
+    @Test
+    void filterByAppSecurityId_blankSearch_isIgnored() {
         AppWebContextCriteria criteria = new AppWebContextCriteria();
         criteria.setSearch("   ");
 
-        AppWebContextSpecification.filterByCriteria(10L, criteria).toPredicate(root, query, cb);
+        AppWebContextSpecification.filterByAppSecurityId(10L, criteria).toPredicate(root, query, cb);
 
         verify(cb, never()).like(any(), anyString());
     }

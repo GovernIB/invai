@@ -7,7 +7,6 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
-import org.jspecify.annotations.NonNull;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,7 @@ import java.nio.charset.StandardCharsets;
  * project-specific title: springdoc-openapi ships swagger-ui's HTML with a fixed browser-tab title
  * and exposes no configuration property to change it.
  *
- * @since 1.0.4
+ * @since 1.0.2
  */
 @Configuration
 public class SwaggerUiTitleFilterConfig {
@@ -70,7 +69,7 @@ public class SwaggerUiTitleFilterConfig {
          * @throws IOException      if an I/O error occurs while reading or writing the response
          */
         @Override
-        protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain chain)
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
                 throws ServletException, IOException {
             BufferedResponseWrapper wrapper = new BufferedResponseWrapper(response);
             chain.doFilter(request, wrapper);
@@ -111,13 +110,13 @@ public class SwaggerUiTitleFilterConfig {
             }
 
             /**
-             * No-op: not needed for a synchronous, fully buffered response.
+             * No-op: not needed for a synchronous, fully-buffered response.
              *
-             * @param writeListener the writing listener (unused)
+             * @param writeListener the write listener (unused)
              */
             @Override
             public void setWriteListener(WriteListener writeListener) {
-                // Not needed for a synchronous, fully buffered response.
+                // Not needed for a synchronous, fully-buffered response.
             }
 
             /**
@@ -130,7 +129,7 @@ public class SwaggerUiTitleFilterConfig {
                 buffer.write(b);
             }
         };
-        /** Lazily created writer over {@link #buffer}, used when the response is written via a {@link PrintWriter}. */
+        /** Lazily-created writer over {@link #buffer}, used when the response is written via a {@link PrintWriter}. */
         private PrintWriter writer;
 
         /**

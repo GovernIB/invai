@@ -205,7 +205,9 @@ describe('application responsible and authorized services', () => {
     responsibles.update(1, responsibleInput).subscribe();
     http.expectOne('/invaiback/application/responsible/1').flush({ id: 1 });
     responsibles.deactivate(1, { observation: null }).subscribe();
-    http.expectOne('/invaiback/application/responsible/deactivate/1').flush({ id: 1 });
+    http
+      .expectOne('/invaiback/application/responsible/1')
+      .flush(null, { status: 204, statusText: 'No Content' });
     responsibles.reactivate(1).subscribe();
     http.expectOne('/invaiback/application/responsible/reactivate/1').flush({ id: 1 });
     expect(responsibleClearCache).toHaveBeenCalledTimes(3);
@@ -218,7 +220,7 @@ describe('application responsible and authorized services', () => {
     http.expectOne('/invaiback/application/authorized/1').flush({ id: 1 });
     authorized.deactivate(1, { observation: null }).subscribe();
     http
-      .expectOne('/invaiback/application/authorized/deactivate/1')
+      .expectOne('/invaiback/application/authorized/1')
       .flush(null, { status: 204, statusText: 'No Content' });
     authorized.reactivate(1).subscribe();
     http.expectOne('/invaiback/application/authorized/reactivate/1').flush({ id: 1 });
@@ -226,17 +228,16 @@ describe('application responsible and authorized services', () => {
     expect(responsibleClearCache).toHaveBeenCalledTimes(3);
   });
 
-  it('models responsible deactivation as 200 and authorized deactivation as 204', () => {
+  it('deactivates responsible and authorized assignments via DELETE with an observation body', () => {
     responsibles.deactivate(7, { observation: 'Baixa' }).subscribe();
-    const responsible = http.expectOne('/invaiback/application/responsible/deactivate/7');
-    expect(responsible.request.method).toBe('PUT');
+    const responsible = http.expectOne('/invaiback/application/responsible/7');
+    expect(responsible.request.method).toBe('DELETE');
     expect(responsible.request.body).toEqual({ observation: 'Baixa' });
-    responsible.flush({ id: 7, observation: 'Baixa', deletedAt: '2026-08-14' });
+    responsible.flush(null, { status: 204, statusText: 'No Content' });
 
     authorized.deactivate(8, { observation: null }).subscribe();
-    const authorizedRequest = http.expectOne(
-      '/invaiback/application/authorized/deactivate/8',
-    );
+    const authorizedRequest = http.expectOne('/invaiback/application/authorized/8');
+    expect(authorizedRequest.request.method).toBe('DELETE');
     expect(authorizedRequest.request.body).toEqual({ observation: null });
     authorizedRequest.flush(null, { status: 204, statusText: 'No Content' });
   });

@@ -106,7 +106,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void create_uniqueName_persistsAndReturnsResponse() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("New Company");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("New Company", null);
         Company model = new Company();
         Company saved = new Company();
         CompanyOutputDTO response = new CompanyOutputDTO();
@@ -122,7 +122,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void create_duplicateName_throwsBusinessRuleException() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("Plexus Tech");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("Plexus Tech", null);
         when(companyRepository.existsByNameAndDeletedAtIsNull("Plexus Tech")).thenReturn(true);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> companyServiceFacadeBean.create(inputDTO));
@@ -132,7 +132,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void update_notFound_throwsBusinessRuleException() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("X");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("X", null);
         when(companyRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> companyServiceFacadeBean.update(99L, inputDTO));
@@ -141,7 +141,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void update_duplicateName_throwsBusinessRuleException() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("Taken");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("Taken", null);
         when(companyRepository.findById(1L)).thenReturn(activeCompany);
         when(companyRepository.existsByNameAndIdNotAndDeletedAtIsNull("Taken", 1L)).thenReturn(true);
 
@@ -152,7 +152,7 @@ class CompanyServiceFacadeBeanTest {
 
     @Test
     void update_valid_updatesAndReturnsResponse() {
-        CompanyInputDTO inputDTO = new CompanyInputDTO("Updated");
+        CompanyInputDTO inputDTO = new CompanyInputDTO("Updated", null);
         Company updated = new Company();
         CompanyOutputDTO response = new CompanyOutputDTO();
         when(companyRepository.findById(1L)).thenReturn(activeCompany);

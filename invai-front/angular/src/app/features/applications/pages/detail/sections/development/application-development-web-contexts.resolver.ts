@@ -6,11 +6,11 @@ import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { PAGINATOR_ROWS } from '@shared/constants/table.constants';
 import { Observable, catchError, defaultIfEmpty, forkJoin, map, of, switchMap } from 'rxjs';
 import { ApplicationWebContextOutput, SecurityCatalogItem } from '../../../../applications.model';
-import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import { ApplicationsService } from '../../../../services/applications.service';
 
 export interface ApplicationDevelopmentWebContextsData {
-  appSecurityId: number | null;
+  appDevelopmentId: number | null;
   page: SpringPage<ApplicationWebContextOutput> | null;
   webContextOptions: SecurityCatalogItem[];
   fieldOptions: SecurityCatalogItem[];
@@ -19,7 +19,7 @@ export interface ApplicationDevelopmentWebContextsData {
 
 export function emptyWebContextsData(): ApplicationDevelopmentWebContextsData {
   return {
-    appSecurityId: null,
+    appDevelopmentId: null,
     page: null,
     webContextOptions: [],
     fieldOptions: [],
@@ -28,19 +28,19 @@ export function emptyWebContextsData(): ApplicationDevelopmentWebContextsData {
 }
 
 /** Called in the route resolver injection context; no initialization requests in the component. */
-export function resolveDevelopmentWebContexts(applicationId: number, appSecurityId: number | null) {
-  const contexts = inject(ApplicationWebContextsService);
+export function resolveDevelopmentWebContexts(applicationId: number, appDevelopmentId: number | null) {
+  const contexts = inject(ApplicationDevelopmentWebContextsService);
   const catalog = inject(WebContextsService);
   const fields = inject(FieldsService);
   const applications = inject(ApplicationsService);
   const anchor =
-    appSecurityId == null
+    appDevelopmentId == null
       ? applications.refreshById(applicationId).pipe(
-          map((application) => application.appSecurityId ?? null),
+          map((application) => application.appDevelopmentId ?? null),
           catchError(() => of(null)),
           defaultIfEmpty(null),
         )
-      : of(appSecurityId);
+      : of(appDevelopmentId);
   const params = { size: 100, sort: 'id,asc', statusId: SoftDeleteStatus.ACTIVE };
   return forkJoin({
     context: anchor.pipe(
@@ -49,14 +49,14 @@ export function resolveDevelopmentWebContexts(applicationId: number, appSecurity
           id == null
             ? of(null)
             : contexts.getPage({
-                appSecurityId: id,
+                appDevelopmentId: id,
                 page: 0,
                 size: PAGINATOR_ROWS,
                 sort: 'id,asc',
                 statusId: SoftDeleteStatus.ACTIVE,
               }),
           null,
-        ).pipe(map((result) => ({ ...result, appSecurityId: id }))),
+        ).pipe(map((result) => ({ ...result, appDevelopmentId: id }))),
       ),
     ),
     options: resolveValue(
@@ -71,7 +71,7 @@ export function resolveDevelopmentWebContexts(applicationId: number, appSecurity
     ),
   }).pipe(
     map(({ context, options, fields }): ApplicationDevelopmentWebContextsData => ({
-      appSecurityId: context.appSecurityId,
+      appDevelopmentId: context.appDevelopmentId,
       page: context.value,
       webContextOptions: options.value,
       fieldOptions: fields.value,

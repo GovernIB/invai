@@ -32,6 +32,14 @@ import {
   APPLICATION_SECURITY_RESOLVE_KEY,
   applicationSecurityResolver,
 } from './pages/detail/sections/security/application-security-section.resolver';
+import {
+  APPLICATION_INTEGRATIONS_RESOLVE_KEY,
+  applicationIntegrationsResolver,
+} from './pages/detail/sections/integrations/application-integrations-section.resolver';
+import {
+  APPLICATION_DATA_RESOLVE_KEY,
+  applicationDataResolver,
+} from './pages/detail/sections/data/application-data-section.resolver';
 
 export const APPLICATIONS_ROUTES: Routes = [
   {
@@ -141,6 +149,32 @@ export const APPLICATIONS_ROUTES: Routes = [
         },
         resolve: {
           [APPLICATION_SECURITY_RESOLVE_KEY]: applicationSecurityResolver,
+        },
+      },
+      {
+        path: 'data',
+        loadComponent: () =>
+          import('./pages/detail/sections/data/application-data-section').then(
+            (m) => m.ApplicationDataSection,
+          ),
+        data: {
+          breadcrumb: $localize`:@@applicationDataTitle:Dades`,
+        },
+        resolve: {
+          [APPLICATION_DATA_RESOLVE_KEY]: applicationDataResolver,
+        },
+      },
+      {
+        path: 'integrations',
+        loadComponent: () =>
+          import('./pages/detail/sections/integrations/application-integrations-section').then(
+            (m) => m.ApplicationIntegrationsSection,
+          ),
+        data: {
+          breadcrumb: $localize`:@@applicationIntegrationsTitle:Integracions`,
+        },
+        resolve: {
+          [APPLICATION_INTEGRATIONS_RESOLVE_KEY]: applicationIntegrationsResolver,
         },
       },
     ],

@@ -1,0 +1,2 @@
+import{k as n}from"./chunk-WX35NQDA.js";function s(r){if(typeof r!="object"||r===null)return!1;let e=r;return typeof e.error=="string"&&e.error.trim().length>0&&typeof e.message=="string"&&e.message.trim().length>0}function i(r){return r instanceof n&&r.status===400&&s(r.error)}var t=new Set([400,504]);function p(r){return r instanceof n&&t.has(r.status)&&s(r.error)?r.error.message:null}export{i as a,p as b};
+/**i18n:cb09f027eada348ba1e0b70006092c6a2a71309ed2b00a75b8dd0a1af1ea8144*/

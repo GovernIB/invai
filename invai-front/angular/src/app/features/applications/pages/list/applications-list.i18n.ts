@@ -19,3 +19,9 @@ export const APPLICATIONS_RESPONSIBLE_SEARCH_ERROR_DETAIL = $localize`No s'han p
 export const APPLICATIONS_QUICK_SEARCH_ARIA_LABEL = $localize`Cerca ràpida d'aplicacions`;
 export const APPLICATIONS_EXPORT_ARIA_LABEL = $localize`Exporta aplicacions a Excel`;
 export const APPLICATIONS_ADD_ARIA_LABEL = $localize`Afegeix una aplicació`;
+export const APPLICATIONS_DIR3_CHECK_LABEL = $localize`:@@applicationsDir3CheckLabel:Validar DIR3 de totes`;
+export const APPLICATIONS_DIR3_CHECK_PROGRESS = $localize`:@@applicationsDir3CheckProgress:Validant el DIR3 de totes les aplicacions…`;
+export const APPLICATIONS_DIR3_CHECK_SUCCESS = $localize`:@@applicationsDir3CheckSuccess:Validació DIR3 completada`;
+export const APPLICATIONS_DIR3_CHECK_MISMATCHES = (count: number) =>
+  $localize`:@@applicationsDir3CheckMismatches:Aplicacions amb discrepàncies DIR3: ${count}.`;
+export const APPLICATIONS_DIR3_CHECK_ERROR = $localize`:@@applicationsDir3CheckError:No s'ha pogut completar la validació DIR3.`;

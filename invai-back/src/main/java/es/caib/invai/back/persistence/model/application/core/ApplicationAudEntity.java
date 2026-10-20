@@ -71,8 +71,7 @@ public class ApplicationAudEntity {
     private Long statusId;
 
     /** Snapshot of the application's description at the time of the audited change. */
-    @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 4000)
     private String description;
 
     /** Snapshot of the application's creation timestamp at the time of the audited change. */
@@ -102,6 +101,10 @@ public class ApplicationAudEntity {
     /** Snapshot of the application's expiration date at the time of the audited change. */
     @Column(name = "EXPIRATION_DATE")
     private LocalDateTime expirationDate;
+
+    /** Snapshot of the application's DIR3 mismatch flag at the time of the audited change. */
+    @Column(name = "DIR3_MISMATCH")
+    private boolean dir3Mismatch;
 
     /** Type of mutation that triggered this audit record (e.g., INSERT, UPDATE, DELETE). */
     @Column(name = "AUD_ACTION", length = 10, nullable = false)

@@ -27,3 +27,15 @@ export function isStructuredBadRequest(
     isApiErrorResponse(error.error)
   );
 }
+
+// Statuses whose structured body carries a localized message meant for the user.
+const USER_MESSAGE_STATUSES = new Set([400, 504]);
+
+/** Reads the localized backend message of a structured 400 or 504 (timeout) response. */
+export function readApiErrorMessage(error: unknown): string | null {
+  return error instanceof HttpErrorResponse &&
+    USER_MESSAGE_STATUSES.has(error.status) &&
+    isApiErrorResponse(error.error)
+    ? error.error.message
+    : null;
+}

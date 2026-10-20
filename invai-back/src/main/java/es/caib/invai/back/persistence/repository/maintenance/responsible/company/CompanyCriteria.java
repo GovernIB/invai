@@ -21,6 +21,9 @@ public class CompanyCriteria {
     /** Company name filter used for partial, case-insensitive matching. */
     private String name;
 
+    /** Company NIF/CIF filter used for partial, case-insensitive matching. */
+    private String nif;
+
     /**
      * Master registry identity indicator managing active vs logical soft-deleted runtime ecosystem state lifecycles.
      *
@@ -29,7 +32,8 @@ public class CompanyCriteria {
     private Long statusId;
 
     /**
-     * Global text lookup variable cross-referencing keywords against the {@code name} column.
+     * Global text lookup variable cross-referencing keywords against the {@code name} and
+     * {@code nif} columns.
      */
     private String search;
 }

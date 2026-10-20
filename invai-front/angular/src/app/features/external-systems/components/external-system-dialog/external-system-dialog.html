@@ -1,0 +1,100 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <div class="md:col-span-8">
+        <p-floatlabel class="w-full">
+          <input
+            id="external-system-dialog-name"
+            class="w-full"
+            type="text"
+            maxlength="150"
+            formControlName="name"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.name) ? 'external-system-dialog-name-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [readOnly]="mode() === 'view'"
+            [class.invai-form-readonly-control]="mode() === 'view'"
+            pInputText
+          />
+          <label for="external-system-dialog-name">{{ labels.name }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.name)) {
+          <p id="external-system-dialog-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{
+              form().controls.name.hasError('required') || form().controls.name.hasError('pattern')
+                ? requiredError
+                : nameMaxLengthError
+            }}
+          </p>
+        }
+      </div>
+      <div class="md:col-span-4">
+        @if (mode() === 'view') {
+          <div class="invai-dialog-static-field">
+            <span id="external-system-dialog-company-view-label" class="invai-dialog-static-field__label">
+              {{ labels.company }}
+            </span>
+            <p class="invai-form-static-value" aria-labelledby="external-system-dialog-company-view-label">
+              {{ companyLabel() }}
+            </p>
+          </div>
+        } @else {
+        <p-floatlabel class="w-full">
+          <p-select
+            inputId="external-system-dialog-company"
+            styleClass="w-full"
+            formControlName="companyId"
+            ariaLabelledBy="external-system-dialog-company-label"
+            appendTo="body"
+            [ariaFilterLabel]="labels.company"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.companyId) ? 'external-system-dialog-company-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.companyId)"
+            [filter]="true"
+            [options]="companyOptions()"
+            optionLabel="label"
+            optionValue="id"
+          />
+          <label id="external-system-dialog-company-label" for="external-system-dialog-company">
+            {{ labels.company }}
+          </label>
+        </p-floatlabel>
+        }
+        @if (isInvalid(form().controls.companyId)) {
+          <p id="external-system-dialog-company-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ requiredError }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+</app-crud-entity-dialog>

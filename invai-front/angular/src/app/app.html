@@ -1,8 +1,12 @@
 @if (isInitialLoading()) {
   <main class="app-initial-loader" aria-live="polite" aria-busy="true">
-    <img class="app-initial-loader__logo" src="assets/images/logo.svg" alt="CAIB" />
+    <img
+      class="app-initial-loader__logo"
+      src="assets/images/logo_govern_vertical_grande.svg"
+      alt="Govern de les Illes Balears"
+    />
     <section class="app-initial-loader__content" aria-label="INVAI">
-      <p class="app-initial-loader__title">INVAI</p>
+      <img class="app-initial-loader__brand" src="assets/images/logo-invai.svg" alt="INVAI" />
       <p class="app-initial-loader__text">Preparant les dades inicials...</p>
     </section>
   </main>
@@ -10,15 +14,18 @@
   <app-main-layout>
     <section class="flex shrink-0 items-center gap-4" header-left>
       <a
-        class="flex items-center gap-2.5 font-semibold text-surface-700 no-underline"
+        class="flex items-center gap-3 no-underline"
         [routerLink]="homeRoute"
         [attr.aria-label]="homeAriaLabel"
       >
-        <img class="h-6 w-auto" src="assets/images/logo.svg" alt="" />
-        <span>{{ title }}</span>
+        <img
+          class="h-[50px] w-auto"
+          src="assets/images/logo_govern_horizontal.svg"
+          alt="Govern de les Illes Balears"
+        />
+        <p-divider class="m-0 h-7" layout="vertical" />
+        <img class="h-6 w-auto" src="assets/images/logo-invai.svg" [alt]="title" />
       </a>
-
-      <p-divider class="m-0 h-7" layout="vertical" />
     </section>
 
     <section class="flex shrink-0 items-center gap-1" header-right>

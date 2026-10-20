@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.core.AppResponsibleAuthorizedEntity;
+import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonEntity;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
@@ -43,7 +44,11 @@ public class AppAuthorizedEntity extends BaseEntity {
     private PersonEntity person;
 
     /** Free-text remarks about this authorization. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
+
+    /** DIR3 validation state of this assignment against the application's administrative unit. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DIR3_VALIDATION_ID", nullable = false)
+    private Dir3ValidationEntity dir3Validation;
 }

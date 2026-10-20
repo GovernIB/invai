@@ -1,10 +1,14 @@
 package es.caib.invai.back.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -85,6 +89,22 @@ public final class Utils {
             }
             throw ex;
         }
+    }
+
+    /**
+     * Slices an in-memory row list into the requested page, for listings with no backing query to
+     * paginate at the database level (e.g. built from a cached external directory, or filtered
+     * catalog data).
+     *
+     * @param rows     the full, already-filtered row list
+     * @param pageable the pagination parameters to apply
+     * @param <T>      the row type
+     * @return the requested page of rows
+     */
+    public static <T> Page<T> paginate(List<T> rows, Pageable pageable) {
+        int start = (int) Math.min(pageable.getOffset(), rows.size());
+        int end = Math.min(start + pageable.getPageSize(), rows.size());
+        return new PageImpl<>(rows.subList(start, end), pageable, rows.size());
     }
 
 }

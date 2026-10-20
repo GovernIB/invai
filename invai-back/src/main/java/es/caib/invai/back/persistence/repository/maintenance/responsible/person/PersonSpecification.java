@@ -29,10 +29,12 @@ public final class PersonSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(cb.isFalse(root.get("personalCaib")));
-
             if (criteria == null) {
                 return cb.and(predicates.toArray(new Predicate[0]));
+            }
+
+            if (criteria.getPersonalCaib() != null) {
+                predicates.add(cb.equal(root.get("personalCaib"), criteria.getPersonalCaib()));
             }
 
             Long statusId = criteria.getStatusId();
@@ -74,8 +76,9 @@ public final class PersonSpecification {
                         cb.lower(cb.concat(cb.concat(root.get("firstName"), " "), root.get("lastName"))),
                         pattern
                 );
+                Predicate searchUserName = cb.like(cb.lower(root.get("userName")), pattern);
 
-                predicates.add(cb.or(searchFirstName, searchLastName, searchEmail, searchFullName));
+                predicates.add(cb.or(searchFirstName, searchLastName, searchEmail, searchFullName, searchUserName));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

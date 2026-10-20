@@ -10,7 +10,9 @@ import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.company.CompanyEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonEntity;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.core.AppResponsibleAuthorizedMapperImpl;
+import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapperImpl;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
+import es.caib.invai.back.service.mapper.catalog.dir3Status.Dir3StatusMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
@@ -62,9 +64,13 @@ class AppAuthorizedMapperTest {
         PersonMapperImpl personMapperImpl = new PersonMapperImpl();
         ReflectionTestUtils.setField(personMapperImpl, "companyMapper", new CompanyMapperImpl());
 
+        Dir3ValidationMapperImpl dir3ValidationMapperImpl = new Dir3ValidationMapperImpl();
+        ReflectionTestUtils.setField(dir3ValidationMapperImpl, "dir3StatusMapper", new Dir3StatusMapperImpl());
+
         AppAuthorizedMapperImpl impl = new AppAuthorizedMapperImpl();
         ReflectionTestUtils.setField(impl, "personMapper", personMapperImpl);
         ReflectionTestUtils.setField(impl, "appResponsibleAuthorizedMapper", appResponsibleAuthorizedMapperImpl);
+        ReflectionTestUtils.setField(impl, "dir3ValidationMapper", dir3ValidationMapperImpl);
         mapper = impl;
     }
 
@@ -304,7 +310,7 @@ class AppAuthorizedMapperTest {
 
     @Test
     void toModelFromInput_resolvesNestedIdsAndIgnoresAuditFields() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(40L, 10L, null, null, null, null, java.util.List.of(20L, 21L), null, false);
+        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(40L, 10L, null, null, null, null, java.util.List.of(20L, 21L), null, false, null, null);
 
         AppAuthorized model = mapper.toModelFromInput(inputDTO);
 
@@ -334,7 +340,7 @@ class AppAuthorizedMapperTest {
                 .observation("Old observation")
                 .build();
         existing.getPerson().setId(10L);
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(41L, 11L, null, null, null, null, java.util.List.of(22L), "New observation", false);
+        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(41L, 11L, null, null, null, null, java.util.List.of(22L), "New observation", false, null, null);
 
         mapper.updateModelFromInput(inputDTO, existing);
 
@@ -347,7 +353,7 @@ class AppAuthorizedMapperTest {
     @Test
     void updateModelFromInput_withNullNestedTargets_leavesThemUntouched() {
         AppAuthorized existing = AppAuthorized.builder().id(6L).build();
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(42L, 12L, null, null, null, null, java.util.List.of(23L), null, false);
+        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(42L, 12L, null, null, null, null, java.util.List.of(23L), null, false, null, null);
 
         mapper.updateModelFromInput(inputDTO, existing);
 

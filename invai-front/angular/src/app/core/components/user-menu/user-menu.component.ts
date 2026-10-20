@@ -41,7 +41,10 @@ export class UserMenuComponent {
   private readonly _helpModalService = inject(HelpModalService);
 
   protected readonly username = computed(() => this._oAuthService.currentUser()?.username ?? '');
-  protected readonly userInitial = computed(() => this.username().charAt(0).toUpperCase() || '?');
+  protected readonly fullName = computed(() => this._oAuthService.currentUser()?.fullName ?? '');
+  protected readonly userInitial = computed(
+    () => (this.fullName() || this.username()).charAt(0).toUpperCase() || '?',
+  );
 
   protected logout() {
     this._oAuthService.logout();

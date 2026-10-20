@@ -6,12 +6,12 @@ import { Observable } from 'rxjs';
 import { DevelopmentModality, DevelopmentStandardAdaption } from '../applications.model';
 import { ApplicationDatabasesService } from './application-databases.service';
 import { ApplicationDevelopmentService } from './application-development.service';
+import { ApplicationDevelopmentWebContextsService } from './application-development-web-contexts.service';
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityMeasuresService,
   ApplicationSecurityRisksService,
   ApplicationSecurityService,
-  ApplicationWebContextsService,
 } from './application-security.service';
 import { ApplicationSystemDatabaseService } from './application-system-database.service';
 import { ApplicationSystemsService } from './application-systems.service';
@@ -20,7 +20,7 @@ import { ApplicationsService } from './applications.service';
 const mutations: { name: string; run: () => Observable<unknown> }[] = [
   { name: 'systems', run: () => TestBed.inject(ApplicationSystemsService).delete(1) },
   { name: 'databases', run: () => TestBed.inject(ApplicationDatabasesService).delete(1) },
-  { name: 'web contexts', run: () => TestBed.inject(ApplicationWebContextsService).delete(1) },
+  { name: 'web contexts', run: () => TestBed.inject(ApplicationDevelopmentWebContextsService).delete(1) },
   { name: 'ENS', run: () => TestBed.inject(ApplicationEnsClassificationsService).delete(1) },
   { name: 'risks', run: () => TestBed.inject(ApplicationSecurityRisksService).delete(1) },
   { name: 'measures', run: () => TestBed.inject(ApplicationSecurityMeasuresService).delete(1) },

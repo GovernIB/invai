@@ -58,15 +58,6 @@ public interface AppAuthorizedRepository {
     Page<AppAuthorized> findAll(Long appResponsibleAuthorizedId, AppAuthorizedCriteria criteria, Pageable pageable);
 
     /**
-     * Checks whether an active authorization already exists for the given anchor/person pair.
-     *
-     * @param appResponsibleAuthorizedId the parent anchor identifier
-     * @param personId the person identifier
-     * @return {@code true} if a matching active authorization exists
-     */
-    boolean existsByAppResponsibleAuthorizedAndPerson(Long appResponsibleAuthorizedId, Long personId);
-
-    /**
      * Checks whether another active authorization already exists for the given anchor/person
      * pair, excluding a specific row identifier.
      *

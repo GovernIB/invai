@@ -33,6 +33,20 @@ export interface ApplicationSecurityResourceFormControls {
 export type ApplicationSecurityResourceFormGroup =
   FormGroup<ApplicationSecurityResourceFormControls>;
 
+export type ApplicationWebContextVerificationForm = FormGroup<{
+  reason: FormControl<string>;
+}>;
+
+export function createApplicationWebContextVerificationForm(
+  formBuilder: FormBuilder,
+): ApplicationWebContextVerificationForm {
+  return formBuilder.nonNullable.group({
+    reason: formBuilder.nonNullable.control('', [
+      (control) => control.value.trim() ? null : { required: true },
+    ]),
+  });
+}
+
 export function createApplicationSecurityForm(
   formBuilder: FormBuilder,
 ): ApplicationSecurityFormGroup {

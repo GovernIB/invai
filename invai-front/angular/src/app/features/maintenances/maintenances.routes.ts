@@ -48,6 +48,14 @@ import {
   SECURITY_MAINTENANCE_RESOLVE_KEY,
   securityMaintenanceResolver,
 } from './security/pages/security-maintenance/security-maintenance.resolver';
+import {
+  EXTERNAL_SYSTEMS_LIST_RESOLVE_KEY,
+  externalSystemsListResolver,
+} from '@features/external-systems/pages/list/external-systems-list.resolver';
+import {
+  INTEGRATIONS_MAINTENANCE_RESOLVE_KEY,
+  integrationsMaintenanceResolver,
+} from './pages/integrations-maintenance/integrations-maintenance.resolver';
 
 export const MAINTENANCES_ROUTES: Routes = [
   {
@@ -136,6 +144,20 @@ export const MAINTENANCES_ROUTES: Routes = [
         },
         resolve: {
           [SECURITY_MAINTENANCE_RESOLVE_KEY]: securityMaintenanceResolver,
+        },
+      },
+      {
+        path: MAINTENANCES_ROUTES_LOC.INTEGRATIONS,
+        loadComponent: () =>
+          import('./pages/integrations-maintenance/integrations-maintenance').then(
+            (m) => m.IntegrationsMaintenance,
+          ),
+        data: {
+          breadcrumb: MAINTENANCES_ROUTES_LABELS.INTEGRATIONS,
+        },
+        resolve: {
+          [EXTERNAL_SYSTEMS_LIST_RESOLVE_KEY]: externalSystemsListResolver,
+          [INTEGRATIONS_MAINTENANCE_RESOLVE_KEY]: integrationsMaintenanceResolver,
         },
       },
       legacyMaintenanceRoute(

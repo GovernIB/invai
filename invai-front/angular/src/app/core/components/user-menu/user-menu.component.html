@@ -7,9 +7,21 @@
   (onClick)="popoverRef.toggle($event)"
 >
   <section class="flex items-center gap-2">
-    <span class="font-medium hidden sm:inline">
-      {{ username() | titlecase }}
-    </span>
+    @if (fullName()) {
+      <span class="hidden sm:flex flex-col items-end leading-tight text-right">
+        <span class="font-medium" data-testid="user-menu-full-name">{{ fullName() }}</span>
+        <span
+          class="text-xs text-surface-500 dark:text-surface-400"
+          data-testid="user-menu-username"
+        >
+          {{ username() }}
+        </span>
+      </span>
+    } @else {
+      <span class="font-medium hidden sm:inline">
+        {{ username() | titlecase }}
+      </span>
+    }
 
     <p-avatar class="bg-surface-200 text-surface-700" [label]="userInitial()" />
   </section>

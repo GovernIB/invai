@@ -1,6 +1,8 @@
 package es.caib.invai.back.ejb.maintenance.responsible.person;
 
 import es.caib.invai.back.exception.BusinessRuleException;
+import es.caib.invai.back.exception.SoffidClientException;
+import es.caib.invai.back.exception.SoffidTimeoutException;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonCombinedSearchOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
@@ -93,7 +95,7 @@ class PersonServiceFacadeBeanTest {
         when(personRepository.findAll(criteria, pageable)).thenReturn(domainPage);
         when(personMapper.toResponse(activePerson)).thenReturn(mapped);
 
-        Page<PersonOutputDTO> result = personServiceFacadeBean.getAll(criteria, pageable);
+        Page<PersonOutputDTO> result = personServiceFacadeBean.searchDatabase(criteria, pageable);
 
         assertEquals(1, result.getTotalElements());
         assertEquals(mapped, result.getContent().get(0));
@@ -249,7 +251,7 @@ class PersonServiceFacadeBeanTest {
         soffidUser.setEmailAddress("joan.puig@caib.es");
         soffidUser.setActive(true);
         Pageable pageable = PageRequest.of(0, 20);
-        when(soffidClient.search("Joan", pageable)).thenReturn(new PageImpl<>(List.of(soffidUser), pageable, 1));
+        when(soffidClient.searchUsers("Joan", pageable)).thenReturn(new PageImpl<>(List.of(soffidUser), pageable, 1));
 
         Page<PersonOutputDTO> result = personServiceFacadeBean.searchSoffid("Joan", pageable);
 
@@ -267,18 +269,18 @@ class PersonServiceFacadeBeanTest {
     @Test
     void searchSoffid_blankFullName_stillDelegatesAsUnfilteredListing() {
         Pageable pageable = PageRequest.of(0, 20);
-        when(soffidClient.search(null, pageable)).thenReturn(new PageImpl<>(List.of(), pageable, 0));
+        when(soffidClient.searchUsers(null, pageable)).thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
         Page<PersonOutputDTO> result = personServiceFacadeBean.searchSoffid(null, pageable);
 
         assertTrue(result.getContent().isEmpty());
-        verify(soffidClient).search(null, pageable);
+        verify(soffidClient).searchUsers(null, pageable);
     }
 
     @Test
     void searchSoffid_noResults_returnsEmptyPage() {
         Pageable pageable = PageRequest.of(0, 20);
-        when(soffidClient.search("Nobody", pageable)).thenReturn(new PageImpl<>(List.of(), pageable, 0));
+        when(soffidClient.searchUsers("Nobody", pageable)).thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
         Page<PersonOutputDTO> result = personServiceFacadeBean.searchSoffid("Nobody", pageable);
 
@@ -301,7 +303,7 @@ class PersonServiceFacadeBeanTest {
         SoffidUser soffidUser = new SoffidUser();
         soffidUser.setFirstName("Remote");
         soffidUser.setEmailAddress("remote@caib.es");
-        when(soffidClient.search(null, pageable)).thenReturn(new PageImpl<>(List.of(soffidUser), pageable, 1));
+        when(soffidClient.searchUsers(null, pageable)).thenReturn(new PageImpl<>(List.of(soffidUser), pageable, 1));
 
         PersonCombinedSearchOutputDTO result = personServiceFacadeBean.searchCombined(null, pageable);
 
@@ -324,7 +326,7 @@ class PersonServiceFacadeBeanTest {
 
         assertEquals(1, result.getDatabase().getTotalElements());
         assertTrue(result.getSoffid().getContent().isEmpty());
-        verify(soffidClient, never()).search(any(), any());
+        verify(soffidClient, never()).searchUsers(any(), any());
     }
 
     @Test
@@ -336,7 +338,7 @@ class PersonServiceFacadeBeanTest {
         SoffidUser soffidUser = new SoffidUser();
         soffidUser.setFirstName("Joan");
         soffidUser.setEmailAddress("joan@caib.es");
-        when(soffidClient.search("Joan", pageable)).thenReturn(new PageImpl<>(List.of(soffidUser), pageable, 1));
+        when(soffidClient.searchUsers("Joan", pageable)).thenReturn(new PageImpl<>(List.of(soffidUser), pageable, 1));
 
         PersonCombinedSearchOutputDTO result = personServiceFacadeBean.searchCombined("Joan", pageable);
 
@@ -350,7 +352,7 @@ class PersonServiceFacadeBeanTest {
         Pageable pageable = PageRequest.of(0, 10);
         when(personRepository.findAll(any(PersonCriteria.class), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(), pageable, 0));
-        when(soffidClient.search("Nobody", pageable)).thenReturn(new PageImpl<>(List.of(), pageable, 0));
+        when(soffidClient.searchUsers("Nobody", pageable)).thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
         PersonCombinedSearchOutputDTO result = personServiceFacadeBean.searchCombined("Nobody", pageable);
 
@@ -359,29 +361,29 @@ class PersonServiceFacadeBeanTest {
     }
 
     // ------------------------------------------------------------------
-    // resolveOrCreatePerson
+    // getOrCreatePerson
     // ------------------------------------------------------------------
 
     @Test
-    void resolveOrCreatePerson_existingEmail_reusesExistingPersonAndSkipsCreation() {
+    void getOrCreatePerson_existingEmail_reusesExistingPersonAndSkipsCreation() {
         Person existing = new Person();
         existing.setId(99L);
         when(personRepository.findByEmail("joan@caib.es")).thenReturn(existing);
 
-        Person result = personServiceFacadeBean.resolveOrCreatePerson("Joan", "Fuster", "joan@caib.es", true, null);
+        Person result = personServiceFacadeBean.getOrCreatePerson("Joan", "Fuster", "joan@caib.es", true, null, "u8443");
 
         assertSame(existing, result);
         verify(personRepository, never()).create(any());
     }
 
     @Test
-    void resolveOrCreatePerson_noExistingEmailPersonalCaib_createsNewCaibPerson() {
+    void getOrCreatePerson_noExistingEmailPersonalCaib_createsNewCaibPersonWithUserName() {
         Person created = new Person();
         created.setId(55L);
         when(personRepository.findByEmail("joan@caib.es")).thenReturn(null);
         when(personRepository.create(any())).thenReturn(created);
 
-        Person result = personServiceFacadeBean.resolveOrCreatePerson("Joan", "Fuster", "joan@caib.es", true, null);
+        Person result = personServiceFacadeBean.getOrCreatePerson("Joan", "Fuster", "joan@caib.es", true, null, "u8443");
 
         ArgumentCaptor<Person> captor = ArgumentCaptor.forClass(Person.class);
         verify(personRepository).create(captor.capture());
@@ -389,29 +391,30 @@ class PersonServiceFacadeBeanTest {
         assertEquals("Fuster", captor.getValue().getLastName());
         assertEquals("joan@caib.es", captor.getValue().getEmail());
         assertTrue(captor.getValue().isPersonalCaib());
+        assertEquals("u8443", captor.getValue().getUserName());
         assertNull(captor.getValue().getCompany());
         assertSame(created, result);
     }
 
     @Test
-    void resolveOrCreatePerson_noExistingEmailExternalWithoutCompany_throwsBusinessRuleException() {
+    void getOrCreatePerson_noExistingEmailExternalWithoutCompany_throwsBusinessRuleException() {
         when(personRepository.findByEmail("maria@extern.es")).thenReturn(null);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> personServiceFacadeBean.resolveOrCreatePerson("Maria", "Puig", "maria@extern.es", false, null));
+                () -> personServiceFacadeBean.getOrCreatePerson("Maria", "Puig", "maria@extern.es", false, null, null));
 
         assertEquals(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB, ex.getMessage());
         verify(personRepository, never()).create(any());
     }
 
     @Test
-    void resolveOrCreatePerson_noExistingEmailExternalWithCompany_createsNewExternalPersonWithCompany() {
+    void getOrCreatePerson_noExistingEmailExternalWithCompany_createsNewExternalPersonWithCompany() {
         Person created = new Person();
         created.setId(56L);
         when(personRepository.findByEmail("maria@extern.es")).thenReturn(null);
         when(personRepository.create(any())).thenReturn(created);
 
-        Person result = personServiceFacadeBean.resolveOrCreatePerson("Maria", "Puig", "maria@extern.es", false, 5L);
+        Person result = personServiceFacadeBean.getOrCreatePerson("Maria", "Puig", "maria@extern.es", false, 5L, null);
 
         ArgumentCaptor<Person> captor = ArgumentCaptor.forClass(Person.class);
         verify(personRepository).create(captor.capture());
@@ -421,45 +424,45 @@ class PersonServiceFacadeBeanTest {
     }
 
     // ------------------------------------------------------------------
-    // syncPersonalCaib
+    // updatePersonalCaibToPerson
     // ------------------------------------------------------------------
 
     @Test
-    void syncPersonalCaib_personNotFound_isNoOp() {
+    void updatePersonalCaib_ToPerson_personNotFound_isNoOp() {
         when(personRepository.findById(10L)).thenReturn(null);
 
-        personServiceFacadeBean.syncPersonalCaib(10L, true);
+        personServiceFacadeBean.updatePersonalCaibToPerson(10L, true);
 
         verify(personRepository, never()).update(any(), any());
     }
 
     @Test
-    void syncPersonalCaib_matchesStoredValue_doesNotTouchPerson() {
+    void updatePersonalCaib_ToPerson_matchesStoredValue_doesNotTouchPerson() {
         Person person = new Person();
         person.setId(10L);
         person.setPersonalCaib(true);
         when(personRepository.findById(10L)).thenReturn(person);
 
-        personServiceFacadeBean.syncPersonalCaib(10L, true);
+        personServiceFacadeBean.updatePersonalCaibToPerson(10L, true);
 
         verify(personRepository, never()).update(any(), any());
     }
 
     @Test
-    void syncPersonalCaib_differsFromStoredValue_updatesPerson() {
+    void updatePersonalCaib_ToPerson_differsFromStoredValue_updatesPerson() {
         Person person = new Person();
         person.setId(10L);
         person.setPersonalCaib(false);
         when(personRepository.findById(10L)).thenReturn(person);
 
-        personServiceFacadeBean.syncPersonalCaib(10L, true);
+        personServiceFacadeBean.updatePersonalCaibToPerson(10L, true);
 
         assertTrue(person.isPersonalCaib());
         verify(personRepository).update(person, 10L);
     }
 
     @Test
-    void syncPersonalCaib_settingNonCaibWithoutCompany_throwsBusinessRuleException() {
+    void updatePersonalCaib_settingNonCaibToPersonWithoutCompany_throwsBusinessRuleException() {
         Person person = new Person();
         person.setId(10L);
         person.setPersonalCaib(true);
@@ -467,23 +470,138 @@ class PersonServiceFacadeBeanTest {
         when(personRepository.findById(10L)).thenReturn(person);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> personServiceFacadeBean.syncPersonalCaib(10L, false));
+                () -> personServiceFacadeBean.updatePersonalCaibToPerson(10L, false));
 
         assertEquals(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB, ex.getMessage());
         verify(personRepository, never()).update(any(), any());
     }
 
     @Test
-    void syncPersonalCaib_settingNonCaibWithCompany_updatesPerson() {
+    void updatePersonalCaib_settingNonCaibToPersonWithCompany_updatesPerson() {
         Person person = new Person();
         person.setId(10L);
         person.setPersonalCaib(true);
         person.setCompany(new Company());
         when(personRepository.findById(10L)).thenReturn(person);
 
-        personServiceFacadeBean.syncPersonalCaib(10L, false);
+        personServiceFacadeBean.updatePersonalCaibToPerson(10L, false);
 
         assertFalse(person.isPersonalCaib());
         verify(personRepository).update(person, 10L);
+    }
+
+    @Test
+    void checkDir3_personNotFoundLocally_stillChecksSoffidByEmail() {
+        when(personRepository.findByEmail("unregistered@example.com")).thenReturn(null);
+        SoffidUser soffidUser = new SoffidUser();
+        soffidUser.setPrimaryGroup("sgaip");
+        when(soffidClient.searchByEmail("unregistered@example.com")).thenReturn(soffidUser);
+        when(soffidClient.resolveGroupDir3("sgaip")).thenReturn("A04027054");
+
+        var result = personServiceFacadeBean.checkDir3("unregistered@example.com", "A04027054");
+
+        assertTrue(result.isMatches());
+        assertEquals("A04027054", result.getGroupDir3());
+    }
+
+    @Test
+    void checkDir3_personNotPersonalCaib_returnsNullPersonDir3WithoutCallingSoffid() {
+        activePerson.setPersonalCaib(false);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+
+        var result = personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054");
+
+        assertFalse(result.isMatches());
+        assertNull(result.getGroupDir3());
+        verify(soffidClient, never()).searchByEmail(any());
+    }
+
+    @Test
+    void checkDir3_blankAdmUnitCode_returnsNullPersonDir3WithoutCallingSoffid() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+
+        var result = personServiceFacadeBean.checkDir3("joan.puig@example.com", "  ");
+
+        assertNull(result.getGroupDir3());
+        verify(soffidClient, never()).searchByEmail(any());
+    }
+
+    @Test
+    void checkDir3_noMatchingSoffidUser_returnsNullPersonDir3() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+        when(soffidClient.searchByEmail("joan.puig@example.com")).thenReturn(null);
+
+        var result = personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054");
+
+        assertNull(result.getGroupDir3());
+        assertFalse(result.isMatches());
+    }
+
+    @Test
+    void checkDir3_primaryGroupHasDir3AndMatches_returnsMatch() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+        SoffidUser soffidUser = new SoffidUser();
+        soffidUser.setPrimaryGroup("sgaip");
+        when(soffidClient.searchByEmail("joan.puig@example.com")).thenReturn(soffidUser);
+        when(soffidClient.resolveGroupDir3("sgaip")).thenReturn("A04027054");
+
+        var result = personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054");
+
+        assertTrue(result.isMatches());
+        assertEquals("A04027054", result.getGroupDir3());
+    }
+
+    @Test
+    void checkDir3_primaryGroupDir3Differs_returnsMismatch() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+        SoffidUser soffidUser = new SoffidUser();
+        soffidUser.setPrimaryGroup("sgaip");
+        when(soffidClient.searchByEmail("joan.puig@example.com")).thenReturn(soffidUser);
+        when(soffidClient.resolveGroupDir3("sgaip")).thenReturn("A04027054");
+
+        var result = personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04000000");
+
+        assertFalse(result.isMatches());
+        assertEquals("A04027054", result.getGroupDir3());
+    }
+
+    @Test
+    void checkDir3_noGroupHasDir3_returnsNullPersonDir3() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+        SoffidUser soffidUser = new SoffidUser();
+        soffidUser.setPrimaryGroup("ncadmin");
+        when(soffidClient.searchByEmail("joan.puig@example.com")).thenReturn(soffidUser);
+        when(soffidClient.resolveGroupDir3("ncadmin")).thenReturn(null);
+
+        var result = personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054");
+
+        assertNull(result.getGroupDir3());
+    }
+
+    @Test
+    void checkDir3_soffidClientError_propagatesInsteadOfBeingSwallowed() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+        when(soffidClient.searchByEmail("joan.puig@example.com"))
+                .thenThrow(new SoffidClientException("500"));
+
+        assertThrows(SoffidClientException.class,
+                () -> personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054"));
+    }
+
+    @Test
+    void checkDir3_soffidTimeout_propagatesInsteadOfBeingSwallowed() {
+        activePerson.setPersonalCaib(true);
+        when(personRepository.findByEmail("joan.puig@example.com")).thenReturn(activePerson);
+        when(soffidClient.searchByEmail("joan.puig@example.com"))
+                .thenThrow(new SoffidTimeoutException());
+
+        assertThrows(SoffidTimeoutException.class,
+                () -> personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054"));
     }
 }

@@ -37,9 +37,12 @@ public class AppAuthorizedAudEntity {
     private Long personId;
 
     /** Free-text remarks about the authorization at the time of the change. */
-    @Lob
-    @Column(name = "OBSERVATION")
+    @Column(name = "OBSERVATION", length = 4000)
     private String observation;
+
+    /** Identifier of the linked DIR3 validation record at the time of the change. */
+    @Column(name = "DIR3_VALIDATION_ID", nullable = false)
+    private Long dir3ValidationId;
 
     /** Timestamp when the mirrored row was created. */
     @Column(name = "CREATED_AT")

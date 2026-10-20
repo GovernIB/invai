@@ -137,10 +137,33 @@ public class AppWebContextRepositoryAdapter implements AppWebContextRepository {
      * @throws DataAccessException if the underlying persistence operation fails
      */
     @Override
-    public Page<AppWebContext> findAll(Long appSecurityId, AppWebContextCriteria criteria, Pageable pageable) {
+    public Page<AppWebContext> findAllByAppSecurityId(Long appSecurityId, AppWebContextCriteria criteria, Pageable pageable) {
         log.debug("Repository: Dynamic search pattern stream across application web context relations for appSecurityId ID: {}", appSecurityId);
         try {
-            Specification<AppWebContextEntity> spec = AppWebContextSpecification.filterByCriteria(appSecurityId, criteria);
+            Specification<AppWebContextEntity> spec = AppWebContextSpecification.filterByAppSecurityId(appSecurityId, criteria);
+            Page<AppWebContextEntity> entityPage = appWebContextJPARepository.findAll(spec, pageable);
+            return entityPage.map(appWebContextMapper::toModel);
+        } catch (DataAccessException e) {
+            log.error("Repository error: Broken chunk streaming query handling for application web context allocation layouts", e);
+            throw e;
+        }
+    }
+
+    /**
+     * Resolves a paginated, filtered list of application-web context links scoped to a
+     * single parent development anchor.
+     *
+     * @param appDevelopmentId mandatory parent development anchor identifier scoping the result set
+     * @param criteria         additional filter criteria
+     * @param pageable         pagination and sorting instructions
+     * @return the paginated page of matching models
+     * @throws DataAccessException if the underlying persistence operation fails
+     */
+    @Override
+    public Page<AppWebContext> findAllByAppDevelopmentId(Long appDevelopmentId, AppWebContextCriteria criteria, Pageable pageable) {
+        log.debug("Repository: Dynamic search pattern stream across application web context relations for appDevelopmentId ID: {}", appDevelopmentId);
+        try {
+            Specification<AppWebContextEntity> spec = AppWebContextSpecification.filterByAppDevelopmentId(appDevelopmentId, criteria);
             Page<AppWebContextEntity> entityPage = appWebContextJPARepository.findAll(spec, pageable);
             return entityPage.map(appWebContextMapper::toModel);
         } catch (DataAccessException e) {
@@ -163,8 +186,14 @@ public class AppWebContextRepositoryAdapter implements AppWebContextRepository {
 
             aud.setAppWebContextId(entity.getId());
             aud.setAppSecurityId(entity.getAppSecurity().getId());
+            aud.setAppDevelopmentId(entity.getAppDevelopment().getId());
             aud.setWebContextId(entity.getWebContext().getId());
             aud.setFieldId(entity.getField().getId());
+            aud.setUrl(entity.getUrl());
+            aud.setValidated(entity.isValidated());
+            aud.setValidatedAt(entity.getValidatedAt());
+            aud.setValidatedBy(entity.getValidatedBy());
+            aud.setValidatedReason(entity.getValidatedReason());
 
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

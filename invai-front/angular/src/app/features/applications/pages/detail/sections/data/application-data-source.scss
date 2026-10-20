@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.application-data-source {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.application-data-source__field,
+.application-data-source__endpoints {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.application-data-source__field > label,
+.application-data-source__label,
+.application-data-source__endpoints > h4 {
+  margin: 0;
+  color: var(--p-text-muted-color);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.application-data-source__toggle {
+  display: flex;
+  min-height: 2.625rem;
+  align-items: center;
+}
+
+.application-data-source__error,
+.application-data-source__help {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.application-data-source__error {
+  color: var(--p-red-600, #dc2626);
+}
+
+.application-data-source__help {
+  color: var(--p-text-muted-color);
+}
+
+.application-data-source__unavailable {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+
+  > p {
+    margin: 0;
+  }
+}

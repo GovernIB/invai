@@ -1,6 +1,7 @@
 package es.caib.invai.back.interna.maintenance.responsible.person;
 
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonCombinedSearchOutputDTO;
+import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonDir3CheckOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonCriteria;
@@ -56,9 +57,9 @@ class PersonControllerTest {
         PersonCriteria filter = new PersonCriteria();
         Pageable pageable = Pageable.unpaged();
         Page<PersonOutputDTO> page = new PageImpl<>(List.of(new PersonOutputDTO()));
-        when(personService.getAll(filter, pageable)).thenReturn(page);
+        when(personService.searchDatabase(filter, pageable)).thenReturn(page);
 
-        ResponseEntity<Page<PersonOutputDTO>> response = personController.getAll(filter, pageable);
+        ResponseEntity<Page<PersonOutputDTO>> response = personController.searchDatabase(filter, pageable);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(page, response.getBody());
@@ -163,5 +164,16 @@ class PersonControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(results, response.getBody());
+    }
+
+    @Test
+    void checkDir3_returnsOkWithServiceResult() {
+        PersonDir3CheckOutputDTO result = new PersonDir3CheckOutputDTO("sgaip", "A04027054", "A04027054", true);
+        when(personService.checkDir3("joan.puig@example.com", "A04027054")).thenReturn(result);
+
+        ResponseEntity<PersonDir3CheckOutputDTO> response = personController.checkDir3("joan.puig@example.com", "A04027054");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(result, response.getBody());
     }
 }

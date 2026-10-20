@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class ApplicationRepositoryAdapter implements ApplicationRepository {
 
-    /** Spring Data JPA repository providing raw CRUD access to {@link es.caib.invai.back.persistence.model.application.core.ApplicationEntity}. */
+    /** Spring Data JPA repository providing raw CRUD access to {@link ApplicationEntity}. */
     @Autowired
     private ApplicationJPARepository applicationJPARepository;
 
@@ -290,6 +290,7 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
             aud.setName(entity.getName());
             aud.setDescription(entity.getDescription());
             aud.setExpirationDate(entity.getExpirationDate());
+            aud.setDir3Mismatch(entity.isDir3Mismatch());
 
             aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
             aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

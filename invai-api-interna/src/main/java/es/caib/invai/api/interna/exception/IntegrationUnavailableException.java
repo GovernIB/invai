@@ -5,7 +5,7 @@ package es.caib.invai.api.interna.exception;
  * cannot be reached or returns an unexpected error. Mapped to HTTP 502 by
  * {@link IntegrationsExceptionHandler}.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 public class IntegrationUnavailableException extends RuntimeException {
 

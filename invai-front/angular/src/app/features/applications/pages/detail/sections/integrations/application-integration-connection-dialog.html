@@ -1,0 +1,295 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="52rem"
+  [ariaLabels]="actionAriaLabels"
+  [canEdit]="canEdit()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  viewPrimaryAction="edit"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (mode() === 'view') {
+    @if (view(); as view) {
+      <div
+        class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+      >
+        <div class="md:col-span-6">
+          <p-floatlabel class="w-full">
+            <input
+              class="invai-form-readonly-control w-full"
+              type="text"
+              readonly
+              [id]="ids.view('system')"
+              [value]="view.systemKind"
+              pInputText
+            />
+            <label [for]="ids.view('system')">{{ labels.systemKind }}</label>
+          </p-floatlabel>
+        </div>
+        <div class="md:col-span-6">
+          <p-floatlabel class="w-full">
+            <input
+              class="invai-form-readonly-control w-full"
+              type="text"
+              readonly
+              [id]="ids.view('system-name')"
+              [value]="view.system"
+              pInputText
+            />
+            <label [for]="ids.view('system-name')">
+              {{ isExternal() ? labels.externalSystem : labels.application }}
+            </label>
+          </p-floatlabel>
+        </div>
+        <div class="md:col-span-6">
+          <p-floatlabel class="w-full">
+            <input
+              class="invai-form-readonly-control w-full"
+              type="text"
+              readonly
+              [id]="ids.view('technology')"
+              [value]="view.technology"
+              pInputText
+            />
+            <label [for]="ids.view('technology')">{{ labels.technology }}</label>
+          </p-floatlabel>
+        </div>
+        <div class="md:col-span-6">
+          <p-floatlabel class="w-full">
+            <input
+              class="invai-form-readonly-control w-full"
+              type="text"
+              readonly
+              [id]="ids.view('user')"
+              [value]="view.user"
+              pInputText
+            />
+            <label [for]="ids.view('user')">{{ labels.user }}</label>
+          </p-floatlabel>
+        </div>
+        <div class="invai-dialog-static-field md:col-span-12">
+          <span class="invai-dialog-static-field__label" [id]="ids.viewLabel('required-roles')">
+            {{ labels.requiredRoles }}
+          </span>
+          <p class="invai-form-static-value" [attr.aria-labelledby]="ids.viewLabel('required-roles')">
+            {{ view.requiredRoles }}
+          </p>
+        </div>
+        <div class="invai-dialog-static-field md:col-span-8">
+          <span class="invai-dialog-static-field__label" [id]="ids.viewLabel('granted-roles')">
+            {{ labels.grantedRoles }}
+          </span>
+          <p class="invai-form-static-value" [attr.aria-labelledby]="ids.viewLabel('granted-roles')">
+            {{ view.grantedRoles }}
+          </p>
+        </div>
+        <div class="md:col-span-4">
+          <p-floatlabel class="w-full">
+            <input
+              class="invai-form-readonly-control w-full"
+              type="text"
+              readonly
+              [id]="ids.view('roles-match')"
+              [value]="view.rolesMatch"
+              pInputText
+            />
+            <label [for]="ids.view('roles-match')">{{ labels.rolesMismatch }}</label>
+          </p-floatlabel>
+        </div>
+      </div>
+    }
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-dialog-form-grid--floating invai-grid grid-cols-1 gap-5 md:grid-cols-12"
+      novalidate
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+    >
+      <fieldset class="m-0 min-w-0 border-0 p-0 md:col-span-12">
+        <legend class="invai-dialog-static-field__label mb-2 p-0" [id]="ids.systemKindLegend">
+          {{ labels.systemKind }}
+        </legend>
+        <div class="flex flex-wrap gap-x-6 gap-y-2">
+          @for (kind of systemKinds; track kind) {
+            <div class="flex items-center gap-2">
+              <p-radiobutton
+                formControlName="systemKind"
+                name="application-integration-dialog-system-kind"
+                [inputId]="kind === 'external' ? ids.kindExternal : ids.kindApplication"
+                [value]="kind"
+              />
+              <label [for]="kind === 'external' ? ids.kindExternal : ids.kindApplication">
+                {{ kinds[kind] }}
+              </label>
+            </div>
+          }
+        </div>
+      </fieldset>
+
+      <div class="md:col-span-6">
+        @if (isExternal()) {
+          <p-floatlabel class="w-full">
+            <p-select
+              appendTo="body"
+              formControlName="externalSystemId"
+              optionLabel="label"
+              optionValue="id"
+              [ariaFilterLabel]="labels.externalSystem"
+              [ariaLabelledBy]="ids.externalSystemLabel"
+              [emptyMessage]="catalogsLoading() ? messages.catalogLoading : ''"
+              [filter]="true"
+              [fluid]="true"
+              [inputId]="ids.externalSystem"
+              [invalid]="isInvalid(form().controls.externalSystemId)"
+              [loading]="catalogsLoading()"
+              [options]="externalSystemOptions()"
+              [pt]="selectPassThrough(form().controls.externalSystemId, ids.externalSystemError)"
+              [required]="true"
+            />
+            <label [for]="ids.externalSystem" [id]="ids.externalSystemLabel">
+              {{ labels.externalSystem }}
+            </label>
+          </p-floatlabel>
+          @if (isInvalid(form().controls.externalSystemId)) {
+            <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="ids.externalSystemError">
+              {{ messages.required }}
+            </p>
+          }
+        } @else {
+          <span class="sr-only" [id]="ids.applicationInstruction">
+            {{ messages.applicationInstruction }}
+          </span>
+          <p-floatlabel class="w-full">
+            <p-select
+              appendTo="body"
+              dataKey="id"
+              formControlName="applicationId"
+              optionLabel="label"
+              optionValue="id"
+              [ariaFilterLabel]="labels.application"
+              [ariaLabelledBy]="ids.applicationLabel"
+              [emptyFilterMessage]="applicationPanelMessage()"
+              [emptyMessage]="applicationPanelMessage()"
+              [filter]="true"
+              [fluid]="true"
+              [inputId]="ids.application"
+              [invalid]="isInvalid(form().controls.applicationId)"
+              [loading]="applicationSearch().loading"
+              [options]="applicationSearch().options"
+              [pt]="
+                selectPassThrough(form().controls.applicationId, ids.applicationError, [
+                  ids.applicationInstruction,
+                  ids.applicationStatus,
+                ])
+              "
+              [required]="true"
+              [resetFilterOnHide]="true"
+              (onFilter)="onApplicationFilter($event)"
+              (onShow)="onApplicationPanelOpen()"
+            />
+            <label [for]="ids.application" [id]="ids.applicationLabel">
+              {{ labels.application }}
+            </label>
+          </p-floatlabel>
+          <span class="sr-only" role="status" [id]="ids.applicationStatus">
+            {{ applicationStatusMessage() }}
+          </span>
+          @if (isInvalid(form().controls.applicationId)) {
+            <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="ids.applicationError">
+              {{ messages.required }}
+            </p>
+          }
+        }
+      </div>
+
+      <div class="md:col-span-6">
+        <p-floatlabel class="w-full">
+          <p-select
+            appendTo="body"
+            formControlName="technologyId"
+            optionLabel="label"
+            optionValue="id"
+            [ariaFilterLabel]="labels.technology"
+            [ariaLabelledBy]="ids.technologyLabel"
+            [emptyMessage]="catalogsLoading() ? messages.catalogLoading : ''"
+            [filter]="true"
+            [fluid]="true"
+            [inputId]="ids.technology"
+            [invalid]="isInvalid(form().controls.technologyId)"
+            [loading]="catalogsLoading()"
+            [options]="technologyOptions()"
+            [pt]="selectPassThrough(form().controls.technologyId, ids.technologyError)"
+            [required]="true"
+          />
+          <label [for]="ids.technology" [id]="ids.technologyLabel">
+            {{ labels.technology }}
+          </label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.technologyId)) {
+          <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="ids.technologyError">
+            {{ messages.required }}
+          </p>
+        }
+      </div>
+
+      <div class="md:col-span-6">
+        <app-application-soffid-person-field
+          [control]="form().controls.user"
+          [idPrefix]="idPrefix"
+          [invalidSelectionMessage]="messages.userInvalid"
+          [label]="labels.user"
+          [loading]="userSearch().loading"
+          [options]="userSearch().options"
+          [requiredMessage]="messages.userRequired"
+          [searchError]="userSearch().error"
+          [searched]="userSearch().searched"
+          [showUserName]="true"
+          [total]="userSearch().total"
+          (searchRequested)="userSearchRequested.emit($event)"
+        />
+      </div>
+
+      <div class="md:col-span-12">
+        <span class="sr-only" [id]="ids.rolesInstruction">{{ messages.rolesInstruction }}</span>
+        <p-floatlabel class="w-full">
+          <p-multiselect
+            appendTo="body"
+            dataKey="roleId"
+            display="chip"
+            formControlName="requiredRoles"
+            optionLabel="label"
+            styleClass="w-full"
+            [ariaFilterLabel]="labels.requiredRoles"
+            [ariaLabelledBy]="ids.rolesLabel"
+            [emptyFilterMessage]="rolePanelMessage()"
+            [emptyMessage]="rolePanelMessage()"
+            [filter]="true"
+            [inputId]="ids.roles"
+            [invalid]="isInvalid(form().controls.requiredRoles)"
+            [loading]="roleSearch().loading"
+            [options]="roleSearch().options"
+            [pt]="rolesPassThrough()"
+            [resetFilterOnHide]="true"
+            [showToggleAll]="false"
+            (onFilter)="onRoleFilter($event)"
+            (onPanelShow)="onRolePanelOpen()"
+          />
+          <label [for]="ids.roles" [id]="ids.rolesLabel">{{ labels.requiredRoles }}</label>
+        </p-floatlabel>
+        <span class="sr-only" role="status" [id]="ids.rolesStatus">{{ roleStatusMessage() }}</span>
+        @if (isInvalid(form().controls.requiredRoles)) {
+          <p class="mb-0 mt-1 text-sm text-red-600" role="alert" [id]="ids.rolesError">
+            {{ messages.rolesRequired }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+</app-crud-entity-dialog>

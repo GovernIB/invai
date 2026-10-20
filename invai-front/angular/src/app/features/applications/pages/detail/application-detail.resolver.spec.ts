@@ -46,6 +46,7 @@ const APPLICATION: ApplicationOutput = {
   missingDatabases: false,
   missingAccessibilityFields: false,
   missingSecurityData: false,
+  missingIntegrationData: false,
 };
 
 describe('applicationDetailResolver', () => {
@@ -58,11 +59,11 @@ describe('applicationDetailResolver', () => {
     getById.mockReset().mockReturnValue(of(APPLICATION));
     getClassifications.mockReset();
     getResponsibles.mockReset().mockReturnValue(of({ content: [], totalElements: 0 }));
-    getContexts.mockReset().mockReturnValue(of({ content: [], totalElements: 0 }));
+    getContexts.mockReset().mockReturnValue(of(false));
     TestBed.configureTestingModule({
       providers: [
         { provide: ApplicationResponsiblesService, useValue: { getPage: getResponsibles } },
-        { provide: ApplicationWebContextsService, useValue: { getPage: getContexts } },
+        { provide: ApplicationWebContextsService, useValue: { hasUnverified: getContexts } },
         { provide: ApplicationsService, useValue: { getById } },
         {
           provide: ApplicationEnsClassificationsService,
@@ -110,19 +111,13 @@ describe('applicationDetailResolver', () => {
     });
   });
 
-  it('checks contexts on detail entry using the shared first page and its total, independently of completeness flags', async () => {
+  it('checks pending contexts independently of completeness flags', async () => {
     getById.mockReturnValue(of({ ...APPLICATION, appSecurityId: 8 }));
-    getContexts.mockReturnValue(of({ content: [], totalElements: 25 }));
+    getContexts.mockReturnValue(of(true));
     const result = await resolveDetail('7');
     expect(result.hasUnverifiedWebContexts).toBe(true);
     expect(result.application?.missingSecurityData).toBe(false);
-    expect(getContexts).toHaveBeenCalledExactlyOnceWith({
-      appSecurityId: 8,
-      page: 0,
-      size: 10,
-      sort: 'id,asc',
-      statusId: 1,
-    });
+    expect(getContexts).toHaveBeenCalledExactlyOnceWith(8);
   });
 
   it('keeps the application available when the context list fails', async () => {

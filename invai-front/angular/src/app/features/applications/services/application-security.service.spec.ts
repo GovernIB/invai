@@ -5,8 +5,6 @@ import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 
 import {
   ApplicationSecurityOutput,
-  ApplicationWebContextInput,
-  ApplicationWebContextOutput,
   SecurityCatalogItem,
 } from '../applications.model';
 import {
@@ -95,25 +93,46 @@ describe('application security services', () => {
     request.flush(page([]));
   });
 
-  it('invalidates a web-context page only after a successful mutation', () => {
+  it('validates with a reason and invalidates cached context pages only on success', () => {
     const params = { appSecurityId: 8, page: 0, size: 10 };
     webContextsService.getPage(params).subscribe();
     httpTesting.expectOne(`${BASE_URL}/web-context/8?page=0&size=10`).flush(page([]));
 
-    const payload: ApplicationWebContextInput = {
-      url: null,
-      appSecurityId: 8,
-      webContextId: 2,
-      fieldId: 3,
-      observation: null,
-    };
-    webContextsService.create(payload).subscribe();
-    const createRequest = httpTesting.expectOne(`${BASE_URL}/web-context`);
-    expect(createRequest.request.body).toEqual(payload);
-    createRequest.flush({ id: 4 } as ApplicationWebContextOutput);
+    webContextsService.validate(4, 'Motiu').subscribe({ error: () => undefined });
+    const failed = httpTesting.expectOne(`${BASE_URL}/web-context/validate/4`);
+    expect(failed.request.method).toBe('PUT');
+    expect(failed.request.body).toEqual({ reason: 'Motiu' });
+    failed.flush(null, { status: 400, statusText: 'Bad request' });
+    webContextsService.getPage(params).subscribe();
+    httpTesting.expectNone(`${BASE_URL}/web-context/8?page=0&size=10`);
 
+    webContextsService.validate(4, 'Motiu').subscribe();
+    httpTesting.expectOne(`${BASE_URL}/web-context/validate/4`).flush(null, { status: 204, statusText: 'No Content' });
     webContextsService.getPage(params).subscribe();
     httpTesting.expectOne(`${BASE_URL}/web-context/8?page=0&size=10`).flush(page([]));
+  });
+
+  it('scans active context pages until it finds a pending verification', () => {
+    const result = vi.fn();
+    webContextsService.hasUnverified(8).subscribe(result);
+    const first = httpTesting.expectOne(req => req.url === `${BASE_URL}/web-context/8` && req.params.get('page') === '0');
+    expect(first.request.params.get('statusId')).toBe(String(SoftDeleteStatus.ACTIVE));
+    first.flush({ ...page([{ validated: true }]), totalPages: 3, totalElements: 21 });
+    httpTesting.expectOne(req => req.url === `${BASE_URL}/web-context/8` && req.params.get('page') === '1')
+      .flush({ ...page([{ validated: false }]), number: 1, totalPages: 3, totalElements: 21 });
+    expect(result).toHaveBeenCalledExactlyOnceWith(true);
+    httpTesting.expectNone(req => req.url === `${BASE_URL}/web-context/8` && req.params.get('page') === '2');
+  });
+
+  it('clears the pending indicator only after checking every active page', () => {
+    const result = vi.fn();
+    webContextsService.hasUnverified(8).subscribe(result);
+    httpTesting.expectOne(req => req.url === `${BASE_URL}/web-context/8` && req.params.get('page') === '0')
+      .flush({ ...page([{ validated: true }]), number: 0, totalPages: 2, totalElements: 11 });
+    expect(result).not.toHaveBeenCalled();
+    httpTesting.expectOne(req => req.url === `${BASE_URL}/web-context/8` && req.params.get('page') === '1')
+      .flush({ ...page([{ validated: true }]), number: 1, totalPages: 2, totalElements: 11 });
+    expect(result).toHaveBeenCalledExactlyOnceWith(false);
   });
 
   it('shares the unpaged security-level catalog using its real response contract', () => {

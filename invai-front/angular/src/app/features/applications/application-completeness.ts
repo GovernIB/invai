@@ -10,6 +10,7 @@ export type ApplicationCompleteness = Pick<
   | 'missingDatabases'
   | 'missingAccessibilityFields'
   | 'missingSecurityData'
+  | 'missingIntegrationData'
 >;
 
 /** Copies server flags without inferring completeness from missing values or form data. */
@@ -25,5 +26,6 @@ export function readApplicationCompleteness(
     missingDatabases: response.missingDatabases ?? null,
     missingAccessibilityFields: response.missingAccessibilityFields ?? null,
     missingSecurityData: response.missingSecurityData ?? null,
+    missingIntegrationData: response.missingIntegrationData ?? null,
   };
 }

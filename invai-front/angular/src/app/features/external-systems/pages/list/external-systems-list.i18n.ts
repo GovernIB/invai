@@ -1,0 +1,28 @@
+export const EXTERNAL_SYSTEMS_LIST_TITLE = $localize`:@@externalSystemsTitle:Sistemes externs`;
+export const EXTERNAL_SYSTEMS_FILTER_NAME = $localize`Nom`;
+export const EXTERNAL_SYSTEMS_FILTER_COMPANY = $localize`Empresa`;
+export const EXTERNAL_SYSTEMS_FILTER_STATUS = $localize`Estat`;
+export const EXTERNAL_SYSTEMS_QUICK_SEARCH_PLACEHOLDER = $localize`Cerca per nom`;
+export const EXTERNAL_SYSTEMS_QUICK_SEARCH_ARIA_LABEL = $localize`:@@externalSystemsQuickSearchAria:Cerca ràpida de sistemes externs`;
+export const EXTERNAL_SYSTEMS_ADD_ARIA_LABEL = $localize`:@@externalSystemsAddAria:Afegeix un sistema extern`;
+export const EXTERNAL_SYSTEMS_LOAD_ERROR_SUMMARY = $localize`Error`;
+export const EXTERNAL_SYSTEMS_LOAD_ERROR_DETAIL = $localize`:@@externalSystemsLoadError:No s'han pogut carregar els sistemes externs.`;
+export const EXTERNAL_SYSTEM_LOAD_ERROR_DETAIL = $localize`:@@externalSystemLoadError:No s'ha pogut carregar el sistema extern.`;
+export const EXTERNAL_SYSTEM_CREATE_SUCCESS_TITLE = $localize`:@@externalSystemCreatedTitle:Sistema extern afegit`;
+export const EXTERNAL_SYSTEM_CREATE_SUCCESS_DETAIL = $localize`:@@externalSystemCreatedDetail:El sistema extern s'ha afegit correctament.`;
+export const EXTERNAL_SYSTEM_UPDATE_SUCCESS_TITLE = $localize`:@@externalSystemUpdatedTitle:Sistema extern actualitzat`;
+export const EXTERNAL_SYSTEM_UPDATE_SUCCESS_DETAIL = $localize`:@@externalSystemUpdatedDetail:El sistema extern s'ha actualitzat correctament.`;
+export const EXTERNAL_SYSTEM_DELETE_SUCCESS_TITLE = $localize`:@@externalSystemDeletedTitle:Sistema extern donat de baixa`;
+export const EXTERNAL_SYSTEM_DELETE_SUCCESS_DETAIL = $localize`:@@externalSystemDeletedDetail:El sistema extern s'ha donat de baixa correctament.`;
+export const EXTERNAL_SYSTEM_RESTORE_SUCCESS_TITLE = $localize`:@@externalSystemRestoredTitle:Sistema extern restaurat`;
+export const EXTERNAL_SYSTEM_RESTORE_SUCCESS_DETAIL = $localize`:@@externalSystemRestoredDetail:El sistema extern s'ha restaurat correctament.`;
+export const EXTERNAL_SYSTEM_SAVE_ERROR_DETAIL = $localize`:@@externalSystemSaveError:No s'ha pogut desar el sistema extern.`;
+export const EXTERNAL_SYSTEM_DELETE_ERROR_DETAIL = $localize`:@@externalSystemDeleteError:No s'ha pogut donar de baixa el sistema extern.`;
+export const EXTERNAL_SYSTEM_RESTORE_ERROR_DETAIL = $localize`:@@externalSystemRestoreError:No s'ha pogut restaurar el sistema extern.`;
+export const EXTERNAL_SYSTEM_DELETE_DIALOG_TITLE = $localize`:@@externalSystemDeleteDialogTitle:Donar de baixa el sistema extern?`;
+export const EXTERNAL_SYSTEM_DELETE_DIALOG_MESSAGE = (name: string) =>
+  $localize`:@@externalSystemDeleteDialogMessage:Estàs a punt de donar de baixa «${name}:externalSystemName:».`;
+export const EXTERNAL_SYSTEM_DELETE_DIALOG_CANCEL_LABEL = $localize`Cancel·lar`;
+export const EXTERNAL_SYSTEM_DELETE_DIALOG_CONFIRM_LABEL = $localize`Donar de baixa`;
+export const EXTERNAL_SYSTEM_DELETE_DIALOG_CANCEL_ARIA_LABEL = $localize`:@@externalSystemDeleteCancelAria:Cancel·la la baixa del sistema extern`;
+export const EXTERNAL_SYSTEM_DELETE_DIALOG_CONFIRM_ARIA_LABEL = $localize`:@@externalSystemDeleteConfirmAria:Confirma la baixa del sistema extern`;

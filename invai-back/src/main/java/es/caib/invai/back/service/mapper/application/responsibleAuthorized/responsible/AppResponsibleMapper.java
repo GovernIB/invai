@@ -4,6 +4,7 @@ import es.caib.invai.back.interna.application.responsibleAuthorized.responsible.
 import es.caib.invai.back.interna.application.responsibleAuthorized.responsible.DTO.AppResponsibleOutputDTO;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.core.AppResponsibleAuthorizedMapper;
+import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapper;
 import es.caib.invai.back.service.mapper.maintenance.responsible.person.PersonMapper;
 import es.caib.invai.back.service.mapper.catalog.responsibleType.ResponsibleTypeMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
@@ -14,12 +15,12 @@ import org.mapstruct.MappingTarget;
 /**
  * MapStruct mapper converting between {@code AppResponsible} persistence entities, their business
  * domain model, and the inbound/outbound AppResponsible DTOs. Delegates the nested anchor, person,
- * and responsible type sub-graphs to {@link AppResponsibleAuthorizedMapper}, {@link PersonMapper},
- * and {@link ResponsibleTypeMapper} respectively.
+ * responsible type, and DIR3 validation sub-graphs to {@link AppResponsibleAuthorizedMapper},
+ * {@link PersonMapper}, {@link ResponsibleTypeMapper}, and {@link Dir3ValidationMapper} respectively.
  *
  * @since 1.0.3
  */
-@Mapper(componentModel = "spring", uses = {AppResponsibleAuthorizedMapper.class, PersonMapper.class, ResponsibleTypeMapper.class})
+@Mapper(componentModel = "spring", uses = {AppResponsibleAuthorizedMapper.class, PersonMapper.class, ResponsibleTypeMapper.class, Dir3ValidationMapper.class})
 public interface AppResponsibleMapper {
 
     /**
@@ -58,6 +59,7 @@ public interface AppResponsibleMapper {
     @Mapping(target = "appResponsibleAuthorized.id", source = "appResponsibleAuthorizedId")
     @Mapping(target = "person.id", source = "personId")
     @Mapping(target = "responsibleType.id", source = "responsibleTypeId")
+    @Mapping(target = "dir3Validation", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -68,17 +70,18 @@ public interface AppResponsibleMapper {
 
     /**
      * Applies the mutable fields of an input DTO onto an existing domain model in place.
-     * Audit fields and {@code responsibleType} are intentionally left untouched: the responsible
-     * type held by an assignment cannot be changed via update, only by deleting and creating a
-     * new assignment (see {@link AppResponsibleMapper}).
+     * Audit fields, {@code responsibleType}, and {@code person} are intentionally left untouched:
+     * neither the responsible type nor the assigned person held by an assignment can be changed via
+     * update, only by deleting and creating a new assignment (see {@link AppResponsibleMapper}).
      *
      * @param inputDTO the input payload with the new values
      * @param model the existing domain model to update
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appResponsibleAuthorized.id", source = "appResponsibleAuthorizedId")
-    @Mapping(target = "person.id", source = "personId")
+    @Mapping(target = "person", ignore = true)
     @Mapping(target = "responsibleType", ignore = true)
+    @Mapping(target = "dir3Validation", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

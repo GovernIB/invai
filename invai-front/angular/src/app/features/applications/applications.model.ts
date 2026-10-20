@@ -2,6 +2,7 @@ import type { Dir3Validation } from './application-dir3.model';
 import { AdministrativeUnit } from '@features/administrative-units/administrative-units.model';
 import { Category } from '@features/categories/categories.model';
 import { Commission } from '@features/commissions/commissions.model';
+import { ExternalSystem } from '@features/external-systems/external-systems.model';
 import { Field } from '@features/fields/fields.model';
 import { Layer } from '@features/layers/layers.model';
 import { AccessibilityResource } from '@features/maintenances/accessibility/accessibility.model';
@@ -49,6 +50,8 @@ export interface Application {
   appDevelopmentId?: number | null;
   appSecurityId?: number | null;
   appAccessibilityId?: number | null;
+  appDataId?: number | null;
+  appIntegrationId?: number | null;
   appResponsibleAuthorizedId: number | null;
   incomplete: boolean | null;
   missingResponsibleTypes: boolean | null;
@@ -58,6 +61,7 @@ export interface Application {
   missingDatabases: boolean | null;
   missingAccessibilityFields: boolean | null;
   missingSecurityData: boolean | null;
+  missingIntegrationData: boolean | null;
 }
 
 export enum ApplicationStatus {
@@ -94,6 +98,9 @@ export interface ApplicationOutput {
   appDevelopmentId: number | null;
   appSecurityId?: number | null;
   appAccessibilityId?: number | null;
+  // Only returned by the detail, create, update and reactivate endpoints.
+  appDataId?: number | null;
+  appIntegrationId?: number | null;
   appResponsibleAuthorizedId: number | null;
   incomplete: boolean | null;
   missingResponsibleTypes: boolean | null;
@@ -103,6 +110,13 @@ export interface ApplicationOutput {
   missingDatabases: boolean | null;
   missingAccessibilityFields: boolean | null;
   missingSecurityData: boolean | null;
+  missingIntegrationData: boolean | null;
+}
+
+export interface ApplicationDir3MismatchOutput {
+  id: number;
+  name: string;
+  dir3Mismatch: boolean;
 }
 
 export interface ApplicationInput {
@@ -415,6 +429,8 @@ export type ApplicationPersonReferenceInput =
       personFirstName: string;
       personLastName: string;
       personEmail: string;
+      // Soffid user code stored on the new person; null when Soffid did not provide one.
+      personUserName: string | null;
       companyId: null;
       personalCaib: true;
     };
@@ -501,18 +517,27 @@ export interface ApplicationWebContextOutput {
   url: string | null;
   id: number;
   appSecurity: ApplicationSecurityOutput;
+  appDevelopment: ApplicationDevelopmentOutput | null;
   webContext: SecurityCatalogItem;
   field: Field;
   observation: string | null;
+  validated: boolean;
+  validatedAt: string | null;
+  validatedBy: string | null;
+  validatedReason: string | null;
   deletedAt: string | null;
 }
 
 export interface ApplicationWebContextInput {
   url: string | null;
-  appSecurityId: number;
+  appDevelopmentId: number;
   webContextId: number;
   fieldId: number;
   observation: string | null;
+}
+
+export interface ApplicationDevelopmentWebContextPageParams extends ApplicationDevelopmentResourcePageParams {
+  statusId?: SoftDeleteStatus;
 }
 
 export interface ApplicationEnsClassificationOutput {
@@ -618,3 +643,102 @@ export interface ApplicationAccessibilityOutput {
   deletedAt: string | null;
 }
 export type EnsClassificationLoadState = 'ready' | 'unknown' | 'inconsistent';
+
+export interface ApplicationDataInput {
+  applicationId: number;
+  observation: string | null;
+  openDataUrl: string | null;
+  useOpenDataUrl: boolean;
+  reuseUrl: string | null;
+  useReuseUrl: boolean;
+}
+
+export interface ApplicationDataParameter {
+  name: string | null;
+  in: string | null;
+  required: boolean;
+  description: string | null;
+  type: string | null;
+  format: string | null;
+  defaultValue: unknown;
+  enumValues: string[] | null;
+}
+
+export interface ApplicationDataOperation {
+  operationId: string | null;
+  summary: string | null;
+  description: string | null;
+  parameters: ApplicationDataParameter[] | null;
+}
+
+export interface ApplicationDataEndpoint {
+  path: string;
+  method: string;
+  operation: ApplicationDataOperation | null;
+}
+
+// openData/reuse are resolved live by GET and returned as null by POST/PUT. A GET also returns
+// null for the one source whose live fetch failed while the other one succeeded.
+export interface ApplicationDataOutput {
+  id: number;
+  application: Pick<ApplicationOutput, 'id'> | null;
+  observation: string | null;
+  openDataUrl: string | null;
+  useOpenDataUrl: boolean;
+  openData: ApplicationDataEndpoint[] | null;
+  reuseUrl: string | null;
+  useReuseUrl: boolean;
+  reuse: ApplicationDataEndpoint[] | null;
+  deletedAt: string | null;
+}
+
+// Anchor of the "Integracions" tab: one per application, holding its observations.
+export interface ApplicationIntegrationOutput {
+  id: number;
+  applicationId: number | null;
+  observation: string | null;
+  deletedAt: string | null;
+}
+
+export interface ApplicationIntegrationInput {
+  applicationId: number;
+  observation: string | null;
+}
+
+// Role as returned by Soffid; `id` is Soffid's own role identifier.
+export interface SoffidRole {
+  id: number;
+  name: string | null;
+  description: string | null;
+  system: string | null;
+}
+
+// requiredRoles, grantedRoles and rolesMismatch are resolved live by GET and returned as null by
+// POST/PUT; grantedRoles and rolesMismatch are also null when Soffid could not be queried.
+export interface ApplicationIntegrationConnectionOutput {
+  id: number;
+  appIntegrationId: number;
+  application: Pick<ApplicationOutput, 'id' | 'code' | 'name'> | null;
+  externalSystem: ExternalSystem | null;
+  technology: Technology | null;
+  username: string | null;
+  requiredRoles: SoffidRole[] | null;
+  grantedRoles: SoffidRole[] | null;
+  rolesMismatch: boolean | null;
+  deletedAt: string | null;
+}
+
+// Exactly one of applicationId and externalSystemId identifies the other system.
+export interface ApplicationIntegrationConnectionInput {
+  appIntegrationId: number;
+  applicationId: number | null;
+  externalSystemId: number | null;
+  technologyId: number;
+  username: string;
+  requiredRoleIds: number[];
+}
+
+export interface ApplicationIntegrationConnectionPageParams extends PageParams {
+  appIntegrationId: number;
+  statusId?: SoftDeleteStatus;
+}

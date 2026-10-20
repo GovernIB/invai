@@ -1,8 +1,7 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { catchError, defaultIfEmpty, forkJoin, map, of, switchMap } from 'rxjs';
-import { PAGINATOR_ROWS } from '@shared/constants/table.constants';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+import { catchError, defaultIfEmpty, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { ApplicationOutput } from '../../applications.model';
 import { ApplicationsService } from '../../services/applications.service';
@@ -36,21 +35,12 @@ export const applicationDetailResolver: ResolveFn<ApplicationDetailResolvedData>
     .getById(id)
     .pipe(
       switchMap((application) => {
-        // Backend has no verification state yet: every active context is pending.
-        // Reuse the section's first-page cache and use the server total across all pages.
         const pending =
           application.appSecurityId == null
             ? of(false)
             : contexts
-                .getPage({
-                  appSecurityId: application.appSecurityId,
-                  page: 0,
-                  size: PAGINATOR_ROWS,
-                  sort: 'id,asc',
-                  statusId: SoftDeleteStatus.ACTIVE,
-                })
+                .hasUnverified(application.appSecurityId)
                 .pipe(
-                  map((page) => page.totalElements > 0),
                   catchError(() => of(null)),
                   defaultIfEmpty(null),
                 );

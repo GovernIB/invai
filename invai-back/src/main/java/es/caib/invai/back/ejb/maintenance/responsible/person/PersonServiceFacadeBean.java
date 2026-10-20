@@ -1,7 +1,10 @@
 package es.caib.invai.back.ejb.maintenance.responsible.person;
 
 import es.caib.invai.back.exception.BusinessRuleException;
+import es.caib.invai.back.exception.SoffidClientException;
+import es.caib.invai.back.exception.SoffidTimeoutException;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonCombinedSearchOutputDTO;
+import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonDir3CheckOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonCriteria;
@@ -19,10 +22,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -36,17 +42,43 @@ import java.util.concurrent.CompletableFuture;
 @Transactional
 public class PersonServiceFacadeBean implements PersonService {
 
-    /** Mapper used to convert between Person domain models and their DTO representations. */
+    /**
+     * Mapper used to convert between Person domain models and their DTO representations.
+     */
     @Autowired
     private PersonMapper personMapper;
 
-    /** Repository providing persistence operations for Person records. */
+    /**
+     * Repository providing persistence operations for Person records.
+     */
     @Autowired
     private PersonRepository personRepository;
 
-    /** Port used to list/search CAIB personnel against the Soffid SCIM API. */
+    /**
+     * Port used to list/search CAIB personnel against the Soffid SCIM API.
+     */
     @Autowired
     private SoffidClient soffidClient;
+
+    /**
+     * Retrieves a person by its unique database identifier as the domain object.
+     *
+     * @param id the unique person record identifier
+     * @return the domain {@link Person}
+     * @throws BusinessRuleException if no person matches the given identifier
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Person getPersonById(Long id) {
+        log.debug("Facade: Fetching person by ID: {}", id);
+        Person person = personRepository.findById(id);
+
+        if (person == null) {
+            throw new BusinessRuleException(Constants.ERR_PERSON_NOT_FOUND);
+        }
+
+        return person;
+    }
 
     /**
      * Retrieves a person by its unique database identifier.
@@ -58,14 +90,7 @@ public class PersonServiceFacadeBean implements PersonService {
     @Override
     @Transactional(readOnly = true)
     public PersonOutputDTO getById(Long id) {
-        log.debug("Facade: Fetching person by ID: {}", id);
-        Person person = personRepository.findById(id);
-
-        if (person == null) {
-            throw new BusinessRuleException(Constants.ERR_PERSON_NOT_FOUND);
-        }
-
-        return personMapper.toResponse(person);
+        return personMapper.toResponse(getPersonById(id));
     }
 
     /**
@@ -77,7 +102,7 @@ public class PersonServiceFacadeBean implements PersonService {
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<PersonOutputDTO> getAll(PersonCriteria filter, Pageable pageable) {
+    public Page<PersonOutputDTO> searchDatabase(PersonCriteria filter, Pageable pageable) {
         log.debug("Facade: Fetching persons via pagination boundaries");
         Page<Person> domainPage = personRepository.findAll(filter, pageable);
         return domainPage.map(personMapper::toResponse);
@@ -90,7 +115,7 @@ public class PersonServiceFacadeBean implements PersonService {
      * @param inputDTO the data used to create the new person record
      * @return the persisted person mapped into a {@link PersonOutputDTO}
      * @throws BusinessRuleException if the person is not CAIB personnel and no company is provided,
-     * or if the email is already registered to another person
+     *                               or if the email is already registered to another person
      */
     @Override
     public PersonOutputDTO create(PersonInputDTO inputDTO) {
@@ -118,7 +143,7 @@ public class PersonServiceFacadeBean implements PersonService {
      * @param inputDTO the data used to update the person record
      * @return the updated person mapped into a {@link PersonOutputDTO}
      * @throws BusinessRuleException if the person does not exist, is not CAIB personnel and no company is
-     * provided, or the email is already owned by another person
+     *                               provided, or the email is already owned by another person
      */
     @Override
     public PersonOutputDTO update(Long id, PersonInputDTO inputDTO) {
@@ -202,21 +227,22 @@ public class PersonServiceFacadeBean implements PersonService {
      * {@code null} (no local row exists yet) and {@code personalCaib} set to {@code true} (Soffid
      * only surfaces CAIB staff) - the same "null id means not yet cached locally" convention
      * already used elsewhere in this codebase for external-source search results. A blank/absent
-     * {@code fullName} lists every active Soffid user, still bounded by {@code pageable} - this
+     * {@code search} lists every active Soffid user, still bounded by {@code pageable} - this
      * pagination is what keeps that unfiltered case from returning Soffid's entire ~85k-user
      * directory in one response.
      *
-     * @param fullName the text to search for, matched (word by word) against the full name, or
-     * {@code null}/blank to list every active Soffid user
+     * @param search   the text to search for, matched (word by word) against the full name, or
+     *                 failing that, against the Soffid username (código de usuario), or {@code null}/blank to list
+     *                 every active Soffid user
      * @param pageable the pagination parameters
      * @return the requested page of matching Soffid candidates, mapped into {@link PersonOutputDTO}
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<PersonOutputDTO> searchSoffid(String fullName, Pageable pageable) {
-        log.debug("Facade: Listing/searching Soffid personnel (fullName='{}')", fullName);
+    public Page<PersonOutputDTO> searchSoffid(String search, Pageable pageable) {
+        log.debug("Facade: Listing/searching Soffid personnel (search='{}')", search);
 
-        return soffidClient.search(fullName, pageable).map(this::toSoffidSearchResult);
+        return soffidClient.searchUsers(search, pageable).map(this::toSoffidSearchResult);
     }
 
     @Override
@@ -225,8 +251,15 @@ public class PersonServiceFacadeBean implements PersonService {
         log.debug("Facade: Combined local/Soffid person search (search='{}')", search);
 
         if (StringUtils.isBlank(search)) {
-            CompletableFuture<Page<PersonOutputDTO>> soffidFuture = CompletableFuture.supplyAsync(
-                    () -> soffidClient.search(null, pageable).map(this::toSoffidSearchResult));
+            SecurityContext securityContext = SecurityContextHolder.getContext();
+            CompletableFuture<Page<PersonOutputDTO>> soffidFuture = CompletableFuture.supplyAsync(() -> {
+                SecurityContextHolder.setContext(securityContext);
+                try {
+                    return soffidClient.searchUsers(null, pageable).map(this::toSoffidSearchResult);
+                } finally {
+                    SecurityContextHolder.clearContext();
+                }
+            });
             Page<PersonOutputDTO> database = personRepository.findAll(new PersonCriteria(), pageable).map(personMapper::toResponse);
             return new PersonCombinedSearchOutputDTO(database, Utils.join(soffidFuture));
         }
@@ -238,7 +271,7 @@ public class PersonServiceFacadeBean implements PersonService {
             return new PersonCombinedSearchOutputDTO(localMatches.map(personMapper::toResponse), Page.empty(pageable));
         }
 
-        Page<PersonOutputDTO> soffid = soffidClient.search(search, pageable).map(this::toSoffidSearchResult);
+        Page<PersonOutputDTO> soffid = soffidClient.searchUsers(search, pageable).map(this::toSoffidSearchResult);
         return new PersonCombinedSearchOutputDTO(Page.empty(pageable), soffid);
     }
 
@@ -257,11 +290,12 @@ public class PersonServiceFacadeBean implements PersonService {
         dto.setLastName(soffidUser.getLastName());
         dto.setEmail(soffidUser.getEmailAddress());
         dto.setPersonalCaib(true);
+        dto.setUserName(soffidUser.getUserName());
         return dto;
     }
 
     @Override
-    public Person resolveOrCreatePerson(String firstName, String lastName, String email, boolean personalCaib, Long companyId) {
+    public Person getOrCreatePerson(String firstName, String lastName, String email, boolean personalCaib, Long companyId, String userName) {
         Person existing = personRepository.findByEmail(email);
         if (existing != null) {
             return existing;
@@ -274,6 +308,7 @@ public class PersonServiceFacadeBean implements PersonService {
         newPerson.setLastName(lastName);
         newPerson.setEmail(email);
         newPerson.setPersonalCaib(personalCaib);
+        newPerson.setUserName(userName);
         if (!personalCaib) {
             Company company = new Company();
             company.setId(companyId);
@@ -283,7 +318,7 @@ public class PersonServiceFacadeBean implements PersonService {
     }
 
     @Override
-    public void syncPersonalCaib(Long personId, boolean personalCaib) {
+    public void updatePersonalCaibToPerson(Long personId, boolean personalCaib) {
         Person person = personRepository.findById(personId);
         if (person == null || person.isPersonalCaib() == personalCaib) {
             return;
@@ -293,5 +328,42 @@ public class PersonServiceFacadeBean implements PersonService {
         }
         person.setPersonalCaib(personalCaib);
         personRepository.update(person, personId);
+    }
+
+    @Override
+    @Transactional(readOnly = true, noRollbackFor = {SoffidClientException.class, SoffidTimeoutException.class})
+    public PersonDir3CheckOutputDTO checkDir3(String emailAddress, String admUnitCode) {
+        Person person = personRepository.findByEmail(emailAddress);
+
+        if ((!Objects.isNull(person) && !person.isPersonalCaib()) || StringUtils.isBlank(admUnitCode) || StringUtils.isBlank(emailAddress)) {
+            return new PersonDir3CheckOutputDTO(null,null, admUnitCode, false);
+        }
+
+        SoffidUser soffidUser = soffidClient.searchByEmail(emailAddress);
+        if(Objects.isNull(soffidUser)){
+            return new PersonDir3CheckOutputDTO(null,null, admUnitCode, false);
+        }
+
+        String personGroup = soffidUser.getPrimaryGroup();
+        String personGroupDir3 = getUserDir3(personGroup);
+        boolean matches = personGroupDir3 != null && personGroupDir3.equalsIgnoreCase(admUnitCode.trim());
+
+        return new PersonDir3CheckOutputDTO(personGroup, personGroupDir3, admUnitCode, matches);
+    }
+
+    /**
+     * Resolves a Soffid user's DIR3CAIB code from their {@code primaryGroup}. The real Soffid
+     * {@code User} resource carries no secondary-group field to fall back to (any such fallback
+     * would need the separate {@code GroupUser} resource instead), so this is the only signal
+     * available.
+     *
+     * @param primaryGroup the Soffid user's primary group short name, possibly blank
+     * @return the resolved DIR3CAIB code, or {@code null} if {@code primaryGroup} is blank, or that
+     * group carries no DIR3 attribute
+     */
+    private String getUserDir3(String primaryGroup) {
+        return StringUtils.isNotBlank(primaryGroup)
+                ? soffidClient.resolveGroupDir3(primaryGroup)
+                : null;
     }
 }

@@ -30,6 +30,7 @@ import {
   APPLICATION_DETAIL_ACCESSIBILITY_INCOMPLETE,
   APPLICATION_DETAIL_DATABASES_INCOMPLETE,
   APPLICATION_DETAIL_DEVELOPMENT_INCOMPLETE,
+  APPLICATION_DETAIL_INTEGRATIONS_INCOMPLETE,
   APPLICATION_DETAIL_RESPONSIBLE_AND_AUTHORIZED_INCOMPLETE,
   APPLICATION_DETAIL_RESPONSIBLE_TYPES_INCOMPLETE,
   APPLICATION_DETAIL_RESPONSIBLE_DIR3_PENDING,
@@ -139,6 +140,20 @@ export class ApplicationDetail implements OnDestroy {
       ].filter(Boolean).join(' '),
       warning: false,
     },
+    {
+      label: APPLICATION_DETAIL_TABS.data,
+      route: 'data' as const,
+      incompleteMessage: '',
+      warning: false,
+    },
+    {
+      label: APPLICATION_DETAIL_TABS.integrations,
+      route: 'integrations' as const,
+      incompleteMessage: this.detailState.application()?.missingIntegrationData
+        ? APPLICATION_DETAIL_INTEGRATIONS_INCOMPLETE
+        : '',
+      warning: false,
+    },
   ]);
   private readonly sectionLabels: Record<ApplicationDetailSection, string> = {
     general: APPLICATION_DETAIL_TABS.general,
@@ -147,6 +162,8 @@ export class ApplicationDetail implements OnDestroy {
     development: APPLICATION_DETAIL_TABS.development,
     accessibility: APPLICATION_DETAIL_TABS.accessibility,
     security: APPLICATION_DETAIL_TABS.security,
+    data: APPLICATION_DETAIL_TABS.data,
+    integrations: APPLICATION_DETAIL_TABS.integrations,
   };
   protected readonly applicationId = computed(() => this.paramMap().get('id'));
   protected readonly applicationName = computed(() => {

@@ -11,7 +11,7 @@ import lombok.Setter;
  * are declared; {@code UnidadRest} carries many more (address, historicosUO, contactos, ...) that
  * are silently ignored via {@link JsonIgnoreProperties}.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Getter
 @Setter

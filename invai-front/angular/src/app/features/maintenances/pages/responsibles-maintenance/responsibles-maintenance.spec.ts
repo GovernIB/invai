@@ -144,7 +144,7 @@ describe('ResponsiblesMaintenance', () => {
           description: 'Gestiona les empreses responsables de les aplicacions per empresa.',
         },
         {
-          title: 'Persones',
+          title: 'Personal extern',
           description: 'Gestiona les persones responsables de les aplicacions per empresa.',
         },
       ]),

@@ -3,8 +3,16 @@ import { AdministrativeUnitsService } from '@features/administrative-units/servi
 import { CommissionType } from '@features/commissions/commissions.model';
 import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
-import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ApplicationAccessibilityInput,
+  ApplicationAccessibilityOutput,
+  ApplicationDataInput,
+  ApplicationDataOutput,
+} from '../../applications.model';
 import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
+import { ApplicationDataService } from '../../services/application-data.service';
+import { ApplicationIntegrationService } from '../../services/application-integration.service';
 
 import {
   Application,
@@ -24,6 +32,7 @@ import { ApplicationOptionsService } from '../../services/application-options.se
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityService,
+  ApplicationWebContextsService,
 } from '../../services/application-security.service';
 import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
 import { ApplicationsService } from '../../services/applications.service';
@@ -68,6 +77,7 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   missingDatabases: false,
   missingAccessibilityFields: false,
   missingSecurityData: false,
+  missingIntegrationData: false,
 };
 
 const SYSTEM_DATABASE_OUTPUT: ApplicationSystemDatabaseOutput = {
@@ -105,6 +115,8 @@ const DEVELOPMENT_OUTPUT: ApplicationDevelopmentOutput = {
 describe('ApplicationDetailState', () => {
   let state: ApplicationDetailState;
   const accessibility = { create: vi.fn(), update: vi.fn() };
+  const dataService = { create: vi.fn(), update: vi.fn(), refreshById: vi.fn() };
+  const integrationService = { create: vi.fn(), update: vi.fn() };
   let updateApplication: ReturnType<typeof vi.fn>;
   let createDevelopment: ReturnType<typeof vi.fn>;
   let updateDevelopment: ReturnType<typeof vi.fn>;
@@ -115,12 +127,25 @@ describe('ApplicationDetailState', () => {
   let refreshById: ReturnType<typeof vi.fn>;
   let createSecurity: ReturnType<typeof vi.fn>;
   let updateSecurity: ReturnType<typeof vi.fn>;
+  let hasUnverified: ReturnType<typeof vi.fn>;
   let createClassification: ReturnType<typeof vi.fn>;
   let updateClassification: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    hasUnverified = vi.fn(() => of(false));
     accessibility.create.mockReset().mockImplementation((input) => of(accessibilityFromInput(input)));
     accessibility.update.mockReset().mockImplementation((_id, input) => of(accessibilityFromInput(input)));
+    dataService.create.mockReset().mockImplementation((input) => of(dataFromInput(12, input)));
+    dataService.update.mockReset().mockImplementation((id, input) => of(dataFromInput(id, input)));
+    dataService.refreshById.mockReset().mockImplementation((id) =>
+      of({ ...DATA_RECORD, id, openData: [ENDPOINT], reuse: [] }),
+    );
+    integrationService.create
+      .mockReset()
+      .mockImplementation((input) => of({ id: 14, ...input, deletedAt: null }));
+    integrationService.update
+      .mockReset()
+      .mockImplementation((id, input) => of({ id, ...input, deletedAt: null }));
 
     updateApplication = vi.fn((_id, payload) =>
       of({
@@ -173,6 +198,8 @@ describe('ApplicationDetailState', () => {
       providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } },
         ApplicationDetailState,
         { provide: ApplicationAccessibilityService, useValue: accessibility },
+        { provide: ApplicationDataService, useValue: dataService },
+        { provide: ApplicationIntegrationService, useValue: integrationService },
         {
           provide: ApplicationOptionsService,
           useValue: {
@@ -209,6 +236,7 @@ describe('ApplicationDetailState', () => {
           provide: ApplicationSecurityService,
           useValue: { create: createSecurity, update: updateSecurity },
         },
+        { provide: ApplicationWebContextsService, useValue: { hasUnverified } },
         {
           provide: ApplicationEnsClassificationsService,
           useValue: { create: createClassification, update: updateClassification },
@@ -244,18 +272,29 @@ describe('ApplicationDetailState', () => {
 
   it('tracks pending contexts separately from backend completeness and resets on application change', () => {
     state.initialize(APPLICATION_OUTPUT);
+    state.appSecurityId.set(8);
     const original = state.application()?.incomplete;
-    state.updateWebContextCount(12);
+    hasUnverified.mockReturnValueOnce(of(true)).mockReturnValueOnce(of(false));
+    state.refreshWebContextVerification();
     expect(state.hasUnverifiedWebContexts()).toBe(true);
     expect(state.application()?.incomplete).toBe(original);
-    state.updateWebContextCount(0);
+    state.refreshWebContextVerification();
     expect(state.hasUnverifiedWebContexts()).toBe(false);
-    state.updateWebContextCount(1);
     state.initialize({ ...APPLICATION_OUTPUT, id: 72 });
     expect(state.hasUnverifiedWebContexts()).toBeNull();
-    state.updateWebContextCount(1);
     state.initialize(null);
     expect(state.hasUnverifiedWebContexts()).toBeNull();
+  });
+
+  it('ignores an older verification scan after a newer result', () => {
+    state.initialize(APPLICATION_OUTPUT);
+    state.appSecurityId.set(8);
+    const older = new Subject<boolean>();
+    hasUnverified.mockReturnValueOnce(older).mockReturnValueOnce(of(false));
+    state.refreshWebContextVerification();
+    state.refreshWebContextVerification();
+    older.next(true);
+    expect(state.hasUnverifiedWebContexts()).toBe(false);
   });
 
   it('initializes Accessibility empty until its data is resolved', () => {
@@ -525,6 +564,202 @@ describe('ApplicationDetailState', () => {
     expect((await firstValueFrom(state.save('accessibility'))).status).toBe('invalid');
     expect(accessibility.create).not.toHaveBeenCalled();
     expect(accessibility.update).not.toHaveBeenCalled();
+  });
+
+  describe('data section', () => {
+    function loadData(record: ApplicationDataOutput = DATA_RECORD): void {
+      state.initialize(APPLICATION_OUTPUT);
+      state.initializeData({
+        applicationId: 1,
+        appDataId: record.id,
+        record,
+        status: 'loaded',
+        errorMessage: null,
+      });
+    }
+
+    it('initializes the saved snapshot and the anchor ID from the loaded record', () => {
+      loadData();
+
+      expect(state.dataForm.getRawValue()).toEqual({
+        useOpenDataUrl: false,
+        openDataUrl: DATA_RECORD.openDataUrl,
+        useReuseUrl: true,
+        reuseUrl: DATA_RECORD.reuseUrl,
+        observations: '<p>Notes</p>',
+      });
+      expect(state.dataForm.pristine).toBe(true);
+      expect(state.appDataId()).toBe(5);
+      expect(state.application()?.appDataId).toBe(5);
+      expect(state.canEditData()).toBe(true);
+    });
+
+    it('discards URL edits when its flag is turned off and requires it while on', () => {
+      loadData();
+      state.startEditing('data');
+      const { useOpenDataUrl, openDataUrl } = state.dataForm.controls;
+
+      useOpenDataUrl.setValue(true);
+      openDataUrl.setValue('');
+      expect(openDataUrl.hasError('required')).toBe(true);
+
+      openDataUrl.setValue('https://custom.example/swagger.json');
+      useOpenDataUrl.setValue(false);
+
+      expect(openDataUrl.value).toBe(DATA_RECORD.openDataUrl);
+      expect(openDataUrl.valid).toBe(true);
+    });
+
+    it('stays in edit mode and selects the source with the first invalid URL', async () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.controls.useOpenDataUrl.setValue(true);
+      state.dataForm.controls.openDataUrl.setValue('');
+      state.dataForm.markAsDirty();
+      state.dataActiveSource.set('reuse');
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'invalid',
+        section: 'data',
+      });
+
+      expect(state.dataActiveSource()).toBe('openData');
+      expect(state.dataForm.controls.openDataUrl.touched).toBe(true);
+      expect(state.isEditing('data')).toBe(true);
+      expect(dataService.update).not.toHaveBeenCalled();
+    });
+
+    it('updates the anchor and reloads its published endpoints after saving', async () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.patchValue({
+        reuseUrl: '  https://reuse.example/openapi.json  ',
+        observations: '<p><br></p>',
+      });
+      state.dataForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'saved',
+        section: 'data',
+      });
+
+      expect(dataService.create).not.toHaveBeenCalled();
+      expect(dataService.update).toHaveBeenCalledWith(5, {
+        applicationId: 1,
+        observation: null,
+        openDataUrl: DATA_RECORD.openDataUrl,
+        useOpenDataUrl: false,
+        reuseUrl: 'https://reuse.example/openapi.json',
+        useReuseUrl: true,
+      } satisfies ApplicationDataInput);
+      expect(dataService.refreshById).toHaveBeenCalledWith(5);
+      expect(state.data()?.openData).toEqual([ENDPOINT]);
+      expect(state.dataStatus()).toBe('loaded');
+      expect(state.isEditing('data')).toBe(false);
+      expect(state.dataForm.pristine).toBe(true);
+      expect(state.dataForm.enabled).toBe(true);
+    });
+
+    it('creates the anchor when the application has none', async () => {
+      state.initialize(APPLICATION_OUTPUT);
+      state.initializeData({
+        applicationId: 1,
+        appDataId: null,
+        record: null,
+        status: 'absent',
+        errorMessage: null,
+      });
+      state.startEditing('data');
+      state.dataForm.controls.observations.setValue('<p>Nova</p>');
+      state.dataForm.markAsDirty();
+
+      await firstValueFrom(state.save('data'));
+
+      expect(dataService.create).toHaveBeenCalledWith(
+        expect.objectContaining({ applicationId: 1, observation: '<p>Nova</p>' }),
+      );
+      expect(dataService.refreshById).toHaveBeenCalledWith(12);
+      expect(state.appDataId()).toBe(12);
+      expect(state.application()?.appDataId).toBe(12);
+    });
+
+    it.each([400, 504])('reports the save but keeps the tab in error when the reload fails with %s', async (status) => {
+      loadData();
+      const message = 'No se ha podido consultar el catálogo de reutilización.';
+      dataService.refreshById.mockReturnValueOnce(
+        throwError(
+          () => new HttpErrorResponse({ status, error: { error: 'Error', message } }),
+        ),
+      );
+      state.startEditing('data');
+      state.dataForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'saved',
+        section: 'data',
+      });
+
+      expect(state.dataStatus()).toBe('failed');
+      expect(state.dataErrorMessage()).toBe(message);
+      expect(state.canEditData()).toBe(false);
+    });
+
+    it('keeps the draft in edit mode when the update fails', async () => {
+      loadData();
+      dataService.update.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
+      state.startEditing('data');
+      state.dataForm.controls.observations.setValue('Draft');
+      state.dataForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('data'))).rejects.toThrow('Unavailable');
+
+      expect(state.dataForm.controls.observations.value).toBe('Draft');
+      expect(state.dataForm.enabled).toBe(true);
+      expect(state.isEditing('data')).toBe(true);
+    });
+
+    it('cancels data changes back to the saved snapshot and tracks them as dirty', () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.controls.observations.setValue('Draft');
+      state.dataForm.markAsDirty();
+
+      expect(state.dirtySections()).toContain('data');
+      state.cancelEditing('data');
+
+      expect(state.dataForm.controls.observations.value).toBe('<p>Notes</p>');
+      expect(state.dataForm.pristine).toBe(true);
+      expect(state.isEditing('data')).toBe(false);
+    });
+
+    it.each(['failed', 'forbidden', 'unavailable', 'deleted'] as const)(
+      'prevents writes for %s data',
+      async (status) => {
+        state.initialize(APPLICATION_OUTPUT);
+        state.initializeData({ applicationId: 1, appDataId: 5, record: null, status, errorMessage: null });
+        state.startEditing('data');
+        state.dataForm.markAsDirty();
+
+        expect(state.isEditing('data')).toBe(false);
+        expect((await firstValueFrom(state.save('data'))).status).toBe('invalid');
+        expect(dataService.update).not.toHaveBeenCalled();
+        expect(dataService.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('ignores results of another application', () => {
+      state.initialize(APPLICATION_OUTPUT);
+      state.initializeData({
+        applicationId: 2,
+        appDataId: 5,
+        record: DATA_RECORD,
+        status: 'loaded',
+        errorMessage: null,
+      });
+
+      expect(state.dataStatus()).toBe('unavailable');
+      expect(state.appDataId()).toBeNull();
+    });
   });
 
   it('enables and cancels sections independently', () => {
@@ -856,6 +1091,161 @@ describe('ApplicationDetailState', () => {
     expect(state.isEditing('responsible')).toBe(false);
   });
 
+  describe('integrations section', () => {
+    const RECORD = { id: 13, applicationId: 1, observation: '<p>Nota</p>', deletedAt: null };
+    type IntegrationStatus = 'loaded' | 'absent' | 'failed' | 'forbidden' | 'deleted' | 'unavailable';
+
+    function loadIntegration(
+      status: IntegrationStatus = 'loaded',
+      record: typeof RECORD | { deletedAt: string } | null = status === 'absent' ? null : RECORD,
+    ): void {
+      state.initialize(APPLICATION_OUTPUT);
+      state.initializeIntegrations({
+        applicationId: 1,
+        appIntegrationId: status === 'absent' ? null : 13,
+        record: record as typeof RECORD | null,
+        status,
+        errorMessage: null,
+        connectionsPage: null,
+        connectionsLoadFailed: false,
+        connectionsErrorMessage: null,
+      });
+    }
+
+    it('initializes the saved observations and the anchor ID from the loaded record', () => {
+      loadIntegration();
+
+      expect(state.integrationsForm.controls.observations.value).toBe('<p>Nota</p>');
+      expect(state.integrationsForm.pristine).toBe(true);
+      expect(state.appIntegrationId()).toBe(13);
+      expect(state.application()?.appIntegrationId).toBe(13);
+      expect(state.canEditIntegrations()).toBe(true);
+    });
+
+    it('updates the observations of an existing anchor and keeps the response as snapshot', async () => {
+      loadIntegration();
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue('<p>Nova nota</p>');
+      state.integrationsForm.markAsDirty();
+
+      expect(state.dirtySections()).toEqual(['integrations']);
+      await expect(firstValueFrom(state.save('integrations'))).resolves.toEqual({
+        status: 'saved',
+        section: 'integrations',
+      });
+
+      expect(integrationService.update).toHaveBeenCalledWith(13, {
+        applicationId: 1,
+        observation: '<p>Nova nota</p>',
+      });
+      expect(integrationService.create).not.toHaveBeenCalled();
+      expect(state.isEditing('integrations')).toBe(false);
+      expect(state.integrationsForm.pristine).toBe(true);
+      expect(state.integrationsForm.enabled).toBe(true);
+
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue('<p>Esborrany</p>');
+      state.cancelEditing('integrations');
+      expect(state.integrationsForm.controls.observations.value).toBe('<p>Nova nota</p>');
+    });
+
+    it('creates the anchor when the application has none and records its ID', async () => {
+      loadIntegration('absent');
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue('<p>Primera</p>');
+      state.integrationsForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('integrations'))).resolves.toEqual({
+        status: 'saved',
+        section: 'integrations',
+      });
+
+      expect(integrationService.create).toHaveBeenCalledWith({
+        applicationId: 1,
+        observation: '<p>Primera</p>',
+      });
+      expect(state.appIntegrationId()).toBe(14);
+      expect(state.application()?.appIntegrationId).toBe(14);
+      expect(state.integrationStatus()).toBe('loaded');
+    });
+
+    it('sends null observations when the editor is emptied', async () => {
+      loadIntegration();
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue('<p><br></p>');
+      state.integrationsForm.markAsDirty();
+
+      await firstValueFrom(state.save('integrations'));
+
+      expect(integrationService.update).toHaveBeenCalledWith(13, {
+        applicationId: 1,
+        observation: null,
+      });
+    });
+
+    it('keeps the draft in edit mode when the update fails', async () => {
+      loadIntegration();
+      integrationService.update.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue('<p>Esborrany</p>');
+      state.integrationsForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('integrations'))).rejects.toThrow('Unavailable');
+
+      expect(state.isEditing('integrations')).toBe(true);
+      expect(state.integrationsForm.controls.observations.value).toBe('<p>Esborrany</p>');
+      expect(state.integrationsForm.enabled).toBe(true);
+    });
+
+    it('finishes an unchanged edit without saving', async () => {
+      loadIntegration();
+      state.startEditing('integrations');
+
+      await expect(firstValueFrom(state.save('integrations'))).resolves.toEqual({
+        status: 'unchanged',
+        section: 'integrations',
+      });
+      expect(state.isEditing('integrations')).toBe(false);
+      expect(integrationService.update).not.toHaveBeenCalled();
+    });
+
+    it.each(['failed', 'forbidden', 'unavailable', 'deleted'] as const)(
+      'blocks edits while the anchor is %s',
+      async (status) => {
+        loadIntegration(status, status === 'deleted' ? { ...RECORD, deletedAt: '2026-09-01' } : null);
+
+        state.startEditing('integrations');
+        expect(state.isEditing('integrations')).toBe(false);
+        expect((await firstValueFrom(state.save('integrations'))).status).toBe('invalid');
+        expect(integrationService.update).not.toHaveBeenCalled();
+      },
+    );
+
+    it('ignores results for another application and resets when it changes', () => {
+      loadIntegration();
+      state.initializeIntegrations({
+        applicationId: 2,
+        appIntegrationId: 99,
+        record: { ...RECORD, id: 99, applicationId: 2 },
+        status: 'loaded',
+        errorMessage: null,
+        connectionsPage: null,
+        connectionsLoadFailed: false,
+        connectionsErrorMessage: null,
+      });
+      expect(state.appIntegrationId()).toBe(13);
+
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue('<p>Esborrany</p>');
+      state.integrationsForm.markAsDirty();
+      state.initialize({ ...APPLICATION_OUTPUT, id: 2 });
+
+      expect(state.integrationsForm.controls.observations.value).toBe('');
+      expect(state.isEditing('integrations')).toBe(false);
+      expect(state.integrationStatus()).toBe('unavailable');
+    });
+  });
+
   it('updates Development and refreshes application completeness', async () => {
     initializeAll();
     state.startEditing('development');
@@ -1054,6 +1444,7 @@ function toApplication(response: ApplicationOutput): Application {
     missingDatabases: response.missingDatabases,
     missingAccessibilityFields: response.missingAccessibilityFields,
     missingSecurityData: response.missingSecurityData,
+    missingIntegrationData: response.missingIntegrationData,
   };
 }
 
@@ -1074,6 +1465,40 @@ function classificationFromInput(
     availability: catalog(input.availabilityId),
     authenticity: catalog(input.authenticityId),
     overallGrade: catalog(input.overallGradeId),
+    deletedAt: null,
+  };
+}
+
+const ENDPOINT = {
+  path: '/api/aplicacions',
+  method: 'GET',
+  operation: { operationId: 'list', summary: 'Llista', description: null, parameters: [] },
+};
+
+const DATA_RECORD: ApplicationDataOutput = {
+  id: 5,
+  application: { id: 1 },
+  observation: '<p>Notes</p>',
+  openDataUrl: 'https://intranet.caib.es/0001api/externa/swagger.json',
+  useOpenDataUrl: false,
+  openData: [ENDPOINT],
+  reuseUrl: 'https://reuse.example/api-docs.json',
+  useReuseUrl: true,
+  reuse: [],
+  deletedAt: null,
+};
+
+function dataFromInput(id: number, input: ApplicationDataInput): ApplicationDataOutput {
+  return {
+    id,
+    application: { id: input.applicationId },
+    observation: input.observation,
+    openDataUrl: input.openDataUrl,
+    useOpenDataUrl: input.useOpenDataUrl,
+    openData: null,
+    reuseUrl: input.reuseUrl,
+    useReuseUrl: input.useReuseUrl,
+    reuse: null,
     deletedAt: null,
   };
 }

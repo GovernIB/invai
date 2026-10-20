@@ -1,12 +1,13 @@
 package es.caib.invai.back.service.mapper.application.security.webContext;
 
-import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextInputDTO;
-import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextOutputDTO;
+import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebContextInputDTO;
+import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebContextOutputDTO;
 import es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextEntity;
 import es.caib.invai.back.service.model.application.security.webContext.AppWebContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper;
 import es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapper;
 import es.caib.invai.back.service.mapper.maintenance.security.webContext.WebContextMapper;
 import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapper;
@@ -17,7 +18,7 @@ import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapper;
  *
  * @since 1.0.4
  */
-@Mapper(componentModel = "spring", uses = {AppSecurityMapper.class, WebContextMapper.class, FieldMapper.class})
+@Mapper(componentModel = "spring", uses = {AppDevelopmentMapper.class, AppSecurityMapper.class, WebContextMapper.class, FieldMapper.class})
 public interface AppWebContextMapper {
 
     /**
@@ -45,17 +46,26 @@ public interface AppWebContextMapper {
     AppWebContextOutputDTO toResponse(AppWebContext model);
 
     /**
-     * Maps incoming flat reference fields into a decoupled domain state instance,
-     * resolving relationship IDs (security anchor, web context, field) to their respective nested model IDs,
-     * while ignoring audit fields.
+     * Maps incoming flat reference fields into a decoupled domain state instance, resolving the
+     * development anchor and the web context/field relationship IDs to their respective nested
+     * model IDs. The security anchor and the validation fields are never populated from this
+     * (Development-only) input DTO: the facade resolves and sets {@code appSecurity} itself (see
+     * {@code AppWebContextServiceFacadeBean.create} under
+     * {@code ejb.application.development.webContext}), and {@code validated}/{@code validatedAt}/
+     * {@code validatedBy}/{@code validatedReason} are only ever set by Security's validate flow.
      *
      * @param inputDTO inbound client creation payload containing mapping configuration
      * @return a decoupled domain state instance ready for orchestration processing pipelines
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "appSecurity.id", source = "appSecurityId")
+    @Mapping(target = "appSecurity", ignore = true)
+    @Mapping(target = "appDevelopment.id", source = "appDevelopmentId")
     @Mapping(target = "webContext.id", source = "webContextId")
     @Mapping(target = "field.id", source = "fieldId")
+    @Mapping(target = "validated", ignore = true)
+    @Mapping(target = "validatedAt", ignore = true)
+    @Mapping(target = "validatedBy", ignore = true)
+    @Mapping(target = "validatedReason", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -66,15 +76,22 @@ public interface AppWebContextMapper {
 
     /**
      * Integrates update parameters from flat payload tracking definitions directly over an active
-     * business entity, avoiding logical soft-delete and primary key attribute modifications.
+     * business entity, avoiding logical soft-delete and primary key attribute modifications. Never
+     * touches {@code appSecurity} or the validation fields, for the same reasons as
+     * {@link #toModelFromInput}.
      *
      * @param inputDTO delta parameter updates tracking values payload DTO
      * @param model    the active operational business graph container targeted for modifier updates
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "appSecurity.id", source = "appSecurityId")
+    @Mapping(target = "appSecurity", ignore = true)
+    @Mapping(target = "appDevelopment.id", source = "appDevelopmentId")
     @Mapping(target = "webContext.id", source = "webContextId")
     @Mapping(target = "field.id", source = "fieldId")
+    @Mapping(target = "validated", ignore = true)
+    @Mapping(target = "validatedAt", ignore = true)
+    @Mapping(target = "validatedBy", ignore = true)
+    @Mapping(target = "validatedReason", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

@@ -22,7 +22,7 @@ import java.util.List;
  * reactive {@code Mono}/{@code Flux} type it has no other machinery to consume yet.
  * </p>
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Component
 @Slf4j

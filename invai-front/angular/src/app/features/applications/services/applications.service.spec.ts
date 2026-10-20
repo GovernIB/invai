@@ -31,6 +31,8 @@ const EXPECTED_APPLICATION: Application = {
   appDevelopmentId: 90,
   appSecurityId: null,
   appAccessibilityId: null,
+  appDataId: null,
+  appIntegrationId: null,
   appResponsibleAuthorizedId: 91,
   incomplete: false,
   missingResponsibleTypes: true,
@@ -56,6 +58,7 @@ const EXPECTED_APPLICATION: Application = {
   missingDatabases: false,
   missingAccessibilityFields: false,
   missingSecurityData: false,
+  missingIntegrationData: false,
 };
 
 const APPLICATION_INPUT: ApplicationInput = {
@@ -120,6 +123,7 @@ const APPLICATION_OUTPUT: ApplicationOutput = {
   missingDatabases: false,
   missingAccessibilityFields: false,
   missingSecurityData: false,
+  missingIntegrationData: false,
 };
 
 const OTHER_APPLICATION_OUTPUT: ApplicationOutput = {
@@ -192,6 +196,27 @@ describe('ApplicationsService', () => {
         missingDevelopmentFields: true,
       }),
     );
+  });
+
+  it('maps the data anchor identifier, defaulting to null when the backend omits it', () => {
+    expect(service.toApplication({ ...APPLICATION_OUTPUT, appDataId: 44 }).appDataId).toBe(44);
+    expect(service.toApplication({ ...APPLICATION_OUTPUT, appDataId: null }).appDataId).toBeNull();
+    expect(service.toApplication(APPLICATION_OUTPUT).appDataId).toBeNull();
+  });
+
+  it('maps the integration anchor identifier and flag, defaulting to null when omitted', () => {
+    const mapped = service.toApplication({
+      ...APPLICATION_OUTPUT,
+      appIntegrationId: 13,
+      missingIntegrationData: true,
+    });
+    expect(mapped.appIntegrationId).toBe(13);
+    expect(mapped.missingIntegrationData).toBe(true);
+    expect(service.toApplication(APPLICATION_OUTPUT).appIntegrationId).toBeNull();
+    expect(
+      service.toApplication({ ...APPLICATION_OUTPUT, missingIntegrationData: undefined as never })
+        .missingIntegrationData,
+    ).toBeNull();
   });
 
   it('maps catalog display names from nameEs for the Spanish locale', () => {
@@ -444,6 +469,44 @@ describe('ApplicationsService', () => {
       .flush(page([]));
   });
 
+  it('checks DIR3 for all applications and invalidates application and assignment caches on success', () => {
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+    const result = vi.fn();
+    const mismatches = [{ id: 7, name: 'Invai', dir3Mismatch: true }];
+
+    service.getPage({ page: 0, size: 10 }).subscribe();
+    flushApplications(httpTesting.expectOne((request) => request.method === 'GET'));
+
+    service.checkDir3MismatchForAllApplications().subscribe(result);
+    const request = httpTesting.expectOne(`${APPLICATION_URL}/dir3-check-all`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({});
+    request.flush(mismatches);
+
+    expect(result).toHaveBeenCalledWith(mismatches);
+    expect(assignmentsChanged).toHaveBeenCalledOnce();
+    service.getPage({ page: 0, size: 10 }).subscribe();
+    flushApplications(httpTesting.expectOne((request) => request.method === 'GET'));
+  });
+
+  it('keeps cached applications when the global DIR3 check fails', () => {
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+
+    service.getAll().subscribe();
+    flushApplications(httpTesting.expectOne(APPLICATION_URL));
+    service.checkDir3MismatchForAllApplications().subscribe({ error: () => undefined });
+    httpTesting.expectOne(`${APPLICATION_URL}/dir3-check-all`).flush('Request failed', {
+      status: 500,
+      statusText: 'Server Error',
+    });
+
+    expect(assignmentsChanged).not.toHaveBeenCalled();
+    service.getAll().subscribe();
+    httpTesting.expectNone(APPLICATION_URL);
+  });
+
   it('separates incomplete, complete and unfiltered pages in the cache', () => {
     for (const incomplete of [undefined, true, false]) {
       service.getPage({ page: 2, size: 10, incomplete }).subscribe();
@@ -471,6 +534,7 @@ describe('ApplicationsService', () => {
       missingDatabases: null,
       missingAccessibilityFields: null,
       missingSecurityData: null,
+      missingIntegrationData: null,
     })).toEqual(expect.objectContaining({
       incomplete: true,
       missingResponsibleTypes: null,
@@ -480,6 +544,7 @@ describe('ApplicationsService', () => {
       missingDatabases: null,
       missingAccessibilityFields: null,
       missingSecurityData: null,
+      missingIntegrationData: null,
     }));
   });
 

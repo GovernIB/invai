@@ -53,6 +53,10 @@ public class PersonAudEntity {
     @Column(name = "IS_PERSONAL_CAIB")
     private Boolean personalCaib;
 
+    /** Snapshot of the Soffid username at the time of the audited change. */
+    @Column(name = "USER_NAME", length = 64)
+    private String userName;
+
     /** Timestamp at which the original record was created. */
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;

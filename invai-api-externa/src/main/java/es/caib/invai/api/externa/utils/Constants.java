@@ -11,4 +11,5 @@ public interface Constants {
      * Configuration environment property pointer key linking back to the target SSO authentication host.
      */
     String KEY_HOST = "es.caib.invai.login.host";
+    String LOGIN_PATH = "/api/auth/login";
 }

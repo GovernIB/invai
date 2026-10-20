@@ -16,6 +16,7 @@ import { APPLICATION_GENERAL_EDIT_NAVIGATION } from '../detail/application-detai
 import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
 import {
   Application,
+  ApplicationDir3MismatchOutput,
   ApplicationInfrastructureFilterOptions,
   ApplicationPageParams,
   ApplicationStatus,
@@ -66,6 +67,7 @@ const APPLICATIONS: Application[] = [
     missingDatabases: false,
     missingAccessibilityFields: false,
     missingSecurityData: false,
+    missingIntegrationData: false,
   },
   {
     id: '2',
@@ -92,6 +94,7 @@ const APPLICATIONS: Application[] = [
     missingDatabases: false,
     missingAccessibilityFields: false,
     missingSecurityData: false,
+    missingIntegrationData: false,
   },
 ];
 
@@ -149,10 +152,13 @@ describe('ApplicationsList', () => {
   let pendingPages: Subject<SpringPage<Application>>[];
   let getPeoplePage: ReturnType<typeof vi.fn>;
   let pendingPeoplePages: Subject<SpringPage<ResponsiblePerson>>[];
+  let pendingDir3Checks: Subject<ApplicationDir3MismatchOutput[]>[];
+  let checkDir3MismatchForAllApplications: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     pendingPages = [];
     pendingPeoplePages = [];
+    pendingDir3Checks = [];
     getPage = vi.fn((_params?: ApplicationPageParams): Observable<SpringPage<Application>> => {
       const request = new Subject<SpringPage<Application>>();
       pendingPages.push(request);
@@ -162,6 +168,11 @@ describe('ApplicationsList', () => {
     getPeoplePage = vi.fn(() => {
       const request = new Subject<SpringPage<ResponsiblePerson>>();
       pendingPeoplePages.push(request);
+      return request;
+    });
+    checkDir3MismatchForAllApplications = vi.fn(() => {
+      const request = new Subject<ApplicationDir3MismatchOutput[]>();
+      pendingDir3Checks.push(request);
       return request;
     });
     activatedRoute = {
@@ -176,7 +187,10 @@ describe('ApplicationsList', () => {
       imports: [ApplicationsList],
       providers: [{ provide: AdministrativeUnitsService, useValue: { getPage: vi.fn() } },
         MessageService,
-        { provide: ApplicationsService, useValue: { getPage } },
+        {
+          provide: ApplicationsService,
+          useValue: { getPage, checkDir3MismatchForAllApplications },
+        },
         {
           provide: ApplicationOptionsService,
           useValue: {
@@ -213,6 +227,89 @@ describe('ApplicationsList', () => {
         .querySelector('.invai-table-loading-container')
         .getAttribute('aria-busy'),
     ).toBe('false');
+  });
+
+  it('shows the DIR3 action before search and prevents repeated checks while loading', () => {
+    const button = fixture.nativeElement.querySelector(
+      '.section-actions__text-button',
+    ) as HTMLButtonElement;
+    const search = fixture.nativeElement.querySelector('.section-actions__search') as HTMLElement;
+    const toolbar = fixture.nativeElement.querySelector('.section-actions') as HTMLElement;
+
+    expect(button).toBeTruthy();
+    expect(button.textContent).toContain('Validar DIR3 de totes');
+    expect(button.compareDocumentPosition(search) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(button.closest('.section-actions')).toBe(toolbar);
+
+    button.click();
+    fixture.detectChanges();
+    expect(checkDir3MismatchForAllApplications).toHaveBeenCalledOnce();
+    expect(button.disabled).toBe(true);
+    expect(button.textContent).toContain('Validar DIR3 de totes');
+    expect(button.querySelector('.p-button-loading-icon')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain(
+      'Validant el DIR3',
+    );
+    button.click();
+    expect(checkDir3MismatchForAllApplications).toHaveBeenCalledOnce();
+
+    pendingDir3Checks[0].next([]);
+    pendingDir3Checks[0].complete();
+    fixture.detectChanges();
+    expect(button.disabled).toBe(false);
+  });
+
+  it('reports the current mismatch count and refreshes the same table query', () => {
+    const add = vi.spyOn(messageService, 'add');
+    accessList().onPageChange({
+      first: 20,
+      rows: 10,
+      sortField: 'name',
+      sortOrder: -1,
+    } as TableLazyLoadEvent);
+    const params = getPage.mock.lastCall?.[0];
+
+    fixture.nativeElement.querySelector('.section-actions__text-button').click();
+    pendingDir3Checks[0].next([
+      { id: 1, name: 'Invai', dir3Mismatch: true },
+      { id: 2, name: 'Portal', dir3Mismatch: true },
+    ]);
+    pendingDir3Checks[0].complete();
+
+    expect(add).toHaveBeenCalledWith({
+      severity: 'warn',
+      summary: 'Validació DIR3 completada',
+      detail: 'Aplicacions amb discrepàncies DIR3: 2.',
+    });
+    expect(getPage).toHaveBeenLastCalledWith(params);
+    expect(accessList().tableFirst()).toBe(20);
+  });
+
+  it('reports zero mismatches and restores the button after a failed check', () => {
+    const add = vi.spyOn(messageService, 'add');
+    const button = fixture.nativeElement.querySelector(
+      '.section-actions__text-button',
+    ) as HTMLButtonElement;
+
+    button.click();
+    pendingDir3Checks[0].next([]);
+    pendingDir3Checks[0].complete();
+    expect(add).toHaveBeenCalledWith({
+      severity: 'success',
+      summary: 'Validació DIR3 completada',
+      detail: 'Aplicacions amb discrepàncies DIR3: 0.',
+    });
+
+    button.click();
+    pendingDir3Checks[1].error(new Error('Check failed'));
+    fixture.detectChanges();
+    expect(add).toHaveBeenLastCalledWith({
+      severity: 'error',
+      summary: 'Error',
+      detail: "No s'ha pogut completar la validació DIR3.",
+    });
+    expect(button.disabled).toBe(false);
+    expect(getPage).toHaveBeenCalledOnce();
   });
 
   it('should expose the server page and total in the table', () => {

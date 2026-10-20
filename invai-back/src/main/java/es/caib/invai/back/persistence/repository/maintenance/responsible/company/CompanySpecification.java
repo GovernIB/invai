@@ -46,8 +46,16 @@ public final class CompanySpecification {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.getName().toLowerCase() + "%"));
             }
 
+            if (criteria.getNif() != null && !criteria.getNif().trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("nif")), "%" + criteria.getNif().toLowerCase() + "%"));
+            }
+
             if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.getSearch().toLowerCase() + "%"));
+                String pattern = "%" + criteria.getSearch().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("name")), pattern),
+                        cb.like(cb.lower(root.get("nif")), pattern)
+                ));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

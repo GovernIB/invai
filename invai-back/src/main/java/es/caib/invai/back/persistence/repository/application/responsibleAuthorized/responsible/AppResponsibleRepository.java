@@ -72,4 +72,11 @@ public interface AppResponsibleRepository {
 
     /** Finds the currently active assignment (if any) holding the given responsible type on the given anchor. */
     AppResponsible findActiveByAppResponsibleAuthorizedAndResponsibleType(Long appResponsibleAuthorizedId, Long responsibleTypeId);
+
+    /**
+     * Finds every active assignment the given person currently holds on the given anchor, across
+     * every responsible type. Used to detect whether the person already has a DIR3 validation
+     * resolved on this anchor (via any type, or via an authorization) before minting a new one.
+     */
+    List<AppResponsible> findAllActiveByAppResponsibleAuthorizedAndPerson(Long appResponsibleAuthorizedId, Long personId);
 }

@@ -99,6 +99,14 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
                 .toList();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public List<AppResponsible> findAllActiveByAppResponsibleAuthorizedAndPerson(Long appResponsibleAuthorizedId, Long personId) {
+        return appResponsibleJPARepository.findAllByAppResponsibleAuthorizedIdAndPersonIdAndDeletedAtIsNull(appResponsibleAuthorizedId, personId).stream()
+                .map(appResponsibleMapper::toModel)
+                .toList();
+    }
+
     /**
      * Builds and persists a historical audit trail row mirroring the current state of the
      * given responsible entity, tagged with the type of mutation that triggered it.
@@ -114,6 +122,7 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         aud.setResponsibleTypeId(entity.getResponsibleType().getId());
         aud.setJobTitle(entity.getJobTitle());
         aud.setObservation(entity.getObservation());
+        aud.setDir3ValidationId(entity.getDir3Validation().getId());
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
         aud.setUpdatedAt(entity.getUpdatedAt());

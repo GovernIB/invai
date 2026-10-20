@@ -80,11 +80,14 @@ public class ApplicationEntity extends BaseEntity {
     private LkupStatusEntity status;
 
     /** Free-text description of the application's scope and purpose. */
-    @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 4000)
     private String description;
 
     /** Date on which the application's lifecycle is scheduled to expire. */
     @Column(name = "EXPIRATION_DATE")
     private LocalDateTime expirationDate;
+
+    /** Whether at least one active, Personal CAIB responsible/authorized assignment's DIR3 currently doesn't match {@link #admUnitCode}, as of the last bulk DIR3 audit run. */
+    @Column(name = "DIR3_MISMATCH", nullable = false)
+    private boolean dir3Mismatch;
 }

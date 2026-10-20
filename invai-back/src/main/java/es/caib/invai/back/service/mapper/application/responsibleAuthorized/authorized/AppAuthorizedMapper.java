@@ -4,6 +4,7 @@ import es.caib.invai.back.interna.application.responsibleAuthorized.authorized.D
 import es.caib.invai.back.interna.application.responsibleAuthorized.authorized.DTO.AppAuthorizedOutputDTO;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedEntity;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.core.AppResponsibleAuthorizedMapper;
+import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapper;
 import es.caib.invai.back.service.mapper.maintenance.responsible.person.PersonMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
 import org.mapstruct.Mapper;
@@ -27,7 +28,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
  *
  * @since 1.0.3
  */
-@Mapper(componentModel = "spring", uses = {PersonMapper.class, AppResponsibleAuthorizedMapper.class})
+@Mapper(componentModel = "spring", uses = {PersonMapper.class, AppResponsibleAuthorizedMapper.class, Dir3ValidationMapper.class})
 public interface AppAuthorizedMapper {
 
     /**
@@ -68,6 +69,7 @@ public interface AppAuthorizedMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appResponsibleAuthorized.id", source = "appResponsibleAuthorizedId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "person.id", source = "personId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "dir3Validation", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -87,6 +89,7 @@ public interface AppAuthorizedMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appResponsibleAuthorized", ignore = true)
     @Mapping(target = "person", ignore = true)
+    @Mapping(target = "dir3Validation", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

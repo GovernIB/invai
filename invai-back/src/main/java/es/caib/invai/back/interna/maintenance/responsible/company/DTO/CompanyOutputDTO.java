@@ -24,6 +24,9 @@ public class CompanyOutputDTO {
     /** Company corporate name label string. */
     private String name;
 
+    /** Company tax identification number (NIF/CIF). */
+    private String nif;
+
     /** Timestamp at which the company was logically deleted, or {@code null} if it is active. */
     private LocalDateTime deletedAt;
 }

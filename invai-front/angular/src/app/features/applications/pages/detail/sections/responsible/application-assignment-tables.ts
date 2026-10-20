@@ -128,8 +128,20 @@ abstract class ApplicationAssignmentTableBase<
     return status === 'NOT_VALIDATED' || status === 'MANUAL' ? status : null;
   }
 
+  protected responsibleDir3Label(row: TItem): string {
+    if (this.responsibleDir3Status(row) !== 'MANUAL') return this.dir3Copy.pending;
+    const reason = 'assignment' in row ? row.assignment?.dir3Validation?.reason?.trim() : undefined;
+    return reason
+      ? `${this.dir3Copy.manual}\n${this.dir3Copy.reason}: ${reason}`
+      : this.dir3Copy.manual;
+  }
+
   protected cellValue(row: TItem, key: string): string {
     return applicationAssignmentCellValue(row, key, this.locale, this.copy.caibRole);
+  }
+
+  protected personUserName(row: TItem): string {
+    return applicationAssignmentPersonUserName(row);
   }
 
   protected isIncompleteResponsiblePersonCell(row: TItem, key: string): boolean {
@@ -214,6 +226,25 @@ export function applicationAssignmentCellValue(
     return row.authorizationTypes.map((item) => localizedName(item, locale)).join(', ');
   }
   return '';
+}
+
+// Soffid user code shown below the name; external persons have none, so nothing is shown.
+function applicationAssignmentPersonUserName(row: Assignment): string {
+  return (
+    ('assignment' in row ? row.assignment?.person.userName : row.person.userName)?.trim() ?? ''
+  );
+}
+
+export function applicationAssignmentCsvCellValue(
+  row: Assignment,
+  key: string,
+  locale: string,
+  caibRole: string,
+): string {
+  const value = applicationAssignmentCellValue(row, key, locale, caibRole);
+  if (key !== 'person') return value;
+  const userName = applicationAssignmentPersonUserName(row);
+  return userName ? `${value}\n${userName}` : value;
 }
 
 export function assignmentRowsToCsv<TItem extends Assignment>(

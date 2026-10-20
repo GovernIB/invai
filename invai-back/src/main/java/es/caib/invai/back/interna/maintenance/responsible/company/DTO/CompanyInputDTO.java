@@ -25,4 +25,8 @@ public class CompanyInputDTO {
     @NotBlank(message = "{" + Constants.VALIDATION_COMPANY_NAME_REQUIRED + "}")
     @Size(max = 150, message = "{" + Constants.VALIDATION_COMPANY_NAME_SIZE + "}")
     private String name;
+
+    /** Company tax identification number (NIF/CIF), optional. */
+    @Size(max = 20, message = "{" + Constants.VALIDATION_COMPANY_NIF_SIZE + "}")
+    private String nif;
 }

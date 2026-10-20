@@ -91,12 +91,6 @@ public class AppAuthorizedRepositoryAdapter implements AppAuthorizedRepository {
 
     /** {@inheritDoc} */
     @Override
-    public boolean existsByAppResponsibleAuthorizedAndPerson(Long appResponsibleAuthorizedId, Long personId) {
-        return appAuthorizedJPARepository.existsByAppResponsibleAuthorizedIdAndPersonIdAndDeletedAtIsNull(appResponsibleAuthorizedId, personId);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public boolean existsByAppResponsibleAuthorizedAndPersonAndIdNot(Long appResponsibleAuthorizedId, Long personId, Long id) {
         return appAuthorizedJPARepository.existsByAppResponsibleAuthorizedIdAndPersonIdAndIdNotAndDeletedAtIsNull(appResponsibleAuthorizedId, personId, id);
     }
@@ -139,6 +133,7 @@ public class AppAuthorizedRepositoryAdapter implements AppAuthorizedRepository {
         aud.setAppResponsibleAuthorizedId(entity.getAppResponsibleAuthorized().getId());
         aud.setPersonId(entity.getPerson().getId());
         aud.setObservation(entity.getObservation());
+        aud.setDir3ValidationId(entity.getDir3Validation().getId());
 
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

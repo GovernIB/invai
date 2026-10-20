@@ -1,9 +1,9 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { ServerErrorDialogService } from '@core/services/server-error-dialog.service';
 
-import { httpErrorLoggingInterceptor } from './http-error-logging.interceptor';
+import { SKIP_SERVER_ERROR_DIALOG, httpErrorLoggingInterceptor } from './http-error-logging.interceptor';
 
 describe('httpErrorLoggingInterceptor', () => {
   let http: HttpClient;
@@ -67,6 +67,24 @@ describe('httpErrorLoggingInterceptor', () => {
     request.flush(payload, { status: 400, statusText: 'Bad Request' });
 
     expect(errorDialog.open).toHaveBeenCalledWith(payload);
+    expect(errorHandler).toHaveBeenCalledOnce();
+  });
+
+  it('lets a request opt out of the global dialog while still logging and propagating the error', () => {
+    const errorHandler = vi.fn();
+    const payload = { error: 'Error de validació', message: 'Documento no disponible.' };
+
+    http
+      .get('/invaiback/application/data/5', {
+        context: new HttpContext().set(SKIP_SERVER_ERROR_DIALOG, true),
+      })
+      .subscribe({ error: errorHandler });
+
+    const request = httpTesting.expectOne('/invaiback/application/data/5');
+    request.flush(payload, { status: 400, statusText: 'Bad Request' });
+
+    expect(errorDialog.open).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledOnce();
     expect(errorHandler).toHaveBeenCalledOnce();
   });
 

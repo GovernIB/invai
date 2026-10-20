@@ -12,6 +12,7 @@ import { APPLICATION_DETAIL_CACHE_TTL_MS } from './application-cache.constants';
 
 import {
   Application,
+  ApplicationDir3MismatchOutput,
   ApplicationInput,
   ApplicationOutput,
   ApplicationPageParams,
@@ -99,6 +100,12 @@ export class ApplicationsService extends BaseApiService {
       .pipe(tap(() => this.clearCache()));
   }
 
+  checkDir3MismatchForAllApplications(): Observable<ApplicationDir3MismatchOutput[]> {
+    return this.http
+      .put<ApplicationDir3MismatchOutput[]>(this.url('dir3-check-all'), {})
+      .pipe(tap(() => this.responsibleChanges.assignmentsChanged()));
+  }
+
   clearCache(): void {
     this._applicationsCache.clear();
     this.detailsCache.clear();
@@ -138,6 +145,8 @@ export class ApplicationsService extends BaseApiService {
       appDevelopmentId: response.appDevelopmentId,
       appSecurityId: response.appSecurityId ?? null,
       appAccessibilityId: response.appAccessibilityId ?? null,
+      appDataId: response.appDataId ?? null,
+      appIntegrationId: response.appIntegrationId ?? null,
       appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
       ...readApplicationCompleteness(response),
     };

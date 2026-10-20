@@ -1,0 +1,36 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  mode="edit"
+  width="38rem"
+  [ariaLabels]="ariaLabels"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isSaving]="isSaving()"
+  [showDeactivate]="false"
+  [submitIcon]="icons.CHECK"
+  [submitLabel]="verifyLabel"
+  [title]="copy.title"
+  (cancelEdit)="closed.emit()"
+  (closed)="closed.emit()"
+  (submitForm)="submitForm.emit()"
+>
+  <form [formGroup]="form()" (ngSubmit)="submitForm.emit()" novalidate>
+    <p class="mb-4">{{ copy.context }}: {{ contextName() }}</p>
+    <label class="mb-2 block" for="application-web-context-verification-reason">{{ copy.reason }}</label>
+    <textarea
+      #reasonInput
+      id="application-web-context-verification-reason"
+      pTextarea
+      class="w-full"
+      rows="4"
+      formControlName="reason"
+      [attr.aria-required]="true"
+      [attr.aria-invalid]="reasonInvalid() || null"
+      [attr.aria-describedby]="reasonInvalid() ? 'application-web-context-verification-reason-error' : null"
+    ></textarea>
+    @if (reasonInvalid()) {
+      <p id="application-web-context-verification-reason-error" class="text-red-700" role="alert">
+        {{ copy.reasonRequired }}
+      </p>
+    }
+  </form>
+</app-crud-entity-dialog>

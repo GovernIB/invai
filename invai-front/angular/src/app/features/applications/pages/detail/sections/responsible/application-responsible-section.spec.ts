@@ -54,6 +54,7 @@ const CAIB_PERSON = {
   lastName: 'Serra',
   email: 'joan@caib.es',
   personalCaib: true,
+  userName: 'u00012',
 };
 const SOFFID_PERSON = {
   id: null,
@@ -63,6 +64,7 @@ const SOFFID_PERSON = {
   email: 'aina@caib.es',
   personalCaib: true as const,
   deletedAt: null,
+  userName: 'u00013',
   label: 'Aina Ferrer — aina@caib.es',
 };
 const RESPONSIBLE_TYPES = [
@@ -129,7 +131,7 @@ describe('ApplicationResponsibleSection', () => {
     getPage: vi.fn(() => of(page(RESPONSIBLES))),
     create: vi.fn(() => of({ ...RESPONSIBLES[0], id: 99 })),
     update: vi.fn(() => of(RESPONSIBLES[0])),
-    deactivate: vi.fn(() => of(RESPONSIBLES[0])),
+    deactivate: vi.fn(() => of(undefined)),
   };
   const authorizedService = {
     getPage: vi.fn(() => of(page(AUTHORIZED))),
@@ -853,7 +855,7 @@ describe('ApplicationResponsibleSection', () => {
   });
 
   it('ignores repeated deactivation and close actions while the request is pending', () => {
-    const request = new Subject<ApplicationAssignedResponsibleOutput>();
+    const request = new Subject<undefined>();
     responsiblesService.deactivate.mockReturnValueOnce(request.asObservable());
     button("Editar Responsables de l'aplicació").click();
     fixture.detectChanges();
@@ -872,7 +874,7 @@ describe('ApplicationResponsibleSection', () => {
     expect(component.deactivatePending()).toBe(true);
     expect(component.deactivateDialogVisible()).toBe(true);
 
-    request.next(RESPONSIBLES[0]);
+    request.next(undefined);
     request.complete();
 
     expect(component.deactivatePending()).toBe(false);
@@ -963,6 +965,7 @@ describe('ApplicationResponsibleSection', () => {
       personFirstName: 'Aina',
       personLastName: 'Ferrer',
       personEmail: 'aina@caib.es',
+      personUserName: 'u00013',
       companyId: null,
       personalCaib: true,
       authorizationTypeIds: [1],
@@ -1066,6 +1069,7 @@ describe('ApplicationResponsibleSection', () => {
       personFirstName: 'Aina',
       personLastName: 'Ferrer',
       personEmail: 'aina@caib.es',
+      personUserName: 'u00013',
       companyId: null,
       personalCaib: true,
       responsibleTypeId: 2,
@@ -1202,7 +1206,7 @@ describe('ApplicationResponsibleSection', () => {
     expect(copy).toHaveBeenCalledWith(
       'Responsabilitat,Persona,Càrrec / Empresa\r\n' +
         'Responsable de la informació,Maria Tur Roig,Plexus\r\n' +
-        'Responsable del servei,Joan Serra,Cap de servei\r\n' +
+        'Responsable del servei,"Joan Serra\nu00012",Cap de servei\r\n' +
         'Responsable de sistemes,Incomplet,—',
     );
 

@@ -56,6 +56,7 @@ export type ApplicationDetailFormGroup = FormGroup<ApplicationDetailFormControls
 export type ApplicationFiltersFormGroup = FormGroup<ApplicationFiltersFormControls>;
 export type ApplicationSystemsDatabasesFormGroup =
   FormGroup<ApplicationSystemsDatabasesFormControls>;
+export type ApplicationIntegrationsFormGroup = FormGroup<ApplicationSystemsDatabasesFormControls>;
 
 export interface ApplicationDetailFormValue {
   application: string;
@@ -119,6 +120,14 @@ export function createApplicationFiltersForm(formBuilder: FormBuilder): Applicat
 export function createApplicationSystemsDatabasesForm(
   formBuilder: FormBuilder,
 ): ApplicationSystemsDatabasesFormGroup {
+  return formBuilder.nonNullable.group({
+    observations: [''],
+  });
+}
+
+export function createApplicationIntegrationsForm(
+  formBuilder: FormBuilder,
+): ApplicationIntegrationsFormGroup {
   return formBuilder.nonNullable.group({
     observations: [''],
   });

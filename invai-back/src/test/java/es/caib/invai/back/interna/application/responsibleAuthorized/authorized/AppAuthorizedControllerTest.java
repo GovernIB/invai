@@ -56,7 +56,7 @@ class AppAuthorizedControllerTest {
 
     @Test
     void create_returnsCreatedWithServiceResult() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false);
+        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false, null, null);
         AppAuthorizedOutputDTO dto = AppAuthorizedOutputDTO.builder().id(1L).build();
         when(appAuthorizedService.create(inputDTO)).thenReturn(dto);
 
@@ -68,7 +68,7 @@ class AppAuthorizedControllerTest {
 
     @Test
     void update_returnsOkWithServiceResult() {
-        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false);
+        AppAuthorizedInputDTO inputDTO = new AppAuthorizedInputDTO(10L, 7L, null, null, null, null, List.of(2L), null, false, null, null);
         AppAuthorizedOutputDTO dto = AppAuthorizedOutputDTO.builder().id(1L).build();
         when(appAuthorizedService.update(1L, inputDTO)).thenReturn(dto);
 

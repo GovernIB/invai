@@ -146,6 +146,7 @@ public class CompanyRepositoryAdapter implements CompanyRepository {
 
         aud.setCompanyId(entity.getId());
         aud.setName(entity.getName());
+        aud.setNif(entity.getNif());
 
         aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

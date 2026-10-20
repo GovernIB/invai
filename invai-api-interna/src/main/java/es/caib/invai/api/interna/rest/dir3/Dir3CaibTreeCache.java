@@ -19,7 +19,7 @@ import java.util.List;
  * never depends on an active user session.
  * </p>
  *
- * @since 1.0.4
+ * @since 1.0.6
  */
 @Component
 @RequiredArgsConstructor

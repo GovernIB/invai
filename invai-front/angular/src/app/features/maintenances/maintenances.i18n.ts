@@ -6,6 +6,8 @@ export const MAINTENANCE_PANEL_DESCRIPTIONS = {
   roles: $localize`Gestiona els rols que es poden assignar als proveïdors d'una aplicació.`,
   layers: $localize`Gestiona les capes d'arquitectura disponibles per classificar tecnologies.`,
   technologies: $localize`Gestiona el catàleg de tecnologies i la capa associada a cadascuna.`,
+  externalSystems: $localize`:@@maintenanceExternalSystemsDescription:Gestiona els sistemes aliens a l'inventari amb què s'integren les aplicacions i l'empresa responsable de cadascun.`,
 };
 
+export const INTEGRATIONS_COMPANY_OPTIONS_LOAD_ERROR = $localize`:@@maintenanceIntegrationsCompaniesError:No s'han pogut carregar les empreses disponibles per als sistemes externs.`;
 export const DEVELOPMENT_LAYER_OPTIONS_LOAD_ERROR = $localize`No s'han pogut carregar les capes disponibles per a les tecnologies.`;

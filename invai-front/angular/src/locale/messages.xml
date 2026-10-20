@@ -6340,6 +6340,11 @@
           <context context-type="linenumber">10</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="applicationsDir3CheckLabel" datatype="html"><source>Validar DIR3 de totes</source></trans-unit>
+      <trans-unit id="applicationsDir3CheckProgress" datatype="html"><source>Validant el DIR3 de totes les aplicacions…</source></trans-unit>
+      <trans-unit id="applicationsDir3CheckSuccess" datatype="html"><source>Validació DIR3 completada</source></trans-unit>
+      <trans-unit id="applicationsDir3CheckMismatches" datatype="html"><source>Aplicacions amb discrepàncies DIR3: <x id="PH" equiv-text="count"/>.</source></trans-unit>
+      <trans-unit id="applicationsDir3CheckError" datatype="html"><source>No s&apos;ha pogut completar la validació DIR3.</source></trans-unit>
       <trans-unit id="4700467232389602501" datatype="html">
         <source>No s&apos;han trobat persones actives</source>
         <context-group purpose="location">
@@ -8617,8 +8622,8 @@
           <context context-type="linenumber">62</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8664369639130489188" datatype="html">
-        <source>Persones</source>
+      <trans-unit id="responsibleExternalPeopleTitle" datatype="html">
+        <source>Personal extern</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/maintenances/responsibles/responsibles.i18n.ts</context>
           <context context-type="linenumber">66</context>
@@ -11910,11 +11915,38 @@
       <trans-unit id="applicationWebContextVerify" datatype="html">
         <source>Verificar</source>
       </trans-unit>
-      <trans-unit id="applicationWebContextVerificationPending" datatype="html">
-        <source>La verificació de contextos web encara no està implementada.</source>
+      <trans-unit id="applicationWebContextVerified" datatype="html">
+        <source>Verificat</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationTitle" datatype="html">
+        <source>Verifica el context web</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationContext" datatype="html">
+        <source>Context web</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationReason" datatype="html">
+        <source>Motiu de la verificació</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationReasonRequired" datatype="html">
+        <source>Indica el motiu de la verificació.</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationCancel" datatype="html">
+        <source>Cancel·la la verificació</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationClose" datatype="html">
+        <source>Tanca el diàleg de verificació</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationSuccess" datatype="html">
+        <source>El context web s'ha verificat correctament.</source>
+      </trans-unit>
+      <trans-unit id="applicationWebContextVerificationError" datatype="html">
+        <source>No s'ha pogut verificar el context web. Revisa el seu estat i torna-ho a provar.</source>
       </trans-unit>
       <trans-unit id="applicationDevelopmentWebContextsLoadError" datatype="html">
         <source>No s'han pogut carregar els contextos web o els seus catàlegs.</source>
+      </trans-unit>
+      <trans-unit id="applicationDevelopmentWebContextAnchorRequired" datatype="html">
+        <source>Desa primer les dades generals de Desenvolupament per poder gestionar els contextos web.</source>
       </trans-unit>
       <trans-unit id="applicationWebContextPendingVerification" datatype="html">
         <source>Context web pendent de verificar.</source>

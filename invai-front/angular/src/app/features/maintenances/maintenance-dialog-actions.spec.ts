@@ -20,6 +20,8 @@ import { RoleDialog } from '@features/roles/components/role-dialog/role-dialog';
 import { createRoleForm } from '@features/roles/forms/role-form.factory';
 import { TechnologyDialog } from '@features/technologies/components/technology-dialog/technology-dialog';
 import { createTechnologyForm } from '@features/technologies/forms/technology-form.factory';
+import { ExternalSystemDialog } from '@features/external-systems/components/external-system-dialog/external-system-dialog';
+import { createExternalSystemForm } from '@features/external-systems/forms/external-system-form.factory';
 
 interface DialogScenario {
   name: string;
@@ -41,6 +43,12 @@ const SCENARIOS: DialogScenario[] = [
     component: TechnologyDialog,
     createForm: createTechnologyForm,
     inputs: { layerOptions: [] },
+  },
+  {
+    name: 'external system',
+    component: ExternalSystemDialog,
+    createForm: createExternalSystemForm,
+    inputs: { companyOptions: [] },
   },
 ];
 

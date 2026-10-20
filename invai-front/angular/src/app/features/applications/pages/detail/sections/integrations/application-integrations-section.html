@@ -1,0 +1,137 @@
+<app-application-detail-section-layout
+  titleId="application-integrations-section-title"
+  [title]="sectionTitle"
+>
+  @if (detailState.canEdit()) {
+    <app-application-detail-section-actions
+      section-actions
+      [isEditing]="detailState.isEditing('integrations')"
+      [isSaving]="isSaving()"
+      [sectionLabel]="sectionTitle"
+      (cancel)="cancelEditing()"
+      (edit)="startEditing()"
+      (save)="save()"
+    />
+  }
+
+  @if (problem(); as problem) {
+    <div class="application-integrations__problem" [attr.aria-busy]="anchorLoading()">
+      <p role="alert">{{ problem }}</p>
+      @if (detailState.integrationStatus() !== 'deleted') {
+        <p-button
+          [ariaLabel]="messages.retry"
+          [icon]="icons.REFRESH"
+          [label]="messages.retry"
+          [loading]="anchorLoading()"
+          (onClick)="retry()"
+        />
+      }
+    </div>
+  }
+
+  @if (showContent()) {
+    <div class="application-integrations">
+      <section class="application-integrations__connections" [attr.aria-labelledby]="connectionsTitleId">
+        <div class="application-integrations__connections-header">
+          <h3 tabindex="-1" [id]="connectionsTitleId">{{ connectionsTitle }}</h3>
+          @if (connections.showActions()) {
+            <p-button
+              styleClass="invai-table-toolbar-button"
+              type="button"
+              [ariaLabel]="addAriaLabel"
+              [disabled]="!connections.canManage()"
+              [icon]="icons.PLUS"
+              (onClick)="connections.create()"
+            />
+          }
+        </div>
+        @if (anchorRequired()) {
+          <p>{{ messages.anchorRequired }}</p>
+        }
+        @if (connections.loadError(); as loadError) {
+          <div class="application-integrations__problem" [attr.aria-busy]="connections.loading()">
+            <p role="alert">{{ loadError }}</p>
+            <p-button
+              severity="secondary"
+              [ariaLabel]="messages.retry"
+              [icon]="icons.REFRESH"
+              [label]="messages.retry"
+              [loading]="connections.loading()"
+              [outlined]="true"
+              (onClick)="connections.reload()"
+            />
+          </div>
+        }
+        <app-application-integrations-table
+          [columns]="columns"
+          [first]="connections.first()"
+          [isLoading]="connections.loading()"
+          [isReadOnly]="!connections.canManage()"
+          [itemsList]="connections.items()"
+          [showActions]="connections.showActions()"
+          (onPageChange)="connections.onPage($event)"
+          (onSelectAction)="connections.onAction($event)"
+        />
+      </section>
+
+      <section class="application-integrations__observations" [attr.aria-labelledby]="observationsLabelId">
+        <h3 [id]="observationsLabelId">{{ observationsLabel }}</h3>
+        @if (detailState.isEditing('integrations')) {
+          <p-editor
+            [formControl]="detailState.integrationsForm.controls.observations"
+            [style]="{ height: '10rem' }"
+            (onInit)="labelEditor($event)"
+          />
+        } @else {
+          <div
+            class="invai-form-static-value invai-form-static-value--rich"
+            [attr.aria-labelledby]="observationsLabelId"
+            [innerHTML]="richTextValue(detailState.integrationsForm.controls.observations.value)"
+          ></div>
+        }
+      </section>
+    </div>
+  }
+</app-application-detail-section-layout>
+
+@if (connections.visible()) {
+  <app-application-integration-connection-dialog
+    [(visible)]="connections.visible"
+    [applicationSearch]="connections.applicationSearch()"
+    [canEdit]="connections.canEdit()"
+    [catalogsLoading]="connections.catalogsLoading()"
+    [externalSystemOptions]="connections.externalSystemOptions()"
+    [form]="connections.form"
+    [isDeleting]="connections.deleting()"
+    [isSaving]="connections.saving()"
+    [mode]="connections.mode()"
+    [roleSearch]="connections.roleSearch()"
+    [selected]="connections.selected()"
+    [technologyOptions]="connections.technologyOptions()"
+    [userSearch]="connections.userSearch()"
+    (applicationSearchRequested)="connections.searchApplications($event)"
+    (cancelEdit)="connections.cancelEdit()"
+    (closed)="connections.close()"
+    (deactivate)="connections.requestDelete()"
+    (edit)="connections.edit()"
+    (roleSearchRequested)="connections.searchRoles($event)"
+    (submitForm)="connections.save()"
+    (userSearchRequested)="connections.searchUsers($event)"
+  />
+}
+@if (connections.deleteVisible()) {
+  <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
+    [(visible)]="connections.deleteVisible"
+    [cancelAriaLabel]="deleteDialog.cancelAriaLabel"
+    [cancelLabel]="deleteDialog.cancelLabel"
+    [confirmAriaLabel]="deleteDialog.confirmAriaLabel"
+    [confirmLabel]="deleteDialog.confirmLabel"
+    [message]="deleteDialog.message"
+    [pending]="connections.deleting()"
+    [title]="deleteDialog.title"
+    (cancel)="connections.closeDelete()"
+    (confirm)="connections.confirmDelete()"
+    (dismissed)="connections.closeDelete()"
+  />
+}

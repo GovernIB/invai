@@ -17,6 +17,8 @@ export interface ResponsiblePerson extends ResponsibleMaintenanceEntity {
   lastName: string;
   email: string;
   personalCaib: boolean;
+  // Soffid user code (e.g. u00004); null for external persons and legacy CAIB records.
+  userName?: string | null;
 }
 
 export interface SoffidPersonCandidate {
@@ -27,6 +29,8 @@ export interface SoffidPersonCandidate {
   email: string;
   personalCaib: true;
   deletedAt: null;
+  // Soffid user code (e.g. u00004); absent in payloads built before the backend exposed it.
+  userName?: string | null;
 }
 
 export interface SoffidPersonOption extends SoffidPersonCandidate {

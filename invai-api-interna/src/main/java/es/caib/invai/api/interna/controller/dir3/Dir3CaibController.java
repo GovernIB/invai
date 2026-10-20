@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Exposes DIR3CAIB's organizational unit tree to {@code invai-back}.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Tag(name = "DIR3CAIB", description = "Consulta de l'arbre d'unitats organitzatives de DIR3CAIB.")
 @RestController

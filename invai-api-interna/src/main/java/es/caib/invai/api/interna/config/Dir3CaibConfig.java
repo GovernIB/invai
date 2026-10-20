@@ -15,7 +15,7 @@ import java.time.Duration;
  * Configures the {@link WebClient} bean used to call the external DIR3CAIB service (the CAIB's
  * implementation of Spain's Directorio Común, a catalog of administrative organizational units).
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Configuration
 public class Dir3CaibConfig {

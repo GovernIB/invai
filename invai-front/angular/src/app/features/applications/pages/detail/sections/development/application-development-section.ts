@@ -128,6 +128,7 @@ import {
   APPLICATION_DEVELOPMENT_TECHNOLOGY_OPTIONS_LOAD_ERROR,
   APPLICATION_DEVELOPMENT_STANDARD_ADAPTIONS_LOAD_ERROR,
   APPLICATION_DEVELOPMENT_URL_ERROR,
+  APPLICATION_DEVELOPMENT_WEB_CONTEXT_ANCHOR_REQUIRED,
 } from './application-development-section.i18n';
 import {
   APPLICATION_DEVELOPMENT_RESOLVE_KEY,
@@ -166,6 +167,7 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected readonly webContextColumns = APPLICATION_SECURITY_WEB_CONTEXT_COLUMNS;
   protected readonly addWebContextAriaLabel = APPLICATION_SECURITY_ADD_ARIA_LABELS['web-context'];
   protected readonly webContextAnchorRequired = APPLICATION_SECURITY_ANCHOR_REQUIRED;
+  protected readonly webContextDevelopmentAnchorRequired = APPLICATION_DEVELOPMENT_WEB_CONTEXT_ANCHOR_REQUIRED;
   protected readonly webContextDeleteDialog = APPLICATION_SECURITY_DELETE_DIALOG;
 
   private readonly route = inject(ActivatedRoute);

@@ -3,14 +3,17 @@ package es.caib.invai.back.persistence.model.application.responsibleAuthorized.t
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.*;
+import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.authorizationType.AuthorizationTypeEntity;
 
+import java.io.Serial;
+
 /**
  * JPA persistent intermediate (join) entity linking an {@link AppAuthorizedEntity} anchor
- * to one of the multiple {@link AuthorizationTypeEntity} catalog values it may hold. Deliberately
- * lightweight (no audit trail, no soft-delete): attaching/detaching a type is a plain
- * insert/hard-delete of this row.
+ * to one of the multiple {@link AuthorizationTypeEntity} catalog values it may hold. Audited and
+ * soft-deleted since 1.0.5 (see {@link AppAuthorizedTypeLinkAudEntity}) - detaching a type sets
+ * {@code deletedAt}/{@code deletedBy} rather than physically removing the row.
  *
  * @since 1.0.3
  */
@@ -18,7 +21,10 @@ import es.caib.invai.back.persistence.model.maintenance.responsible.authorizatio
 @Table(name = "INV_APP_AUTHORIZED_TYPE_LINK")
 @Getter
 @Setter
-public class AppAuthorizedTypeLinkEntity {
+public class AppAuthorizedTypeLinkEntity extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /** Primary key unique identifier. */
     @Id

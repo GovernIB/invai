@@ -3,6 +3,7 @@
   [class.section-actions--without-search]="hideQuickSearch()"
   [class.section-actions--on-primary]="appearance() === 'on-primary'"
 >
+  <ng-content select="[before-search]"></ng-content>
   @if (!hideQuickSearch()) {
     <div class="section-actions__search relative flex w-[400px] max-w-full items-center">
       <span

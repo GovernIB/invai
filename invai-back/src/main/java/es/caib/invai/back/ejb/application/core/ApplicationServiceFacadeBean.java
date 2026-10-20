@@ -1,10 +1,12 @@
 package es.caib.invai.back.ejb.application.core;
 
 import es.caib.invai.back.exception.BusinessRuleException;
+import es.caib.invai.back.interna.catalog.admUnit.DTO.AdmUnitOutputDTO;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
-import es.caib.invai.back.interna.integrations.dir3.admUnit.DTO.AdmUnitOutputDTO;
 import es.caib.invai.back.persistence.repository.application.accessibility.AppAccessibilityRepository;
+import es.caib.invai.back.persistence.repository.application.data.AppDataRepository;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationRepository;
 import es.caib.invai.back.persistence.repository.application.development.core.AppDevelopmentRepository;
@@ -16,17 +18,24 @@ import es.caib.invai.back.persistence.repository.application.system_database.dat
 import es.caib.invai.back.persistence.repository.application.system_database.system.AppSystemCriteria;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.core.AppResponsibleAuthorizedRepository;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.authorized.AppAuthorizedRepository;
+import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.dir3.Dir3ValidationRepository;
+import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible.AppResponsibleCriteria;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible.AppResponsibleRepository;
+import es.caib.invai.back.persistence.repository.application.integration.core.AppIntegrationRepository;
+import es.caib.invai.back.persistence.repository.application.integration.connection.AppIntegrationConnectionCriteria;
 import es.caib.invai.back.persistence.repository.application.security.core.AppSecurityRepository;
 import es.caib.invai.back.persistence.repository.catalog.responsibleType.ResponsibleTypeRepository;
 import es.caib.invai.back.service.facade.application.core.ApplicationService;
+import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.facade.application.security.ensClassification.AppEnsClassificationService;
 import es.caib.invai.back.service.facade.application.security.risk.AppSecurityRiskService;
 import es.caib.invai.back.service.facade.application.security.webContext.AppWebContextService;
 import es.caib.invai.back.service.facade.application.system_database.database.AppDatabaseService;
 import es.caib.invai.back.service.facade.application.system_database.system.AppSystemService;
-import es.caib.invai.back.service.facade.integrations.dir3.admUnit.AdmUnitService;
+import es.caib.invai.back.service.facade.application.integration.connection.AppIntegrationConnectionService;
+import es.caib.invai.back.service.facade.catalog.admUnit.AdmUnitService;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
+import es.caib.invai.back.service.model.application.integration.core.AppIntegration;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
@@ -40,27 +49,38 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import es.caib.invai.back.service.model.application.accessibility.AppAccessibility;
+import es.caib.invai.back.service.model.application.data.AppData;
 import es.caib.invai.back.service.model.application.development.core.AppDevelopment;
 import es.caib.invai.back.service.model.application.system_database.core.AppInformationSystemDb;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
+import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
+import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
+import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.application.core.Application;
+import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
+import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonDir3CheckOutputDTO;
 
 /**
  * Facade service implementation for managing system Application objects.
  * Handles status assignments, internal cascading operations, and dynamic criteria filtering.
  * <p>
  * {@link #getById} additionally computes completeness flags for the Responsables,
- * Desenvolupament, Accessibilitat, Seguretat, and System Database (Sistemes/Bases de dades) tabs
+ * Desenvolupament, Accessibilitat, Seguretat, System Database (Sistemes/Bases de dades), and
+ * Integracio tabs
  * ({@code missingResponsibleTypes}, {@code missingAuthorized}, {@code missingDevelopmentFields},
  * {@code missingAccessibilityFields}, {@code missingSecurityData}, {@code missingSystems},
- * {@code missingDatabases} on {@link ApplicationOutputDTO}) — see {@link #isDevelopmentIncomplete},
- * {@link #hasUnfilledResponsibleType}, {@link #hasNoActiveAuthorized}, {@link
- * #isAccessibilityIncomplete}, {@link #isSecurityIncomplete}, {@link #hasNoActiveSystem} and
- * {@link #hasNoActiveDatabase}. {@code create}/{@code update}/{@code reactivate} do not compute
- * these flags.
+ * {@code missingDatabases}, {@code missingIntegrationData} on {@link ApplicationOutputDTO}) — see
+ * {@link #isDevelopmentIncomplete}, {@link #hasUnfilledResponsibleType}, {@link
+ * #hasNoActiveAuthorized}, {@link #isAccessibilityIncomplete}, {@link #isSecurityIncomplete},
+ * {@link #hasNoActiveSystem}, {@link #hasNoActiveDatabase} and {@link #hasNoActiveConnection}.
+ * {@code create}/{@code update}/{@code reactivate} do not compute these flags.
  * </p>
  *
  * @since 1.0.1
@@ -124,6 +144,18 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     @Autowired
     private AppAccessibilityRepository appAccessibilityRepository;
 
+    /** Repository handling persistence of the "Open Data" tab linked to an application. */
+    @Autowired
+    private AppDataRepository appDataRepository;
+
+    /** Repository handling persistence of the "Integracio" tab linked to an application. */
+    @Autowired
+    private AppIntegrationRepository appIntegrationRepository;
+
+    /** Facade used to check for at least one active integration connection on an integration anchor. */
+    @Autowired
+    private AppIntegrationConnectionService appIntegrationConnectionService;
+
     /** Facade used to check for at least one active "Web Context" record on a security anchor. */
     @Autowired
     private AppWebContextService appWebContextService;
@@ -140,16 +172,24 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     @Autowired
     private AdmUnitService admUnitService;
 
+    /** Facade used to check a person's DIR3 against an administrative unit code when recalculating DIR3 validation statuses. */
+    @Autowired
+    private PersonService personService;
+
+    /** Repository used to update the DIR3 validation record linked to each responsible/authorized assignment. */
+    @Autowired
+    private Dir3ValidationRepository dir3ValidationRepository;
+
     /**
      * Retrieves an application by its unique identifier, together with its linked
      * information system database, development, and responsible/authorized records. Every tab's
      * completeness flag is computed here and passed straight into
      * {@link ApplicationMapper#toResponse(Application, AppInformationSystemDb, AppDevelopment,
      * AppResponsibleAuthorized, AppSecurity, AppAccessibility, Boolean, Boolean, Boolean, Boolean,
-     * Boolean, Boolean, Boolean)} so the response DTO comes back fully populated in one call (see {@link
-     * #isDevelopmentIncomplete}, {@link #hasUnfilledResponsibleType}, {@link #hasNoActiveAuthorized},
-     * {@link #isAccessibilityIncomplete}, {@link #isSecurityIncomplete}, {@link #hasNoActiveSystem}
-     * and {@link #hasNoActiveDatabase}).
+     * Boolean, Boolean, Boolean, Boolean)} so the response DTO comes back fully populated in one call
+     * (see {@link #isDevelopmentIncomplete}, {@link #hasUnfilledResponsibleType}, {@link
+     * #hasNoActiveAuthorized}, {@link #isAccessibilityIncomplete}, {@link #isSecurityIncomplete},
+     * {@link #hasNoActiveSystem}, {@link #hasNoActiveDatabase} and {@link #hasNoActiveConnection}).
      *
      * @param id primary key of the application to fetch
      * @return the mapped {@link ApplicationOutputDTO} representation
@@ -170,6 +210,8 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
         AppResponsibleAuthorized appResponsibleAuthorized = fetchSingleAppResponsibleAuthorized(id);
         AppSecurity appSecurity = fetchSingleAppSecurity(id);
         AppAccessibility appAccessibility = fetchSingleAppAccessibility(id);
+        AppData appData = fetchSingleAppData(id);
+        AppIntegration appIntegration = fetchSingleAppIntegration(id);
 
         boolean missingDevelopmentFields = isDevelopmentIncomplete(appDevelopment);
         boolean missingResponsibleTypes = hasUnfilledResponsibleType(appResponsibleAuthorized);
@@ -178,15 +220,18 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
         boolean missingSecurityData = isSecurityIncomplete(appSecurity);
         boolean missingSystems = hasNoActiveSystem(appInformationSystemDb);
         boolean missingDatabases = hasNoActiveDatabase(appInformationSystemDb);
+        boolean missingIntegrationData = hasNoActiveConnection(appIntegration);
 
         ApplicationOutputDTO response = applicationMapper.toResponse(application, appInformationSystemDb, appDevelopment, appResponsibleAuthorized, appSecurity, appAccessibility,
                 missingDevelopmentFields, missingResponsibleTypes, missingAuthorized,
                 missingAccessibilityFields, missingSecurityData,
-                missingSystems, missingDatabases);
+                missingSystems, missingDatabases, missingIntegrationData);
         response.setIncomplete(missingDevelopmentFields || missingResponsibleTypes || missingAuthorized
-                || missingAccessibilityFields || missingSecurityData || missingSystems || missingDatabases);
+                || missingAccessibilityFields || missingSecurityData || missingSystems || missingDatabases
+                || missingIntegrationData);
         response.setAdmUnit(admUnitService.resolveByCode(application.getAdmUnitCode()));
-        response.setDepartment(admUnitService.resolveDepartment(application.getAdmUnitCode()));
+        response.setAppDataId(appData != null ? appData.getId() : null);
+        response.setAppIntegrationId(appIntegration != null ? appIntegration.getId() : null);
         return response;
     }
 
@@ -215,9 +260,11 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
         }
 
         Page<Application> domainPage = applicationRepository.findAll(criteria, pageable);
+        Map<String, AdmUnitOutputDTO> admUnitsByCode = admUnitService.getAdmUnitsByCodes(
+                domainPage.getContent().stream().map(Application::getAdmUnitCode).toList());
         return domainPage.map(application -> {
             ApplicationOutputDTO dto = applicationMapper.toResponse(application);
-            dto.setAdmUnit(admUnitService.resolveByCode(application.getAdmUnitCode()));
+            dto.setAdmUnit(admUnitsByCode.get(application.getAdmUnitCode()));
             dto.setIncomplete(incompleteFilter != null ? incompleteFilter : isIncomplete(application.getId()));
             return dto;
         });
@@ -226,14 +273,15 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     /**
      * Creates a new application and automatically instantiates and persists default
      * AppInformationSystemDb, Development, AppResponsibleAuthorized ("Responsables i Autoritzats" tab),
-     * AppSecurity ("Seguretat" tab), and AppAccessibility ("Accessibilitat" tab) records bound to it.
+     * AppSecurity ("Seguretat" tab), AppAccessibility ("Accessibilitat" tab), AppData ("Open Data"
+     * tab), and AppIntegration ("Integracio" tab) records bound to it.
      */
     @Override
     public ApplicationOutputDTO create(ApplicationInputDTO inputDTO) {
         log.info(Constants.LOG_FACADE_CREATE, inputDTO.getCode());
 
         Utils.sanitize(inputDTO);
-        validateAdmUnitCode(inputDTO.getAdmUnitCode());
+        admUnitService.validateAdmUnitCode(inputDTO.getAdmUnitCode());
 
         if (applicationRepository.existsByCode(inputDTO.getCode())) {
             throw new BusinessRuleException(Constants.ERR_CODE_DUPLICATED);
@@ -268,8 +316,18 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
         appAccessibilityModel.setApplication(savedModel);
         AppAccessibility savedAppAccessibility = appAccessibilityRepository.create(appAccessibilityModel);
 
+        AppData appDataModel = new AppData();
+        appDataModel.setApplication(savedModel);
+        AppData savedAppData = appDataRepository.create(appDataModel);
+
+        AppIntegration appIntegrationModel = new AppIntegration();
+        appIntegrationModel.setApplication(savedModel);
+        AppIntegration savedAppIntegration = appIntegrationRepository.create(appIntegrationModel);
+
         ApplicationOutputDTO response = applicationMapper.toResponse(savedModel, savedInfoDb, savedDev, savedAppResponsibleAuthorized, savedAppSecurity, savedAppAccessibility);
         response.setAdmUnit(admUnitService.resolveByCode(savedModel.getAdmUnitCode()));
+        response.setAppDataId(savedAppData != null ? savedAppData.getId() : null);
+        response.setAppIntegrationId(savedAppIntegration != null ? savedAppIntegration.getId() : null);
         return response;
     }
 
@@ -290,7 +348,7 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
         }
 
         Utils.sanitize(inputDTO);
-        validateAdmUnitCode(inputDTO.getAdmUnitCode());
+        admUnitService.validateAdmUnitCode(inputDTO.getAdmUnitCode());
 
         if (applicationRepository.existsByCodeAndIdNot(inputDTO.getCode(), id)) {
             throw new BusinessRuleException(Constants.ERR_CODE_OWNED_BY_OTHER);
@@ -299,6 +357,7 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
             throw new BusinessRuleException(Constants.ERR_PREFIX_OWNED_BY_OTHER);
         }
 
+        String oldAdmUnitCode = existing.getAdmUnitCode();
         applicationMapper.updateModelFromInput(inputDTO, existing);
         Application updatedModel = applicationRepository.update(existing, id);
 
@@ -323,6 +382,10 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
             appResponsibleAuthorized = appResponsibleAuthorizedRepository.create(appResponsibleAuthorized);
         }
 
+        if (!Objects.equals(oldAdmUnitCode, updatedModel.getAdmUnitCode())) {
+            recalculateDir3Statuses(appResponsibleAuthorized.getId(), updatedModel.getAdmUnitCode());
+        }
+
         AppSecurity appSecurity = fetchSingleAppSecurity(id);
         if (appSecurity == null) {
             appSecurity = new AppSecurity();
@@ -337,8 +400,24 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
             appAccessibility = appAccessibilityRepository.create(appAccessibility);
         }
 
+        AppData appData = fetchSingleAppData(id);
+        if (appData == null) {
+            appData = new AppData();
+            appData.setApplication(updatedModel);
+            appData = appDataRepository.create(appData);
+        }
+
+        AppIntegration appIntegration = fetchSingleAppIntegration(id);
+        if (appIntegration == null) {
+            appIntegration = new AppIntegration();
+            appIntegration.setApplication(updatedModel);
+            appIntegration = appIntegrationRepository.create(appIntegration);
+        }
+
         ApplicationOutputDTO response = applicationMapper.toResponse(updatedModel, infoDb, dev, appResponsibleAuthorized, appSecurity, appAccessibility);
         response.setAdmUnit(admUnitService.resolveByCode(updatedModel.getAdmUnitCode()));
+        response.setAppDataId(appData != null ? appData.getId() : null);
+        response.setAppIntegrationId(appIntegration != null ? appIntegration.getId() : null);
         return response;
     }
 
@@ -401,6 +480,20 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
             appAccessibility.setDeletedBy(currentUser);
             appAccessibilityRepository.delete(appAccessibility);
         }
+
+        AppData appData = fetchSingleAppData(id);
+        if (appData != null && appData.getDeletedAt() == null) {
+            appData.setDeletedAt(now);
+            appData.setDeletedBy(currentUser);
+            appDataRepository.delete(appData);
+        }
+
+        AppIntegration appIntegration = fetchSingleAppIntegration(id);
+        if (appIntegration != null && appIntegration.getDeletedAt() == null) {
+            appIntegration.setDeletedAt(now);
+            appIntegration.setDeletedBy(currentUser);
+            appIntegrationRepository.delete(appIntegration);
+        }
     }
 
     /**
@@ -460,10 +553,92 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
             appAccessibility = appAccessibilityRepository.update(appAccessibility, appAccessibility.getId());
         }
 
+        AppData appData = fetchSingleAppData(id);
+        if (appData != null && appData.getDeletedAt() != null) {
+            appData.setDeletedAt(null);
+            appData.setDeletedBy(null);
+            appData = appDataRepository.update(appData, appData.getId());
+        }
+
+        AppIntegration appIntegration = fetchSingleAppIntegration(id);
+        if (appIntegration != null && appIntegration.getDeletedAt() != null) {
+            appIntegration.setDeletedAt(null);
+            appIntegration.setDeletedBy(null);
+            appIntegration = appIntegrationRepository.update(appIntegration, appIntegration.getId());
+        }
+
         ApplicationOutputDTO response = applicationMapper.toResponse(updatedModel, infoDb, dev, appResponsibleAuthorized, appSecurity, appAccessibility);
         response.setAdmUnit(admUnitService.resolveByCode(updatedModel.getAdmUnitCode()));
+        response.setAppDataId(appData != null ? appData.getId() : null);
+        response.setAppIntegrationId(appIntegration != null ? appIntegration.getId() : null);
         return response;
     }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Applications with a blank administrative unit, or with no "Responsables i Autoritzats" anchor
+     * yet, are skipped entirely - their assignments can never mismatch (see
+     * {@link Dir3ValidationStatus#resolve}); if either was previously flagged as mismatching (e.g.
+     * the administrative unit was cleared afterward), the stale flag is cleared. Every
+     * {@code VALIDATED}, {@code NOT_VALIDATED}, or {@code MANUAL} assignment is always checked live
+     * against Soffid; only {@code NOT_APPLY} is skipped outright. {@code MANUAL} is promotable to
+     * {@code VALIDATED} on a match, but protected from the change status (see
+     * {@link #checkDir3AndModifiedStatus}).
+     * </p>
+     * <p>
+     * A single {@code hasMismatch} signal, computed per application from the resulting status of
+     * every active, Personal CAIB assignment after the check above ({@code true} if any of them is
+     * left {@code NOT_VALIDATED} - {@code MANUAL} never counts), drives both outcomes: it's persisted
+     * as-is on {@code Application.dir3Mismatch} (written only when it actually differs from the
+     * currently stored value, so a run that changes nothing writes nothing), and it decides whether
+     * the application is included in the returned list - which therefore reports every application
+     * currently mismatching, not just ones that changed in this run.
+     * </p>
+     */
+    @Override
+    public List<ApplicationDir3MismatchOutputDTO> checkDir3MismatchForAllApplications() {
+        log.info("Facade: Auditing DIR3 mismatches across every application");
+        List<ApplicationDir3MismatchOutputDTO> mismatchedApplications = new ArrayList<>();
+        for (Application application : applicationRepository.findAll(new ApplicationCriteria(), Pageable.unpaged())) {
+            if (StringUtils.isBlank(application.getAdmUnitCode())) {
+                clearDir3MismatchIfSet(application);
+                continue;
+            }
+            AppResponsibleAuthorized anchor = appResponsibleAuthorizedRepository.findByApplicationId(application.getId());
+            if (anchor == null) {
+                clearDir3MismatchIfSet(application);
+                continue;
+            }
+            boolean hasMismatch = false;
+            AppResponsibleCriteria activeCriteria = AppResponsibleCriteria.builder().statusId(StatusEnum.ACTIVE.getId()).build();
+            for (AppResponsible responsible : appResponsibleRepository.findAll(anchor.getId(), activeCriteria, Pageable.unpaged())) {
+                checkDir3AndModifiedStatus(responsible.getPerson(), responsible.getDir3Validation(), application.getAdmUnitCode());
+                if (responsible.getDir3Validation().getDir3Status() == Dir3ValidationStatus.NOT_VALIDATED) {
+                    hasMismatch = true;
+                }
+            }
+            for (AppAuthorized authorized : appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(anchor.getId())) {
+                checkDir3AndModifiedStatus(authorized.getPerson(), authorized.getDir3Validation(), application.getAdmUnitCode());
+                if (authorized.getDir3Validation().getDir3Status() == Dir3ValidationStatus.NOT_VALIDATED) {
+                    hasMismatch = true;
+                }
+            }
+            if (application.isDir3Mismatch() != hasMismatch) {
+                application.setDir3Mismatch(hasMismatch);
+                applicationRepository.update(application, application.getId());
+            }
+            if (hasMismatch) {
+                mismatchedApplications.add(ApplicationDir3MismatchOutputDTO.builder()
+                        .id(application.getId())
+                        .name(application.getName())
+                        .dir3Mismatch(true)
+                        .build());
+            }
+        }
+        return mismatchedApplications;
+    }
+
 
     /**
      * Fetches the {@code AppInformationSystemDb} anchor linked to the given application, if any.
@@ -519,10 +694,34 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     }
 
     /**
+     * Fetches the {@code AppData} anchor linked to the given application, if any. Like
+     * {@code AppInformationSystemDb}/{@code AppDevelopment}/{@code AppResponsibleAuthorized}/
+     * {@code AppSecurity}/{@code AppAccessibility}, this anchor is auto-created by {@link #create},
+     * so it should only be {@code null} for applications created before this anchor was introduced.
+     *
+     * @param applicationId identifier of the owning application
+     * @return the linked open data anchor, or {@code null} if none exists
+     */
+    private AppData fetchSingleAppData(Long applicationId) {
+        return appDataRepository.findByApplicationId(applicationId);
+    }
+
+    /**
+     * Fetches the {@code AppIntegration} anchor linked to the given application, if any.
+     *
+     * @param applicationId identifier of the owning application
+     * @return the linked integration anchor, or {@code null} if none exists
+     */
+    private AppIntegration fetchSingleAppIntegration(Long applicationId) {
+        return appIntegrationRepository.findByApplicationId(applicationId);
+    }
+
+    /**
      * Checks whether the given application has at least one incomplete tab, via the exact same
      * per-tab checks {@link #getById} computes ({@link #isDevelopmentIncomplete}, {@link
      * #hasUnfilledResponsibleType}, {@link #hasNoActiveAuthorized}, {@link #isAccessibilityIncomplete},
-     * {@link #isSecurityIncomplete}, {@link #hasNoActiveSystem}, {@link #hasNoActiveDatabase}) — used
+     * {@link #isSecurityIncomplete}, {@link #hasNoActiveSystem}, {@link #hasNoActiveDatabase} and
+     * {@link #hasNoActiveConnection}) — used
      * by {@link #getAll} to populate {@code incomplete} per row. Costs the same handful of lookups
      * per application as {@link #getById} does for one, so it is only called once per row actually
      * being returned (or, when filtering by {@code incomplete}, once per application in the system —
@@ -540,7 +739,8 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
                 || isAccessibilityIncomplete(fetchSingleAppAccessibility(applicationId))
                 || isSecurityIncomplete(fetchSingleAppSecurity(applicationId))
                 || hasNoActiveSystem(appInformationSystemDb)
-                || hasNoActiveDatabase(appInformationSystemDb);
+                || hasNoActiveDatabase(appInformationSystemDb)
+                || hasNoActiveConnection(fetchSingleAppIntegration(applicationId));
     }
 
     /**
@@ -576,7 +776,7 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     }
 
     /**
-     * Checks whether the given anchor is missing, or has no active authorized person at all.
+     * Checks whether the given anchor is missing or has no active authorized person at all.
      *
      * @param appResponsibleAuthorized the anchor to check, possibly {@code null}
      * @return {@code true} if the anchor is missing, or no active authorized person exists on it
@@ -602,7 +802,7 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
                 || appAccessibility.getCompliance() == null
                 || appAccessibility.getPublicUrl() == null
                 || appAccessibility.getMobileApplication() == null
-                || (Boolean.TRUE.equals(appAccessibility.getMobileApplication()) && appAccessibility.getMobileApplicationName() == null)
+                || (appAccessibility.getMobileApplication() && appAccessibility.getMobileApplicationName() == null)
                 || appAccessibility.getExpireDate() == null;
     }
 
@@ -629,7 +829,7 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     }
 
     /**
-     * Checks whether the given information system database anchor is missing, or has no active
+     * Checks whether the given information system database anchor is missing or has no active
      * system link at all.
      *
      * @param appInformationSystemDb the anchor to check, possibly {@code null}
@@ -644,7 +844,7 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     }
 
     /**
-     * Checks whether the given information system database anchor is missing, or has no active
+     * Checks whether the given information system database anchor is missing or has no active
      * database link at all.
      *
      * @param appInformationSystemDb the anchor to check, possibly {@code null}
@@ -659,29 +859,124 @@ public class ApplicationServiceFacadeBean implements ApplicationService {
     }
 
     /**
-     * Validates that {@code admUnitCode}, when provided, matches a unit in the live DIR3CAIB tree
-     * and sits strictly below department (Conselleria) level — an application must link to a
-     * specific unit within a department, never to the department itself. No local record is
-     * created or referenced — the code is simply stored on the application as given. Blank/
-     * {@code null} is valid: the administrative unit is optional.
+     * Checks whether the given integration anchor is missing or has no active integration
+     * connection at all.
      *
-     * @param admUnitCode the DIR3CAIB code supplied on the create/update payload, may be blank or {@code null}
-     * @throws BusinessRuleException if {@code admUnitCode} is non-blank and has no match in
-     * DIR3CAIB, matches a unit at or above department level, or DIR3CAIB cannot be reached (using
-     * {@link AdmUnitService#resolveByCodeOrThrow}
-     * rather than the null-swallowing {@code resolveByCode}, so an outage is reported as
-     * "unavailable" instead of being misreported as "code not found")
+     * @param appIntegration the anchor to check, possibly {@code null}
+     * @return {@code true} if the anchor is missing, or no active connection exists on it
      */
-    private void validateAdmUnitCode(String admUnitCode) {
-        if (StringUtils.isBlank(admUnitCode)) {
+    private boolean hasNoActiveConnection(AppIntegration appIntegration) {
+        if (appIntegration == null) {
+            return true;
+        }
+        return appIntegrationConnectionService.getAll(appIntegration.getId(),
+                AppIntegrationConnectionCriteria.builder().statusId(StatusEnum.ACTIVE.getId()).build(), FIRST_ROW).isEmpty();
+    }
+
+    /**
+     * Recalculates the DIR3 validation status of every active responsible/authorized assignment on
+     * the given anchor against the application's new administrative unit code, whenever that code
+     * has just changed. Applied uniformly regardless of the assignment's current status - this can
+     * revert a {@code MANUAL} override back to {@code VALIDATED} (if the new unit genuinely matches)
+     * or to {@code NOT_VALIDATED} (if it still doesn't).
+     *
+     * @param anchorId the "Responsables i Autoritzats" anchor identifier scoping the assignments to recalculate
+     * @param newAdmUnitCode the application's newly assigned administrative unit code, possibly blank
+     */
+    private void recalculateDir3Statuses(Long anchorId, String newAdmUnitCode) {
+        AppResponsibleCriteria activeCriteria = AppResponsibleCriteria.builder().statusId(StatusEnum.ACTIVE.getId()).build();
+        for (AppResponsible responsible : appResponsibleRepository.findAll(anchorId, activeCriteria, Pageable.unpaged())) {
+            updateDir3Status(responsible, newAdmUnitCode);
+        }
+        for (AppAuthorized authorized : appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(anchorId)) {
+            updateDir3Status(authorized, newAdmUnitCode);
+        }
+    }
+
+    /**
+     * Recalculates and, if changed, persists the DIR3 validation status of a single responsible
+     * assignment against the given administrative unit code.
+     */
+    private void updateDir3Status(AppResponsible responsible, String newAdmUnitCode) {
+        Dir3ValidationStatus newStatus = checkAssignedPersonDir3Status(
+                responsible.getPerson().isPersonalCaib(), newAdmUnitCode, responsible.getPerson().getEmail());
+        Dir3Validation dir3Validation = responsible.getDir3Validation();
+        if (dir3Validation.getDir3Status() != newStatus) {
+            dir3Validation.setDir3Status(newStatus);
+            dir3ValidationRepository.update(dir3Validation, dir3Validation.getId());
+        }
+    }
+
+    /**
+     * Recalculates and, if changed, persists the DIR3 validation status of a single authorized
+     * assignment against the given administrative unit code.
+     */
+    private void updateDir3Status(AppAuthorized authorized, String newAdmUnitCode) {
+        Dir3ValidationStatus newStatus = checkAssignedPersonDir3Status(
+                authorized.getPerson().isPersonalCaib(), newAdmUnitCode, authorized.getPerson().getEmail());
+        Dir3Validation dir3Validation = authorized.getDir3Validation();
+        if (dir3Validation.getDir3Status() != newStatus) {
+            dir3Validation.setDir3Status(newStatus);
+            dir3ValidationRepository.update(dir3Validation, dir3Validation.getId());
+        }
+    }
+
+    /**
+     * Resolves the DIR3 validation state for the cascade recalculation, catching any failure from
+     * {@link PersonService#checkDir3} so a Soffid outage/timeout never blocks saving the
+     * application itself - it's simply treated as inconclusive (see {@link Dir3ValidationStatus#resolve}).
+     */
+    private Dir3ValidationStatus checkAssignedPersonDir3Status(boolean personalCaib, String admUnitCode, String personEmail) {
+        PersonDir3CheckOutputDTO checkResult = null;
+        if (personalCaib && StringUtils.isNotBlank(admUnitCode)) {
+            try {
+                checkResult = personService.checkDir3(personEmail, admUnitCode);
+            } catch (RuntimeException ex) {
+                log.warn("Facade: Could not verify DIR3 while recalculating validation for person email: {}", personEmail);
+            }
+        }
+        return Dir3ValidationStatus.resolve(personalCaib, admUnitCode, checkResult);
+    }
+
+    /**
+     * Clears a previously-set {@code dir3Mismatch} flag on an application that can no longer
+     * mismatch (blank administrative unit, or no "Responsables i Autoritzats" anchor yet), avoiding
+     * an unnecessary write - and audit trail row - when the flag is already {@code false}.
+     */
+    private void clearDir3MismatchIfSet(Application application) {
+        if (application.isDir3Mismatch()) {
+            application.setDir3Mismatch(false);
+            applicationRepository.update(application, application.getId());
+        }
+    }
+
+    /**
+     * Checks a single assignment's person against the given administrative unit code - a person who
+     * isn't Personal CAIB, or whose assignment is already {@code NOT_APPLY}, is skipped without
+     * calling Soffid at all, since neither can ever change here. Every other assignment
+     * ({@code VALIDATED}, {@code NOT_VALIDATED}, or {@code MANUAL}) is always checked live against
+     * Soffid: on a match, a {@code NOT_VALIDATED} or {@code MANUAL} assignment is promoted to
+     * {@code VALIDATED}; on a mismatch, only a {@code VALIDATED} assignment is downgraded to
+     * {@code NOT_VALIDATED} - {@code MANUAL} is protected from the downgrade direction only. Callers
+     * read the outcome by inspecting {@code dir3Validation}'s status afterward (see
+     * {@link #checkDir3MismatchForAllApplications}), rather than from a return value here.
+     */
+    private void checkDir3AndModifiedStatus(Person person, Dir3Validation dir3Validation, String admUnitCode) {
+        Dir3ValidationStatus previousStatus = dir3Validation.getDir3Status();
+        if (!person.isPersonalCaib() || previousStatus == Dir3ValidationStatus.NOT_APPLY) {
             return;
         }
-        AdmUnitOutputDTO admUnit = admUnitService.resolveByCodeOrThrow(admUnitCode);
-        if (admUnit == null) {
-            throw new BusinessRuleException(Constants.ERR_APPLICATION_ADMUNIT_NOT_FOUND);
+        boolean matches = checkAssignedPersonDir3Status(true, admUnitCode, person.getEmail()) == Dir3ValidationStatus.VALIDATED;
+        if (matches) {
+            if (previousStatus == Dir3ValidationStatus.NOT_VALIDATED || previousStatus == Dir3ValidationStatus.MANUAL) {
+                dir3Validation.setDir3Status(Dir3ValidationStatus.VALIDATED);
+                dir3ValidationRepository.update(dir3Validation, dir3Validation.getId());
+            }
+            return;
         }
-        if (admUnit.getLevel() == null || admUnit.getLevel() <= admUnitService.getDepartmentHierarchyLevel()) {
-            throw new BusinessRuleException(Constants.ERR_APPLICATION_ADMUNIT_MUST_BE_DEPARTMENT_CHILD);
+        if (previousStatus == Dir3ValidationStatus.VALIDATED) {
+            dir3Validation.setDir3Status(Dir3ValidationStatus.NOT_VALIDATED);
+            dir3ValidationRepository.update(dir3Validation, dir3Validation.getId());
         }
     }
 

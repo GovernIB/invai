@@ -25,6 +25,11 @@ export class ApplicationSoffidPersonField {
   searched = input(false);
   searchError = input(false);
   total = input(0);
+  // Integrations reuse the field for a Soffid user, identified by its user code.
+  label = input<string>(APPLICATION_RESPONSIBLE_COPY.soffidPerson);
+  requiredMessage = input<string>(APPLICATION_RESPONSIBLE_COPY.soffidRequired);
+  invalidSelectionMessage = input<string>(APPLICATION_RESPONSIBLE_COPY.soffidInvalidSelection);
+  showUserName = input(false);
 
   searchRequested = output<string>();
 
@@ -53,8 +58,8 @@ export class ApplicationSoffidPersonField {
   protected validationErrorMessage(): string {
     if (!this.invalid()) return '';
     return this.control().hasError('required')
-      ? this.copy.soffidRequired
-      : this.copy.soffidInvalidSelection;
+      ? this.requiredMessage()
+      : this.invalidSelectionMessage();
   }
 
   protected passThrough(): AutoCompletePassThrough {
@@ -79,10 +84,12 @@ export class ApplicationSoffidPersonField {
 
   protected onPersonSelected(event: AutoCompleteSelectEvent): void {
     const person = event.value as SoffidPersonOption;
+    const name = `${person.firstName} ${person.lastName}`.trim();
+    const userName = person.userName?.trim();
     this.control().setValue(
       {
         ...person,
-        label: `${person.firstName} ${person.lastName}`.trim(),
+        label: this.showUserName() && userName ? `${name} (${userName})`.trim() : name,
       },
       { emitEvent: false },
     );

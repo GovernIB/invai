@@ -19,7 +19,7 @@ import {
   configureApplicationSecurityResourceForm,
   createApplicationSecurityResourceForm,
 } from '../../../../forms/application-security-form.factory';
-import { ApplicationWebContextsService } from '../../../../services/application-security.service';
+import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
 import { ApplicationDetailState } from '../../application-detail-state';
 import { ApplicationSecurityTableAction } from '../security/application-security-resource-table';
 import {
@@ -37,7 +37,7 @@ import { ApplicationDevelopmentWebContextsData } from './application-development
 @Injectable()
 export class ApplicationDevelopmentWebContextsState {
   private readonly detail = inject(ApplicationDetailState);
-  private readonly service = inject(ApplicationWebContextsService);
+  private readonly service = inject(ApplicationDevelopmentWebContextsService);
   private readonly messages = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly locale = inject(LOCALE_ID);
@@ -48,7 +48,7 @@ export class ApplicationDevelopmentWebContextsState {
   private readonly contextsCatalog = signal<SecurityCatalogItem[]>([]);
   private readonly fieldsCatalog = signal<SecurityCatalogItem[]>([]);
 
-  readonly appSecurityId = computed(() => this.resolvedAnchor() ?? this.detail.appSecurityId());
+  readonly appDevelopmentId = computed(() => this.resolvedAnchor() ?? this.detail.development()?.id ?? null);
   readonly items = signal<PaginatedList<ApplicationWebContextOutput>>({ items: [], total: 0 });
   readonly first = signal(0);
   readonly loading = signal(false);
@@ -67,7 +67,8 @@ export class ApplicationDevelopmentWebContextsState {
   readonly canManage = computed(
     () =>
       this.showActions() &&
-      this.appSecurityId() != null &&
+      this.appDevelopmentId() != null &&
+      this.detail.appSecurityId() != null &&
       !this.sectionBusy() &&
       !this.saving() &&
       !this.deleting(),
@@ -81,9 +82,8 @@ export class ApplicationDevelopmentWebContextsState {
   );
 
   initialize(data: ApplicationDevelopmentWebContextsData): void {
-    this.resolvedAnchor.set(data.appSecurityId);
+    this.resolvedAnchor.set(data.appDevelopmentId);
     this.items.set({ items: data.page?.content ?? [], total: data.page?.totalElements ?? 0 });
-    if (data.page) this.detail.updateWebContextCount(data.page.totalElements);
     this.contextsCatalog.set(data.webContextOptions);
     this.fieldsCatalog.set(data.fieldOptions);
     if (data.loadFailed) this.error(APPLICATION_DEVELOPMENT_WEB_CONTEXTS_LOAD_ERROR);
@@ -128,7 +128,7 @@ export class ApplicationDevelopmentWebContextsState {
     }
     const value = this.form.getRawValue();
     const payload: ApplicationWebContextInput = {
-      appSecurityId: this.appSecurityId()!,
+      appDevelopmentId: this.appDevelopmentId()!,
       webContextId: value.webContextId!,
       fieldId: value.fieldId!,
       url: value.url.trim() || null,
@@ -146,6 +146,7 @@ export class ApplicationDevelopmentWebContextsState {
         next: () => {
           this.close();
           this.loadPage();
+          this.detail.refreshWebContextVerification();
           this.detail.refreshCompletenessAfterMutation();
           this.success(APPLICATION_SECURITY_RESOURCE_SAVE_SUCCESS);
         },
@@ -179,6 +180,7 @@ export class ApplicationDevelopmentWebContextsState {
           this.closeDelete();
           this.close();
           this.loadPage();
+          this.detail.refreshWebContextVerification();
           this.detail.refreshCompletenessAfterMutation();
           this.success(APPLICATION_SECURITY_RESOURCE_DELETE_SUCCESS);
         },
@@ -193,8 +195,8 @@ export class ApplicationDevelopmentWebContextsState {
   }
 
   private loadPage(): void {
-    const appSecurityId = this.appSecurityId();
-    if (appSecurityId == null) return;
+    const appDevelopmentId = this.appDevelopmentId();
+    if (appDevelopmentId == null) return;
     const requestVersion = ++this.pageRequestVersion;
     this.cancelPage.next();
     this.loading.set(true);
@@ -203,7 +205,7 @@ export class ApplicationDevelopmentWebContextsState {
       typeof this.tableState.sortField === 'string' ? this.tableState.sortField : 'id';
     this.service
       .getPage({
-        appSecurityId,
+        appDevelopmentId,
         page: Math.floor(this.first() / rows),
         size: rows,
         sort: `${sortField},${this.tableState.sortOrder === -1 ? 'desc' : 'asc'}`,
@@ -218,7 +220,6 @@ export class ApplicationDevelopmentWebContextsState {
       )
       .subscribe({
         next: (page) => {
-          this.detail.updateWebContextCount(page.totalElements);
           if (page.content.length === 0 && page.number > 0) {
             this.onPage({ ...this.tableState, first: (page.number - 1) * rows });
             return;

@@ -10,14 +10,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- * Exposes Soffid personnel/role lookups to {@code invai-back}.
+ * Exposes Soffid personnel/role/group lookups to {@code invai-back}.
  *
- * @since 1.0.4
+ * @since 1.0.5
  */
 @Tag(name = "Soffid", description = "Cerca de personal, rols i grups de Soffid.")
 @RestController
@@ -72,5 +76,41 @@ public class SoffidController {
                                                         @RequestParam int size) {
         Page<SoffidRole> result = soffidClient.searchRoles(name, PageRequest.of(page, size));
         return new SoffidPageResponse<>(result.getContent(), result.getTotalElements());
+    }
+
+    /**
+     * Resolves the DIR3CAIB code registered on a Soffid group.
+     *
+     * @param groupName the Soffid group's short internal name to look up (e.g. {@code "sgaip"})
+     * @return {@code {"dir3Code": "..."}}, or 204 No Content if the group doesn't exist or carries
+     * no {@code "DIR3"} attribute
+     */
+    @GetMapping("/groups/{groupName}/dir3")
+    public ResponseEntity<Map<String, String>> resolveGroupDir3(@PathVariable String groupName) {
+        String dir3Code = soffidClient.resolveGroupDir3(groupName);
+        return dir3Code != null ? ResponseEntity.ok(Map.of("dir3Code", dir3Code)) : ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Fetches the roles Soffid currently reports as granted to the given account.
+     *
+     * @param username the Soffid account name to look up granted roles for
+     * @return every role currently granted to {@code username}, or an empty list if none
+     */
+    @GetMapping("/users/{username}/roles")
+    public List<SoffidRole> getUserRoles(@PathVariable String username) {
+        return soffidClient.getUserRoles(username);
+    }
+
+    /**
+     * Resolves the current Soffid role details for a given set of role ids.
+     *
+     * @param ids the Soffid role ids to resolve
+     * @return every role Soffid currently has for the given ids - fewer than requested if some id
+     * no longer exists
+     */
+    @GetMapping("/roles/by-ids")
+    public List<SoffidRole> getRolesByIds(@RequestParam List<Long> ids) {
+        return soffidClient.getRolesByIds(ids);
     }
 }

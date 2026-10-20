@@ -2,9 +2,11 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
+import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+import { PAGINATOR_ROWS } from '@shared/constants/table.constants';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
 import { cachedRequest, pageParamsCacheKey } from '@shared/utils/service-cache.utils';
-import { Observable, tap } from 'rxjs';
+import { EMPTY, Observable, defaultIfEmpty, expand, filter, map, take, tap } from 'rxjs';
 
 import {
   ApplicationEnsClassificationInput,
@@ -18,7 +20,6 @@ import {
   ApplicationSecurityRiskOutput,
   ApplicationSecurityRoleOutput,
   ApplicationSecurityRolePageParams,
-  ApplicationWebContextInput,
   ApplicationWebContextOutput,
   SecurityCatalogItem,
 } from '../applications.model';
@@ -93,7 +94,7 @@ abstract class MutableApplicationSecurityPageService<
   TInput,
   TParams extends ApplicationSecurityPageParams = ApplicationSecurityPageParams,
 > extends ApplicationSecurityPageService<TOutput, TParams> {
-  private readonly applicationsService = inject(ApplicationsService);
+  protected readonly applicationsService = inject(ApplicationsService);
   create(payload: TInput): Observable<TOutput> {
     return this.http.post<TOutput>(this.url(), payload).pipe(
       tap(() => {
@@ -134,11 +135,39 @@ export class ApplicationSecurityRolesService extends ApplicationSecurityPageServ
 }
 
 @Injectable({ providedIn: 'root' })
-export class ApplicationWebContextsService extends MutableApplicationSecurityPageService<
-  ApplicationWebContextOutput,
-  ApplicationWebContextInput
-> {
+export class ApplicationWebContextsService extends ApplicationSecurityPageService<ApplicationWebContextOutput> {
   protected override readonly ENTITY_URI = 'application/security/web-context';
+  private readonly applicationsService = inject(ApplicationsService);
+
+  validate(id: number, reason: string): Observable<void> {
+    return this.http.put<void>(this.url('validate', id), { reason }).pipe(
+      tap(() => {
+        this.clearCache();
+        this.applicationsService.clearCache();
+      }),
+    );
+  }
+
+  hasUnverified(appSecurityId: number): Observable<boolean> {
+    const params = {
+      appSecurityId,
+      page: 0,
+      size: PAGINATOR_ROWS,
+      sort: 'id,asc',
+      statusId: SoftDeleteStatus.ACTIVE,
+    };
+    return this.getPage(params).pipe(
+      expand((page) =>
+        page.content.some((item) => !item.validated) || page.number + 1 >= page.totalPages
+          ? EMPTY
+          : this.getPage({ ...params, page: page.number + 1 }),
+      ),
+      map((page) => page.content.some((item) => !item.validated)),
+      filter(Boolean),
+      take(1),
+      defaultIfEmpty(false),
+    );
+  }
 }
 
 @Injectable({ providedIn: 'root' })

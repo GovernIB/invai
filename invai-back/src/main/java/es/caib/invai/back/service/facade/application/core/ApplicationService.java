@@ -1,10 +1,13 @@
 package es.caib.invai.back.service.facade.application.core;
 
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * Service Facade boundary interface declaring business use cases and orchestration rules
@@ -69,4 +72,19 @@ public interface ApplicationService {
      * @return the reactivated application with refreshed technical metadata
      */
     ApplicationOutputDTO reactivate(Long id);
+
+    /**
+     * Audits every application in the inventory, checking each active responsible/authorized
+     * assignment's DIR3 live against Soffid, against the owning application's administrative unit.
+     * Only {@code NOT_APPLY} assignments are skipped outright (never checked, never changed, never
+     * flagged); every other assignment ({@code VALIDATED}, {@code NOT_VALIDATED}, or {@code MANUAL}) is
+     * always checked. On a match, a {@code NOT_VALIDATED} or {@code MANUAL} assignment is promoted to
+     * {@code VALIDATED}; on a mismatch, only a {@code VALIDATED} assignment is downgraded to
+     * {@code NOT_VALIDATED} ({@code MANUAL} is protected from the downgrade direction only). Only that
+     * one downgrade transition counts towards flagging its application - a promotion, or an
+     * assignment already {@code NOT_VALIDATED}/{@code MANUAL} mismatching again, isn't news.
+     *
+     * @return the applications with at least one assignment that just mismatched, identified by ID and name
+     */
+    List<ApplicationDir3MismatchOutputDTO> checkDir3MismatchForAllApplications();
 }

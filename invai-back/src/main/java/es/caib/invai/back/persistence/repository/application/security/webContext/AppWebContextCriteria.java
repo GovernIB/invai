@@ -26,6 +26,11 @@ public class AppWebContextCriteria {
     private Long appSecurityId;
 
     /**
+     * Exact matching filter for the associated development anchor identifier.
+     */
+    private Long appDevelopmentId;
+
+    /**
      * Exact matching filter for the associated web context identifier.
      */
     private Long webContextId;
@@ -34,6 +39,11 @@ public class AppWebContextCriteria {
      * Exact matching filter for the associated functional field identifier.
      */
     private Long fieldId;
+
+    /**
+     * Partial, case-insensitive matching filter against the {@code url} column.
+     */
+    private String url;
 
     /**
      * Free-text global search query pattern across numeric IDs and attributes.

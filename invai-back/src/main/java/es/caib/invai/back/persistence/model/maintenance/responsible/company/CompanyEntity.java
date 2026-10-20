@@ -36,4 +36,8 @@ public class CompanyEntity extends BaseEntity {
     /** Company corporate name label string. */
     @Column(name = "NAME", nullable = false, length = 150)
     private String name;
+
+    /** Company tax identification number (NIF/CIF). */
+    @Column(name = "NIF", length = 20)
+    private String nif;
 }

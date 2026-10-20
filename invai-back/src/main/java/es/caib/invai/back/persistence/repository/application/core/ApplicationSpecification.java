@@ -1,6 +1,7 @@
 package es.caib.invai.back.persistence.repository.application.core;
 
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
+import es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity;
 import es.caib.invai.back.persistence.model.application.system_database.database.AppDatabaseEntity;
 import es.caib.invai.back.persistence.model.application.system_database.system.AppSystemEntity;
@@ -186,6 +187,92 @@ public final class ApplicationSpecification {
                         ? cb.disjunction()
                         : root.get("admUnitCode").in(admUnitCodes);
 
+                // Server, database and responsible/authorized names live on child entities reachable
+                // only through a correlated EXISTS subquery, same join paths as serverId/databaseId/
+                // responsibleId above, but matching by name instead of by id.
+                Subquery<Long> systemServerNameSubquery = query.subquery(Long.class);
+                Root<AppSystemEntity> systemServerNameRoot = systemServerNameSubquery.from(AppSystemEntity.class);
+                systemServerNameSubquery.select(systemServerNameRoot.get("id"));
+                systemServerNameSubquery.where(cb.and(
+                        cb.equal(systemServerNameRoot.get("informationSystemDb").get("application").get("id"), root.get("id")),
+                        cb.like(cb.lower(systemServerNameRoot.get("system").get("server").get("name")), pattern),
+                        cb.isNull(systemServerNameRoot.get("deletedAt"))
+                ));
+
+                Subquery<Long> databaseServerNameSubquery = query.subquery(Long.class);
+                Root<AppDatabaseEntity> databaseServerNameRoot = databaseServerNameSubquery.from(AppDatabaseEntity.class);
+                databaseServerNameSubquery.select(databaseServerNameRoot.get("id"));
+                databaseServerNameSubquery.where(cb.and(
+                        cb.equal(databaseServerNameRoot.get("informationSystemDb").get("application").get("id"), root.get("id")),
+                        cb.like(cb.lower(databaseServerNameRoot.get("database").get("server").get("name")), pattern),
+                        cb.isNull(databaseServerNameRoot.get("deletedAt"))
+                ));
+
+                Predicate searchServer = cb.or(cb.exists(systemServerNameSubquery), cb.exists(databaseServerNameSubquery));
+
+                Subquery<Long> databaseNameSubquery = query.subquery(Long.class);
+                Root<AppDatabaseEntity> databaseNameRoot = databaseNameSubquery.from(AppDatabaseEntity.class);
+                databaseNameSubquery.select(databaseNameRoot.get("id"));
+                databaseNameSubquery.where(cb.and(
+                        cb.equal(databaseNameRoot.get("informationSystemDb").get("application").get("id"), root.get("id")),
+                        cb.like(cb.lower(databaseNameRoot.get("database").get("service")), pattern),
+                        cb.isNull(databaseNameRoot.get("deletedAt"))
+                ));
+
+                Predicate searchDatabase = cb.exists(databaseNameSubquery);
+
+                Subquery<Long> responsibleNameSubquery = query.subquery(Long.class);
+                Root<AppResponsibleEntity> responsibleNameRoot = responsibleNameSubquery.from(AppResponsibleEntity.class);
+                responsibleNameSubquery.select(responsibleNameRoot.get("id"));
+                responsibleNameSubquery.where(cb.and(
+                        cb.equal(responsibleNameRoot.get("appResponsibleAuthorized").get("application").get("id"), root.get("id")),
+                        cb.or(
+                                cb.like(cb.lower(responsibleNameRoot.get("person").get("firstName")), pattern),
+                                cb.like(cb.lower(responsibleNameRoot.get("person").get("lastName")), pattern)
+                        ),
+                        cb.isNull(responsibleNameRoot.get("deletedAt"))
+                ));
+
+                Subquery<Long> authorizedNameSubquery = query.subquery(Long.class);
+                Root<AppAuthorizedEntity> authorizedNameRoot = authorizedNameSubquery.from(AppAuthorizedEntity.class);
+                authorizedNameSubquery.select(authorizedNameRoot.get("id"));
+                authorizedNameSubquery.where(cb.and(
+                        cb.equal(authorizedNameRoot.get("appResponsibleAuthorized").get("application").get("id"), root.get("id")),
+                        cb.or(
+                                cb.like(cb.lower(authorizedNameRoot.get("person").get("firstName")), pattern),
+                                cb.like(cb.lower(authorizedNameRoot.get("person").get("lastName")), pattern)
+                        ),
+                        cb.isNull(authorizedNameRoot.get("deletedAt"))
+                ));
+
+                Predicate searchResponsibleAuthorized = cb.or(cb.exists(responsibleNameSubquery), cb.exists(authorizedNameSubquery));
+
+                Subquery<Long> systemEnvironmentNameSubquery = query.subquery(Long.class);
+                Root<AppSystemEntity> systemEnvironmentNameRoot = systemEnvironmentNameSubquery.from(AppSystemEntity.class);
+                systemEnvironmentNameSubquery.select(systemEnvironmentNameRoot.get("id"));
+                systemEnvironmentNameSubquery.where(cb.and(
+                        cb.equal(systemEnvironmentNameRoot.get("informationSystemDb").get("application").get("id"), root.get("id")),
+                        cb.or(
+                                cb.like(cb.lower(systemEnvironmentNameRoot.get("system").get("server").get("environment").get("name")), pattern),
+                                cb.like(cb.lower(systemEnvironmentNameRoot.get("system").get("server").get("environment").get("nameEs")), pattern)
+                        ),
+                        cb.isNull(systemEnvironmentNameRoot.get("deletedAt"))
+                ));
+
+                Subquery<Long> databaseEnvironmentNameSubquery = query.subquery(Long.class);
+                Root<AppDatabaseEntity> databaseEnvironmentNameRoot = databaseEnvironmentNameSubquery.from(AppDatabaseEntity.class);
+                databaseEnvironmentNameSubquery.select(databaseEnvironmentNameRoot.get("id"));
+                databaseEnvironmentNameSubquery.where(cb.and(
+                        cb.equal(databaseEnvironmentNameRoot.get("informationSystemDb").get("application").get("id"), root.get("id")),
+                        cb.or(
+                                cb.like(cb.lower(databaseEnvironmentNameRoot.get("database").get("server").get("environment").get("name")), pattern),
+                                cb.like(cb.lower(databaseEnvironmentNameRoot.get("database").get("server").get("environment").get("nameEs")), pattern)
+                        ),
+                        cb.isNull(databaseEnvironmentNameRoot.get("deletedAt"))
+                ));
+
+                Predicate searchEnvironment = cb.or(cb.exists(systemEnvironmentNameSubquery), cb.exists(databaseEnvironmentNameSubquery));
+
                 predicates.add(cb.or(
                         searchCode, searchPrefix, searchName, searchDesc,
                         searchCategory, searchCategoryEs,
@@ -193,7 +280,11 @@ public final class ApplicationSpecification {
                         searchField, searchFieldEs,
                         searchCommission, searchCommissionEs,
                         searchAdmUnit,
-                        searchStatus
+                        searchStatus,
+                        searchServer,
+                        searchDatabase,
+                        searchResponsibleAuthorized,
+                        searchEnvironment
                 ));
             }
 

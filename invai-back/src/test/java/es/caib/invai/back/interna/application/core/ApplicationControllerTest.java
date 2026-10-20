@@ -1,5 +1,6 @@
 package es.caib.invai.back.interna.application.core;
 
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
@@ -104,5 +105,17 @@ class ApplicationControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(dto, response.getBody());
+    }
+
+    @Test
+    void checkDir3MismatchForAllApplications_returnsOkWithServiceResult() {
+        List<ApplicationDir3MismatchOutputDTO> mismatches = List.of(
+                ApplicationDir3MismatchOutputDTO.builder().id(1L).name("App One").dir3Mismatch(true).build());
+        when(applicationService.checkDir3MismatchForAllApplications()).thenReturn(mismatches);
+
+        ResponseEntity<List<ApplicationDir3MismatchOutputDTO>> response = applicationController.checkDir3MismatchForAllApplications();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(mismatches, response.getBody());
     }
 }

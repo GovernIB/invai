@@ -2,6 +2,7 @@ package es.caib.invai.back.interna.maintenance.responsible.person;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonCombinedSearchOutputDTO;
+import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonDir3CheckOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonCriteria;
@@ -52,11 +53,11 @@ public class PersonController {
      * @return a page of {@link PersonOutputDTO} results
      */
     @GetMapping("database-search")
-    public ResponseEntity<Page<PersonOutputDTO>> getAll(
+    public ResponseEntity<Page<PersonOutputDTO>> searchDatabase(
             @ModelAttribute PersonCriteria filter,
             @PageableDefault(sort = "id") Pageable pageable) {
         log.debug("REST: Initiating multi-criteria fetch grid search query parameters");
-        Page<PersonOutputDTO> multiQueryResult = personService.getAll(filter, pageable);
+        Page<PersonOutputDTO> multiQueryResult = personService.searchDatabase(filter, pageable);
         return ResponseEntity.ok(multiQueryResult);
     }
 
@@ -124,24 +125,25 @@ public class PersonController {
     }
 
     /**
-     * Lists CAIB personnel against the Soffid SCIM API - a {@code getAll} when {@code fullName} is
+     * Lists CAIB personnel against the Soffid SCIM API - a {@code getAll} when {@code search} is
      * omitted, or restricted to matches when given - feeding both a general listing and the
      * "assign a responsible/authorized person" typeahead. Does not touch the local Person catalog
      * listing. Always paginated, since an unfiltered listing spans Soffid's entire personnel
      * directory.
      *
-     * @param fullName the text to search for, matched (word by word) against the full name, or
-     * omitted to list every active Soffid user
+     * @param search the text to search for, matched (word by word) against the full name, or
+     * failing that, against the Soffid username (código de usuario), or omitted to list every
+     * active Soffid user
      * @param pageable the pagination parameters
      * @return the requested page of matching Soffid candidates, mapped into {@link PersonOutputDTO}
      * with a {@code null} id
      */
     @GetMapping("soffid-search")
     public ResponseEntity<Page<PersonOutputDTO>> searchSoffid(
-            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String search,
             @PageableDefault Pageable pageable) {
         log.debug("REST: Request to list/search Soffid personnel");
-        return ResponseEntity.ok(personService.searchSoffid(fullName, pageable));
+        return ResponseEntity.ok(personService.searchSoffid(search, pageable));
     }
 
     /**
@@ -161,5 +163,24 @@ public class PersonController {
             @PageableDefault(sort = {"firstName", "lastName"}) Pageable pageable) {
         log.debug("REST: Request to list/search persons combining local catalog and Soffid");
         return ResponseEntity.ok(personService.searchCombined(search, pageable));
+    }
+
+    /**
+     * Checks, on a best-effort basis, whether a person belongs to the given DIR3CAIB
+     * administrative unit - a purely advisory (non-blocking) check, independent of the
+     * assign-responsible/authorized flow itself: the frontend decides weather/how to warn the user
+     * based on the response, this endpoint never blocks the assignment.
+     *
+     * @param emailAddress the identifier of the person to check
+     * @param admUnitCode the DIR3CAIB code to check against (typically the application's assigned
+     * administrative unit)
+     * @return the check result, with {@code verified=false} when it could not be determined
+     */
+    @GetMapping("dir3-check")
+    public ResponseEntity<PersonDir3CheckOutputDTO> checkDir3(
+            @RequestParam String emailAddress,
+            @RequestParam String admUnitCode) {
+        log.debug("REST: Request to check DIR3 for person email address: {} against admUnitCode: {}", emailAddress, admUnitCode);
+        return ResponseEntity.ok(personService.checkDir3(emailAddress, admUnitCode));
     }
 }

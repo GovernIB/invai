@@ -1,6 +1,7 @@
 package es.caib.invai.back.interna.application.responsibleAuthorized.responsible.DTO;
 
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
+import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +37,8 @@ public class AppResponsibleOutputDTO {
     private String jobTitle;
     /** Free-text remarks about this responsible assignment. */
     private String observation;
+    /** DIR3 validation state of this assignment against the application's administrative unit. */
+    private Dir3Validation dir3Validation;
     /** Timestamp when this record was soft-deleted, or {@code null} if still active. */
     private LocalDateTime deletedAt;
 }

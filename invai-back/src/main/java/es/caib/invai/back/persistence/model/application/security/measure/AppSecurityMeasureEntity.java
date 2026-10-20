@@ -47,7 +47,6 @@ public class AppSecurityMeasureEntity extends BaseEntity {
     private EnsRequirementEntity ensRequirement;
 
     /** Free-text description of the applied security measure. */
-    @Lob
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 4000)
     private String description;
 }

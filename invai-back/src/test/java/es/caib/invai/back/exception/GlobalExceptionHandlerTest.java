@@ -14,6 +14,12 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import jakarta.persistence.PersistenceException;
 import java.sql.SQLException;
 import java.util.Locale;
@@ -201,6 +207,98 @@ class GlobalExceptionHandlerTest {
 
         assertNotNull(response.getBody());
         assertEquals("A generic, safe error message", response.getBody().getMessage());
+    }
+
+    // --- handleSoffidTimeoutExceptions ---
+
+    @Test
+    void handleSoffidTimeoutExceptions_returns504WithGenericMessage() {
+        when(messageSource.getMessage(eq("exception.soffid.timeout"), eq(null), any(Locale.class)))
+                .thenReturn("Soffid timed out");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleSoffidTimeoutExceptions();
+
+        assertEquals(HttpStatus.GATEWAY_TIMEOUT, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Validation Error", response.getBody().getError());
+        assertEquals("Soffid timed out", response.getBody().getMessage());
+    }
+
+    // --- handleResourceNotFoundExceptions ---
+
+    @Test
+    void handleResourceNotFoundExceptions_noResourceFoundException_returns404WithGenericMessage() {
+        when(messageSource.getMessage(eq("exception.resource.notfound"), eq(null), any(Locale.class)))
+                .thenReturn("Resource not found");
+        NoResourceFoundException ex = new NoResourceFoundException(org.springframework.http.HttpMethod.GET, "interna/");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleResourceNotFoundExceptions(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Validation Error", response.getBody().getError());
+        assertEquals("Resource not found", response.getBody().getMessage());
+    }
+
+    @Test
+    void handleResourceNotFoundExceptions_noHandlerFoundException_returns404WithGenericMessage() {
+        when(messageSource.getMessage(eq("exception.resource.notfound"), eq(null), any(Locale.class)))
+                .thenReturn("Resource not found");
+        NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/unknown", null);
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleResourceNotFoundExceptions(ex);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Resource not found", response.getBody().getMessage());
+    }
+
+    // --- handleTypeMismatchExceptions ---
+
+    @Test
+    void handleTypeMismatchExceptions_namesTheOffendingParameter() {
+        when(messageSource.getMessage(eq("exception.parameter.invalidformat"), eq(new Object[]{"id"}), any(Locale.class)))
+                .thenReturn("Parameter 'id' has an invalid format");
+        MethodArgumentTypeMismatchException ex =
+                new MethodArgumentTypeMismatchException("abc", Long.class, "id", methodParameter, new NumberFormatException());
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleTypeMismatchExceptions(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Parameter 'id' has an invalid format", response.getBody().getMessage());
+    }
+
+    // --- handleMissingParameterExceptions ---
+
+    @Test
+    void handleMissingParameterExceptions_namesTheMissingParameter() {
+        when(messageSource.getMessage(eq("exception.parameter.missing"), eq(new Object[]{"admUnitCode"}), any(Locale.class)))
+                .thenReturn("Missing required parameter 'admUnitCode'");
+        MissingServletRequestParameterException ex =
+                new MissingServletRequestParameterException("admUnitCode", "String");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleMissingParameterExceptions(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Missing required parameter 'admUnitCode'", response.getBody().getMessage());
+    }
+
+    // --- handleMalformedRequestBodyExceptions ---
+
+    @Test
+    void handleMalformedRequestBodyExceptions_neverLeaksRawParserError() {
+        when(messageSource.getMessage(eq("exception.request.malformedbody"), eq(null), any(Locale.class)))
+                .thenReturn("The request body is invalid");
+        HttpMessageNotReadableException ex = new HttpMessageNotReadableException(
+                "JSON parse error: leaking internal field names", (org.springframework.http.HttpInputMessage) null);
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleMalformedRequestBodyExceptions(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("The request body is invalid", response.getBody().getMessage());
     }
 
     // --- handleUnexpectedExceptions (catch-all) ---

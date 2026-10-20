@@ -221,11 +221,13 @@ app-section-actions {
 // Only page-frame actions use the white control treatment.
 .section-actions.section-actions--on-primary {
   .section-actions__search,
-  .section-actions__buttons {
+  .section-actions__buttons,
+  .section-actions__text-button {
     order: 0;
   }
 
   .p-button.invai-table-toolbar-button,
+  .p-button.section-actions__text-button,
   .custom-multiselect-button .p-multiselect {
     color: var(--p-primary-color);
     background: var(--surface-a);
@@ -233,19 +235,22 @@ app-section-actions {
   }
 
   .p-button.invai-table-toolbar-button:not(:disabled):hover,
+  .p-button.section-actions__text-button:not(:disabled):hover,
   .custom-multiselect-button .p-multiselect:not(.p-disabled):hover {
     color: var(--p-primary-hover-color);
     background: var(--p-primary-50);
     border-color: var(--p-primary-50);
   }
 
-  .p-button.invai-table-toolbar-button:not(:disabled):active {
+  .p-button.invai-table-toolbar-button:not(:disabled):active,
+  .p-button.section-actions__text-button:not(:disabled):active {
     color: var(--p-primary-active-color);
     background: var(--p-primary-100);
     border-color: var(--p-primary-100);
   }
 
   .p-button.invai-table-toolbar-button:disabled,
+  .p-button.section-actions__text-button:disabled,
   .custom-multiselect-button .p-multiselect.p-disabled {
     color: var(--p-text-muted-color);
     background: var(--p-surface-200);
@@ -253,11 +258,17 @@ app-section-actions {
   }
 
   .p-button.invai-table-toolbar-button:focus-visible,
+  .p-button.section-actions__text-button:focus-visible,
   .section-actions-search__input:focus-visible,
   .custom-multiselect-button .p-multiselect:focus-within {
     outline: 2px solid var(--invai-page-frame-color);
     outline-offset: 2px;
     box-shadow: none;
+  }
+
+  .p-button.section-actions__text-button {
+    min-height: var(--invai-table-toolbar-control-size);
+    padding-inline: 0.875rem;
   }
 
   .section-actions__badge-on-primary {

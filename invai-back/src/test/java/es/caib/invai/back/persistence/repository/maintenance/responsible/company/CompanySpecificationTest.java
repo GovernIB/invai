@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -53,6 +54,7 @@ class CompanySpecificationTest {
         lenient().when(cb.like(any(), anyString())).thenReturn(predicate);
         lenient().when(cb.isNull(any())).thenReturn(predicate);
         lenient().when(cb.isNotNull(any())).thenReturn(predicate);
+        lenient().when(cb.or(any(), any())).thenReturn(predicate);
         lenient().when(cb.and(any(Predicate[].class))).thenReturn(predicate);
     }
 
@@ -109,13 +111,34 @@ class CompanySpecificationTest {
     }
 
     @Test
-    void filterByCriteria_withSearch_addsLikePredicateOnLoweredName() {
+    void filterByCriteria_withNif_addsLikePredicateOnLoweredNif() {
+        CompanyCriteria criteria = new CompanyCriteria();
+        criteria.setNif("B123");
+
+        CompanySpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb).like(eq(path), eq("%b123%"));
+    }
+
+    @Test
+    void filterByCriteria_blankNif_isIgnored() {
+        CompanyCriteria criteria = new CompanyCriteria();
+        criteria.setNif("   ");
+
+        CompanySpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
+
+        verify(cb, never()).like(any(), anyString());
+    }
+
+    @Test
+    void filterByCriteria_withSearch_orsNameAndNifPredicatesOnLoweredPaths() {
         CompanyCriteria criteria = new CompanyCriteria();
         criteria.setSearch("tech");
 
         CompanySpecification.filterByCriteria(criteria).toPredicate(root, query, cb);
 
-        verify(cb).like(eq(path), eq("%tech%"));
+        verify(cb, times(2)).like(eq(path), eq("%tech%"));
+        verify(cb).or(predicate, predicate);
     }
 
     @Test

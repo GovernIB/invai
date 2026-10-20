@@ -59,6 +59,8 @@ export class ApplicationSecurityResourceTable extends TableComponentBase<Applica
   showActions = input(false);
   showVerify = input(false);
   showVerificationWarnings = input(false);
+  showVerifiedReason = input(false);
+  verifyDisabled = input(false);
 
   private readonly locale = inject(LOCALE_ID);
   private readonly selectedRow = signal<ApplicationSecurityResourceOutput | null>(null);

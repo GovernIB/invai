@@ -63,7 +63,7 @@ export class ApplicationAuthorizedService extends BaseApiService {
 
   deactivate(id: number, input: ApplicationAssignmentDeactivateInput): Observable<void> {
     return this.http
-      .put<void>(this.url('deactivate', id), input)
+      .delete<void>(this.url(id), { body: input })
       .pipe(tap(() => this.changed()));
   }
 

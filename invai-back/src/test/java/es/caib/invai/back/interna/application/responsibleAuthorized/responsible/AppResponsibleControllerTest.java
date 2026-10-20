@@ -55,7 +55,7 @@ class AppResponsibleControllerTest {
 
     @Test
     void create_returnsCreatedWithServiceResult() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false);
+        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false, null, null);
         AppResponsibleOutputDTO dto = new AppResponsibleOutputDTO();
         when(appResponsibleService.create(inputDTO)).thenReturn(dto);
 
@@ -67,7 +67,7 @@ class AppResponsibleControllerTest {
 
     @Test
     void update_returnsOkWithServiceResult() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false);
+        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, null, null, false, null, null);
         AppResponsibleOutputDTO dto = new AppResponsibleOutputDTO();
         when(appResponsibleService.update(1L, inputDTO)).thenReturn(dto);
 

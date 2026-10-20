@@ -27,7 +27,7 @@ html {
 
 .app-initial-loader__logo {
   width: auto;
-  height: 100px;
+  height: 140px;
   flex: 0 0 auto;
   margin-right: 0.5rem;
 }
@@ -40,11 +40,10 @@ html {
   text-align: left;
 }
 
-.app-initial-loader__title {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.1;
+.app-initial-loader__brand {
+  width: auto;
+  height: 3rem;
+  align-self: flex-start;
 }
 
 .app-initial-loader__text {
@@ -59,8 +58,11 @@ html {
     gap: 1.25rem;
     padding: 1.5rem;
   }
-  .app-initial-loader__title {
-    font-size: 1.6rem;
+  .app-initial-loader__logo {
+    height: 100px;
+  }
+  .app-initial-loader__brand {
+    height: 2.25rem;
   }
 }
 

@@ -25,9 +25,9 @@ import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTy
  * <p>
  * Declares three {@code toResponse} overloads, each backing a different
  * {@code ApplicationServiceFacadeBean} call site: the 1-argument form for {@code getAll} (no
- * anchors resolved), the 5-argument form for {@code create}/{@code update}/{@code reactivate}
- * (anchors resolved, no completeness flags), and the 12-argument form for {@code getById} (anchors
- * plus the Responsables/Desenvolupament/Seguretat/Accessibilitat/Sistemes/Base de dades
+ * anchors resolved), the 6-argument form for {@code create}/{@code update}/{@code reactivate}
+ * (anchors resolved, no completeness flags), and the 14-argument form for {@code getById} (anchors
+ * plus the Responsables/Desenvolupament/Seguretat/Accessibilitat/Sistemes/Base de dades/Integracio
  * completeness flags).
  * </p>
  *
@@ -71,6 +71,8 @@ public interface ApplicationMapper {
     @Mapping(target = "appResponsibleAuthorizedId", ignore = true)
     @Mapping(target = "appSecurityId", ignore = true)
     @Mapping(target = "appAccessibilityId", ignore = true)
+    @Mapping(target = "appDataId", ignore = true)
+    @Mapping(target = "appIntegrationId", ignore = true)
     ApplicationOutputDTO toResponse(Application application);
 
     /**
@@ -110,6 +112,9 @@ public interface ApplicationMapper {
     @Mapping(target = "appResponsibleAuthorizedId", source = "appResponsibleAuthorized.id")
     @Mapping(target = "appSecurityId", source = "appSecurity.id")
     @Mapping(target = "appAccessibilityId", source = "appAccessibility.id")
+    @Mapping(target = "appDataId", ignore = true)
+    @Mapping(target = "appIntegrationId", ignore = true)
+    @Mapping(target = "missingIntegrationData", ignore = true)
     ApplicationOutputDTO toResponse(
             Application application,
             AppInformationSystemDb appInformationSystemDb,
@@ -143,6 +148,8 @@ public interface ApplicationMapper {
      * or has no active system link at all
      * @param missingDatabases          {@code true} if the "AppInformationSystemDb" anchor is missing,
      * or has no active database link at all
+     * @param missingIntegrationData    {@code true} if the "AppIntegration" anchor is missing, or has
+     * no active integration connection at all
      * @return the mapped outbound DTO
      */
     @Mapping(target = "id", source = "application.id")
@@ -164,6 +171,8 @@ public interface ApplicationMapper {
     @Mapping(target = "appResponsibleAuthorizedId", source = "appResponsibleAuthorized.id")
     @Mapping(target = "appSecurityId", source = "appSecurity.id")
     @Mapping(target = "appAccessibilityId", source = "appAccessibility.id")
+    @Mapping(target = "appDataId", ignore = true)
+    @Mapping(target = "appIntegrationId", ignore = true)
     @Mapping(target = "missingDevelopmentFields", source = "missingDevelopmentFields")
     @Mapping(target = "missingResponsibleTypes", source = "missingResponsibleTypes")
     @Mapping(target = "missingAuthorized", source = "missingAuthorized")
@@ -171,6 +180,7 @@ public interface ApplicationMapper {
     @Mapping(target = "missingSecurityData", source = "missingSecurityData")
     @Mapping(target = "missingSystems", source = "missingSystems")
     @Mapping(target = "missingDatabases", source = "missingDatabases")
+    @Mapping(target = "missingIntegrationData", source = "missingIntegrationData")
     ApplicationOutputDTO toResponse(
             Application application,
             AppInformationSystemDb appInformationSystemDb,
@@ -184,7 +194,8 @@ public interface ApplicationMapper {
             Boolean missingAccessibilityFields,
             Boolean missingSecurityData,
             Boolean missingSystems,
-            Boolean missingDatabases
+            Boolean missingDatabases,
+            Boolean missingIntegrationData
     );
 
     /**
@@ -207,6 +218,7 @@ public interface ApplicationMapper {
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "dir3Mismatch", ignore = true)
     Application toModelFromInput(ApplicationInputDTO inputDTO);
 
     /**
@@ -224,6 +236,7 @@ public interface ApplicationMapper {
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "dir3Mismatch", ignore = true)
     @Mapping(target = "category.id", source = "categoryId")
     @Mapping(target = "systemType.id", source = "systemTypeId")
     @Mapping(target = "field.id", source = "fieldId")

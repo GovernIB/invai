@@ -1,7 +1,7 @@
 package es.caib.invai.back.interna.application.core.DTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import es.caib.invai.back.interna.integrations.dir3.admUnit.DTO.AdmUnitOutputDTO;
+import es.caib.invai.back.interna.catalog.admUnit.DTO.AdmUnitOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.category.DTO.CategoryOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.commission.DTO.CommissionOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
@@ -53,16 +53,6 @@ public class ApplicationOutputDTO {
      * no admin unit is linked, or the linked code has no current DIR3CAIB match.
      */
     private AdmUnitOutputDTO admUnit;
-
-    /**
-     * Department (Conselleria) ancestor of {@link #admUnit} in the DIR3CAIB hierarchy, derived
-     * live at fetch time rather than stored — only the {@code admUnit} reference is persisted, so a
-     * government reorganization is reflected immediately without any data migration. {@code null}
-     * when {@code admUnit} is unset, has no DIR3CAIB match, or has no department-level ancestor.
-     * Only populated on the {@code getById} response; {@code create}/{@code update}/{@code
-     * reactivate}/{@code getAll} leave it {@code null}.
-     */
-    private AdmUnitOutputDTO department;
 
     /** The {@code Commission} overseeing this application. */
     private CommissionOutputDTO csCommission;
@@ -131,6 +121,23 @@ public class ApplicationOutputDTO {
     /** {@code true} if the "AppSecurity" anchor is missing, or has no active record in any of its Web Context, ENS Classification, or Security Risk child tables. Per-tab detail only — see {@link #missingResponsibleTypes}. */
     private Boolean missingSecurityData;
 
+    /** {@code true} if the "AppIntegration" anchor is missing, or has no active integration connection at all. Per-tab detail only — see {@link #missingResponsibleTypes}. */
+    private Boolean missingIntegrationData;
+
     /** {@code true} if any tab has missing or incomplete data — i.e. what the 7 per-tab {@code missingXxx} flags above would OR together. Unlike those, always populated, both here and in list results. */
     private boolean incomplete;
+
+    /**
+     * {@code true} if, as of the last bulk DIR3 audit run, at least one active, Personal CAIB
+     * responsible/authorized assignment's DIR3 no longer matches this application's administrative
+     * unit. A {@code MANUAL} assignment (a mismatch already reviewed and accepted by a {@code
+     * ROLE_INV_SUPER} user) never counts toward this flag.
+     */
+    private boolean dir3Mismatch;
+
+    /** Foreign key identifier of the linked "Open Data" tab record. */
+    private Long appDataId;
+
+    /** Foreign key identifier of the linked "Integration" tab record. */
+    private Long appIntegrationId;
 }

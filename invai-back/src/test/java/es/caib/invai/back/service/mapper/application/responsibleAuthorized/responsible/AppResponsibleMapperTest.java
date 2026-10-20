@@ -11,7 +11,9 @@ import es.caib.invai.back.persistence.model.catalog.status.LkupStatusEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.company.CompanyEntity;
 import es.caib.invai.back.persistence.model.maintenance.responsible.person.PersonEntity;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.core.AppResponsibleAuthorizedMapperImpl;
+import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapperImpl;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
+import es.caib.invai.back.service.mapper.catalog.dir3Status.Dir3StatusMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.responsibleType.ResponsibleTypeMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
@@ -69,10 +71,14 @@ class AppResponsibleMapperTest {
         PersonMapperImpl personMapperImpl = new PersonMapperImpl();
         ReflectionTestUtils.setField(personMapperImpl, "companyMapper", new CompanyMapperImpl());
 
+        Dir3ValidationMapperImpl dir3ValidationMapperImpl = new Dir3ValidationMapperImpl();
+        ReflectionTestUtils.setField(dir3ValidationMapperImpl, "dir3StatusMapper", new Dir3StatusMapperImpl());
+
         AppResponsibleMapperImpl impl = new AppResponsibleMapperImpl();
         ReflectionTestUtils.setField(impl, "appResponsibleAuthorizedMapper", appResponsibleAuthorizedMapperImpl);
         ReflectionTestUtils.setField(impl, "personMapper", personMapperImpl);
         ReflectionTestUtils.setField(impl, "responsibleTypeMapper", new ResponsibleTypeMapperImpl());
+        ReflectionTestUtils.setField(impl, "dir3ValidationMapper", dir3ValidationMapperImpl);
         mapper = impl;
     }
 
@@ -337,7 +343,7 @@ class AppResponsibleMapperTest {
 
     @Test
     void toModelFromInput_resolvesNestedIdsAndIgnoresAuditFields() {
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, "Cap de projecte", null, false);
+        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(40L, 10L, null, null, null, null, 20L, "Cap de projecte", null, false, null, null);
 
         AppResponsible model = mapper.toModelFromInput(inputDTO);
 
@@ -361,7 +367,7 @@ class AppResponsibleMapperTest {
     }
 
     @Test
-    void updateModelFromInput_mergesNestedIdsAndObservationWithoutTouchingIdOrResponsibleType() {
+    void updateModelFromInput_mergesAnchorAndObservationWithoutTouchingIdPersonOrResponsibleType() {
         AppResponsible existing = AppResponsible.builder()
                 .id(5L)
                 .appResponsibleAuthorized(AppResponsibleAuthorized.builder().id(40L).build())
@@ -371,28 +377,28 @@ class AppResponsibleMapperTest {
                 .build();
         existing.getPerson().setId(10L);
         existing.getResponsibleType().setId(20L);
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(41L, 11L, null, null, null, null, 21L, "Analista", "Updated observation", false);
+        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(41L, 10L, null, null, null, null, 21L, "Analista", "Updated observation", false, null, null);
 
         mapper.updateModelFromInput(inputDTO, existing);
 
         assertEquals(5L, existing.getId());
         assertEquals(41L, existing.getAppResponsibleAuthorized().getId());
-        assertEquals(11L, existing.getPerson().getId());
+        assertEquals(10L, existing.getPerson().getId());
         assertEquals(20L, existing.getResponsibleType().getId());
         assertEquals("Analista", existing.getJobTitle());
         assertEquals("Updated observation", existing.getObservation());
     }
 
     @Test
-    void updateModelFromInput_withNullNestedTargets_initializesThemButLeavesResponsibleTypeUntouched() {
+    void updateModelFromInput_withNullNestedTargets_initializesAnchorButLeavesPersonAndResponsibleTypeUntouched() {
         AppResponsible existing = AppResponsible.builder().id(6L).build();
-        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(42L, 12L, null, null, null, null, 22L, null, null, false);
+        AppResponsibleInputDTO inputDTO = new AppResponsibleInputDTO(42L, 12L, null, null, null, null, 22L, null, null, false, null, null);
 
         mapper.updateModelFromInput(inputDTO, existing);
 
         assertEquals(6L, existing.getId());
         assertEquals(42L, existing.getAppResponsibleAuthorized().getId());
-        assertEquals(12L, existing.getPerson().getId());
+        assertNull(existing.getPerson());
         assertNull(existing.getResponsibleType());
     }
 
