@@ -1,8 +1,9 @@
 package es.caib.invai.back.service.facade.application.core;
 
-import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDetailOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
+import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,7 @@ public interface ApplicationService {
      * @param id primary key tracking index mapping the system application profile
      * @return the mapped presentation outbound DTO schema representation
      */
-    ApplicationOutputDTO getById(Long id);
+    ApplicationDetailOutputDTO getById(Long id);
 
     /**
      * Retrieves the complete list of all applications in the inventory matching multi-dimensional parameters.
@@ -74,17 +75,30 @@ public interface ApplicationService {
     ApplicationOutputDTO reactivate(Long id);
 
     /**
-     * Audits every application in the inventory, checking each active responsible/authorized
-     * assignment's DIR3 live against Soffid, against the owning application's administrative unit.
-     * Only {@code NOT_APPLY} assignments are skipped outright (never checked, never changed, never
-     * flagged); every other assignment ({@code VALIDATED}, {@code NOT_VALIDATED}, or {@code MANUAL}) is
-     * always checked. On a match, a {@code NOT_VALIDATED} or {@code MANUAL} assignment is promoted to
-     * {@code VALIDATED}; on a mismatch, only a {@code VALIDATED} assignment is downgraded to
-     * {@code NOT_VALIDATED} ({@code MANUAL} is protected from the downgrade direction only). Only that
-     * one downgrade transition counts towards flagging its application - a promotion, or an
-     * assignment already {@code NOT_VALIDATED}/{@code MANUAL} mismatching again, isn't news.
+     * Lists the identifiers of every application in the inventory, in a single read-only
+     * transaction. Lets long-running jobs process the applications one by one, each in its own
+     * transaction, without holding every record in memory.
      *
-     * @return the applications with at least one assignment that just mismatched, identified by ID and name
+     * @return the identifiers of all applications
      */
-    List<ApplicationDir3MismatchOutputDTO> checkDir3MismatchForAllApplications();
+    List<Long> getAllApplicationIds();
+
+    /**
+     * Assigns to an already created application the roles Soffid has for it: those whose name starts
+     * with the application's prefix followed by an underscore (case-sensitive, so prefix {@code AP2}
+     * matches {@code AP2_ADMIN} but not {@code ap2_admin} nor {@code XAP2_ADMIN}). Each is assigned
+     * to the application's security anchor, and its data - as Soffid reports it now - is stored in
+     * {@code INV_SECURITY_ROLE}. It is idempotent: a role the application already has an active
+     * assignment to (matched by its Soffid id) is skipped, so calling it again only adds the roles
+     * Soffid has gained since. Roles are never removed. A Soffid failure is not swallowed: it
+     * propagates and nothing is assigned.
+     *
+     * @param id the unique identifier of the application whose prefix names the roles to assign
+     * @return the role assignments created by this call, empty if there was nothing new to assign
+     * @throws es.caib.invai.back.exception.BusinessRuleException if no application exists with the given
+     * ID, it is deactivated, it has no security anchor, or Soffid can't be queried
+     * @throws es.caib.invai.back.exception.SoffidTimeoutException if Soffid takes too long to answer
+     * @since 1.0.6
+     */
+    List<AppRoleOutputDTO> assignSoffidRoles(Long id);
 }

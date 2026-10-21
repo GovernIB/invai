@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * Registers a filter that rewrites the bundled swagger-ui {@code <title>Swagger UI</title>} to a
@@ -77,14 +78,14 @@ public class SwaggerUiTitleFilterConfig {
             byte[] content = wrapper.getBuffer();
             String contentType = wrapper.getContentType();
 
-            if (contentType != null && contentType.contains("text/html")) {
+            if (Objects.nonNull(contentType) && contentType.contains("text/html")) {
                 String html = new String(content, StandardCharsets.UTF_8)
                         .replace("<title>Swagger UI</title>", "<title>" + title + "</title>");
                 byte[] rewritten = html.getBytes(StandardCharsets.UTF_8);
                 response.setContentLength(rewritten.length);
                 response.getOutputStream().write(rewritten);
             } else {
-                if (contentType != null) {
+                if (Objects.nonNull(contentType)) {
                     response.setContentLength(content.length);
                 }
                 response.getOutputStream().write(content);
@@ -159,7 +160,7 @@ public class SwaggerUiTitleFilterConfig {
          */
         @Override
         public PrintWriter getWriter() {
-            if (writer == null) {
+            if (Objects.isNull(writer)) {
                 writer = new PrintWriter(new OutputStreamWriter(buffer, StandardCharsets.UTF_8), true);
             }
             return writer;
@@ -171,7 +172,7 @@ public class SwaggerUiTitleFilterConfig {
          * @return the buffered response body as a byte array
          */
         byte[] getBuffer() {
-            if (writer != null) {
+            if (Objects.nonNull(writer)) {
                 writer.flush();
             }
             return buffer.toByteArray();

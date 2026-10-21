@@ -131,10 +131,10 @@ public class AdmUnitServiceFacadeBean implements AdmUnitService {
             return;
         }
         AdmUnitOutputDTO admUnit = getTreeByCode().get(admUnitCode);
-        if (admUnit == null) {
+        if (Objects.isNull(admUnit)) {
             throw new BusinessRuleException(Constants.ERR_ADMUNIT_NOT_FOUND);
         }
-        if (admUnit.getLevel() == null || admUnit.getLevel() < departmentHierarchyLevel) {
+        if (Objects.isNull(admUnit.getLevel()) || admUnit.getLevel() < departmentHierarchyLevel) {
             throw new BusinessRuleException(Constants.ERR_ADMUNIT_ABOVE_DEPARTMENT_LEVEL);
         }
     }
@@ -155,7 +155,7 @@ public class AdmUnitServiceFacadeBean implements AdmUnitService {
         }
         String nameLowerCase = name.toLowerCase();
         return fetchTree().stream()
-                .filter(dto -> dto.getName() != null && dto.getName().toLowerCase().contains(nameLowerCase))
+                .filter(dto -> Objects.nonNull(dto.getName()) && dto.getName().toLowerCase().contains(nameLowerCase))
                 .map(AdmUnitOutputDTO::getCode)
                 .toList();
     }
@@ -175,10 +175,10 @@ public class AdmUnitServiceFacadeBean implements AdmUnitService {
     public Page<AdmUnitOutputDTO> getAll(String search, Pageable pageable) {
         String searchLowerCase = StringUtils.isBlank(search) ? null : search.toLowerCase();
         List<AdmUnitOutputDTO> eligibleUnits = fetchTree().stream()
-                .filter(dto -> dto.getLevel() != null && dto.getLevel() >= departmentHierarchyLevel)
-                .filter(dto -> searchLowerCase == null
-                        || (dto.getName() != null && dto.getName().toLowerCase().contains(searchLowerCase))
-                        || (dto.getCode() != null && dto.getCode().toLowerCase().contains(searchLowerCase)))
+                .filter(dto -> Objects.nonNull(dto.getLevel()) && dto.getLevel() >= departmentHierarchyLevel)
+                .filter(dto -> Objects.isNull(searchLowerCase)
+                        || (Objects.nonNull(dto.getName()) && dto.getName().toLowerCase().contains(searchLowerCase))
+                        || (Objects.nonNull(dto.getCode()) && dto.getCode().toLowerCase().contains(searchLowerCase)))
                 .toList();
         return Utils.paginate(eligibleUnits, pageable);
     }

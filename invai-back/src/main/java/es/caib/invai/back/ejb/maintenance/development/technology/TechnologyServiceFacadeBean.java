@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative catalog Technologies.
@@ -55,7 +56,7 @@ public class TechnologyServiceFacadeBean implements TechnologyService {
         log.debug("Facade: Fetching technology by ID: {}", id);
         Technology technology = technologyRepository.findById(id);
 
-        if (technology == null) {
+        if (Objects.isNull(technology)) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGYCATALOG_NOT_FOUND);
         }
 
@@ -114,7 +115,7 @@ public class TechnologyServiceFacadeBean implements TechnologyService {
         log.info("Facade: Updating technology with ID: {}", id);
 
         Technology existing = technologyRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGYCATALOG_NOT_FOUND);
         }
 
@@ -140,11 +141,11 @@ public class TechnologyServiceFacadeBean implements TechnologyService {
         log.info("Facade: Logically deleting technology with ID: {}", id);
         Technology existing = technologyRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGYCATALOG_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGYCATALOG_NOT_ACTIVE);
         }
 
@@ -170,11 +171,11 @@ public class TechnologyServiceFacadeBean implements TechnologyService {
         log.info("Facade: Reactivating technology with ID: {}", id);
         Technology existing = technologyRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGYCATALOG_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGYCATALOG_ACTIVE);
         }
 

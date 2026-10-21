@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Corporate specification provider executing defensive dynamic predicate tree evaluation
@@ -38,12 +39,12 @@ public class AppSecurityRiskSpecification {
 
             predicates.add(cb.equal(root.get("appSecurity").get("id"), appSecurityId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -51,17 +52,17 @@ public class AppSecurityRiskSpecification {
                 );
             }
 
-            if (criteria.getAppSecurityId() != null) {
+            if (Objects.nonNull(criteria.getAppSecurityId())) {
                 predicates.add(cb.equal(root.get("appSecurity").get("id"), criteria.getAppSecurityId()));
             }
-            if (criteria.getLevelId() != null) {
+            if (Objects.nonNull(criteria.getLevelId())) {
                 predicates.add(cb.equal(root.get("level").get("id"), criteria.getLevelId()));
             }
-            if (criteria.getFieldId() != null) {
+            if (Objects.nonNull(criteria.getFieldId())) {
                 predicates.add(cb.equal(root.get("field").get("id"), criteria.getFieldId()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getSearch().trim().toLowerCase() + "%";
                 List<Predicate> searchPredicates = new ArrayList<>();
 

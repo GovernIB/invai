@@ -16,6 +16,8 @@ import es.caib.invai.back.service.mapper.catalog.ensSubject.EnsSubjectMapper;
 import es.caib.invai.back.service.mapper.maintenance.security.personalDataProcessing.PersonalDataProcessingMapper;
 import es.caib.invai.back.service.mapper.catalog.securityLevel.SecurityLevelMapper;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * AppEnsClassification relation entities, business domain models, and API transfer schemas.
@@ -121,7 +123,7 @@ public interface AppEnsClassificationMapper {
      * @return a stub carrying only the given id, or {@code null}
      */
     default IdentityProvider mapIdentityProviderId(Long identityProviderId) {
-        if (identityProviderId == null) {
+        if (Objects.isNull(identityProviderId)) {
             return null;
         }
         IdentityProvider identityProvider = new IdentityProvider();
@@ -137,7 +139,7 @@ public interface AppEnsClassificationMapper {
      * @return a stub carrying only the given id, or {@code null}
      */
     default PersonalDataProcessing mapPersonalDataProcessingId(Long personalDataProcessingId) {
-        if (personalDataProcessingId == null) {
+        if (Objects.isNull(personalDataProcessingId)) {
             return null;
         }
         PersonalDataProcessing personalDataProcessing = new PersonalDataProcessing();

@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppAccessibilityRepository} on top of
@@ -157,8 +158,8 @@ public class AppAccessibilityRepositoryAdapter implements AppAccessibilityReposi
 
             aud.setAppAccessibilityId(entity.getId());
             aud.setApplicationId(entity.getApplication().getId());
-            aud.setComplianceId(entity.getCompliance() != null ? entity.getCompliance().getId() : null);
-            aud.setClassificationSegmentId(entity.getClassificationSegment() != null ? entity.getClassificationSegment().getId() : null);
+            aud.setComplianceId(Objects.nonNull(entity.getCompliance()) ? entity.getCompliance().getId() : null);
+            aud.setClassificationSegmentId(Objects.nonNull(entity.getClassificationSegment()) ? entity.getClassificationSegment().getId() : null);
             aud.setPublicUrl(entity.getPublicUrl());
             aud.setMobileApplication(entity.getMobileApplication());
             aud.setMobileApplicationName(entity.getMobileApplicationName());
@@ -166,8 +167,8 @@ public class AppAccessibilityRepositoryAdapter implements AppAccessibilityReposi
             aud.setObservations(entity.getObservations());
             aud.setExpireDate(entity.getExpireDate());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

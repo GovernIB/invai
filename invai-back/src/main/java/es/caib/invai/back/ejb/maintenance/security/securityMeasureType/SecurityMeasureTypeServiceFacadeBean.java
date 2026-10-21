@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative SecurityMeasureTypes.
@@ -50,7 +51,7 @@ public class SecurityMeasureTypeServiceFacadeBean implements SecurityMeasureType
         log.debug("Facade: Fetching security measure type entry by ID: {}", id);
         SecurityMeasureType securityMeasureType = securityMeasureTypeRepository.findById(id);
 
-        if (securityMeasureType == null) {
+        if (Objects.isNull(securityMeasureType)) {
             throw new BusinessRuleException(Constants.ERR_SECURITYMEASURETYPE_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class SecurityMeasureTypeServiceFacadeBean implements SecurityMeasureType
         log.info("Facade: Updating security measure type entry with ID: {}", id);
 
         SecurityMeasureType existing = securityMeasureTypeRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SECURITYMEASURETYPE_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class SecurityMeasureTypeServiceFacadeBean implements SecurityMeasureType
         log.info("Facade: Logically deleting security measure type entry with ID: {}", id);
         SecurityMeasureType existing = securityMeasureTypeRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SECURITYMEASURETYPE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SECURITYMEASURETYPE_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class SecurityMeasureTypeServiceFacadeBean implements SecurityMeasureType
         log.info("Facade: Reactivating security measure type entry with ID: {}", id);
         SecurityMeasureType existing = securityMeasureTypeRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SECURITYMEASURETYPE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SECURITYMEASURETYPE_ACTIVE);
         }
 

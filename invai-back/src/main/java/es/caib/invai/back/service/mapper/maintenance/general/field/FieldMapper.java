@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Functional Field Area database entities, business domain models, and API transfer schemas.
@@ -81,7 +83,7 @@ public interface FieldMapper {
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
     default FieldOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         FieldOutputDTO field = new FieldOutputDTO();

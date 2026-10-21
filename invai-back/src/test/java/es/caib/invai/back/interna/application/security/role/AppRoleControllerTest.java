@@ -83,4 +83,13 @@ class AppRoleControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(appRoleService).delete(1L);
     }
+
+
+    @Test
+    void validate_returnsNoContentAndDelegatesToService() {
+        ResponseEntity<Void> response = appRoleController.validate(3L);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(appRoleService).validate(3L);
+    }
 }

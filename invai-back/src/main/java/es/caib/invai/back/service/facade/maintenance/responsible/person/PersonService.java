@@ -3,12 +3,14 @@ package es.caib.invai.back.service.facade.maintenance.responsible.person;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonCombinedSearchOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonDir3CheckOutputDTO;
+import es.caib.invai.back.service.model.application.dir3.PrimaryGroupDir3;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonCriteria;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.Collection;
 
 /**
  * Service Facade boundary interface declaring business use cases and orchestration rules
@@ -175,4 +177,19 @@ public interface PersonService {
      * @throws es.caib.invai.back.exception.SoffidTimeoutException if the Soffid call times out
      */
     PersonDir3CheckOutputDTO checkDir3(String emailAddress, String admUnitCode);
+
+    /**
+     * Takes a picture of the DIR3 unit of the given people from Soffid, in a few bulk calls (one per
+     * batch of addresses, plus one for the groups) instead of the two calls per person that
+     * {@link #checkDir3} makes. Checking a person against an administrative unit from that picture
+     * gives the same result as {@link #checkDir3} would, with no further call to Soffid. Runs outside
+     * any database transaction, since it only talks to Soffid.
+     *
+     * @param emailAddresses the e-mail addresses of the people to include; blanks and repeats are ignored
+     * @return the picture, to be used for one run and then dropped
+     * @throws es.caib.invai.back.exception.SoffidClientException if a Soffid call fails for any
+     * reason other than a timeout
+     * @throws es.caib.invai.back.exception.SoffidTimeoutException if a Soffid call times out
+     */
+    PrimaryGroupDir3 getPrimaryGroupDir3FromSoffid(Collection<String> emailAddresses);
 }

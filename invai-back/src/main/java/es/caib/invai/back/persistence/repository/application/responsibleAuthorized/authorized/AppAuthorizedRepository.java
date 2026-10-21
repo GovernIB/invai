@@ -71,6 +71,9 @@ public interface AppAuthorizedRepository {
     /** Finds every active authorization currently held by the given person, across all applications. */
     List<AppAuthorized> findAllActiveByPersonId(Long personId);
 
+    /** Finds the distinct e-mail addresses of the Personal CAIB people holding an active authorization on any application. */
+    List<String> findAllActivePersonalCaibEmails();
+
     /** Finds the currently active authorization (if any) held by the given person on the given anchor. */
     AppAuthorized findActiveByAppResponsibleAuthorizedAndPerson(Long appResponsibleAuthorizedId, Long personId);
 

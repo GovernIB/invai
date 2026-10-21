@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for Security's view of web context assignments: a read-only
@@ -71,7 +72,7 @@ public class AppWebContextServiceFacadeBean implements AppWebContextService {
         log.info("Facade: Validating web context ID: {}", id);
 
         AppWebContext existingModel = appWebContextRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_WEB_CONTEXT_NOT_FOUND);
         }
         if (existingModel.isValidated()) {

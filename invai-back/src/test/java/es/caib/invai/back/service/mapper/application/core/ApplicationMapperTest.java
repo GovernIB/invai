@@ -1,6 +1,7 @@
 package es.caib.invai.back.service.mapper.application.core;
 
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDetailOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.category.CategoryEntity;
@@ -164,7 +165,54 @@ class ApplicationMapperTest {
     }
 
     @Test
-    void toResponse_allSourcesPresent_flattensEveryField() {
+    void toResponse_mapsOnlyWhatTheApplicationsListShows() {
+        Category category = new Category();
+        category.setId(10L);
+        category.setName("Category name");
+        Application application = getApplication(category);
+        application.setDescription("not in the list");
+
+        ApplicationOutputDTO response = mapper.toResponse(application);
+
+        assertEquals(200L, response.getId());
+        assertEquals("APP02", response.getCode());
+        assertEquals("AP2", response.getPrefix());
+        assertEquals("Application Two", response.getName());
+        assertEquals(10L, response.getCategory().getId());
+        assertEquals("Category name", response.getCategory().getName());
+        assertEquals(20L, response.getSystemType().getId());
+        assertEquals(30L, response.getField().getId());
+    }
+
+    @Test
+    void toResponse_neverPopulatesAdmUnit_becauseItIsResolvedByTheFacadeNotMapped() {
+        Application application = new Application();
+        application.setId(1L);
+        application.setAdmUnitCode("AU1");
+
+        assertNull(mapper.toResponse(application).getAdmUnit());
+    }
+
+    @Test
+    void toResponse_nullNestedReferences_leavesThemNull() {
+        Application application = new Application();
+        application.setId(1L);
+
+        ApplicationOutputDTO response = mapper.toResponse(application);
+
+        assertEquals(1L, response.getId());
+        assertNull(response.getCategory());
+        assertNull(response.getSystemType());
+        assertNull(response.getField());
+    }
+
+    @Test
+    void toResponse_null_returnsNull() {
+        assertNull(mapper.toResponse(null));
+    }
+
+    @Test
+    void toDetailResponse_allSourcesPresent_flattensEveryField() {
         Application application = new Application();
         application.setId(1L);
         application.setName("Application One");
@@ -192,7 +240,7 @@ class ApplicationMapperTest {
         AppAccessibility appAccessibility = new AppAccessibility();
         appAccessibility.setId(1300L);
 
-        ApplicationOutputDTO response = mapper.toResponse(application, infoDb, development, appResponsibleAuthorized, appSecurity, appAccessibility);
+        ApplicationDetailOutputDTO response = mapper.toDetailResponse(application, infoDb, development, appResponsibleAuthorized, appSecurity, appAccessibility, null, null, null, null, null, null, null, null);
 
         assertEquals(1L, response.getId());
         assertEquals("Application One", response.getName());
@@ -210,24 +258,24 @@ class ApplicationMapperTest {
     }
 
     @Test
-    void toResponse_neverPopulatesAdmUnit_becauseItIsResolvedByTheFacadeNotMapped() {
+    void toDetailResponse_neverPopulatesAdmUnit_becauseItIsResolvedByTheFacadeNotMapped() {
         Application application = new Application();
         application.setId(1L);
         application.setStatus(StatusEnum.ACTIVE);
         application.setAdmUnitCode("AU1");
 
-        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null);
+        ApplicationDetailOutputDTO response = mapper.toDetailResponse(application, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertNull(response.getAdmUnit());
     }
 
     @Test
-    void toResponse_withCompletenessFlags_mapsEachBooleanToItsOwnField() {
+    void toDetailResponse_withCompletenessFlags_mapsEachBooleanToItsOwnField() {
         Application application = new Application();
         application.setId(1L);
         application.setStatus(StatusEnum.ACTIVE);
 
-        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null, true, false, true, true, false, true, false, true);
+        ApplicationDetailOutputDTO response = mapper.toDetailResponse(application, null, null, null, null, null, true, false, true, true, false, true, false, true);
 
         assertTrue(response.getMissingDevelopmentFields());
         assertFalse(response.getMissingResponsibleTypes());
@@ -240,12 +288,12 @@ class ApplicationMapperTest {
     }
 
     @Test
-    void toResponse_nullInfoDbAndDevelopment_leavesIdsNull() {
+    void toDetailResponse_nullInfoDbAndDevelopment_leavesIdsNull() {
         Application application = new Application();
         application.setId(1L);
         application.setStatus(StatusEnum.ACTIVE);
 
-        ApplicationOutputDTO response = mapper.toResponse(application, null, null, null, null, null);
+        ApplicationDetailOutputDTO response = mapper.toDetailResponse(application, null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertEquals(1L, response.getId());
         assertNull(response.getAppInformationSystemDbId());
@@ -256,8 +304,8 @@ class ApplicationMapperTest {
     }
 
     @Test
-    void toResponse_allSourcesNull_returnsNull() {
-        assertNull(mapper.toResponse(null, null, null, null, null, null));
+    void toDetailResponse_allSourcesNull_returnsNull() {
+        assertNull(mapper.toDetailResponse(null, null, null, null, null, null, null, null, null, null, null, null, null, null));
     }
 
     private ApplicationInputDTO buildInputDTO() {

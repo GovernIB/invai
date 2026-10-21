@@ -21,7 +21,7 @@ public class LkupStatusEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inv_status_seq")
     @SequenceGenerator(name = "inv_status_seq", sequenceName = "INV_STATUS_SEQ", allocationSize = 1)
-    @Column(name = "STATUS_ID")
+    @Column(name = "ID")
     private Long id;
 
     /** Display label of the status (typically Catalan). */

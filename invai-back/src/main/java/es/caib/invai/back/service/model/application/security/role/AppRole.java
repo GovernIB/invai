@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
 
 /**
@@ -36,4 +37,14 @@ public class AppRole {
     private LocalDateTime deletedAt;
     /** Identifier of the user who logically deleted this record, or {@code null} if still active. */
     private String deletedBy;
+    /**
+     * Validation state of this assignment against the application's prefix: {@code VALIDATED} if
+     * the role's name starts with the prefix followed by an underscore, {@code NOT_VALIDATED} if it
+     * doesn't, {@code MANUAL} if a person vouched for it anyway.
+     */
+    private ValidationStatusEnum validationStatus;
+    /** Timestamp of the manual validation, populated only when the state is {@code MANUAL}. */
+    private LocalDateTime manualValidatedAt;
+    /** User who validated the assignment manually, populated only when the state is {@code MANUAL}. */
+    private String manualValidatedBy;
 }

@@ -62,6 +62,26 @@ public class SoffidConfig {
     private String grantedRolePath;
 
     /**
+     * Maximum time, in seconds, to wait for each Soffid call to answer. Soffid can take several
+     * seconds to respond, so this must stay comfortably above its slowest observed response.
+     */
+    @Getter
+    @Value("${es.caib.invai.soffid.request-timeout-seconds}")
+    private long requestTimeoutSeconds;
+
+    /** Maximum time, in seconds, to connect to Soffid. */
+    @Value("${es.caib.invai.soffid.connect-timeout-seconds}")
+    private long connectTimeoutSeconds;
+
+    /**
+     * Maximum time, in seconds, to wait for Soffid to answer at the HTTP level. If it is not above
+     * {@link #requestTimeoutSeconds}, it fires first, and the failure reaches {@code SoffidClient}
+     * as an unavailable service instead of as a timeout.
+     */
+    @Value("${es.caib.invai.soffid.response-timeout-seconds}")
+    private long responseTimeoutSeconds;
+
+    /**
      * Builds the {@link WebClient} instance used to call the Soffid SCIM 2.0 API, pre-configured
      * with the base URL and HTTP Basic Auth credentials, and explicit connect/read timeouts to
      * avoid indefinitely blocking on an unreachable or slow external system.
@@ -71,8 +91,8 @@ public class SoffidConfig {
     @Bean
     public WebClient soffidWebClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofSeconds(10));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(connectTimeoutSeconds * 1000))
+                .responseTimeout(Duration.ofSeconds(responseTimeoutSeconds));
 
         return WebClient.builder()
                 .baseUrl(baseUrl)

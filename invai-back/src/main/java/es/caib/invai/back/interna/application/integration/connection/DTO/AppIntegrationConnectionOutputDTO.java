@@ -44,7 +44,11 @@ public class AppIntegrationConnectionOutputDTO {
     /** Soffid username. */
     private String username;
 
-    /** Roles required by this integration, persisted as a snapshot, in the same shape Soffid's own role search returns. */
+    /**
+     * Details of the roles required by this integration. Only their ids are persisted; the rest is
+     * resolved live from Soffid on every read, in the same shape Soffid's own role search returns.
+     * {@code null} if that live lookup failed (see {@link #rolesUnavailable}).
+     */
     private List<SoffidRole> requiredRoles;
 
     /**
@@ -60,6 +64,13 @@ public class AppIntegrationConnectionOutputDTO {
      * granted-roles lookup itself failed.
      */
     private Boolean rolesMismatch;
+
+    /**
+     * {@code true} if Soffid couldn't be reached while resolving this row's roles, in which case
+     * {@link #requiredRoles}, {@link #grantedRoles} and {@link #rolesMismatch} are all {@code null}.
+     * The row itself is still returned: the roles are an enrichment, not part of the stored data.
+     */
+    private Boolean rolesUnavailable;
 
     /** Timestamp at which this record was logically deleted, or {@code null} if still active. */
     private LocalDateTime deletedAt;

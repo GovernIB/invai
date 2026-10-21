@@ -2,7 +2,7 @@ package es.caib.invai.back.persistence.repository.application.responsibleAuthori
 
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationAudEntity;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity;
-import es.caib.invai.back.persistence.model.catalog.dir3Status.LkupDir3StatusEntity;
+import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import org.junit.jupiter.api.AfterEach;
@@ -52,8 +52,8 @@ class Dir3ValidationRepositoryAdapterTest {
         return a;
     }
 
-    private LkupDir3StatusEntity statusEntity(Long id) {
-        LkupDir3StatusEntity status = new LkupDir3StatusEntity();
+    private LkupValidationStatusEntity statusEntity(Long id) {
+        LkupValidationStatusEntity status = new LkupValidationStatusEntity();
         status.setId(id);
         return status;
     }

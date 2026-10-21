@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Infrastructure outbound adapter implementing {@link AppResponsibleRepository}, translating
@@ -93,6 +94,15 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
 
     /** {@inheritDoc} */
     @Override
+    public List<String> findAllActivePersonalCaibEmails() {
+        return appResponsibleJPARepository.findAllByDeletedAtIsNullAndPersonPersonalCaibTrueAndPersonEmailIsNotNull().stream()
+                .map(responsible -> responsible.getPerson().getEmail())
+                .distinct()
+                .toList();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public List<AppResponsible> findAllActiveByPersonId(Long personId) {
         return appResponsibleJPARepository.findAllByPersonIdAndDeletedAtIsNull(personId).stream()
                 .map(appResponsibleMapper::toModel)
@@ -123,8 +133,8 @@ public class AppResponsibleRepositoryAdapter implements AppResponsibleRepository
         aud.setJobTitle(entity.getJobTitle());
         aud.setObservation(entity.getObservation());
         aud.setDir3ValidationId(entity.getDir3Validation().getId());
-        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+        aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
         aud.setUpdatedAt(entity.getUpdatedAt());
         aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());

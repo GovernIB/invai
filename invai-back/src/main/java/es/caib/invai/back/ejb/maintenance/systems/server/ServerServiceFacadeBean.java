@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing host server core configurations.
@@ -51,7 +52,7 @@ public class ServerServiceFacadeBean implements ServerService {
         log.debug("Facade: Fetching server by ID: {}", id);
         Server server = serverRepository.findById(id);
 
-        if (server == null) {
+        if (Objects.isNull(server)) {
             throw new BusinessRuleException(Constants.ERR_SERVER_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class ServerServiceFacadeBean implements ServerService {
         log.info("Facade: Updating server with ID: {}", id);
 
         Server existing = serverRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SERVER_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class ServerServiceFacadeBean implements ServerService {
         log.info("Facade: Logically deleting server with ID: {}", id);
         Server existing = serverRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SERVER_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SERVER_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class ServerServiceFacadeBean implements ServerService {
         log.info("Facade: Reactivating server with ID: {}", id);
         Server existing = serverRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SERVER_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SERVER_ACTIVE);
         }
 

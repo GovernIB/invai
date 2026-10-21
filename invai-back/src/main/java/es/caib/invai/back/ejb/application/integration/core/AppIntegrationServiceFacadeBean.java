@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementing CRUD for the "Integracio" anchor. Like its
@@ -48,19 +49,19 @@ public class AppIntegrationServiceFacadeBean implements AppIntegrationService {
     public AppIntegrationOutputDTO getById(Long id) {
         log.debug("Facade: Fetching application integration anchor for ID: {}", id);
         AppIntegration domain = appIntegrationRepository.findById(id);
-        return domain == null ? null : appIntegrationMapper.toResponse(domain);
+        return Objects.isNull(domain) ? null : appIntegrationMapper.toResponse(domain);
     }
 
     @Override
     public AppIntegrationOutputDTO create(AppIntegrationInputDTO inputDTO) {
         log.info("Facade: Persisting new application integration anchor for application ID: {}", inputDTO.getApplicationId());
 
-        if (applicationRepository.findById(inputDTO.getApplicationId()) == null) {
+        if (Objects.isNull(applicationRepository.findById(inputDTO.getApplicationId()))) {
             throw new BusinessRuleException(Constants.ERR_APP_NOT_FOUND);
         }
 
         AppIntegration existing = appIntegrationRepository.findByApplicationId(inputDTO.getApplicationId());
-        if (existing != null && existing.getDeletedAt() == null) {
+        if (Objects.nonNull(existing) && Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_ALREADY_EXISTS);
         }
 
@@ -76,7 +77,7 @@ public class AppIntegrationServiceFacadeBean implements AppIntegrationService {
         log.info("Facade: Updating application integration anchor ID: {}", id);
 
         AppIntegration existingModel = appIntegrationRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_NOT_FOUND);
         }
 
@@ -91,7 +92,7 @@ public class AppIntegrationServiceFacadeBean implements AppIntegrationService {
         log.info("Facade: Logically deleting application integration anchor ID: {}", id);
 
         AppIntegration existingModel = appIntegrationRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_NOT_FOUND);
         }
 

@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -37,12 +38,12 @@ public final class SystemSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -50,19 +51,19 @@ public final class SystemSpecification {
                 );
             } 
 
-            if (criteria.getServerId() != null) {
+            if (Objects.nonNull(criteria.getServerId())) {
                 predicates.add(cb.equal(root.get("server").get("id"), criteria.getServerId()));
             }
 
-            if (criteria.getInstance() != null && !criteria.getInstance().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getInstance()) && !criteria.getInstance().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("instance")), "%" + criteria.getInstance().toLowerCase() + "%"));
             }
 
-            if (criteria.getVersion() != null && !criteria.getVersion().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getVersion()) && !criteria.getVersion().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("version")), "%" + criteria.getVersion().toLowerCase() + "%"));
             }
 
-            if (criteria.getUnassignedToInformationSystemDbId() != null) {
+            if (Objects.nonNull(criteria.getUnassignedToInformationSystemDbId())) {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<AppSystemEntity> appSystemRoot = subquery.from(AppSystemEntity.class);
                 subquery.select(appSystemRoot.get("id"));
@@ -75,7 +76,7 @@ public final class SystemSpecification {
             }
 
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String pattern = "%" + criteria.getSearch().toLowerCase() + "%";
                 Predicate searchServer = cb.like(cb.lower(root.get("server").get("name")), pattern);
                 Predicate searchInstance = cb.like(cb.lower(root.get("instance")), pattern);

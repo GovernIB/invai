@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Working Commission database entities, business domain models, and API transfer schemas.
@@ -86,7 +88,7 @@ public interface CommissionMapper {
      * @return a stub domain model tracking the target index, or {@code null} if the input parameter is null
      */
     default CommissionOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         CommissionOutputDTO commission = new CommissionOutputDTO();

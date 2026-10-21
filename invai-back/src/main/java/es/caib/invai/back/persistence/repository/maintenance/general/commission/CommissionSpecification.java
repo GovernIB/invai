@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -37,12 +38,12 @@ public final class CommissionSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -50,27 +51,27 @@ public final class CommissionSpecification {
                 );
             }
 
-            if (criteria.getName() != null && !criteria.getName().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getName()) && !criteria.getName().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.getName().toLowerCase() + "%"));
             }
 
-            if (criteria.getNameEs() != null && !criteria.getNameEs().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getNameEs()) && !criteria.getNameEs().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("nameEs")), "%" + criteria.getNameEs().toLowerCase() + "%"));
             }
 
-            if (criteria.getCommissionType() != null) {
+            if (Objects.nonNull(criteria.getCommissionType())) {
                 predicates.add(cb.equal(root.get("commissionType"), criteria.getCommissionType()));
             }
 
-            if (criteria.getApprovalDate() != null) {
+            if (Objects.nonNull(criteria.getApprovalDate())) {
                 predicates.add(cb.equal(root.get("approvalDate"), criteria.getApprovalDate()));
             }
 
-            if (criteria.getExpedientNumber() != null && !criteria.getExpedientNumber().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getExpedientNumber()) && !criteria.getExpedientNumber().trim().isEmpty()) {
                 predicates.add(cb.equal(root.get("expedientNumber"), criteria.getExpedientNumber().trim()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String pattern = "%" + criteria.getSearch().toLowerCase() + "%";
 
                 Predicate searchName = cb.like(cb.lower(root.get("name")), pattern);

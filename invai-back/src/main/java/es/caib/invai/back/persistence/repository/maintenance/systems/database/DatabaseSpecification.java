@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Subquery;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -37,12 +38,12 @@ public final class DatabaseSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -50,19 +51,19 @@ public final class DatabaseSpecification {
                 );
             }
 
-            if (criteria.getServerId() != null) {
+            if (Objects.nonNull(criteria.getServerId())) {
                 predicates.add(cb.equal(root.get("server").get("id"), criteria.getServerId()));
             }
 
-            if (criteria.getService() != null && !criteria.getService().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getService()) && !criteria.getService().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("service")), "%" + criteria.getService().toLowerCase() + "%"));
             }
 
-            if (criteria.getDatabaseTypeId() != null) {
+            if (Objects.nonNull(criteria.getDatabaseTypeId())) {
                 predicates.add(cb.equal(root.get("databaseType").get("id"), criteria.getDatabaseTypeId()));
             }
 
-            if (criteria.getUnassignedToInformationSystemDbId() != null) {
+            if (Objects.nonNull(criteria.getUnassignedToInformationSystemDbId())) {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<AppDatabaseEntity> appDatabaseRoot = subquery.from(AppDatabaseEntity.class);
                 subquery.select(appDatabaseRoot.get("id"));
@@ -75,7 +76,7 @@ public final class DatabaseSpecification {
             }
 
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String pattern = "%" + criteria.getSearch().toLowerCase() + "%";
 
                 Predicate searchServer = cb.like(cb.lower(root.get("server").get("name")), pattern);

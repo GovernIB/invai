@@ -9,6 +9,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.maintenance.systems.server.ServerMapper;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Enterprise Systems database entities, business domain models, and API transfer schemas.
@@ -80,7 +82,7 @@ public interface SystemMapper {
      * Convenience reference lookup utility initializing a detached shallow domain reference.
      */
     default SystemOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         SystemOutputDTO system = new SystemOutputDTO();

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing system core configurations.
@@ -58,7 +59,7 @@ public class SystemServiceFacadeBean implements SystemService {
         log.debug("Facade: Fetching system by ID: {}", id);
         System system = systemRepository.findById(id);
 
-        if (system == null) {
+        if (Objects.isNull(system)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_NOT_FOUND);
         }
 
@@ -121,7 +122,7 @@ public class SystemServiceFacadeBean implements SystemService {
         log.info("Facade: Updating system with ID: {}", id);
 
         System existing = systemRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_NOT_FOUND);
         }
 
@@ -149,11 +150,11 @@ public class SystemServiceFacadeBean implements SystemService {
         log.info("Facade: Logically deleting system with ID: {}", id);
         System existing = systemRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_NOT_FOUND);
         }
 
-        if(existing.getDeletedAt() != null){
+        if(Objects.nonNull(existing.getDeletedAt())){
             throw new BusinessRuleException(Constants.ERR_SYSTEM_NOT_ACTIVE);
         }
 
@@ -175,11 +176,11 @@ public class SystemServiceFacadeBean implements SystemService {
         log.info("Facade: Reactivating system with ID: {}", id);
         System existing = systemRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_ACTIVE);
         }
 
@@ -199,8 +200,8 @@ public class SystemServiceFacadeBean implements SystemService {
      */
     private void validateServerType(Long serverId) {
         Server server = serverRepository.findById(serverId);
-        if (server != null
-                && (server.getServerType() == null
+        if (Objects.nonNull(server)
+                && (Objects.isNull(server.getServerType())
                 || !Constants.SERVER_TYPE_CODE_APPLICATION.equals(server.getServerType().getCode()))) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_SERVER_TYPE_INVALID);
         }

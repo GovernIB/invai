@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing application-to-information-system-database groupings.
@@ -66,7 +67,7 @@ public class AppInformationSystemDbServiceFacadeBean implements AppInformationSy
         log.info("Facade: Creating new information system database grouping for Application ID: {}", inputDTO.getApplicationId());
 
         AppInformationSystemDb existing = appInformationSystemDbRepository.findByApplicationId(inputDTO.getApplicationId());
-        if (existing != null && existing.getDeletedAt() == null) {
+        if (Objects.nonNull(existing) && Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_INFORMATION_SYSTEM_DB_ALREADY_EXISTS);
         }
 
@@ -90,7 +91,7 @@ public class AppInformationSystemDbServiceFacadeBean implements AppInformationSy
         log.info("Facade: Updating application information system database ID: {}", id);
 
         AppInformationSystemDb existingModel = appInformationSystemDbRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_INFORMATION_SYSTEM_DB_NOT_FOUND);
         }
 
@@ -111,11 +112,11 @@ public class AppInformationSystemDbServiceFacadeBean implements AppInformationSy
         log.info("Facade: Logically deleting application information system database ID: {}", id);
 
         AppInformationSystemDb existingModel = appInformationSystemDbRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_INFORMATION_SYSTEM_DB_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_INFORMATION_SYSTEM_DB_NOT_ACTIVE);
         }
 

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative architecture Layers.
@@ -53,7 +54,7 @@ public class LayerServiceFacadeBean implements LayerService {
         log.debug("Facade: Fetching layer by ID: {}", id);
         Layer layer = layerRepository.findById(id);
 
-        if (layer == null) {
+        if (Objects.isNull(layer)) {
             throw new BusinessRuleException(Constants.ERR_LAYER_NOT_FOUND);
         }
 
@@ -89,7 +90,7 @@ public class LayerServiceFacadeBean implements LayerService {
         log.info("Facade: Updating layer with ID: {}", id);
 
         Layer existing = layerRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_LAYER_NOT_FOUND);
         }
 
@@ -108,11 +109,11 @@ public class LayerServiceFacadeBean implements LayerService {
         log.info("Facade: Logically deleting layer with ID: {}", id);
         Layer existing = layerRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_LAYER_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_LAYER_NOT_ACTIVE);
         }
 
@@ -131,11 +132,11 @@ public class LayerServiceFacadeBean implements LayerService {
         log.info("Facade: Reactivating layer with ID: {}", id);
         Layer existing = layerRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_LAYER_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_LAYER_ACTIVE);
         }
 

@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative Companies.
@@ -69,7 +70,7 @@ public class CompanyServiceFacadeBean implements CompanyService {
         log.debug("Facade: Fetching company by ID: {}", id);
         Company company = companyRepository.findById(id);
 
-        if (company == null) {
+        if (Objects.isNull(company)) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_NOT_FOUND);
         }
 
@@ -127,7 +128,7 @@ public class CompanyServiceFacadeBean implements CompanyService {
         log.info("Facade: Updating company with ID: {}", id);
 
         Company existing = companyRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_NOT_FOUND);
         }
 
@@ -166,11 +167,11 @@ public class CompanyServiceFacadeBean implements CompanyService {
         log.info("Facade: Logically deleting company with ID: {}", id);
         Company existing = companyRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_NOT_ACTIVE);
         }
 
@@ -196,7 +197,7 @@ public class CompanyServiceFacadeBean implements CompanyService {
     private void assertNoBlockingResponsibilities(List<Person> persons) {
         for (Person person : persons) {
             for (AppResponsible responsible : appResponsibleRepository.findAllActiveByPersonId(person.getId())) {
-                if (responsible.getAppResponsibleAuthorized().getDeletedAt() == null) {
+                if (Objects.isNull(responsible.getAppResponsibleAuthorized().getDeletedAt())) {
                     throw new BusinessRuleException(Constants.ERR_COMPANY_HAS_RESPONSIBLE);
                 }
             }
@@ -216,14 +217,14 @@ public class CompanyServiceFacadeBean implements CompanyService {
     private void assertNoBlockingAuthorizations(Long companyId, List<Person> persons) {
         for (Person person : persons) {
             for (AppAuthorized authorized : appAuthorizedRepository.findAllActiveByPersonId(person.getId())) {
-                if (authorized.getAppResponsibleAuthorized().getDeletedAt() != null) {
+                if (Objects.nonNull(authorized.getAppResponsibleAuthorized().getDeletedAt())) {
                     continue;
                 }
                 boolean hasExternalBackup = appAuthorizedRepository
                         .findAllActiveByAppResponsibleAuthorized(authorized.getAppResponsibleAuthorized().getId()).stream()
                         .filter(other -> !other.getId().equals(authorized.getId()))
                         .anyMatch(other -> other.getPerson().isPersonalCaib()
-                                || other.getPerson().getCompany() == null
+                                || Objects.isNull(other.getPerson().getCompany())
                                 || !companyId.equals(other.getPerson().getCompany().getId()));
                 if (!hasExternalBackup) {
                     throw new BusinessRuleException(Constants.ERR_COMPANY_HAS_AUTHORIZED);
@@ -272,11 +273,11 @@ public class CompanyServiceFacadeBean implements CompanyService {
         log.info("Facade: Reactivating company with ID: {}", id);
         Company existing = companyRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_ACTIVE);
         }
 

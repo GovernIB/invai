@@ -1,8 +1,9 @@
 package es.caib.invai.back.interna.application.core;
 
-import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDetailOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
+import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
 import es.caib.invai.back.service.facade.application.core.ApplicationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +43,10 @@ class ApplicationControllerTest {
 
     @Test
     void getById_returnsOkWithServiceResult() {
-        ApplicationOutputDTO dto = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO dto = new ApplicationDetailOutputDTO();
         when(applicationService.getById(1L)).thenReturn(dto);
 
-        ResponseEntity<ApplicationOutputDTO> response = applicationController.getById(1L);
+        ResponseEntity<ApplicationDetailOutputDTO> response = applicationController.getById(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(dto, response.getBody());
@@ -108,14 +109,13 @@ class ApplicationControllerTest {
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_returnsOkWithServiceResult() {
-        List<ApplicationDir3MismatchOutputDTO> mismatches = List.of(
-                ApplicationDir3MismatchOutputDTO.builder().id(1L).name("App One").dir3Mismatch(true).build());
-        when(applicationService.checkDir3MismatchForAllApplications()).thenReturn(mismatches);
+    void assignSoffidRoles_returnsOkWithTheRolesAssignedByTheService() {
+        List<AppRoleOutputDTO> assigned = List.of(new AppRoleOutputDTO());
+        when(applicationService.assignSoffidRoles(1L)).thenReturn(assigned);
 
-        ResponseEntity<List<ApplicationDir3MismatchOutputDTO>> response = applicationController.checkDir3MismatchForAllApplications();
+        ResponseEntity<List<AppRoleOutputDTO>> response = applicationController.assignSoffidRoles(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertSame(mismatches, response.getBody());
+        assertSame(assigned, response.getBody());
     }
 }

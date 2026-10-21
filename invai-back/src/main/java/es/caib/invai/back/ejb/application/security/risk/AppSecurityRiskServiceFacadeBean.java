@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing application security risk records.
@@ -85,7 +86,7 @@ public class AppSecurityRiskServiceFacadeBean implements AppSecurityRiskService 
         log.info("Facade: Initiating security validation rules check prior to executing transaction merge on ID: {}", id);
 
         AppSecurityRisk existingModel = appSecurityRiskRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_RISK_NOT_FOUND);
         }
 
@@ -107,11 +108,11 @@ public class AppSecurityRiskServiceFacadeBean implements AppSecurityRiskService 
         log.info("Facade: Evaluating infrastructure components prior to setting logical deletion properties for target: {}", id);
 
         AppSecurityRisk existingModel = appSecurityRiskRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_RISK_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_RISK_NOT_ACTIVE);
         }
 

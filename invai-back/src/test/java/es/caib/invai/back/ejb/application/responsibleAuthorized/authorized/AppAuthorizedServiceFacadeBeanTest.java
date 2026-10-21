@@ -21,7 +21,7 @@ import es.caib.invai.back.service.model.application.responsibleAuthorized.core.A
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.type.AppAuthorizedTypeLink;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,7 +94,7 @@ class AppAuthorizedServiceFacadeBeanTest {
         AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(10L).application(application).build();
         Person person = new Person();
         person.setId(7L);
-        Dir3Validation dir3Validation = Dir3Validation.builder().id(500L).dir3Status(Dir3ValidationStatus.NOT_APPLY).build();
+        Dir3Validation dir3Validation = Dir3Validation.builder().id(500L).dir3Status(ValidationStatusEnum.NOT_APPLY).build();
         activeModel = AppAuthorized.builder().id(1L).appResponsibleAuthorized(anchor).person(person).dir3Validation(dir3Validation).build();
 
         lenient().when(dir3ValidationRepository.create(any())).thenAnswer(invocation -> {
@@ -310,8 +310,8 @@ class AppAuthorizedServiceFacadeBeanTest {
 
         ArgumentCaptor<Dir3Validation> captor = ArgumentCaptor.forClass(Dir3Validation.class);
         verify(dir3ValidationRepository).create(captor.capture());
-        assertEquals(Dir3ValidationStatus.VALIDATED, captor.getValue().getDir3Status());
-        assertEquals(Dir3ValidationStatus.VALIDATED, model.getDir3Validation().getDir3Status());
+        assertEquals(ValidationStatusEnum.VALIDATED, captor.getValue().getDir3Status());
+        assertEquals(ValidationStatusEnum.VALIDATED, model.getDir3Validation().getDir3Status());
         verify(personService, never()).checkDir3(any(), any());
     }
 
@@ -321,7 +321,7 @@ class AppAuthorizedServiceFacadeBeanTest {
         AppAuthorized model = new AppAuthorized();
         AppAuthorized saved = AppAuthorized.builder().id(1L).build();
         AppAuthorizedOutputDTO response = AppAuthorizedOutputDTO.builder().id(1L).build();
-        Dir3Validation sharedDir3Validation = Dir3Validation.builder().id(500L).dir3Status(Dir3ValidationStatus.MANUAL).build();
+        Dir3Validation sharedDir3Validation = Dir3Validation.builder().id(500L).dir3Status(ValidationStatusEnum.MANUAL).build();
         AppResponsible existingResponsibleAssignment = new AppResponsible();
         existingResponsibleAssignment.setDir3Validation(sharedDir3Validation);
         when(appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(10L, 7L)).thenReturn(null);

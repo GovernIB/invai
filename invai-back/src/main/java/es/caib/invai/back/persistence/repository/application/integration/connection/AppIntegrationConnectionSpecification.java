@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -34,12 +35,12 @@ public final class AppIntegrationConnectionSpecification {
 
             predicates.add(cb.equal(root.get("appIntegration").get("id"), appIntegrationId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -47,13 +48,13 @@ public final class AppIntegrationConnectionSpecification {
                 );
             }
 
-            if (criteria.getApplicationId() != null) {
+            if (Objects.nonNull(criteria.getApplicationId())) {
                 predicates.add(cb.equal(root.get("application").get("id"), criteria.getApplicationId()));
             }
-            if (criteria.getExternalSystemId() != null) {
+            if (Objects.nonNull(criteria.getExternalSystemId())) {
                 predicates.add(cb.equal(root.get("externalSystem").get("id"), criteria.getExternalSystemId()));
             }
-            if (criteria.getTechnologyId() != null) {
+            if (Objects.nonNull(criteria.getTechnologyId())) {
                 predicates.add(cb.equal(root.get("technology").get("id"), criteria.getTechnologyId()));
             }
 

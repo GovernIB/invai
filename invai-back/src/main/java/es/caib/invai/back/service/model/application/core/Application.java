@@ -19,7 +19,7 @@ import es.caib.invai.back.service.model.maintenance.general.systemType.SystemTyp
 @Setter
 public class Application {
 
-    /** Unique application asset entry sequence sequence key. */
+    /** Unique application asset entry sequence key. */
     private Long id;
 
     /** Standardized corporate structural designation code identifier. */

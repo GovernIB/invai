@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Infrastructure repository Adapter implementing the outbound port boundary {@link ApplicationRepository}.
@@ -292,20 +293,20 @@ public class ApplicationRepositoryAdapter implements ApplicationRepository {
             aud.setExpirationDate(entity.getExpirationDate());
             aud.setDir3Mismatch(entity.isDir3Mismatch());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
                         aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());
             aud.setDeletedBy(entity.getDeletedBy());
 
-            if (entity.getCategory() != null) aud.setCategoryId(entity.getCategory().getId());
-            if (entity.getSystemType() != null) aud.setSystemTypeId(entity.getSystemType().getId());
-            if (entity.getField() != null) aud.setFieldId(entity.getField().getId());
+            if (Objects.nonNull(entity.getCategory())) aud.setCategoryId(entity.getCategory().getId());
+            if (Objects.nonNull(entity.getSystemType())) aud.setSystemTypeId(entity.getSystemType().getId());
+            if (Objects.nonNull(entity.getField())) aud.setFieldId(entity.getField().getId());
             aud.setAdmUnitCode(entity.getAdmUnitCode());
-            if (entity.getCsCommission() != null) aud.setCommissionId(entity.getCsCommission().getId());
-            if (entity.getStatus() != null) aud.setStatusId(entity.getStatus().getId());
+            if (Objects.nonNull(entity.getCsCommission())) aud.setCommissionId(entity.getCsCommission().getId());
+            if (Objects.nonNull(entity.getStatus())) aud.setStatusId(entity.getStatus().getId());
 
             aud.setAudAction(action);
             aud.setAuditDate(LocalDateTime.now());

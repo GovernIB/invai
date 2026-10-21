@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing application-to-security groupings.
@@ -66,7 +67,7 @@ public class AppSecurityServiceFacadeBean implements AppSecurityService {
         log.info("Facade: Creating new security anchor for Application ID: {}", inputDTO.getApplicationId());
 
         AppSecurity existing = appSecurityRepository.findByApplicationId(inputDTO.getApplicationId());
-        if (existing != null && existing.getDeletedAt() == null) {
+        if (Objects.nonNull(existing) && Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_ALREADY_EXISTS);
         }
 
@@ -90,7 +91,7 @@ public class AppSecurityServiceFacadeBean implements AppSecurityService {
         log.info("Facade: Updating application security ID: {}", id);
 
         AppSecurity existingModel = appSecurityRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_NOT_FOUND);
         }
 
@@ -111,11 +112,11 @@ public class AppSecurityServiceFacadeBean implements AppSecurityService {
         log.info("Facade: Logically deleting application security ID: {}", id);
 
         AppSecurity existingModel = appSecurityRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_NOT_ACTIVE);
         }
 

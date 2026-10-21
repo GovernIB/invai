@@ -6,6 +6,7 @@ import es.caib.invai.back.service.model.catalog.securityLevel.SecurityLevel;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MapStruct translation utility specializing in state conversions across security level
@@ -66,7 +67,7 @@ public interface SecurityLevelMapper {
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
     default SecurityLevel map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         SecurityLevel securityLevel = new SecurityLevel();

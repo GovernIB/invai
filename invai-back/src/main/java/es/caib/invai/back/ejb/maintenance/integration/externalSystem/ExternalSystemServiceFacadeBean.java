@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative External Systems.
@@ -55,7 +56,7 @@ public class ExternalSystemServiceFacadeBean implements ExternalSystemService {
         log.debug("Facade: Fetching external system by ID: {}", id);
         ExternalSystem externalSystem = externalSystemRepository.findById(id);
 
-        if (externalSystem == null) {
+        if (Objects.isNull(externalSystem)) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_NOT_FOUND);
         }
 
@@ -91,7 +92,7 @@ public class ExternalSystemServiceFacadeBean implements ExternalSystemService {
 
         Utils.sanitize(inputDTO);
 
-        if (companyRepository.findById(inputDTO.getCompanyId()) == null) {
+        if (Objects.isNull(companyRepository.findById(inputDTO.getCompanyId()))) {
             throw new BusinessRuleException(Constants.ERR_COMPANY_NOT_FOUND);
         }
 
@@ -119,7 +120,7 @@ public class ExternalSystemServiceFacadeBean implements ExternalSystemService {
         log.info("Facade: Updating external system with ID: {}", id);
 
         ExternalSystem existing = externalSystemRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_NOT_FOUND);
         }
 
@@ -144,11 +145,11 @@ public class ExternalSystemServiceFacadeBean implements ExternalSystemService {
         log.info("Facade: Logically deleting external system with ID: {}", id);
         ExternalSystem existing = externalSystemRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_NOT_ACTIVE);
         }
 
@@ -170,11 +171,11 @@ public class ExternalSystemServiceFacadeBean implements ExternalSystemService {
         log.info("Facade: Reactivating external system with ID: {}", id);
         ExternalSystem existing = externalSystemRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_ACTIVE);
         }
 

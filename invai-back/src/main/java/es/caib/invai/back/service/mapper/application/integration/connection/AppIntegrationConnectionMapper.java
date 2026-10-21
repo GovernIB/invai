@@ -14,6 +14,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.Objects;
+
 /**
  * MapStruct mapper converting between {@link AppIntegrationConnection} domain models, {@link
  * AppIntegrationConnectionEntity} persistence entities, and the inbound/outbound DTOs. The mutual
@@ -33,6 +35,7 @@ public interface AppIntegrationConnectionMapper {
     @Mapping(target = "requiredRoles", ignore = true)
     @Mapping(target = "grantedRoles", ignore = true)
     @Mapping(target = "rolesMismatch", ignore = true)
+    @Mapping(target = "rolesUnavailable", ignore = true)
     AppIntegrationConnectionOutputDTO toResponse(AppIntegrationConnection model);
 
     @Mapping(target = "id", ignore = true)
@@ -50,8 +53,8 @@ public interface AppIntegrationConnectionMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appIntegration.id", source = "appIntegrationId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "application.id", source = "applicationId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "externalSystem.id", source = "externalSystemId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "application", source = "applicationId")
+    @Mapping(target = "externalSystem", source = "externalSystemId")
     @Mapping(target = "technology.id", source = "technologyId", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -70,7 +73,7 @@ public interface AppIntegrationConnectionMapper {
      * @return a stub carrying only the given id, or {@code null}
      */
     default Application mapApplicationId(Long applicationId) {
-        if (applicationId == null) {
+        if (Objects.isNull(applicationId)) {
             return null;
         }
         Application application = new Application();
@@ -87,7 +90,7 @@ public interface AppIntegrationConnectionMapper {
      * @return a stub carrying only the given id, or {@code null}
      */
     default ExternalSystem mapExternalSystemId(Long externalSystemId) {
-        if (externalSystemId == null) {
+        if (Objects.isNull(externalSystemId)) {
             return null;
         }
         ExternalSystem externalSystem = new ExternalSystem();

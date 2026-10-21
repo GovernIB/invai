@@ -23,7 +23,11 @@ public class AppRoleInputDTO {
     @NotNull(message = "{validation.approle.appSecurityId}")
     private Long appSecurityId;
 
-    /** Foreign key unique identification pointer referencing the target security role. */
+    /**
+     * Soffid's own numeric identifier of the role to assign (the {@code roleId} Soffid's role search
+     * returns), not the local catalog's identifier. The role's data is asked of Soffid and kept in the
+     * local security role catalog.
+     */
     @NotNull(message = "{validation.approle.securityRoleId}")
     private Long securityRoleId;
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service for the "AppTechnology" list: technology stack entries (layer, technology, version,
@@ -92,7 +93,7 @@ public class AppTechnologyServiceFacadeBean implements AppTechnologyService {
         log.info("Facade: Updating technology ID: {}", id);
 
         AppTechnology existingModel = appTechnologyRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGY_NOT_FOUND);
         }
 
@@ -115,11 +116,11 @@ public class AppTechnologyServiceFacadeBean implements AppTechnologyService {
         log.info("Facade: Logically deleting technology ID: {}", id);
 
         AppTechnology existingModel = appTechnologyRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGY_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGY_NOT_ACTIVE);
         }
 

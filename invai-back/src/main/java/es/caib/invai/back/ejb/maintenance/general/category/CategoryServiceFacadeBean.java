@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative taxonomy Categories.
@@ -57,7 +58,7 @@ public class CategoryServiceFacadeBean implements CategoryService {
         log.debug("Facade: Fetching category by ID: {}", id);
         Category category = categoryRepository.findById(id);
 
-        if (category == null) {
+        if (Objects.isNull(category)) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
         }
 
@@ -122,7 +123,7 @@ public class CategoryServiceFacadeBean implements CategoryService {
         log.info("Facade: Updating category with ID: {}", id);
 
         Category existing = categoryRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
         }
 
@@ -152,11 +153,11 @@ public class CategoryServiceFacadeBean implements CategoryService {
         log.info("Facade: Logically deleting category with ID: {}", id);
         Category existing = categoryRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_ACTIVE);
         }
 
@@ -182,11 +183,11 @@ public class CategoryServiceFacadeBean implements CategoryService {
         log.info("Facade: Reactivating category with ID: {}", id);
         Category existing = categoryRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_CATEGORY_ACTIVE);
         }
 

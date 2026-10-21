@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * IdentityProvider database entities, business domain models, and API transfer schemas.
@@ -81,7 +83,7 @@ public interface IdentityProviderMapper {
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
     default IdentityProviderOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         IdentityProviderOutputDTO identityProvider = new IdentityProviderOutputDTO();

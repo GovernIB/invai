@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link AppAuthorizedTypeLinkRepository} implementation delegating persistence to the
@@ -64,6 +65,15 @@ public class AppAuthorizedTypeLinkRepositoryAdapter implements AppAuthorizedType
                 .toList();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public List<AppAuthorizedTypeLink> findAllActiveByAppAuthorizedIdIn(List<Long> appAuthorizedIds) {
+        return appAuthorizedTypeLinkJPARepository.findAllByAppAuthorizedIdInAndDeletedAtIsNull(appAuthorizedIds)
+                .stream()
+                .map(appAuthorizedTypeLinkMapper::toModel)
+                .toList();
+    }
+
     /**
      * Builds and persists an audit trail row snapshotting the current state of the given entity.
      *
@@ -77,8 +87,8 @@ public class AppAuthorizedTypeLinkRepositoryAdapter implements AppAuthorizedType
         aud.setAppAuthorizedId(entity.getAppAuthorized().getId());
         aud.setAuthorizationTypeId(entity.getAuthorizationType().getId());
 
-        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+        aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
         aud.setUpdatedAt(entity.getUpdatedAt());
         aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());

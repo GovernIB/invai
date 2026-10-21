@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.rest.dir3;
 
+import es.caib.invai.api.interna.controller.dir3.Dir3CaibController;
 import es.caib.invai.api.interna.exception.IntegrationUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Calls DIR3CAIB's real {@code obtenerArbolUnidades} REST operation on behalf of
@@ -53,7 +55,7 @@ public class Dir3CaibClient {
                     })
                     .block();
 
-            if (response == null || response.getStatusCode() == HttpStatus.NO_CONTENT || response.getBody() == null) {
+            if (Objects.isNull(response) || response.getStatusCode() == HttpStatus.NO_CONTENT || Objects.isNull(response.getBody())) {
                 return List.of();
             }
             return response.getBody();

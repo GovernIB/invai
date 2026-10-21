@@ -16,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -315,5 +316,34 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals("Validation Error", response.getBody().getError());
         assertEquals("An unexpected error occurred", response.getBody().getMessage());
+    }
+
+    // --- handleMissingPartExceptions ---
+
+    @Test
+    void handleMissingPartExceptions_namesTheMissingPart() {
+        when(messageSource.getMessage(eq("exception.parameter.missing"), eq(new Object[]{"file"}), any(Locale.class)))
+                .thenReturn("Missing required parameter 'file'");
+
+        ResponseEntity<ValidationErrorResponse> response =
+                handler.handleMissingPartExceptions(new MissingServletRequestPartException("file"));
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Missing required parameter 'file'", response.getBody().getMessage());
+    }
+
+    // --- handleMaxUploadSizeExceededExceptions ---
+
+    @Test
+    void handleMaxUploadSizeExceededExceptions_isABadRequestWithTheFileTooLargeMessage() {
+        when(messageSource.getMessage(eq("exception.documentation.attachment.filetoolarge"), eq(null), any(Locale.class)))
+                .thenReturn("The file exceeds the maximum size of 5 MB");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleMaxUploadSizeExceededExceptions();
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("The file exceeds the maximum size of 5 MB", response.getBody().getMessage());
     }
 }

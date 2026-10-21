@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppSecurityMeasureRepository} on top of Spring Data
@@ -161,11 +162,11 @@ public class AppSecurityMeasureRepositoryAdapter implements AppSecurityMeasureRe
 
             aud.setAppSecurityMeasureId(entity.getId());
             aud.setAppSecurityId(entity.getAppSecurity().getId());
-            aud.setTypeId(entity.getType() != null ? entity.getType().getId() : null);
-            aud.setEnsRequirementId(entity.getEnsRequirement() != null ? entity.getEnsRequirement().getId() : null);
+            aud.setTypeId(Objects.nonNull(entity.getType()) ? entity.getType().getId() : null);
+            aud.setEnsRequirementId(Objects.nonNull(entity.getEnsRequirement()) ? entity.getEnsRequirement().getId() : null);
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

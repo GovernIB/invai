@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppDataRepository} on top of Spring Data JPA,
@@ -120,12 +121,10 @@ public class AppDataRepositoryAdapter implements AppDataRepository {
             aud.setApplicationId(entity.getApplication().getId());
             aud.setObservation(entity.getObservation());
             aud.setOpenDataUrl(entity.getOpenDataUrl());
-            aud.setUseOpenDataUrl(entity.isUseOpenDataUrl());
             aud.setReuseUrl(entity.getReuseUrl());
-            aud.setUseReuseUrl(entity.isUseReuseUrl());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());

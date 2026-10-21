@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppSecurityRepository} on top of
@@ -159,8 +160,8 @@ public class AppSecurityRepositoryAdapter implements AppSecurityRepository {
             aud.setApplicationId(entity.getApplication().getId());
             aud.setObservation(entity.getObservation());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

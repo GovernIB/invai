@@ -8,8 +8,9 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper;
 import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper;
+
+import java.util.Objects;
 
 /**
  * MapStruct mapper converting between {@link AppProvider} domain models, {@link AppProviderEntity}
@@ -18,7 +19,7 @@ import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {AppDevelopmentMapper.class, RoleMapper.class})
+@Mapper(componentModel = "spring", uses = {es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper.class, RoleMapper.class})
 public interface AppProviderMapper {
 
     /**
@@ -96,7 +97,7 @@ public interface AppProviderMapper {
      */
     @AfterMapping
     default void nullifyRoleWhenIdMissing(AppProviderInputDTO inputDTO, @MappingTarget AppProvider model) {
-        if (inputDTO.getRoleId() == null) {
+        if (Objects.isNull(inputDTO.getRoleId())) {
             model.setRole(null);
         }
     }

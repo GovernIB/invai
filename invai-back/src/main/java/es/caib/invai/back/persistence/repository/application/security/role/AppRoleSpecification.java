@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Corporate specification provider executing defensive dynamic predicate tree evaluation
@@ -38,12 +39,12 @@ public class AppRoleSpecification {
 
             predicates.add(cb.equal(root.get("appSecurity").get("id"), appSecurityId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -51,22 +52,22 @@ public class AppRoleSpecification {
                 );
             }
 
-            if (criteria.getAppSecurityId() != null) {
+            if (Objects.nonNull(criteria.getAppSecurityId())) {
                 predicates.add(cb.equal(root.get("appSecurity").get("id"), criteria.getAppSecurityId()));
             }
-            if (criteria.getSecurityRoleId() != null) {
+            if (Objects.nonNull(criteria.getSecurityRoleId())) {
                 predicates.add(cb.equal(root.get("securityRole").get("id"), criteria.getSecurityRoleId()));
             }
-            if (criteria.getSecurityRoleName() != null && !criteria.getSecurityRoleName().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSecurityRoleName()) && !criteria.getSecurityRoleName().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("securityRole").get("name")),
                         "%" + criteria.getSecurityRoleName().trim().toLowerCase() + "%"));
             }
-            if (criteria.getSystem() != null && !criteria.getSystem().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSystem()) && !criteria.getSystem().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("securityRole").get("system")),
                         "%" + criteria.getSystem().trim().toLowerCase() + "%"));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getSearch().trim().toLowerCase() + "%";
                 List<Predicate> searchPredicates = new ArrayList<>();
 

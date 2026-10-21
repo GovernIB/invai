@@ -2,7 +2,7 @@ package es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3
 
 import es.caib.invai.back.interna.application.responsibleAuthorized.dir3.DTO.Dir3ValidationOutputDTO;
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity;
-import es.caib.invai.back.service.mapper.catalog.dir3Status.Dir3StatusMapper;
+import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,11 +10,11 @@ import org.mapstruct.Mapping;
 /**
  * MapStruct mapper converting between {@code Dir3Validation} persistence entities and their
  * business domain model. Delegates the {@code dir3Status} lookup conversion to
- * {@link Dir3StatusMapper}.
+ * {@link ValidationStatusMapper}.
  *
  * @since 1.0.5
  */
-@Mapper(componentModel = "spring", uses = {Dir3StatusMapper.class})
+@Mapper(componentModel = "spring", uses = {ValidationStatusMapper.class})
 public interface Dir3ValidationMapper {
 
     /**
@@ -31,7 +31,7 @@ public interface Dir3ValidationMapper {
      * @param model the domain model to convert
      * @return the corresponding persistence entity
      */
-    @Mapping(target = "dir3Status", source = "dir3Status", qualifiedByName = "mapDir3ValidationStatusToEntity")
+    @Mapping(target = "dir3Status", source = "dir3Status", qualifiedByName = "mapValidationStatusEnumToEntity")
     Dir3ValidationEntity toEntity(Dir3Validation model);
 
     /**

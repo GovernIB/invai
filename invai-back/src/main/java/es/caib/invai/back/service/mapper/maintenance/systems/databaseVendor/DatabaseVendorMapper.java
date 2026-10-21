@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * DatabaseVendor database entities, business domain models, and API transfer schemas.
@@ -60,7 +62,7 @@ public interface DatabaseVendorMapper {
      * Convenience reference lookup utility initializing a detached shallow domain reference.
      */
     default DatabaseVendorOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         DatabaseVendorOutputDTO dto = new DatabaseVendorOutputDTO();

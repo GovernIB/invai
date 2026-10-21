@@ -31,7 +31,7 @@ public class CommissionEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inv_commission_seq")
     @SequenceGenerator(name = "inv_commission_seq", sequenceName = "INV_COMMISSION_SEQ", allocationSize = 1)
-    @Column(name = "COMMISSION_ID")
+    @Column(name = "ID")
     private Long id;
 
     /** Core departmental description label sequence. Mapped to a non-nullable column of size 100. */

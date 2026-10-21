@@ -6,6 +6,7 @@ import es.caib.invai.back.service.model.catalog.standardAdaption.StandardAdaptio
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MapStruct translation utility specializing in state conversions across GOIB standards
@@ -64,7 +65,7 @@ public interface StandardAdaptionMapper {
      * @return a disconnected compliance structure stub tracking the configuration reference ID, or {@code null} if absent
      */
     default StandardAdaption map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         StandardAdaption standardAdaption = new StandardAdaption();

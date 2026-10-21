@@ -5,6 +5,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 
+import java.util.Objects;
+
 /**
  * Technical security utility component providing static convenience operations to interface
  * with the active Spring Security engine framework.
@@ -41,7 +43,7 @@ public final class SecurityUtils {
     public static Object getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (Objects.isNull(authentication) || !authentication.isAuthenticated()) {
             return SYSTEM_USER;
         }
 

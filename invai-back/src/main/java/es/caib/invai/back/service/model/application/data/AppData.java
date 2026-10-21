@@ -15,11 +15,10 @@ import es.caib.invai.back.service.model.application.core.Application;
  * AppDevelopment/AppSecurity/AppAccessibility/AppInformationSystemDb/AppResponsibleAuthorized
  * counterparts, this anchor is auto-created when the owning {@code Application} is created, so it
  * should only be {@code null} for applications created before this anchor was introduced. Carries
- * no swagger/OpenAPI data of its own - that is resolved live on every {@code getById} call (see
- * {@code es.caib.invai.back.ejb.application.data.AppDataServiceFacadeBean}), independently for
- * each tab, fetched from either the application's own external REST API/backend (derived from its
- * {@code code}), or, when {@link #useOpenDataUrl}/{@link #useReuseUrl} is {@code true}, from
- * {@link #openDataUrl}/{@link #reuseUrl} instead.
+ * no swagger/OpenAPI data of its own: only the URL of each tab's swagger when a person typed one in
+ * ({@code null} means the default URL, derived from the application's {@code code}). Whether a URL
+ * works is never stored: it is queried every time it is needed (see {@code
+ * es.caib.invai.back.ejb.application.data.AppDataServiceFacadeBean}).
  *
  * @since 1.0.5
  */
@@ -35,14 +34,10 @@ public class AppData {
     private Application application;
     /** Free-text observations about this application's open data / external REST API. */
     private String observation;
-    /** Explicit OpenAPI document URL to query instead of the application-name-derived one, used only when {@link #useOpenDataUrl} is {@code true}. */
+    /** URL of the swagger of the "Open Data" tab typed in by hand; {@code null} means the tab uses the default one, derived from the application's {@code code}. */
     private String openDataUrl;
-    /** Whether to query {@link #openDataUrl} instead of deriving the URL from the application's own {@code code}. Defaults to {@code false}. */
-    private boolean useOpenDataUrl;
-    /** Explicit reuse document URL to query instead of the application-name-derived one, used only when {@link #useReuseUrl} is {@code true}. */
+    /** URL of the swagger of the "Reutilització" tab typed in by hand; {@code null} means the tab uses the default one, derived from the application's {@code code}. */
     private String reuseUrl;
-    /** Whether to query {@link #reuseUrl} instead of deriving the URL from the application's own {@code code}. Defaults to {@code false}. */
-    private boolean useReuseUrl;
     /** Timestamp at which this record was created. */
     private LocalDateTime createdAt;
     /** Identifier of the user who created this record. */

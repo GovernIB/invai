@@ -10,6 +10,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Internationalization (i18n) and localization configuration.
@@ -53,7 +54,7 @@ public class LocaleConfig {
             @Override
             public Locale resolveLocale(HttpServletRequest request) {
                 String referer = request.getHeader("Referer");
-                if (referer != null && (referer.contains("/ca/") || referer.endsWith("/ca"))) {
+                if (Objects.nonNull(referer) && (referer.contains("/ca/") || referer.endsWith("/ca"))) {
                     return new Locale("ca");
                 }
 

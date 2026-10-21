@@ -604,4 +604,97 @@ class PersonServiceFacadeBeanTest {
         assertThrows(SoffidTimeoutException.class,
                 () -> personServiceFacadeBean.checkDir3("joan.puig@example.com", "A04027054"));
     }
+
+    // ------------------------------------------------------------------
+    // getPrimaryGroupDir3FromSoffid
+    // ------------------------------------------------------------------
+
+    private static SoffidUser soffidUser(String email, String primaryGroup) {
+        SoffidUser user = new SoffidUser();
+        user.setEmailAddress(email);
+        user.setPrimaryGroup(primaryGroup);
+        return user;
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_asksSoffidForEachPersonOnceInBatchesAndForTheGroupsOnce() {
+        org.springframework.test.util.ReflectionTestUtils.setField(personServiceFacadeBean, "usersBatchSize", 2);
+        when(soffidClient.getUsersByEmails(any())).thenReturn(List.of());
+        when(soffidClient.getGroupsDir3()).thenReturn(java.util.Map.of());
+
+        personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(List.of("a@caib.es", "B@caib.es", "a@caib.es", " ", "c@caib.es", "d@caib.es", "e@caib.es"));
+
+        ArgumentCaptor<List<String>> batches = ArgumentCaptor.forClass(List.class);
+        verify(soffidClient, times(3)).getUsersByEmails(batches.capture());
+        assertEquals(List.of(List.of("a@caib.es", "b@caib.es"), List.of("c@caib.es", "d@caib.es"), List.of("e@caib.es")),
+                batches.getAllValues());
+        verify(soffidClient, times(1)).getGroupsDir3();
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_checkingFromItGivesTheSameAnswerAsAskingSoffid() {
+        when(soffidClient.getUsersByEmails(any())).thenReturn(List.of(
+                soffidUser("Ana@caib.es", "sgaip"), soffidUser("joan@caib.es", "dgtic"), soffidUser("sensegrup@caib.es", null)));
+        when(soffidClient.getGroupsDir3()).thenReturn(java.util.Map.of("sgaip", "A04027054", "dgtic", "A04003003"));
+
+        var primaryGroupDir3 = personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(
+                List.of("ana@caib.es", "joan@caib.es", "sensegrup@caib.es", "ausente@caib.es"));
+
+        assertTrue(primaryGroupDir3.check("ana@caib.es", "A04027054").isMatches());
+        assertFalse(primaryGroupDir3.check("joan@caib.es", "A04027054").isMatches());
+        assertEquals("A04003003", primaryGroupDir3.check("joan@caib.es", "A04027054").getGroupDir3());
+        assertFalse(primaryGroupDir3.check("sensegrup@caib.es", "A04027054").isMatches());
+        assertNull(primaryGroupDir3.check("sensegrup@caib.es", "A04027054").getPersonGroup());
+        assertFalse(primaryGroupDir3.check("ausente@caib.es", "A04027054").isMatches());
+        verify(soffidClient, never()).searchByEmail(any());
+        verify(soffidClient, never()).resolveGroupDir3(any());
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_noPeople_doesNotAskForUsersButStillLoadsTheGroups() {
+        when(soffidClient.getGroupsDir3()).thenReturn(java.util.Map.of());
+
+        personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(List.of());
+
+        verify(soffidClient, never()).getUsersByEmails(any());
+        verify(soffidClient, times(1)).getGroupsDir3();
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_batchSizeIsCappedToWhatTheInternalApiAccepts() {
+        org.springframework.test.util.ReflectionTestUtils.setField(personServiceFacadeBean, "usersBatchSize", 5000);
+        when(soffidClient.getUsersByEmails(any())).thenReturn(List.of());
+        when(soffidClient.getGroupsDir3()).thenReturn(java.util.Map.of());
+        List<String> emails = java.util.stream.IntStream.rangeClosed(1, 250).mapToObj(i -> "u" + i + "@caib.es").toList();
+
+        personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(emails);
+
+        verify(soffidClient, times(3)).getUsersByEmails(any());
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_aNonPositiveBatchSizeStillProgresses() {
+        org.springframework.test.util.ReflectionTestUtils.setField(personServiceFacadeBean, "usersBatchSize", 0);
+        when(soffidClient.getUsersByEmails(any())).thenReturn(List.of());
+        when(soffidClient.getGroupsDir3()).thenReturn(java.util.Map.of());
+
+        personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(List.of("a@caib.es", "b@caib.es"));
+
+        verify(soffidClient, times(2)).getUsersByEmails(any());
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_soffidTimesOutWhileLoadingUsers_propagates() {
+        when(soffidClient.getUsersByEmails(any())).thenThrow(new SoffidTimeoutException());
+
+        assertThrows(SoffidTimeoutException.class, () -> personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(List.of("a@caib.es")));
+    }
+
+    @Test
+    void getPrimaryGroupDir3FromSoffid_soffidFailsWhileLoadingGroups_propagates() {
+        when(soffidClient.getUsersByEmails(any())).thenReturn(List.of());
+        when(soffidClient.getGroupsDir3()).thenThrow(new SoffidClientException("502"));
+
+        assertThrows(SoffidClientException.class, () -> personServiceFacadeBean.getPrimaryGroupDir3FromSoffid(List.of("a@caib.es")));
+    }
 }

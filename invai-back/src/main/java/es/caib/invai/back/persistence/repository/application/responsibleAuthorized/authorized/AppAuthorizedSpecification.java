@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -41,12 +42,12 @@ public class AppAuthorizedSpecification {
 
             predicates.add(cb.equal(root.get("appResponsibleAuthorized").get("id"), appResponsibleAuthorizedId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -54,11 +55,11 @@ public class AppAuthorizedSpecification {
                 );
             }
 
-            if (criteria.getPersonId() != null) {
+            if (Objects.nonNull(criteria.getPersonId())) {
                 predicates.add(cb.equal(root.get("person").get("id"), criteria.getPersonId()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getSearch().trim().toLowerCase() + "%";
                 List<Predicate> searchPredicates = new ArrayList<>();
 

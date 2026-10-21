@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Infrastructure repository Adapter implementing the outbound port boundary {@link PersonRepository}.
@@ -165,11 +166,11 @@ public class PersonRepositoryAdapter implements PersonRepository {
             aud.setFirstName(entity.getFirstName());
             aud.setLastName(entity.getLastName());
             aud.setEmail(entity.getEmail());
-            aud.setCompanyId(entity.getCompany() != null ? entity.getCompany().getId() : null);
+            aud.setCompanyId(Objects.nonNull(entity.getCompany()) ? entity.getCompany().getId() : null);
             aud.setUserName(entity.getUserName());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());
             aud.setDeletedAt(entity.getDeletedAt());

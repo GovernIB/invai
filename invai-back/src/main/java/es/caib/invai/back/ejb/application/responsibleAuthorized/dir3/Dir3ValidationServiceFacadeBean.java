@@ -7,7 +7,7 @@ import es.caib.invai.back.persistence.repository.application.responsibleAuthoriz
 import es.caib.invai.back.service.facade.application.responsibleAuthorized.dir3.Dir3ValidationService;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing {@code Dir3Validation} records directly, replacing
@@ -47,15 +48,15 @@ public class Dir3ValidationServiceFacadeBean implements Dir3ValidationService {
         log.info("Facade: Manually validating DIR3 validation ID: {}", id);
 
         Dir3Validation existing = dir3ValidationRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DIR3VALIDATION_NOT_FOUND);
         }
-        if (existing.getDir3Status() != Dir3ValidationStatus.NOT_VALIDATED) {
+        if (existing.getDir3Status() != ValidationStatusEnum.NOT_VALIDATED) {
             throw new BusinessRuleException(Constants.ERR_DIR3VALIDATION_MANUAL_VALIDATION_NOT_ALLOWED);
         }
 
         Utils.sanitize(inputDTO);
-        existing.setDir3Status(Dir3ValidationStatus.MANUAL);
+        existing.setDir3Status(ValidationStatusEnum.MANUAL);
         existing.setManualValidatedAt(LocalDateTime.now());
         existing.setManualValidatedBy(Utils.resolveCurrentUsername());
         existing.setReason(inputDTO.getReason());

@@ -35,6 +35,18 @@ public class AppRoleAudEntity {
     @Column(name = "SECURITY_ROLE_ID", nullable = false)
     private Long securityRoleId;
 
+    /** Snapshot of the validation state id at the time of the audited change. */
+    @Column(name = "VALIDATION_STATUS_ID")
+    private Long validationStatusId;
+
+    /** Snapshot of the manual validation timestamp at the time of the audited change. */
+    @Column(name = "MANUAL_VALIDATED_AT")
+    private LocalDateTime manualValidatedAt;
+
+    /** Snapshot of the manually validating user at the time of the audited change. */
+    @Column(name = "MANUAL_VALIDATED_BY")
+    private String manualValidatedBy;
+
     /** Timestamp at which the original record was created. */
     @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;

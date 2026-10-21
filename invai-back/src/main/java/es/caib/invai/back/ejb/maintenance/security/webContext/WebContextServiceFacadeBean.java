@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative WebContexts.
@@ -50,7 +51,7 @@ public class WebContextServiceFacadeBean implements WebContextService {
         log.debug("Facade: Fetching web context by ID: {}", id);
         WebContext webContext = webContextRepository.findById(id);
 
-        if (webContext == null) {
+        if (Objects.isNull(webContext)) {
             throw new BusinessRuleException(Constants.ERR_WEBCONTEXT_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class WebContextServiceFacadeBean implements WebContextService {
         log.info("Facade: Updating web context with ID: {}", id);
 
         WebContext existing = webContextRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_WEBCONTEXT_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class WebContextServiceFacadeBean implements WebContextService {
         log.info("Facade: Logically deleting web context with ID: {}", id);
         WebContext existing = webContextRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_WEBCONTEXT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_WEBCONTEXT_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class WebContextServiceFacadeBean implements WebContextService {
         log.info("Facade: Reactivating web context with ID: {}", id);
         WebContext existing = webContextRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_WEBCONTEXT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_WEBCONTEXT_ACTIVE);
         }
 

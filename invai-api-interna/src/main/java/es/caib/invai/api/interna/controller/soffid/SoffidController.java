@@ -8,15 +8,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Exposes Soffid personnel/role/group lookups to {@code invai-back}.
@@ -28,6 +33,9 @@ import java.util.Map;
 @RequestMapping("soffid")
 @RequiredArgsConstructor
 public class SoffidController {
+
+    /** Most e-mail addresses accepted in one lookup: Soffid rejects the filter URL (HTTP 414) a little above 100. */
+    static final int MAX_EMAILS_PER_REQUEST = 100;
 
     /** Client performing the real calls to Soffid's SCIM 2.0 API. */
     private final SoffidClient soffidClient;
@@ -58,7 +66,7 @@ public class SoffidController {
     @GetMapping("/users/by-email")
     public ResponseEntity<SoffidUser> searchByEmail(@RequestParam String email) {
         SoffidUser user = soffidClient.searchByEmail(email);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.noContent().build();
+        return Objects.nonNull(user) ? ResponseEntity.ok(user) : ResponseEntity.noContent().build();
     }
 
     /**
@@ -88,7 +96,7 @@ public class SoffidController {
     @GetMapping("/groups/{groupName}/dir3")
     public ResponseEntity<Map<String, String>> resolveGroupDir3(@PathVariable String groupName) {
         String dir3Code = soffidClient.resolveGroupDir3(groupName);
-        return dir3Code != null ? ResponseEntity.ok(Map.of("dir3Code", dir3Code)) : ResponseEntity.noContent().build();
+        return Objects.nonNull(dir3Code) ? ResponseEntity.ok(Map.of("dir3Code", dir3Code)) : ResponseEntity.noContent().build();
     }
 
     /**
@@ -100,6 +108,37 @@ public class SoffidController {
     @GetMapping("/users/{username}/roles")
     public List<SoffidRole> getUserRoles(@PathVariable String username) {
         return soffidClient.getUserRoles(username);
+    }
+
+    /**
+     * Looks up the active Soffid users having any of the given e-mail addresses, in one call. It is
+     * a POST only because the addresses travel in the body (a long list would not fit in a URL);
+     * it changes nothing.
+     *
+     * @param emails the exact e-mail addresses to look up, at most {@value #MAX_EMAILS_PER_REQUEST}
+     * @return the active users found - fewer than requested if some address has no active user
+     * @throws ResponseStatusException with HTTP 400 if more than {@value #MAX_EMAILS_PER_REQUEST} addresses are sent
+     */
+    @PostMapping("/users/by-emails")
+    public List<SoffidUser> getUsersByEmails(@RequestBody List<String> emails) {
+        if (Objects.isNull(emails) || emails.isEmpty()) {
+            return List.of();
+        }
+        if (emails.size() > MAX_EMAILS_PER_REQUEST) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "At most " + MAX_EMAILS_PER_REQUEST + " e-mail addresses per request");
+        }
+        return soffidClient.getUsersByEmails(emails);
+    }
+
+    /**
+     * Gets the DIR3CAIB code of every Soffid group that has one, by group name.
+     *
+     * @return the DIR3CAIB code of every group having one, keyed by the group's short name
+     */
+    @GetMapping("/groups/dir3")
+    public Map<String, String> getGroupsDir3() {
+        return soffidClient.getGroupsDir3();
     }
 
     /**

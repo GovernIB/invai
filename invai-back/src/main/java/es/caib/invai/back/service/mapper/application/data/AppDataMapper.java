@@ -13,9 +13,9 @@ import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
 /**
  * MapStruct mapper converting between {@link AppData} domain models, {@link
  * AppDataEntity} persistence entities, and the inbound/outbound AppData DTOs. {@code
- * openData} on {@link AppDataOutputDTO} is never populated by this mapper - it holds no
- * persisted counterpart on the domain model, and is instead set by the facade after the live
- * external fetch.
+ * openDataUrl} and {@code reuseUrl} on {@link AppDataOutputDTO} are never populated by this
+ * mapper - the URL a tab uses is the one typed in or, else, a default one only the facade knows
+ * how to build.
  *
  * @since 1.0.5
  */
@@ -40,13 +40,13 @@ public interface AppDataMapper {
 
     /**
      * Maps an {@link AppData} domain model to its outbound {@link AppDataOutputDTO},
-     * leaving {@code openData}/{@code reuse} unset - the facade fills them in after fetching each live.
+     * leaving {@code openDataUrl}/{@code reuseUrl} unset - the facade fills them in.
      *
      * @param model the domain model to convert
      * @return the mapped outbound DTO
      */
-    @Mapping(target = "openData", ignore = true)
-    @Mapping(target = "reuse", ignore = true)
+    @Mapping(target = "openDataUrl", ignore = true)
+    @Mapping(target = "reuseUrl", ignore = true)
     AppDataOutputDTO toResponse(AppData model);
 
     /**
@@ -64,6 +64,8 @@ public interface AppDataMapper {
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "openDataUrl", ignore = true)
+    @Mapping(target = "reuseUrl", ignore = true)
     AppData toModelFromInput(AppDataInputDTO inputDTO);
 
     /**
@@ -81,5 +83,7 @@ public interface AppDataMapper {
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "openDataUrl", ignore = true)
+    @Mapping(target = "reuseUrl", ignore = true)
     void updateModelFromInput(AppDataInputDTO inputDTO, @MappingTarget AppData model);
 }

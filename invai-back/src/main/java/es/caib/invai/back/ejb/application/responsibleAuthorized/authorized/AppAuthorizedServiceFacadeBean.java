@@ -19,7 +19,7 @@ import es.caib.invai.back.service.model.application.responsibleAuthorized.author
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.type.AppAuthorizedTypeLink;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing person authorizations linked to applications.
@@ -141,11 +142,11 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         AppAuthorized currentAuthorizedHolder = appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(
                 inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getPersonId());
 
-        if (currentAuthorizedHolder != null) {
+        if (Objects.nonNull(currentAuthorizedHolder)) {
             deactivate(currentAuthorizedHolder, null);
         }
 
-        Dir3ValidationStatus dir3Status = Dir3ValidationStatus.resolveFromInputFlag(inputDTO.getDir3Status());
+        ValidationStatusEnum dir3Status = ValidationStatusEnum.resolveFromInputFlag(inputDTO.getDir3Status());
 
         Dir3Validation dir3Validation = checkDir3Validation(
                 inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getPersonId(), dir3Status);
@@ -176,10 +177,10 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         log.info(Constants.LOG_FACADE_DEACTIVATE, id);
 
         AppAuthorized existingModel = appAuthorizedRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_NOT_FOUND);
         }
-        if (inputDTO.getPersonId() != null && !inputDTO.getPersonId().equals(existingModel.getPerson().getId())) {
+        if (Objects.nonNull(inputDTO.getPersonId()) && !inputDTO.getPersonId().equals(existingModel.getPerson().getId())) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_PERSON_IMMUTABLE);
         }
 
@@ -204,15 +205,15 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         log.info(Constants.LOG_FACADE_DEACTIVATE, id);
 
         AppAuthorized existingModel = appAuthorizedRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_NOT_ACTIVE);
         }
 
-        deactivate(existingModel, dto != null ? dto.getObservation() : null);
+        deactivate(existingModel, Objects.nonNull(dto) ? dto.getObservation() : null);
     }
 
     /**
@@ -227,11 +228,11 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
         log.info("Facade: Reactivating application authorized assignment for ID: {}", id);
 
         AppAuthorized existingModel = appAuthorizedRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() == null) {
+        if (Objects.isNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APPAUTHORIZED_ACTIVE);
         }
 
@@ -280,7 +281,7 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
      * person without a company
      */
     private Person getOrCreatePerson(AppAuthorizedInputDTO inputDTO) {
-        if (inputDTO.getPersonId() != null) {
+        if (Objects.nonNull(inputDTO.getPersonId())) {
             return personService.getPersonById(inputDTO.getPersonId());
         }
         if (StringUtils.isBlank(inputDTO.getPersonFirstName()) || StringUtils.isBlank(inputDTO.getPersonLastName()) || StringUtils.isBlank(inputDTO.getPersonEmail())) {
@@ -305,7 +306,7 @@ public class AppAuthorizedServiceFacadeBean implements AppAuthorizedService {
      * @param requestedStatus the DIR3 status computed by the caller, used only when nothing to share exists yet
      * @return the DIR3 validation to attach to the new authorization
      */
-    private Dir3Validation checkDir3Validation(Long appResponsibleAuthorizedId, Long personId, Dir3ValidationStatus requestedStatus) {
+    private Dir3Validation checkDir3Validation(Long appResponsibleAuthorizedId, Long personId, ValidationStatusEnum requestedStatus) {
         List<AppResponsible> existingResponsibleAssignments =
                 appResponsibleRepository.findAllActiveByAppResponsibleAuthorizedAndPerson(appResponsibleAuthorizedId, personId);
         if (!existingResponsibleAssignments.isEmpty()) {

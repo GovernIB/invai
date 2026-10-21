@@ -70,6 +70,9 @@ public interface AppResponsibleRepository {
     /** Finds every active assignment currently held by the given person, across all applications. */
     List<AppResponsible> findAllActiveByPersonId(Long personId);
 
+    /** Finds the distinct e-mail addresses of the Personal CAIB people holding an active assignment on any application. */
+    List<String> findAllActivePersonalCaibEmails();
+
     /** Finds the currently active assignment (if any) holding the given responsible type on the given anchor. */
     AppResponsible findActiveByAppResponsibleAuthorizedAndResponsibleType(Long appResponsibleAuthorizedId, Long responsibleTypeId);
 

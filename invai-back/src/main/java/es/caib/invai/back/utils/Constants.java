@@ -139,13 +139,13 @@ public interface Constants {
     String VALIDATION_APP_SECURITY_APPLICATION_ID = "validation.appsecurity.applicationId";
     String VALIDATION_APP_INFORMATION_SYSTEM_DB_APPLICATION_ID = "validation.appinformationsystemdb.applicationId";
     String VALIDATION_APPDATA_APPLICATIONID = "validation.appdata.applicationId";
-    String VALIDATION_APPDATA_OPENDATAURL_OVERFLOW = "validation.appdata.openDataUrl.overflow";
     String VALIDATION_APPINTEGRATION_APPLICATIONID = "validation.appintegration.applicationId";
     String VALIDATION_APPINTEGRATIONCONNECTION_APPINTEGRATIONID = "validation.appintegrationconnection.appIntegrationId";
     String VALIDATION_APPINTEGRATIONCONNECTION_TECHNOLOGYID = "validation.appintegrationconnection.technologyId";
     String VALIDATION_APPINTEGRATIONCONNECTION_USERNAME = "validation.appintegrationconnection.username";
     String VALIDATION_APPINTEGRATIONCONNECTION_REQUIREDROLES = "validation.appintegrationconnection.requiredRoles";
-    String VALIDATION_APPDATA_REUSEURL_OVERFLOW = "validation.appdata.reuseUrl.overflow";
+    String VALIDATION_APPDATA_URL_OVERFLOW = "validation.appdata.url.overflow";
+    String VALIDATION_APPDATA_URL_INVALID = "validation.appdata.url.invalid";
 
     // --- 13. APPLICATION DEVELOPMENT VALIDATIONS ---
     String VALIDATION_DEVELOPMENT_APPLICATION_ID = "validation.development.applicationId";
@@ -256,6 +256,33 @@ public interface Constants {
     String VALIDATION_EXTERNALSYSTEM_NAME_SIZE = "validation.externalsystem.name.size";
     String VALIDATION_EXTERNALSYSTEM_COMPANY_ID_REQUIRED = "validation.externalsystem.companyId.required";
 
+    // --- 35. DOCUMENT CATEGORY VALIDATIONS ---
+    String VALIDATION_DOCUMENTCATEGORY_NAME_REQUIRED = "validation.documentcategory.name.required";
+    String VALIDATION_DOCUMENTCATEGORY_NAME_SIZE = "validation.documentcategory.name.size";
+    String VALIDATION_DOCUMENTCATEGORY_NAME_ES_REQUIRED = "validation.documentcategory.nameEs.required";
+    String VALIDATION_DOCUMENTCATEGORY_NAME_ES_SIZE = "validation.documentcategory.nameEs.size";
+    String VALIDATION_DOCUMENTATION_APPLICATION_REQUIRED = "validation.documentation.application.required";
+    String VALIDATION_DOCUMENTATION_TITLE_REQUIRED = "validation.documentation.title.required";
+    String VALIDATION_DOCUMENTATION_TITLE_SIZE = "validation.documentation.title.size";
+    String VALIDATION_DOCUMENTATION_SECTION_REQUIRED = "validation.documentation.section.required";
+    String VALIDATION_DOCUMENTATION_CATEGORY_REQUIRED = "validation.documentation.category.required";
+    String VALIDATION_DOCUMENTATION_STATUS_REQUIRED = "validation.documentation.status.required";
+    String VALIDATION_DOCUMENTATION_ATTACHMENT_VERSION_LABEL_REQUIRED = "validation.documentation.attachment.versionLabel.required";
+    String VALIDATION_DOCUMENTATION_ATTACHMENT_VERSION_LABEL_SIZE = "validation.documentation.attachment.versionLabel.size";
+    String VALIDATION_DOCUMENTATION_ATTACHMENT_CHANGE_NOTE_SIZE = "validation.documentation.attachment.changeNote.size";
+    String VALIDATION_DOCUMENTATION_METADATA_KEY_REQUIRED = "validation.documentation.metadata.key.required";
+    String VALIDATION_DOCUMENTATION_METADATA_KEY_SIZE = "validation.documentation.metadata.key.size";
+    String VALIDATION_DOCUMENTATION_METADATA_VALUE_REQUIRED = "validation.documentation.metadata.value.required";
+    String VALIDATION_DOCUMENTATION_METADATA_VALUE_SIZE = "validation.documentation.metadata.value.size";
+    String VALIDATION_LINK_APPLICATION_REQUIRED = "validation.link.application.required";
+    String VALIDATION_LINK_TITLE_REQUIRED = "validation.link.title.required";
+    String VALIDATION_LINK_TITLE_SIZE = "validation.link.title.size";
+    String VALIDATION_LINK_DESCRIPTION_SIZE = "validation.link.description.size";
+    String VALIDATION_LINK_SECTION_REQUIRED = "validation.link.section.required";
+    String VALIDATION_LINK_URL_REQUIRED = "validation.link.url.required";
+    String VALIDATION_LINK_URL_SIZE = "validation.link.url.size";
+    String VALIDATION_LINK_URL_INVALID = "validation.link.url.invalid";
+
     // =========================================================================
     // EXCEPTION TRANSLATION BUNDLE KEYS (Business Rules Exceptions)
     // =========================================================================
@@ -264,6 +291,9 @@ public interface Constants {
     String ERR_APP_ACTIVE = "exception.application.active";
     String ERR_APP_NOT_ACTIVE = "exception.application.notactive";
     String ERR_APP_NOT_FOUND = "exception.application.notfound";
+    String ERR_APP_SOFFID_ROLES_UNAVAILABLE = "exception.application.soffidrolesunavailable";
+    String ERR_DIR3AUDIT_SESSION = "exception.dir3audit.session";
+    String ERR_DIR3AUDIT_SOFFID = "exception.dir3audit.soffid";
     String ERR_APPLICATION_CODE_SIZE = "exception.application.codesize";
     String ERR_APPLICATION_NAME_OVERFLOW = "exception.application.name.overflow";
     String ERR_APPLICATION_PREFIX_OVERFLOW = "exception.application.prefix.overflow";
@@ -360,9 +390,7 @@ public interface Constants {
     String ERR_APP_DATA_NOT_ACTIVE = "exception.appdata.notactive";
     String ERR_APP_DATA_NOT_FOUND = "exception.appdata.notfound";
     String ERR_APP_DATA_ALREADY_EXISTS = "exception.appdata.alreadyexists";
-    String ERR_APP_DATA_URL_REQUIRED = "exception.appdata.urlrequired";
-    String ERR_OPENDATA_UNAVAILABLE = "exception.opendata.unavailable";
-    String ERR_REUSE_UNAVAILABLE = "exception.reuse.unavailable";
+    String ERR_DATA_URL_UNAVAILABLE = "exception.data.url.unavailable";
     String ERR_DATA_TIMEOUT = "exception.data.timeout";
 
     // --- APPLICATION INTEGRATION ERRORS ---
@@ -371,12 +399,12 @@ public interface Constants {
     String ERR_APP_INTEGRATION_CONNECTION_NOT_FOUND = "exception.appintegrationconnection.notfound";
     String ERR_APP_INTEGRATION_CONNECTION_SYSTEM_REQUIRED = "exception.appintegrationconnection.systemrequired";
     String ERR_APP_INTEGRATION_CONNECTION_SYSTEM_AMBIGUOUS = "exception.appintegrationconnection.systemambiguous";
-    String ERR_REQUIREDROLE_UNAVAILABLE = "exception.requiredrole.unavailable";
-    String ERR_GRANTEDROLE_UNAVAILABLE = "exception.grantedrole.unavailable";
+    String ERR_SOFFID_ROLE_NOT_FOUND = "exception.soffidrole.notfound";
 
     // --- APPLICATION SECURITY ROLE ERRORS ---
     String ERR_APP_ROLE_NOT_ACTIVE = "exception.approle.notactive";
     String ERR_APP_ROLE_NOT_FOUND = "exception.approle.notfound";
+    String ERR_APP_ROLE_MANUAL_VALIDATION_NOT_ALLOWED = "exception.approle.manualvalidationnotallowed";
 
     // --- APPLICATION SECURITY WEB CONTEXT ERRORS ---
     String ERR_APP_WEB_CONTEXT_NOT_ACTIVE = "exception.appwebcontext.notactive";
@@ -451,6 +479,35 @@ public interface Constants {
     String ERR_COMPANY_NOT_FOUND = "exception.company.notfound";
     String ERR_COMPANY_HAS_RESPONSIBLE = "exception.company.hasresponsible";
     String ERR_COMPANY_HAS_AUTHORIZED = "exception.company.hasauthorized";
+
+    // --- DOCUMENT CATEGORY CORE ERRORS ---
+    String ERR_DOCUMENTCATEGORY_ACTIVE = "exception.documentcategory.active";
+    String ERR_DOCUMENTCATEGORY_DUPLICATED = "exception.documentcategory.duplicated";
+    String ERR_DOCUMENTCATEGORY_HAS_ACTIVE_SUBCATEGORIES = "exception.documentcategory.hasactivesubcategories";
+    String ERR_DOCUMENTCATEGORY_NAME_ES_DUPLICATED = "exception.documentcategory.nameesduplicated";
+    String ERR_DOCUMENTCATEGORY_NOT_ACTIVE = "exception.documentcategory.notactive";
+    String ERR_DOCUMENTCATEGORY_NOT_FOUND = "exception.documentcategory.notfound";
+    String ERR_DOCUMENTCATEGORY_PARENT_NOT_ACTIVE = "exception.documentcategory.parentnotactive";
+    String ERR_DOCUMENTCATEGORY_PARENT_NOT_CATEGORY = "exception.documentcategory.parentnotcategory";
+    String ERR_DOCUMENTCATEGORY_PARENT_NOT_FOUND = "exception.documentcategory.parentnotfound";
+    String ERR_DOCUMENTCATEGORY_TYPE_CHANGE_NOT_ALLOWED = "exception.documentcategory.typechangenotallowed";
+    String ERR_DOCUMENTATION_NOT_FOUND = "exception.documentation.notfound";
+    String ERR_DOCUMENTATION_NOT_ACTIVE = "exception.documentation.notactive";
+    String ERR_DOCUMENTATION_ATTACHMENT_NOT_FOUND = "exception.documentation.attachment.notfound";
+    String ERR_DOCUMENTATION_ATTACHMENT_VERSION_DUPLICATED = "exception.documentation.attachment.versionduplicated";
+    String ERR_DOCUMENTATION_SECTION_NOT_FOUND = "exception.documentation.sectionnotfound";
+    String ERR_DOCUMENTATION_STATUS_NOT_FOUND = "exception.documentation.statusnotfound";
+    String ERR_DOCUMENTATION_CATEGORY_NOT_FOUND = "exception.documentation.categorynotfound";
+    String ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE = "exception.documentation.categorynotactive";
+    String ERR_DOCUMENTATION_ATTACHMENT_FILE_EMPTY = "exception.documentation.attachment.fileempty";
+    String ERR_DOCUMENTATION_ATTACHMENT_FILE_TOO_LARGE = "exception.documentation.attachment.filetoolarge";
+    String ERR_DOCUMENTATION_ATTACHMENT_FILE_TYPE_NOT_ALLOWED = "exception.documentation.attachment.filetypenotallowed";
+    String ERR_DOCUMENTATION_ATTACHMENT_FILE_UNREADABLE = "exception.documentation.attachment.fileunreadable";
+    String ERR_DOCUMENTATION_METADATA_DUPLICATED = "exception.documentation.metadata.duplicated";
+    String ERR_LINK_NOT_FOUND = "exception.link.notfound";
+    String ERR_LINK_NOT_ACTIVE = "exception.link.notactive";
+    String ERR_LINK_SECTION_NOT_FOUND = "exception.link.sectionnotfound";
+    String ERR_LINK_DUPLICATED = "exception.link.duplicated";
 
     // --- EXTERNAL SYSTEM CORE ERRORS ---
     String ERR_EXTERNALSYSTEM_ACTIVE = "exception.externalsystem.active";

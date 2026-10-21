@@ -10,6 +10,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * External System database entities, business domain models, and API transfer schemas.
@@ -83,7 +85,7 @@ public interface ExternalSystemMapper {
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
     default ExternalSystemOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         ExternalSystemOutputDTO externalSystem = new ExternalSystemOutputDTO();

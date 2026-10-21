@@ -2,6 +2,8 @@ package es.caib.invai.back.interna.application.data;
 
 import es.caib.invai.back.interna.application.data.DTO.AppDataInputDTO;
 import es.caib.invai.back.interna.application.data.DTO.AppDataOutputDTO;
+import es.caib.invai.back.interna.application.data.DTO.AppDataUrlInputDTO;
+import es.caib.invai.back.interna.application.data.DTO.AppDataUrlOutputDTO;
 import es.caib.invai.back.service.facade.application.data.AppDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,8 +47,19 @@ class AppDataControllerTest {
     }
 
     @Test
+    void checkUrl_returnsOkWithServiceResult() {
+        AppDataUrlOutputDTO dto = new AppDataUrlOutputDTO("https://intranet.caib.es/sedeibapi/externa", true);
+        when(appDataService.checkUrl("https://intranet.caib.es/sedeibapi/externa")).thenReturn(dto);
+
+        ResponseEntity<AppDataUrlOutputDTO> response = appDataController.checkUrl("https://intranet.caib.es/sedeibapi/externa");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(dto, response.getBody());
+    }
+
+    @Test
     void create_returnsCreatedWithServiceResult() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, "Observacio", null, false, null, false);
+        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, "Observacio");
         AppDataOutputDTO dto = new AppDataOutputDTO();
         when(appDataService.create(inputDTO)).thenReturn(dto);
 
@@ -58,11 +71,35 @@ class AppDataControllerTest {
 
     @Test
     void update_returnsOkWithServiceResult() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, "Observacio actualitzada", null, false, null, false);
+        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, "Observacio actualitzada");
         AppDataOutputDTO dto = new AppDataOutputDTO();
         when(appDataService.update(1L, inputDTO)).thenReturn(dto);
 
         ResponseEntity<AppDataOutputDTO> response = appDataController.update(1L, inputDTO);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(dto, response.getBody());
+    }
+
+    @Test
+    void updateOpenDataUrl_returnsOkWithServiceResult() {
+        AppDataUrlInputDTO inputDTO = new AppDataUrlInputDTO("https://swagger.example.test/open");
+        AppDataUrlOutputDTO dto = new AppDataUrlOutputDTO("https://swagger.example.test/open", true);
+        when(appDataService.updateOpenDataUrl(1L, inputDTO)).thenReturn(dto);
+
+        ResponseEntity<AppDataUrlOutputDTO> response = appDataController.updateOpenDataUrl(1L, inputDTO);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertSame(dto, response.getBody());
+    }
+
+    @Test
+    void updateReuseUrl_returnsOkWithServiceResult() {
+        AppDataUrlInputDTO inputDTO = new AppDataUrlInputDTO(null);
+        AppDataUrlOutputDTO dto = new AppDataUrlOutputDTO("https://intranet.caib.es/sedeibapi/interna", false);
+        when(appDataService.updateReuseUrl(1L, inputDTO)).thenReturn(dto);
+
+        ResponseEntity<AppDataUrlOutputDTO> response = appDataController.updateReuseUrl(1L, inputDTO);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertSame(dto, response.getBody());

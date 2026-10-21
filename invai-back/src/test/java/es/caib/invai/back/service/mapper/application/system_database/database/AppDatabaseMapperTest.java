@@ -751,13 +751,10 @@ class AppDatabaseMapperTest {
         assertEquals(420L, applicationOutputDTO.getId());
         assertEquals("APP02", applicationOutputDTO.getCode());
         assertEquals("Application Two", applicationOutputDTO.getName());
-        assertEquals(StatusEnum.INACTIVE, applicationOutputDTO.getStatus());
         assertEquals(400L, applicationOutputDTO.getCategory().getId());
         assertEquals(401L, applicationOutputDTO.getSystemType().getId());
         assertEquals(402L, applicationOutputDTO.getField().getId());
         assertNull(applicationOutputDTO.getAdmUnit());
-        assertEquals(411L, applicationOutputDTO.getCsCommission().getId());
-        assertEquals(LocalDate.of(2031, 12, 31), applicationOutputDTO.getExpirationDate());
     }
 
     @Test

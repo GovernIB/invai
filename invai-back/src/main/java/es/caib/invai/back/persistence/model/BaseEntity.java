@@ -13,6 +13,7 @@ import jakarta.persistence.PreUpdate;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Abstract base class and mapped superclass providing common structural metadata definitions
@@ -63,9 +64,9 @@ public abstract class BaseEntity implements Serializable {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        OidcUserInfo currentUser = (OidcUserInfo) SecurityUtils.getCurrentUser();
-        if (currentUser.getClaims().get("preferred_username") != null) {
-            this.createdBy = (String) currentUser.getClaims().get("preferred_username");
+        String username = getCurrentUsername();
+        if (Objects.nonNull(username)) {
+            this.createdBy = username;
         }
     }
 
@@ -75,12 +76,27 @@ public abstract class BaseEntity implements Serializable {
      */
     @PreUpdate
     protected void onUpdate() {
-        if (this.deletedAt == null) {
+        if (Objects.isNull(this.deletedAt)) {
             this.updatedAt = LocalDateTime.now();
-            OidcUserInfo currentUser = (OidcUserInfo) SecurityUtils.getCurrentUser();
-            if (currentUser.getClaims().get("preferred_username") != null) {
-                this.updatedBy = (String) currentUser.getClaims().get("preferred_username");
+            String username = getCurrentUsername();
+            if (Objects.nonNull(username)) {
+                this.updatedBy = username;
             }
         }
+    }
+
+    /**
+     * Gets the username of the current actor: the {@code preferred_username} claim of an OpenID
+     * Connect user, or the plain username a background job or system routine runs under (see
+     * {@link SecurityUtils#getCurrentUser()}), which is not an OIDC user at all.
+     *
+     * @return the username, or {@code null} if the actor is an OIDC user without that claim
+     */
+    private static String getCurrentUsername() {
+        Object currentUser = SecurityUtils.getCurrentUser();
+        if (currentUser instanceof OidcUserInfo userInfo) {
+            return (String) userInfo.getClaims().get("preferred_username");
+        }
+        return currentUser instanceof String username ? username : null;
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative ComplianceSituations.
@@ -50,7 +51,7 @@ public class ComplianceSituationServiceFacadeBean implements ComplianceSituation
         log.debug("Facade: Fetching compliance situation entry by ID: {}", id);
         ComplianceSituation complianceSituation = complianceSituationRepository.findById(id);
 
-        if (complianceSituation == null) {
+        if (Objects.isNull(complianceSituation)) {
             throw new BusinessRuleException(Constants.ERR_COMPLIANCESITUATION_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class ComplianceSituationServiceFacadeBean implements ComplianceSituation
         log.info("Facade: Updating compliance situation entry with ID: {}", id);
 
         ComplianceSituation existing = complianceSituationRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_COMPLIANCESITUATION_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class ComplianceSituationServiceFacadeBean implements ComplianceSituation
         log.info("Facade: Logically deleting compliance situation entry with ID: {}", id);
         ComplianceSituation existing = complianceSituationRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_COMPLIANCESITUATION_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_COMPLIANCESITUATION_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class ComplianceSituationServiceFacadeBean implements ComplianceSituation
         log.info("Facade: Reactivating compliance situation entry with ID: {}", id);
         ComplianceSituation existing = complianceSituationRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_COMPLIANCESITUATION_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_COMPLIANCESITUATION_ACTIVE);
         }
 

@@ -1,22 +1,21 @@
 package es.caib.invai.back.interna.application.core.DTO;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import es.caib.invai.back.interna.catalog.admUnit.DTO.AdmUnitOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.category.DTO.CategoryOutputDTO;
-import es.caib.invai.back.interna.maintenance.general.commission.DTO.CommissionOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.systemType.DTO.SystemTypeOutputDTO;
-import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 /**
- * Outbound representation of an {@code Application}, returned by all of {@code getAll}, {@code
- * getById}, {@code create}, {@code update}, and {@code reactivate}.
+ * Simple outbound representation of an {@code Application}: only what the applications list shows
+ * (code, prefix, name, category, system type, field and administrative unit) plus the identifier
+ * needed to act on a row. Returned by {@code getAll}, {@code create}, {@code update} and {@code
+ * reactivate}, and embedded wherever another resource refers to its application. The complete
+ * representation, with every field, is {@link ApplicationDetailOutputDTO}, returned only by
+ * {@code getById}.
  *
  * @since 1.0.1
  */
@@ -53,91 +52,4 @@ public class ApplicationOutputDTO {
      * no admin unit is linked, or the linked code has no current DIR3CAIB match.
      */
     private AdmUnitOutputDTO admUnit;
-
-    /** The {@code Commission} overseeing this application. */
-    private CommissionOutputDTO csCommission;
-
-    /** Free-text description of the application. */
-    private String description;
-
-    /** Lifecycle status of the application (e.g. active/inactive). */
-    private StatusEnum status;
-
-    /** Date the application was soft-deleted, mirroring {@code deletedAt}; {@code null} while active. */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDate expirationDate;
-
-    /** Date the application record was created. */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDate createdAt;
-
-    /** Username of the user who created the application. */
-    private String createdBy;
-
-    /** Date the application record was last updated. */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDate updatedAt;
-
-    /** Username of the user who last updated the application. */
-    private String updatedBy;
-
-    /** Foreign key identifier of the linked "AppInformationSystemDb" tab record. */
-    private Long appInformationSystemDbId;
-
-    /** Foreign key identifier of the linked "AppDevelopment" tab record. */
-    private Long appDevelopmentId;
-
-    /** Foreign key identifier of the linked "Responsables i Autoritzats" tab record. */
-    private Long appResponsibleAuthorizedId;
-
-    /** Foreign key identifier of the linked "Seguretat" tab record. */
-    private Long appSecurityId;
-
-    /** Foreign key identifier of the linked "Accessibilitat" tab record. */
-    private Long appAccessibilityId;
-
-    /**
-     * {@code true} if any registered responsible type has no active holder on this application.
-     * Per-tab detail only: populated on {@code getById}, left {@code null} on {@code getAll} — a
-     * list row never computes any single tab's status, only the aggregate {@link #incomplete}.
-     */
-    private Boolean missingResponsibleTypes;
-
-    /** {@code true} if this application has no active authorized person at all. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingAuthorized;
-
-    /** {@code true} if the "AppInformationSystemDb" anchor is missing, or has no active system link at all. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingSystems;
-
-    /** {@code true} if the "AppInformationSystemDb" anchor is missing, or has no active database link at all. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingDatabases;
-
-    /** {@code true} if the linked "AppDevelopment" record is missing, or has any of its required fields (all but {@code observation}) left blank. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingDevelopmentFields;
-
-    /** {@code true} if the linked "AppAccessibility" record is missing, or has any of its required fields (all but {@code nonAccessibleContent} and {@code observations}) left blank. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingAccessibilityFields;
-
-    /** {@code true} if the "AppSecurity" anchor is missing, or has no active record in any of its Web Context, ENS Classification, or Security Risk child tables. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingSecurityData;
-
-    /** {@code true} if the "AppIntegration" anchor is missing, or has no active integration connection at all. Per-tab detail only — see {@link #missingResponsibleTypes}. */
-    private Boolean missingIntegrationData;
-
-    /** {@code true} if any tab has missing or incomplete data — i.e. what the 7 per-tab {@code missingXxx} flags above would OR together. Unlike those, always populated, both here and in list results. */
-    private boolean incomplete;
-
-    /**
-     * {@code true} if, as of the last bulk DIR3 audit run, at least one active, Personal CAIB
-     * responsible/authorized assignment's DIR3 no longer matches this application's administrative
-     * unit. A {@code MANUAL} assignment (a mismatch already reviewed and accepted by a {@code
-     * ROLE_INV_SUPER} user) never counts toward this flag.
-     */
-    private boolean dir3Mismatch;
-
-    /** Foreign key identifier of the linked "Open Data" tab record. */
-    private Long appDataId;
-
-    /** Foreign key identifier of the linked "Integration" tab record. */
-    private Long appIntegrationId;
 }

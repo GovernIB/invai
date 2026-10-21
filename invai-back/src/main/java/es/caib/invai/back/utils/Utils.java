@@ -1,16 +1,23 @@
 package es.caib.invai.back.utils;
 
+import es.caib.invai.back.exception.BusinessRuleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.Objects;
 
 /**
  * Global static utility catalog providing stateless operational routines for data sanitization
@@ -29,7 +36,7 @@ public final class Utils {
      * @param target the target object instance payload to sanitize
      */
     public static void sanitize(Object target) {
-        if (target == null) {
+        if (Objects.isNull(target)) {
             return;
         }
 
@@ -41,7 +48,7 @@ public final class Utils {
                     field.setAccessible(true);
                     String value = (String) field.get(target);
 
-                    if (value != null) {
+                    if (Objects.nonNull(value)) {
                         field.set(target, value.trim());
                     }
                 } catch (IllegalAccessException e) {
@@ -61,7 +68,7 @@ public final class Utils {
     public static String resolveCurrentUsername() {
         Object currentUserObj = SecurityUtils.getCurrentUser();
         if (currentUserObj instanceof OidcUserInfo currentUser) {
-            if (currentUser.getClaims().get("preferred_username") != null) {
+            if (Objects.nonNull(currentUser.getClaims().get("preferred_username"))) {
                 return (String) currentUser.getClaims().get("preferred_username");
             }
         } else if (currentUserObj instanceof String) {
@@ -72,7 +79,7 @@ public final class Utils {
 
     /**
      * Waits for the given future, unwrapping {@link CompletionException} so the original runtime
-     * exception thrown by the future's task (e.g. a {@code BusinessRuleException} raised by an
+     * exception thrown by the future's task (e.g., a {@code BusinessRuleException} raised by an
      * outbound call run via {@link CompletableFuture#supplyAsync}) propagates as-is instead of
      * being masked by the future's own wrapper.
      *
@@ -93,7 +100,7 @@ public final class Utils {
 
     /**
      * Slices an in-memory row list into the requested page, for listings with no backing query to
-     * paginate at the database level (e.g. built from a cached external directory, or filtered
+     * paginate at the database level (e.g., built from a cached external directory, or filtered
      * catalog data).
      *
      * @param rows     the full, already-filtered row list
@@ -105,6 +112,49 @@ public final class Utils {
         int start = (int) Math.min(pageable.getOffset(), rows.size());
         int end = Math.min(start + pageable.getPageSize(), rows.size());
         return new PageImpl<>(rows.subList(start, end), pageable, rows.size());
+    }
+
+    /**
+     * Reads the bytes of an uploaded file.
+     *
+     * @param file the uploaded file
+     * @return the bytes of the file
+     * @throws BusinessRuleException if the file can't be read
+     */
+    public static byte[] readContent(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            log.error("Utils error: Failure reading the uploaded file", e);
+            throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_ATTACHMENT_FILE_UNREADABLE);
+        }
+    }
+
+    /**
+     * Gets the name of a file without the folders some browsers send along with it.
+     *
+     * @param fileName the name as sent by the client, may be {@code null}
+     * @return the name without any folder, or {@code null} if there was none
+     */
+    public static String baseName(String fileName) {
+        if (Objects.isNull(fileName)) {
+            return null;
+        }
+        return fileName.substring(Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\')) + 1);
+    }
+
+    /**
+     * Calculates the SHA-256 of the given bytes.
+     *
+     * @param content the bytes to digest
+     * @return the digest in lower case hexadecimal
+     */
+    public static String sha256Hex(byte[] content) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 
 }

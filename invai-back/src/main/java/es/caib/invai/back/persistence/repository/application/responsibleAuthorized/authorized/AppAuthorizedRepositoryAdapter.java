@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * {@link AppAuthorizedRepository} implementation delegating persistence to the
@@ -97,6 +98,15 @@ public class AppAuthorizedRepositoryAdapter implements AppAuthorizedRepository {
 
     /** {@inheritDoc} */
     @Override
+    public List<String> findAllActivePersonalCaibEmails() {
+        return appAuthorizedJPARepository.findAllByDeletedAtIsNullAndPersonPersonalCaibTrueAndPersonEmailIsNotNull().stream()
+                .map(authorized -> authorized.getPerson().getEmail())
+                .distinct()
+                .toList();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public List<AppAuthorized> findAllActiveByPersonId(Long personId) {
         return appAuthorizedJPARepository.findAllByPersonIdAndDeletedAtIsNull(personId).stream()
                 .map(appAuthorizedMapper::toModel)
@@ -135,8 +145,8 @@ public class AppAuthorizedRepositoryAdapter implements AppAuthorizedRepository {
         aud.setObservation(entity.getObservation());
         aud.setDir3ValidationId(entity.getDir3Validation().getId());
 
-        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+        aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
         aud.setUpdatedAt(entity.getUpdatedAt());
         aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());

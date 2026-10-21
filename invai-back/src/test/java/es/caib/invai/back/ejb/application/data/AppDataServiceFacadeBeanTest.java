@@ -4,16 +4,13 @@ import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.exception.DataTimeoutException;
 import es.caib.invai.back.interna.application.data.DTO.AppDataInputDTO;
 import es.caib.invai.back.interna.application.data.DTO.AppDataOutputDTO;
-import es.caib.invai.back.interna.application.data.DTO.OpenDataEndpointOutputDTO;
-import es.caib.invai.back.interna.application.data.DTO.OpenDataOperationOutputDTO;
+import es.caib.invai.back.interna.application.data.DTO.AppDataUrlInputDTO;
+import es.caib.invai.back.interna.application.data.DTO.AppDataUrlOutputDTO;
+import es.caib.invai.back.persistence.repository.application.core.ApplicationRepository;
 import es.caib.invai.back.persistence.repository.application.data.AppDataRepository;
 import es.caib.invai.back.rest.data.DataApiClient;
-import es.caib.invai.back.rest.data.OpenApiDocumentResult;
-import es.caib.invai.back.rest.openapi.OpenApiDocument;
-import es.caib.invai.back.rest.openapi.OpenApiOperation;
-import es.caib.invai.back.rest.openapi.OpenApiPathItem;
+import es.caib.invai.back.rest.data.UrlCheckResult;
 import es.caib.invai.back.service.mapper.application.data.AppDataMapper;
-import es.caib.invai.back.service.mapper.application.data.OpenDataOperationMapper;
 import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.application.data.AppData;
 import es.caib.invai.back.utils.Constants;
@@ -23,31 +20,36 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link AppDataServiceFacadeBean}, exercising every branch of its CRUD
- * business rules plus the GET-only filtering of the live OpenAPI document resolution.
+ * Unit tests for {@link AppDataServiceFacadeBean}, with every collaborator mocked. {@code
+ * @Value}-injected fields are only resolved inside a Spring context, so they're set explicitly
+ * here, mirroring what the corresponding properties resolve to in production.
  */
 @ExtendWith(MockitoExtension.class)
 class AppDataServiceFacadeBeanTest {
+
+    private static final String DEFAULT_OPEN_DATA_URL = "https://intranet.caib.es/sedeibapi/externa";
+    private static final String DEFAULT_REUSE_URL = "https://intranet.caib.es/sedeibapi/interna";
+    private static final String TYPED_OPEN_DATA_URL = "https://swagger.example.test/open";
+    private static final String TYPED_REUSE_URL = "https://swagger.example.test/reuse";
 
     @Mock
     private AppDataMapper appDataMapper;
@@ -56,473 +58,484 @@ class AppDataServiceFacadeBeanTest {
     private AppDataRepository appDataRepository;
 
     @Mock
+    private ApplicationRepository applicationRepository;
+
+    @Mock
     private DataApiClient dataApiClient;
-
-    @Mock
-    private OpenDataOperationMapper openDataOperationMapper;
-
-    @Mock
-    private AppDataUrlCacheService appDataUrlCacheService;
 
     @InjectMocks
     private AppDataServiceFacadeBean appDataServiceFacadeBean;
 
+    private Application application;
     private AppData activeModel;
 
-    /**
-     * Every {@code getById} test resolves both tabs; tests focused only on the "Open Data" side
-     * don't care about "Reutilització", so this default keeps the reuse fetch harmless (empty
-     * document) unless a test overrides it. {@code lenient()} since not every test reaches
-     * {@code getById} at all.
-     */
     @BeforeEach
     void setUp() {
-        Application application = new Application();
+        application = new Application();
         application.setId(10L);
-        application.setCode("sedeib");
+        application.setCode("SEDEIB");
 
         activeModel = new AppData();
         activeModel.setId(1L);
         activeModel.setApplication(application);
 
-        lenient().when(dataApiClient.fetchOpenApiDocument(any(), anyBoolean(), any()))
-                .thenReturn(new OpenApiDocumentResult(new OpenApiDocument(), null));
-        lenient().when(dataApiClient.fetchReuseDocument(any(), anyBoolean(), any()))
-                .thenReturn(new OpenApiDocumentResult(new OpenApiDocument(), null));
+        ReflectionTestUtils.setField(appDataServiceFacadeBean, "baseUrl", "https://intranet.caib.es");
+        ReflectionTestUtils.setField(appDataServiceFacadeBean, "openDataPathPrefix", "api/externa");
+        ReflectionTestUtils.setField(appDataServiceFacadeBean, "reusePathPrefix", "api/interna");
     }
 
-    private static OpenApiPathItem pathItemWithGet(String operationId) {
-        OpenApiOperation operation = new OpenApiOperation();
-        operation.setOperationId(operationId);
-        OpenApiPathItem pathItem = new OpenApiPathItem();
-        pathItem.setGet(operation);
-        return pathItem;
+    private static UrlCheckResult answer(String url, int statusCode) {
+        return new UrlCheckResult(url, statusCode >= 200 && statusCode < 300, statusCode);
     }
 
-    private static OpenDataOperationOutputDTO operationOutputFor(String operationId) {
-        return OpenDataOperationOutputDTO.builder().operationId(operationId).build();
+    private static AppDataInputDTO input() {
+        return new AppDataInputDTO(10L, "obs");
     }
+
+    // ------------------------------------------------------------------
+    // getById
+    // ------------------------------------------------------------------
 
     @Test
-    void getById_notFound_returnsNull() {
+    void getById_notFound_returnsNullAndChecksNothing() {
         when(appDataRepository.findById(99L)).thenReturn(null);
 
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(99L);
+        assertNull(appDataServiceFacadeBean.getById(99L));
 
-        assertNull(result);
-        verify(dataApiClient, never()).fetchOpenApiDocument(any(), anyBoolean(), any());
-        verify(dataApiClient, never()).fetchReuseDocument(any(), anyBoolean(), any());
+        verify(dataApiClient, never()).checkUrl(any());
     }
 
     @Test
-    void getById_found_resolvesOnlyGetEndpointsFromLiveDocument() {
+    void getById_noTypedUrls_returnsTheDefaultOnesBuiltFromTheCode() {
         AppDataOutputDTO mapped = new AppDataOutputDTO();
         when(appDataRepository.findById(1L)).thenReturn(activeModel);
         when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
-
-        OpenApiPathItem centrePathItem = pathItemWithGet("centrePerEtapa");
-        OpenApiPathItem alumnePathItem = pathItemWithGet("groupByPerIlla");
-        OpenApiPathItem noVerbsPathItem = new OpenApiPathItem();
-
-        Map<String, OpenApiPathItem> paths = new LinkedHashMap<>();
-        paths.put("/services/centre", centrePathItem);
-        paths.put("/services/alumne-matricula", alumnePathItem);
-        paths.put("/services/no-verbs", noVerbsPathItem);
-        OpenApiDocument document = new OpenApiDocument();
-        document.setPaths(paths);
-
-        when(dataApiClient.fetchOpenApiDocument("sedeib", false, null))
-                .thenReturn(new OpenApiDocumentResult(document, "https://intranet.caib.es/sedeibapi/externa/openapi.json"));
-        when(openDataOperationMapper.toResponse(centrePathItem.getGet())).thenReturn(operationOutputFor("centrePerEtapa"));
-        when(openDataOperationMapper.toResponse(alumnePathItem.getGet())).thenReturn(operationOutputFor("groupByPerIlla"));
 
         AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
 
-        assertEquals(mapped, result);
-        List<OpenDataEndpointOutputDTO> endpoints = result.getOpenData();
-        assertEquals(2, endpoints.size());
-        OpenDataEndpointOutputDTO centre = endpoints.stream()
-                .filter(e -> e.getPath().equals("/services/centre")).findFirst().orElseThrow();
-        assertEquals("GET", centre.getMethod());
-        assertEquals("centrePerEtapa", centre.getOperation().getOperationId());
-        assertEquals("groupByPerIlla", endpoints.stream()
-                .filter(e -> e.getPath().equals("/services/alumne-matricula")).findFirst().orElseThrow()
-                .getOperation().getOperationId());
-        verify(appDataUrlCacheService).cacheOpenDataUrl(activeModel, "https://intranet.caib.es/sedeibapi/externa/openapi.json");
+        assertSame(mapped, result);
+        assertEquals(DEFAULT_OPEN_DATA_URL, result.getOpenDataUrl());
+        assertEquals(DEFAULT_REUSE_URL, result.getReuseUrl());
     }
 
     @Test
-    void getById_applicationCodeStoredInMixedCase_lowercasesItBeforeFetching() {
-        activeModel.getApplication().setCode("SeDeIb");
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
+    void getById_typedUrls_areReturnedInsteadOfTheDefaultOnes() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
+        activeModel.setReuseUrl(TYPED_REUSE_URL);
         when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
+
+        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
+
+        assertEquals(TYPED_OPEN_DATA_URL, result.getOpenDataUrl());
+        assertEquals(TYPED_REUSE_URL, result.getReuseUrl());
+    }
+
+    @Test
+    void getById_aTypedUrlOnOneTabOnly_leavesTheOtherOneOnItsDefault() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
+
+        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
+
+        assertEquals(TYPED_OPEN_DATA_URL, result.getOpenDataUrl());
+        assertEquals(DEFAULT_REUSE_URL, result.getReuseUrl());
+    }
+
+    @Test
+    void getById_aBlankTypedUrl_isTreatedAsTheDefaultOne() {
+        activeModel.setOpenDataUrl("   ");
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
+
+        assertEquals(DEFAULT_OPEN_DATA_URL, appDataServiceFacadeBean.getById(1L).getOpenDataUrl());
+    }
+
+    @Test
+    void getById_theDefaultUrlIsTheHostThenTheLowerCasedCodeDirectlyFollowedByThePathSegment() {
+        application.setCode("APP_02");
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
+
+        assertEquals("https://intranet.caib.es/app_02api/externa", appDataServiceFacadeBean.getById(1L).getOpenDataUrl());
+    }
+
+    @Test
+    void getById_theDefaultUrlIgnoresATrailingSlashOnTheHostOrOnThePathSegment() {
+        ReflectionTestUtils.setField(appDataServiceFacadeBean, "baseUrl", "https://intranet.caib.es/");
+        ReflectionTestUtils.setField(appDataServiceFacadeBean, "openDataPathPrefix", "api/externa/");
+        ReflectionTestUtils.setField(appDataServiceFacadeBean, "reusePathPrefix", "api/interna/");
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
+
+        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
+
+        assertEquals(DEFAULT_OPEN_DATA_URL, result.getOpenDataUrl());
+        assertEquals(DEFAULT_REUSE_URL, result.getReuseUrl());
+    }
+
+    @Test
+    void getById_queriesNoUrl_andStoresNothing() {
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
 
         appDataServiceFacadeBean.getById(1L);
 
-        verify(dataApiClient).fetchOpenApiDocument("sedeib", false, null);
-        verify(dataApiClient).fetchReuseDocument("sedeib", false, null);
+        verifyNoInteractions(dataApiClient);
+        verify(appDataRepository, never()).update(any(), any());
+        verify(appDataRepository, never()).create(any());
+    }
+
+    // ------------------------------------------------------------------
+    // checkUrl
+    // ------------------------------------------------------------------
+
+    @Test
+    void checkUrl_aUrlThatWorks_isReportedValid() {
+        when(dataApiClient.checkUrl(DEFAULT_OPEN_DATA_URL)).thenReturn(answer(DEFAULT_OPEN_DATA_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.checkUrl(DEFAULT_OPEN_DATA_URL);
+
+        assertEquals(DEFAULT_OPEN_DATA_URL, result.getUrl());
+        assertTrue(result.isValidUrl());
     }
 
     @Test
-    void getById_applicationCodeWithUnderscoresAndDigits_onlyLowercasesWithoutRemovingAnyCharacter() {
-        activeModel.getApplication().setCode("SEDE_IB-2");
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
+    void checkUrl_aUrlAnsweringAnError_isReportedNotValid_notRaisedAsAnError() {
+        when(dataApiClient.checkUrl(DEFAULT_REUSE_URL)).thenReturn(answer(DEFAULT_REUSE_URL, 404));
 
-        appDataServiceFacadeBean.getById(1L);
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.checkUrl(DEFAULT_REUSE_URL);
 
-        verify(dataApiClient).fetchOpenApiDocument("sede_ib-2", false, null);
-        verify(dataApiClient).fetchReuseDocument("sede_ib-2", false, null);
+        assertEquals(DEFAULT_REUSE_URL, result.getUrl());
+        assertFalse(result.isValidUrl());
     }
 
     @Test
-    void getById_documentWithNoPaths_returnsEmptyOpenDataList() {
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
-        OpenApiDocument document = new OpenApiDocument();
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
-        when(dataApiClient.fetchOpenApiDocument("sedeib", false, null))
-                .thenReturn(new OpenApiDocumentResult(document, "https://intranet.caib.es/sedeibapi/externa/openapi.json"));
+    void checkUrl_aUrlThatCouldNotBeQueried_isReportedNotValid() {
+        when(dataApiClient.checkUrl(DEFAULT_REUSE_URL)).thenReturn(new UrlCheckResult(DEFAULT_REUSE_URL, false, null));
 
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertEquals(List.of(), result.getOpenData());
+        assertFalse(appDataServiceFacadeBean.checkUrl(DEFAULT_REUSE_URL).isValidUrl());
     }
 
     @Test
-    void getById_useOpenDataUrlTrue_fetchesFromExplicitUrlInsteadOfApplicationName() {
-        activeModel.setUseOpenDataUrl(true);
-        activeModel.setOpenDataUrl("https://example.test/custom/openapi.json");
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
+    void checkUrl_alwaysQueriesTheUrl_nothingIsRememberedFromTheLastCall() {
+        when(dataApiClient.checkUrl(DEFAULT_OPEN_DATA_URL)).thenReturn(answer(DEFAULT_OPEN_DATA_URL, 200));
 
-        OpenApiPathItem customPathItem = pathItemWithGet("customGet");
-        OpenApiDocument document = new OpenApiDocument();
-        document.setPaths(Map.of("/custom/endpoint", customPathItem));
+        appDataServiceFacadeBean.checkUrl(DEFAULT_OPEN_DATA_URL);
+        appDataServiceFacadeBean.checkUrl(DEFAULT_OPEN_DATA_URL);
 
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
-        when(dataApiClient.fetchOpenApiDocument("sedeib", true, "https://example.test/custom/openapi.json"))
-                .thenReturn(new OpenApiDocumentResult(document, "https://example.test/custom/openapi.json"));
-        when(openDataOperationMapper.toResponse(customPathItem.getGet())).thenReturn(operationOutputFor("customGet"));
-
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertEquals(1, result.getOpenData().size());
-        assertEquals("customGet", result.getOpenData().get(0).getOperation().getOperationId());
-        verify(dataApiClient).fetchOpenApiDocument("sedeib", true, "https://example.test/custom/openapi.json");
+        verify(dataApiClient, times(2)).checkUrl(DEFAULT_OPEN_DATA_URL);
+        verifyNoInteractions(appDataRepository);
     }
 
     @Test
-    void getById_openDataFetchFails_returnsNullOpenDataButValidReuse() {
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
-        when(dataApiClient.fetchOpenApiDocument("sedeib", false, null))
-                .thenThrow(new BusinessRuleException(Constants.ERR_OPENDATA_UNAVAILABLE));
+    void checkUrl_theCheckTimingOut_propagates() {
+        when(dataApiClient.checkUrl(DEFAULT_OPEN_DATA_URL)).thenThrow(new DataTimeoutException());
 
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertNull(result.getOpenData());
-        assertEquals(List.of(), result.getReuse());
+        assertThrows(DataTimeoutException.class, () -> appDataServiceFacadeBean.checkUrl(DEFAULT_OPEN_DATA_URL));
     }
 
     @Test
-    void getById_bothFetchesFail_throwsBusinessRuleException() {
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
-        when(dataApiClient.fetchOpenApiDocument("sedeib", false, null))
-                .thenThrow(new BusinessRuleException(Constants.ERR_OPENDATA_UNAVAILABLE));
-        when(dataApiClient.fetchReuseDocument("sedeib", false, null))
-                .thenThrow(new BusinessRuleException(Constants.ERR_REUSE_UNAVAILABLE));
+    void checkUrl_theCheckBeingUnavailable_propagates() {
+        when(dataApiClient.checkUrl(DEFAULT_OPEN_DATA_URL)).thenThrow(new BusinessRuleException(Constants.ERR_DATA_URL_UNAVAILABLE));
 
-        assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.getById(1L));
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.checkUrl(DEFAULT_OPEN_DATA_URL));
+
+        assertEquals(Constants.ERR_DATA_URL_UNAVAILABLE, ex.getMessage());
+    }
+
+    // ------------------------------------------------------------------
+    // create
+    // ------------------------------------------------------------------
+
+    @Test
+    void create_applicationNotFound_throwsBusinessRuleException() {
+        when(applicationRepository.findById(10L)).thenReturn(null);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.create(input()));
+
+        assertEquals(Constants.ERR_APP_NOT_FOUND, ex.getMessage());
+        verify(appDataRepository, never()).create(any());
     }
 
     @Test
-    void getById_bothFetchesFail_onlyOpenDataTimesOut_throwsDataTimeoutException() {
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
-        when(dataApiClient.fetchOpenApiDocument("sedeib", false, null))
-                .thenThrow(new DataTimeoutException());
-        when(dataApiClient.fetchReuseDocument("sedeib", false, null))
-                .thenThrow(new BusinessRuleException(Constants.ERR_REUSE_UNAVAILABLE));
+    void create_activeAnchorAlreadyExists_throwsBusinessRuleException() {
+        when(applicationRepository.findById(10L)).thenReturn(application);
+        when(appDataRepository.findByApplicationId(10L)).thenReturn(activeModel);
 
-        assertThrows(DataTimeoutException.class, () -> appDataServiceFacadeBean.getById(1L));
-    }
-
-    @Test
-    void getById_found_resolvesOnlyGetEndpointsFromLiveReuseDocument() {
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
-
-        OpenApiPathItem centrePathItem = pathItemWithGet("centrePerEtapa");
-        OpenApiPathItem noVerbsPathItem = new OpenApiPathItem();
-
-        Map<String, OpenApiPathItem> paths = new LinkedHashMap<>();
-        paths.put("/services/centre", centrePathItem);
-        paths.put("/services/no-verbs", noVerbsPathItem);
-        OpenApiDocument document = new OpenApiDocument();
-        document.setPaths(paths);
-
-        when(dataApiClient.fetchReuseDocument("sedeib", false, null))
-                .thenReturn(new OpenApiDocumentResult(document, "https://intranet.caib.es/sedeibapi/externa/swagger.json"));
-        when(openDataOperationMapper.toResponse(centrePathItem.getGet())).thenReturn(operationOutputFor("centrePerEtapa"));
-
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertEquals(mapped, result);
-        List<OpenDataEndpointOutputDTO> endpoints = result.getReuse();
-        assertEquals(1, endpoints.size());
-        assertEquals("centrePerEtapa", endpoints.get(0).getOperation().getOperationId());
-        verify(appDataUrlCacheService).cacheReuseUrl(activeModel, "https://intranet.caib.es/sedeibapi/externa/swagger.json");
-    }
-
-    @Test
-    void getById_reuseDocumentWithNoPaths_returnsEmptyReuseList() {
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
-
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertEquals(List.of(), result.getReuse());
-    }
-
-    @Test
-    void getById_useReuseUrlTrue_fetchesFromExplicitUrlInsteadOfApplicationName() {
-        activeModel.setUseReuseUrl(true);
-        activeModel.setReuseUrl("https://example.test/custom/back");
-        AppDataOutputDTO mapped = new AppDataOutputDTO();
-
-        OpenApiPathItem customPathItem = pathItemWithGet("customGet");
-        OpenApiDocument document = new OpenApiDocument();
-        document.setPaths(Map.of("/custom/endpoint", customPathItem));
-
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
-        when(dataApiClient.fetchReuseDocument("sedeib", true, "https://example.test/custom/back"))
-                .thenReturn(new OpenApiDocumentResult(document, "https://example.test/custom/back"));
-        when(openDataOperationMapper.toResponse(customPathItem.getGet())).thenReturn(operationOutputFor("customGet"));
-
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertEquals(1, result.getReuse().size());
-        assertEquals("customGet", result.getReuse().get(0).getOperation().getOperationId());
-        verify(dataApiClient).fetchReuseDocument("sedeib", true, "https://example.test/custom/back");
-    }
-
-    @Test
-    void getById_reuseFetchFails_returnsNullReuseButValidOpenData() {
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
-        when(dataApiClient.fetchReuseDocument("sedeib", false, null))
-                .thenThrow(new BusinessRuleException(Constants.ERR_REUSE_UNAVAILABLE));
-
-        AppDataOutputDTO result = appDataServiceFacadeBean.getById(1L);
-
-        assertNull(result.getReuse());
-        assertEquals(List.of(), result.getOpenData());
-    }
-
-    /**
-     * Regression test for the "everything ends up cached as reuse" bug: {@code
-     * resolveOpenDataEndpoints}/{@code resolveReuseEndpoints} used to run concurrently and both
-     * close over the very same shared {@code AppData} instance, so two concurrent full-entity
-     * saves could race over that shared instance and clobber one column with the other's stale
-     * snapshot. Both tabs are now resolved sequentially, each caching its own URL right after its
-     * own fetch, so this proves each tab's resolved URL lands in its own cache call rather than
-     * both ending up cached under the same one.
-     */
-    @Test
-    void getById_resolvesBothTabs_cachesEachUrlUnderItsOwnTab() {
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataMapper.toResponse(activeModel)).thenReturn(new AppDataOutputDTO());
-        when(dataApiClient.fetchOpenApiDocument("sedeib", false, null))
-                .thenReturn(new OpenApiDocumentResult(new OpenApiDocument(), "https://intranet.caib.es/sedeibapi/externa/openapi.json"));
-        when(dataApiClient.fetchReuseDocument("sedeib", false, null))
-                .thenReturn(new OpenApiDocumentResult(new OpenApiDocument(), "https://intranet.caib.es/sedeibapi/externa/swagger.json"));
-
-        appDataServiceFacadeBean.getById(1L);
-
-        verify(appDataUrlCacheService).cacheOpenDataUrl(activeModel, "https://intranet.caib.es/sedeibapi/externa/openapi.json");
-        verify(appDataUrlCacheService).cacheReuseUrl(activeModel, "https://intranet.caib.es/sedeibapi/externa/swagger.json");
-    }
-
-    @Test
-    void create_noActiveAnchorForApplication_persistsAndReturnsResponse() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, "Observacio", null, false, null, false);
-        AppData model = new AppData();
-        AppData saved = new AppData();
-        AppDataOutputDTO response = new AppDataOutputDTO();
-        when(appDataRepository.findByApplicationId(10L)).thenReturn(null);
-        when(appDataMapper.toModelFromInput(inputDTO)).thenReturn(model);
-        when(appDataRepository.create(model)).thenReturn(saved);
-        when(appDataMapper.toResponse(saved)).thenReturn(response);
-
-        AppDataOutputDTO result = appDataServiceFacadeBean.create(inputDTO);
-
-        assertEquals(response, result);
-    }
-
-    @Test
-    void create_applicationAlreadyHasActiveAnchor_throwsBusinessRuleException() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, null, false, null, false);
-        AppData existing = new AppData();
-        existing.setDeletedAt(null);
-        when(appDataRepository.findByApplicationId(10L)).thenReturn(existing);
-
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.create(inputDTO));
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.create(input()));
 
         assertEquals(Constants.ERR_APP_DATA_ALREADY_EXISTS, ex.getMessage());
         verify(appDataRepository, never()).create(any());
     }
 
     @Test
-    void create_applicationHasOnlySoftDeletedAnchor_allowsCreate() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, null, false, null, false);
-        AppData softDeleted = new AppData();
-        softDeleted.setDeletedAt(LocalDateTime.now());
-        when(appDataRepository.findByApplicationId(10L)).thenReturn(softDeleted);
-        when(appDataMapper.toModelFromInput(inputDTO)).thenReturn(new AppData());
-        when(appDataRepository.create(any())).thenReturn(new AppData());
-        when(appDataMapper.toResponse(any())).thenReturn(new AppDataOutputDTO());
+    void create_previousAnchorSoftDeleted_doesNotBlockANewOne() {
+        activeModel.setDeletedAt(LocalDateTime.now());
+        AppDataInputDTO inputDTO = input();
+        AppData toSave = new AppData();
+        AppData saved = new AppData();
+        when(applicationRepository.findById(10L)).thenReturn(application);
+        when(appDataRepository.findByApplicationId(10L)).thenReturn(activeModel);
+        when(appDataMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
+        when(appDataRepository.create(toSave)).thenReturn(saved);
+        when(appDataMapper.toResponse(saved)).thenReturn(new AppDataOutputDTO());
 
         appDataServiceFacadeBean.create(inputDTO);
 
-        verify(appDataRepository).create(any());
+        verify(appDataRepository).create(toSave);
     }
 
     @Test
-    void create_useOpenDataUrlTrueWithBlankUrl_throwsBusinessRuleException() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, "  ", true, null, false);
+    void create_checksNothing_andLeavesTheTabsOutOfTheResponse() {
+        AppDataInputDTO inputDTO = input();
+        AppData toSave = new AppData();
+        AppData saved = new AppData();
+        AppDataOutputDTO mapped = new AppDataOutputDTO();
+        when(applicationRepository.findById(10L)).thenReturn(application);
         when(appDataRepository.findByApplicationId(10L)).thenReturn(null);
+        when(appDataMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
+        when(appDataRepository.create(toSave)).thenReturn(saved);
+        when(appDataMapper.toResponse(saved)).thenReturn(mapped);
 
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.create(inputDTO));
+        AppDataOutputDTO result = appDataServiceFacadeBean.create(inputDTO);
 
-        assertEquals(Constants.ERR_APP_DATA_URL_REQUIRED, ex.getMessage());
-        verify(appDataRepository, never()).create(any());
+        assertSame(mapped, result);
+        assertNull(result.getOpenDataUrl());
+        assertNull(result.getReuseUrl());
+        verifyNoInteractions(dataApiClient);
     }
 
-    @Test
-    void create_useOpenDataUrlTrueWithUrl_persistsAndReturnsResponse() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, "https://example.test/openapi.json", true, null, false);
-        when(appDataRepository.findByApplicationId(10L)).thenReturn(null);
-        when(appDataMapper.toModelFromInput(inputDTO)).thenReturn(new AppData());
-        when(appDataRepository.create(any())).thenReturn(new AppData());
-        when(appDataMapper.toResponse(any())).thenReturn(new AppDataOutputDTO());
-
-        appDataServiceFacadeBean.create(inputDTO);
-
-        verify(appDataRepository).create(any());
-    }
-
-    @Test
-    void create_useReuseUrlTrueWithBlankUrl_throwsBusinessRuleException() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, null, false, "  ", true);
-        when(appDataRepository.findByApplicationId(10L)).thenReturn(null);
-
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.create(inputDTO));
-
-        assertEquals(Constants.ERR_APP_DATA_URL_REQUIRED, ex.getMessage());
-        verify(appDataRepository, never()).create(any());
-    }
-
-    @Test
-    void create_useReuseUrlTrueWithUrl_persistsAndReturnsResponse() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, null, false, "https://example.test/back", true);
-        when(appDataRepository.findByApplicationId(10L)).thenReturn(null);
-        when(appDataMapper.toModelFromInput(inputDTO)).thenReturn(new AppData());
-        when(appDataRepository.create(any())).thenReturn(new AppData());
-        when(appDataMapper.toResponse(any())).thenReturn(new AppDataOutputDTO());
-
-        appDataServiceFacadeBean.create(inputDTO);
-
-        verify(appDataRepository).create(any());
-    }
+    // ------------------------------------------------------------------
+    // update (observation only)
+    // ------------------------------------------------------------------
 
     @Test
     void update_notFound_throwsBusinessRuleException() {
         when(appDataRepository.findById(99L)).thenReturn(null);
 
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.update(99L, input()));
+
+        assertEquals(Constants.ERR_APP_DATA_NOT_FOUND, ex.getMessage());
+        verify(appDataRepository, never()).update(any(), any());
+    }
+
+    @Test
+    void update_appliesTheInput_checksNothing_andLeavesTheTabsOutOfTheResponse() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
+        AppDataInputDTO inputDTO = input();
+        AppDataOutputDTO mapped = new AppDataOutputDTO();
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(appDataRepository.update(activeModel, 1L)).thenReturn(activeModel);
+        when(appDataMapper.toResponse(activeModel)).thenReturn(mapped);
+
+        AppDataOutputDTO result = appDataServiceFacadeBean.update(1L, inputDTO);
+
+        verify(appDataMapper).updateModelFromInput(inputDTO, activeModel);
+        assertEquals(TYPED_OPEN_DATA_URL, activeModel.getOpenDataUrl());
+        assertNull(result.getOpenDataUrl());
+        assertNull(result.getReuseUrl());
+        verifyNoInteractions(dataApiClient);
+    }
+
+    // ------------------------------------------------------------------
+    // updateOpenDataUrl
+    // ------------------------------------------------------------------
+
+    @Test
+    void updateOpenDataUrl_notFound_throwsBusinessRuleException() {
+        when(appDataRepository.findById(99L)).thenReturn(null);
+
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.update(99L, new AppDataInputDTO(10L, null, null, false, null, false)));
+                () -> appDataServiceFacadeBean.updateOpenDataUrl(99L, new AppDataUrlInputDTO(TYPED_OPEN_DATA_URL)));
+
+        assertEquals(Constants.ERR_APP_DATA_NOT_FOUND, ex.getMessage());
+        verify(appDataRepository, never()).update(any(), any());
+    }
+
+    @Test
+    void updateOpenDataUrl_aTypedUrl_isCheckedSavedAndReturnedAsTheIntegrationReportedIt() {
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(TYPED_OPEN_DATA_URL)).thenReturn(answer(TYPED_OPEN_DATA_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO(TYPED_OPEN_DATA_URL));
+
+        assertEquals(TYPED_OPEN_DATA_URL, result.getUrl());
+        assertTrue(result.isValidUrl());
+        assertEquals(TYPED_OPEN_DATA_URL, activeModel.getOpenDataUrl());
+        verify(appDataRepository).update(activeModel, 1L);
+        verify(dataApiClient, never()).checkUrl(DEFAULT_REUSE_URL);
+    }
+
+    @Test
+    void updateOpenDataUrl_aTypedUrlThatDoesNotWork_isSavedAnywayAndReportedNotValid() {
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl("https://swagger.example.test/broken"))
+                .thenReturn(answer("https://swagger.example.test/broken", 404));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO("https://swagger.example.test/broken"));
+
+        assertEquals("https://swagger.example.test/broken", result.getUrl());
+        assertFalse(result.isValidUrl());
+        assertEquals("https://swagger.example.test/broken", activeModel.getOpenDataUrl());
+        verify(appDataRepository).update(activeModel, 1L);
+    }
+
+    @Test
+    void updateOpenDataUrl_theSameUrlAsBefore_isCheckedAgainAnyway() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(TYPED_OPEN_DATA_URL)).thenReturn(answer(TYPED_OPEN_DATA_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO(TYPED_OPEN_DATA_URL));
+
+        verify(dataApiClient).checkUrl(TYPED_OPEN_DATA_URL);
+        assertTrue(result.isValidUrl());
+    }
+
+    @Test
+    void updateOpenDataUrl_aNullUrl_goesBackToTheDefaultOneAndReturnsIt() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(DEFAULT_OPEN_DATA_URL)).thenReturn(answer(DEFAULT_OPEN_DATA_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO(null));
+
+        assertEquals(DEFAULT_OPEN_DATA_URL, result.getUrl());
+        assertNull(activeModel.getOpenDataUrl());
+        assertTrue(result.isValidUrl());
+    }
+
+    @Test
+    void updateOpenDataUrl_aBlankUrl_isTreatedAsNull() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(DEFAULT_OPEN_DATA_URL)).thenReturn(answer(DEFAULT_OPEN_DATA_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO("   "));
+
+        assertEquals(DEFAULT_OPEN_DATA_URL, result.getUrl());
+        assertNull(activeModel.getOpenDataUrl());
+    }
+
+    @Test
+    void updateOpenDataUrl_aTypedUrlWithSurroundingBlanks_isTrimmedBeforeItIsStoredAndChecked() {
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(TYPED_OPEN_DATA_URL)).thenReturn(answer(TYPED_OPEN_DATA_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO("  " + TYPED_OPEN_DATA_URL + "  "));
+
+        assertEquals(TYPED_OPEN_DATA_URL, result.getUrl());
+        assertEquals(TYPED_OPEN_DATA_URL, activeModel.getOpenDataUrl());
+    }
+
+    @Test
+    void updateOpenDataUrl_theCheckTimingOut_propagatesAndSavesNothing() {
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(TYPED_OPEN_DATA_URL)).thenThrow(new DataTimeoutException());
+
+        assertThrows(DataTimeoutException.class,
+                () -> appDataServiceFacadeBean.updateOpenDataUrl(1L, new AppDataUrlInputDTO(TYPED_OPEN_DATA_URL)));
+
+        verify(appDataRepository, never()).update(any(), any());
+    }
+
+    // ------------------------------------------------------------------
+    // updateReuseUrl
+    // ------------------------------------------------------------------
+
+    @Test
+    void updateReuseUrl_notFound_throwsBusinessRuleException() {
+        when(appDataRepository.findById(99L)).thenReturn(null);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> appDataServiceFacadeBean.updateReuseUrl(99L, new AppDataUrlInputDTO(TYPED_REUSE_URL)));
 
         assertEquals(Constants.ERR_APP_DATA_NOT_FOUND, ex.getMessage());
     }
 
     @Test
-    void update_found_updatesAndReturnsResponse() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, "Nova observacio", null, false, null, false);
-        AppData updated = new AppData();
-        AppDataOutputDTO response = new AppDataOutputDTO();
+    void updateReuseUrl_aTypedUrl_isCheckedSavedAndReturned_withoutTouchingTheOpenDataTab() {
+        activeModel.setOpenDataUrl(TYPED_OPEN_DATA_URL);
         when(appDataRepository.findById(1L)).thenReturn(activeModel);
-        when(appDataRepository.update(activeModel, 1L)).thenReturn(updated);
-        when(appDataMapper.toResponse(updated)).thenReturn(response);
+        when(dataApiClient.checkUrl(TYPED_REUSE_URL)).thenReturn(answer(TYPED_REUSE_URL, 200));
 
-        AppDataOutputDTO result = appDataServiceFacadeBean.update(1L, inputDTO);
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateReuseUrl(1L, new AppDataUrlInputDTO(TYPED_REUSE_URL));
 
-        assertEquals(response, result);
-        verify(appDataMapper).updateModelFromInput(inputDTO, activeModel);
+        assertEquals(TYPED_REUSE_URL, result.getUrl());
+        assertTrue(result.isValidUrl());
+        assertEquals(TYPED_REUSE_URL, activeModel.getReuseUrl());
+        assertEquals(TYPED_OPEN_DATA_URL, activeModel.getOpenDataUrl());
+        verify(dataApiClient, never()).checkUrl(DEFAULT_OPEN_DATA_URL);
     }
 
     @Test
-    void update_useOpenDataUrlTrueWithBlankUrl_throwsBusinessRuleException() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, null, true, null, false);
+    void updateReuseUrl_aTypedUrlThatDoesNotWork_isSavedAnywayAndReportedNotValid() {
         when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(TYPED_REUSE_URL)).thenReturn(answer(TYPED_REUSE_URL, 500));
 
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.update(1L, inputDTO));
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateReuseUrl(1L, new AppDataUrlInputDTO(TYPED_REUSE_URL));
 
-        assertEquals(Constants.ERR_APP_DATA_URL_REQUIRED, ex.getMessage());
-        verify(appDataMapper, never()).updateModelFromInput(any(), any());
+        assertFalse(result.isValidUrl());
+        assertEquals(TYPED_REUSE_URL, activeModel.getReuseUrl());
     }
 
     @Test
-    void update_useReuseUrlTrueWithBlankUrl_throwsBusinessRuleException() {
-        AppDataInputDTO inputDTO = new AppDataInputDTO(10L, null, null, false, null, true);
+    void updateReuseUrl_aNullUrl_goesBackToTheDefaultOneAndReturnsIt() {
+        activeModel.setReuseUrl(TYPED_REUSE_URL);
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(DEFAULT_REUSE_URL)).thenReturn(answer(DEFAULT_REUSE_URL, 200));
+
+        AppDataUrlOutputDTO result = appDataServiceFacadeBean.updateReuseUrl(1L, new AppDataUrlInputDTO(null));
+
+        assertEquals(DEFAULT_REUSE_URL, result.getUrl());
+        assertNull(activeModel.getReuseUrl());
+    }
+
+    @Test
+    void updateReuseUrl_theSameUrlAsBefore_isCheckedAgainAnyway() {
+        activeModel.setReuseUrl(TYPED_REUSE_URL);
+        when(appDataRepository.findById(1L)).thenReturn(activeModel);
+        when(dataApiClient.checkUrl(TYPED_REUSE_URL)).thenReturn(answer(TYPED_REUSE_URL, 200));
+
+        appDataServiceFacadeBean.updateReuseUrl(1L, new AppDataUrlInputDTO(TYPED_REUSE_URL));
+
+        verify(dataApiClient).checkUrl(TYPED_REUSE_URL);
+    }
+
+    // ------------------------------------------------------------------
+    // delete
+    // ------------------------------------------------------------------
+
+    @Test
+    void delete_valid_softDeletes() {
         when(appDataRepository.findById(1L)).thenReturn(activeModel);
 
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.update(1L, inputDTO));
+        appDataServiceFacadeBean.delete(1L);
 
-        assertEquals(Constants.ERR_APP_DATA_URL_REQUIRED, ex.getMessage());
-        verify(appDataMapper, never()).updateModelFromInput(any(), any());
+        assertNotNull(activeModel.getDeletedAt());
+        assertNotNull(activeModel.getDeletedBy());
+        verify(appDataRepository).delete(activeModel);
     }
 
     @Test
     void delete_notFound_throwsBusinessRuleException() {
         when(appDataRepository.findById(99L)).thenReturn(null);
 
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.delete(99L));
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.delete(99L));
 
         assertEquals(Constants.ERR_APP_DATA_NOT_FOUND, ex.getMessage());
     }
 
     @Test
-    void delete_alreadyInactive_throwsBusinessRuleException() {
+    void delete_alreadyDeleted_throwsBusinessRuleException() {
         activeModel.setDeletedAt(LocalDateTime.now());
         when(appDataRepository.findById(1L)).thenReturn(activeModel);
 
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
-                () -> appDataServiceFacadeBean.delete(1L));
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> appDataServiceFacadeBean.delete(1L));
 
         assertEquals(Constants.ERR_APP_DATA_NOT_ACTIVE, ex.getMessage());
         verify(appDataRepository, never()).delete(any());
-    }
-
-    @Test
-    void delete_active_softDeletes() {
-        when(appDataRepository.findById(1L)).thenReturn(activeModel);
-
-        appDataServiceFacadeBean.delete(1L);
-
-        assertNotNull(activeModel.getDeletedAt());
-        verify(appDataRepository).delete(activeModel);
     }
 }

@@ -6,7 +6,7 @@ import es.caib.invai.back.interna.application.responsibleAuthorized.dir3.DTO.Dir
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.dir3.Dir3ValidationRepository;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapper;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ class Dir3ValidationServiceFacadeBeanTest {
 
     @BeforeEach
     void setUp() {
-        noValidado = Dir3Validation.builder().id(500L).dir3Status(Dir3ValidationStatus.NOT_VALIDATED).build();
+        noValidado = Dir3Validation.builder().id(500L).dir3Status(ValidationStatusEnum.NOT_VALIDATED).build();
     }
 
     @Test
@@ -61,7 +61,7 @@ class Dir3ValidationServiceFacadeBeanTest {
 
     @Test
     void validateManually_alreadyValidado_throwsBusinessRuleException() {
-        noValidado.setDir3Status(Dir3ValidationStatus.VALIDATED);
+        noValidado.setDir3Status(ValidationStatusEnum.VALIDATED);
         when(dir3ValidationRepository.findById(500L)).thenReturn(noValidado);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
@@ -72,7 +72,7 @@ class Dir3ValidationServiceFacadeBeanTest {
 
     @Test
     void validateManually_alreadyManual_throwsBusinessRuleException() {
-        noValidado.setDir3Status(Dir3ValidationStatus.MANUAL);
+        noValidado.setDir3Status(ValidationStatusEnum.MANUAL);
         when(dir3ValidationRepository.findById(500L)).thenReturn(noValidado);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
@@ -83,7 +83,7 @@ class Dir3ValidationServiceFacadeBeanTest {
 
     @Test
     void validateManually_alreadyNoAplica_throwsBusinessRuleException() {
-        noValidado.setDir3Status(Dir3ValidationStatus.NOT_APPLY);
+        noValidado.setDir3Status(ValidationStatusEnum.NOT_APPLY);
         when(dir3ValidationRepository.findById(500L)).thenReturn(noValidado);
 
         BusinessRuleException ex = assertThrows(BusinessRuleException.class,
@@ -103,7 +103,7 @@ class Dir3ValidationServiceFacadeBeanTest {
 
         ArgumentCaptor<Dir3Validation> captor = ArgumentCaptor.forClass(Dir3Validation.class);
         verify(dir3ValidationRepository).update(captor.capture(), eq(500L));
-        assertEquals(Dir3ValidationStatus.MANUAL, captor.getValue().getDir3Status());
+        assertEquals(ValidationStatusEnum.MANUAL, captor.getValue().getDir3Status());
         assertNotNull(captor.getValue().getManualValidatedAt());
         assertEquals("El DIR3 de Soffid esta desactualitzat, s'ha comprovat manualment", captor.getValue().getReason());
         assertSame(response, result);

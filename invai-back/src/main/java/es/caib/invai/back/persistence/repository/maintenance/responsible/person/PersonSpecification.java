@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -29,16 +30,16 @@ public final class PersonSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
-            if (criteria.getPersonalCaib() != null) {
+            if (Objects.nonNull(criteria.getPersonalCaib())) {
                 predicates.add(cb.equal(root.get("personalCaib"), criteria.getPersonalCaib()));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -46,27 +47,27 @@ public final class PersonSpecification {
                 );
             }
 
-            if (criteria.getFirstName() != null && !criteria.getFirstName().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getFirstName()) && !criteria.getFirstName().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("firstName")), "%" + criteria.getFirstName().toLowerCase() + "%"));
             }
 
-            if (criteria.getLastName() != null && !criteria.getLastName().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getLastName()) && !criteria.getLastName().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("lastName")), "%" + criteria.getLastName().toLowerCase() + "%"));
             }
 
-            if (criteria.getEmail() != null && !criteria.getEmail().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getEmail()) && !criteria.getEmail().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("email")), "%" + criteria.getEmail().toLowerCase() + "%"));
             }
 
-            if (criteria.getCompanyId() != null) {
+            if (Objects.nonNull(criteria.getCompanyId())) {
                 predicates.add(cb.equal(root.get("company").get("id"), criteria.getCompanyId()));
             }
 
-            if (criteria.getExcludeId() != null) {
+            if (Objects.nonNull(criteria.getExcludeId())) {
                 predicates.add(cb.notEqual(root.get("id"), criteria.getExcludeId()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String pattern = "%" + criteria.getSearch().trim().toLowerCase().replaceAll("\\s+", " ") + "%";
 
                 Predicate searchFirstName = cb.like(cb.lower(root.get("firstName")), pattern);

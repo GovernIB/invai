@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing application-to-database mapping core distributions.
@@ -93,7 +94,7 @@ public class AppDatabaseServiceFacadeBean implements AppDatabaseService {
         log.info("Facade: Initiating security validation rules check prior to executing transaction merge on ID: {}", id);
 
         AppDatabase existingModel = appDatabaseRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_DATABASE_NOT_FOUND);
         }
 
@@ -121,11 +122,11 @@ public class AppDatabaseServiceFacadeBean implements AppDatabaseService {
         log.info("Facade: Evaluating infrastructure components prior to setting logical deletion properties for target: {}", id);
 
         AppDatabase existingModel = appDatabaseRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_DATABASE_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_DATABASE_NOT_ACTIVE);
         }
 

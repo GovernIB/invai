@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppEnsClassificationRepository} on top of Spring Data
@@ -164,19 +165,19 @@ public class AppEnsClassificationRepositoryAdapter implements AppEnsClassificati
 
             aud.setAppEnsClassificationId(entity.getId());
             aud.setAppSecurityId(entity.getAppSecurity().getId());
-            aud.setIdentityProviderId(entity.getIdentityProvider() != null ? entity.getIdentityProvider().getId() : null);
-            aud.setEnsSubjectId(entity.getEnsSubject() != null ? entity.getEnsSubject().getId() : null);
-            aud.setPersonalDataProcessingId(entity.getPersonalDataProcessing() != null ? entity.getPersonalDataProcessing().getId() : null);
+            aud.setIdentityProviderId(Objects.nonNull(entity.getIdentityProvider()) ? entity.getIdentityProvider().getId() : null);
+            aud.setEnsSubjectId(Objects.nonNull(entity.getEnsSubject()) ? entity.getEnsSubject().getId() : null);
+            aud.setPersonalDataProcessingId(Objects.nonNull(entity.getPersonalDataProcessing()) ? entity.getPersonalDataProcessing().getId() : null);
             aud.setApprovalDate(entity.getApprovalDate());
-            aud.setConfidentialityId(entity.getConfidentiality() != null ? entity.getConfidentiality().getId() : null);
-            aud.setIntegrityId(entity.getIntegrity() != null ? entity.getIntegrity().getId() : null);
-            aud.setTraceabilityId(entity.getTraceability() != null ? entity.getTraceability().getId() : null);
-            aud.setAvailabilityId(entity.getAvailability() != null ? entity.getAvailability().getId() : null);
-            aud.setAuthenticityId(entity.getAuthenticity() != null ? entity.getAuthenticity().getId() : null);
-            aud.setOverallGradeId(entity.getOverallGrade() != null ? entity.getOverallGrade().getId() : null);
+            aud.setConfidentialityId(Objects.nonNull(entity.getConfidentiality()) ? entity.getConfidentiality().getId() : null);
+            aud.setIntegrityId(Objects.nonNull(entity.getIntegrity()) ? entity.getIntegrity().getId() : null);
+            aud.setTraceabilityId(Objects.nonNull(entity.getTraceability()) ? entity.getTraceability().getId() : null);
+            aud.setAvailabilityId(Objects.nonNull(entity.getAvailability()) ? entity.getAvailability().getId() : null);
+            aud.setAuthenticityId(Objects.nonNull(entity.getAuthenticity()) ? entity.getAuthenticity().getId() : null);
+            aud.setOverallGradeId(Objects.nonNull(entity.getOverallGrade()) ? entity.getOverallGrade().getId() : null);
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

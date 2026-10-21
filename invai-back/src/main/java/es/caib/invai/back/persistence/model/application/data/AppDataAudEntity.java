@@ -43,21 +43,13 @@ public class AppDataAudEntity {
     @Column(name = "OBSERVATION", length = 4000)
     private String observation;
 
-    /** Explicit OpenAPI document URL at the time of the audited change. */
+    /** URL of the "Open Data" swagger typed in by hand, at the time of the audited change. */
     @Column(name = "OPEN_DATA_URL")
     private String openDataUrl;
 
-    /** Whether the explicit URL was in use at the time of the audited change. */
-    @Column(name = "USE_OPEN_DATA_URL")
-    private Boolean useOpenDataUrl;
-
-    /** Explicit reuse document URL at the time of the audited change. */
+    /** URL of the "Reutilització" swagger typed in by hand, at the time of the audited change. */
     @Column(name = "REUSE_URL")
     private String reuseUrl;
-
-    /** Whether the explicit reuse URL was in use at the time of the audited change. */
-    @Column(name = "USE_REUSE_URL")
-    private Boolean useReuseUrl;
 
     /** Timestamp at which the original record was created. */
     @Column(name = "CREATED_AT")

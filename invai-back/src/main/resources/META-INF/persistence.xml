@@ -82,7 +82,7 @@
 
         <class>es.caib.invai.back.persistence.model.catalog.responsibleType.LkupResponsibleTypeEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.catalog.dir3Status.LkupDir3StatusEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity</class>
 
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity</class>
         <class>es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationAudEntity</class>
@@ -146,6 +146,21 @@
 
         <class>es.caib.invai.back.persistence.model.maintenance.integration.externalSystem.ExternalSystemEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.integration.externalSystem.ExternalSystemAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryAudEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.documentStatus.LkupDocumentStatusEntity</class>
+        <class>es.caib.invai.back.persistence.model.catalog.mimeType.LkupMimeTypeEntity</class>
+
+        <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentVersionEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentVersionAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationMetadataEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationMetadataAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.link.AppLinkAudEntity</class>
 
         <class>es.caib.invai.back.persistence.model.application.integration.core.AppIntegrationEntity</class>
         <class>es.caib.invai.back.persistence.model.application.integration.core.AppIntegrationAudEntity</class>

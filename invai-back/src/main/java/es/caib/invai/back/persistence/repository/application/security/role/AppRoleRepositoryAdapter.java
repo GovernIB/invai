@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppRoleRepository} on top of Spring Data
@@ -164,9 +165,12 @@ public class AppRoleRepositoryAdapter implements AppRoleRepository {
             aud.setAppRoleId(entity.getId());
             aud.setAppSecurityId(entity.getAppSecurity().getId());
             aud.setSecurityRoleId(entity.getSecurityRole().getId());
+            aud.setValidationStatusId(entity.getValidationStatus().getId());
+            aud.setManualValidatedAt(entity.getManualValidatedAt());
+            aud.setManualValidatedBy(entity.getManualValidatedBy());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

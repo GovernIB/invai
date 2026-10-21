@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing system Database objects.
@@ -58,7 +59,7 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
         log.debug("Facade: Fetching database by ID: {}", id);
         Database database = databaseRepository.findById(id);
 
-        if (database == null) {
+        if (Objects.isNull(database)) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_NOT_FOUND);
         }
 
@@ -120,7 +121,7 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
         log.info("Facade: Updating database ID: {}", id);
 
         Database existing = databaseRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_NOT_FOUND);
         }
 
@@ -148,11 +149,11 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
         log.info("Facade: Logically deleting database ID: {}", id);
         Database existing = databaseRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_NOT_ACTIVE);
         }
 
@@ -174,11 +175,11 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
         log.info("Facade: Reactivating database ID: {}", id);
         Database existing = databaseRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_ACTIVE);
         }
 
@@ -199,8 +200,8 @@ public class DatabaseServiceFacadeBean implements DatabaseService {
      */
     private void validateServerType(Long serverId) {
         Server server = serverRepository.findById(serverId);
-        if (server != null
-                && (server.getServerType() == null
+        if (Objects.nonNull(server)
+                && (Objects.isNull(server.getServerType())
                 || !Constants.SERVER_TYPE_CODE_DATABASE.equals(server.getServerType().getCode()))) {
             throw new BusinessRuleException(Constants.ERR_DATABASE_SERVER_TYPE_INVALID);
         }

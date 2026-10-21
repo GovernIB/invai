@@ -6,6 +6,7 @@ import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MapStruct translation utility specializing in state conversions across responsible type
@@ -66,7 +67,7 @@ public interface ResponsibleTypeMapper {
      * @return a stub domain model tracking the target index, or {@code null} if input is null
      */
     default ResponsibleType map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         ResponsibleType responsibleType = new ResponsibleType();

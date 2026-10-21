@@ -14,7 +14,7 @@ import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonSe
 import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.exception.BusinessRuleException;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing person-to-responsible-type assignments on the
@@ -98,7 +99,7 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     @Override
     @Transactional(readOnly = true)
     public Page<AppResponsibleOutputDTO> getAll(Long appResponsibleAuthorizedId, AppResponsibleCriteria criteria, Pageable pageable) {
-        if (criteria != null && StatusEnum.INACTIVE.getId().equals(criteria.getStatusId())) {
+        if (Objects.nonNull(criteria) && StatusEnum.INACTIVE.getId().equals(criteria.getStatusId())) {
             Page<AppResponsible> domainPage = appResponsibleRepository.findAll(appResponsibleAuthorizedId, criteria, pageable);
             return domainPage.map(appResponsibleMapper::toResponse);
         }
@@ -136,13 +137,13 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
         AppResponsible currentResponsibleHolder = appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(
                 inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getResponsibleTypeId());
 
-        if (currentResponsibleHolder != null) {
+        if (Objects.nonNull(currentResponsibleHolder)) {
             deactivate(currentResponsibleHolder, null);
         }
 
         AppResponsible model = appResponsibleMapper.toModelFromInput(inputDTO);
 
-        Dir3ValidationStatus dir3Status = Dir3ValidationStatus.resolveFromInputFlag(inputDTO.getDir3Status());
+        ValidationStatusEnum dir3Status = ValidationStatusEnum.resolveFromInputFlag(inputDTO.getDir3Status());
 
         Dir3Validation dir3Validation = checkDir3Validation(
                 inputDTO.getAppResponsibleAuthorizedId(), inputDTO.getPersonId(), dir3Status);
@@ -173,14 +174,14 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     public AppResponsibleOutputDTO update(Long id, AppResponsibleInputDTO inputDTO) {
         AppResponsible existing = appResponsibleRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
         }
 
         Utils.sanitize(inputDTO);
         inputDTO.setPersonalCaib(Boolean.TRUE.equals(inputDTO.getPersonalCaib()));
 
-        if (inputDTO.getPersonId() == null) {
+        if (Objects.isNull(inputDTO.getPersonId())) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_PERSON_DATA_REQUIRED);
         }
 
@@ -206,13 +207,13 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     @Override
     public void delete(Long id, AppResponsibleDeleteDTO dto) {
         AppResponsible existing = appResponsibleRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
         }
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_ACTIVE);
         }
-        deactivate(existing, dto != null ? dto.getObservation() : null);
+        deactivate(existing, Objects.nonNull(dto) ? dto.getObservation() : null);
     }
 
     /**
@@ -225,10 +226,10 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     @Override
     public AppResponsibleOutputDTO reactivate(Long id) {
         AppResponsible existing = appResponsibleRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_NOT_FOUND);
         }
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APPRESPONSIBLE_ACTIVE);
         }
         if (appResponsibleRepository.existsByAppResponsibleAuthorizedAndResponsibleTypeAndIdNot(
@@ -251,7 +252,7 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
     private AppResponsibleOutputDTO buildRow(Long appResponsibleAuthorizedId, ResponsibleType type) {
         AppResponsible existing = appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(
                 appResponsibleAuthorizedId, type.getId());
-        if (existing != null) {
+        if (Objects.nonNull(existing)) {
             return appResponsibleMapper.toResponse(existing);
         }
         AppResponsibleOutputDTO placeholder = new AppResponsibleOutputDTO();
@@ -270,23 +271,23 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
      * @return {@code true} if the row matches every provided filter
      */
     private boolean matchesCriteria(AppResponsibleOutputDTO row, AppResponsibleCriteria criteria) {
-        if (criteria == null) {
+        if (Objects.isNull(criteria)) {
             return true;
         }
-        if (criteria.getResponsibleTypeId() != null && !criteria.getResponsibleTypeId().equals(row.getResponsibleType().getId())) {
+        if (Objects.nonNull(criteria.getResponsibleTypeId()) && !criteria.getResponsibleTypeId().equals(row.getResponsibleType().getId())) {
             return false;
         }
-        if (criteria.getPersonId() != null && (row.getPerson() == null || !criteria.getPersonId().equals(row.getPerson().getId()))) {
+        if (Objects.nonNull(criteria.getPersonId()) && (Objects.isNull(row.getPerson()) || !criteria.getPersonId().equals(row.getPerson().getId()))) {
             return false;
         }
         String search = criteria.getSearch();
-        if (search != null && !search.isBlank()) {
+        if (Objects.nonNull(search) && !search.isBlank()) {
             String needle = search.trim().toLowerCase();
-            boolean typeMatches = row.getResponsibleType().getName() != null
+            boolean typeMatches = Objects.nonNull(row.getResponsibleType().getName())
                     && row.getResponsibleType().getName().toLowerCase().contains(needle);
-            boolean personMatches = row.getPerson() != null
-                    && ((row.getPerson().getFirstName() != null && row.getPerson().getFirstName().toLowerCase().contains(needle))
-                    || (row.getPerson().getLastName() != null && row.getPerson().getLastName().toLowerCase().contains(needle)));
+            boolean personMatches = Objects.nonNull(row.getPerson())
+                    && ((Objects.nonNull(row.getPerson().getFirstName()) && row.getPerson().getFirstName().toLowerCase().contains(needle))
+                    || (Objects.nonNull(row.getPerson().getLastName()) && row.getPerson().getLastName().toLowerCase().contains(needle)));
             return typeMatches || personMatches;
         }
         return true;
@@ -309,7 +310,7 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
      * person without a company
      */
     private Person getOrCreatePerson(AppResponsibleInputDTO inputDTO) {
-        if (inputDTO.getPersonId() != null) {
+        if (Objects.nonNull(inputDTO.getPersonId())) {
             return personService.getPersonById(inputDTO.getPersonId());
         }
         if (StringUtils.isBlank(inputDTO.getPersonFirstName())
@@ -335,7 +336,7 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
      * @param requestedStatus the DIR3 status computed by the caller, used only when nothing to share exists yet
      * @return the DIR3 validation to attach to the new assignment
      */
-    private Dir3Validation checkDir3Validation(Long appResponsibleAuthorizedId, Long personId, Dir3ValidationStatus requestedStatus) {
+    private Dir3Validation checkDir3Validation(Long appResponsibleAuthorizedId, Long personId, ValidationStatusEnum requestedStatus) {
         List<AppResponsible> siblingResponsibleAssignments =
                 appResponsibleRepository.findAllActiveByAppResponsibleAuthorizedAndPerson(appResponsibleAuthorizedId, personId);
         if (!siblingResponsibleAssignments.isEmpty()) {
@@ -343,7 +344,7 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
         }
         AppAuthorized existingAuthorized =
                 appAuthorizedRepository.findActiveByAppResponsibleAuthorizedAndPerson(appResponsibleAuthorizedId, personId);
-        if (existingAuthorized != null) {
+        if (Objects.nonNull(existingAuthorized)) {
             return existingAuthorized.getDir3Validation();
         }
         return dir3ValidationRepository.create(Dir3Validation.builder().dir3Status(requestedStatus).build());
@@ -361,7 +362,7 @@ public class AppResponsibleServiceFacadeBean implements AppResponsibleService {
      * @throws BusinessRuleException if the type requires Personal CAIB and {@code personalCaib} is {@code false}
      */
     private void requirePersonalCaibIfRequiredByType(ResponsibleType type, boolean personalCaib) {
-        if (type == null || !type.isRequiresPersonalCaib()) {
+        if (Objects.isNull(type) || !type.isRequiresPersonalCaib()) {
             return;
         }
         if (!personalCaib) {

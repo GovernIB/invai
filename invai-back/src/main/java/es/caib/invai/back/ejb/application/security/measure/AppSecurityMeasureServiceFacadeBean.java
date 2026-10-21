@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing application security measure entries linked to
@@ -87,7 +88,7 @@ public class AppSecurityMeasureServiceFacadeBean implements AppSecurityMeasureSe
         log.info("Facade: Initiating security validation rules check prior to executing transaction merge on ID: {}", id);
 
         AppSecurityMeasure existingModel = appSecurityMeasureRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_MEASURE_NOT_FOUND);
         }
 
@@ -109,11 +110,11 @@ public class AppSecurityMeasureServiceFacadeBean implements AppSecurityMeasureSe
         log.info("Facade: Evaluating infrastructure components prior to setting logical deletion properties for target: {}", id);
 
         AppSecurityMeasure existingModel = appSecurityMeasureRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_MEASURE_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_SECURITY_MEASURE_NOT_ACTIVE);
         }
 

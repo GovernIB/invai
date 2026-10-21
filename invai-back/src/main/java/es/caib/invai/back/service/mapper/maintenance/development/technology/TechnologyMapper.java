@@ -9,6 +9,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.maintenance.development.layer.LayerMapper;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Technology catalog database entities, business domain models, and API transfer schemas.
@@ -67,13 +69,6 @@ public interface TechnologyMapper {
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
-    /**
-     * Applies the changes from an inbound API request DTO onto an existing business domain model,
-     * leaving audit and identifier fields untouched.
-     *
-     * @param inputDTO the request payload with the new values
-     * @param model    the existing domain model to update in place
-     */
     void updateModelFromInput(TechnologyInputDTO inputDTO, @MappingTarget Technology model);
 
     /**
@@ -83,7 +78,7 @@ public interface TechnologyMapper {
      * @return an output DTO with only the ID set, or {@code null} if the value is {@code null}
      */
     default TechnologyOutputDTO map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         TechnologyOutputDTO technology = new TechnologyOutputDTO();

@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Infrastructure repository Adapter implementing the outbound port boundary
@@ -90,13 +91,13 @@ public class AppIntegrationConnectionRepositoryAdapter implements AppIntegration
 
         aud.setAppIntegrationConnectionId(entity.getId());
         aud.setAppIntegrationId(entity.getAppIntegration().getId());
-        aud.setApplicationId(entity.getApplication() != null ? entity.getApplication().getId() : null);
-        aud.setExternalSystemId(entity.getExternalSystem() != null ? entity.getExternalSystem().getId() : null);
+        aud.setApplicationId(Objects.nonNull(entity.getApplication()) ? entity.getApplication().getId() : null);
+        aud.setExternalSystemId(Objects.nonNull(entity.getExternalSystem()) ? entity.getExternalSystem().getId() : null);
         aud.setTechnologyId(entity.getTechnology().getId());
         aud.setUsername(entity.getUsername());
 
-        aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-        aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+        aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+        aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
         aud.setUpdatedAt(entity.getUpdatedAt());
         aud.setUpdatedBy(entity.getUpdatedBy());
         aud.setDeletedAt(entity.getDeletedAt());

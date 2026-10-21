@@ -5,13 +5,15 @@ import es.caib.invai.back.rest.dir3.UnidadRest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Objects;
+
 /**
  * MapStruct translation utility converting a raw DIR3CAIB tree node into its outbound
  * {@link AdmUnitOutputDTO} representation.
  *
  * @since 1.0.5
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", imports = Objects.class)
 public interface AdmUnitMapper {
 
     /**
@@ -23,7 +25,7 @@ public interface AdmUnitMapper {
      * @return the mapped output DTO
      */
     @Mapping(target = "code", source = "codigo")
-    @Mapping(target = "name", expression = "java(unidadRest.getDenominacionCooficial() != null ? unidadRest.getDenominacionCooficial() : unidadRest.getDenominacion())")
+    @Mapping(target = "name", expression = "java(Objects.nonNull(unidadRest.getDenominacionCooficial()) ?unidadRest.getDenominacionCooficial() : unidadRest.getDenominacion())")
     @Mapping(target = "parentCode", source = "codUnidadSuperior")
     @Mapping(target = "level", source = "nivelJerarquico")
     AdmUnitOutputDTO toResponse(UnidadRest unidadRest);

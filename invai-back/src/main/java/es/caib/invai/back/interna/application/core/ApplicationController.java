@@ -3,9 +3,10 @@ package es.caib.invai.back.interna.application.core;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.service.facade.application.core.ApplicationService;
-import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDetailOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
+import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,11 +75,11 @@ public class ApplicationController {
      * {@link #getAll}, which only ever returns the aggregate {@code incomplete} flag.
      *
      * @param id primary key of the application to fetch
-     * @return a {@link ResponseEntity} wrapping the mapped {@link ApplicationOutputDTO}, HTTP 200
+     * @return a {@link ResponseEntity} wrapping the mapped {@link ApplicationDetailOutputDTO}, HTTP 200
      * @throws BusinessRuleException if no application exists with the given ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApplicationOutputDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<ApplicationDetailOutputDTO> getById(@PathVariable Long id) {
         log.debug("REST: Fetching application by ID: {}", id);
         return ResponseEntity.ok(applicationService.getById(id));
     }
@@ -146,19 +147,22 @@ public class ApplicationController {
     }
 
     /**
-     * Audits every application in the inventory, checking each active responsible/authorized
-     * assignment's DIR3 against the owning application's administrative unit. Any assignment found
-     * to mismatch - and not already {@code MANUAL} or {@code NOT_APPLY} - is downgraded to
-     * {@code NOT_VALIDATED}. Each application's persisted {@code dir3Mismatch} flag is also refreshed
-     * to reflect its current real state ({@code true} if any active, Personal CAIB assignment
-     * mismatches now, {@code MANUAL} assignments never counting).
+     * Assigns to an already created application the roles Soffid has for it: those whose name starts
+     * with the application's prefix and an underscore. Each is assigned to the application's
+     * security anchor, with its data stored locally as Soffid reports it. Idempotent: roles the
+     * application already has an active assignment to are skipped, so calling it again only adds
+     * what Soffid has gained since, and no role is ever removed.
      *
-     * @return a {@link ResponseEntity} wrapping every application currently mismatching (not just
-     * ones that changed in this run), identified by ID and name, HTTP 200
+     * @param id primary key of the application whose prefix names the roles to assign
+     * @return a {@link ResponseEntity} wrapping the role assignments created by this call (empty if
+     * nothing new), HTTP 200
+     * @throws BusinessRuleException if no application exists with the given ID, it is deactivated, it
+     *                               has no security anchor, or Soffid can't be queried (HTTP 400; a
+     *                               Soffid timeout is reported as HTTP 504)
      */
-    @PutMapping("dir3-check-all")
-    public ResponseEntity<List<ApplicationDir3MismatchOutputDTO>> checkDir3MismatchForAllApplications() {
-        log.info("REST: Request to audit DIR3 mismatches across every application");
-        return ResponseEntity.ok(applicationService.checkDir3MismatchForAllApplications());
+    @PutMapping("assign-roles/{id}")
+    public ResponseEntity<List<AppRoleOutputDTO>> assignSoffidRoles(@PathVariable Long id) {
+        log.info("REST: Request to assign the Soffid roles named after the prefix of application ID: {}", id);
+        return ResponseEntity.ok(applicationService.assignSoffidRoles(id));
     }
 }

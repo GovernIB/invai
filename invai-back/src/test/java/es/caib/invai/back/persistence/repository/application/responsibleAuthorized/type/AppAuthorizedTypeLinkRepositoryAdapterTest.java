@@ -123,6 +123,24 @@ class AppAuthorizedTypeLinkRepositoryAdapterTest {
     }
 
     @Test
+    void findAllActiveByAppAuthorizedIdIn_mapsEveryEntryOfEveryAnchorInOneQuery() {
+        AppAuthorizedTypeLinkRepositoryAdapter adapter = buildAdapter();
+        AppAuthorizedTypeLinkEntity entity1 = new AppAuthorizedTypeLinkEntity();
+        AppAuthorizedTypeLinkEntity entity2 = new AppAuthorizedTypeLinkEntity();
+        AppAuthorizedTypeLink model1 = AppAuthorizedTypeLink.builder().id(1L).appAuthorizedId(7L).build();
+        AppAuthorizedTypeLink model2 = AppAuthorizedTypeLink.builder().id(2L).appAuthorizedId(8L).build();
+
+        when(appAuthorizedTypeLinkJPARepository.findAllByAppAuthorizedIdInAndDeletedAtIsNull(List.of(7L, 8L)))
+                .thenReturn(List.of(entity1, entity2));
+        when(appAuthorizedTypeLinkMapper.toModel(entity1)).thenReturn(model1);
+        when(appAuthorizedTypeLinkMapper.toModel(entity2)).thenReturn(model2);
+
+        List<AppAuthorizedTypeLink> result = adapter.findAllActiveByAppAuthorizedIdIn(List.of(7L, 8L));
+
+        assertEquals(List.of(model1, model2), result);
+    }
+
+    @Test
     void findAllActiveByAppAuthorizedId_emptyRepository_returnsEmptyList() {
         AppAuthorizedTypeLinkRepositoryAdapter adapter = buildAdapter();
         when(appAuthorizedTypeLinkJPARepository.findAllByAppAuthorizedIdAndDeletedAtIsNull(5L)).thenReturn(List.of());

@@ -1,6 +1,7 @@
 package es.caib.invai.api.interna.rest.soffid;
 
 import es.caib.invai.api.interna.config.SoffidConfig;
+import es.caib.invai.api.interna.exception.IntegrationTimeoutException;
 import es.caib.invai.api.interna.exception.IntegrationUnavailableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -54,6 +56,15 @@ class SoffidClientTest {
                 .exchangeFunction(exchangeFunction)
                 .build();
         ReflectionTestUtils.setField(client, "soffidWebClient", webClient);
+    }
+
+    @Test
+    void searchByEmail_noAnswerWithinTheConfiguredTimeout_throwsIntegrationTimeoutException() {
+        SoffidConfig soffidConfig = (SoffidConfig) ReflectionTestUtils.getField(client, "soffidConfig");
+        ReflectionTestUtils.setField(soffidConfig, "requestTimeoutSeconds", 1L);
+        wireWebClient(request -> Mono.never());
+
+        assertThrows(IntegrationTimeoutException.class, () -> client.searchByEmail("joan.puig@caib.es"));
     }
 
     private static final String ONE_RESULT_BODY = """
@@ -129,6 +140,41 @@ class SoffidClientTest {
         assertTrue(decodedUrl.contains("(fullName co 'Joan' or userName co 'Joan' or emailAddress co 'Joan')"), decodedUrl);
         assertTrue(decodedUrl.contains("(fullName co 'Fuster' or userName co 'Fuster' or emailAddress co 'Fuster')"), decodedUrl);
         assertTrue(decodedUrl.contains("active eq true"), decodedUrl);
+    }
+
+    @Test
+    void searchUsers_wordWithDollar_isMatchedAgainstTheUserNameOnly() {
+        String[] capturedUrl = new String[1];
+        wireWebClient(request -> {
+            capturedUrl[0] = request.url().toString();
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(ONE_RESULT_BODY)
+                    .build());
+        });
+
+        client.searchUsers("$inv", PageRequest.of(0, 20));
+
+        String decodedUrl = URLDecoder.decode(capturedUrl[0], StandardCharsets.UTF_8);
+        assertTrue(decodedUrl.contains("filter=userName co '$inv' and active eq true"), decodedUrl);
+        assertTrue(!decodedUrl.contains("fullName") && !decodedUrl.contains("emailAddress"), decodedUrl);
+    }
+
+    @Test
+    void searchUsers_wordWithDollarAndAnotherWord_onlyTheDollarWordIsLimitedToTheUserName() {
+        String[] capturedUrl = new String[1];
+        wireWebClient(request -> {
+            capturedUrl[0] = request.url().toString();
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(ONE_RESULT_BODY)
+                    .build());
+        });
+
+        client.searchUsers("$inv Integracio", PageRequest.of(0, 20));
+
+        String decodedUrl = URLDecoder.decode(capturedUrl[0], StandardCharsets.UTF_8);
+        assertTrue(decodedUrl.contains("userName co '$inv' and (fullName co 'Integracio' or userName co 'Integracio' or emailAddress co 'Integracio') and active eq true"), decodedUrl);
     }
 
     @Test
@@ -608,5 +654,179 @@ class SoffidClientTest {
         wireWebClient(request -> Mono.just(ClientResponse.create(HttpStatus.UNAUTHORIZED).build()));
 
         assertThrows(IntegrationUnavailableException.class, () -> client.resolveGroupDir3("sgaip"));
+    }
+
+    // ------------------------------------------------------------------
+    // bulk lookups
+    // ------------------------------------------------------------------
+
+    private static final String TWO_USERS_BODY = """
+            {
+              "totalResults": 85710,
+              "Resources": [
+                {"id": 1, "userName": "u00001", "emailAddress": "ana@caib.es", "active": true, "primaryGroup": "sgaip"},
+                {"id": 2, "userName": "u00002", "emailAddress": "joan@caib.es", "active": true, "primaryGroup": "dgtic"}
+              ]
+            }
+            """;
+
+    @Test
+    void getUsersByEmails_returnsTheUsersFoundIgnoringTheUnreliableTotal() {
+        wireWebClient(request -> Mono.just(ClientResponse.create(HttpStatus.OK)
+                .header("Content-Type", "application/json")
+                .body(TWO_USERS_BODY)
+                .build()));
+
+        List<SoffidUser> result = client.getUsersByEmails(List.of("ana@caib.es", "joan@caib.es", "ausente@caib.es"));
+
+        assertEquals(2, result.size());
+        assertEquals("sgaip", result.get(0).getPrimaryGroup());
+        assertEquals("joan@caib.es", result.get(1).getEmailAddress());
+    }
+
+    @Test
+    void getUsersByEmails_sendsOneOrClausePerAddressRestrictedToActiveUsersAndCountMatchingTheBatch() {
+        String[] capturedUrl = new String[1];
+        wireWebClient(request -> {
+            capturedUrl[0] = request.url().toString();
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(TWO_USERS_BODY)
+                    .build());
+        });
+
+        client.getUsersByEmails(List.of("ana@caib.es", "joan@caib.es", "o'brien@caib.es"));
+
+        String decodedUrl = URLDecoder.decode(capturedUrl[0], StandardCharsets.UTF_8);
+        assertTrue(decodedUrl.contains("(emailAddress eq 'ana@caib.es' or emailAddress eq 'joan@caib.es' "
+                + "or emailAddress eq 'o\\'brien@caib.es') and active eq true"), decodedUrl);
+        assertTrue(capturedUrl[0].contains("count=3"), capturedUrl[0]);
+        assertTrue(capturedUrl[0].contains("startIndex=1"), capturedUrl[0]);
+    }
+
+    @Test
+    void getUsersByEmails_aPlusSignInAnAddress_isEncodedSoSoffidDoesNotReadItAsASpace() {
+        String[] capturedUrl = new String[1];
+        wireWebClient(request -> {
+            capturedUrl[0] = request.url().toString();
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(TWO_USERS_BODY)
+                    .build());
+        });
+
+        client.getUsersByEmails(List.of("ana+tag@caib.es"));
+
+        assertTrue(capturedUrl[0].contains("ana%2Btag"), capturedUrl[0]);
+    }
+
+    @Test
+    void getUsersByEmails_emptyAnswer_returnsEmptyList() {
+        wireWebClient(request -> Mono.just(ClientResponse.create(HttpStatus.OK)
+                .header("Content-Type", "application/json")
+                .body("{\"totalResults\": 0}")
+                .build()));
+
+        assertEquals(List.of(), client.getUsersByEmails(List.of("ausente@caib.es")));
+    }
+
+    @Test
+    void getUsersByEmails_unauthorized_throwsIntegrationUnavailableException() {
+        wireWebClient(request -> Mono.just(ClientResponse.create(HttpStatus.UNAUTHORIZED).build()));
+
+        assertThrows(IntegrationUnavailableException.class, () -> client.getUsersByEmails(List.of("ana@caib.es")));
+    }
+
+    @Test
+    void getUsersByEmails_noAnswerWithinTheConfiguredTimeout_throwsIntegrationTimeoutException() {
+        SoffidConfig soffidConfig = (SoffidConfig) ReflectionTestUtils.getField(client, "soffidConfig");
+        ReflectionTestUtils.setField(soffidConfig, "requestTimeoutSeconds", 1L);
+        wireWebClient(request -> Mono.never());
+
+        assertThrows(IntegrationTimeoutException.class, () -> client.getUsersByEmails(List.of("ana@caib.es")));
+    }
+
+    private static String groupsBody(int count, int firstIndex, String dir3Prefix) {
+        StringBuilder resources = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            if (i > 0) {
+                resources.append(',');
+            }
+            resources.append("{\"id\": ").append(firstIndex + i).append(", \"name\": \"g").append(firstIndex + i)
+                    .append("\", \"attributes\": {\"DIR3\": \"").append(dir3Prefix).append(firstIndex + i).append(" \"}}");
+        }
+        return "{\"totalResults\": 3619, \"Resources\": [" + resources + "]}";
+    }
+
+    @Test
+    void getGroupsDir3_asksOnlyForTheGroupsCarryingADir3AndReturnsThemTrimmedByName() {
+        String[] capturedUrl = new String[1];
+        wireWebClient(request -> {
+            capturedUrl[0] = request.url().toString();
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(groupsBody(2, 1, "A0402"))
+                    .build());
+        });
+
+        Map<String, String> result = client.getGroupsDir3();
+
+        assertEquals(Map.of("g1", "A04021", "g2", "A04022"), result);
+        String decodedUrl = URLDecoder.decode(capturedUrl[0], StandardCharsets.UTF_8);
+        assertTrue(decodedUrl.contains("filter=attributes.DIR3 pr"), decodedUrl);
+        assertTrue(capturedUrl[0].contains("count=1000"), capturedUrl[0]);
+    }
+
+    @Test
+    void getGroupsDir3_ignoresGroupsWithABlankDir3OrNoAttributes() {
+        wireWebClient(request -> Mono.just(ClientResponse.create(HttpStatus.OK)
+                .header("Content-Type", "application/json")
+                .body("""
+                        {"Resources": [
+                          {"name": "sgaip", "attributes": {"DIR3": "A04027054 "}},
+                          {"name": "blank", "attributes": {"DIR3": "  "}},
+                          {"name": "none"},
+                          {"attributes": {"DIR3": "A0"}}
+                        ]}
+                        """)
+                .build()));
+
+        assertEquals(Map.of("sgaip", "A04027054"), client.getGroupsDir3());
+    }
+
+    @Test
+    void getGroupsDir3_aFullPage_isFollowedByTheNextOneUntilAShortPage() {
+        List<String> startIndexes = new ArrayList<>();
+        wireWebClient(request -> {
+            String url = request.url().toString();
+            String startIndex = url.replaceAll(".*startIndex=(\\d+).*", "$1");
+            startIndexes.add(startIndex);
+            String body = "1".equals(startIndex) ? groupsBody(1000, 1, "A") : groupsBody(5, 1001, "A");
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(body)
+                    .build());
+        });
+
+        Map<String, String> result = client.getGroupsDir3();
+
+        assertEquals(List.of("1", "1001"), startIndexes);
+        assertEquals(1005, result.size());
+    }
+
+    @Test
+    void getGroupsDir3_unauthorized_throwsIntegrationUnavailableException() {
+        wireWebClient(request -> Mono.just(ClientResponse.create(HttpStatus.UNAUTHORIZED).build()));
+
+        assertThrows(IntegrationUnavailableException.class, () -> client.getGroupsDir3());
+    }
+
+    @Test
+    void getGroupsDir3_noAnswerWithinTheConfiguredTimeout_throwsIntegrationTimeoutException() {
+        SoffidConfig soffidConfig = (SoffidConfig) ReflectionTestUtils.getField(client, "soffidConfig");
+        ReflectionTestUtils.setField(soffidConfig, "requestTimeoutSeconds", 1L);
+        wireWebClient(request -> Mono.never());
+
+        assertThrows(IntegrationTimeoutException.class, () -> client.getGroupsDir3());
     }
 }

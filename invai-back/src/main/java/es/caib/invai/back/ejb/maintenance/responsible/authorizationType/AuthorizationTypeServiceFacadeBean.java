@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative AuthorizationTypes.
@@ -50,7 +51,7 @@ public class AuthorizationTypeServiceFacadeBean implements AuthorizationTypeServ
         log.debug("Facade: Fetching authorization type by ID: {}", id);
         AuthorizationType authorizationType = authorizationTypeRepository.findById(id);
 
-        if (authorizationType == null) {
+        if (Objects.isNull(authorizationType)) {
             throw new BusinessRuleException(Constants.ERR_AUTHORIZATIONTYPE_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class AuthorizationTypeServiceFacadeBean implements AuthorizationTypeServ
         log.info("Facade: Updating authorization type with ID: {}", id);
 
         AuthorizationType existing = authorizationTypeRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_AUTHORIZATIONTYPE_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class AuthorizationTypeServiceFacadeBean implements AuthorizationTypeServ
         log.info("Facade: Logically deleting authorization type with ID: {}", id);
         AuthorizationType existing = authorizationTypeRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_AUTHORIZATIONTYPE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_AUTHORIZATIONTYPE_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class AuthorizationTypeServiceFacadeBean implements AuthorizationTypeServ
         log.info("Facade: Reactivating authorization type with ID: {}", id);
         AuthorizationType existing = authorizationTypeRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_AUTHORIZATIONTYPE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_AUTHORIZATIONTYPE_ACTIVE);
         }
 

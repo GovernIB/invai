@@ -6,6 +6,7 @@ import es.caib.invai.back.service.model.catalog.modality.Modality;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MapStruct translation utility specializing in state conversions across development modality
@@ -64,7 +65,7 @@ public interface ModalityMapper {
      * @return a disconnected modality structure stub tracking the configuration reference ID, or {@code null} if absent
      */
     default Modality map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         Modality modality = new Modality();

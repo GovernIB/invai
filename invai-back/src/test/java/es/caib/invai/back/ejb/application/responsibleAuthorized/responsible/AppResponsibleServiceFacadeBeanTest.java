@@ -17,7 +17,7 @@ import es.caib.invai.back.service.model.application.responsibleAuthorized.author
 import es.caib.invai.back.service.model.application.responsibleAuthorized.core.AppResponsibleAuthorized;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
@@ -90,7 +90,7 @@ class AppResponsibleServiceFacadeBeanTest {
         responsibleType.setId(20L);
         Person person = new Person();
         person.setId(10L);
-        Dir3Validation dir3Validation = Dir3Validation.builder().id(500L).dir3Status(Dir3ValidationStatus.NOT_APPLY).build();
+        Dir3Validation dir3Validation = Dir3Validation.builder().id(500L).dir3Status(ValidationStatusEnum.NOT_APPLY).build();
 
         activeAppResponsible = new AppResponsible();
         activeAppResponsible.setId(1L);
@@ -281,8 +281,8 @@ class AppResponsibleServiceFacadeBeanTest {
 
         ArgumentCaptor<Dir3Validation> captor = ArgumentCaptor.forClass(Dir3Validation.class);
         verify(dir3ValidationRepository).create(captor.capture());
-        assertEquals(Dir3ValidationStatus.VALIDATED, captor.getValue().getDir3Status());
-        assertEquals(Dir3ValidationStatus.VALIDATED, model.getDir3Validation().getDir3Status());
+        assertEquals(ValidationStatusEnum.VALIDATED, captor.getValue().getDir3Status());
+        assertEquals(ValidationStatusEnum.VALIDATED, model.getDir3Validation().getDir3Status());
         verify(personService, never()).checkDir3(any(), any());
     }
 
@@ -292,7 +292,7 @@ class AppResponsibleServiceFacadeBeanTest {
         AppResponsible model = new AppResponsible();
         AppResponsible saved = new AppResponsible();
         AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        Dir3Validation sharedDir3Validation = Dir3Validation.builder().id(500L).dir3Status(Dir3ValidationStatus.MANUAL).build();
+        Dir3Validation sharedDir3Validation = Dir3Validation.builder().id(500L).dir3Status(ValidationStatusEnum.MANUAL).build();
         AppResponsible siblingAssignment = new AppResponsible();
         siblingAssignment.setDir3Validation(sharedDir3Validation);
         when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 21L)).thenReturn(null);
@@ -314,7 +314,7 @@ class AppResponsibleServiceFacadeBeanTest {
         AppResponsible model = new AppResponsible();
         AppResponsible saved = new AppResponsible();
         AppResponsibleOutputDTO response = new AppResponsibleOutputDTO();
-        Dir3Validation sharedDir3Validation = Dir3Validation.builder().id(500L).dir3Status(Dir3ValidationStatus.VALIDATED).build();
+        Dir3Validation sharedDir3Validation = Dir3Validation.builder().id(500L).dir3Status(ValidationStatusEnum.VALIDATED).build();
         AppAuthorized existingAuthorized = AppAuthorized.builder().dir3Validation(sharedDir3Validation).build();
         when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(40L, 20L)).thenReturn(null);
         when(appResponsibleRepository.findAllActiveByAppResponsibleAuthorizedAndPerson(40L, 10L)).thenReturn(List.of());

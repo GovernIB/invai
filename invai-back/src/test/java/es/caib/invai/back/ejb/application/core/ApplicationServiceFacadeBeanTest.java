@@ -1,8 +1,10 @@
 package es.caib.invai.back.ejb.application.core;
 
+import es.caib.invai.back.service.facade.application.security.role.AppRoleService;
+import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.exception.BusinessRuleException;
-import es.caib.invai.back.interna.application.core.DTO.ApplicationDir3MismatchOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationInputDTO;
+import es.caib.invai.back.interna.application.core.DTO.ApplicationDetailOutputDTO;
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
 import es.caib.invai.back.persistence.repository.application.accessibility.AppAccessibilityRepository;
 import es.caib.invai.back.persistence.repository.application.data.AppDataRepository;
@@ -13,7 +15,7 @@ import es.caib.invai.back.interna.application.security.risk.DTO.AppSecurityRiskO
 import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebContextOutputDTO;
 import es.caib.invai.back.interna.application.system_database.database.DTO.AppDatabaseOutputDTO;
 import es.caib.invai.back.interna.application.system_database.system.DTO.AppSystemOutputDTO;
-import es.caib.invai.back.interna.application.integration.connection.DTO.AppIntegrationConnectionOutputDTO;
+import es.caib.invai.back.service.model.application.integration.connection.AppIntegrationConnection;
 import es.caib.invai.back.persistence.repository.application.development.core.AppDevelopmentRepository;
 import es.caib.invai.back.persistence.repository.application.system_database.core.AppInformationSystemDbRepository;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.core.AppResponsibleAuthorizedRepository;
@@ -30,7 +32,7 @@ import es.caib.invai.back.service.facade.application.security.risk.AppSecurityRi
 import es.caib.invai.back.service.facade.application.security.webContext.AppWebContextService;
 import es.caib.invai.back.service.facade.application.system_database.database.AppDatabaseService;
 import es.caib.invai.back.service.facade.application.system_database.system.AppSystemService;
-import es.caib.invai.back.service.facade.application.integration.connection.AppIntegrationConnectionService;
+import es.caib.invai.back.persistence.repository.application.integration.connection.AppIntegrationConnectionRepository;
 import es.caib.invai.back.service.facade.catalog.admUnit.AdmUnitService;
 import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
@@ -44,7 +46,7 @@ import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.D
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.responsible.AppResponsible;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.authorized.AppAuthorized;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.service.model.catalog.responsibleType.ResponsibleType;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.service.model.catalog.modality.Modality;
@@ -132,7 +134,7 @@ class ApplicationServiceFacadeBeanTest {
     private AppIntegrationRepository appIntegrationRepository;
 
     @Mock
-    private AppIntegrationConnectionService appIntegrationConnectionService;
+    private AppIntegrationConnectionRepository appIntegrationConnectionRepository;
 
     @Mock
     private AppWebContextService appWebContextService;
@@ -151,6 +153,9 @@ class ApplicationServiceFacadeBeanTest {
 
     @Mock
     private Dir3ValidationRepository dir3ValidationRepository;
+
+    @Mock
+    private AppRoleService appRoleService;
 
     @InjectMocks
     private ApplicationServiceFacadeBean applicationServiceFacadeBean;
@@ -177,7 +182,7 @@ class ApplicationServiceFacadeBeanTest {
         appResponsibleAuthorized.setId(9L);
         AppSecurity appSecurity = new AppSecurity();
         appSecurity.setId(11L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(infoDb);
@@ -189,47 +194,47 @@ class ApplicationServiceFacadeBeanTest {
         when(appSecurityRiskService.getAll(eq(11L), any(), any())).thenReturn(Page.empty());
         when(appSystemService.getAll(eq(5L), any(), any())).thenReturn(Page.empty());
         when(appDatabaseService.getAll(eq(5L), any(), any())).thenReturn(Page.empty());
-        when(applicationMapper.toResponse(eq(activeApplication), eq(infoDb), eq(development), eq(appResponsibleAuthorized), eq(appSecurity), eq(null),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(infoDb), eq(development), eq(appResponsibleAuthorized), eq(appSecurity), eq(null),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
 
     @Test
     void getById_found_noInfoDbOrDevelopment_returnsMappedResponseWithNulls() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(null);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(null);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), eq(null), eq(null), eq(null), eq(null), eq(null),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(null), eq(null), eq(null), eq(null), eq(null),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
 
     @Test
     void getById_everyAnchorMissing_setsIncompleteTrue() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(null);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(null);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), eq(null), eq(null), eq(null), eq(null), eq(null),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(null), eq(null), eq(null), eq(null), eq(null),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertTrue(result.isIncomplete());
     }
@@ -257,7 +262,7 @@ class ApplicationServiceFacadeBeanTest {
         accessibility.setExpireDate(LocalDateTime.now());
         AppIntegration appIntegration = new AppIntegration();
         appIntegration.setId(13L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(infoDb);
@@ -272,13 +277,13 @@ class ApplicationServiceFacadeBeanTest {
         when(appEnsClassificationService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppEnsClassificationOutputDTO())));
         when(appSecurityRiskService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppSecurityRiskOutputDTO())));
         when(appSystemService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppSystemOutputDTO())));
-        when(appIntegrationConnectionService.getAll(eq(13L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppIntegrationConnectionOutputDTO())));
+        when(appIntegrationConnectionRepository.findAll(eq(13L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppIntegrationConnection())));
         when(appDatabaseService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppDatabaseOutputDTO())));
-        when(applicationMapper.toResponse(eq(activeApplication), eq(infoDb), eq(development), eq(appResponsibleAuthorized), eq(appSecurity), eq(accessibility),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(infoDb), eq(development), eq(appResponsibleAuthorized), eq(appSecurity), eq(accessibility),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertFalse(result.isIncomplete());
     }
@@ -288,29 +293,29 @@ class ApplicationServiceFacadeBeanTest {
         activeApplication.setAdmUnitCode("DGSAN");
         AdmUnitOutputDTO admUnit = new AdmUnitOutputDTO();
         admUnit.setCode("DGSAN");
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
         when(admUnitService.resolveByCode("DGSAN")).thenReturn(admUnit);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertSame(admUnit, result.getAdmUnit());
     }
 
     @Test
     void getById_noAdmUnitLinked_leavesAdmUnitNull() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertNull(result.getAdmUnit());
     }
@@ -368,7 +373,7 @@ class ApplicationServiceFacadeBeanTest {
         infoDb.setId(5L);
         AppIntegration appIntegration = new AppIntegration();
         appIntegration.setId(13L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(infoDb);
@@ -386,10 +391,10 @@ class ApplicationServiceFacadeBeanTest {
         when(appSystemService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppSystemOutputDTO())));
         when(appDatabaseService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppDatabaseOutputDTO())));
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(appIntegration);
-        when(appIntegrationConnectionService.getAll(eq(13L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppIntegrationConnectionOutputDTO())));
-        when(applicationMapper.toResponse(activeApplication, infoDb, development, anchor, appSecurity, appAccessibility, false, false, false, false, false, false, false, false)).thenReturn(expected);
+        when(appIntegrationConnectionRepository.findAll(eq(13L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppIntegrationConnection())));
+        when(applicationMapper.toDetailResponse(activeApplication, infoDb, development, anchor, appSecurity, appAccessibility, false, false, false, false, false, false, false, false)).thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -399,7 +404,7 @@ class ApplicationServiceFacadeBeanTest {
         AppResponsibleAuthorized anchor = new AppResponsibleAuthorized();
         anchor.setId(9L);
         AppDevelopment development = completeDevelopment();
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(development);
@@ -408,10 +413,10 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(9L, 1L)).thenReturn(new AppResponsible());
         when(appResponsibleRepository.findActiveByAppResponsibleAuthorizedAndResponsibleType(9L, 2L)).thenReturn(null);
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of(new AppAuthorized()));
-        when(applicationMapper.toResponse(eq(activeApplication), any(), eq(development), eq(anchor), eq(null), eq(null), eq(false), eq(true), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true)))
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), eq(development), eq(anchor), eq(null), eq(null), eq(false), eq(true), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -421,17 +426,17 @@ class ApplicationServiceFacadeBeanTest {
         AppResponsibleAuthorized anchor = new AppResponsibleAuthorized();
         anchor.setId(9L);
         AppDevelopment development = completeDevelopment();
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(development);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
         when(responsibleTypeRepository.findAll()).thenReturn(List.of());
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(applicationMapper.toResponse(eq(activeApplication), any(), eq(development), eq(anchor), eq(null), eq(null), eq(false), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), eq(development), eq(anchor), eq(null), eq(null), eq(false), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -439,15 +444,15 @@ class ApplicationServiceFacadeBeanTest {
     @Test
     void getById_noAppResponsibleAuthorizedAnchor_bothResponsibleFlagsTrue() {
         AppDevelopment development = completeDevelopment();
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(development);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), eq(development), eq(null), eq(null), eq(null), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), eq(development), eq(null), eq(null), eq(null), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
         verify(responsibleTypeRepository, never()).findAll();
@@ -456,15 +461,15 @@ class ApplicationServiceFacadeBeanTest {
 
     @Test
     void getById_missingDevelopmentRecord_missingDevelopmentFieldsTrue() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(null);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), eq(null), eq(null), eq(null), eq(null), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), eq(null), eq(null), eq(null), eq(null), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -473,15 +478,15 @@ class ApplicationServiceFacadeBeanTest {
     void getById_developmentMissingOneRequiredField_missingDevelopmentFieldsTrue() {
         AppDevelopment development = completeDevelopment();
         development.setCode(null);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(development);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), eq(development), eq(null), eq(null), eq(null), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), eq(development), eq(null), eq(null), eq(null), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -492,32 +497,32 @@ class ApplicationServiceFacadeBeanTest {
         development.setObservation(null);
         AppResponsibleAuthorized anchor = new AppResponsibleAuthorized();
         anchor.setId(9L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appDevelopmentRepository.findByApplicationId(1L)).thenReturn(development);
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
         when(responsibleTypeRepository.findAll()).thenReturn(List.of());
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of(new AppAuthorized()));
-        when(applicationMapper.toResponse(eq(activeApplication), any(), eq(development), eq(anchor), eq(null), eq(null), eq(false), eq(false), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true)))
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), eq(development), eq(anchor), eq(null), eq(null), eq(false), eq(false), eq(false), eq(true), eq(true), eq(true), eq(true), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
 
     @Test
     void getById_noAccessibilityRecord_missingAccessibilityFieldsTrue() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), eq(true), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -526,15 +531,15 @@ class ApplicationServiceFacadeBeanTest {
     void getById_accessibilityMissingOneRequiredField_missingAccessibilityFieldsTrue() {
         AppAccessibility accessibility = completeAccessibility();
         accessibility.setPublicUrl(null);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(accessibility);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), eq(true), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -544,15 +549,15 @@ class ApplicationServiceFacadeBeanTest {
         AppAccessibility accessibility = completeAccessibility();
         accessibility.setMobileApplication(false);
         accessibility.setMobileApplicationName(null);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(accessibility);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), eq(false), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -562,15 +567,15 @@ class ApplicationServiceFacadeBeanTest {
         AppAccessibility accessibility = completeAccessibility();
         accessibility.setMobileApplication(true);
         accessibility.setMobileApplicationName(null);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(accessibility);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), eq(true), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -580,30 +585,30 @@ class ApplicationServiceFacadeBeanTest {
         AppAccessibility accessibility = completeAccessibility();
         accessibility.setNonAccessibleContent(null);
         accessibility.setObservations(null);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(accessibility);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), eq(false), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
 
     @Test
     void getById_noSecurityAnchor_missingSecurityDataTrue() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), eq(null), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), eq(null), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(true), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
         verify(appWebContextService, never()).getAll(any(), any(), any());
@@ -613,18 +618,18 @@ class ApplicationServiceFacadeBeanTest {
     void getById_securityMissingWebContext_missingSecurityDataTrue() {
         AppSecurity appSecurity = new AppSecurity();
         appSecurity.setId(11L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(appSecurity);
         when(appWebContextService.getAll(eq(11L), any(), any())).thenReturn(Page.empty());
         when(appEnsClassificationService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppEnsClassificationOutputDTO())));
         when(appSecurityRiskService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppSecurityRiskOutputDTO())));
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), eq(appSecurity), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), eq(appSecurity), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(true), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -633,33 +638,33 @@ class ApplicationServiceFacadeBeanTest {
     void getById_securityAllThreeChildTablesPresent_missingSecurityDataFalse() {
         AppSecurity appSecurity = new AppSecurity();
         appSecurity.setId(11L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(appSecurity);
         when(appWebContextService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppWebContextOutputDTO())));
         when(appEnsClassificationService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppEnsClassificationOutputDTO())));
         when(appSecurityRiskService.getAll(eq(11L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppSecurityRiskOutputDTO())));
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), eq(appSecurity), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), eq(appSecurity), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(false), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
 
     @Test
     void getById_noInformationSystemDbAnchor_missingSystemsAndDatabasesTrue() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), eq(null), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(null), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(true), eq(true), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
         verify(appSystemService, never()).getAll(any(), any(), any());
@@ -670,17 +675,17 @@ class ApplicationServiceFacadeBeanTest {
     void getById_noActiveSystemLink_missingSystemsTrueDatabasesFalse() {
         AppInformationSystemDb infoDb = new AppInformationSystemDb();
         infoDb.setId(5L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(infoDb);
         when(appSystemService.getAll(eq(5L), any(), any())).thenReturn(Page.empty());
         when(appDatabaseService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppDatabaseOutputDTO())));
-        when(applicationMapper.toResponse(eq(activeApplication), eq(infoDb), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(infoDb), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(true), eq(false), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -689,51 +694,51 @@ class ApplicationServiceFacadeBeanTest {
     void getById_activeSystemAndDatabaseLinksPresent_bothFlagsFalse() {
         AppInformationSystemDb infoDb = new AppInformationSystemDb();
         infoDb.setId(5L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appInformationSystemDbRepository.findByApplicationId(1L)).thenReturn(infoDb);
         when(appSystemService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppSystemOutputDTO())));
         when(appDatabaseService.getAll(eq(5L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppDatabaseOutputDTO())));
-        when(applicationMapper.toResponse(eq(activeApplication), eq(infoDb), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), eq(infoDb), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(false), eq(false), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
 
     @Test
     void getById_noIntegrationAnchor_missingIntegrationDataTrue() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
-        verify(appIntegrationConnectionService, never()).getAll(any(), any(), any());
+        verify(appIntegrationConnectionRepository, never()).findAll(any(), any(), any());
     }
 
     @Test
     void getById_integrationHasNoActiveConnection_missingIntegrationDataTrue() {
         AppIntegration appIntegration = new AppIntegration();
         appIntegration.setId(13L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(appIntegration);
-        when(appIntegrationConnectionService.getAll(eq(13L), any(), any())).thenReturn(Page.empty());
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(appIntegrationConnectionRepository.findAll(eq(13L), any(), any())).thenReturn(Page.empty());
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(true)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -742,16 +747,16 @@ class ApplicationServiceFacadeBeanTest {
     void getById_integrationHasActiveConnection_missingIntegrationDataFalse() {
         AppIntegration appIntegration = new AppIntegration();
         appIntegration.setId(13L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(appIntegration);
-        when(appIntegrationConnectionService.getAll(eq(13L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppIntegrationConnectionOutputDTO())));
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(appIntegrationConnectionRepository.findAll(eq(13L), any(), any())).thenReturn(new PageImpl<>(List.of(new AppIntegrationConnection())));
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), eq(false)))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(expected, result);
     }
@@ -760,31 +765,31 @@ class ApplicationServiceFacadeBeanTest {
     void getById_setsAppIntegrationIdFromIntegrationAnchor() {
         AppIntegration appIntegration = new AppIntegration();
         appIntegration.setId(13L);
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(appIntegration);
-        when(appIntegrationConnectionService.getAll(eq(13L), any(), any())).thenReturn(Page.empty());
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(appIntegrationConnectionRepository.findAll(eq(13L), any(), any())).thenReturn(Page.empty());
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertEquals(13L, result.getAppIntegrationId());
     }
 
     @Test
     void getById_noIntegrationAnchor_leavesAppIntegrationIdNull() {
-        ApplicationOutputDTO expected = new ApplicationOutputDTO();
+        ApplicationDetailOutputDTO expected = new ApplicationDetailOutputDTO();
 
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(null);
-        when(applicationMapper.toResponse(eq(activeApplication), any(), any(), any(), any(), any(),
+        when(applicationMapper.toDetailResponse(eq(activeApplication), any(), any(), any(), any(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(expected);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.getById(1L);
+        ApplicationDetailOutputDTO result = applicationServiceFacadeBean.getById(1L);
 
         assertNull(result.getAppIntegrationId());
     }
@@ -859,20 +864,18 @@ class ApplicationServiceFacadeBeanTest {
         when(applicationMapper.toResponse(activeApplication)).thenReturn(mapped);
         when(admUnitService.getAdmUnitsByCodes(any())).thenReturn(Collections.emptyMap());
 
-        Page<ApplicationOutputDTO> result = applicationServiceFacadeBean.getAll(criteria, pageable);
+        applicationServiceFacadeBean.getAll(criteria, pageable);
 
         assertEquals(List.of(1L), criteria.getIncompleteApplicationIds());
-        assertTrue(result.getContent().get(0).isIncomplete());
     }
 
     @Test
-    void getAll_noIncompleteFilter_checksOnlyTheReturnedPageNotEveryApplication() {
+    void getAll_noIncompleteFilter_doesNotCheckTheCompletenessOfAnyApplication() {
         ApplicationCriteria criteria = new ApplicationCriteria();
         Pageable pageable = PageRequest.of(0, 10);
         Application other = new Application();
         other.setId(2L);
-        // Neither application's anchors are stubbed, so both come back incomplete - the point of
-        // this test is that only the 2 returned rows are checked, not the whole table.
+        // The list rows carry no completeness data, so no application's tabs are looked at.
         Page<Application> domainPage = new PageImpl<>(List.of(activeApplication, other));
         ApplicationOutputDTO mappedFirst = new ApplicationOutputDTO();
         ApplicationOutputDTO mappedSecond = new ApplicationOutputDTO();
@@ -884,11 +887,11 @@ class ApplicationServiceFacadeBeanTest {
 
         Page<ApplicationOutputDTO> result = applicationServiceFacadeBean.getAll(criteria, pageable);
 
+        assertEquals(2, result.getContent().size());
         assertNull(criteria.getIncompleteApplicationIds());
-        List<ApplicationOutputDTO> content = result.getContent();
-        assertTrue(content.get(0).isIncomplete());
-        assertTrue(content.get(1).isIncomplete());
         verify(applicationRepository, never()).findAll(isNull(), any());
+        verify(appDevelopmentRepository, never()).findByApplicationId(any());
+        verify(appInformationSystemDbRepository, never()).findByApplicationId(any());
     }
 
     private ApplicationInputDTO buildInputDTO() {
@@ -946,7 +949,7 @@ class ApplicationServiceFacadeBeanTest {
         AppIntegration savedAppIntegration = new AppIntegration();
         savedAppIntegration.setId(15L);
         when(appIntegrationRepository.create(any(AppIntegration.class))).thenReturn(savedAppIntegration);
-        when(applicationMapper.toResponse(saved, savedInfoDb, savedDev, savedAppResponsibleAuthorized, savedAppSecurity, savedAppAccessibility)).thenReturn(response);
+        when(applicationMapper.toResponse(saved)).thenReturn(response);
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.create(inputDTO);
 
@@ -976,7 +979,6 @@ class ApplicationServiceFacadeBeanTest {
         ArgumentCaptor<AppIntegration> appIntegrationCaptor = ArgumentCaptor.forClass(AppIntegration.class);
         verify(appIntegrationRepository).create(appIntegrationCaptor.capture());
         assertEquals(saved, appIntegrationCaptor.getValue().getApplication());
-        assertEquals(15L, result.getAppIntegrationId());
     }
 
     @Test
@@ -994,7 +996,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.create(any(AppResponsibleAuthorized.class))).thenReturn(new AppResponsibleAuthorized());
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(new AppSecurity());
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(new AppAccessibility());
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(new ApplicationOutputDTO());
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
 
         applicationServiceFacadeBean.create(inputDTO);
 
@@ -1047,7 +1049,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.create(any(AppResponsibleAuthorized.class))).thenReturn(new AppResponsibleAuthorized());
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(new AppSecurity());
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(new AppAccessibility());
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(new ApplicationOutputDTO());
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.create(inputDTO);
 
@@ -1075,7 +1077,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.create(any(AppResponsibleAuthorized.class))).thenReturn(new AppResponsibleAuthorized());
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(new AppSecurity());
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(new AppAccessibility());
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(new ApplicationOutputDTO());
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.create(inputDTO);
 
@@ -1096,7 +1098,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.create(any(AppResponsibleAuthorized.class))).thenReturn(new AppResponsibleAuthorized());
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(new AppSecurity());
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(new AppAccessibility());
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(new ApplicationOutputDTO());
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.create(inputDTO);
 
@@ -1166,7 +1168,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.create(any(AppResponsibleAuthorized.class))).thenReturn(new AppResponsibleAuthorized());
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(new AppSecurity());
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(new AppAccessibility());
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(new ApplicationOutputDTO());
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
         // admUnitCode actually changes here, triggering the DIR3 status recalculation cascade.
         when(appResponsibleRepository.findAll(any(), any(), any())).thenReturn(Page.empty());
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(any())).thenReturn(List.of());
@@ -1207,10 +1209,10 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(new AppSecurity());
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(new AppAccessibility());
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(new ApplicationOutputDTO());
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
     }
 
-    private AppResponsible buildAppResponsibleWithDir3Validation(Long personId, boolean personalCaib, Dir3ValidationStatus currentStatus) {
+    private AppResponsible buildAppResponsibleWithDir3Validation(Long personId, boolean personalCaib, ValidationStatusEnum currentStatus) {
         Person person = new Person();
         person.setId(personId);
         person.setEmail("person" + personId + "@caib.es");
@@ -1240,14 +1242,14 @@ class ApplicationServiceFacadeBeanTest {
         ApplicationInputDTO inputDTO = buildInputDTO();
         inputDTO.setAdmUnitCode("NEW_UNIT");
         stubUpdateWithAdmUnitCodeChange("OLD_UNIT", "NEW_UNIT");
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.VALIDATED);
+        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, ValidationStatusEnum.VALIDATED);
         when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
         when(personService.checkDir3("person50@caib.es", "NEW_UNIT")).thenReturn(new PersonDir3CheckOutputDTO(null, "SOME_OTHER_CODE", "NEW_UNIT", false));
 
         applicationServiceFacadeBean.update(1L, inputDTO);
 
-        assertEquals(Dir3ValidationStatus.NOT_VALIDATED, responsible.getDir3Validation().getDir3Status());
+        assertEquals(ValidationStatusEnum.NOT_VALIDATED, responsible.getDir3Validation().getDir3Status());
         verify(dir3ValidationRepository).update(responsible.getDir3Validation(), 700L);
     }
 
@@ -1256,14 +1258,14 @@ class ApplicationServiceFacadeBeanTest {
         ApplicationInputDTO inputDTO = buildInputDTO();
         inputDTO.setAdmUnitCode("NEW_UNIT");
         stubUpdateWithAdmUnitCodeChange("OLD_UNIT", "NEW_UNIT");
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.MANUAL);
+        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, ValidationStatusEnum.MANUAL);
         when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
         when(personService.checkDir3("person50@caib.es", "NEW_UNIT")).thenReturn(new PersonDir3CheckOutputDTO(null, "NEW_UNIT", "NEW_UNIT", true));
 
         applicationServiceFacadeBean.update(1L, inputDTO);
 
-        assertEquals(Dir3ValidationStatus.VALIDATED, responsible.getDir3Validation().getDir3Status());
+        assertEquals(ValidationStatusEnum.VALIDATED, responsible.getDir3Validation().getDir3Status());
         verify(dir3ValidationRepository).update(responsible.getDir3Validation(), 700L);
     }
 
@@ -1272,13 +1274,13 @@ class ApplicationServiceFacadeBeanTest {
         ApplicationInputDTO inputDTO = buildInputDTO();
         inputDTO.setAdmUnitCode("NEW_UNIT");
         stubUpdateWithAdmUnitCodeChange("OLD_UNIT", "NEW_UNIT");
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(60L, false, Dir3ValidationStatus.NOT_APPLY);
+        AppResponsible responsible = buildAppResponsibleWithDir3Validation(60L, false, ValidationStatusEnum.NOT_APPLY);
         when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
         when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
 
         applicationServiceFacadeBean.update(1L, inputDTO);
 
-        assertEquals(Dir3ValidationStatus.NOT_APPLY, responsible.getDir3Validation().getDir3Status());
+        assertEquals(ValidationStatusEnum.NOT_APPLY, responsible.getDir3Validation().getDir3Status());
         verify(personService, never()).checkDir3(any(), any());
         verify(dir3ValidationRepository, never()).update(any(), any());
     }
@@ -1332,7 +1334,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.create(any(AppResponsibleAuthorized.class))).thenReturn(createdAppResponsibleAuthorized);
         when(appSecurityRepository.create(any(AppSecurity.class))).thenReturn(createdAppSecurity);
         when(appAccessibilityRepository.create(any(AppAccessibility.class))).thenReturn(createdAppAccessibility);
-        when(applicationMapper.toResponse(updated, createdInfoDb, createdDev, createdAppResponsibleAuthorized, createdAppSecurity, createdAppAccessibility)).thenReturn(response);
+        when(applicationMapper.toResponse(updated)).thenReturn(response);
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.update(1L, inputDTO);
 
@@ -1371,7 +1373,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(existingAppResponsibleAuthorized);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(existingAppSecurity);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(existingAppAccessibility);
-        when(applicationMapper.toResponse(updated, existingInfoDb, existingDev, existingAppResponsibleAuthorized, existingAppSecurity, existingAppAccessibility)).thenReturn(response);
+        when(applicationMapper.toResponse(updated)).thenReturn(response);
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.update(1L, inputDTO);
 
@@ -1388,6 +1390,7 @@ class ApplicationServiceFacadeBeanTest {
         ApplicationInputDTO inputDTO = buildInputDTO();
         Application updated = new Application();
         updated.setId(1L);
+        updated.setPrefix("AP1");
         AppIntegration createdAppIntegration = new AppIntegration();
         createdAppIntegration.setId(15L);
         ApplicationOutputDTO response = new ApplicationOutputDTO();
@@ -1398,14 +1401,13 @@ class ApplicationServiceFacadeBeanTest {
         when(applicationRepository.update(activeApplication, 1L)).thenReturn(updated);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(null);
         when(appIntegrationRepository.create(any(AppIntegration.class))).thenReturn(createdAppIntegration);
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(response);
+        when(applicationMapper.toResponse(any())).thenReturn(response);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.update(1L, inputDTO);
+        applicationServiceFacadeBean.update(1L, inputDTO);
 
         ArgumentCaptor<AppIntegration> appIntegrationCaptor = ArgumentCaptor.forClass(AppIntegration.class);
         verify(appIntegrationRepository).create(appIntegrationCaptor.capture());
         assertEquals(updated, appIntegrationCaptor.getValue().getApplication());
-        assertEquals(15L, result.getAppIntegrationId());
     }
 
     @Test
@@ -1413,6 +1415,7 @@ class ApplicationServiceFacadeBeanTest {
         ApplicationInputDTO inputDTO = buildInputDTO();
         Application updated = new Application();
         updated.setId(1L);
+        updated.setPrefix("AP1");
         AppIntegration existingAppIntegration = new AppIntegration();
         existingAppIntegration.setId(15L);
         ApplicationOutputDTO response = new ApplicationOutputDTO();
@@ -1422,12 +1425,36 @@ class ApplicationServiceFacadeBeanTest {
         when(applicationRepository.existsByPrefixAndIdNot("AP2", 1L)).thenReturn(false);
         when(applicationRepository.update(activeApplication, 1L)).thenReturn(updated);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(existingAppIntegration);
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(response);
+        when(applicationMapper.toResponse(any())).thenReturn(response);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.update(1L, inputDTO);
+        applicationServiceFacadeBean.update(1L, inputDTO);
 
         verify(appIntegrationRepository, never()).create(any());
-        assertEquals(15L, result.getAppIntegrationId());
+    }
+
+    private AppSecurity stubUpdateWithPrefixChange(String updatedPrefix) {
+        Application updated = new Application();
+        updated.setId(1L);
+        updated.setPrefix(updatedPrefix);
+        AppSecurity securityAnchor = new AppSecurity();
+        securityAnchor.setId(31L);
+        when(applicationRepository.findById(1L)).thenReturn(activeApplication);
+        when(applicationRepository.existsByCodeAndIdNot("APP02", 1L)).thenReturn(false);
+        when(applicationRepository.existsByPrefixAndIdNot("AP2", 1L)).thenReturn(false);
+        when(applicationRepository.update(activeApplication, 1L)).thenReturn(updated);
+        when(appSecurityRepository.findByApplicationId(1L)).thenReturn(securityAnchor);
+        when(applicationMapper.toResponse(any())).thenReturn(new ApplicationOutputDTO());
+        return securityAnchor;
+    }
+
+    @Test
+    void update_prefixChanges_doesNotTouchTheAssignedRoles() {
+        stubUpdateWithPrefixChange("AP2");
+
+        applicationServiceFacadeBean.update(1L, buildInputDTO());
+
+        verify(appRoleService, never()).recalculateValidation(any(), any());
+        verify(appRoleService, never()).assignByPrefix(any(), any());
     }
 
     @Test
@@ -1567,7 +1594,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.update(appResponsibleAuthorized, 9L)).thenReturn(updatedAppResponsibleAuthorized);
         when(appSecurityRepository.update(appSecurity, 11L)).thenReturn(updatedAppSecurity);
         when(appAccessibilityRepository.update(appAccessibility, 13L)).thenReturn(updatedAppAccessibility);
-        when(applicationMapper.toResponse(updated, updatedInfoDb, updatedDev, updatedAppResponsibleAuthorized, updatedAppSecurity, updatedAppAccessibility)).thenReturn(response);
+        when(applicationMapper.toResponse(updated)).thenReturn(response);
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.reactivate(1L);
 
@@ -1608,7 +1635,7 @@ class ApplicationServiceFacadeBeanTest {
         when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(appResponsibleAuthorized);
         when(appSecurityRepository.findByApplicationId(1L)).thenReturn(appSecurity);
         when(appAccessibilityRepository.findByApplicationId(1L)).thenReturn(appAccessibility);
-        when(applicationMapper.toResponse(updated, infoDb, dev, appResponsibleAuthorized, appSecurity, appAccessibility)).thenReturn(response);
+        when(applicationMapper.toResponse(updated)).thenReturn(response);
 
         ApplicationOutputDTO result = applicationServiceFacadeBean.reactivate(1L);
 
@@ -1675,14 +1702,13 @@ class ApplicationServiceFacadeBeanTest {
         when(applicationRepository.update(activeApplication, 1L)).thenReturn(updated);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(appIntegration);
         when(appIntegrationRepository.update(appIntegration, 15L)).thenReturn(updatedAppIntegration);
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(response);
+        when(applicationMapper.toResponse(any())).thenReturn(response);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.reactivate(1L);
+        applicationServiceFacadeBean.reactivate(1L);
 
         assertNull(appIntegration.getDeletedAt());
         assertNull(appIntegration.getDeletedBy());
         verify(appIntegrationRepository, times(1)).update(appIntegration, 15L);
-        assertEquals(15L, result.getAppIntegrationId());
     }
 
     @Test
@@ -1699,16 +1725,15 @@ class ApplicationServiceFacadeBeanTest {
         when(applicationRepository.findById(1L)).thenReturn(activeApplication);
         when(applicationRepository.update(activeApplication, 1L)).thenReturn(updated);
         when(appIntegrationRepository.findByApplicationId(1L)).thenReturn(appIntegration);
-        when(applicationMapper.toResponse(any(), any(), any(), any(), any(), any())).thenReturn(response);
+        when(applicationMapper.toResponse(any())).thenReturn(response);
 
-        ApplicationOutputDTO result = applicationServiceFacadeBean.reactivate(1L);
+        applicationServiceFacadeBean.reactivate(1L);
 
         verify(appIntegrationRepository, never()).update(any(), any());
-        assertEquals(15L, result.getAppIntegrationId());
     }
 
     // ------------------------------------------------------------------
-    // checkDir3MismatchForAllApplications
+    // getAllApplicationIds
     // ------------------------------------------------------------------
 
     private Application applicationWithAdmUnitCode(Long id, String name, String admUnitCode) {
@@ -1725,297 +1750,82 @@ class ApplicationServiceFacadeBeanTest {
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_blankAdmUnitCode_isSkippedEntirely() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", null));
+    void getAllApplicationIds_returnsTheIdOfEveryApplication() {
+        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", null), applicationWithAdmUnitCode(7L, "App Two", null));
 
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
+        assertEquals(List.of(1L, 7L), applicationServiceFacadeBean.getAllApplicationIds());
+    }
 
-        assertEquals(0, result.size());
-        verify(appResponsibleAuthorizedRepository, never()).findByApplicationId(any());
+    // ------------------------------------------------------------------
+    // assignSoffidRoles - roles Soffid has for an already created application
+    // ------------------------------------------------------------------
+
+    /** Stubs an active application with prefix AP2 and security anchor 55. */
+    private void stubApplicationWithSecurity() {
+        Application application = new Application();
+        application.setId(1L);
+        application.setPrefix("AP2");
+        AppSecurity appSecurity = new AppSecurity();
+        appSecurity.setId(55L);
+        when(applicationRepository.findById(1L)).thenReturn(application);
+        when(appSecurityRepository.findByApplicationId(1L)).thenReturn(appSecurity);
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_noAnchor_isSkipped() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
+    void assignSoffidRoles_activeApplication_assignsTheRolesNamedAfterItsPrefixToItsSecurityAnchor() {
+        stubApplicationWithSecurity();
+        List<AppRoleOutputDTO> assigned = List.of(new AppRoleOutputDTO());
+        when(appRoleService.assignByPrefix(55L, "AP2")).thenReturn(assigned);
 
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
+        List<AppRoleOutputDTO> result = applicationServiceFacadeBean.assignSoffidRoles(1L);
 
-        assertEquals(0, result.size());
-        verify(appResponsibleRepository, never()).findAll(any(), any(), any());
+        assertEquals(assigned, result);
+        verify(appRoleService).assignByPrefix(55L, "AP2");
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_nonPersonalCaibPerson_neverChecksSoffidAndNeverMismatches() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(60L, false, Dir3ValidationStatus.NOT_APPLY);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
+    void assignSoffidRoles_applicationNotFound_throwsAndAssignsNothing() {
+        when(applicationRepository.findById(1L)).thenReturn(null);
 
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> applicationServiceFacadeBean.assignSoffidRoles(1L));
 
-        assertEquals(0, result.size());
-        verify(personService, never()).checkDir3(any(), any());
-        verify(dir3ValidationRepository, never()).update(any(), any());
+        assertEquals(Constants.ERR_APP_NOT_FOUND, ex.getMessage());
+        verify(appRoleService, never()).assignByPrefix(any(), any());
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_matchingResponsible_isNotFlaggedOrTouched() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "A04026919", "A04026919", true));
+    void assignSoffidRoles_applicationDeactivated_throwsAndAssignsNothing() {
+        Application application = new Application();
+        application.setPrefix("AP2");
+        application.setDeletedAt(LocalDateTime.now());
+        when(applicationRepository.findById(1L)).thenReturn(application);
 
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> applicationServiceFacadeBean.assignSoffidRoles(1L));
 
-        assertEquals(0, result.size());
-        assertEquals(Dir3ValidationStatus.VALIDATED, responsible.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository, never()).update(any(), any());
+        assertEquals(Constants.ERR_APP_NOT_ACTIVE, ex.getMessage());
+        verify(appRoleService, never()).assignByPrefix(any(), any());
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_mismatchedResponsible_flagsApplicationAndDowngradesToNoValidado() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
+    void assignSoffidRoles_applicationWithoutSecurityAnchor_throwsAndAssignsNothing() {
+        Application application = new Application();
+        application.setPrefix("AP2");
+        when(applicationRepository.findById(1L)).thenReturn(application);
+        when(appSecurityRepository.findByApplicationId(1L)).thenReturn(null);
 
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> applicationServiceFacadeBean.assignSoffidRoles(1L));
 
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals("App One", result.get(0).getName());
-        assertTrue(result.get(0).isDir3Mismatch());
-        assertEquals(Dir3ValidationStatus.NOT_VALIDATED, responsible.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository).update(responsible.getDir3Validation(), 700L);
+        assertEquals(Constants.ERR_APP_SECURITY_NOT_FOUND, ex.getMessage());
+        verify(appRoleService, never()).assignByPrefix(any(), any());
     }
 
     @Test
-    void checkDir3MismatchForAllApplications_manualAssignmentStillMismatching_isCheckedButProtectedFromDowngrade() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.MANUAL);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
+    void assignSoffidRoles_theAssignmentFails_theFailureIsNotSwallowed() {
+        stubApplicationWithSecurity();
+        when(appRoleService.assignByPrefix(55L, "AP2")).thenThrow(new BusinessRuleException(Constants.ERR_APP_SOFFID_ROLES_UNAVAILABLE));
 
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> applicationServiceFacadeBean.assignSoffidRoles(1L));
 
-        assertEquals(0, result.size());
-        verify(personService).checkDir3("person50@caib.es", "A04026919");
-        assertEquals(Dir3ValidationStatus.MANUAL, responsible.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_manualAssignmentNowMatching_isPromotedToValidadoButNotFlagged() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.MANUAL);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "A04026919", "A04026919", true));
-
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertEquals(0, result.size());
-        verify(personService).checkDir3("person50@caib.es", "A04026919");
-        assertEquals(Dir3ValidationStatus.VALIDATED, responsible.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository).update(responsible.getDir3Validation(), 700L);
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_noAplicaAssignment_isNeverCheckedOrChanged() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.NOT_APPLY);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertEquals(0, result.size());
-        verify(personService, never()).checkDir3(any(), any());
-        assertEquals(Dir3ValidationStatus.NOT_APPLY, responsible.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_alreadyNoValidadoStillMismatching_isIncludedButDir3ValidationNotRewritten() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.NOT_VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
-
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        // Unlike mismatchFound in the old design, the returned list now reports every application
-        // currently mismatching - not just newly-discovered downgrades - so a person who was
-        // already NOT_VALIDATED before this run, and still doesn't match, is included here too.
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getId());
-        verify(personService).checkDir3("person50@caib.es", "A04026919");
-        assertEquals(Dir3ValidationStatus.NOT_VALIDATED, responsible.getDir3Validation().getDir3Status());
-        // The Dir3Validation status itself didn't change (it was already NOT_VALIDATED), so no need
-        // to write it again - only the resulting status matters for the list/application flag.
-        verify(dir3ValidationRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_alreadyNoValidadoNowMatching_isPromotedToValidadoButNotFlagged() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.NOT_VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "A04026919", "A04026919", true));
-
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertEquals(0, result.size());
-        verify(personService).checkDir3("person50@caib.es", "A04026919");
-        assertEquals(Dir3ValidationStatus.VALIDATED, responsible.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository).update(responsible.getDir3Validation(), 700L);
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_mismatchedAuthorized_flagsApplicationAndDowngradesToNoValidado() {
-        stubAllApplications(applicationWithAdmUnitCode(1L, "App One", "A04026919"));
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of()));
-        Person person = new Person();
-        person.setId(55L);
-        person.setEmail("person55@caib.es");
-        person.setPersonalCaib(true);
-        AppAuthorized authorized = AppAuthorized.builder()
-                .id(2L)
-                .person(person)
-                .dir3Validation(Dir3Validation.builder().id(701L).dir3Status(Dir3ValidationStatus.VALIDATED).build())
-                .build();
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of(authorized));
-        when(personService.checkDir3("person55@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
-
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertEquals(1, result.size());
-        assertEquals(Dir3ValidationStatus.NOT_VALIDATED, authorized.getDir3Validation().getDir3Status());
-        verify(dir3ValidationRepository).update(authorized.getDir3Validation(), 701L);
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_onlyMismatchedApplicationsAreReturned() {
-        Application cleanApp = applicationWithAdmUnitCode(1L, "Clean App", "A04026919");
-        Application mismatchedApp = applicationWithAdmUnitCode(2L, "Mismatched App", "A04026919");
-        stubAllApplications(cleanApp, mismatchedApp);
-        AppResponsibleAuthorized anchor1 = AppResponsibleAuthorized.builder().id(9L).build();
-        AppResponsibleAuthorized anchor2 = AppResponsibleAuthorized.builder().id(10L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor1);
-        when(appResponsibleAuthorizedRepository.findByApplicationId(2L)).thenReturn(anchor2);
-        AppResponsible matching = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.VALIDATED);
-        AppResponsible mismatched = buildAppResponsibleWithDir3Validation(51L, true, Dir3ValidationStatus.VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(matching)));
-        when(appResponsibleRepository.findAll(eq(10L), any(), any())).thenReturn(new PageImpl<>(List.of(mismatched)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(any())).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "A04026919", "A04026919", true));
-        when(personService.checkDir3("person51@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
-
-        List<ApplicationDir3MismatchOutputDTO> result = applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertEquals(1, result.size());
-        assertEquals(2L, result.get(0).getId());
-        assertEquals("Mismatched App", result.get(0).getName());
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_currentMismatch_persistsTrueOnApplication() {
-        Application application = applicationWithAdmUnitCode(1L, "App One", "A04026919");
-        stubAllApplications(application);
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
-
-        applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertTrue(application.isDir3Mismatch());
-        verify(applicationRepository).update(application, 1L);
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_onlyManualMismatching_doesNotPersistDir3MismatchTrue() {
-        Application application = applicationWithAdmUnitCode(1L, "App One", "A04026919");
-        stubAllApplications(application);
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.MANUAL);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
-
-        applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertFalse(application.isDir3Mismatch());
-        verify(applicationRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_flagAlreadyCurrent_doesNotCallUpdateAgain() {
-        Application application = applicationWithAdmUnitCode(1L, "App One", "A04026919");
-        application.setDir3Mismatch(true);
-        stubAllApplications(application);
-        AppResponsibleAuthorized anchor = AppResponsibleAuthorized.builder().id(9L).build();
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(anchor);
-        AppResponsible responsible = buildAppResponsibleWithDir3Validation(50L, true, Dir3ValidationStatus.NOT_VALIDATED);
-        when(appResponsibleRepository.findAll(eq(9L), any(), any())).thenReturn(new PageImpl<>(List.of(responsible)));
-        when(appAuthorizedRepository.findAllActiveByAppResponsibleAuthorized(9L)).thenReturn(List.of());
-        when(personService.checkDir3("person50@caib.es", "A04026919")).thenReturn(new PersonDir3CheckOutputDTO(null, "OTHER_UNIT", "A04026919", false));
-
-        applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertTrue(application.isDir3Mismatch());
-        verify(applicationRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_blankAdmUnitCode_clearsStaleMismatchFlag() {
-        Application application = applicationWithAdmUnitCode(1L, "App One", null);
-        application.setDir3Mismatch(true);
-        stubAllApplications(application);
-
-        applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertFalse(application.isDir3Mismatch());
-        verify(applicationRepository).update(application, 1L);
-    }
-
-    @Test
-    void checkDir3MismatchForAllApplications_noAnchor_clearsStaleMismatchFlag() {
-        Application application = applicationWithAdmUnitCode(1L, "App One", "A04026919");
-        application.setDir3Mismatch(true);
-        stubAllApplications(application);
-        when(appResponsibleAuthorizedRepository.findByApplicationId(1L)).thenReturn(null);
-
-        applicationServiceFacadeBean.checkDir3MismatchForAllApplications();
-
-        assertFalse(application.isDir3Mismatch());
-        verify(applicationRepository).update(application, 1L);
+        assertEquals(Constants.ERR_APP_SOFFID_ROLES_UNAVAILABLE, ex.getMessage());
     }
 }

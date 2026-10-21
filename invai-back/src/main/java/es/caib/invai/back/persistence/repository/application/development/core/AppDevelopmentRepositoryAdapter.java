@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Implementation of {@link AppDevelopmentRepository} backed by {@link AppDevelopmentJPARepository}.
@@ -153,15 +154,15 @@ public class AppDevelopmentRepositoryAdapter implements AppDevelopmentRepository
 
             aud.setDevelopmentId(entity.getId());
             aud.setApplicationId(entity.getApplication().getId());
-            aud.setEnvironmentId(entity.getEnvironment() != null ? entity.getEnvironment().getId() : null);
-            aud.setModalityId(entity.getModality() != null ? entity.getModality().getId() : null);
+            aud.setEnvironmentId(Objects.nonNull(entity.getEnvironment()) ? entity.getEnvironment().getId() : null);
+            aud.setModalityId(Objects.nonNull(entity.getModality()) ? entity.getModality().getId() : null);
             aud.setCode(entity.getCode());
-            aud.setStandardAdaptionId(entity.getStandardAdaption() != null ? entity.getStandardAdaption().getId() : null);
+            aud.setStandardAdaptionId(Objects.nonNull(entity.getStandardAdaption()) ? entity.getStandardAdaption().getId() : null);
             aud.setRevisionDate(entity.getRevisionDate());
             aud.setObservation(entity.getObservation());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

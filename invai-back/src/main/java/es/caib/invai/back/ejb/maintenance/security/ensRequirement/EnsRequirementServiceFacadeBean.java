@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative EnsRequirements.
@@ -50,7 +51,7 @@ public class EnsRequirementServiceFacadeBean implements EnsRequirementService {
         log.debug("Facade: Fetching ENS requirement entry by ID: {}", id);
         EnsRequirement ensRequirement = ensRequirementRepository.findById(id);
 
-        if (ensRequirement == null) {
+        if (Objects.isNull(ensRequirement)) {
             throw new BusinessRuleException(Constants.ERR_ENSREQUIREMENT_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class EnsRequirementServiceFacadeBean implements EnsRequirementService {
         log.info("Facade: Updating ENS requirement entry with ID: {}", id);
 
         EnsRequirement existing = ensRequirementRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ENSREQUIREMENT_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class EnsRequirementServiceFacadeBean implements EnsRequirementService {
         log.info("Facade: Logically deleting ENS requirement entry with ID: {}", id);
         EnsRequirement existing = ensRequirementRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ENSREQUIREMENT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_ENSREQUIREMENT_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class EnsRequirementServiceFacadeBean implements EnsRequirementService {
         log.info("Facade: Reactivating ENS requirement entry with ID: {}", id);
         EnsRequirement existing = ensRequirementRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ENSREQUIREMENT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_ENSREQUIREMENT_ACTIVE);
         }
 

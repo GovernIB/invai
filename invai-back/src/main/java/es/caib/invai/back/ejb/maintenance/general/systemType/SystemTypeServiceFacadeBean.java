@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for categorizing asset classification environments (SystemType).
@@ -57,7 +58,7 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         log.debug("Facade: Fetching system type by ID: {}", id);
         SystemType systemType = systemTypeRepository.findById(id);
 
-        if (systemType == null) {
+        if (Objects.isNull(systemType)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
@@ -121,7 +122,7 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         log.info("Facade: Updating system type with ID: {}", id);
 
         SystemType existing = systemTypeRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
@@ -151,11 +152,11 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         log.info("Facade: Logically deleting system type with ID: {}", id);
         SystemType existing = systemTypeRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_ACTIVE);
         }
 
@@ -181,11 +182,11 @@ public class SystemTypeServiceFacadeBean implements SystemTypeService {
         log.info("Facade: Reactivating system type with ID: {}", id);
         SystemType existing = systemTypeRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_SYSTEM_TYPE_ACTIVE);
         }
 

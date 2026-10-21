@@ -27,7 +27,7 @@ public class FieldEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inv_field_seq")
     @SequenceGenerator(name = "inv_field_seq", sequenceName = "INV_FIELD_SEQ", allocationSize = 1)
-    @Column(name = "FIELD_ID")
+    @Column(name = "ID")
     private Long id;
 
     /** Field name (Catalan). */

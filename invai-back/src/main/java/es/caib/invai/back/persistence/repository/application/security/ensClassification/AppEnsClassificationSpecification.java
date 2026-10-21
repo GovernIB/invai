@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Corporate specification provider executing defensive dynamic predicate tree evaluation
@@ -39,12 +40,12 @@ public class AppEnsClassificationSpecification {
 
             predicates.add(cb.equal(root.get("appSecurity").get("id"), appSecurityId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -52,16 +53,16 @@ public class AppEnsClassificationSpecification {
                 );
             }
 
-            if (criteria.getAppSecurityId() != null) {
+            if (Objects.nonNull(criteria.getAppSecurityId())) {
                 predicates.add(cb.equal(root.get("appSecurity").get("id"), criteria.getAppSecurityId()));
             }
-            if (criteria.getIdentityProviderId() != null) {
+            if (Objects.nonNull(criteria.getIdentityProviderId())) {
                 predicates.add(cb.equal(root.get("identityProvider").get("id"), criteria.getIdentityProviderId()));
             }
-            if (criteria.getEnsSubjectId() != null) {
+            if (Objects.nonNull(criteria.getEnsSubjectId())) {
                 predicates.add(cb.equal(root.get("ensSubject").get("id"), criteria.getEnsSubjectId()));
             }
-            if (criteria.getPersonalDataProcessingId() != null) {
+            if (Objects.nonNull(criteria.getPersonalDataProcessingId())) {
                 predicates.add(cb.equal(root.get("personalDataProcessing").get("id"), criteria.getPersonalDataProcessingId()));
             }
 

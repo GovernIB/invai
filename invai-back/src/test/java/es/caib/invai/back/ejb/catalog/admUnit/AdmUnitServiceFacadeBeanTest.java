@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,7 +65,7 @@ class AdmUnitServiceFacadeBeanTest {
             UnidadRest source = invocation.getArgument(0);
             AdmUnitOutputDTO dto = new AdmUnitOutputDTO();
             dto.setCode(source.getCodigo());
-            dto.setName(source.getDenominacionCooficial() != null ? source.getDenominacionCooficial() : source.getDenominacion());
+            dto.setName(Objects.nonNull(source.getDenominacionCooficial()) ? source.getDenominacionCooficial() : source.getDenominacion());
             dto.setParentCode(source.getCodUnidadSuperior());
             dto.setLevel(source.getNivelJerarquico());
             return dto;

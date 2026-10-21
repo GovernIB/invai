@@ -16,9 +16,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Calls the {@code invai-api-interna} module's Soffid endpoints on behalf of the person/role
@@ -26,20 +26,18 @@ import java.util.Map;
  * {@code IntegracionsClientConfig}. Keeps throwing {@link SoffidClientException}/
  * {@link SoffidTimeoutException} exactly as before, so downstream callers (including
  * {@code GlobalExceptionHandler} and {@code PersonService#checkDir3}) need no changes.
+ * <p>
+ * This client applies no timeout of its own to Soffid: {@code invai-api-interna} does, and answers
+ * a 504 when Soffid takes too long, which is what becomes a {@link SoffidTimeoutException} (see
+ * {@code toSoffidException}). The HTTP timeouts of {@code IntegracionsClientConfig} are only a
+ * safety net for {@code invai-api-interna} itself not answering.
+ * </p>
  *
  * @since 1.0.4
  */
 @Component
 @Slf4j
 public class SoffidClient {
-
-    /**
-     * Deterministic per-request timeout applied on top of the underlying {@link WebClient}'s own
-     * connect/response timeouts via {@code Mono#block(Duration)}, which always raises an
-     * {@link IllegalStateException} on expiry. Callers rely on this to tell a timeout apart from
-     * any other Soffid failure.
-     */
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
 
     /** Pre-configured {@link WebClient} pointing at {@code invai-api-interna}, see {@code IntegracionsClientConfig}. */
     @Autowired
@@ -58,21 +56,18 @@ public class SoffidClient {
         try {
             SoffidPageResponse<SoffidUser> body = integracionsWebClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/soffid/users")
-                            .queryParam("search", search == null ? "" : search)
+                            .queryParam("search", Objects.isNull(search) ? "" : search)
                             .queryParam("page", pageable.getPageNumber())
                             .queryParam("size", pageable.getPageSize())
                             .build())
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<SoffidPageResponse<SoffidUser>>() {
                     })
-                    .block(REQUEST_TIMEOUT);
+                    .block();
 
-            List<SoffidUser> content = body != null && body.getContent() != null ? body.getContent() : List.of();
-            long totalElements = body != null ? body.getTotalElements() : 0;
+            List<SoffidUser> content = Objects.nonNull(body) && Objects.nonNull(body.getContent()) ? body.getContent() : List.of();
+            long totalElements = Objects.nonNull(body) ? body.getTotalElements() : 0;
             return new PageImpl<>(content, pageable, totalElements);
-        } catch (IllegalStateException ex) {
-            log.error("Timed out searching Soffid users (search='{}')", search, ex);
-            throw new SoffidTimeoutException();
         } catch (WebClientResponseException ex) {
             log.error("Failed to search Soffid users (search='{}')", search, ex);
             throw toSoffidException(ex);
@@ -96,12 +91,9 @@ public class SoffidClient {
                             .build())
                     .retrieve()
                     .toEntity(SoffidUser.class)
-                    .block(REQUEST_TIMEOUT);
+                    .block();
 
-            return response != null ? response.getBody() : null;
-        } catch (IllegalStateException ex) {
-            log.error("Timed out looking up Soffid user by email (email='{}')", email, ex);
-            throw new SoffidTimeoutException();
+            return Objects.nonNull(response) ? response.getBody() : null;
         } catch (WebClientResponseException ex) {
             log.error("Failed to look up Soffid user by email (email='{}')", email, ex);
             throw toSoffidException(ex);
@@ -123,26 +115,77 @@ public class SoffidClient {
         try {
             SoffidPageResponse<SoffidRole> body = integracionsWebClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/soffid/roles")
-                            .queryParam("name", name == null ? "" : name)
+                            .queryParam("name", Objects.isNull(name) ? "" : name)
                             .queryParam("page", pageable.getPageNumber())
                             .queryParam("size", pageable.getPageSize())
                             .build())
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<SoffidPageResponse<SoffidRole>>() {
                     })
-                    .block(REQUEST_TIMEOUT);
+                    .block();
 
-            List<SoffidRole> content = body != null && body.getContent() != null ? body.getContent() : List.of();
-            long totalElements = body != null ? body.getTotalElements() : 0;
+            List<SoffidRole> content = Objects.nonNull(body) && Objects.nonNull(body.getContent()) ? body.getContent() : List.of();
+            long totalElements = Objects.nonNull(body) ? body.getTotalElements() : 0;
             return new PageImpl<>(content, pageable, totalElements);
-        } catch (IllegalStateException ex) {
-            log.error("Timed out searching Soffid roles (name='{}')", name, ex);
-            throw new SoffidTimeoutException();
         } catch (WebClientResponseException ex) {
             log.error("Failed to search Soffid roles (name='{}')", name, ex);
             throw toSoffidException(ex);
         } catch (WebClientException ex) {
             log.error("Failed to search Soffid roles (name='{}')", name, ex);
+            throw new SoffidClientException(ex.getClass().getSimpleName());
+        }
+    }
+
+    /**
+     * Look up, in a single call, the active Soffid users having any of the given e-mail addresses
+     * - The bulk counterpart of {@link #searchByEmail}. {@code invai-api-interna} rejects more than
+     * 100 addresses per call, and Soffid only accepts a few dozen, so keep the batch small.
+     *
+     * @param emails the exact e-mail addresses to look up, never empty
+     * @return the active users found - fewer than requested if some address has no active user
+     */
+    public List<SoffidUser> getUsersByEmails(List<String> emails) {
+        try {
+            ResponseEntity<List<SoffidUser>> response = integracionsWebClient.post()
+                    .uri("/soffid/users/by-emails")
+                    .bodyValue(emails)
+                    .retrieve()
+                    .toEntityList(SoffidUser.class)
+                    .block();
+
+            List<SoffidUser> body = Objects.nonNull(response) ? response.getBody() : null;
+            return Objects.nonNull(body) ? body : List.of();
+        } catch (WebClientResponseException ex) {
+            log.error("Failed to fetch Soffid users by e-mail (batch of {})", emails.size(), ex);
+            throw toSoffidException(ex);
+        } catch (WebClientException ex) {
+            log.error("Failed to fetch Soffid users by e-mail (batch of {})", emails.size(), ex);
+            throw new SoffidClientException(ex.getClass().getSimpleName());
+        }
+    }
+
+    /**
+     * Gets the DIR3CAIB code of every Soffid group that has one, in a single call - there are only a
+     * handful of them among thousands of groups.
+     *
+     * @return the DIR3CAIB code of every group having one, keyed by the group's short name
+     */
+    public Map<String, String> getGroupsDir3() {
+        try {
+            ResponseEntity<Map<String, String>> response = integracionsWebClient.get()
+                    .uri("/soffid/groups/dir3")
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {
+                    })
+                    .block();
+
+            Map<String, String> body = Objects.nonNull(response) ? response.getBody() : null;
+            return Objects.nonNull(body) ? body : Map.of();
+        } catch (WebClientResponseException ex) {
+            log.error("Failed to fetch the Soffid groups with a DIR3", ex);
+            throw toSoffidException(ex);
+        } catch (WebClientException ex) {
+            log.error("Failed to fetch the Soffid groups with a DIR3", ex);
             throw new SoffidClientException(ex.getClass().getSimpleName());
         }
     }
@@ -162,13 +205,10 @@ public class SoffidClient {
                     .retrieve()
                     .toEntity(new ParameterizedTypeReference<Map<String, String>>() {
                     })
-                    .block(REQUEST_TIMEOUT);
+                    .block();
 
-            Map<String, String> body = response != null ? response.getBody() : null;
-            return body != null ? body.get("dir3Code") : null;
-        } catch (IllegalStateException ex) {
-            log.error("Timed out resolving DIR3 for Soffid group (groupName='{}')", groupName, ex);
-            throw new SoffidTimeoutException();
+            Map<String, String> body = Objects.nonNull(response) ? response.getBody() : null;
+            return Objects.nonNull(body) ? body.get("dir3Code") : null;
         } catch (WebClientResponseException ex) {
             log.error("Failed to resolve DIR3 for Soffid group (groupName='{}')", groupName, ex);
             throw toSoffidException(ex);
@@ -190,13 +230,10 @@ public class SoffidClient {
                     .uri(uriBuilder -> uriBuilder.path("/soffid/users/{username}/roles").build(username))
                     .retrieve()
                     .toEntityList(SoffidRole.class)
-                    .block(REQUEST_TIMEOUT);
+                    .block();
 
-            List<SoffidRole> body = response != null ? response.getBody() : null;
-            return body != null ? body : List.of();
-        } catch (IllegalStateException ex) {
-            log.error("Timed out fetching granted roles for Soffid account (username='{}')", username, ex);
-            throw new SoffidTimeoutException();
+            List<SoffidRole> body = Objects.nonNull(response) ? response.getBody() : null;
+            return Objects.nonNull(body) ? body : List.of();
         } catch (WebClientResponseException ex) {
             log.error("Failed to fetch granted roles for Soffid account (username='{}')", username, ex);
             throw toSoffidException(ex);
@@ -219,13 +256,10 @@ public class SoffidClient {
                     .uri(uriBuilder -> uriBuilder.path("/soffid/roles/by-ids").queryParam("ids", ids).build())
                     .retrieve()
                     .toEntityList(SoffidRole.class)
-                    .block(REQUEST_TIMEOUT);
+                    .block();
 
-            List<SoffidRole> body = response != null ? response.getBody() : null;
-            return body != null ? body : List.of();
-        } catch (IllegalStateException ex) {
-            log.error("Timed out fetching Soffid roles by id (ids={})", ids, ex);
-            throw new SoffidTimeoutException();
+            List<SoffidRole> body = Objects.nonNull(response) ? response.getBody() : null;
+            return Objects.nonNull(body) ? body : List.of();
         } catch (WebClientResponseException ex) {
             log.error("Failed to fetch Soffid roles by id (ids={})", ids, ex);
             throw toSoffidException(ex);

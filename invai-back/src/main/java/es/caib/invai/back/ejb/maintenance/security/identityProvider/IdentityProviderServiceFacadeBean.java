@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative IdentityProviders.
@@ -50,7 +51,7 @@ public class IdentityProviderServiceFacadeBean implements IdentityProviderServic
         log.debug("Facade: Fetching identity provider by ID: {}", id);
         IdentityProvider identityProvider = identityProviderRepository.findById(id);
 
-        if (identityProvider == null) {
+        if (Objects.isNull(identityProvider)) {
             throw new BusinessRuleException(Constants.ERR_IDENTITYPROVIDER_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class IdentityProviderServiceFacadeBean implements IdentityProviderServic
         log.info("Facade: Updating identity provider with ID: {}", id);
 
         IdentityProvider existing = identityProviderRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_IDENTITYPROVIDER_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class IdentityProviderServiceFacadeBean implements IdentityProviderServic
         log.info("Facade: Logically deleting identity provider with ID: {}", id);
         IdentityProvider existing = identityProviderRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_IDENTITYPROVIDER_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_IDENTITYPROVIDER_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class IdentityProviderServiceFacadeBean implements IdentityProviderServic
         log.info("Facade: Reactivating identity provider with ID: {}", id);
         IdentityProvider existing = identityProviderRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_IDENTITYPROVIDER_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_IDENTITYPROVIDER_ACTIVE);
         }
 

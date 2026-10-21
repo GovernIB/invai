@@ -13,7 +13,7 @@ import es.caib.invai.back.persistence.model.maintenance.responsible.person.Perso
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.core.AppResponsibleAuthorizedMapperImpl;
 import es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3.Dir3ValidationMapperImpl;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
-import es.caib.invai.back.service.mapper.catalog.dir3Status.Dir3StatusMapperImpl;
+import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.responsibleType.ResponsibleTypeMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMapperImpl;
@@ -72,7 +72,7 @@ class AppResponsibleMapperTest {
         ReflectionTestUtils.setField(personMapperImpl, "companyMapper", new CompanyMapperImpl());
 
         Dir3ValidationMapperImpl dir3ValidationMapperImpl = new Dir3ValidationMapperImpl();
-        ReflectionTestUtils.setField(dir3ValidationMapperImpl, "dir3StatusMapper", new Dir3StatusMapperImpl());
+        ReflectionTestUtils.setField(dir3ValidationMapperImpl, "validationStatusMapper", new ValidationStatusMapperImpl());
 
         AppResponsibleMapperImpl impl = new AppResponsibleMapperImpl();
         ReflectionTestUtils.setField(impl, "appResponsibleAuthorizedMapper", appResponsibleAuthorizedMapperImpl);

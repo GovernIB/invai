@@ -13,12 +13,15 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import es.caib.invai.back.utils.Constants;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Global controller advice responsible for intercepting, translating, and standardizing
@@ -55,7 +58,7 @@ public class GlobalExceptionHandler {
 
         String rawMessage = firstError.getDefaultMessage();
 
-        if (rawMessage != null && rawMessage.startsWith("{") && rawMessage.endsWith("}")) {
+        if (Objects.nonNull(rawMessage) && rawMessage.startsWith("{") && rawMessage.endsWith("}")) {
             String cleanKey = rawMessage.replace("{", "").replace("}", "");
             return buildLocalizedErrorResponse(cleanKey, firstError.getArguments(), true);
         } else {
@@ -74,7 +77,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ValidationErrorResponse> handleBusinessExceptions(BusinessRuleException ex) {
         String rawMessage = ex.getMessage();
 
-        if (rawMessage == null) {
+        if (Objects.isNull(rawMessage)) {
             return buildLocalizedErrorResponse(Constants.VALIDATION_APPLICATION_DEFAULT, null, true);
         }
 
@@ -98,16 +101,16 @@ public class GlobalExceptionHandler {
         String databaseErrorMessage = null;
 
         Throwable cause = ex.getCause();
-        while (cause != null) {
-            if (cause instanceof java.sql.SQLException || (cause.getMessage() != null && cause.getMessage().contains("ORA-"))) {
+        while (Objects.nonNull(cause)) {
+            if (cause instanceof java.sql.SQLException || (Objects.nonNull(cause.getMessage()) && cause.getMessage().contains("ORA-"))) {
                 databaseErrorMessage = cause.getMessage();
                 break;
             }
             cause = cause.getCause();
         }
 
-        if (databaseErrorMessage == null) {
-            databaseErrorMessage = ex.getMessage() != null ? ex.getMessage() : "Unknown persistence error";
+        if (Objects.isNull(databaseErrorMessage)) {
+            databaseErrorMessage = Objects.nonNull(ex.getMessage()) ? ex.getMessage() : "Unknown persistence error";
         }
         log.error("Unhandled persistence exception: {}", databaseErrorMessage, ex);
 
@@ -151,6 +154,29 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ValidationErrorResponse> handleMissingParameterExceptions(MissingServletRequestParameterException ex) {
         return buildLocalizedErrorResponse(Constants.ERR_MISSING_REQUIRED_PARAMETER, new Object[]{ex.getParameterName()}, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles a multipart request that is missing one of its parts (e.g. the file) as a bad request
+     * naming the part.
+     *
+     * @param ex the exception thrown when a required request part is not present
+     * @return HTTP 400 with the localized error
+     */
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMissingPartExceptions(MissingServletRequestPartException ex) {
+        return buildLocalizedErrorResponse(Constants.ERR_MISSING_REQUIRED_PARAMETER, new Object[]{ex.getRequestPartName()}, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles an upload that exceeds the maximum size the multipart configuration accepts.
+     *
+     * @return HTTP 400 with the localized error
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMaxUploadSizeExceededExceptions() {
+        log.warn("Upload rejected: it exceeds the maximum size accepted by the multipart configuration");
+        return buildLocalizedErrorResponse(Constants.ERR_DOCUMENTATION_ATTACHMENT_FILE_TOO_LARGE, null, HttpStatus.BAD_REQUEST);
     }
 
     /**

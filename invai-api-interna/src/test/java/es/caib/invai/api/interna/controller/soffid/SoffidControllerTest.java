@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -129,5 +132,54 @@ class SoffidControllerTest {
 
         assertEquals(1, result.size());
         assertEquals(26L, result.get(0).getId());
+    }
+
+    @Test
+    void getUsersByEmails_delegatesToTheClient() {
+        SoffidUser user = new SoffidUser();
+        user.setEmailAddress("ana@caib.es");
+        when(soffidClient.getUsersByEmails(List.of("ana@caib.es"))).thenReturn(List.of(user));
+
+        List<SoffidUser> result = new SoffidController(soffidClient).getUsersByEmails(List.of("ana@caib.es"));
+
+        assertEquals(List.of(user), result);
+    }
+
+    @Test
+    void getUsersByEmails_emptyList_answersEmptyWithoutCallingSoffid() {
+        List<SoffidUser> result = new SoffidController(soffidClient).getUsersByEmails(List.of());
+
+        assertEquals(List.of(), result);
+        verify(soffidClient, never()).getUsersByEmails(any());
+    }
+
+    @Test
+    void getUsersByEmails_moreThanTheLimit_isRejectedWithBadRequest() {
+        List<String> tooMany = java.util.stream.IntStream.rangeClosed(1, SoffidController.MAX_EMAILS_PER_REQUEST + 1)
+                .mapToObj(i -> "u" + i + "@caib.es").toList();
+
+        ResponseStatusException ex = Assertions.assertThrows(ResponseStatusException.class,
+                () -> new SoffidController(soffidClient).getUsersByEmails(tooMany));
+
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        verify(soffidClient, never()).getUsersByEmails(any());
+    }
+
+    @Test
+    void getUsersByEmails_exactlyTheLimit_isAccepted() {
+        List<String> atLimit = java.util.stream.IntStream.rangeClosed(1, SoffidController.MAX_EMAILS_PER_REQUEST)
+                .mapToObj(i -> "u" + i + "@caib.es").toList();
+        when(soffidClient.getUsersByEmails(atLimit)).thenReturn(List.of());
+
+        new SoffidController(soffidClient).getUsersByEmails(atLimit);
+
+        verify(soffidClient).getUsersByEmails(atLimit);
+    }
+
+    @Test
+    void getGroupsDir3_delegatesToTheClient() {
+        when(soffidClient.getGroupsDir3()).thenReturn(Map.of("sgaip", "A04027054"));
+
+        assertEquals(Map.of("sgaip", "A04027054"), new SoffidController(soffidClient).getGroupsDir3());
     }
 }

@@ -6,6 +6,7 @@ import es.caib.invai.back.service.model.maintenance.systems.serverType.ServerTyp
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MapStruct translation utility specializing in state conversions across server type
@@ -64,7 +65,7 @@ public interface ServerTypeMapper {
      * @return a disconnected server type structure stub tracking the configuration reference ID, or {@code null} if absent
      */
     default ServerType map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         ServerType serverType = new ServerType();

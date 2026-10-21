@@ -35,7 +35,7 @@ public class ApplicationEntity extends BaseEntity {
             sequenceName = "INV_APPLICATION_SEQ",
             allocationSize = 1
     )
-    @Column(name = "APP_APPLICATION_ID", nullable = false, updatable = false)
+    @Column(name = "ID", nullable = false, updatable = false)
     private Long id;
 
     /** Unique administrative identification code of the application. */

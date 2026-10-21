@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Builds the JPA {@link Specification} used by {@link AppProviderJPARepository#findAll} to filter
@@ -41,12 +42,12 @@ public class AppProviderSpecification {
 
             predicates.add(cb.equal(root.get("appDevelopment").get("id"), appDevelopmentId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -54,11 +55,11 @@ public class AppProviderSpecification {
                 );
             } 
 
-            if (criteria.getAppDevelopmentId() != null) {
+            if (Objects.nonNull(criteria.getAppDevelopmentId())) {
                 predicates.add(cb.equal(root.get("appDevelopment").get("id"), criteria.getAppDevelopmentId()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getSearch().trim().toLowerCase() + "%";
                 List<Predicate> searchPredicates = new ArrayList<>();
 

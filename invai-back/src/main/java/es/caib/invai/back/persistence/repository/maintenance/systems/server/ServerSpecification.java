@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -29,12 +30,12 @@ public final class ServerSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -42,23 +43,23 @@ public final class ServerSpecification {
                 );
             } 
 
-            if (criteria.getName() != null && !criteria.getName().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getName()) && !criteria.getName().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.getName().toLowerCase() + "%"));
             }
 
-            if (criteria.getEnvironmentId() != null) {
+            if (Objects.nonNull(criteria.getEnvironmentId())) {
                 predicates.add(cb.equal(root.get("environment").get("id"), criteria.getEnvironmentId()));
             }
 
-            if (criteria.getServerTypeId() != null) {
+            if (Objects.nonNull(criteria.getServerTypeId())) {
                 predicates.add(cb.equal(root.get("serverType").get("id"), criteria.getServerTypeId()));
             }
 
-            if (criteria.getServerTypeCode() != null && !criteria.getServerTypeCode().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getServerTypeCode()) && !criteria.getServerTypeCode().trim().isEmpty()) {
                 predicates.add(cb.equal(root.get("serverType").get("code"), criteria.getServerTypeCode().trim()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String pattern = "%" + criteria.getSearch().toLowerCase() + "%";
                 predicates.add(cb.like(cb.lower(root.get("name")), pattern));
             }

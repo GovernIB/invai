@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementing CRUD for the "AppAccessibility" (Accessibilitat) tab anchor.
@@ -72,7 +73,7 @@ public class AppAccessibilityServiceFacadeBean implements AppAccessibilityServic
         log.info("Facade: Persisting new application accessibility anchor for application ID: {}", inputDTO.getApplicationId());
 
         AppAccessibility existing = appAccessibilityRepository.findByApplicationId(inputDTO.getApplicationId());
-        if (existing != null && existing.getDeletedAt() == null) {
+        if (Objects.nonNull(existing) && Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_ACCESSIBILITY_ALREADY_EXISTS);
         }
 
@@ -98,7 +99,7 @@ public class AppAccessibilityServiceFacadeBean implements AppAccessibilityServic
         log.info("Facade: Updating application accessibility anchor ID: {}", id);
 
         AppAccessibility existingModel = appAccessibilityRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_ACCESSIBILITY_NOT_FOUND);
         }
 
@@ -120,11 +121,11 @@ public class AppAccessibilityServiceFacadeBean implements AppAccessibilityServic
         log.info("Facade: Logically deleting application accessibility anchor ID: {}", id);
 
         AppAccessibility existingModel = appAccessibilityRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_ACCESSIBILITY_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_ACCESSIBILITY_NOT_ACTIVE);
         }
 

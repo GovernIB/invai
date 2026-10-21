@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing database vendor/type catalog configurations.
@@ -51,7 +52,7 @@ public class DatabaseVendorServiceFacadeBean implements DatabaseVendorService {
         log.debug("Facade: Fetching database vendor by ID: {}", id);
         DatabaseVendor databaseVendor = databaseVendorRepository.findById(id);
 
-        if (databaseVendor == null) {
+        if (Objects.isNull(databaseVendor)) {
             throw new BusinessRuleException(Constants.ERR_DATABASEVENDOR_NOT_FOUND);
         }
 
@@ -109,7 +110,7 @@ public class DatabaseVendorServiceFacadeBean implements DatabaseVendorService {
         log.info("Facade: Updating database vendor with ID: {}", id);
 
         DatabaseVendor existing = databaseVendorRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DATABASEVENDOR_NOT_FOUND);
         }
 
@@ -134,11 +135,11 @@ public class DatabaseVendorServiceFacadeBean implements DatabaseVendorService {
         log.info("Facade: Logically deleting database vendor with ID: {}", id);
         DatabaseVendor existing = databaseVendorRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DATABASEVENDOR_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DATABASEVENDOR_NOT_ACTIVE);
         }
 
@@ -160,11 +161,11 @@ public class DatabaseVendorServiceFacadeBean implements DatabaseVendorService {
         log.info("Facade: Reactivating database vendor with ID: {}", id);
         DatabaseVendor existing = databaseVendorRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_DATABASEVENDOR_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DATABASEVENDOR_ACTIVE);
         }
 

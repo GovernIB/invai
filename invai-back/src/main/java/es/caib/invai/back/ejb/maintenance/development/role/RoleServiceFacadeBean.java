@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative provider Roles.
@@ -55,7 +56,7 @@ public class RoleServiceFacadeBean implements RoleService {
         log.debug("Facade: Fetching role by ID: {}", id);
         Role role = roleRepository.findById(id);
 
-        if (role == null) {
+        if (Objects.isNull(role)) {
             throw new BusinessRuleException(Constants.ERR_ROLE_NOT_FOUND);
         }
 
@@ -113,7 +114,7 @@ public class RoleServiceFacadeBean implements RoleService {
         log.info("Facade: Updating role with ID: {}", id);
 
         Role existing = roleRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ROLE_NOT_FOUND);
         }
 
@@ -139,11 +140,11 @@ public class RoleServiceFacadeBean implements RoleService {
         log.info("Facade: Logically deleting role with ID: {}", id);
         Role existing = roleRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ROLE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_ROLE_NOT_ACTIVE);
         }
 
@@ -169,11 +170,11 @@ public class RoleServiceFacadeBean implements RoleService {
         log.info("Facade: Reactivating role with ID: {}", id);
         Role existing = roleRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ROLE_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_ROLE_ACTIVE);
         }
 

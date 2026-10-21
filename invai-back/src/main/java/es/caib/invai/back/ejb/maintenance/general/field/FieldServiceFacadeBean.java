@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing field configurations.
@@ -57,7 +58,7 @@ public class FieldServiceFacadeBean implements FieldService {
         log.debug("Facade: Fetching field by ID: {}", id);
         Field field = fieldRepository.findById(id);
 
-        if (field == null) {
+        if (Objects.isNull(field)) {
             throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
@@ -121,7 +122,7 @@ public class FieldServiceFacadeBean implements FieldService {
         log.info("Facade: Updating field with ID: {}", id);
 
         Field existing = fieldRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
@@ -151,11 +152,11 @@ public class FieldServiceFacadeBean implements FieldService {
         log.info("Facade: Logically deleting field with ID: {}", id);
         Field existing = fieldRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_FIELD_NOT_ACTIVE);
         }
 
@@ -181,11 +182,11 @@ public class FieldServiceFacadeBean implements FieldService {
         log.info("Facade: Reactivating field with ID: {}", id);
         Field existing = fieldRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_FIELD_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_FIELD_ACTIVE);
         }
 

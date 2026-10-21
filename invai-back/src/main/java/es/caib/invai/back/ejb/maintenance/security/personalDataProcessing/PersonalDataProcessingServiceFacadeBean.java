@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative PersonalDataProcessings.
@@ -50,7 +51,7 @@ public class PersonalDataProcessingServiceFacadeBean implements PersonalDataProc
         log.debug("Facade: Fetching personal data processing entry by ID: {}", id);
         PersonalDataProcessing personalDataProcessing = personalDataProcessingRepository.findById(id);
 
-        if (personalDataProcessing == null) {
+        if (Objects.isNull(personalDataProcessing)) {
             throw new BusinessRuleException(Constants.ERR_PERSONALDATAPROCESSING_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class PersonalDataProcessingServiceFacadeBean implements PersonalDataProc
         log.info("Facade: Updating personal data processing entry with ID: {}", id);
 
         PersonalDataProcessing existing = personalDataProcessingRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_PERSONALDATAPROCESSING_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class PersonalDataProcessingServiceFacadeBean implements PersonalDataProc
         log.info("Facade: Logically deleting personal data processing entry with ID: {}", id);
         PersonalDataProcessing existing = personalDataProcessingRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_PERSONALDATAPROCESSING_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_PERSONALDATAPROCESSING_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class PersonalDataProcessingServiceFacadeBean implements PersonalDataProc
         log.info("Facade: Reactivating personal data processing entry with ID: {}", id);
         PersonalDataProcessing existing = personalDataProcessingRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_PERSONALDATAPROCESSING_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_PERSONALDATAPROCESSING_ACTIVE);
         }
 

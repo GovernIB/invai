@@ -1,10 +1,10 @@
 package es.caib.invai.back.service.mapper.application.responsibleAuthorized.dir3;
 
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.dir3.Dir3ValidationEntity;
-import es.caib.invai.back.persistence.model.catalog.dir3Status.LkupDir3StatusEntity;
-import es.caib.invai.back.service.mapper.catalog.dir3Status.Dir3StatusMapperImpl;
+import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
+import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapperImpl;
 import es.caib.invai.back.service.model.application.responsibleAuthorized.dir3.Dir3Validation;
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Unit tests for the generated {@link Dir3ValidationMapperImpl}, exercising every conversion
  * direction declared on {@link Dir3ValidationMapper}.
  * <p>
- * {@link Dir3ValidationMapper} declares {@code uses = {Dir3StatusMapper.class}}, so the generated
+ * {@link Dir3ValidationMapper} declares {@code uses = {ValidationStatusMapper.class}}, so the generated
  * implementation carries an {@code @Autowired} field for that collaborator. Since no Spring
- * context is bootstrapped here, a real {@link Dir3StatusMapperImpl} instance is injected manually
+ * context is bootstrapped here, a real {@link ValidationStatusMapperImpl} instance is injected manually
  * via {@link ReflectionTestUtils}, following the same pattern used in {@code AppResponsibleMapperTest}.
  * </p>
  */
@@ -31,7 +31,7 @@ class Dir3ValidationMapperTest {
     @BeforeEach
     void setUp() {
         Dir3ValidationMapperImpl mapperImpl = new Dir3ValidationMapperImpl();
-        ReflectionTestUtils.setField(mapperImpl, "dir3StatusMapper", new Dir3StatusMapperImpl());
+        ReflectionTestUtils.setField(mapperImpl, "validationStatusMapper", new ValidationStatusMapperImpl());
         mapper = mapperImpl;
     }
 
@@ -39,7 +39,7 @@ class Dir3ValidationMapperTest {
     void toModel_mapsEveryEntityFieldIncludingResolvedDir3Status() {
         Dir3ValidationEntity entity = new Dir3ValidationEntity();
         entity.setId(1L);
-        LkupDir3StatusEntity statusEntity = new LkupDir3StatusEntity();
+        LkupValidationStatusEntity statusEntity = new LkupValidationStatusEntity();
         statusEntity.setId(2L);
         entity.setDir3Status(statusEntity);
         LocalDateTime manualValidatedAt = LocalDateTime.of(2025, 3, 1, 10, 0);
@@ -56,7 +56,7 @@ class Dir3ValidationMapperTest {
         Dir3Validation model = mapper.toModel(entity);
 
         assertEquals(1L, model.getId());
-        assertEquals(Dir3ValidationStatus.NOT_VALIDATED, model.getDir3Status());
+        assertEquals(ValidationStatusEnum.NOT_VALIDATED, model.getDir3Status());
         assertEquals(manualValidatedAt, model.getManualValidatedAt());
         assertEquals("jdoe", model.getManualValidatedBy());
         assertEquals("DIR3 corregit manualment per l'administrador", model.getReason());
@@ -77,7 +77,7 @@ class Dir3ValidationMapperTest {
     void toEntity_mapsEveryModelField() {
         Dir3Validation model = Dir3Validation.builder()
                 .id(9L)
-                .dir3Status(Dir3ValidationStatus.MANUAL)
+                .dir3Status(ValidationStatusEnum.MANUAL)
                 .manualValidatedAt(LocalDateTime.of(2025, 3, 1, 10, 0))
                 .manualValidatedBy("jdoe")
                 .reason("DIR3 corregit manualment per l'administrador")

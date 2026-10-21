@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service for the "AppProvider" list: provider (company) assignments that hang many-to-one
@@ -92,7 +93,7 @@ public class AppProviderServiceFacadeBean implements AppProviderService {
         log.info("Facade: Updating provider ID: {}", id);
 
         AppProvider existingModel = appProviderRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_PROVIDER_NOT_FOUND);
         }
 
@@ -115,11 +116,11 @@ public class AppProviderServiceFacadeBean implements AppProviderService {
         log.info("Facade: Logically deleting provider ID: {}", id);
 
         AppProvider existingModel = appProviderRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_PROVIDER_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_PROVIDER_NOT_ACTIVE);
         }
 

@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link SoffidClient}. {@link WebClient} is wired with a stub
@@ -218,5 +221,61 @@ class SoffidClientTest {
                 new HttpHeaders())));
 
         assertThrows(SoffidClientException.class, () -> client.searchUsers("Joan", PageRequest.of(0, 20)));
+    }
+
+    @Test
+    void getUsersByEmails_success_postsTheAddressesAndReturnsMappedUsers() {
+        SoffidClient client = buildClient(request -> {
+            assertEquals("https://integracions.example.local/soffid/users/by-emails", request.url().toString());
+            assertEquals(HttpMethod.POST, request.method());
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body("[{\"id\":1,\"emailAddress\":\"ana@caib.es\",\"primaryGroup\":\"sgaip\"}]")
+                    .build());
+        });
+
+        List<SoffidUser> result = client.getUsersByEmails(List.of("ana@caib.es", "ausente@caib.es"));
+
+        assertEquals(1, result.size());
+        assertEquals("sgaip", result.get(0).getPrimaryGroup());
+    }
+
+    @Test
+    void getUsersByEmails_gatewayTimeout_throwsSoffidTimeoutException() {
+        SoffidClient client = buildClient(request ->
+                Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build()));
+
+        assertThrows(SoffidTimeoutException.class, () -> client.getUsersByEmails(List.of("ana@caib.es")));
+    }
+
+    @Test
+    void getUsersByEmails_badGateway_throwsSoffidClientException() {
+        SoffidClient client = buildClient(request ->
+                Mono.just(ClientResponse.create(HttpStatus.BAD_GATEWAY).build()));
+
+        assertThrows(SoffidClientException.class,
+                () -> client.getUsersByEmails(List.of("ana@caib.es")));
+    }
+
+    @Test
+    void getGroupsDir3_success_returnsTheDir3ByGroupName() {
+        SoffidClient client = buildClient(request -> {
+            assertEquals("https://integracions.example.local/soffid/groups/dir3", request.url().toString());
+            assertEquals(HttpMethod.GET, request.method());
+            return Mono.just(ClientResponse.create(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body("{\"sgaip\":\"A04027054\",\"dgtic\":\"A04003003\"}")
+                    .build());
+        });
+
+        assertEquals(java.util.Map.of("sgaip", "A04027054", "dgtic", "A04003003"), client.getGroupsDir3());
+    }
+
+    @Test
+    void getGroupsDir3_gatewayTimeout_throwsSoffidTimeoutException() {
+        SoffidClient client = buildClient(request ->
+                Mono.just(ClientResponse.create(HttpStatus.GATEWAY_TIMEOUT).build()));
+
+        assertThrows(SoffidTimeoutException.class, client::getGroupsDir3);
     }
 }

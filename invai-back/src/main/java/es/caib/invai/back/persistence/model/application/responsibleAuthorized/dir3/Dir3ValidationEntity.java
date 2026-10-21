@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
-import es.caib.invai.back.persistence.model.catalog.dir3Status.LkupDir3StatusEntity;
+import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
@@ -37,7 +37,7 @@ public class Dir3ValidationEntity extends BaseEntity {
     /** Current DIR3 validation state. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DIR3_STATUS_ID", nullable = false)
-    private LkupDir3StatusEntity dir3Status;
+    private LkupValidationStatusEntity dir3Status;
 
     /** Timestamp of the manual DIR3 validation, populated only when {@link #dir3Status} is MANUAL. */
     @Column(name = "MANUAL_VALIDATED_AT")

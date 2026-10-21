@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static es.caib.invai.back.utils.Constants.*;
 
@@ -61,7 +62,7 @@ public class CommissionServiceFacadeBean implements CommissionService {
     public CommissionOutputDTO getById(Long id) {
         log.debug("Facade: Fetching commission by id: {}", id);
         Commission commission = commissionRepository.findById(id);
-        if (commission == null) {
+        if (Objects.isNull(commission)) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_FOUND);
         }
         return commissionMapper.toResponse(commission);
@@ -121,7 +122,7 @@ public class CommissionServiceFacadeBean implements CommissionService {
         log.info("Facade: Updating commission ID: {}", id);
 
         Commission existing = commissionRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_FOUND);
         }
 
@@ -152,11 +153,11 @@ public class CommissionServiceFacadeBean implements CommissionService {
     public void delete(Long id) {
         log.info("Facade: Executing logical delete for commission ID: {}", id);
         Commission existing = commissionRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_ACTIVE);
         }
 
@@ -182,11 +183,11 @@ public class CommissionServiceFacadeBean implements CommissionService {
         log.info("Facade: Reactivating commission ID: {}", id);
         Commission existing = commissionRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(ERR_COMMISSION_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(ERR_COMMISSION_ACTIVE);
         }
 

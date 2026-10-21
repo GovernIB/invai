@@ -297,20 +297,11 @@ class AppInformationSystemDbMapperTest {
         assertEquals(200L, applicationDTO.getId());
         assertEquals("APP001", applicationDTO.getCode());
         assertEquals("Application name", applicationDTO.getName());
-        assertEquals(StatusEnum.INACTIVE, applicationDTO.getStatus());
-        // LocalDateTime -> XMLGregorianCalendar -> LocalDate round trip keeps only the date part
-        assertEquals(LocalDate.of(2030, 6, 15), applicationDTO.getExpirationDate());
-        assertEquals(LocalDate.of(2021, 1, 1), applicationDTO.getCreatedAt());
-        assertEquals("application-creator", applicationDTO.getCreatedBy());
-        assertEquals(LocalDate.of(2021, 2, 1), applicationDTO.getUpdatedAt());
-        assertEquals("application-updater", applicationDTO.getUpdatedBy());
 
         assertEquals(100L, applicationDTO.getCategory().getId());
         assertEquals(101L, applicationDTO.getSystemType().getId());
         assertEquals(102L, applicationDTO.getField().getId());
         assertNull(applicationDTO.getAdmUnit());
-        assertEquals(104L, applicationDTO.getCsCommission().getId());
-        assertEquals(CommissionType.TECNICA, applicationDTO.getCsCommission().getCommissionType());
     }
 
     @Test

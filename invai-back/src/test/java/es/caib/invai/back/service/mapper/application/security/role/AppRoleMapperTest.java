@@ -21,6 +21,9 @@ import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.application.security.role.AppRole;
 import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
+import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
+import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapperImpl;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -61,6 +64,7 @@ class AppRoleMapperTest {
         AppRoleMapperImpl impl = new AppRoleMapperImpl();
         ReflectionTestUtils.setField(impl, "appSecurityMapper", appSecurityMapperImpl);
         ReflectionTestUtils.setField(impl, "securityRoleMapper", new SecurityRoleMapperImpl());
+        ReflectionTestUtils.setField(impl, "validationStatusMapper", new ValidationStatusMapperImpl());
         mapper = impl;
     }
 
@@ -305,13 +309,13 @@ class AppRoleMapperTest {
     // ------------------------------------------------------------------
 
     @Test
-    void toModelFromInput_resolvesNestedIdsAndIgnoresAuditFields() {
+    void toModelFromInput_resolvesTheAnchorIdLeavesTheRoleToTheCallerAndIgnoresAuditFields() {
         AppRoleInputDTO inputDTO = new AppRoleInputDTO(50L, 60L);
 
         AppRole model = mapper.toModelFromInput(inputDTO);
 
         assertEquals(50L, model.getAppSecurity().getId());
-        assertEquals(60L, model.getSecurityRole().getId());
+        assertNull(model.getSecurityRole());
         assertNull(model.getId());
         assertNull(model.getCreatedAt());
         assertNull(model.getCreatedBy());
@@ -342,7 +346,7 @@ class AppRoleMapperTest {
 
         assertEquals(4L, existing.getId());
         assertEquals(70L, existing.getAppSecurity().getId());
-        assertEquals(80L, existing.getSecurityRole().getId());
+        assertEquals(23L, existing.getSecurityRole().getId());
     }
 
     @Test
@@ -357,7 +361,7 @@ class AppRoleMapperTest {
 
         assertEquals(5L, existing.getId());
         assertEquals(90L, existing.getAppSecurity().getId());
-        assertEquals(91L, existing.getSecurityRole().getId());
+        assertNull(existing.getSecurityRole());
     }
 
     @Test
@@ -372,5 +376,73 @@ class AppRoleMapperTest {
 
         assertEquals(6L, existing.getId());
         assertEquals(13L, existing.getAppSecurity().getId());
+    }
+
+
+    // ------------------------------------------------------------------
+    // Validation state
+    // ------------------------------------------------------------------
+
+    @Test
+    void toModel_validationData_isMappedToTheEnumAndTheManualFields() {
+        AppRoleEntity entity = buildDeepEntity();
+        LkupValidationStatusEntity status = new LkupValidationStatusEntity();
+        status.setId(ValidationStatusEnum.MANUAL.getId());
+        entity.setValidationStatus(status);
+        entity.setManualValidatedAt(LocalDateTime.of(2026, 10, 7, 9, 30));
+        entity.setManualValidatedBy("jdoe");
+
+        AppRole model = mapper.toModel(entity);
+
+        assertEquals(ValidationStatusEnum.MANUAL, model.getValidationStatus());
+        assertEquals(LocalDateTime.of(2026, 10, 7, 9, 30), model.getManualValidatedAt());
+        assertEquals("jdoe", model.getManualValidatedBy());
+    }
+
+    @Test
+    void toEntity_validationData_isMappedToTheStatusRowAndTheManualFields() {
+        AppRole model = buildDeepModel();
+        model.setValidationStatus(ValidationStatusEnum.NOT_VALIDATED);
+        model.setManualValidatedBy("jdoe");
+
+        AppRoleEntity entity = mapper.toEntity(model);
+
+        assertEquals(ValidationStatusEnum.NOT_VALIDATED.getId(), entity.getValidationStatus().getId());
+        assertEquals("jdoe", entity.getManualValidatedBy());
+    }
+
+    @Test
+    void toResponse_validationData_isExposed() {
+        AppRole model = buildDeepModel();
+        model.setValidationStatus(ValidationStatusEnum.MANUAL);
+        model.setManualValidatedAt(LocalDateTime.of(2026, 10, 7, 9, 30));
+        model.setManualValidatedBy("jdoe");
+
+        AppRoleOutputDTO dto = mapper.toResponse(model);
+
+        assertEquals(ValidationStatusEnum.MANUAL, dto.getValidationStatus());
+        assertEquals(LocalDateTime.of(2026, 10, 7, 9, 30), dto.getManualValidatedAt());
+        assertEquals("jdoe", dto.getManualValidatedBy());
+    }
+
+    @Test
+    void toModelFromInput_neverTakesTheValidationFromThePayload() {
+        AppRole model = mapper.toModelFromInput(new AppRoleInputDTO(5L, 7L));
+
+        assertNull(model.getValidationStatus());
+        assertNull(model.getManualValidatedAt());
+        assertNull(model.getManualValidatedBy());
+    }
+
+    @Test
+    void updateModelFromInput_leavesTheValidationOfTheModelUntouched() {
+        AppRole model = buildDeepModel();
+        model.setValidationStatus(ValidationStatusEnum.MANUAL);
+        model.setManualValidatedBy("jdoe");
+
+        mapper.updateModelFromInput(new AppRoleInputDTO(5L, 7L), model);
+
+        assertEquals(ValidationStatusEnum.MANUAL, model.getValidationStatus());
+        assertEquals("jdoe", model.getManualValidatedBy());
     }
 }

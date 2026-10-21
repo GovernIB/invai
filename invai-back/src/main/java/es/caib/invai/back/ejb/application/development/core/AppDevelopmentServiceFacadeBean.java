@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service for the "AppDevelopment" tab: the single development record attached 1-to-1 to an
@@ -75,7 +76,7 @@ public class AppDevelopmentServiceFacadeBean implements AppDevelopmentService {
                 inputDTO.getApplicationId(), inputDTO.getEnvironmentId());
 
         AppDevelopment existing = appDevelopmentRepository.findByApplicationId(inputDTO.getApplicationId());
-        if (existing != null && existing.getDeletedAt() == null) {
+        if (Objects.nonNull(existing) && Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DEVELOPMENT_ALREADY_EXISTS);
         }
 
@@ -100,7 +101,7 @@ public class AppDevelopmentServiceFacadeBean implements AppDevelopmentService {
         log.info("Facade: Updating development ID: {}", id);
 
         AppDevelopment existingModel = appDevelopmentRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_DEVELOPMENT_NOT_FOUND);
         }
 
@@ -123,11 +124,11 @@ public class AppDevelopmentServiceFacadeBean implements AppDevelopmentService {
         log.info("Facade: Logically deleting development ID: {}", id);
 
         AppDevelopment existingModel = appDevelopmentRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_DEVELOPMENT_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DEVELOPMENT_NOT_ACTIVE);
         }
 

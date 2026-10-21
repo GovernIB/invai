@@ -294,4 +294,21 @@ class AppResponsibleRepositoryAdapterTest {
         assertEquals("jdoe", aud.getDeletedBy());
         assertEquals("Deixa l'empresa", aud.getObservation());
     }
+
+    @Test
+    void findAllActivePersonalCaibEmails_returnsTheDistinctEmailsOfTheActiveAssignments() {
+        var adapter = buildAdapter();
+        when(appResponsibleJPARepository.findAllByDeletedAtIsNullAndPersonPersonalCaibTrueAndPersonEmailIsNotNull())
+                .thenReturn(List.of(responsibleOf("ana@caib.es"), responsibleOf("joan@caib.es"), responsibleOf("ana@caib.es")));
+
+        assertEquals(List.of("ana@caib.es", "joan@caib.es"), adapter.findAllActivePersonalCaibEmails());
+    }
+
+    private static AppResponsibleEntity responsibleOf(String email) {
+        PersonEntity person = new PersonEntity();
+        person.setEmail(email);
+        AppResponsibleEntity responsible = new AppResponsibleEntity();
+        responsible.setPerson(person);
+        return responsible;
+    }
 }

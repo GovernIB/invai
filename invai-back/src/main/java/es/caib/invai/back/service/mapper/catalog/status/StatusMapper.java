@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * MapStruct translation utility specializing in state conversions across lifecycle tracking entities,
@@ -66,7 +67,7 @@ public interface StatusMapper {
      * @return a disconnected status structure stub tracking the configuration reference ID
      */
     default Status map(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         Status status = new Status();
@@ -84,7 +85,7 @@ public interface StatusMapper {
      */
     @Named("mapLongToStatusEnum")
     default StatusEnum mapLongToStatusEnum(Long value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return null;
         }
         for (StatusEnum status : StatusEnum.values()) {
@@ -104,7 +105,7 @@ public interface StatusMapper {
      */
     @Named("mapStatusEnumToStatusEntity")
     default LkupStatusEntity mapStatusEnumToStatusEntity(StatusEnum statusEnum) {
-        if (statusEnum == null) return null;
+        if (Objects.isNull(statusEnum)) return null;
         LkupStatusEntity entity = new LkupStatusEntity();
         entity.setId(statusEnum.getId());
         return entity;
@@ -118,7 +119,7 @@ public interface StatusMapper {
      * @return the matching target domain {@link StatusEnum} key, or {@code null} if mismatched or absent
      */
     default StatusEnum mapStatusEntityToStatusEnum(LkupStatusEntity lkupStatusEntity) {
-        if (lkupStatusEntity == null || lkupStatusEntity.getId() == null) return null;
+        if (Objects.isNull(lkupStatusEntity) || Objects.isNull(lkupStatusEntity.getId())) return null;
 
         for (StatusEnum status : StatusEnum.values()) {
             if (status.getId().equals(lkupStatusEntity.getId())) {

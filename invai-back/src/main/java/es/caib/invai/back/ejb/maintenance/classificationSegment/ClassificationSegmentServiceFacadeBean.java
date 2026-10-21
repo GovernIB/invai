@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for administrative ClassificationSegments.
@@ -50,7 +51,7 @@ public class ClassificationSegmentServiceFacadeBean implements ClassificationSeg
         log.debug("Facade: Fetching classification segment entry by ID: {}", id);
         ClassificationSegment classificationSegment = classificationSegmentRepository.findById(id);
 
-        if (classificationSegment == null) {
+        if (Objects.isNull(classificationSegment)) {
             throw new BusinessRuleException(Constants.ERR_CLASSIFICATIONSEGMENT_NOT_FOUND);
         }
 
@@ -108,7 +109,7 @@ public class ClassificationSegmentServiceFacadeBean implements ClassificationSeg
         log.info("Facade: Updating classification segment entry with ID: {}", id);
 
         ClassificationSegment existing = classificationSegmentRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_CLASSIFICATIONSEGMENT_NOT_FOUND);
         }
 
@@ -133,11 +134,11 @@ public class ClassificationSegmentServiceFacadeBean implements ClassificationSeg
         log.info("Facade: Logically deleting classification segment entry with ID: {}", id);
         ClassificationSegment existing = classificationSegmentRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_CLASSIFICATIONSEGMENT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_CLASSIFICATIONSEGMENT_NOT_ACTIVE);
         }
 
@@ -159,11 +160,11 @@ public class ClassificationSegmentServiceFacadeBean implements ClassificationSeg
         log.info("Facade: Reactivating classification segment entry with ID: {}", id);
         ClassificationSegment existing = classificationSegmentRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_CLASSIFICATIONSEGMENT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_CLASSIFICATIONSEGMENT_ACTIVE);
         }
 

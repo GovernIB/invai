@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing environment core configurations.
@@ -51,7 +52,7 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
         log.debug("Facade: Fetching environment by ID: {}", id);
         Environment environment = environmentRepository.findById(id);
 
-        if (environment == null) {
+        if (Objects.isNull(environment)) {
             throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_NOT_FOUND);
         }
 
@@ -109,7 +110,7 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
         log.info("Facade: Updating environment with ID: {}", id);
 
         Environment existing = environmentRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_NOT_FOUND);
         }
 
@@ -134,11 +135,11 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
         log.info("Facade: Logically deleting environment with ID: {}", id);
         Environment existing = environmentRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_NOT_FOUND);
         }
 
@@ -160,11 +161,11 @@ public class EnvironmentServiceFacadeBean implements EnvironmentService {
         log.info("Facade: Reactivating environment with ID: {}", id);
         Environment existing = environmentRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_ENVIRONMENT_ACTIVE);
         }
 

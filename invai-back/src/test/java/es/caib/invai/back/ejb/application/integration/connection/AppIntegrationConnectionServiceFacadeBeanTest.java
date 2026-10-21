@@ -1,6 +1,7 @@
 package es.caib.invai.back.ejb.application.integration.connection;
 
 import es.caib.invai.back.exception.BusinessRuleException;
+import es.caib.invai.back.exception.SoffidClientException;
 import es.caib.invai.back.exception.SoffidTimeoutException;
 import es.caib.invai.back.interna.application.integration.connection.DTO.AppIntegrationConnectionInputDTO;
 import es.caib.invai.back.interna.application.integration.connection.DTO.AppIntegrationConnectionOutputDTO;
@@ -33,9 +34,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -220,7 +223,7 @@ class AppIntegrationConnectionServiceFacadeBeanTest {
         appIntegrationConnectionServiceFacadeBean.update(1L, inputDTO);
 
         verify(appIntegrationRequiredRoleRepository).delete(current);
-        assertTrue(current.getDeletedAt() != null);
+        assertTrue(Objects.nonNull(current.getDeletedAt()));
     }
 
     @Test
@@ -265,7 +268,7 @@ class AppIntegrationConnectionServiceFacadeBeanTest {
 
         verify(appIntegrationConnectionRepository).delete(activeModel);
         verify(appIntegrationRequiredRoleRepository).delete(child);
-        assertTrue(child.getDeletedAt() != null);
+        assertTrue(Objects.nonNull(child.getDeletedAt()));
     }
 
     @Test
@@ -289,14 +292,63 @@ class AppIntegrationConnectionServiceFacadeBeanTest {
     }
 
     @Test
-    void getAll_requiredRoleLookupFails_throwsBusinessRuleException() {
+    void getAll_requiredRoleLookupFails_returnsRowWithoutRoles() {
         AppIntegrationRequiredRole required = existingRequiredRole(500L, 100L);
         when(appIntegrationRequiredRoleRepository.findAllActiveByAppIntegrationConnectionId(1L)).thenReturn(List.of(required));
         when(soffidClient.getRolesByIds(List.of(100L))).thenThrow(new SoffidTimeoutException());
 
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class, this::getAllSingleResult);
+        AppIntegrationConnectionOutputDTO result = getAllSingleResult();
 
-        assertEquals(Constants.ERR_REQUIREDROLE_UNAVAILABLE, ex.getMessage());
+        assertTrue(result.getRolesUnavailable());
+        assertNull(result.getRequiredRoles());
+        assertNull(result.getGrantedRoles());
+        assertNull(result.getRolesMismatch());
+    }
+
+    @Test
+    void getAll_soffidAnswersWithError_returnsRowWithoutRoles() {
+        when(soffidClient.getGrantedRoles("u00629")).thenThrow(new SoffidClientException("exception.soffid.unavailable"));
+
+        AppIntegrationConnectionOutputDTO result = getAllSingleResult();
+
+        assertTrue(result.getRolesUnavailable());
+        assertNull(result.getGrantedRoles());
+        assertNull(result.getRolesMismatch());
+    }
+
+    @Test
+    void getAll_soffidTimesOut_skipsSoffidForTheRemainingRows() {
+        AppIntegrationConnection second = new AppIntegrationConnection();
+        second.setId(2L);
+        second.setUsername("u00630");
+        when(appIntegrationConnectionMapper.toResponse(any())).thenAnswer(invocation -> new AppIntegrationConnectionOutputDTO());
+        when(appIntegrationConnectionRepository.findAll(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(activeModel, second)));
+        when(soffidClient.getGrantedRoles("u00629")).thenThrow(new SoffidTimeoutException());
+
+        List<AppIntegrationConnectionOutputDTO> result = appIntegrationConnectionServiceFacadeBean
+                .getAll(10L, new AppIntegrationConnectionCriteria(), Pageable.unpaged()).getContent();
+
+        assertTrue(result.get(0).getRolesUnavailable());
+        assertTrue(result.get(1).getRolesUnavailable());
+        verify(soffidClient, never()).getGrantedRoles("u00630");
+    }
+
+    @Test
+    void getAll_soffidAnswersWithError_stillResolvesTheRemainingRows() {
+        AppIntegrationConnection second = new AppIntegrationConnection();
+        second.setId(2L);
+        second.setUsername("u00630");
+        when(appIntegrationConnectionMapper.toResponse(any())).thenAnswer(invocation -> new AppIntegrationConnectionOutputDTO());
+        when(appIntegrationConnectionRepository.findAll(any(), any(), any()))
+                .thenReturn(new PageImpl<>(List.of(activeModel, second)));
+        when(soffidClient.getGrantedRoles("u00629")).thenThrow(new SoffidClientException("exception.soffid.unavailable"));
+
+        List<AppIntegrationConnectionOutputDTO> result = appIntegrationConnectionServiceFacadeBean
+                .getAll(10L, new AppIntegrationConnectionCriteria(), Pageable.unpaged()).getContent();
+
+        assertTrue(result.get(0).getRolesUnavailable());
+        assertFalse(result.get(1).getRolesUnavailable());
     }
 
     @Test
@@ -331,11 +383,7 @@ class AppIntegrationConnectionServiceFacadeBeanTest {
     }
 
     @Test
-    void getAll_grantedRoleLookupFails_throwsBusinessRuleException() {
-        when(soffidClient.getGrantedRoles("u00629")).thenThrow(new SoffidTimeoutException());
-
-        BusinessRuleException ex = assertThrows(BusinessRuleException.class, this::getAllSingleResult);
-
-        assertEquals(Constants.ERR_GRANTEDROLE_UNAVAILABLE, ex.getMessage());
+    void getAll_soffidAvailable_rolesAreFlaggedAsAvailable() {
+        assertFalse(getAllSingleResult().getRolesUnavailable());
     }
 }

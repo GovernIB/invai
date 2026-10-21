@@ -1,5 +1,6 @@
 package es.caib.invai.back.persistence.repository.application.security.role;
 
+import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
 import es.caib.invai.back.persistence.model.application.security.role.AppRoleAudEntity;
 import es.caib.invai.back.persistence.model.application.security.role.AppRoleEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
@@ -69,6 +70,11 @@ class AppRoleRepositoryAdapterTest {
         SecurityRoleEntity securityRole = new SecurityRoleEntity();
         securityRole.setId(20L);
         entity.setSecurityRole(securityRole);
+        LkupValidationStatusEntity validationStatus = new LkupValidationStatusEntity();
+        validationStatus.setId(3L);
+        entity.setValidationStatus(validationStatus);
+        entity.setManualValidatedAt(LocalDateTime.of(2026, 10, 7, 9, 30));
+        entity.setManualValidatedBy("jdoe");
         return entity;
     }
 
@@ -130,6 +136,9 @@ class AppRoleRepositoryAdapterTest {
         assertEquals(5L, aud.getAppRoleId());
         assertEquals(10L, aud.getAppSecurityId());
         assertEquals(20L, aud.getSecurityRoleId());
+        assertEquals(3L, aud.getValidationStatusId());
+        assertEquals(LocalDateTime.of(2026, 10, 7, 9, 30), aud.getManualValidatedAt());
+        assertEquals("jdoe", aud.getManualValidatedBy());
         assertEquals("INSERT", aud.getAudAction());
         assertNotNull(aud.getCreatedAt());
         assertEquals("SYSTEM_USER", aud.getCreatedBy());

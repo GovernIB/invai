@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing application-to-system mapping core distributions.
@@ -90,7 +91,7 @@ public class AppSystemServiceFacadeBean implements AppSystemService {
         log.info("Facade: Modifying metadata links matching active tracker index for ID: {}", id);
 
         AppSystem existing = appSystemRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_APPLICATIONSYSTEM_NOT_FOUND);
         }
 
@@ -117,11 +118,11 @@ public class AppSystemServiceFacadeBean implements AppSystemService {
         log.info("Facade: Logically soft deleting application system linking tracking index row for ID: {}", id);
         AppSystem existing = appSystemRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_APPLICATIONSYSTEM_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APPLICATIONSYSTEM_NOT_ACTIVE);
         }
 

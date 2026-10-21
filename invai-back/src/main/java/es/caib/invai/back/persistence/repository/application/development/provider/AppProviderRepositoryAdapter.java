@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * JPA-backed implementation of {@link AppProviderRepository}: delegates CRUD and filtered
@@ -173,12 +174,12 @@ public class AppProviderRepositoryAdapter implements AppProviderRepository {
             aud.setProviderId(entity.getId());
             aud.setAppDevelopmentId(entity.getAppDevelopment().getId());
             aud.setCompanyName(entity.getCompanyName());
-            aud.setRoleId(entity.getRole() != null ? entity.getRole().getId() : null);
+            aud.setRoleId(Objects.nonNull(entity.getRole()) ? entity.getRole().getId() : null);
             aud.setStartDate(entity.getStartDate());
             aud.setExpireDate(entity.getExpireDate());
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
            
                         aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

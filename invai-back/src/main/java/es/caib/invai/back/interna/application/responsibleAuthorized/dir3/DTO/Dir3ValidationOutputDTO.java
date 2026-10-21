@@ -1,6 +1,6 @@
 package es.caib.invai.back.interna.application.responsibleAuthorized.dir3.DTO;
 
-import es.caib.invai.back.service.model.catalog.dir3Status.Dir3ValidationStatus;
+import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ public class Dir3ValidationOutputDTO {
     private Long id;
 
     /** Current DIR3 validation state. */
-    private Dir3ValidationStatus dir3Status;
+    private ValidationStatusEnum dir3Status;
 
     /** Timestamp of the manual DIR3 validation, populated only when {@link #dir3Status} is MANUAL. */
     private LocalDateTime manualValidatedAt;

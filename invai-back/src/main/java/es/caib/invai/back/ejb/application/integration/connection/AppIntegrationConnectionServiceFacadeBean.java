@@ -30,14 +30,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Facade service implementing CRUD for integration connections. {@link #getAll} additionally
  * enriches each connection with its live-resolved required role details ({@link #getRequiredRoles})
  * and granted roles ({@link #getGrantedRoles}), comparing them via {@link #hasMismatch} to compute
- * {@code rolesMismatch}; being a read, it is free to let a {@link BusinessRuleException} propagate if
- * Soffid can't be reached. {@link #create}/{@link #update}, by contrast, never attempt this live
+ * {@code rolesMismatch}. If Soffid can't be reached the connections are still returned, just without
+ * those three fields and with {@code rolesUnavailable} set: the roles are an enrichment of what is
+ * stored, so a Soffid outage must not hide the stored data. After a timeout the rest of the page skips Soffid altogether, so the outage
+ * costs one timeout per request rather than one per row. {@link #create}/{@link #update}, by
+ * contrast, never attempt this live
  * resolution at all - unlike a read, a write has already taken effect by the time it would run, and
  * a transient Soffid outage must not roll back an otherwise-successful write (mirrors {@code
  * AppDataServiceFacadeBean}, which likewise only resolves its live OpenAPI/reuse documents from
@@ -95,13 +100,28 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
     public Page<AppIntegrationConnectionOutputDTO> getAll(Long appIntegrationId, AppIntegrationConnectionCriteria criteria, Pageable pageable) {
         log.debug("Facade: Fetching application integration connections for anchor ID: {}", appIntegrationId);
         Page<AppIntegrationConnection> domainPage = appIntegrationConnectionRepository.findAll(appIntegrationId, criteria, pageable);
+        AtomicBoolean soffidTimedOut = new AtomicBoolean(false);
         return domainPage.map(domain -> {
             AppIntegrationConnectionOutputDTO response = appIntegrationConnectionMapper.toResponse(domain);
-            List<SoffidRole> requiredRoles = getRequiredRoles(domain.getId());
-            List<SoffidRole> grantedRoles = getGrantedRoles(domain.getUsername());
-            response.setRequiredRoles(requiredRoles);
-            response.setGrantedRoles(grantedRoles);
-            response.setRolesMismatch(hasMismatch(requiredRoles, grantedRoles));
+            if (soffidTimedOut.get()) {
+               response.setRolesUnavailable(true);
+                return response;
+            }
+            try {
+                List<SoffidRole> requiredRoles = getRequiredRoles(domain.getId());
+                List<SoffidRole> grantedRoles = getGrantedRoles(domain.getUsername());
+                response.setRequiredRoles(requiredRoles);
+                response.setGrantedRoles(grantedRoles);
+                response.setRolesMismatch(hasMismatch(requiredRoles, grantedRoles));
+                response.setRolesUnavailable(false);
+            } catch (SoffidTimeoutException e) {
+                soffidTimedOut.set(true);
+                log.warn("Soffid timed out resolving the roles of connection ID: {}; returning it without roles", domain.getId());
+                response.setRolesUnavailable(true);
+            } catch (SoffidClientException e) {
+                log.warn("Soffid unavailable resolving the roles of connection ID: {}; returning it without roles", domain.getId());
+                response.setRolesUnavailable(true);
+            }
             return response;
         });
     }
@@ -127,7 +147,7 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
         log.info("Facade: Updating application integration connection ID: {}", id);
 
         AppIntegrationConnection existingModel = appIntegrationConnectionRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_CONNECTION_NOT_FOUND);
         }
 
@@ -147,7 +167,7 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
         log.info("Facade: Logically deleting application integration connection ID: {}", id);
 
         AppIntegrationConnection existingModel = appIntegrationConnectionRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_CONNECTION_NOT_FOUND);
         }
 
@@ -169,8 +189,8 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
      * @throws BusinessRuleException if zero or both are set
      */
     private void requireExactlyOneSystem(AppIntegrationConnectionInputDTO inputDTO) {
-        boolean hasApplication = inputDTO.getApplicationId() != null;
-        boolean hasExternalSystem = inputDTO.getExternalSystemId() != null;
+        boolean hasApplication = Objects.nonNull(inputDTO.getApplicationId());
+        boolean hasExternalSystem = Objects.nonNull(inputDTO.getExternalSystemId());
         if (!hasApplication && !hasExternalSystem) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_CONNECTION_SYSTEM_REQUIRED);
         }
@@ -188,16 +208,16 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
      * @throws BusinessRuleException if any referenced id doesn't exist
      */
     private void requireReferencesExist(AppIntegrationConnectionInputDTO inputDTO) {
-        if (appIntegrationRepository.findById(inputDTO.getAppIntegrationId()) == null) {
+        if (Objects.isNull(appIntegrationRepository.findById(inputDTO.getAppIntegrationId()))) {
             throw new BusinessRuleException(Constants.ERR_APP_INTEGRATION_NOT_FOUND);
         }
-        if (inputDTO.getApplicationId() != null && applicationRepository.findById(inputDTO.getApplicationId()) == null) {
+        if (Objects.nonNull(inputDTO.getApplicationId()) && Objects.isNull(applicationRepository.findById(inputDTO.getApplicationId()))) {
             throw new BusinessRuleException(Constants.ERR_APP_NOT_FOUND);
         }
-        if (inputDTO.getExternalSystemId() != null && externalSystemRepository.findById(inputDTO.getExternalSystemId()) == null) {
+        if (Objects.nonNull(inputDTO.getExternalSystemId()) && Objects.isNull(externalSystemRepository.findById(inputDTO.getExternalSystemId()))) {
             throw new BusinessRuleException(Constants.ERR_EXTERNALSYSTEM_NOT_FOUND);
         }
-        if (technologyRepository.findById(inputDTO.getTechnologyId()) == null) {
+        if (Objects.isNull(technologyRepository.findById(inputDTO.getTechnologyId()))) {
             throw new BusinessRuleException(Constants.ERR_TECHNOLOGY_NOT_FOUND);
         }
     }
@@ -208,7 +228,8 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
      *
      * @param connectionId identifier of the connection whose required roles to resolve
      * @return the connection's required role details
-     * @throws BusinessRuleException if Soffid can't be reached
+     * @throws SoffidTimeoutException if Soffid timed out
+     * @throws SoffidClientException  if Soffid can't be reached or answered with an error
      */
     private List<SoffidRole> getRequiredRoles(Long connectionId) {
         List<Long> ids = appIntegrationRequiredRoleRepository
@@ -216,12 +237,7 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
                 .map(AppIntegrationRequiredRole::getRoleId)
                 .toList();
 
-        try {
-            return ids.isEmpty() ? List.of() : soffidClient.getRolesByIds(ids);
-        } catch (SoffidTimeoutException | SoffidClientException e) {
-            log.error("Could not resolve required role details for connection ID: {}", connectionId, e);
-            throw new BusinessRuleException(Constants.ERR_REQUIREDROLE_UNAVAILABLE);
-        }
+        return ids.isEmpty() ? List.of() : soffidClient.getRolesByIds(ids);
     }
 
     /**
@@ -229,15 +245,11 @@ public class AppIntegrationConnectionServiceFacadeBean implements AppIntegration
      *
      * @param username the Soffid account name to resolve granted roles for
      * @return the roles currently granted to {@code username}
-     * @throws BusinessRuleException if Soffid can't be reached
+     * @throws SoffidTimeoutException if Soffid timed out
+     * @throws SoffidClientException  if Soffid can't be reached or answered with an error
      */
     private List<SoffidRole> getGrantedRoles(String username) {
-        try {
-            return soffidClient.getGrantedRoles(username);
-        } catch (SoffidTimeoutException | SoffidClientException e) {
-            log.error("Could not resolve granted roles for username '{}'", username, e);
-            throw new BusinessRuleException(Constants.ERR_GRANTEDROLE_UNAVAILABLE);
-        }
+        return soffidClient.getGrantedRoles(username);
     }
 
     /**

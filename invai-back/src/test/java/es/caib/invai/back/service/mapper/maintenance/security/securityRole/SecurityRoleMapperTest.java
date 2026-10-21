@@ -2,6 +2,7 @@ package es.caib.invai.back.service.mapper.maintenance.security.securityRole;
 
 import es.caib.invai.back.interna.maintenance.security.securityRole.DTO.SecurityRoleOutputDTO;
 import es.caib.invai.back.persistence.model.maintenance.security.securityRole.SecurityRoleEntity;
+import es.caib.invai.back.rest.soffid.SoffidRole;
 import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -37,6 +38,50 @@ class SecurityRoleMapperTest {
     @Test
     void toModel_null_returnsNull() {
         assertNull(mapper.toModel(null));
+    }
+
+    @Test
+    void toModelFromSoffid_mapsSoffidIdToRoleIdAndLeavesLocalIdEmpty() {
+        SoffidRole soffidRole = new SoffidRole();
+        soffidRole.setId(393195L);
+        soffidRole.setName("OWS_ADMIN_ROLE");
+        soffidRole.setSystem("OWS");
+        soffidRole.setDescription("Administrator OWS role");
+
+        SecurityRole model = mapper.toModelFromSoffid(soffidRole);
+
+        assertNull(model.getId());
+        assertEquals(393195L, model.getRoleId());
+        assertEquals("OWS_ADMIN_ROLE", model.getName());
+        assertEquals("OWS", model.getSystem());
+        assertEquals("Administrator OWS role", model.getDescription());
+    }
+
+    @Test
+    void toModelFromSoffid_null_returnsNull() {
+        assertNull(mapper.toModelFromSoffid(null));
+    }
+
+    @Test
+    void toResponseFromSoffid_mapsSoffidIdToRoleIdAndLeavesLocalIdEmpty() {
+        SoffidRole soffidRole = new SoffidRole();
+        soffidRole.setId(393195L);
+        soffidRole.setName("OWS_ADMIN_ROLE");
+        soffidRole.setSystem("OWS");
+        soffidRole.setDescription("Administrator OWS role");
+
+        SecurityRoleOutputDTO dto = mapper.toResponseFromSoffid(soffidRole);
+
+        assertNull(dto.getId());
+        assertEquals(393195L, dto.getRoleId());
+        assertEquals("OWS_ADMIN_ROLE", dto.getName());
+        assertEquals("OWS", dto.getSystem());
+        assertEquals("Administrator OWS role", dto.getDescription());
+    }
+
+    @Test
+    void toResponseFromSoffid_null_returnsNull() {
+        assertNull(mapper.toResponseFromSoffid(null));
     }
 
     @Test

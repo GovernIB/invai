@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for managing ENS classification records hanging off the
@@ -89,7 +90,7 @@ public class AppEnsClassificationServiceFacadeBean implements AppEnsClassificati
         log.info("Facade: Initiating security validation rules check prior to executing transaction merge on ID: {}", id);
 
         AppEnsClassification existingModel = appEnsClassificationRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_ENS_CLASSIFICATION_NOT_FOUND);
         }
 
@@ -111,11 +112,11 @@ public class AppEnsClassificationServiceFacadeBean implements AppEnsClassificati
         log.info("Facade: Evaluating infrastructure components prior to setting logical deletion properties for target: {}", id);
 
         AppEnsClassification existingModel = appEnsClassificationRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_ENS_CLASSIFICATION_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_ENS_CLASSIFICATION_NOT_ACTIVE);
         }
 

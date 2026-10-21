@@ -1,5 +1,6 @@
 package es.caib.invai.back.utils;
 
+import es.caib.invai.back.exception.BusinessRuleException;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.AfterEach;
@@ -10,16 +11,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link Utils}, covering its reflective field sanitization routine and its
@@ -116,5 +125,63 @@ class UtilsTest {
         CompletableFuture<String> future = CompletableFuture.failedFuture(new Exception("checked failure"));
 
         assertThrows(CompletionException.class, () -> Utils.join(future));
+    }
+
+    // --- readContent ---
+
+    @Test
+    void readContent_returnsTheBytesOfTheUploadedFile() {
+        byte[] bytes = "%PDF-1.7".getBytes(StandardCharsets.UTF_8);
+
+        assertArrayEquals(bytes, Utils.readContent(new MockMultipartFile("file", "a.pdf", "application/pdf", bytes)));
+    }
+
+    @Test
+    void readContent_fileThatCannotBeRead_throwsBusinessRuleException() throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getBytes()).thenThrow(new IOException("disk failure"));
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class, () -> Utils.readContent(file));
+
+        assertEquals(Constants.ERR_DOCUMENTATION_ATTACHMENT_FILE_UNREADABLE, ex.getMessage());
+    }
+
+    // --- baseName ---
+
+    @Test
+    void baseName_nullName_returnsNull() {
+        assertNull(Utils.baseName(null));
+    }
+
+    @Test
+    void baseName_plainName_isKept() {
+        assertEquals("manual.pdf", Utils.baseName("manual.pdf"));
+    }
+
+    @Test
+    void baseName_dropsUnixFolders() {
+        assertEquals("manual.pdf", Utils.baseName("/home/user/docs/manual.pdf"));
+    }
+
+    @Test
+    void baseName_dropsWindowsFolders() {
+        assertEquals("Manual.PDF", Utils.baseName("C:\\docs\\Manual.PDF"));
+    }
+
+    // --- sha256Hex ---
+
+    @Test
+    void sha256Hex_isTheLowerCaseHexDigestOfTheBytes() {
+        assertEquals("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+                Utils.sha256Hex("hello".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    void sha256Hex_sameContentGivesTheSameDigestAndDifferentContentDoesNot() {
+        byte[] a = "a".getBytes(StandardCharsets.UTF_8);
+
+        assertEquals(Utils.sha256Hex(a), Utils.sha256Hex("a".getBytes(StandardCharsets.UTF_8)));
+        assertNotEquals(Utils.sha256Hex(a), Utils.sha256Hex("b".getBytes(StandardCharsets.UTF_8)));
+        assertEquals(64, Utils.sha256Hex(a).length());
     }
 }

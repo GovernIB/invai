@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
+import java.util.Objects;
 
 /**
  * Internal REST controller handling session state and identity verification checks.
@@ -42,7 +43,7 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ResponseEntity<?> getAuthInformation(Principal principal) {
-        if (principal == null) {
+        if (Objects.isNull(principal)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -64,12 +65,12 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         log.debug("Auth: Processing logout request for current authenticated user");
 
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+        if (Objects.nonNull(SecurityContextHolder.getContext().getAuthentication())) {
             new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
         }
 
         HttpSession session = request.getSession(false);
-        if (session != null) {
+        if (Objects.nonNull(session)) {
             session.invalidate();
         }
 

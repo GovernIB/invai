@@ -23,7 +23,7 @@ public class CategoryEntity extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "CATEGORY_ID")
+    @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inv_category_seq")
     @SequenceGenerator(
             name = "inv_category_seq",

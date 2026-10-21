@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Facade service implementation for Development's view of web context assignments: full CRUD, the
@@ -87,12 +88,12 @@ public class AppWebContextServiceFacadeBean implements AppWebContextService {
         log.info("Facade: Creating new web context entry for AppDevelopment ID: {}", inputDTO.getAppDevelopmentId());
 
         AppDevelopment development = appDevelopmentRepository.findById(inputDTO.getAppDevelopmentId());
-        if (development == null) {
+        if (Objects.isNull(development)) {
             throw new BusinessRuleException(Constants.ERR_DEVELOPMENT_NOT_FOUND);
         }
 
         AppSecurity security = appSecurityRepository.findByApplicationId(development.getApplication().getId());
-        if (security == null) {
+        if (Objects.isNull(security)) {
             throw new BusinessRuleException(Constants.ERR_APP_WEB_CONTEXT_NO_SECURITY_ANCHOR);
         }
 
@@ -119,7 +120,7 @@ public class AppWebContextServiceFacadeBean implements AppWebContextService {
         log.info("Facade: Updating web context ID: {}", id);
 
         AppWebContext existingModel = appWebContextRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_WEB_CONTEXT_NOT_FOUND);
         }
 
@@ -140,11 +141,11 @@ public class AppWebContextServiceFacadeBean implements AppWebContextService {
         log.info("Facade: Logically deleting web context ID: {}", id);
 
         AppWebContext existingModel = appWebContextRepository.findById(id);
-        if (existingModel == null) {
+        if (Objects.isNull(existingModel)) {
             throw new BusinessRuleException(Constants.ERR_APP_WEB_CONTEXT_NOT_FOUND);
         }
 
-        if (existingModel.getDeletedAt() != null) {
+        if (Objects.nonNull(existingModel.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_APP_WEB_CONTEXT_NOT_ACTIVE);
         }
 

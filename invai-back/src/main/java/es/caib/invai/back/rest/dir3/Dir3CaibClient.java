@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Calls the {@code invai-api-interna} module's DIR3CAIB endpoint on behalf of
@@ -56,7 +57,7 @@ public class Dir3CaibClient {
                     })
                     .block();
 
-            if (response == null || response.getStatusCode() == HttpStatus.NO_CONTENT || response.getBody() == null) {
+            if (Objects.isNull(response) || response.getStatusCode() == HttpStatus.NO_CONTENT || Objects.isNull(response.getBody())) {
                 return List.of();
             }
             return response.getBody();

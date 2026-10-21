@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Repository adapter implementing {@link AppSecurityRiskRepository} on top of Spring Data
@@ -162,13 +163,13 @@ public class AppSecurityRiskRepositoryAdapter implements AppSecurityRiskReposito
             AppSecurityRiskAudEntity aud = new AppSecurityRiskAudEntity();
 
             aud.setAppSecurityRiskId(entity.getId());
-            aud.setAppSecurityId(entity.getAppSecurity() != null ? entity.getAppSecurity().getId() : null);
-            aud.setLevelId(entity.getLevel() != null ? entity.getLevel().getId() : null);
+            aud.setAppSecurityId(Objects.nonNull(entity.getAppSecurity()) ? entity.getAppSecurity().getId() : null);
+            aud.setLevelId(Objects.nonNull(entity.getLevel()) ? entity.getLevel().getId() : null);
             aud.setDescription(entity.getDescription());
-            aud.setFieldId(entity.getField() != null ? entity.getField().getId() : null);
+            aud.setFieldId(Objects.nonNull(entity.getField()) ? entity.getField().getId() : null);
 
-            aud.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
-            aud.setCreatedBy(entity.getCreatedBy() != null ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
+            aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
+            aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());
 
             aud.setUpdatedAt(entity.getUpdatedAt());
             aud.setUpdatedBy(entity.getUpdatedBy());

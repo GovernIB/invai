@@ -3,6 +3,7 @@ package es.caib.invai.back.persistence.repository.application.responsibleAuthori
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.responsible.AppResponsibleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,13 @@ public interface AppResponsibleJPARepository extends JpaRepository<AppResponsibl
 
     /** Finds the currently active assignment (if any) holding the given responsible type on the given anchor. */
     Optional<AppResponsibleEntity> findByAppResponsibleAuthorizedIdAndResponsibleTypeIdAndDeletedAtIsNull(Long appResponsibleAuthorizedId, Long responsibleTypeId);
+
+    /**
+     * Finds every active (not soft-deleted) assignment, on any application, held by a Personal CAIB person with an
+     * e-mail. The person is fetched with the assignment, so reading its e-mail costs no extra query per row.
+     */
+    @EntityGraph(attributePaths = "person")
+    List<AppResponsibleEntity> findAllByDeletedAtIsNullAndPersonPersonalCaibTrueAndPersonEmailIsNotNull();
 
     /** Finds every active (not soft-deleted) assignment currently held by the given person, across all applications. */
     List<AppResponsibleEntity> findAllByPersonIdAndDeletedAtIsNull(Long personId);

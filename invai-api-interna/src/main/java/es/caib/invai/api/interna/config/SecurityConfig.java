@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Web Security Configuration for the integrations module, acting as an OAuth2 Resource Server:
@@ -45,7 +46,7 @@ public class SecurityConfig {
     private String clientId;
 
     /**
-     * Configures HTTP security to require a valid Bearer JWT, mapping its roles claim to Spring
+     * Configures HTTP security to require a valid Bearer JWT, mapping its role claim to Spring
      * Security authorities, with no session state kept between requests.
      *
      * @param http the {@link HttpSecurity} builder
@@ -89,11 +90,11 @@ public class SecurityConfig {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
 
-        Map<String, Object> clientIdResourceAccess = resourceAccess != null
+        Map<String, Object> clientIdResourceAccess = Objects.nonNull(resourceAccess)
                 ? objectMapper.convertValue(resourceAccess.get(clientId), new TypeReference<>() {})
                 : null;
 
-        List<String> roles = clientIdResourceAccess != null
+        List<String> roles = Objects.nonNull(clientIdResourceAccess)
                 ? objectMapper.convertValue(clientIdResourceAccess.get("roles"), new TypeReference<>() {})
                 : List.of();
 

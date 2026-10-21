@@ -38,4 +38,14 @@ public interface AppAuthorizedTypeLinkRepository {
      * @return the matching join rows
      */
     List<AppAuthorizedTypeLink> findAllActiveByAppAuthorizedId(Long appAuthorizedId);
+
+    /**
+     * Resolves, in a single batched query, all active (non soft-deleted) authorization type join
+     * rows attached to any of the given authorized person anchors - use this instead of calling
+     * {@link #findAllActiveByAppAuthorizedId} in a loop to avoid N+1 queries.
+     *
+     * @param appAuthorizedIds the authorized person anchor identifiers
+     * @return the matching join rows, for all the given anchors together
+     */
+    List<AppAuthorizedTypeLink> findAllActiveByAppAuthorizedIdIn(List<Long> appAuthorizedIds);
 }

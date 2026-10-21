@@ -36,6 +36,14 @@ public class Dir3CaibConfig {
     @Value("${es.caib.invai.dir3caib.password}")
     private String dir3CaibPassword;
 
+    /** Maximum time, in seconds, to connect to DIR3CAIB. */
+    @Value("${es.caib.invai.dir3caib.connect-timeout-seconds}")
+    private long connectTimeoutSeconds;
+
+    /** Maximum time, in seconds, to wait for DIR3CAIB to answer. */
+    @Value("${es.caib.invai.dir3caib.response-timeout-seconds}")
+    private long responseTimeoutSeconds;
+
     /**
      * Builds the {@link WebClient} used by {@code Dir3CaibClient}, pre-configured with the
      * DIR3CAIB base URL, HTTP Basic Auth credentials, and explicit connect/read timeouts.
@@ -45,8 +53,8 @@ public class Dir3CaibConfig {
     @Bean
     public WebClient dir3CaibWebClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofSeconds(10));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.toIntExact(connectTimeoutSeconds * 1000))
+                .responseTimeout(Duration.ofSeconds(responseTimeoutSeconds));
 
         ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
                 .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(4 * 1024 * 1024))

@@ -13,10 +13,10 @@ import java.io.Serial;
  * Manteniments / Seguretat catalog. Inherits fundamental structural audit capabilities and
  * behavior hooks from {@link BaseEntity}.
  * <p>
- * Acts as a locally-populated cache table of Soffid roles, keyed by {@link #roleId} (Soffid's
- * own numeric role identifier). Currently populated by no write path yet: only the Soffid
- * search proxy exists, so this table stays empty until a future iteration adds the
- * resolve-or-create flow that feeds {@code INV_APP_ROLE} assignments.
+ * Holds the data of the Soffid role assigned to an application ({@link #roleId} is Soffid's own
+ * numeric role identifier; name, system and description are as Soffid reported them). It is never
+ * handled on its own: its row is saved, and rewritten, together with the {@code INV_APP_ROLE}
+ * assignment that points to it (see {@code AppRoleServiceFacadeBean}).
  * </p>
  *
  * @since 1.0.4

@@ -3,6 +3,7 @@ package es.caib.invai.back.persistence.repository.application.responsibleAuthori
 import es.caib.invai.back.persistence.model.application.responsibleAuthorized.authorized.AppAuthorizedEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,15 @@ public interface AppAuthorizedJPARepository extends JpaRepository<AppAuthorizedE
      * @return the matching active authorization entities
      */
     List<AppAuthorizedEntity> findAllByPersonIdAndDeletedAtIsNull(Long personId);
+
+    /**
+     * Finds every active (not soft-deleted) authorization, on any application, held by a Personal CAIB person with an
+     * e-mail. The person is fetched with the authorization, so reading its e-mail costs no extra query per row.
+     *
+     * @return the matching active authorization entities, with their person
+     */
+    @EntityGraph(attributePaths = "person")
+    List<AppAuthorizedEntity> findAllByDeletedAtIsNullAndPersonPersonalCaibTrueAndPersonEmailIsNotNull();
 
     /**
      * Finds the currently active (not soft-deleted) authorization, if any, held by the given

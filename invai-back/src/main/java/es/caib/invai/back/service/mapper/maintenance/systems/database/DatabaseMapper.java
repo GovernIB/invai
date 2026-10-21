@@ -11,6 +11,8 @@ import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.maintenance.systems.databaseVendor.DatabaseVendorMapper;
 import es.caib.invai.back.service.mapper.maintenance.systems.server.ServerMapper;
 
+import java.util.Objects;
+
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
  * Database relational database entities, business domain models, and API transfer schemas.
@@ -94,7 +96,7 @@ public interface DatabaseMapper {
      */
     @AfterMapping
     default void nullifyDatabaseTypeWhenIdMissing(DatabaseInputDTO inputDTO, @MappingTarget Database model) {
-        if (inputDTO.getDatabaseTypeId() == null) {
+        if (Objects.isNull(inputDTO.getDatabaseTypeId())) {
             model.setDatabaseType(null);
         }
     }

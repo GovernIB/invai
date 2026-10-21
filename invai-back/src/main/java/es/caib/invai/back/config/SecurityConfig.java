@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Core Web Security Configuration using Spring Security.
@@ -163,11 +164,11 @@ public class SecurityConfig {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
 
-            Map<String, Object> clientIdResourceAccess = resourceAccess != null
+            Map<String, Object> clientIdResourceAccess = Objects.nonNull(resourceAccess)
                     ? objectMapper.convertValue(resourceAccess.get(clientId), new TypeReference<>() {})
                     : null;
 
-            List<String> roles = clientIdResourceAccess != null
+            List<String> roles = Objects.nonNull(clientIdResourceAccess)
                     ? objectMapper.convertValue(clientIdResourceAccess.get("roles"), new TypeReference<>() {})
                     : List.of();
 

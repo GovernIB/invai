@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapper;
+import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapper;
 import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapper;
 
 /**
@@ -16,7 +17,7 @@ import es.caib.invai.back.service.mapper.maintenance.security.securityRole.Secur
  *
  * @since 1.0.4
  */
-@Mapper(componentModel = "spring", uses = {AppSecurityMapper.class, SecurityRoleMapper.class})
+@Mapper(componentModel = "spring", uses = {AppSecurityMapper.class, SecurityRoleMapper.class, ValidationStatusMapper.class})
 public interface AppRoleMapper {
 
     /**
@@ -33,6 +34,7 @@ public interface AppRoleMapper {
      * @param model the active composite business domain model node
      * @return a mapped relational database entity layout
      */
+    @Mapping(target = "validationStatus", source = "validationStatus", qualifiedByName = "mapValidationStatusEnumToEntity")
     AppRoleEntity toEntity(AppRole model);
 
     /**
@@ -45,21 +47,25 @@ public interface AppRoleMapper {
 
     /**
      * Maps incoming flat reference fields into a decoupled domain state instance,
-     * resolving relationship IDs (security anchor, security role) to their respective nested model IDs,
-     * while ignoring audit fields.
+     * resolving the security anchor ID to its nested model ID and ignoring audit fields. The security
+     * role is not mapped: the payload carries Soffid's role id, which the caller resolves to the local
+     * copy of the role. Nor are the validation fields: they are only ever set by the facade.
      *
      * @param inputDTO inbound client creation payload containing mapping configuration
      * @return a decoupled domain state instance ready for orchestration processing pipelines
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appSecurity.id", source = "appSecurityId")
-    @Mapping(target = "securityRole.id", source = "securityRoleId")
+    @Mapping(target = "securityRole", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "validationStatus", ignore = true)
+    @Mapping(target = "manualValidatedAt", ignore = true)
+    @Mapping(target = "manualValidatedBy", ignore = true)
     AppRole toModelFromInput(AppRoleInputDTO inputDTO);
 
     /**
@@ -71,12 +77,15 @@ public interface AppRoleMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "appSecurity.id", source = "appSecurityId")
-    @Mapping(target = "securityRole.id", source = "securityRoleId")
+    @Mapping(target = "securityRole", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "validationStatus", ignore = true)
+    @Mapping(target = "manualValidatedAt", ignore = true)
+    @Mapping(target = "manualValidatedBy", ignore = true)
     void updateModelFromInput(AppRoleInputDTO inputDTO, @MappingTarget AppRole model);
 }

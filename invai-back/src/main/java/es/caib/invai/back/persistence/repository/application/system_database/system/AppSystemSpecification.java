@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Corporate specification provider executing defensive dynamic predicate tree evaluation
@@ -38,12 +39,12 @@ public class AppSystemSpecification {
 
             predicates.add(cb.equal(root.get("informationSystemDb").get("id"), informationSystemDbId));
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
             Long statusId = criteria.getStatusId();
-            if (statusId != null) {
+            if (Objects.nonNull(statusId)) {
                 boolean isActive = StatusEnum.ACTIVE.getId().equals(statusId);
                 predicates.add(isActive
                         ? cb.isNull(root.get("deletedAt"))
@@ -51,14 +52,14 @@ public class AppSystemSpecification {
                 );
             } 
 
-            if (criteria.getInformationSystemDbId() != null) {
+            if (Objects.nonNull(criteria.getInformationSystemDbId())) {
                 predicates.add(cb.equal(root.get("informationSystemDb").get("id"), criteria.getInformationSystemDbId()));
             }
-            if (criteria.getSystemId() != null) {
+            if (Objects.nonNull(criteria.getSystemId())) {
                 predicates.add(cb.equal(root.get("system").get("id"), criteria.getSystemId()));
             }
 
-            if (criteria.getSearch() != null && !criteria.getSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getSearch()) && !criteria.getSearch().trim().isEmpty()) {
                 String searchPattern = "%" + criteria.getSearch().trim().toLowerCase() + "%";
 
                 Predicate searchServer = cb.like(cb.lower(root.get("system").get("server").get("name")), searchPattern);

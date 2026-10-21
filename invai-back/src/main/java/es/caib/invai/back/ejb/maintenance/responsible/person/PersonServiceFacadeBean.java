@@ -14,20 +14,27 @@ import es.caib.invai.back.rest.soffid.SoffidUser;
 import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
 import es.caib.invai.back.service.mapper.maintenance.responsible.person.PersonMapper;
 import es.caib.invai.back.service.model.maintenance.responsible.company.Company;
+import es.caib.invai.back.service.model.application.dir3.PrimaryGroupDir3;
 import es.caib.invai.back.service.model.maintenance.responsible.person.Person;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,6 +48,13 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Transactional
 public class PersonServiceFacadeBean implements PersonService {
+
+    /** Most e-mail addresses {@code invai-api-interna} accepts in one lookup; the batch size is capped to it. */
+    private static final int MAX_USERS_PER_BATCH = 100;
+
+    /** E-mail addresses asked per Soffid call when loading the DIR3 of the primary group of the people (Soffid rejects long filters above ~100). */
+    @Value("${es.caib.invai.soffid.users-batch-size:50}")
+    private int usersBatchSize = 50;
 
     /**
      * Mapper used to convert between Person domain models and their DTO representations.
@@ -73,7 +87,7 @@ public class PersonServiceFacadeBean implements PersonService {
         log.debug("Facade: Fetching person by ID: {}", id);
         Person person = personRepository.findById(id);
 
-        if (person == null) {
+        if (Objects.isNull(person)) {
             throw new BusinessRuleException(Constants.ERR_PERSON_NOT_FOUND);
         }
 
@@ -123,7 +137,7 @@ public class PersonServiceFacadeBean implements PersonService {
 
         Utils.sanitize(inputDTO);
 
-        if (!inputDTO.isPersonalCaib() && inputDTO.getCompanyId() == null) {
+        if (!inputDTO.isPersonalCaib() && Objects.isNull(inputDTO.getCompanyId())) {
             throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
         }
 
@@ -150,13 +164,13 @@ public class PersonServiceFacadeBean implements PersonService {
         log.info("Facade: Updating person with ID: {}", id);
 
         Person existing = personRepository.findById(id);
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_PERSON_NOT_FOUND);
         }
 
         Utils.sanitize(inputDTO);
 
-        if (!inputDTO.isPersonalCaib() && inputDTO.getCompanyId() == null) {
+        if (!inputDTO.isPersonalCaib() && Objects.isNull(inputDTO.getCompanyId())) {
             throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
         }
 
@@ -179,11 +193,11 @@ public class PersonServiceFacadeBean implements PersonService {
         log.info("Facade: Logically deleting person with ID: {}", id);
         Person existing = personRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_PERSON_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() != null) {
+        if (Objects.nonNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_PERSON_NOT_ACTIVE);
         }
 
@@ -205,11 +219,11 @@ public class PersonServiceFacadeBean implements PersonService {
         log.info("Facade: Reactivating person with ID: {}", id);
         Person existing = personRepository.findById(id);
 
-        if (existing == null) {
+        if (Objects.isNull(existing)) {
             throw new BusinessRuleException(Constants.ERR_PERSON_NOT_FOUND);
         }
 
-        if (existing.getDeletedAt() == null) {
+        if (Objects.isNull(existing.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_PERSON_ACTIVE);
         }
 
@@ -297,10 +311,10 @@ public class PersonServiceFacadeBean implements PersonService {
     @Override
     public Person getOrCreatePerson(String firstName, String lastName, String email, boolean personalCaib, Long companyId, String userName) {
         Person existing = personRepository.findByEmail(email);
-        if (existing != null) {
+        if (Objects.nonNull(existing)) {
             return existing;
         }
-        if (!personalCaib && companyId == null) {
+        if (!personalCaib && Objects.isNull(companyId)) {
             throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
         }
         Person newPerson = new Person();
@@ -320,10 +334,10 @@ public class PersonServiceFacadeBean implements PersonService {
     @Override
     public void updatePersonalCaibToPerson(Long personId, boolean personalCaib) {
         Person person = personRepository.findById(personId);
-        if (person == null || person.isPersonalCaib() == personalCaib) {
+        if (Objects.isNull(person) || person.isPersonalCaib() == personalCaib) {
             return;
         }
-        if (!personalCaib && person.getCompany() == null) {
+        if (!personalCaib && Objects.isNull(person.getCompany())) {
             throw new BusinessRuleException(Constants.ERR_PERSON_COMPANY_REQUIRED_WHEN_NOT_CAIB);
         }
         person.setPersonalCaib(personalCaib);
@@ -335,7 +349,7 @@ public class PersonServiceFacadeBean implements PersonService {
     public PersonDir3CheckOutputDTO checkDir3(String emailAddress, String admUnitCode) {
         Person person = personRepository.findByEmail(emailAddress);
 
-        if ((!Objects.isNull(person) && !person.isPersonalCaib()) || StringUtils.isBlank(admUnitCode) || StringUtils.isBlank(emailAddress)) {
+        if ((Objects.nonNull(person) && !person.isPersonalCaib()) || StringUtils.isBlank(admUnitCode) || StringUtils.isBlank(emailAddress)) {
             return new PersonDir3CheckOutputDTO(null,null, admUnitCode, false);
         }
 
@@ -346,9 +360,39 @@ public class PersonServiceFacadeBean implements PersonService {
 
         String personGroup = soffidUser.getPrimaryGroup();
         String personGroupDir3 = getUserDir3(personGroup);
-        boolean matches = personGroupDir3 != null && personGroupDir3.equalsIgnoreCase(admUnitCode.trim());
+        boolean matches = Objects.nonNull(personGroupDir3) && personGroupDir3.equalsIgnoreCase(admUnitCode.trim());
 
         return new PersonDir3CheckOutputDTO(personGroup, personGroupDir3, admUnitCode, matches);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Not transactional: it only talks to Soffid, so it must not hold a database connection while
+     * it waits for it.
+     * </p>
+     */
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public PrimaryGroupDir3 getPrimaryGroupDir3FromSoffid(Collection<String> emailAddresses) {
+        List<String> emails = emailAddresses.stream()
+                .filter(StringUtils::isNotBlank)
+                .map(email -> email.trim().toLowerCase())
+                .distinct()
+                .toList();
+        int batchSize = Math.min(Math.max(usersBatchSize, 1), MAX_USERS_PER_BATCH);
+
+        Map<String, String> primaryGroupByEmail = new HashMap<>();
+        for (int from = 0; from < emails.size(); from += batchSize) {
+            List<String> batch = emails.subList(from, Math.min(from + batchSize, emails.size()));
+            for (SoffidUser user : soffidClient.getUsersByEmails(batch)) {
+                if (StringUtils.isNotBlank(user.getEmailAddress()) && StringUtils.isNotBlank(user.getPrimaryGroup())) {
+                    primaryGroupByEmail.put(user.getEmailAddress().trim().toLowerCase(), user.getPrimaryGroup());
+                }
+            }
+        }
+        log.info("Facade: DIR3 of the primary group of {} people loaded from Soffid ({} found)", emails.size(), primaryGroupByEmail.size());
+        return new PrimaryGroupDir3(primaryGroupByEmail, soffidClient.getGroupsDir3());
     }
 
     /**

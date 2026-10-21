@@ -13,6 +13,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Utility factory class responsible for building programmatic JPA {@link Specification}
@@ -43,49 +44,49 @@ public final class ApplicationSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (criteria == null) {
+            if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
-            if (criteria.getPrefix() != null && !criteria.getPrefix().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getPrefix()) && !criteria.getPrefix().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("prefix")), "%" + criteria.getPrefix().toLowerCase() + "%"));
             }
 
-            if (criteria.getApplicationName() != null && !criteria.getApplicationName().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getApplicationName()) && !criteria.getApplicationName().trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + criteria.getApplicationName().toLowerCase() + "%"));
             }
 
-            if (criteria.getCategoryId() != null && !criteria.getCategoryId().toString().isEmpty()) {
+            if (Objects.nonNull(criteria.getCategoryId()) && !criteria.getCategoryId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("category").get("id"), criteria.getCategoryId()));
             }
 
-            if (criteria.getSystemTypeId() != null && !criteria.getSystemTypeId().toString().isEmpty()) {
+            if (Objects.nonNull(criteria.getSystemTypeId()) && !criteria.getSystemTypeId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("systemType").get("id"), criteria.getSystemTypeId()));
             }
 
-            if (criteria.getFieldId() != null && !criteria.getFieldId().toString().isEmpty()) {
+            if (Objects.nonNull(criteria.getFieldId()) && !criteria.getFieldId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("field").get("id"), criteria.getFieldId()));
             }
 
-            if (criteria.getCommissionId() != null && !criteria.getCommissionId().toString().isEmpty()) {
+            if (Objects.nonNull(criteria.getCommissionId()) && !criteria.getCommissionId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("csCommission").get("id"), criteria.getCommissionId()));
             }
 
-            if (criteria.getAdmUnitCode() != null && !criteria.getAdmUnitCode().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getAdmUnitCode()) && !criteria.getAdmUnitCode().trim().isEmpty()) {
                 predicates.add(cb.equal(root.get("admUnitCode"), criteria.getAdmUnitCode()));
             }
 
-            if (criteria.getStatusId() != null && !criteria.getStatusId().toString().isEmpty()) {
+            if (Objects.nonNull(criteria.getStatusId()) && !criteria.getStatusId().toString().isEmpty()) {
                 predicates.add(cb.equal(root.get("status").get("id"), criteria.getStatusId()));
             }
 
-            if (criteria.getDescription() != null && !criteria.getDescription().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getDescription()) && !criteria.getDescription().trim().isEmpty()) {
                 predicates.add(((HibernateCriteriaBuilder) cb).ilike(root.get("description"), "%" + criteria.getDescription() + "%"));
             }
 
-            if (criteria.getIncomplete() != null) {
+            if (Objects.nonNull(criteria.getIncomplete())) {
                 List<Long> incompleteIds = criteria.getIncompleteApplicationIds();
-                boolean noneIncomplete = incompleteIds == null || incompleteIds.isEmpty();
+                boolean noneIncomplete = Objects.isNull(incompleteIds) || incompleteIds.isEmpty();
                 if (criteria.getIncomplete()) {
                     predicates.add(noneIncomplete ? cb.disjunction() : root.get("id").in(incompleteIds));
                 } else {
@@ -93,7 +94,7 @@ public final class ApplicationSpecification {
                 }
             }
 
-            if (criteria.getResponsibleId() != null) {
+            if (Objects.nonNull(criteria.getResponsibleId())) {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<AppResponsibleEntity> appResponsibleRoot = subquery.from(AppResponsibleEntity.class);
                 subquery.select(appResponsibleRoot.get("id"));
@@ -105,7 +106,7 @@ public final class ApplicationSpecification {
                 predicates.add(cb.exists(subquery));
             }
 
-            if (criteria.getDatabaseId() != null) {
+            if (Objects.nonNull(criteria.getDatabaseId())) {
                 Subquery<Long> subquery = query.subquery(Long.class);
                 Root<AppDatabaseEntity> appDatabaseRoot = subquery.from(AppDatabaseEntity.class);
                 subquery.select(appDatabaseRoot.get("id"));
@@ -117,7 +118,7 @@ public final class ApplicationSpecification {
                 predicates.add(cb.exists(subquery));
             }
 
-            if (criteria.getServerId() != null) {
+            if (Objects.nonNull(criteria.getServerId())) {
                 Subquery<Long> systemSubquery = query.subquery(Long.class);
                 Root<AppSystemEntity> appSystemRoot = systemSubquery.from(AppSystemEntity.class);
                 systemSubquery.select(appSystemRoot.get("id"));
@@ -139,7 +140,7 @@ public final class ApplicationSpecification {
                 predicates.add(cb.or(cb.exists(systemSubquery), cb.exists(databaseSubquery)));
             }
 
-            if (criteria.getEnvironmentId() != null) {
+            if (Objects.nonNull(criteria.getEnvironmentId())) {
                 Subquery<Long> systemSubquery = query.subquery(Long.class);
                 Root<AppSystemEntity> appSystemRoot = systemSubquery.from(AppSystemEntity.class);
                 systemSubquery.select(appSystemRoot.get("id"));
@@ -161,7 +162,7 @@ public final class ApplicationSpecification {
                 predicates.add(cb.or(cb.exists(systemSubquery), cb.exists(databaseSubquery)));
             }
 
-            if (criteria.getQuickSearch() != null && !criteria.getQuickSearch().trim().isEmpty()) {
+            if (Objects.nonNull(criteria.getQuickSearch()) && !criteria.getQuickSearch().trim().isEmpty()) {
                 String pattern = "%" + criteria.getQuickSearch().toLowerCase() + "%";
 
                 Predicate searchCode = cb.like(cb.lower(root.get("code")), pattern);
@@ -183,7 +184,7 @@ public final class ApplicationSpecification {
                 // Admin units are no longer stored locally, so their name can't be matched via a SQL
                 // join — the facade pre-resolves matching DIR3CAIB codes onto quickSearchAdmUnitCodes.
                 List<String> admUnitCodes = criteria.getQuickSearchAdmUnitCodes();
-                Predicate searchAdmUnit = (admUnitCodes == null || admUnitCodes.isEmpty())
+                Predicate searchAdmUnit = (Objects.isNull(admUnitCodes) || admUnitCodes.isEmpty())
                         ? cb.disjunction()
                         : root.get("admUnitCode").in(admUnitCodes);
 

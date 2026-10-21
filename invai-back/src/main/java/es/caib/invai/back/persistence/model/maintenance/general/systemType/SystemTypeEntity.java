@@ -27,7 +27,7 @@ public class SystemTypeEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inv_system_type_seq")
     @SequenceGenerator(name = "inv_system_type_seq", sequenceName = "INV_SYSTEM_TYPE_SEQ", allocationSize = 1)
-    @Column(name = "SYSTEM_TYPE_ID")
+    @Column(name = "ID")
     private Long id;
 
     /** The Catalan descriptive name of the system type. */

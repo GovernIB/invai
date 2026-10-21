@@ -85,6 +85,23 @@ public class AppRoleController {
     }
 
     /**
+     * Manually validates an application role assignment whose role doesn't match the application's
+     * prefix (state, "No validado"), moving it to "Manual" and recording the moment and the acting
+     * user. It takes nobody: it only changes the state. One-way: this endpoint refuses any
+     * assignment not in "No validado".
+     *
+     * @param id identifier of the role assignment to validate
+     * @return an empty response body confirming success status
+     * @since 1.0.6
+     */
+    @PutMapping("/validate/{id}")
+    public ResponseEntity<Void> validate(@PathVariable Long id) {
+        log.info("REST: Request to validate application role assignment ID: {}", id);
+        appRoleService.validate(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * Transitions a target tracking record into an inactive state by enforcing logical deletion structures.
      *
      * @param id target primary structural key to process for deprecation
