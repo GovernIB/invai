@@ -3,6 +3,7 @@ package es.caib.invai.back.persistence.repository.maintenance.documentation.docu
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryAudEntity;
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapper;
+import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,6 +162,100 @@ class DocumentCategoryRepositoryAdapterTest {
 
         assertTrue(result.isEmpty());
         verify(documentCategoryJPARepository, never()).findAllByParentIdInOrderByNameAsc(anyCollection());
+    }
+
+    // ------------------------------------------------------------------
+    // Filtering of the subcategories
+    // ------------------------------------------------------------------
+
+    private static DocumentCategory named(Long id, Long parentId, String name, String nameEs, boolean deleted) {
+        DocumentCategory model = model(id, parentId);
+        model.setName(name);
+        model.setNameEs(nameEs);
+        model.setDeletedAt(deleted ? LocalDateTime.of(2026, 10, 22, 10, 0) : null);
+        return model;
+    }
+
+    /** Lists the page of the single category {@code category} whose subcategories are {@code children}. */
+    private List<DocumentCategory> subcategoriesFound(DocumentCategoryCriteria criteria, DocumentCategory category, DocumentCategory... children) {
+        DocumentCategoryEntity categoryEntity = entity(category.getId(), null);
+        when(documentCategoryJPARepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(categoryEntity)));
+        when(documentCategoryMapper.toModel(categoryEntity)).thenReturn(category);
+        List<DocumentCategoryEntity> childEntities = new ArrayList<>();
+        for (DocumentCategory child : children) {
+            DocumentCategoryEntity childEntity = entity(child.getId(), categoryEntity);
+            childEntities.add(childEntity);
+            when(documentCategoryMapper.toModel(childEntity)).thenReturn(child);
+        }
+        when(documentCategoryJPARepository.findAllByParentIdInOrderByNameAsc(List.of(category.getId()))).thenReturn(childEntities);
+
+        return adapter.findAll(criteria, Pageable.unpaged()).getContent().get(0).getSubcategories();
+    }
+
+    @Test
+    void findAll_statusActive_showsOnlyTheActiveSubcategories() {
+        DocumentCategory active = named(2L, 1L, "Actiu", "Activo", false);
+        DocumentCategory deleted = named(3L, 1L, "Esborrat", "Borrado", true);
+
+        List<DocumentCategory> result = subcategoriesFound(new DocumentCategoryCriteria(null, StatusEnum.ACTIVE.getId(), null),
+                named(1L, null, "Manuals", "Manuales", false), active, deleted);
+
+        assertEquals(List.of(active), result);
+    }
+
+    @Test
+    void findAll_statusInactive_showsOnlyTheDeletedSubcategories() {
+        DocumentCategory active = named(2L, 1L, "Actiu", "Activo", false);
+        DocumentCategory deleted = named(3L, 1L, "Esborrat", "Borrado", true);
+
+        List<DocumentCategory> result = subcategoriesFound(new DocumentCategoryCriteria(null, StatusEnum.INACTIVE.getId(), null),
+                named(1L, null, "Manuals", "Manuales", true), active, deleted);
+
+        assertEquals(List.of(deleted), result);
+    }
+
+    @Test
+    void findAll_textMatchingOnlySomeSubcategories_showsOnlyThose() {
+        DocumentCategory matching = named(2L, 1L, "Guia PDF", "Guia PDF", false);
+        DocumentCategory other = named(3L, 1L, "Esquema", "Esquema", false);
+
+        List<DocumentCategory> result = subcategoriesFound(new DocumentCategoryCriteria("pdf", null, null),
+                named(1L, null, "Manuals", "Manuales", false), matching, other);
+
+        assertEquals(List.of(matching), result);
+    }
+
+    @Test
+    void findAll_textMatchingTheSpanishNameOfASubcategory_ignoresCase() {
+        DocumentCategory matching = named(2L, 1L, "Guia", "Guía de USUARIO", false);
+        DocumentCategory other = named(3L, 1L, "Esquema", "Esquema", false);
+
+        List<DocumentCategory> result = subcategoriesFound(new DocumentCategoryCriteria(null, null, "usuario"),
+                named(1L, null, "Manuals", "Manuales", false), matching, other);
+
+        assertEquals(List.of(matching), result);
+    }
+
+    @Test
+    void findAll_textMatchingTheCategoryItself_keepsAllItsSubcategories() {
+        DocumentCategory first = named(2L, 1L, "Guia", "Guia", false);
+        DocumentCategory second = named(3L, 1L, "Esquema", "Esquema", false);
+
+        List<DocumentCategory> result = subcategoriesFound(new DocumentCategoryCriteria("manual", null, null),
+                named(1L, null, "Manuals", "Manuales", false), first, second);
+
+        assertEquals(List.of(first, second), result);
+    }
+
+    @Test
+    void findAll_nameAndSearchTogether_bothHaveToMatch() {
+        DocumentCategory both = named(2L, 1L, "Guia PDF antigua", "Guia PDF antigua", false);
+        DocumentCategory onlyOne = named(3L, 1L, "Esquema PDF", "Esquema PDF", false);
+
+        List<DocumentCategory> result = subcategoriesFound(new DocumentCategoryCriteria("pdf", null, "antigua"),
+                named(1L, null, "Manuals", "Manuales", false), both, onlyOne);
+
+        assertEquals(List.of(both), result);
     }
 
     // ------------------------------------------------------------------

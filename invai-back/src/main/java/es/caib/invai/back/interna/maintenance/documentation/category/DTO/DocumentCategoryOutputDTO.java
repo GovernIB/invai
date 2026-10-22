@@ -35,7 +35,8 @@ public class DocumentCategoryOutputDTO {
 
     /**
      * Subcategories of a category (active and logically deleted ones, told apart by their
-     * {@code deletedAt}), sorted by name. Empty for a subcategory.
+     * {@code deletedAt}), sorted by name; in a filtered listing only those fulfilling the filter.
+     * Empty for a subcategory.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DocumentCategoryOutputDTO> subcategories;

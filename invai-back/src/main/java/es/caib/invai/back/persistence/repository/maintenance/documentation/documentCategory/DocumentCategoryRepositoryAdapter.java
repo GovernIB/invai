@@ -3,9 +3,11 @@ package es.caib.invai.back.persistence.repository.maintenance.documentation.docu
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryAudEntity;
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapper;
+import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Objects;
 
 /**
@@ -45,7 +48,7 @@ public class DocumentCategoryRepositoryAdapter implements DocumentCategoryReposi
                 .map(documentCategoryMapper::toModel)
                 .orElse(null);
         if (Objects.nonNull(documentCategory) && documentCategory.isCategory()) {
-            attachSubcategories(List.of(documentCategory));
+            attachSubcategories(List.of(documentCategory), null);
         }
         return documentCategory;
     }
@@ -54,7 +57,7 @@ public class DocumentCategoryRepositoryAdapter implements DocumentCategoryReposi
     public Page<DocumentCategory> findAll(DocumentCategoryCriteria filter, Pageable pageable) {
         Specification<DocumentCategoryEntity> spec = DocumentCategorySpecification.filterByCriteria(filter);
         Page<DocumentCategory> page = documentCategoryJPARepository.findAll(spec, pageable).map(documentCategoryMapper::toModel);
-        attachSubcategories(page.getContent());
+        attachSubcategories(page.getContent(), filter);
         return page;
     }
 
@@ -116,12 +119,15 @@ public class DocumentCategoryRepositoryAdapter implements DocumentCategoryReposi
     }
 
     /**
-     * Loads, with a single query, the subcategories (active or deleted, sorted by name) of the given
-     * categories and sets each list on its category.
+     * Loads, with a single query, the subcategories (sorted by name) of the given categories and
+     * sets on each category the ones that fulfil the filter: the status applies to every
+     * subcategory, and the text keeps a subcategory only if it matches it, unless the category itself
+     * matches, in which case all its subcategories are kept.
      *
      * @param categories categories to fill in the subcategories of
+     * @param filter     filter the subcategories must fulfil, {@code null} to keep all of them
      */
-    private void attachSubcategories(List<DocumentCategory> categories) {
+    private void attachSubcategories(List<DocumentCategory> categories, DocumentCategoryCriteria filter) {
         if (categories.isEmpty()) {
             return;
         }
@@ -129,7 +135,44 @@ public class DocumentCategoryRepositoryAdapter implements DocumentCategoryReposi
         Map<Long, List<DocumentCategory>> byParent = documentCategoryJPARepository.findAllByParentIdInOrderByNameAsc(categoryIds).stream()
                 .map(documentCategoryMapper::toModel)
                 .collect(Collectors.groupingBy(DocumentCategory::getParentId));
-        categories.forEach(category -> category.setSubcategories(byParent.getOrDefault(category.getId(), List.of())));
+        categories.forEach(category -> category.setSubcategories(byParent.getOrDefault(category.getId(), List.of()).stream()
+                .filter(subcategory -> fulfilsFilter(category, subcategory, filter))
+                .toList()));
+    }
+
+    /**
+     * Tells whether a subcategory has to be shown under its category for the given filter.
+     *
+     * @param category    the category the subcategory belongs to
+     * @param subcategory the subcategory to check
+     * @param filter      the filter to fulfil, may be {@code null}
+     * @return {@code true} if the subcategory fulfils the status and every text of the filter
+     */
+    private static boolean fulfilsFilter(DocumentCategory category, DocumentCategory subcategory, DocumentCategoryCriteria filter) {
+        if (Objects.isNull(filter)) {
+            return true;
+        }
+        if (Objects.nonNull(filter.getStatusId())) {
+            boolean active = StatusEnum.ACTIVE.getId().equals(filter.getStatusId());
+            if (active != Objects.isNull(subcategory.getDeletedAt())) {
+                return false;
+            }
+        }
+        return Stream.of(filter.getName(), filter.getSearch())
+                .filter(StringUtils::isNotBlank)
+                .allMatch(text -> containsName(category, text) || containsName(subcategory, text));
+    }
+
+    /**
+     * Tells whether the Catalan or Spanish name of a category or subcategory contains the text,
+     * ignoring case.
+     *
+     * @param category the category or subcategory to check
+     * @param text     the text to look for
+     * @return {@code true} if either name contains the text
+     */
+    private static boolean containsName(DocumentCategory category, String text) {
+        return StringUtils.containsIgnoreCase(category.getName(), text) || StringUtils.containsIgnoreCase(category.getNameEs(), text);
     }
 
     /**

@@ -31,8 +31,9 @@ public class DocumentCategory {
     private Long parentId;
 
     /**
-     * Subcategories of this category (active and logically deleted ones), sorted by name. Only
-     * filled in by the repository when this record is a category; always empty for a subcategory.
+     * Subcategories of this category, sorted by name: the active and logically deleted ones, or
+     * only those fulfilling the filter of the listing. Only filled in by the repository when this
+     * record is a category; always empty for a subcategory.
      */
     private List<DocumentCategory> subcategories = new ArrayList<>();
 

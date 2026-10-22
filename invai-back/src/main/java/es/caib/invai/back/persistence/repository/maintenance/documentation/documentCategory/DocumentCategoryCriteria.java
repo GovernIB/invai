@@ -8,8 +8,9 @@ import lombok.Setter;
 /**
  * Search filters used to build the dynamic query that lists the documentation categories (the
  * records without a parent). A category is found when it, or any of its subcategories, fulfils
- * the {@code name} or {@code search} text; the subcategories of every category found are always
- * returned with it.
+ * the {@code name} or {@code search} text. The status applies to the subcategories too, and each
+ * category comes with the subcategories that match the text, or with all of them when the category
+ * itself matches.
  *
  * @since 1.0.6
  */
