@@ -25,3 +25,21 @@ export const APPLICATIONS_DIR3_CHECK_SUCCESS = $localize`:@@applicationsDir3Chec
 export const APPLICATIONS_DIR3_CHECK_MISMATCHES = (count: number) =>
   $localize`:@@applicationsDir3CheckMismatches:Aplicacions amb discrepàncies DIR3: ${count}.`;
 export const APPLICATIONS_DIR3_CHECK_ERROR = $localize`:@@applicationsDir3CheckError:No s'ha pogut completar la validació DIR3.`;
+export const APPLICATIONS_DIR3_AUDIT_STARTING_LABEL = $localize`:@@applicationsDir3AuditStartingLabel:Validant DIR3…`;
+export const APPLICATIONS_DIR3_AUDIT_PROGRESS_LABEL = (processed: number, total: number) =>
+  $localize`:@@applicationsDir3AuditProgressLabel:Validant DIR3: ${processed} de ${total}`;
+export const APPLICATIONS_DIR3_AUDIT_RESULT_WITH_FAILURES = (mismatches: number, failed: number) =>
+  $localize`:@@applicationsDir3AuditResultWithFailures:Aplicacions amb discrepàncies DIR3: ${mismatches}. Aplicacions que no s'han pogut validar: ${failed}.`;
+export const APPLICATIONS_DIR3_AUDIT_STATUS_ERROR = $localize`:@@applicationsDir3AuditStatusError:No s'ha pogut consultar el progrés de la validació DIR3.`;
+
+// The back-end reports why a background DIR3 audit failed as a message key, not a localized text.
+const APPLICATIONS_DIR3_AUDIT_FAILURE_REASONS: Readonly<Record<string, string>> = {
+  'exception.dir3audit.session': $localize`:@@applicationsDir3AuditSessionFailure:La validació DIR3 s'ha aturat perquè la teva sessió ha caducat o no es pot renovar. Tanca la sessió, torna a entrar i torna-ho a provar.`,
+  'exception.dir3audit.soffid': $localize`:@@applicationsDir3AuditSoffidFailure:La validació DIR3 no ha pogut començar perquè no s'han pogut consultar les dades de Soffid. Torna-ho a provar més tard.`,
+};
+
+export function dir3AuditFailureMessage(reason: string | null): string {
+  return reason && Object.hasOwn(APPLICATIONS_DIR3_AUDIT_FAILURE_REASONS, reason)
+    ? APPLICATIONS_DIR3_AUDIT_FAILURE_REASONS[reason]
+    : APPLICATIONS_DIR3_CHECK_ERROR;
+}

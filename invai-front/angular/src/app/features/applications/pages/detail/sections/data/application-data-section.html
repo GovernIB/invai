@@ -31,51 +31,43 @@
 
   @if (showContent()) {
     <form class="application-data" novalidate [formGroup]="detailState.dataForm">
-      <p-tabs [value]="detailState.dataActiveSource()" (valueChange)="onSourceChange($event)">
-        <p-tablist [pt]="tabListPassThrough">
-          <p-tab value="openData">{{ labels.openData }}</p-tab>
-          <p-tab value="reuse">{{ labels.reuse }}</p-tab>
-        </p-tablist>
-        <p-tabpanels>
-          <p-tabpanel value="openData">
-            <app-application-data-source
-              idPrefix="application-data-open-data"
-              [endpoints]="detailState.data()?.openData ?? null"
-              [isEditing]="detailState.isEditing('data')"
-              [isLoading]="dataLoading()"
-              [showEndpoints]="detailState.dataStatus() !== 'absent'"
-              [title]="labels.openData"
-              [unavailable]="sourceUnavailable('openData')"
-              [urlControl]="detailState.dataForm.controls.openDataUrl"
-              [useUrlControl]="detailState.dataForm.controls.useOpenDataUrl"
-              (retry)="retry()"
-            />
-          </p-tabpanel>
-          <p-tabpanel value="reuse">
-            <app-application-data-source
-              idPrefix="application-data-reuse"
-              [endpoints]="detailState.data()?.reuse ?? null"
-              [isEditing]="detailState.isEditing('data')"
-              [isLoading]="dataLoading()"
-              [showEndpoints]="detailState.dataStatus() !== 'absent'"
-              [title]="labels.reuse"
-              [unavailable]="sourceUnavailable('reuse')"
-              [urlControl]="detailState.dataForm.controls.reuseUrl"
-              [useUrlControl]="detailState.dataForm.controls.useReuseUrl"
-              (retry)="retry()"
-            />
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
+      <app-application-data-url-panel
+        idPrefix="application-data-open-data"
+        [canEdit]="detailState.canEditData()"
+        [isEditing]="detailState.isEditing('data')"
+        [manualControl]="detailState.dataForm.controls.manualOpenDataUrl"
+        [pendingMessage]="urlMessages.pending"
+        [state]="detailState.dataUrls().openData"
+        [title]="labels.openData"
+        [urlControl]="detailState.dataForm.controls.openDataUrl"
+      />
+
+      <app-application-data-url-panel
+        idPrefix="application-data-reuse"
+        [canEdit]="detailState.canEditData()"
+        [isEditing]="detailState.isEditing('data')"
+        [manualControl]="detailState.dataForm.controls.manualReuseUrl"
+        [pendingMessage]="urlMessages.pending"
+        [state]="detailState.dataUrls().reuse"
+        [title]="labels.reuse"
+        [urlControl]="detailState.dataForm.controls.reuseUrl"
+      />
 
       <section class="application-data__observations" [attr.aria-labelledby]="observationsLabelId">
-        <h4 [id]="observationsLabelId">{{ labels.observations }}</h4>
+        <h3 [id]="observationsLabelId">{{ labels.observations }}</h3>
         @if (detailState.isEditing('data')) {
           <p-editor
             [formControl]="detailState.dataForm.controls.observations"
             [style]="{ height: '10rem' }"
+            [invalid]="observationsInvalid()"
+            [appRichTextAria]="observationsInvalid() ? observationsErrorId : null"
             (onInit)="labelEditor($event)"
           />
+          @if (observationsInvalid()) {
+            <p [id]="observationsErrorId" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+              {{ textMaxBytesError }}
+            </p>
+          }
         } @else {
           <div
             class="invai-form-static-value invai-form-static-value--rich"

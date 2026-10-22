@@ -138,8 +138,16 @@
         formControlName="description"
         [readOnly]="mode() === 'view'"
         [class.invai-form-readonly-control]="mode() === 'view'"
+        [invalid]="isInvalid(form().controls.description)"
+        [attr.aria-invalid]="isInvalid(form().controls.description)"
+        [attr.aria-describedby]="isInvalid(form().controls.description) ? 'application-host-description-error' : null"
         pTextarea
       ></textarea>
+      @if (isInvalid(form().controls.description)) {
+        <p id="application-host-description-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+          {{ textMaxBytesError }}
+        </p>
+      }
     </div>
   </form>
 </app-crud-entity-dialog>

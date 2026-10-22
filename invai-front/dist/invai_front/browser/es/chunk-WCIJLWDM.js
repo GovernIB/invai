@@ -1,0 +1,2 @@
+import{b as a}from"./chunk-5GZPYY6D.js";import{b as o}from"./chunk-ZQJ2IOBD.js";import{V as i,ua as r}from"./chunk-26JRJ62F.js";var c=class e extends o{ENTITY_URI="mime-type";cache=new Map;getAll(){return a(this.cache,"all",()=>this.http.get(this.url()))}static \u0275fac=(()=>{let t;return function(p){return(t||(t=r(e)))(p||e)}})();static \u0275prov=i({token:e,factory:e.\u0275fac,providedIn:"root"})};export{c as a};
+/**i18n:e8136fae3ab93b16771db13725b428f9aac2934b6934bfc6b4b028b903db9add*/

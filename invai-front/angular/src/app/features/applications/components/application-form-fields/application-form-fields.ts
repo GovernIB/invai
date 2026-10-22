@@ -3,6 +3,8 @@ import { AbstractControl, FormControl, ReactiveFormsModule } from '@angular/form
 import { AdministrativeUnitField } from '@features/administrative-units/administrative-unit-field';
 import { AdministrativeUnitSearchAction, AdministrativeUnitSearchState } from '@features/administrative-units/administrative-unit-search.state';
 import { CommissionType } from '@features/commissions/commissions.model';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { RichTextAria } from '@shared/directives/rich-text-aria.directive';
 import { Editor } from 'primeng/editor';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -52,7 +54,7 @@ export type ApplicationAuditFormControls = Pick<
 @Component({
   selector: 'app-application-form-fields',
   standalone: true,
-  imports: [AdministrativeUnitField, Editor, InputText, ReactiveFormsModule, Select],
+  imports: [AdministrativeUnitField, Editor, InputText, ReactiveFormsModule, RichTextAria, Select],
   templateUrl: './application-form-fields.html',
   styleUrl: './application-form-fields.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +78,7 @@ export class ApplicationFormFields {
 
   protected readonly prefixMaxLength = APPLICATION_PREFIX_MAX_LENGTH;
   protected readonly codeMaxLength = APPLICATION_CODE_MAX_LENGTH;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
 
   protected get descriptionEditorPassThrough(): EditorPassThrough {
     return {

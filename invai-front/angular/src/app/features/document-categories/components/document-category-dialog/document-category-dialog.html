@@ -1,0 +1,124 @@
+<app-crud-entity-dialog
+  [(visible)]="visible"
+  width="42rem"
+  [ariaLabels]="actionAriaLabels()"
+  [canEdit]="canEdit()"
+  [canRestore]="canRestore()"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isLoading]="isLoading()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (restore)="restore.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (isLoading()) {
+    <div class="flex min-h-32 items-center justify-center" role="status">
+      <p-progressSpinner [style]="{ width: '2.5rem', height: '2.5rem' }" aria-hidden="true" />
+      <span class="sr-only">{{ loadingLabel }}</span>
+    </div>
+  } @else {
+    <form
+      class="invai-dialog-form-grid invai-grid grid-cols-1 gap-5 md:grid-cols-2"
+      novalidate
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+    >
+      @if (kind() === 'subcategory') {
+        <div class="md:col-span-2">
+          @if (isCategorySelectable()) {
+            <p-floatlabel class="w-full">
+              <p-select
+                appendTo="body"
+                ariaLabelledBy="document-category-dialog-category-label"
+                formControlName="parentId"
+                inputId="document-category-dialog-category"
+                optionLabel="label"
+                optionValue="id"
+                styleClass="w-full"
+                [ariaFilterLabel]="labels.category"
+                [filter]="true"
+                [options]="categoryOptions()"
+              />
+              <label id="document-category-dialog-category-label" for="document-category-dialog-category">
+                {{ labels.category }}
+              </label>
+            </p-floatlabel>
+          } @else {
+            <div class="invai-dialog-static-field">
+              <span
+                id="document-category-dialog-category-view-label"
+                class="invai-dialog-static-field__label"
+              >
+                {{ labels.category }}
+              </span>
+              <p
+                class="invai-form-static-value"
+                aria-labelledby="document-category-dialog-category-view-label"
+              >
+                {{ categoryLabel() }}
+              </p>
+            </div>
+          }
+        </div>
+      }
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="document-category-dialog-name"
+            class="w-full"
+            formControlName="name"
+            pInputText
+            type="text"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.name) ? 'document-category-dialog-name-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.name)"
+            [attr.maxlength]="nameMaxLength"
+            [class.invai-form-readonly-control]="mode() === 'view'"
+            [readOnly]="mode() === 'view'"
+          />
+          <label for="document-category-dialog-name">{{ labels.name }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.name)) {
+          <p id="document-category-dialog-name-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ nameError(form().controls.name, errors.nameMaxLength) }}
+          </p>
+        }
+      </div>
+      <div>
+        <p-floatlabel class="w-full">
+          <input
+            id="document-category-dialog-name-es"
+            class="w-full"
+            formControlName="nameEs"
+            pInputText
+            type="text"
+            [attr.aria-describedby]="
+              isInvalid(form().controls.nameEs) ? 'document-category-dialog-name-es-error' : null
+            "
+            [attr.aria-invalid]="isInvalid(form().controls.nameEs)"
+            [attr.maxlength]="nameMaxLength"
+            [class.invai-form-readonly-control]="mode() === 'view'"
+            [readOnly]="mode() === 'view'"
+          />
+          <label for="document-category-dialog-name-es">{{ labels.nameEs }}</label>
+        </p-floatlabel>
+        @if (isInvalid(form().controls.nameEs)) {
+          <p
+            id="document-category-dialog-name-es-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ nameError(form().controls.nameEs, errors.nameEsMaxLength) }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+</app-crud-entity-dialog>

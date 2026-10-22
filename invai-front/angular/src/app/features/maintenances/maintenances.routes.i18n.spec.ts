@@ -11,7 +11,15 @@ describe('maintenance section routes', () => {
       MAINTENANCES_ROUTES_LABELS.DEVELOPMENT,
       MAINTENANCES_ROUTES_LABELS.SECURITY,
       MAINTENANCES_ROUTES_LABELS.INTEGRATIONS,
-    ]).toEqual(['General', 'Responsables', 'Desenvolupament', 'Seguretat', 'Integracions']);
+      MAINTENANCES_ROUTES_LABELS.DOCUMENTATION,
+    ]).toEqual([
+      'General',
+      'Responsables',
+      'Desenvolupament',
+      'Seguretat',
+      'Integracions',
+      'Documentació',
+    ]);
   });
 
   it('exposes localized canonical paths independently from their labels', () => {
@@ -21,6 +29,14 @@ describe('maintenance section routes', () => {
       MAINTENANCES_ROUTES_LOC.DEVELOPMENT,
       MAINTENANCES_ROUTES_LOC.SECURITY,
       MAINTENANCES_ROUTES_LOC.INTEGRATIONS,
-    ]).toEqual(['general', 'responsables', 'desenvolupament', 'seguretat', 'integracions']);
+      MAINTENANCES_ROUTES_LOC.DOCUMENTATION,
+    ]).toEqual([
+      'general',
+      'responsables',
+      'desenvolupament',
+      'seguretat',
+      'integracions',
+      'documentacio',
+    ]);
   });
 });

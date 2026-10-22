@@ -1166,6 +1166,26 @@ describe('ApplicationSystemsDatabasesSection', () => {
     expect(staticValue.textContent).toContain('Text enriquit');
   });
 
+  it('shows the size error instead of the missing-aggregate toast for long observations', () => {
+    const addSpy = vi.spyOn(messageService, 'add');
+    detailState.startEditing('systems-databases');
+    detailState.systemsDatabasesForm.controls.observations.setValue(`<p>${'a'.repeat(4000)}</p>`);
+    detailState.systemsDatabasesForm.markAsDirty();
+
+    (fixture.componentInstance as unknown as { save(): void }).save();
+    fixture.detectChanges();
+
+    const error = fixture.nativeElement.querySelector(
+      '#application-systems-databases-observations-error',
+    ) as HTMLElement;
+    expect(error.getAttribute('role')).toBe('alert');
+    expect(error.textContent).toContain('El text supera la mida màxima permesa');
+    expect(fixture.debugElement.query(By.directive(Editor)).componentInstance.invalid()).toBe(
+      true,
+    );
+    expect(addSpy).not.toHaveBeenCalled();
+  });
+
   it('shows a pending message when opening documentation', () => {
     const addSpy = vi.spyOn(messageService, 'add');
 

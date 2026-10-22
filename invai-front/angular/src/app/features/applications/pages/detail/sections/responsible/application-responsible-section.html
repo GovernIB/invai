@@ -23,8 +23,25 @@
         aria-labelledby="application-responsibles-title"
       >
         <div class="application-responsible__panel-header">
-          <h4 id="application-responsibles-title">{{ copy.responsiblesTitle }}</h4>
+          <h3 id="application-responsibles-title">{{ copy.responsiblesTitle }}</h3>
           <div class="application-responsible__panel-actions">
+            @if (detailState.canEdit()) {
+              <p-button
+                type="button"
+                tooltipPosition="top"
+                [ariaLabel]="dir3Copy.applicationCheck"
+                [disabled]="applicationDir3Checking()"
+                [icon]="icons.VERIFIED"
+                [loading]="applicationDir3Checking()"
+                [outlined]="true"
+                [pTooltip]="dir3Copy.applicationCheck"
+                styleClass="invai-table-toolbar-button"
+                (onClick)="checkApplicationDir3()"
+              />
+              <span class="sr-only" role="status">
+                {{ applicationDir3Checking() ? dir3Copy.applicationCheckProgress : '' }}
+              </span>
+            }
             <p-button
               [ariaLabel]="copy.copyResponsibles"
               [disabled]="responsibles().items.length === 0 || copying() !== null"
@@ -36,13 +53,11 @@
             />
             @if (canUseRowActions()) {
               <p-button
+                #responsibleAddButton
                 [ariaLabel]="copy.addResponsible"
-                [disabled]="
-                  !canAttemptResponsibleAdd() || assignableVacantResponsibleTypes().length === 0
-                "
+                [disabled]="!canAttemptResponsibleAdd() || responsibleTypes().length === 0"
                 [icon]="icons.PLUS"
                 [outlined]="true"
-                [pt]="responsibleAddButtonPassThrough()"
                 styleClass="invai-table-toolbar-button"
                 (onClick)="openResponsibleDialog()"
               />
@@ -68,7 +83,7 @@
         aria-labelledby="application-authorized-title"
       >
         <div class="application-responsible__panel-header">
-          <h4 id="application-authorized-title">{{ copy.authorizedTitle }}</h4>
+          <h3 id="application-authorized-title">{{ copy.authorizedTitle }}</h3>
           <div class="application-responsible__panel-actions">
             <p-button
               [ariaLabel]="copy.copyAuthorized"
@@ -141,6 +156,40 @@
       />
     }
 
+    <p-dialog
+      styleClass="invai-dialog"
+      [(visible)]="responsibilitiesCompleteDialogVisible"
+      [closable]="true"
+      [closeOnEscape]="true"
+      [dismissableMask]="true"
+      [draggable]="false"
+      [modal]="true"
+      [resizable]="false"
+      [style]="{ width: '28rem', maxWidth: 'calc(100vw - 2rem)' }"
+      (onHide)="onResponsibilitiesCompleteDialogHidden()"
+    >
+      <ng-template #header let-titleId="ariaLabelledBy">
+        <h2 class="m-0 min-w-0 text-base font-semibold" [id]="titleId">
+          {{ copy.allResponsibilitiesAssignedTitle }}
+        </h2>
+      </ng-template>
+
+      <div class="flex items-start gap-3 text-sm leading-5 text-color-secondary">
+        <i class="mt-1 text-color-secondary" [class]="icons.INFO_CIRCLE" aria-hidden="true"></i>
+        <p class="m-0">{{ copy.allResponsibilitiesAssignedDetail }}</p>
+      </div>
+
+      <ng-template #footer>
+        <div class="flex justify-end">
+          <p-button
+            [icon]="icons.CHECK"
+            [label]="copy.allResponsibilitiesAssignedClose"
+            (onClick)="closeResponsibilitiesCompleteDialog()"
+          />
+        </div>
+      </ng-template>
+    </p-dialog>
+
     @if (authorizedDialogVisible()) {
       <app-application-authorized-dialog
         [(visible)]="authorizedDialogVisible"
@@ -197,28 +246,22 @@
             id="application-assignment-deactivate-observation"
             class="w-full"
             [attr.aria-describedby]="
-              deactivateForm.controls.observation.invalid &&
-              deactivateForm.controls.observation.touched
+              deactivateObservationInvalid()
                 ? 'application-assignment-deactivate-observation-error'
                 : null
             "
-            [attr.aria-invalid]="
-              deactivateForm.controls.observation.invalid &&
-              deactivateForm.controls.observation.touched
-            "
+            [attr.aria-invalid]="deactivateObservationInvalid()"
+            [invalid]="deactivateObservationInvalid()"
             formControlName="observation"
             pTextarea
             rows="4"
           ></textarea>
-          @if (
-            deactivateForm.controls.observation.invalid &&
-            deactivateForm.controls.observation.touched
-          ) {
+          @if (deactivateObservationInvalid()) {
             <p
               id="application-assignment-deactivate-observation-error"
               class="mb-0 mt-1 text-sm text-red-600"
             >
-              {{ copy.deactivateObservationRequired }}
+              {{ deactivateObservationError() }}
             </p>
           }
         </form>

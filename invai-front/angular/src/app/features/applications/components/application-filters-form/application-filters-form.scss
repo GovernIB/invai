@@ -21,11 +21,6 @@
   .application-filter-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .application-filter-row--identity > div {
-    // Match the administrative-unit field's static label (1rem) and gap (0.5rem).
-    padding-block-start: 1.5rem;
-  }
 }
 
 @container (min-width: 72rem) {

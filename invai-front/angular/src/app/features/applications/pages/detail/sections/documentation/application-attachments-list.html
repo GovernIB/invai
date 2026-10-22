@@ -1,0 +1,189 @@
+<section class="application-documentation-list" aria-labelledby="application-attachments-title">
+  <div class="application-documentation-list__header">
+    <h3 id="application-attachments-title">{{ texts.title }}</h3>
+    <app-section-actions
+      columnsInputId="application-attachments-columns"
+      [(isFiltersCollapsed)]="isFiltersCollapsed"
+      [(quickSearchValue)]="quickSearchTerm"
+      [(selectedColumns)]="selectedColumns"
+      [addButtonAriaLabel]="texts.addAriaLabel"
+      [availableColumns]="selectableColumns()"
+      [columnsButtonAriaLabel]="texts.columnsAriaLabel"
+      [exportButtonAriaLabel]="texts.exportAriaLabel"
+      [filtersButtonAriaLabel]="texts.filtersAriaLabel"
+      [filtersSelected]="selectedFilters()"
+      [hideAddButton]="!canManage()"
+      [isSearchLoading]="isSearchIndicatorLoading()"
+      [quickSearchAriaLabel]="texts.quickSearchAriaLabel"
+      [quickSearchPlaceholder]="texts.quickSearchPlaceholder"
+      (onAdd)="openCreateDialog()"
+      (onExport)="onExport()"
+      (onQuickSearchChange)="onQuickSearchChange($event)"
+    />
+  </div>
+
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [headingLevel]="4"
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="filtersForm">
+        <div class="invai-filter-field--compact">
+          <p-floatlabel class="w-full">
+            <p-select
+              ariaLabelledBy="application-attachments-filter-section-label"
+              formControlName="sectionId"
+              inputId="application-attachments-filter-section"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [loading]="isCatalogsLoading()"
+              [options]="sectionOptions()"
+              [showClear]="true"
+            />
+            <label
+              id="application-attachments-filter-section-label"
+              for="application-attachments-filter-section"
+            >
+              {{ common.sectionFilter }}
+            </label>
+          </p-floatlabel>
+        </div>
+        <div class="invai-filter-field--compact">
+          <p-floatlabel class="w-full">
+            <p-select
+              ariaLabelledBy="application-attachments-filter-type-label"
+              formControlName="mimeTypeId"
+              inputId="application-attachments-filter-type"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [loading]="isCatalogsLoading()"
+              [options]="mimeTypeOptions()"
+              [showClear]="true"
+            />
+            <label
+              id="application-attachments-filter-type-label"
+              for="application-attachments-filter-type"
+            >
+              {{ texts.documentTypeFilter }}
+            </label>
+          </p-floatlabel>
+        </div>
+        <div class="invai-filter-field--compact">
+          <p-floatlabel class="w-full">
+            <p-select
+              ariaLabelledBy="application-attachments-filter-category-label"
+              formControlName="categoryId"
+              inputId="application-attachments-filter-category"
+              optionLabel="label"
+              optionValue="id"
+              styleClass="w-full"
+              [ariaFilterLabel]="texts.categoryFilter"
+              [filter]="true"
+              [loading]="isCategoriesLoading()"
+              [options]="categoryOptions()"
+              [showClear]="true"
+            />
+            <label
+              id="application-attachments-filter-category-label"
+              for="application-attachments-filter-category"
+            >
+              {{ texts.categoryFilter }}
+            </label>
+          </p-floatlabel>
+        </div>
+        <div class="invai-filter-field--compact">
+          <p-floatlabel class="w-full">
+            <p-select
+              ariaLabelledBy="application-attachments-filter-subcategory-label"
+              formControlName="subcategoryId"
+              inputId="application-attachments-filter-subcategory"
+              optionLabel="label"
+              optionValue="id"
+              styleClass="w-full"
+              [ariaFilterLabel]="texts.subcategoryFilter"
+              [filter]="true"
+              [options]="subcategoryFilterOptions()"
+              [showClear]="true"
+            />
+            <label
+              id="application-attachments-filter-subcategory-label"
+              for="application-attachments-filter-subcategory"
+            >
+              {{ texts.subcategoryFilter }}
+            </label>
+          </p-floatlabel>
+        </div>
+        <div class="invai-filter-field--compact">
+          <p-floatlabel class="w-full">
+            <p-select
+              ariaLabelledBy="application-attachments-filter-state-label"
+              formControlName="statusId"
+              inputId="application-attachments-filter-state"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [loading]="isCatalogsLoading()"
+              [options]="stateOptions()"
+              [showClear]="true"
+            />
+            <label
+              id="application-attachments-filter-state-label"
+              for="application-attachments-filter-state"
+            >
+              {{ texts.stateFilter }}
+            </label>
+          </p-floatlabel>
+        </div>
+      </form>
+    </app-search-filters>
+  }
+
+  <app-application-attachments-table
+    [canManage]="canManage()"
+    [columns]="sortedSelectedColumns()"
+    [first]="tableFirst()"
+    [isInitialLoading]="isInitialTableLoading()"
+    [isLoading]="isLoading()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+</section>
+
+@if (isDialogVisible()) {
+  <app-application-attachment-dialog
+    [(visible)]="isDialogVisible"
+    [canEdit]="canManage()"
+    [categoryOptions]="categoryOptions()"
+    [form]="entityForm"
+    [isCategoriesLoading]="isCategoriesLoading()"
+    [isCatalogsLoading]="isCatalogsLoading()"
+    [mimeTypes]="mimeTypes()"
+    [sectionOptions]="sectionOptions()"
+    [isDeleting]="isDeleting()"
+    [isSaving]="isSaving()"
+    mode="create"
+    (closed)="closeDialog()"
+    (submitForm)="submit()"
+  />
+}
+@if (isDeleteDialogVisible()) {
+  <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
+    [(visible)]="isDeleteDialogVisible"
+    [cancelAriaLabel]="texts.deleteDialogCancelAriaLabel"
+    [cancelLabel]="common.deleteCancel"
+    [confirmAriaLabel]="texts.deleteDialogConfirmAriaLabel"
+    [confirmLabel]="common.deleteConfirm"
+    [message]="deleteDialogMessage()"
+    [title]="texts.deleteDialogTitle"
+    (cancel)="closeDeleteDialog()"
+    (confirm)="confirmDelete()"
+  />
+}

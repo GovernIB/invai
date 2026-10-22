@@ -1,4 +1,5 @@
 import type { Dir3Validation } from './application-dir3.model';
+import type { ValidationStatus } from './validation-status.model';
 import { AdministrativeUnit } from '@features/administrative-units/administrative-units.model';
 import { Category } from '@features/categories/categories.model';
 import { Commission } from '@features/commissions/commissions.model';
@@ -53,6 +54,8 @@ export interface Application {
   appDataId?: number | null;
   appIntegrationId?: number | null;
   appResponsibleAuthorizedId: number | null;
+  /** At least one active Personal CAIB assignment has a DIR3 that mismatches the application. */
+  dir3Mismatch: boolean;
   incomplete: boolean | null;
   missingResponsibleTypes: boolean | null;
   missingAuthorized: boolean | null;
@@ -102,6 +105,8 @@ export interface ApplicationOutput {
   appDataId?: number | null;
   appIntegrationId?: number | null;
   appResponsibleAuthorizedId: number | null;
+  // Persisted by the DIR3 audits (`dir3/check-all`, `dir3/check/{id}`).
+  dir3Mismatch?: boolean;
   incomplete: boolean | null;
   missingResponsibleTypes: boolean | null;
   missingAuthorized: boolean | null;
@@ -117,6 +122,23 @@ export interface ApplicationDir3MismatchOutput {
   id: number;
   name: string;
   dir3Mismatch: boolean;
+}
+
+// The DIR3 audit of every application runs in the background on the server that launched it.
+export type Dir3AuditState = 'IDLE' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+
+export interface Dir3AuditStatus {
+  state: Dir3AuditState;
+  startedBy: string | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  totalApplications: number;
+  processedApplications: number;
+  mismatchedApplications: ApplicationDir3MismatchOutput[];
+  // Back-end message key (not a localized text) explaining why a FAILED audit stopped, if known.
+  failureReason: string | null;
+  // Applications whose audit failed and were left unchanged; a COMPLETED audit may still have some.
+  failedApplicationIds: number[];
 }
 
 export interface ApplicationInput {
@@ -511,6 +533,18 @@ export interface ApplicationSecurityRoleOutput {
   appSecurity: ApplicationSecurityOutput;
   securityRole: ApplicationSecurityRole;
   deletedAt: string | null;
+  // VALIDATED when the role name starts with `<prefix>_` (case-sensitive), NOT_VALIDATED when it
+  // does not, MANUAL when someone vouched for it; a role added by hand is saved MANUAL directly.
+  validationStatus: ValidationStatus;
+  // Set only when validationStatus is MANUAL.
+  manualValidatedAt: string | null;
+  manualValidatedBy: string | null;
+}
+
+// securityRoleId is Soffid's own role id (ApplicationSecurityRole.roleId), not the local catalog id.
+export interface ApplicationSecurityRoleInput {
+  appSecurityId: number;
+  securityRoleId: number;
 }
 
 export interface ApplicationWebContextOutput {
@@ -603,6 +637,8 @@ export interface ApplicationSecurityMeasureInput {
 }
 
 export interface ApplicationSecurityRolePageParams extends ApplicationSecurityPageParams {
+  search?: string;
+  securityRoleName?: string;
   system?: string;
 }
 
@@ -644,52 +680,47 @@ export interface ApplicationAccessibilityOutput {
 }
 export type EnsClassificationLoadState = 'ready' | 'unknown' | 'inconsistent';
 
+// The "Dades" tab has two sources, each with the URL of its swagger.
+export type ApplicationDataSource = 'openData' | 'reuse';
+
+// PUT application/data/{id} only saves the observation; each URL is set on its own.
 export interface ApplicationDataInput {
   applicationId: number;
   observation: string | null;
-  openDataUrl: string | null;
-  useOpenDataUrl: boolean;
-  reuseUrl: string | null;
-  useReuseUrl: boolean;
 }
 
-export interface ApplicationDataParameter {
-  name: string | null;
-  in: string | null;
-  required: boolean;
-  description: string | null;
-  type: string | null;
-  format: string | null;
-  defaultValue: unknown;
-  enumValues: string[] | null;
+// Body of PUT application/data/{id}/open-data and /reuse. A null URL goes back to the default one,
+// derived by the back-end from the application's code.
+export interface ApplicationDataUrlInput {
+  url: string | null;
 }
 
-export interface ApplicationDataOperation {
-  operationId: string | null;
-  summary: string | null;
-  description: string | null;
-  parameters: ApplicationDataParameter[] | null;
+// Answer of GET application/data/check-url and of the PUT of a source: the URL the back-end queried
+// and whether it answered with a 2xx status code.
+export interface ApplicationDataUrlOutput {
+  url: string | null;
+  validUrl: boolean;
 }
 
-export interface ApplicationDataEndpoint {
-  path: string;
-  method: string;
-  operation: ApplicationDataOperation | null;
-}
-
-// openData/reuse are resolved live by GET and returned as null by POST/PUT. A GET also returns
-// null for the one source whose live fetch failed while the other one succeeded.
+// GET gives the URL each source uses (typed in by hand, or else the default one, derived from the
+// application's code) without querying it; POST and PUT return both URLs as null.
 export interface ApplicationDataOutput {
   id: number;
   application: Pick<ApplicationOutput, 'id'> | null;
   observation: string | null;
   openDataUrl: string | null;
-  useOpenDataUrl: boolean;
-  openData: ApplicationDataEndpoint[] | null;
   reuseUrl: string | null;
-  useReuseUrl: boolean;
-  reuse: ApplicationDataEndpoint[] | null;
   deletedAt: string | null;
+}
+
+// Whether the URL of a source answers: `checking` while check-url is pending, `failed` when it
+// could not be checked at all.
+export type ApplicationDataUrlCheck = 'checking' | 'valid' | 'invalid' | 'failed';
+
+// URL a source uses, as the Dades tab shows it, and the outcome of checking it.
+export interface ApplicationDataUrlState {
+  url: string | null;
+  check: ApplicationDataUrlCheck;
 }
 
 // Anchor of the "Integracions" tab: one per application, holding its observations.
@@ -714,7 +745,8 @@ export interface SoffidRole {
 }
 
 // requiredRoles, grantedRoles and rolesMismatch are resolved live by GET and returned as null by
-// POST/PUT; grantedRoles and rolesMismatch are also null when Soffid could not be queried.
+// POST/PUT. When GET cannot query Soffid it still returns the row, with rolesUnavailable true and
+// those three fields null; rolesUnavailable itself is null in POST/PUT responses.
 export interface ApplicationIntegrationConnectionOutput {
   id: number;
   appIntegrationId: number;
@@ -725,6 +757,7 @@ export interface ApplicationIntegrationConnectionOutput {
   requiredRoles: SoffidRole[] | null;
   grantedRoles: SoffidRole[] | null;
   rolesMismatch: boolean | null;
+  rolesUnavailable: boolean | null;
   deletedAt: string | null;
 }
 

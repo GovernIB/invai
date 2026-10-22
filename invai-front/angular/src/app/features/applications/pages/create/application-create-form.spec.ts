@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { MessageService } from 'primeng/api';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { ApplicationStatus } from '../../applications.model';
 import { ApplicationCreateFormGroup } from '../../forms/application-form.factory';
@@ -13,6 +13,7 @@ import {
   ApplicationOptionsService,
   ApplicationSelectOptions,
 } from '../../services/application-options.service';
+import { ApplicationSoffidRolesAssignmentService } from '../../services/application-security.service';
 import { ApplicationsService } from '../../services/applications.service';
 import { ApplicationCreateForm } from './application-create-form';
 
@@ -40,6 +41,18 @@ const OPTIONS: ApplicationSelectOptions = {
 
 };
 
+const VALID_FORM_VALUE = {
+  application: 'Invai',
+  category: 1,
+  informationSystem: 2,
+  scope: 3,
+  commission: 4,
+  prefix: 'CVF',
+  code: '0001',
+  administrativeUnit: 'UA01',
+  description: '',
+};
+
 describe('ApplicationCreateForm', () => {
   let fixture: ComponentFixture<ApplicationCreateForm>;
   let formComponent: {
@@ -49,6 +62,7 @@ describe('ApplicationCreateForm', () => {
   };
   let messageService: MessageService;
   let create: ReturnType<typeof vi.fn>;
+  let assign: ReturnType<typeof vi.fn>;
   let getAdministrativeUnitOptions: ReturnType<typeof vi.fn>;
   const route = {};
   const router = { navigate: vi.fn() };
@@ -56,6 +70,7 @@ describe('ApplicationCreateForm', () => {
   beforeEach(async () => {
     router.navigate.mockReset();
     create = vi.fn(() => of({ id: 1 }));
+    assign = vi.fn(() => of([]));
     getAdministrativeUnitOptions = vi.fn(() => of([]));
 
     await TestBed.configureTestingModule({
@@ -64,6 +79,7 @@ describe('ApplicationCreateForm', () => {
         MessageService,
         { provide: ActivatedRoute, useValue: route },
         { provide: ApplicationsService, useValue: { create } },
+        { provide: ApplicationSoffidRolesAssignmentService, useValue: { assign } },
         {
           provide: ApplicationOptionsService,
           useValue: {
@@ -132,7 +148,75 @@ describe('ApplicationCreateForm', () => {
       description: '',
       statusId: ApplicationStatus.ACTIVE,
     });
+    expect(assign).toHaveBeenCalledWith(1);
     expect(addSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
+    expect(router.navigate).toHaveBeenCalledWith(['..'], { relativeTo: route });
+  });
+
+  it.each([
+    {
+      roles: 0,
+      detail: 'Aplicació afegida correctament. No hi ha cap rol de Soffid amb el prefix CVF.',
+    },
+    { roles: 1, detail: 'Aplicació afegida correctament amb 1 rol de Soffid assignat.' },
+    { roles: 3, detail: 'Aplicació afegida correctament amb 3 rols de Soffid assignats.' },
+  ])('reports the $roles Soffid role(s) assigned to the created application', ({ roles, detail }) => {
+    const addSpy = vi.spyOn(messageService, 'add');
+    assign.mockReturnValueOnce(of(Array.from({ length: roles }, (_, id) => ({ id }))));
+
+    formComponent.form.patchValue(VALID_FORM_VALUE);
+    formComponent.submit();
+
+    expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+      severity: 'success',
+      summary: 'Aplicació afegida',
+      detail,
+    });
+    expect(router.navigate).toHaveBeenCalledWith(['..'], { relativeTo: route });
+  });
+
+  it('keeps saving until the Soffid roles are assigned before leaving the form', () => {
+    const assigned = new Subject<unknown[]>();
+    assign.mockReturnValueOnce(assigned);
+
+    formComponent.form.patchValue(VALID_FORM_VALUE);
+    formComponent.submit();
+    fixture.detectChanges();
+
+    const submitButton = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(submitButton.disabled).toBe(true);
+    expect(router.navigate).not.toHaveBeenCalled();
+
+    assigned.next([]);
+    assigned.complete();
+    fixture.detectChanges();
+
+    expect(submitButton.disabled).toBe(false);
+    expect(router.navigate).toHaveBeenCalledWith(['..'], { relativeTo: route });
+  });
+
+  it('warns without reporting a failed creation when the Soffid roles cannot be assigned', () => {
+    const addSpy = vi.spyOn(messageService, 'add');
+    assign.mockReturnValueOnce(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 504,
+            error: { error: 'Error', message: 'Soffid ha trigat massa a respondre.' },
+          }),
+      ),
+    );
+
+    formComponent.form.patchValue(VALID_FORM_VALUE);
+    formComponent.submit();
+
+    expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+      severity: 'warn',
+      summary: 'Aplicació afegida',
+      detail: "L'aplicació s'ha afegit, però no s'han pogut assignar els seus rols de Soffid.",
+    });
     expect(router.navigate).toHaveBeenCalledWith(['..'], { relativeTo: route });
   });
 
@@ -280,6 +364,7 @@ describe('ApplicationCreateForm', () => {
       summary: 'Error',
       detail: "No s'ha pogut afegir l'aplicació.",
     });
+    expect(assign).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 

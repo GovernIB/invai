@@ -7,6 +7,8 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { richTextMaxBytesValidator } from '@shared/utils/text-length.utils';
 
 import { DevelopmentModality, DevelopmentStandardAdaption } from '../applications.model';
 
@@ -63,7 +65,10 @@ export function createApplicationDevelopmentForm(
       Validators.required,
     ),
     revisionDate: formBuilder.control<Date | null>(null, Validators.required),
-    observation: formBuilder.nonNullable.control(''),
+    observation: formBuilder.nonNullable.control(
+      '',
+      richTextMaxBytesValidator(TEXT_FIELD_MAX_BYTES),
+    ),
   });
 }
 

@@ -56,6 +56,15 @@ import {
   INTEGRATIONS_MAINTENANCE_RESOLVE_KEY,
   integrationsMaintenanceResolver,
 } from './pages/integrations-maintenance/integrations-maintenance.resolver';
+import {
+  DOCUMENT_CATEGORIES_LIST_RESOLVE_KEY,
+  documentCategoriesListResolver,
+} from '@features/document-categories/pages/list/document-categories-list.resolver';
+import {
+  DOCUMENT_CATEGORY_DETAIL_RESOLVE_KEY,
+  documentCategoryDetailResolver,
+} from '@features/document-categories/pages/detail/document-category-detail.resolver';
+import { documentCategoryDetailCanDeactivate } from '@features/document-categories/pages/detail/document-category-detail.guard';
 
 export const MAINTENANCES_ROUTES: Routes = [
   {
@@ -160,6 +169,19 @@ export const MAINTENANCES_ROUTES: Routes = [
           [INTEGRATIONS_MAINTENANCE_RESOLVE_KEY]: integrationsMaintenanceResolver,
         },
       },
+      {
+        path: MAINTENANCES_ROUTES_LOC.DOCUMENTATION,
+        loadComponent: () =>
+          import('./pages/documentation-maintenance/documentation-maintenance').then(
+            (m) => m.DocumentationMaintenance,
+          ),
+        data: {
+          breadcrumb: MAINTENANCES_ROUTES_LABELS.DOCUMENTATION,
+        },
+        resolve: {
+          [DOCUMENT_CATEGORIES_LIST_RESOLVE_KEY]: documentCategoriesListResolver,
+        },
+      },
       legacyMaintenanceRoute(
         MAINTENANCES_ROUTES_LOC.CATEGORIES,
         MAINTENANCES_ROUTES_LOC.GENERAL,
@@ -183,6 +205,19 @@ export const MAINTENANCES_ROUTES: Routes = [
       legacyEnvironmentRoute(MAINTENANCES_ROUTES_LOC.SYSTEMS_DATABASES),
       legacyEnvironmentRoute(MAINTENANCES_ROUTES_LOC.ENVIRONMENTS),
     ],
+  },
+  // The detail of a document category is a page of its own, outside the maintenance tabs; the
+  // router reaches it once no tab matches the URL.
+  {
+    path: `${MAINTENANCES_ROUTES_LOC.DOCUMENTATION}/${MAINTENANCES_ROUTES_LOC.DOCUMENT_CATEGORIES}/:id`,
+    canDeactivate: [documentCategoryDetailCanDeactivate],
+    loadComponent: () =>
+      import('@features/document-categories/pages/detail/document-category-detail').then(
+        (m) => m.DocumentCategoryDetail,
+      ),
+    resolve: {
+      [DOCUMENT_CATEGORY_DETAIL_RESOLVE_KEY]: documentCategoryDetailResolver,
+    },
   },
 ];
 

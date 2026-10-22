@@ -1,4 +1,6 @@
-export type Dir3ValidationStatus = 'VALIDATED' | 'NOT_VALIDATED' | 'MANUAL' | 'NOT_APPLY';
+import { ValidationStatus } from './validation-status.model';
+
+export type Dir3ValidationStatus = ValidationStatus;
 
 export interface Dir3Validation {
   id: number;

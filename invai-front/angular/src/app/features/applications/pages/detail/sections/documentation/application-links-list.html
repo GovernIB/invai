@@ -1,0 +1,99 @@
+<section class="application-documentation-list" aria-labelledby="application-links-title">
+  <div class="application-documentation-list__header">
+    <h3 id="application-links-title">{{ texts.title }}</h3>
+    <app-section-actions
+      columnsInputId="application-links-columns"
+      [(isFiltersCollapsed)]="isFiltersCollapsed"
+      [(quickSearchValue)]="quickSearchTerm"
+      [(selectedColumns)]="selectedColumns"
+      [addButtonAriaLabel]="texts.addAriaLabel"
+      [availableColumns]="selectableColumns()"
+      [columnsButtonAriaLabel]="texts.columnsAriaLabel"
+      [filtersButtonAriaLabel]="texts.filtersAriaLabel"
+      [filtersSelected]="selectedFilters()"
+      [hideAddButton]="!canManage()"
+      [hideExportButton]="true"
+      [isSearchLoading]="isSearchIndicatorLoading()"
+      [quickSearchAriaLabel]="texts.quickSearchAriaLabel"
+      [quickSearchPlaceholder]="texts.quickSearchPlaceholder"
+      (onAdd)="openCreateDialog()"
+      (onQuickSearchChange)="onQuickSearchChange($event)"
+    />
+  </div>
+
+  @if (!isFiltersCollapsed()) {
+    <app-search-filters
+      [headingLevel]="4"
+      [hideMoreFiltersButton]="true"
+      [isDisable]="isLoading()"
+      [isLoading]="isLoading()"
+      (onReset)="reset()"
+      (onSearch)="onFilterSearch()"
+    >
+      <form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="filtersForm">
+        <div class="invai-filter-field--compact">
+          <p-floatlabel class="w-full">
+            <p-select
+              ariaLabelledBy="application-links-filter-section-label"
+              formControlName="sectionId"
+              inputId="application-links-filter-section"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [loading]="isSectionsLoading()"
+              [options]="sectionOptions()"
+              [showClear]="true"
+            />
+            <label id="application-links-filter-section-label" for="application-links-filter-section">
+              {{ common.sectionFilter }}
+            </label>
+          </p-floatlabel>
+        </div>
+      </form>
+    </app-search-filters>
+  }
+
+  <app-application-links-table
+    [canManage]="canManage()"
+    [columns]="sortedSelectedColumns()"
+    [first]="tableFirst()"
+    [isInitialLoading]="isInitialTableLoading()"
+    [isLoading]="isLoading()"
+    [itemsList]="itemsList()"
+    (onPageChange)="onPageChange($event)"
+    (onSelectAction)="onTableAction($event)"
+  />
+</section>
+
+@if (isDialogVisible()) {
+  <app-application-link-dialog
+    [(visible)]="isDialogVisible"
+    [canEdit]="canManage()"
+    [form]="entityForm"
+    [isDeleting]="isDeleting()"
+    [isSaving]="isSaving()"
+    [isSectionsLoading]="isSectionsLoading()"
+    [mode]="dialogMode()"
+    [section]="selectedSection()"
+    [sectionOptions]="sectionOptions()"
+    (cancelEdit)="cancelEdit()"
+    (closed)="closeDialog()"
+    (deactivate)="deactivateSelected()"
+    (edit)="startEdit()"
+    (submitForm)="submit()"
+  />
+}
+@if (isDeleteDialogVisible()) {
+  <app-confirmation-dialog
+    confirmIcon="pi pi-trash"
+    [(visible)]="isDeleteDialogVisible"
+    [cancelAriaLabel]="texts.deleteDialogCancelAriaLabel"
+    [cancelLabel]="common.deleteCancel"
+    [confirmAriaLabel]="texts.deleteDialogConfirmAriaLabel"
+    [confirmLabel]="common.deleteConfirm"
+    [message]="deleteDialogMessage()"
+    [title]="texts.deleteDialogTitle"
+    (cancel)="closeDeleteDialog()"
+    (confirm)="confirmDelete()"
+  />
+}

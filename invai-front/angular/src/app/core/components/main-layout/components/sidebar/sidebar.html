@@ -1,5 +1,7 @@
-<aside
+<nav
   [attr.id]="isDrawerVariant() ? 'sidebar-navigation-drawer-content' : 'sidebar-navigation-inline'"
+  [attr.aria-label]="landmarkAriaLabel()"
+  [attr.aria-hidden]="isVisible() ? null : 'true'"
   [class]="asideClass()"
   class="transition-[width] duration-300 bg-white h-full shadow-[8px_0_12px_-8px_#0000001A]"
 >
@@ -74,4 +76,4 @@
       </ng-template>
     </p-tieredMenu>
   }
-</aside>
+</nav>

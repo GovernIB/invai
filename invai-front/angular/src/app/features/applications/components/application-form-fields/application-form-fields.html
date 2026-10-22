@@ -321,8 +321,15 @@
         [formControl]="controls().description"
         [pt]="descriptionEditorPassThrough"
         [style]="{ height: '10rem' }"
+        [invalid]="isInvalid(controls().description)"
+        [appRichTextAria]="isInvalid(controls().description) ? errorId('description') : null"
         (onInit)="initializeDescriptionEditor($event)"
       />
+      @if (isInvalid(controls().description)) {
+        <small [id]="errorId('description')" class="application-form-fields__error">
+          {{ textMaxBytesError }}
+        </small>
+      }
     }
   </div>
 </div>

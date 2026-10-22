@@ -13,6 +13,18 @@ export const APPLICATION_DETAIL_ACTIVATION_DIALOG_MESSAGE = (applicationName: st
 export const APPLICATION_DETAIL_ACTIVATION_SUCCESS_TITLE = $localize`Aplicació donada d'alta`;
 export const APPLICATION_DETAIL_ACTIVATION_SUCCESS_MESSAGE = $localize`L'aplicació s'ha donat d'alta correctament.`;
 export const APPLICATION_DETAIL_ACTIVATION_ERROR_MESSAGE = $localize`No s'ha pogut donar d'alta l'aplicació.`;
+export const APPLICATION_DETAIL_ACTIVATION_ROLES_ERROR_MESSAGE =
+  $localize`L'aplicació s'ha donat d'alta, però no s'han pogut assignar els seus rols de Soffid.`;
+// Appended to a success message: the back-end only returns the roles it has just assigned.
+export const APPLICATION_DETAIL_ROLES_ASSIGNED_MESSAGE = (assignedRoles: number, prefix: string) => {
+  if (assignedRoles === 0) {
+    return $localize`No s'ha assignat cap rol nou de Soffid amb el prefix ${prefix}:prefix:.`;
+  }
+  if (assignedRoles === 1) {
+    return $localize`S'ha assignat 1 rol de Soffid amb el prefix ${prefix}:prefix:.`;
+  }
+  return $localize`S'han assignat ${assignedRoles}:assignedRoles: rols de Soffid amb el prefix ${prefix}:prefix:.`;
+};
 export const APPLICATION_DETAIL_SECTIONS_ARIA_LABEL = $localize`Seccions de l'aplicació`;
 export const APPLICATION_DETAIL_COMPLETENESS_REFRESH_ERROR = $localize`:@@applicationCompletenessRefreshError:No s'han pogut actualitzar els indicadors de dades incompletes. Es mantenen els últims valors rebuts del servidor.`;
 export const APPLICATION_DETAIL_COMPLETENESS_RETRY = $localize`:@@applicationCompletenessRetry:Torna a carregar els indicadors`;
@@ -37,6 +49,8 @@ export const APPLICATION_DETAIL_SECTION_SAVE_MOCKED_MESSAGE = (sectionLabel: str
   $localize`Els canvis de ${sectionLabel}:sectionLabel: s'han conservat localment, però encara no s'han enviat al servidor.`;
 export const APPLICATION_DETAIL_SAVE_ERROR_TITLE = $localize`Error`;
 export const APPLICATION_DETAIL_SAVE_ERROR_MESSAGE = $localize`No s'han pogut desar els canvis.`;
+export const APPLICATION_DETAIL_SAVE_ROLES_ERROR_MESSAGE = (prefix: string) =>
+  $localize`Els canvis s'han desat, però no s'han pogut assignar els rols de Soffid del prefix ${prefix}:prefix:.`;
 export const APPLICATION_DETAIL_ACTIVATION_ERROR_TITLE = APPLICATION_DETAIL_SAVE_ERROR_TITLE;
 export const APPLICATION_DETAIL_WITHDRAWAL_LABEL = $localize`Donar de baixa`;
 export const APPLICATION_DETAIL_WITHDRAWAL_ARIA_LABEL = $localize`Donar de baixa l'aplicació`;
@@ -67,4 +81,5 @@ export const APPLICATION_DETAIL_TABS = {
   security: $localize`Seguretat`,
   data: $localize`:@@applicationDataTitle:Dades`,
   integrations: $localize`:@@applicationIntegrationsTitle:Integracions`,
+  documentation: $localize`:@@applicationDocumentationTitle:Documentació`,
 };

@@ -1,6 +1,7 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { isStructuredBadRequest } from '@core/models/api-error.model';
 import { SearchFiltersComponent } from '@components/search-filters/search-filters.component';
 import { SectionActionsComponent } from '@components/section-actions/section-actions.component';
 import { SectionContainerComponent } from '@components/section-container/section-container.component';
@@ -23,6 +24,7 @@ import {
   map,
   of,
   Subject,
+  Subscription,
   switchMap,
   tap,
   timer,
@@ -35,6 +37,7 @@ import {
   ApplicationInfrastructureFilterOptions,
   ApplicationPageParams,
   ApplicationStatus,
+  Dir3AuditStatus,
 } from '../../applications.model';
 import { ApplicationFiltersForm, ApplicationsTable } from '../../components';
 import { ApplicationTableAction } from '../../components/applications-table/applications-table';
@@ -44,6 +47,10 @@ import { ApplicationsService } from '../../services/applications.service';
 import { APPLICATION_GENERAL_EDIT_NAVIGATION } from '../detail/application-detail-navigation';
 import {
   APPLICATIONS_ADD_ARIA_LABEL,
+  APPLICATIONS_DIR3_AUDIT_PROGRESS_LABEL,
+  APPLICATIONS_DIR3_AUDIT_RESULT_WITH_FAILURES,
+  APPLICATIONS_DIR3_AUDIT_STARTING_LABEL,
+  APPLICATIONS_DIR3_AUDIT_STATUS_ERROR,
   APPLICATIONS_DIR3_CHECK_ERROR,
   APPLICATIONS_DIR3_CHECK_LABEL,
   APPLICATIONS_DIR3_CHECK_MISMATCHES,
@@ -68,7 +75,8 @@ import {
   APPLICATIONS_LOAD_ERROR_SUMMARY,
   APPLICATIONS_QUICK_SEARCH_ARIA_LABEL,
   APPLICATIONS_RESPONSIBLE_SEARCH_ERROR_DETAIL,
-  APPLICATIONS_TITLE
+  APPLICATIONS_TITLE,
+  dir3AuditFailureMessage,
 } from './applications-list.i18n';
 import {
   APPLICATIONS_LIST_RESOLVE_KEY,
@@ -128,9 +136,21 @@ export class ApplicationsList
   protected readonly quickSearchAriaLabel = APPLICATIONS_QUICK_SEARCH_ARIA_LABEL;
   protected readonly exportAriaLabel = APPLICATIONS_EXPORT_ARIA_LABEL;
   protected readonly addAriaLabel = APPLICATIONS_ADD_ARIA_LABEL;
-  protected readonly dir3CheckLabel = APPLICATIONS_DIR3_CHECK_LABEL;
   protected readonly dir3CheckProgress = APPLICATIONS_DIR3_CHECK_PROGRESS;
-  protected readonly isDir3Checking = signal(false);
+  private readonly dir3Audit = signal<Dir3AuditStatus | null>(null);
+  private readonly isDir3AuditStarting = signal(false);
+  protected readonly isDir3Checking = computed(
+    () => this.isDir3AuditStarting() || this.dir3Audit()?.state === 'RUNNING',
+  );
+  // The progress is shown on the button only; the status region announces the start once.
+  protected readonly dir3CheckLabel = computed(() => {
+    const audit = this.dir3Audit();
+    if (audit?.state !== 'RUNNING') return APPLICATIONS_DIR3_CHECK_LABEL;
+    return audit.totalApplications > 0
+      ? APPLICATIONS_DIR3_AUDIT_PROGRESS_LABEL(audit.processedApplications, audit.totalApplications)
+      : APPLICATIONS_DIR3_AUDIT_STARTING_LABEL;
+  });
+  private dir3AuditWatch: Subscription | null = null;
 
   quickSearchTerm = '';
   private readonly isQuickSearchPending = signal(false);
@@ -184,23 +204,18 @@ export class ApplicationsList
   protected checkAllApplicationDir3(): void {
     if (this.isDir3Checking()) return;
 
-    this.isDir3Checking.set(true);
+    this.isDir3AuditStarting.set(true);
     this.applicationsService
-      .checkDir3MismatchForAllApplications()
+      .startDir3Audit()
       .pipe(
-        finalize(() => this.isDir3Checking.set(false)),
+        finalize(() => this.isDir3AuditStarting.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (mismatches) => {
-          this.messageService.add({
-            severity: mismatches.length ? 'warn' : 'success',
-            summary: APPLICATIONS_DIR3_CHECK_SUCCESS,
-            detail: APPLICATIONS_DIR3_CHECK_MISMATCHES(mismatches.length),
-          });
-          this.searchRequests.next({ params: this.lastPageParams });
-        },
-        error: () => {
+        next: (status) => this.followDir3Audit(status),
+        error: (error: unknown) => {
+          // The server error dialog already shows a structured 400, e.g. an unrenewable session.
+          if (isStructuredBadRequest(error)) return;
           this.messageService.add({
             severity: 'error',
             summary: APPLICATIONS_LOAD_ERROR_SUMMARY,
@@ -208,6 +223,51 @@ export class ApplicationsList
           });
         },
       });
+  }
+
+  private followDir3Audit(status: Dir3AuditStatus): void {
+    this.dir3AuditWatch?.unsubscribe();
+    this.dir3AuditWatch = this.applicationsService
+      .watchDir3Audit(status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (current) => {
+          const wasRunning = this.dir3Audit()?.state === 'RUNNING';
+          this.dir3Audit.set(current);
+          if (wasRunning && current.state !== 'RUNNING') this.reportDir3AuditOutcome(current);
+        },
+        error: () => {
+          this.dir3Audit.set(null);
+          this.messageService.add({
+            severity: 'error',
+            summary: APPLICATIONS_LOAD_ERROR_SUMMARY,
+            detail: APPLICATIONS_DIR3_AUDIT_STATUS_ERROR,
+          });
+        },
+      });
+  }
+
+  private reportDir3AuditOutcome(status: Dir3AuditStatus): void {
+    if (status.state === 'COMPLETED') {
+      const mismatches = status.mismatchedApplications.length;
+      const failed = status.failedApplicationIds.length;
+      this.messageService.add({
+        severity: mismatches || failed ? 'warn' : 'success',
+        summary: APPLICATIONS_DIR3_CHECK_SUCCESS,
+        detail: failed
+          ? APPLICATIONS_DIR3_AUDIT_RESULT_WITH_FAILURES(mismatches, failed)
+          : APPLICATIONS_DIR3_CHECK_MISMATCHES(mismatches),
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: APPLICATIONS_LOAD_ERROR_SUMMARY,
+        detail: dir3AuditFailureMessage(status.failureReason),
+      });
+    }
+    if (status.processedApplications > 0) {
+      this.searchRequests.next({ params: this.lastPageParams });
+    }
   }
 
   protected override initializeResults(): void {

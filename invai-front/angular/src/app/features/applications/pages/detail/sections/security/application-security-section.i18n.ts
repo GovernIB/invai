@@ -36,7 +36,7 @@ export const APPLICATION_SECURITY_DATE_PLACEHOLDER = $localize`dd/mm/aaaa`;
 export const APPLICATION_SECURITY_LABELS = {
   url: $localize`URL`,
   system: $localize`Sistema`,
-  applyRoleFilters: $localize`:@@applicationSecurityRoleSearch:Cerca rols per sistema`,
+  roleCode: $localize`:@@applicationSecurityRoleCode:Codi`,
   urlError: $localize`:@@webContextUrlError:Introdueix una URL http:// o https:// de fins a 255 caràcters.`,
   overallGrade: $localize`Grau d'adequació a l'ENS`,
   identityProvider: $localize`Proveïdor d'identitat`,
@@ -55,6 +55,28 @@ export const APPLICATION_SECURITY_LABELS = {
   description: $localize`Descripció`,
   measureType: $localize`Tipus`,
   ensRequirement: $localize`Requisit ENS`,
+};
+
+export const APPLICATION_SECURITY_ROLE_LIST_COPY = {
+  quickSearchPlaceholder: $localize`:@@applicationSecurityRoleQuickSearchPlaceholder:Cerca per codi o descripció`,
+  quickSearchAriaLabel: $localize`:@@applicationSecurityRoleQuickSearchAriaLabel:Cerca rols de l'aplicació per codi o descripció`,
+  quickSearchClearAriaLabel: $localize`:@@applicationSecurityRoleQuickSearchClear:Esborra la cerca de rols`,
+  filtersButtonAriaLabel: $localize`:@@applicationSecurityRoleFiltersButton:Mostra o oculta els filtres de rols`,
+};
+
+export const APPLICATION_SECURITY_ROLE_FILTER_LABELS = {
+  securityRoleName: $localize`:@@applicationSecurityRoleFilterCode:Codi`,
+  system: $localize`:@@applicationSecurityRoleFilterSystem:Sistema`,
+};
+
+export const APPLICATION_SECURITY_ROLE_SEARCH_COPY = {
+  instruction: $localize`:@@applicationSecurityRoleSearchInstruction:Obre la llista i escriu el codi del rol, per exemple amb el prefix INV_.`,
+  searching: $localize`:@@applicationSecurityRoleSearching:Cercant rols a Soffid…`,
+  empty: $localize`:@@applicationSecurityRoleSearchEmpty:No s'han trobat rols a Soffid.`,
+  error: $localize`:@@applicationSecurityRoleSearchError:No s'ha pogut consultar Soffid. Torna-ho a provar.`,
+  required: $localize`:@@applicationSecurityRoleRequired:Selecciona un rol de Soffid.`,
+  refine: (shown: number, total: number) =>
+    $localize`:@@applicationSecurityRoleSearchRefine:Es mostren ${shown}:SHOWN: de ${total}:TOTAL: rols. Escriu més text per acotar la cerca.`,
 };
 
 export const APPLICATION_SECURITY_ROLE_COLUMNS: Partial<KeyLabel>[] = [
@@ -181,8 +203,27 @@ export const APPLICATION_WEB_CONTEXT_VERIFICATION = {
 export const APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION =
   $localize`:@@applicationWebContextPendingVerification:Context web pendent de verificar.`;
 
+export const APPLICATION_SECURITY_ROLE_VALIDATION = {
+  notValidated: $localize`:@@applicationSecurityRoleNotValidated:Rol no validat: el codi no comença pel prefix de l'aplicació.`,
+  manual: $localize`:@@applicationSecurityRoleManual:Rol validat manualment`,
+  manualBy: (user: string, date: string) =>
+    $localize`:@@applicationSecurityRoleManualBy:Rol validat manualment per ${user} el ${date}`,
+  validate: $localize`:@@applicationSecurityRoleValidate:Validar manualment`,
+  confirmTitle: $localize`:@@applicationSecurityRoleValidateTitle:Validar manualment el rol?`,
+  confirmMessage: (role: string) =>
+    $localize`:@@applicationSecurityRoleValidateMessage:El rol «${role}» no comença pel prefix de l'aplicació. Si el valides, quedarà registrat al teu nom.`,
+  confirmLabel: $localize`:@@applicationSecurityRoleValidateConfirm:Validar`,
+  confirmAriaLabel: $localize`:@@applicationSecurityRoleValidateConfirmAria:Confirma la validació manual del rol`,
+  cancelAriaLabel: $localize`:@@applicationSecurityRoleValidateCancelAria:Cancel·la la validació manual del rol`,
+  success: $localize`:@@applicationSecurityRoleValidateSuccess:El rol s'ha validat manualment.`,
+  error: $localize`:@@applicationSecurityRoleValidateError:No s'ha pogut validar manualment el rol. Revisa el seu estat i torna-ho a provar.`,
+  prefixNote: (prefix: string) =>
+    $localize`:@@applicationSecurityRolePrefixNote:Aquest rol no comença per «${prefix}_». Es desarà com a validat manualment al teu nom.`,
+};
+
 export const APPLICATION_SECURITY_ADD_ARIA_LABELS: Record<ApplicationSecurityResourceKind, string> =
   {
+    role: $localize`:@@applicationSecurityRoleAdd:Afegeix un rol de l'aplicació`,
     'web-context': $localize`Afegeix un context web`,
     risk: $localize`Afegeix un risc de seguretat`,
     measure: $localize`Afegeix una mesura de seguretat`,
@@ -192,6 +233,11 @@ export const APPLICATION_SECURITY_DIALOG_TITLES: Record<
   ApplicationSecurityResourceKind,
   Record<CrudEntityDialogMode, string>
 > = {
+  role: {
+    create: $localize`:@@applicationSecurityRoleAdd:Afegeix un rol de l'aplicació`,
+    view: $localize`:@@applicationSecurityRoleView:Consulta el rol de l'aplicació`,
+    edit: $localize`:@@applicationSecurityRoleEdit:Edita el rol de l'aplicació`,
+  },
   'web-context': {
     create: $localize`Afegeix un context web`,
     view: $localize`Consulta el context web`,

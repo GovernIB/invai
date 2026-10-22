@@ -1,0 +1,113 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.application-data-url {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.application-data-url__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+  }
+}
+
+.application-data-url__current,
+.application-data-url__field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.application-data-url__current > dt,
+.application-data-url__field > label {
+  margin: 0;
+  color: var(--p-text-muted-color);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.application-data-url__current > dd {
+  margin: 0;
+}
+
+// Long URLs wrap anywhere so the value reflows at 320 px.
+.application-data-url__link {
+  display: inline-flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 0.4rem;
+  color: var(--p-primary-color);
+  text-decoration: underline;
+
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+  }
+}
+
+.application-data-url__link-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.application-data-url__check {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .application-data-url__check .pi-spin {
+    animation: none;
+  }
+}
+
+.application-data-url__warning {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: var(--p-orange-800);
+  background: var(--p-orange-50);
+  border-radius: var(--p-border-radius-md);
+}
+
+.application-data-url__manual {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  > label {
+    cursor: pointer;
+  }
+}
+
+.application-data-url__error,
+.application-data-url__help {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.application-data-url__error {
+  color: var(--p-red-600, #dc2626);
+}
+
+.application-data-url__help {
+  color: var(--p-text-muted-color);
+}

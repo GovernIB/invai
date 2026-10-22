@@ -23,7 +23,7 @@ export interface ApplicationDataLoadResult {
   appDataId: number | null;
   record: ApplicationDataOutput | null;
   status: ApplicationDataLoadStatus;
-  // Localized backend message, e.g. when a published document cannot be fetched.
+  // Localized backend message, e.g. when the anchor cannot be read.
   errorMessage: string | null;
 }
 

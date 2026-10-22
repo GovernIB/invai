@@ -59,7 +59,10 @@ const rows = (page: Page) => page.locator('app-external-systems-table tbody tr')
 test('adds the Integracions maintenance tab with the external systems panel', async ({ page }) => {
   await openExternalSystems(page);
 
-  await expect(page.locator('.maintenances-tabs a').last()).toHaveText('Integracions');
+  await expect(page.locator('.maintenances-tabs a', { hasText: 'Integracions' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
   await expect(page.getByRole('button', { name: /Sistemes externs/ })).toHaveAttribute('aria-expanded', 'true');
   await expect(rows(page)).toHaveCount(1);
   await expect(rows(page).first()).toContainText('Soffid');

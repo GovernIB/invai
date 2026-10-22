@@ -78,10 +78,20 @@
           <span class="invai-dialog-static-field__label" [id]="ids.viewLabel('required-roles')">
             {{ labels.requiredRoles }}
           </span>
-          <p class="invai-form-static-value" [attr.aria-labelledby]="ids.viewLabel('required-roles')">
+          <p
+            class="invai-form-static-value"
+            [attr.aria-labelledby]="ids.viewLabel('required-roles')"
+            [attr.aria-describedby]="view.rolesUnavailable ? ids.rolesUnavailable : null"
+          >
             {{ view.requiredRoles }}
           </p>
         </div>
+        @if (view.rolesUnavailable) {
+          <p class="m-0 flex items-start gap-2 md:col-span-12" [id]="ids.rolesUnavailable">
+            <i class="pi pi-info-circle mt-1" aria-hidden="true"></i>
+            <span>{{ rolesTexts.unavailableDetail }}</span>
+          </p>
+        }
         <div class="invai-dialog-static-field md:col-span-8">
           <span class="invai-dialog-static-field__label" [id]="ids.viewLabel('granted-roles')">
             {{ labels.grantedRoles }}
@@ -148,10 +158,12 @@
               [fluid]="true"
               [inputId]="ids.externalSystem"
               [invalid]="isInvalid(form().controls.externalSystemId)"
-              [loading]="catalogsLoading()"
+              [loading]="pickerLoading('externalSystem', catalogsLoading())"
               [options]="externalSystemOptions()"
               [pt]="selectPassThrough(form().controls.externalSystemId, ids.externalSystemError)"
               [required]="true"
+              (onHide)="onPanelHide('externalSystem')"
+              (onShow)="onPanelShow('externalSystem')"
             />
             <label [for]="ids.externalSystem" [id]="ids.externalSystemLabel">
               {{ labels.externalSystem }}
@@ -181,7 +193,7 @@
               [fluid]="true"
               [inputId]="ids.application"
               [invalid]="isInvalid(form().controls.applicationId)"
-              [loading]="applicationSearch().loading"
+              [loading]="pickerLoading('application', applicationSearch().loading)"
               [options]="applicationSearch().options"
               [pt]="
                 selectPassThrough(form().controls.applicationId, ids.applicationError, [
@@ -192,6 +204,7 @@
               [required]="true"
               [resetFilterOnHide]="true"
               (onFilter)="onApplicationFilter($event)"
+              (onHide)="onPanelHide('application')"
               (onShow)="onApplicationPanelOpen()"
             />
             <label [for]="ids.application" [id]="ids.applicationLabel">
@@ -223,10 +236,12 @@
             [fluid]="true"
             [inputId]="ids.technology"
             [invalid]="isInvalid(form().controls.technologyId)"
-            [loading]="catalogsLoading()"
+            [loading]="pickerLoading('technology', catalogsLoading())"
             [options]="technologyOptions()"
             [pt]="selectPassThrough(form().controls.technologyId, ids.technologyError)"
             [required]="true"
+            (onHide)="onPanelHide('technology')"
+            (onShow)="onPanelShow('technology')"
           />
           <label [for]="ids.technology" [id]="ids.technologyLabel">
             {{ labels.technology }}
@@ -273,12 +288,13 @@
             [filter]="true"
             [inputId]="ids.roles"
             [invalid]="isInvalid(form().controls.requiredRoles)"
-            [loading]="roleSearch().loading"
+            [loading]="pickerLoading('roles', roleSearch().loading)"
             [options]="roleSearch().options"
             [pt]="rolesPassThrough()"
             [resetFilterOnHide]="true"
             [showToggleAll]="false"
             (onFilter)="onRoleFilter($event)"
+            (onPanelHide)="onPanelHide('roles')"
             (onPanelShow)="onRolePanelOpen()"
           />
           <label [for]="ids.roles" [id]="ids.rolesLabel">{{ labels.requiredRoles }}</label>

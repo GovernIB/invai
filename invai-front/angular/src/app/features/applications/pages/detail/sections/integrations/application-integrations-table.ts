@@ -11,6 +11,7 @@ import { MenuItem, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Menu } from 'primeng/menu';
 import { TableModule } from 'primeng/table';
+import { Tooltip } from 'primeng/tooltip';
 
 import {
   ApplicationIntegrationConnectionOutput,
@@ -46,9 +47,17 @@ export function soffidRoleNames(roles: SoffidRole[] | null): string {
   return names.length ? names.join(', ') : APPLICATION_INTEGRATIONS_EMPTY_VALUE;
 }
 
+// With Soffid unreachable the stored required roles cannot be resolved either, so neither list is
+// shown as empty: an empty value would read as a connection without roles.
+export function requiredRoleNames(row: ApplicationIntegrationConnectionOutput): string {
+  return row.rolesUnavailable
+    ? APPLICATION_INTEGRATIONS_ROLES_TEXTS.unavailable
+    : soffidRoleNames(row.requiredRoles);
+}
+
 export function grantedRoleNames(row: ApplicationIntegrationConnectionOutput): string {
-  return row.grantedRoles === null
-    ? APPLICATION_INTEGRATIONS_ROLES_TEXTS.grantedUnavailable
+  return row.rolesUnavailable || row.grantedRoles === null
+    ? APPLICATION_INTEGRATIONS_ROLES_TEXTS.unavailable
     : soffidRoleNames(row.grantedRoles);
 }
 
@@ -61,7 +70,7 @@ export function rolesMatch(row: ApplicationIntegrationConnectionOutput): Applica
 @Component({
   selector: 'app-application-integrations-table',
   standalone: true,
-  imports: [Button, Menu, TableModule],
+  imports: [Button, Menu, TableModule, Tooltip],
   templateUrl: './application-integrations-table.html',
   styleUrls: [
     '../../../../../../shared/styles/development-maintenance-table.scss',
@@ -93,7 +102,8 @@ export class ApplicationIntegrationsTable extends TableComponentBase<Application
     {
       label: this.actions.edit,
       icon: PrimeIcons.PENCIL,
-      disabled: this.isReadOnly(),
+      // Editing replaces the whole set of required roles, which Soffid could not resolve here.
+      disabled: this.isReadOnly() || Boolean(this.selectedRow()?.rolesUnavailable),
       command: () => this.emitRowAction(ApplicationIntegrationsTableAction.Edit),
     },
     {
@@ -115,7 +125,7 @@ export class ApplicationIntegrationsTable extends TableComponentBase<Application
       case 'username':
         return row.username?.trim() || this.emptyValue;
       case 'requiredRoles':
-        return soffidRoleNames(row.requiredRoles);
+        return requiredRoleNames(row);
       case 'grantedRoles':
         return grantedRoleNames(row);
       default:

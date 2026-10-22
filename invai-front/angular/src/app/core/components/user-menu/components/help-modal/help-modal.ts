@@ -21,6 +21,7 @@ import {
   HELP_MODAL_SEARCH_ARIA_LABEL,
   HELP_MODAL_SEARCH_PLACEHOLDER,
   HELP_MODAL_TITLE,
+  HELP_MODAL_TOPICS_ARIA_LABEL,
 } from './help-modal.i18n';
 import { HelpModalService, SearchResult } from './help-modal.service';
 
@@ -48,6 +49,7 @@ export default class HelpModal {
   protected readonly title = HELP_MODAL_TITLE;
   protected readonly searchAriaLabel = HELP_MODAL_SEARCH_ARIA_LABEL;
   protected readonly searchPlaceholder = HELP_MODAL_SEARCH_PLACEHOLDER;
+  protected readonly topicsAriaLabel = HELP_MODAL_TOPICS_ARIA_LABEL;
   protected readonly emptyMessage = HELP_MODAL_EMPTY_MESSAGE;
   protected readonly emptySelection = HELP_MODAL_EMPTY_SELECTION;
   protected readonly content = signal<string>('');

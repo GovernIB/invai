@@ -47,6 +47,12 @@ textarea.invai-form-readonly-control[readonly] {
   padding: 0.75rem;
 }
 
+/* PrimeNG adds `p-invalid` to the editor but its theme draws no invalid border. */
+.p-editor.p-invalid .p-editor-toolbar,
+.p-editor.p-invalid .p-editor-content {
+  border-color: var(--p-textarea-invalid-border-color, var(--p-red-500));
+}
+
 .invai-table-consultable-row {
   cursor: pointer;
   user-select: none;

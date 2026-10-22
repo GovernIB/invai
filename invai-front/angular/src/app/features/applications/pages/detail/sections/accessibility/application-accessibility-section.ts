@@ -29,6 +29,8 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { formatDate } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { RichTextAria } from '@shared/directives/rich-text-aria.directive';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { DatePicker } from 'primeng/datepicker';
@@ -86,6 +88,7 @@ interface CatalogOption {
     Editor,
     InputText,
     ReactiveFormsModule,
+    RichTextAria,
     Select,
   ],
   templateUrl: './application-accessibility-section.html',
@@ -108,6 +111,7 @@ export class ApplicationAccessibilitySection implements OnInit {
   private readonly applicationsService = inject(ApplicationsService);
   protected readonly accessibilityLoading = signal(false);
   protected readonly messages = APPLICATION_ACCESSIBILITY_MESSAGES;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly classificationOptions = signal<CatalogOption[]>([]);
   protected readonly complianceOptions = signal<CatalogOption[]>([]);
   protected readonly classificationFailed = signal(false);

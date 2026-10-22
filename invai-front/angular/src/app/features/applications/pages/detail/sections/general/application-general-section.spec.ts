@@ -4,6 +4,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { MessageService } from 'primeng/api';
 import { Editor } from 'primeng/editor';
+import { of } from 'rxjs';
 
 import { ApplicationStatus } from '../../../../applications.model';
 import { APPLICATION_OPTIONS_RESOLVE_KEY } from '../../../../resolvers/application-options.resolver';
@@ -16,6 +17,7 @@ import { ApplicationGeneralSection } from './application-general-section';
 describe('ApplicationGeneralSection', () => {
   let fixture: ComponentFixture<ApplicationGeneralSection>;
   let detailState: ApplicationDetailState;
+  let messageService: MessageService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -58,8 +60,10 @@ describe('ApplicationGeneralSection', () => {
 
     fixture = TestBed.createComponent(ApplicationGeneralSection);
     detailState = TestBed.inject(ApplicationDetailState);
+    messageService = TestBed.inject(MessageService);
     detailState.application.set({
       id: '7',
+      prefix: 'INV',
       status: ApplicationStatus.ACTIVE,
     } as never);
     fixture.detectChanges();
@@ -154,4 +158,78 @@ describe('ApplicationGeneralSection', () => {
 
     expect(detailState.isUnsavedChangesDialogVisible()).toBe(true);
   });
+
+  it.each([
+    {
+      assignedSoffidRoles: undefined,
+      severity: 'success',
+      detail: "S'han desat correctament els canvis de Dades generals de l'aplicació.",
+    },
+    {
+      assignedSoffidRoles: 0,
+      severity: 'success',
+      detail:
+        "S'han desat correctament els canvis de Dades generals de l'aplicació. " +
+        "No s'ha assignat cap rol nou de Soffid amb el prefix INV.",
+    },
+    {
+      assignedSoffidRoles: 2,
+      severity: 'success',
+      detail:
+        "S'han desat correctament els canvis de Dades generals de l'aplicació. " +
+        "S'han assignat 2 rols de Soffid amb el prefix INV.",
+    },
+    {
+      assignedSoffidRoles: null,
+      severity: 'warn',
+      detail: "Els canvis s'han desat, però no s'han pogut assignar els rols de Soffid del prefix INV.",
+    },
+  ])(
+    'reports the Soffid roles assigned after saving General ($assignedSoffidRoles)',
+    ({ assignedSoffidRoles, severity, detail }) => {
+      const addSpy = vi.spyOn(messageService, 'add');
+      vi.spyOn(detailState, 'save').mockReturnValueOnce(
+        of({ status: 'saved', section: 'general', assignedSoffidRoles }),
+      );
+
+      (fixture.componentInstance as unknown as { save: () => void }).save();
+
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+        severity,
+        summary: 'Canvis desats',
+        detail,
+      });
+    },
+  );
+
+  it.each([
+    {
+      assignedSoffidRoles: 1,
+      severity: 'success',
+      detail:
+        "L'aplicació s'ha donat d'alta correctament. S'ha assignat 1 rol de Soffid amb el prefix INV.",
+    },
+    {
+      assignedSoffidRoles: null,
+      severity: 'warn',
+      detail: "L'aplicació s'ha donat d'alta, però no s'han pogut assignar els seus rols de Soffid.",
+    },
+  ])(
+    'reports the Soffid roles assigned after restoring the application ($assignedSoffidRoles)',
+    ({ assignedSoffidRoles, severity, detail }) => {
+      const addSpy = vi.spyOn(messageService, 'add');
+      vi.spyOn(detailState, 'activate').mockReturnValueOnce(
+        of({ activated: true, assignedSoffidRoles }),
+      );
+
+      (fixture.componentInstance as unknown as { confirmActivation: () => void })
+        .confirmActivation();
+
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+        severity,
+        summary: "Aplicació donada d'alta",
+        detail,
+      });
+    },
+  );
 });

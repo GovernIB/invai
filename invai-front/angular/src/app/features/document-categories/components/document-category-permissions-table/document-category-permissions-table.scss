@@ -1,0 +1,29 @@
+app-document-category-permissions-table {
+  display: block;
+  min-width: 0;
+
+  // The role names the row, but reads as an ordinary body cell.
+  .p-datatable-tbody > tr > th.document-category-permissions__role {
+    font-weight: 400;
+    text-align: start;
+    background: inherit;
+    border-color: var(--p-datatable-body-cell-border-color);
+    border-style: solid;
+    border-width: 0 0 1px;
+    padding: var(--p-datatable-body-cell-padding);
+  }
+
+  .document-category-permissions__choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .document-category-permissions__choice > label {
+    cursor: pointer;
+  }
+
+  .p-checkbox-disabled + label {
+    cursor: default;
+  }
+}

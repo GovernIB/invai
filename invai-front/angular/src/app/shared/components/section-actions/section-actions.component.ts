@@ -15,6 +15,7 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TooltipModule } from 'primeng/tooltip';
+import { BadgePassThrough } from 'primeng/types/badge';
 import { ButtonPassThrough } from 'primeng/types/button';
 import {
   SECTION_ACTIONS_ADD_ARIA_LABEL,
@@ -22,6 +23,7 @@ import {
   SECTION_ACTIONS_COLUMNS_FILTER_PLACEHOLDER,
   SECTION_ACTIONS_COLUMNS_ARIA_LABEL,
   SECTION_ACTIONS_EXPORT_ARIA_LABEL,
+  SECTION_ACTIONS_FILTERS_APPLIED_ARIA_LABEL,
   SECTION_ACTIONS_FILTERS_ARIA_LABEL,
   SECTION_ACTIONS_QUICK_SEARCH_ARIA_LABEL,
 } from './section-actions.i18n';
@@ -67,6 +69,16 @@ export class SectionActionsComponent {
   protected readonly filtersButtonPassThrough = computed<ButtonPassThrough>(() => ({
     root: { 'aria-expanded': String(!this.isFiltersCollapsed()) },
   }));
+  protected readonly filtersButtonName = computed(() => {
+    const selected = this.filtersSelected();
+    return selected
+      ? SECTION_ACTIONS_FILTERS_APPLIED_ARIA_LABEL(this.filtersButtonAriaLabel(), selected)
+      : this.filtersButtonAriaLabel();
+  });
+  // The count is announced through filtersButtonName; a bare number would only add noise.
+  protected readonly filtersBadgePassThrough: BadgePassThrough = {
+    root: { 'aria-hidden': 'true' },
+  };
 
   onSearchInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;

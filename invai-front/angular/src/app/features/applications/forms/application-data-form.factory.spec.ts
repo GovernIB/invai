@@ -9,17 +9,24 @@ import {
 describe('createApplicationDataForm', () => {
   const formBuilder = new FormBuilder();
 
-  it('creates the empty value with both explicit URLs unused and valid', () => {
+  it('creates the empty value with no URL typed in by hand and valid', () => {
     const form = createApplicationDataForm(formBuilder);
 
-    expect(form.getRawValue()).toEqual(EMPTY_APPLICATION_DATA_VALUE);
+    expect(form.getRawValue()).toEqual({
+      manualOpenDataUrl: false,
+      openDataUrl: '',
+      manualReuseUrl: false,
+      reuseUrl: '',
+      observations: '',
+    });
+    expect(EMPTY_APPLICATION_DATA_VALUE).toEqual(form.getRawValue());
     expect(form.valid).toBe(true);
   });
 
   it.each([
-    ['useOpenDataUrl', 'openDataUrl'],
-    ['useReuseUrl', 'reuseUrl'],
-  ] as const)('requires %s\'s URL only while the flag is on', (flag, url) => {
+    ['manualOpenDataUrl', 'openDataUrl'],
+    ['manualReuseUrl', 'reuseUrl'],
+  ] as const)('requires the URL only while %s is checked', (flag, url) => {
     const form = createApplicationDataForm(formBuilder);
 
     form.controls[flag].setValue(true);
@@ -29,21 +36,13 @@ describe('createApplicationDataForm', () => {
     form.controls[url].setValue('   ');
     expect(form.controls[url].hasError('required')).toBe(true);
 
-    form.controls[url].setValue('https://intranet.caib.es/appapi/externa/swagger.json');
+    form.controls[url].setValue('https://intranet.caib.es/appapi/externa');
     expect(form.controls[url].valid).toBe(true);
 
     form.controls[url].setValue('');
     form.controls[flag].setValue(false);
     form.controls[url].updateValueAndValidity();
     expect(form.controls[url].valid).toBe(true);
-  });
-
-  it('keeps a detected URL valid while its flag is off', () => {
-    const form = createApplicationDataForm(formBuilder);
-
-    form.controls.openDataUrl.setValue('https://intranet.caib.es/appapi/externa/openapi.json');
-
-    expect(form.controls.openDataUrl.valid).toBe(true);
   });
 
   it('limits both URLs to the backend maximum length', () => {
@@ -57,14 +56,27 @@ describe('createApplicationDataForm', () => {
     expect(form.controls.reuseUrl.hasError('maxlength')).toBe(true);
   });
 
-  it.each(['intranet.caib.es/swagger.json', 'ftp://host/swagger.json', 'https://'])(
-    'rejects %s as a non HTTP(S) URL',
+  it.each(['http://intranet.caib.es/appapi/interna', '  https://reuse.example/api  '])(
+    'accepts %s as an absolute HTTP(S) URL',
     (value) => {
       const form = createApplicationDataForm(formBuilder);
 
       form.controls.reuseUrl.setValue(value);
 
-      expect(form.controls.reuseUrl.hasError('pattern')).toBe(true);
+      expect(form.controls.reuseUrl.valid).toBe(true);
     },
   );
+
+  it.each([
+    'intranet.caib.es/swagger.json',
+    'ftp://host/swagger.json',
+    'https://',
+    'HTTPS://reuse.example/api',
+  ])('rejects %s, which the back-end would refuse', (value) => {
+    const form = createApplicationDataForm(formBuilder);
+
+    form.controls.reuseUrl.setValue(value);
+
+    expect(form.controls.reuseUrl.hasError('pattern')).toBe(true);
+  });
 });

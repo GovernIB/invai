@@ -1,0 +1,85 @@
+<section class="application-data-url" [attr.aria-labelledby]="ids().title">
+  <h3 class="application-data-url__title" tabindex="-1" [id]="ids().title">{{ title() }}</h3>
+
+  <div class="application-data-url__fields invai-grid grid-cols-1 gap-4 md:grid-cols-12">
+    <dl class="application-data-url__current md:col-span-8">
+      <dt>{{ labels.currentUrl }}</dt>
+      <dd class="invai-form-static-value">
+        @if (state(); as state) {
+          @if (state.url; as url) {
+            <a class="application-data-url__link" rel="noopener noreferrer" target="_blank" [href]="url">
+              <span class="application-data-url__link-text">{{ url }}</span>
+              <i aria-hidden="true" [class]="icons.EXTERNAL_LINK"></i>
+              <span class="sr-only">&ngsp;{{ labels.opensInNewTab }}</span>
+            </a>
+          } @else {
+            {{ labels.noUrl }}
+          }
+        } @else {
+          {{ pendingMessage() }}
+        }
+      </dd>
+    </dl>
+
+    <!-- The URL is checked after it is shown: announce the outcome once it arrives. -->
+    @if (state(); as state) {
+      <div
+        class="application-data-url__status md:col-span-12"
+        role="status"
+        [attr.aria-busy]="state.check === 'checking' ? true : null"
+      >
+        @if (state.check === 'checking') {
+          <p class="application-data-url__check">
+            <i aria-hidden="true" [class]="icons.SPINNER + ' pi-spin'"></i>
+            <span>{{ messages.checking }}</span>
+          </p>
+        } @else if (state.check === 'valid') {
+          <p class="application-data-url__check">
+            <i aria-hidden="true" [class]="icons.CHECK_CIRCLE"></i>
+            <span>{{ messages.responding }}</span>
+          </p>
+        } @else if (warning(); as warning) {
+          <p class="application-data-url__warning" [id]="ids().warning">
+            <i aria-hidden="true" [class]="icons.EXCLAMATION_TRIANGLE"></i>
+            <span>{{ warning }}</span>
+          </p>
+        }
+      </div>
+    }
+
+    @if (isEditing()) {
+      <div class="application-data-url__manual md:col-span-12">
+        <p-checkbox
+          [binary]="true"
+          [formControl]="manualControl()"
+          [inputId]="ids().manual"
+          [pt]="checkboxPassThrough()"
+        />
+        <label [for]="ids().manual">{{ labels.manualUrl }}</label>
+      </div>
+
+      @if (manualControl().value) {
+        <div class="application-data-url__field md:col-span-8">
+          <label [for]="ids().url">{{ labels.newUrl }}</label>
+          <input
+            pInputText
+            autocomplete="url"
+            class="w-full"
+            type="url"
+            [attr.aria-describedby]="urlDescribedBy()"
+            [attr.aria-invalid]="urlError() ? true : null"
+            [attr.maxlength]="urlMaxLength"
+            [formControl]="urlControl()"
+            [id]="ids().url"
+          />
+          @if (urlError(); as message) {
+            <p class="application-data-url__error" role="alert" [id]="ids().urlError">
+              {{ message }}
+            </p>
+          }
+          <p class="application-data-url__help" [id]="ids().urlHelp">{{ messages.help }}</p>
+        </div>
+      }
+    }
+  </div>
+</section>

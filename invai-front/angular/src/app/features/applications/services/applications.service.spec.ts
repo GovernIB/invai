@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http/testing';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { SKIP_SERVER_ERROR_DIALOG } from '@core/interceptors/http-error-logging.interceptor';
 import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
 import { Observable } from 'rxjs';
 
@@ -15,6 +16,7 @@ import {
   ApplicationOutput,
   ApplicationStatus,
   ApplicationStatusCode,
+  Dir3AuditStatus,
 } from '../applications.model';
 import { ApplicationsService } from './applications.service';
 
@@ -34,6 +36,7 @@ const EXPECTED_APPLICATION: Application = {
   appDataId: null,
   appIntegrationId: null,
   appResponsibleAuthorizedId: 91,
+  dir3Mismatch: false,
   incomplete: false,
   missingResponsibleTypes: true,
   missingAuthorized: false,
@@ -196,6 +199,16 @@ describe('ApplicationsService', () => {
         missingDevelopmentFields: true,
       }),
     );
+  });
+
+  it('maps the persisted DIR3 mismatch flag, defaulting to false when the backend omits it', () => {
+    expect(service.toApplication({ ...APPLICATION_OUTPUT, dir3Mismatch: true }).dir3Mismatch).toBe(
+      true,
+    );
+    expect(service.toApplication({ ...APPLICATION_OUTPUT, dir3Mismatch: false }).dir3Mismatch).toBe(
+      false,
+    );
+    expect(service.toApplication(APPLICATION_OUTPUT).dir3Mismatch).toBe(false);
   });
 
   it('maps the data anchor identifier, defaulting to null when the backend omits it', () => {
@@ -469,42 +482,144 @@ describe('ApplicationsService', () => {
       .flush(page([]));
   });
 
-  it('checks DIR3 for all applications and invalidates application and assignment caches on success', () => {
+  it('launches the background DIR3 audit without invalidating any cache', () => {
     const changes = TestBed.inject(ResponsibleDataChangesService);
     const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
     const result = vi.fn();
-    const mismatches = [{ id: 7, name: 'Invai', dir3Mismatch: true }];
-
-    service.getPage({ page: 0, size: 10 }).subscribe();
-    flushApplications(httpTesting.expectOne((request) => request.method === 'GET'));
-
-    service.checkDir3MismatchForAllApplications().subscribe(result);
-    const request = httpTesting.expectOne(`${APPLICATION_URL}/dir3-check-all`);
-    expect(request.request.method).toBe('PUT');
-    expect(request.request.body).toEqual({});
-    request.flush(mismatches);
-
-    expect(result).toHaveBeenCalledWith(mismatches);
-    expect(assignmentsChanged).toHaveBeenCalledOnce();
-    service.getPage({ page: 0, size: 10 }).subscribe();
-    flushApplications(httpTesting.expectOne((request) => request.method === 'GET'));
-  });
-
-  it('keeps cached applications when the global DIR3 check fails', () => {
-    const changes = TestBed.inject(ResponsibleDataChangesService);
-    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+    const status = dir3AuditStatus({ state: 'RUNNING' });
 
     service.getAll().subscribe();
     flushApplications(httpTesting.expectOne(APPLICATION_URL));
-    service.checkDir3MismatchForAllApplications().subscribe({ error: () => undefined });
-    httpTesting.expectOne(`${APPLICATION_URL}/dir3-check-all`).flush('Request failed', {
+
+    service.startDir3Audit().subscribe(result);
+    const request = httpTesting.expectOne(`${APPLICATION_URL}/dir3/check-all`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({});
+    request.flush(status, { status: 202, statusText: 'Accepted' });
+
+    expect(result).toHaveBeenCalledWith(status);
+    expect(assignmentsChanged).not.toHaveBeenCalled();
+    service.getAll().subscribe();
+    httpTesting.expectNone(APPLICATION_URL);
+  });
+
+  it('reads the DIR3 audit status without opening the server error dialog', () => {
+    const result = vi.fn();
+    const status = dir3AuditStatus({ state: 'COMPLETED' });
+
+    service.getDir3AuditStatus().subscribe(result);
+    const request = httpTesting.expectOne(`${APPLICATION_URL}/dir3/check-all/status`);
+    expect(request.request.method).toBe('GET');
+    expect(request.request.context.get(SKIP_SERVER_ERROR_DIALOG)).toBe(true);
+    request.flush(status);
+
+    expect(result).toHaveBeenCalledWith(status);
+  });
+
+  it('polls a running DIR3 audit until it ends and then invalidates the caches once', () => {
+    vi.useFakeTimers();
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+    const states = vi.fn();
+    const complete = vi.fn();
+
+    service
+      .watchDir3Audit(dir3AuditStatus({ state: 'RUNNING' }), 1000)
+      .subscribe({ next: (status) => states(status.state), complete });
+    expect(states).toHaveBeenCalledWith('RUNNING');
+    httpTesting.expectNone(`${APPLICATION_URL}/dir3/check-all/status`);
+
+    vi.advanceTimersByTime(1000);
+    httpTesting
+      .expectOne(`${APPLICATION_URL}/dir3/check-all/status`)
+      .flush(dir3AuditStatus({ state: 'RUNNING', processedApplications: 1 }));
+    expect(assignmentsChanged).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1000);
+    httpTesting
+      .expectOne(`${APPLICATION_URL}/dir3/check-all/status`)
+      .flush(dir3AuditStatus({ state: 'COMPLETED', processedApplications: 2 }));
+
+    expect(states.mock.calls.map(([state]) => state)).toEqual(['RUNNING', 'RUNNING', 'COMPLETED']);
+    expect(complete).toHaveBeenCalledOnce();
+    expect(assignmentsChanged).toHaveBeenCalledOnce();
+    vi.advanceTimersByTime(5000);
+    httpTesting.expectNone(`${APPLICATION_URL}/dir3/check-all/status`);
+    vi.useRealTimers();
+  });
+
+  it('does not poll nor invalidate caches for an audit that is not running', () => {
+    vi.useFakeTimers();
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+    const result = vi.fn();
+    const status = dir3AuditStatus({ state: 'COMPLETED' });
+
+    service.watchDir3Audit(status, 1000).subscribe(result);
+    vi.advanceTimersByTime(5000);
+
+    expect(result).toHaveBeenCalledExactlyOnceWith(status);
+    httpTesting.expectNone(`${APPLICATION_URL}/dir3/check-all/status`);
+    expect(assignmentsChanged).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('stops polling the DIR3 audit when its status cannot be read', () => {
+    vi.useFakeTimers();
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+    const error = vi.fn();
+
+    service.watchDir3Audit(dir3AuditStatus({ state: 'RUNNING' }), 1000).subscribe({ error });
+    vi.advanceTimersByTime(1000);
+    httpTesting.expectOne(`${APPLICATION_URL}/dir3/check-all/status`).flush('Request failed', {
+      status: 500,
+      statusText: 'Server Error',
+    });
+
+    expect(error).toHaveBeenCalledOnce();
+    vi.advanceTimersByTime(5000);
+    httpTesting.expectNone(`${APPLICATION_URL}/dir3/check-all/status`);
+    expect(assignmentsChanged).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('checks DIR3 for one application and invalidates its cached detail on success', () => {
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+    const result = vi.fn();
+    const outcome = { id: 1, name: 'Invai', dir3Mismatch: false };
+
+    service.getById(1).subscribe();
+    httpTesting.expectOne(`${APPLICATION_URL}/1`).flush(APPLICATION_OUTPUT);
+
+    service.checkDir3Mismatch(1).subscribe(result);
+    const request = httpTesting.expectOne(`${APPLICATION_URL}/dir3/check/1`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({});
+    request.flush(outcome);
+
+    expect(result).toHaveBeenCalledWith(outcome);
+    expect(assignmentsChanged).toHaveBeenCalledOnce();
+    service.getById(1).subscribe();
+    httpTesting.expectOne(`${APPLICATION_URL}/1`).flush(APPLICATION_OUTPUT);
+  });
+
+  it('keeps cached application details when the single DIR3 check fails', () => {
+    const changes = TestBed.inject(ResponsibleDataChangesService);
+    const assignmentsChanged = vi.spyOn(changes, 'assignmentsChanged');
+
+    service.getById(1).subscribe();
+    httpTesting.expectOne(`${APPLICATION_URL}/1`).flush(APPLICATION_OUTPUT);
+    service.checkDir3Mismatch(1).subscribe({ error: () => undefined });
+    httpTesting.expectOne(`${APPLICATION_URL}/dir3/check/1`).flush('Soffid unavailable', {
       status: 500,
       statusText: 'Server Error',
     });
 
     expect(assignmentsChanged).not.toHaveBeenCalled();
-    service.getAll().subscribe();
-    httpTesting.expectNone(APPLICATION_URL);
+    service.getById(1).subscribe();
+    httpTesting.expectNone(`${APPLICATION_URL}/1`);
   });
 
   it('separates incomplete, complete and unfiltered pages in the cache', () => {
@@ -725,6 +840,21 @@ describe('ApplicationsService', () => {
 
 function flushApplications(request: TestRequest): void {
   request.flush(page([APPLICATION_OUTPUT]));
+}
+
+function dir3AuditStatus(overrides: Partial<Dir3AuditStatus>): Dir3AuditStatus {
+  return {
+    state: 'IDLE',
+    startedBy: 'admin',
+    startedAt: '2026-10-08T08:00:00',
+    finishedAt: null,
+    totalApplications: 2,
+    processedApplications: 0,
+    mismatchedApplications: [],
+    failureReason: null,
+    failedApplicationIds: [],
+    ...overrides,
+  };
 }
 
 function page<T>(content: T[]): Record<string, unknown> {

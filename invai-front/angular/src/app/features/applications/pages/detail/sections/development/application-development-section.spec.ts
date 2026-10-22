@@ -635,6 +635,30 @@ describe('ApplicationDevelopmentSection', () => {
     ).toBeNull();
   });
 
+  it('labels the observations editor and reports observations over the storage limit', () => {
+    state.editing.set(true);
+    state.developmentForm.enable({ emitEvent: false });
+    fixture.detectChanges();
+    const root = document.createElement('div');
+    const editor = fixture.debugElement.query(By.directive(Editor)).componentInstance as Editor;
+    editor.onEditorInit.emit({ editor: { root } } as never);
+
+    state.developmentForm.controls.observation.setValue(`<p>${'a'.repeat(4000)}</p>`);
+    state.developmentForm.controls.observation.markAsDirty();
+    fixture.detectChanges();
+
+    const error = fixture.nativeElement.querySelector(
+      '#application-development-observation-error',
+    ) as HTMLElement;
+    expect(error.getAttribute('role')).toBe('alert');
+    expect(error.textContent).toContain('El text supera la mida màxima permesa');
+    expect(editor.invalid()).toBe(true);
+    expect(root.getAttribute('role')).toBe('textbox');
+    expect(root.getAttribute('aria-labelledby')).toBe('application-development-observation-label');
+    expect(root.getAttribute('aria-invalid')).toBe('true');
+    expect(root.getAttribute('aria-describedby')).toBe('application-development-observation-error');
+  });
+
   it('renders Development observations statically outside edit mode', () => {
     const staticValue = () =>
       fixture.nativeElement.querySelector(

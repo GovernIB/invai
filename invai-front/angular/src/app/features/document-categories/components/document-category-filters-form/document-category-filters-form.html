@@ -1,0 +1,31 @@
+<form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="form()">
+  <div class="invai-filter-field--wide">
+    <p-floatlabel class="w-full">
+      <input
+        id="document-categories-filter-name"
+        class="w-full"
+        type="text"
+        formControlName="name"
+        pInputText
+      />
+      <label for="document-categories-filter-name">{{ labels().name }}</label>
+    </p-floatlabel>
+  </div>
+  <div class="invai-filter-field--compact">
+    <p-floatlabel class="w-full">
+      <p-select
+        inputId="document-categories-filter-status"
+        styleClass="w-full"
+        formControlName="status"
+        ariaLabelledBy="document-categories-filter-status-label"
+        [options]="statusOptions"
+        [showClear]="true"
+        optionLabel="label"
+        optionValue="value"
+      />
+      <label id="document-categories-filter-status-label" for="document-categories-filter-status">
+        {{ labels().status }}
+      </label>
+    </p-floatlabel>
+  </div>
+</form>

@@ -5,7 +5,7 @@ import { ExternalSystemCatalogService } from '@features/external-systems/service
 import { ResponsiblePeopleService } from '@features/maintenances/responsibles/services/responsible-people.service';
 import { TechnologyCatalogService } from '@features/technologies/services/technology-catalog.service';
 import { MessageService } from 'primeng/api';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { ApplicationIntegrationConnectionOutput } from '../../../../applications.model';
 import { ApplicationIntegrationConnectionsService } from '../../../../services/application-integration-connections.service';
@@ -26,6 +26,7 @@ const ROW: ApplicationIntegrationConnectionOutput = {
   requiredRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: 'SEYCON' }],
   grantedRoles: [],
   rolesMismatch: true,
+  rolesUnavailable: false,
   deletedAt: null,
 };
 const PAGE = { content: [ROW], totalElements: 1, number: 0 };
@@ -164,6 +165,55 @@ describe('ApplicationIntegrationConnectionsState', () => {
     expect(state.mode()).toBe('view');
     expect(state.selected()).toBe(ROW);
     expect(technologies.getActiveOptions).not.toHaveBeenCalled();
+    expect(applications.getPage).not.toHaveBeenCalled();
+    expect(roles.search).not.toHaveBeenCalled();
+  });
+
+  it('requests the unfiltered pickers with the dialog and reuses them when a panel opens', () => {
+    const pendingApplications = new Subject<unknown>();
+    applications.getPage.mockReturnValueOnce(pendingApplications);
+    state.create();
+
+    expect(applications.getPage).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ quickSearch: undefined }),
+    );
+    expect(roles.search).toHaveBeenCalledExactlyOnceWith('');
+    expect(state.roleSearch().options).toEqual([{ roleId: 33, label: 'INV_READ — SEYCON' }]);
+
+    state.searchApplications('');
+    expect(applications.getPage).toHaveBeenCalledOnce();
+    expect(state.applicationSearch().loading).toBe(true);
+    pendingApplications.next({
+      content: [{ id: '9', code: 'APP-003', name: 'Registre' }],
+      totalElements: 1,
+    });
+    expect(state.applicationSearch().options).toEqual([{ id: 9, label: 'APP-003 — Registre' }]);
+
+    state.searchApplications(' ');
+    state.searchRoles('');
+    expect(applications.getPage).toHaveBeenCalledOnce();
+    expect(roles.search).toHaveBeenCalledOnce();
+
+    state.searchApplications('reg');
+    state.searchApplications('');
+    expect(applications.getPage).toHaveBeenCalledTimes(3);
+  });
+
+  it('requests the pickers when a consultation switches to edit and retries failed ones', () => {
+    roles.search.mockReturnValueOnce(throwError(() => new Error('offline')));
+    state.onAction({ action: ApplicationIntegrationsTableAction.View, params: ROW });
+    state.edit();
+
+    expect(applications.getPage).toHaveBeenCalledOnce();
+    expect(state.applicationSearch().options.map((option) => option.id)).toEqual([8, 9]);
+    expect(state.roleSearch()).toEqual(expect.objectContaining({ error: true, loading: false }));
+
+    state.searchRoles('');
+    expect(roles.search).toHaveBeenCalledTimes(2);
+    expect(state.roleSearch().options).toEqual([
+      { roleId: 26, label: 'INV_ADMIN — SEYCON' },
+      { roleId: 33, label: 'INV_READ — SEYCON' },
+    ]);
   });
 
   it('creates a connection with an external system and reloads the page', () => {
@@ -225,7 +275,14 @@ describe('ApplicationIntegrationConnectionsState', () => {
     });
     expect(state.form.valid).toBe(true);
     expect(state.form.pristine).toBe(true);
-    expect(state.applicationSearch().options).toEqual([{ id: 8, label: 'APP-002 — Portal Salut' }]);
+    expect(state.applicationSearch().options).toEqual([
+      { id: 8, label: 'APP-002 — Portal Salut' },
+      { id: 9, label: 'APP-003 — Registre' },
+    ]);
+    expect(state.roleSearch().options).toEqual([
+      { roleId: 26, label: 'INV_ADMIN — SEYCON' },
+      { roleId: 33, label: 'INV_READ — SEYCON' },
+    ]);
     expect(state.technologyOptions()).toContainEqual({ id: 9, label: 'Struts' });
 
     state.save();
@@ -237,6 +294,28 @@ describe('ApplicationIntegrationConnectionsState', () => {
       username: 'u00004',
       requiredRoleIds: [26],
     });
+  });
+
+  it('never edits a connection whose roles Soffid could not resolve', () => {
+    const unavailable: ApplicationIntegrationConnectionOutput = {
+      ...ROW,
+      requiredRoles: null,
+      grantedRoles: null,
+      rolesMismatch: null,
+      rolesUnavailable: true,
+    };
+
+    state.onAction({ action: ApplicationIntegrationsTableAction.Edit, params: unavailable });
+    expect(state.visible()).toBe(false);
+
+    state.onAction({ action: ApplicationIntegrationsTableAction.View, params: unavailable });
+    expect(state.mode()).toBe('view');
+    expect(state.canEdit()).toBe(false);
+    state.edit();
+    expect(state.mode()).toBe('view');
+    state.save();
+    expect(service.update).not.toHaveBeenCalled();
+    expect(applications.getPage).not.toHaveBeenCalled();
   });
 
   it('restores the snapshot when an edit is cancelled', () => {

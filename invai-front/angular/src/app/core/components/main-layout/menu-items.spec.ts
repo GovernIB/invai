@@ -26,6 +26,7 @@ describe('MENU_ITEMS', () => {
       'Accessibilitat',
       'Seguretat',
       'Integracions',
+      'Documentació',
     ]);
     expect(MENU_ITEMS.find(({ label }) => label === SYSTEMS_ROUTES_LABELS.BASE)).toBeUndefined();
   });

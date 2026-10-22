@@ -1,0 +1,135 @@
+<app-section-container [header]="detail()?.application?.name || texts.fallback">
+  @if (detail(); as current) {
+    <div class="document-detail-toolbar">
+      <p class="document-detail-instructions">{{ texts.requiredHint }}</p>
+      @if (current.application.canManage) {
+        <app-application-detail-section-actions
+          [sectionLabel]="texts.fallback"
+          [isEditing]="isEditing()"
+          [isSaving]="isSaving()"
+          [disabled]="versionSaving()"
+          (edit)="startEditing()"
+          (cancel)="cancelEditing()"
+          (save)="save()"
+        />
+      }
+    </div>
+    @if (!current.application.canManage) {
+      <p role="status">{{ texts.readOnly }}</p>
+    }
+    <form class="document-detail-form" novalidate [formGroup]="form" (ngSubmit)="save()">
+      <div>
+        <label for="document-detail-title">{{ labels.title }}</label>
+        <input id="document-detail-title" class="w-full" pInputText formControlName="title" required
+          [readOnly]="!isEditing()" [class.invai-form-readonly-control]="!isEditing()" [attr.maxlength]="titleMaxLength"
+          [attr.aria-invalid]="isInvalid(form.controls.title)"
+          [attr.aria-describedby]="isInvalid(form.controls.title) ? 'document-detail-title-error' : null" />
+        @if (isInvalid(form.controls.title)) {
+          <p id="document-detail-title-error" class="document-detail-error" role="alert">{{ errorOf(form.controls.title) }}</p>
+        }
+      </div>
+      <div>
+        <label id="document-detail-category-label" [attr.for]="isEditing() ? 'document-detail-category' : 'document-detail-category-value'">{{ labels.category }}</label>
+        @if (isEditing()) {
+          <p-select inputId="document-detail-category" ariaLabelledBy="document-detail-category-label"
+            appendTo="body" formControlName="categoryId" optionLabel="label" optionValue="id" styleClass="w-full"
+            [options]="current.categories" [invalid]="isInvalid(form.controls.categoryId)"
+            [pt]="selectPt(form.controls.categoryId, 'document-detail-category')" (onChange)="categoryChanged()" />
+        } @else {
+          <output id="document-detail-category-value" class="invai-form-static-value">{{ categoryLabel() }}</output>
+        }
+        @if (isInvalid(form.controls.categoryId)) {
+          <p id="document-detail-category-error" class="document-detail-error" role="alert">{{ common.required }}</p>
+        }
+      </div>
+      <div>
+        <label id="document-detail-subcategory-label" [attr.for]="isEditing() ? 'document-detail-subcategory' : 'document-detail-subcategory-value'">{{ labels.subcategory }}</label>
+        @if (isEditing()) {
+          <p-select inputId="document-detail-subcategory" ariaLabelledBy="document-detail-subcategory-label"
+            appendTo="body" formControlName="subcategoryId" optionLabel="label" optionValue="id" styleClass="w-full"
+            [options]="subcategories()" [showClear]="true" />
+        } @else {
+          <output id="document-detail-subcategory-value" class="invai-form-static-value">{{ subcategoryLabel() }}</output>
+        }
+      </div>
+      <div>
+        <label id="document-detail-state-label" [attr.for]="isEditing() ? 'document-detail-state' : 'document-detail-state-value'">{{ labels.state }}</label>
+        @if (isEditing()) {
+          <p-select inputId="document-detail-state" ariaLabelledBy="document-detail-state-label"
+            appendTo="body" formControlName="statusId" optionLabel="label" optionValue="value" styleClass="w-full"
+            [options]="statusOptions()" [pt]="selectPt(form.controls.statusId, 'document-detail-state')"
+            [invalid]="isInvalid(form.controls.statusId)" />
+        } @else {
+          <output id="document-detail-state-value" class="invai-form-static-value">{{ stateLabel() }}</output>
+        }
+        @if (isInvalid(form.controls.statusId)) {
+          <p id="document-detail-state-error" class="document-detail-error" role="alert">{{ common.required }}</p>
+        }
+      </div>
+    </form>
+    <section class="document-detail-versions" aria-labelledby="document-detail-versions-title">
+      <div class="document-detail-versions__header">
+        <h2 id="document-detail-versions-title">{{ texts.versions }}</h2>
+        @if (current.application.canManage) {
+          <p-button type="button" [label]="texts.newVersion" [ariaLabel]="texts.newVersion"
+            [style]="{ maxWidth: '100%', whiteSpace: 'normal' }"
+            [pt]="{ label: { style: { overflowWrap: 'anywhere', minWidth: '0' } } }"
+            [icon]="icons.PLUS" [outlined]="true" (onClick)="openNewVersion()" />
+        }
+      </div>
+      <app-application-document-versions-table [columns]="columns"
+        [itemsList]="versions()"
+        [first]="versionFirst()"
+        (onPageChange)="versionPage($event)" (onSelectAction)="versionAction($event)" />
+    </section>
+    <div class="document-detail-actions">
+      <p-button type="button" [label]="texts.back" [ariaLabel]="texts.back" [icon]="icons.ARROW_LEFT"
+        [link]="true" [disabled]="isSaving() || versionSaving()" (onClick)="goBack()" />
+    </div>
+  } @else {
+    <p role="alert">{{ texts.loadError }}</p>
+    <div class="document-detail-actions">
+      <p-button [label]="texts.retry" [ariaLabel]="texts.retry" [icon]="icons.REFRESH" (onClick)="retry()" />
+      <p-button [label]="texts.back" [ariaLabel]="texts.back" [icon]="icons.ARROW_LEFT" [link]="true" (onClick)="goBack()" />
+    </div>
+  }
+</app-section-container>
+
+@if (versionDialogVisible()) {
+  <app-crud-entity-dialog mode="create" width="36rem"
+    [(visible)]="versionDialogVisible" [ariaLabels]="versionDialogAria" [title]="texts.newVersion"
+    [isSaving]="versionSaving()" [submitLabel]="texts.save" [submitIcon]="icons.SAVE"
+    [cancelLabel]="texts.cancel" (closed)="versionDialogVisible.set(false)" (submitForm)="saveVersion()">
+    <form class="document-version-form" novalidate [formGroup]="versionForm" (ngSubmit)="saveVersion()">
+      <div>
+        <label for="document-version-number">{{ labels.version }}</label>
+        <input id="document-version-number" class="w-full" pInputText formControlName="version" required [attr.maxlength]="versionMaxLength"
+          [attr.aria-invalid]="isInvalid(versionForm.controls.version)"
+          [attr.aria-describedby]="isInvalid(versionForm.controls.version) ? 'document-version-number-error' : null" />
+        @if (isInvalid(versionForm.controls.version)) {
+          <p id="document-version-number-error" class="document-detail-error" role="alert">{{ errorOf(versionForm.controls.version) }}</p>
+        }
+      </div>
+      <div>
+        <label for="document-version-file">{{ labels.file }}</label>
+        <input id="document-version-file" class="w-full" pInputText type="file"
+          [disabled]="versionSaving() || !canAttachVersion()" [attr.accept]="accept()"
+          [attr.aria-invalid]="hasVersionFileError()"
+          [attr.aria-describedby]="versionFileDescribedBy()"
+          (change)="selectVersionFile($event)" />
+        <p id="document-version-file-hint" class="document-version-hint" role="status">{{ versionFileHint() }}</p>
+        <!-- A new element per refusal, so that refusing the same file twice is announced twice. -->
+        @for (alert of versionFileAlerts(); track alert.key) {
+          <p id="document-version-file-error" class="document-detail-error" role="alert">{{ alert.message }}</p>
+        }
+      </div>
+    </form>
+  </app-crud-entity-dialog>
+}
+@if (leaveDialogVisible()) {
+  <app-confirmation-dialog [(visible)]="leaveDialogVisible" severity="warn"
+    [title]="texts.unsavedTitle" [message]="texts.unsavedMessage"
+    [cancelLabel]="texts.stay" [cancelAriaLabel]="texts.stay"
+    [confirmLabel]="texts.discard" [confirmAriaLabel]="texts.discard" [confirmIcon]="icons.TIMES"
+    [confirmOutlined]="false" (cancel)="decideLeave(false)" (confirm)="decideLeave(true)" />
+}

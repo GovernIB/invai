@@ -42,23 +42,25 @@
 
   <div class="section-actions__buttons">
     @if (!hideCollapseButton()) {
+      <!-- pBadge also accepts PrimeNG's pt input, so it would copy the button's aria-expanded. -->
       <span
         class="inline-flex"
         pTooltip="Filtres"
         tooltipPosition="top"
         i18n-pTooltip
+        pBadge
+        [badgeStyleClass]="appearance() === 'on-primary' ? 'section-actions__badge-on-primary' : 'bg-primary text-secondary'"
+        [badgeDisabled]="!filtersSelected()"
+        [pBadgePT]="filtersBadgePassThrough"
+        [value]="filtersSelected() ?? 0"
       >
         <p-button
-          [badgeStyleClass]="appearance() === 'on-primary' ? 'section-actions__badge-on-primary' : 'bg-primary text-secondary'"
-          [badgeDisabled]="!filtersSelected()"
           [icon]="PrimeIcons.FILTER"
           [outlined]="true"
-          [ariaLabel]="filtersButtonAriaLabel()"
+          [ariaLabel]="filtersButtonName()"
           [pt]="filtersButtonPassThrough()"
-          [value]="filtersSelected() ?? 0"
           styleClass="invai-table-toolbar-button"
           (onClick)="onToggleFilters()"
-          pBadge
         />
       </span>
     }

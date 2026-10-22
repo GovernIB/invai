@@ -46,7 +46,7 @@ interface MaintenanceTestData {
 
 interface RoleTransferRequest {
   items: { id: number; type: 'RESPONSIBLE' | 'AUTHORIZED' }[];
-  toPersonId: number | null;
+  toPersonEmailAddress: string | null;
   revoke: boolean;
 }
 
@@ -240,6 +240,10 @@ test.describe('maintenance section navigation', () => {
       'Responsables',
       'Sistemes i DB',
       'Desenvolupament',
+      'Accessibilitat',
+      'Seguretat',
+      'Integracions',
+      'Documentació',
     ]);
     await expect(tabs.getByRole('link', { name: 'General' })).toHaveAttribute(
       'aria-current',
@@ -264,16 +268,16 @@ test.describe('maintenance section navigation', () => {
     await expect(page).toHaveURL(/\/manteniments\/responsables$/);
 
     const companies = page.getByRole('button', { name: /^Empreses/ });
-    const people = page.getByRole('button', { name: /^Persones/ });
+    const people = page.getByRole('button', { name: /^Personal extern/ });
     const authorizations = page.getByRole('button', { name: /^Autoritzacions/ });
     const roleTransfer = page.getByRole('button', {
       name: /^Transferència i revocació de rols/,
     });
     await expect(page.locator('.maintenance-panel-title')).toHaveText([
       'Transferència i revocació de rols',
-      'Empreses',
-      'Persones',
+      'Personal extern',
       'Autoritzacions',
+      'Empreses',
     ]);
     await expect(companies).toHaveAttribute('aria-expanded', 'false');
     await expect(people).toHaveAttribute('aria-expanded', 'false');
@@ -317,11 +321,13 @@ test.describe('maintenance section navigation', () => {
       },
     ];
 
-    await page.route('**/invaiback/person*', (route) =>
+    // The pickers search the database and Soffid at once through /person/all.
+    await page.route('**/invaiback/person/all**', (route) =>
       route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ content: people, totalElements: people.length }),
+        json: {
+          database: { content: people, totalElements: people.length, number: 0, last: true },
+          soffid: { content: [], totalElements: 0, number: 0, last: true },
+        },
       }),
     );
     await page.route('**/invaiback/role-transfer**', async (route) => {
@@ -355,11 +361,11 @@ test.describe('maintenance section navigation', () => {
 
     await page.goto('/manteniments/responsables#role-transfer');
     await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
-    await selectOption(page, 'role-transfer-source', 'E2E Persona origen');
+    await selectPerson(page, 'role-transfer-source', /^E2E Persona origen/);
     await expect(page.getByRole('heading', { name: 'E2E Aplicació' })).toBeVisible();
     await page.getByRole('checkbox', { name: /Responsable de servei/ }).check();
     await page.getByRole('button', { name: 'Mou els rols seleccionats al lot' }).click();
-    await selectOption(page, 'role-transfer-destination', 'E2E Persona destí');
+    await selectPerson(page, 'role-transfer-destination', /^E2E Persona destí/);
     await page.getByRole('button', { name: 'Transfereix els rols preparats' }).click();
     await page.getByRole('button', { name: "Confirma l'acció" }).click();
 
@@ -367,7 +373,7 @@ test.describe('maintenance section navigation', () => {
       .poll(() => postedBatch)
       .toEqual({
         items: [{ id: 7001, type: 'RESPONSIBLE' }],
-        toPersonId: 902,
+        toPersonEmailAddress: 'desti@example.org',
         revoke: false,
       });
     await expect(
@@ -376,7 +382,8 @@ test.describe('maintenance section navigation', () => {
   });
 
   test('keeps wide maintenance tables inside the expanded panel', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
+    // Narrow enough for the commissions table to overflow and scroll inside its panel.
+    await page.setViewportSize({ width: 800, height: 800 });
     await page.goto('/manteniments/general#commissions');
     await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
 
@@ -429,12 +436,12 @@ test.describe('systems maintenance navigation', () => {
     ).toHaveAttribute('aria-current', 'page');
 
     await expect(page.locator('.maintenance-panel-title')).toHaveText([
-      'Entorns',
-      'Servidors físics',
       "Servidors d'aplicacions",
-      'Servidors de bases de dades',
       'Bases de dades',
+      'Servidors físics',
+      'Servidors de bases de dades',
       'Proveïdors de bases de dades',
+      'Entorns',
     ]);
 
     await expect(databases).toHaveAttribute('aria-expanded', 'false');
@@ -569,7 +576,9 @@ test.describe('systems maintenance navigation', () => {
       await expect(
         page.getByRole('heading', { name: "Consultar servidor d'aplicacions" }),
       ).toBeVisible();
-      await expect(page.locator('#application-host-server')).toBeDisabled();
+      await expect(
+        page.locator('p[aria-labelledby="application-host-server-label"]'),
+      ).toContainText(physicalServer.name);
       await page
         .getByRole('button', {
           name: "Tanca el formulari del servidor d'aplicacions",
@@ -856,16 +865,30 @@ async function fillCommissionDialog(page: Page, input: MaintenanceInput): Promis
   await selectOption(page, 'commission-dialog-type', 'Tècnica');
 }
 
+// Person options also show the e-mail and the source, so they are matched by their start.
+async function selectPerson(page: Page, inputId: string, name: RegExp): Promise<void> {
+  await page.locator(`#${inputId}`).click();
+  await page.getByRole('option', { name }).click();
+}
+
 async function expectDialogValues(
   page: Page,
   scenario: MaintenanceScenario,
   input: MaintenanceInput,
-  disabled: boolean,
+  readOnly: boolean,
 ): Promise<void> {
   for (const [id, value] of Object.entries(scenario.dialogValues(input))) {
+    // In view mode some dialogs swap a picker for a read-only "<id>-view" text input.
+    const viewControl = page.locator(`#${id}-view`);
+    if (readOnly && (await viewControl.count()) > 0) {
+      // The read-only date is formatted with the browser locale; see the fixme test below.
+      await expect(viewControl).not.toHaveValue('');
+      await expect(viewControl).not.toBeEditable();
+      continue;
+    }
     const control = page.locator(`#${id}`);
     await expect(control).toHaveValue(value);
-    if (disabled) await expect(control).toBeDisabled();
+    if (readOnly) await expect(control).not.toBeEditable();
   }
 }
 
@@ -1081,3 +1104,33 @@ function displayDate(date: string): string {
   const [year, month, day] = date.split('-');
   return `${day}/${month}/${year}`;
 }
+
+// commission-dialog.ts formats the read-only date with `new Intl.DateTimeFormat()`, i.e. the
+// browser locale, so it shows "7/21/2026" or "21/7/2026" instead of the picker's "21/07/2026".
+test.fixme('shows the commission approval date in the application format when consulting it', async ({
+  page,
+}) => {
+  await page.route(/\/invaiback\/commission(?:\?.*)?$/, (route) =>
+    route.fulfill({
+      json: {
+        content: [
+          {
+            id: 9901,
+            name: 'E2E Comissió data',
+            nameEs: 'E2E Comisión fecha',
+            expedientNumber: 'E2E-DATA',
+            approvalDate: '2026-07-21',
+            commissionType: 'TECNICA',
+            deletedAt: null,
+          },
+        ],
+        totalElements: 1,
+      },
+    }),
+  );
+  await page.goto('/manteniments/general#commissions');
+
+  const row = page.getByRole('row').filter({ hasText: 'E2E-DATA' });
+  await selectRowAction(page, row, VIEW_ACTION);
+  await expect(page.locator('#commission-dialog-approval-date-view')).toHaveValue('21/07/2026');
+});

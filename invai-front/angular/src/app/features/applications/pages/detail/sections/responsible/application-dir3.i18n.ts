@@ -23,4 +23,11 @@ export const DIR3_COPY = {
   manualError: $localize`:@@dir3ManualError:No s'ha pogut validar manualment. Revisa l'estat actual i torna-ho a provar.`,
   partial: $localize`:@@dir3Partial:El responsable ja s'ha afegit. Només queda completar la validació manual; tornar-ho a provar no duplicarà l'alta.`,
   changed: $localize`:@@dir3StateChanged:L'estat DIR3 ha canviat. S'han actualitzat les dades; tanca aquest diàleg i revisa el responsable.`,
+  applicationCheck: $localize`:@@dir3ApplicationCheck:Validar el DIR3 de l'aplicació`,
+  applicationCheckProgress: $localize`:@@dir3ApplicationCheckProgress:Validant el DIR3 dels responsables i autoritzats…`,
+  applicationCheckDone: $localize`:@@dir3ApplicationCheckDone:Validació DIR3 completada`,
+  applicationCheckMismatch: $localize`:@@dir3ApplicationCheckMismatch:L'aplicació té responsables o autoritzats amb discrepàncies DIR3.`,
+  applicationCheckOk: $localize`:@@dir3ApplicationCheckOk:El DIR3 de tots els responsables i autoritzats coincideix amb el de l'aplicació.`,
+  applicationCheckNoUnit: $localize`:@@dir3ApplicationCheckNoUnit:L'aplicació no té unitat administrativa, per això no es pot validar el DIR3.`,
+  applicationCheckError: $localize`:@@dir3ApplicationCheckError:No s'ha pogut completar la validació DIR3 de l'aplicació. Torna-ho a provar.`,
 };

@@ -4,7 +4,7 @@ import { FULL_ROUTES } from '@core/components/main-layout/routes/full.routes';
 import { PrimeIcons } from 'primeng/api';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { BreadcrumbService } from './breadcrumb.service';
-import { BREADCRUMBS_HOME_ARIA_LABEL } from './breadcrumbs.i18n';
+import { BREADCRUMBS_HOME_ARIA_LABEL, BREADCRUMBS_NAVIGATION_ARIA_LABEL } from './breadcrumbs.i18n';
 
 @Component({
   selector: 'app-breadcrumbs',
@@ -24,6 +24,8 @@ export class Breadcrumbs {
     ariaLabel: BREADCRUMBS_HOME_ARIA_LABEL,
     routerLink: FULL_ROUTES.HOME,
   };
+
+  protected readonly navigationAriaLabel = BREADCRUMBS_NAVIGATION_ARIA_LABEL;
 
   items = this.breadcrumbService.breadcrumbs;
 }

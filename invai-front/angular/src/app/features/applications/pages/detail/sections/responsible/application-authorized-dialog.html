@@ -138,8 +138,24 @@
         class="w-full"
         rows="3"
         formControlName="observation"
+        [invalid]="isInvalid(form().controls.observation)"
+        [attr.aria-invalid]="isInvalid(form().controls.observation) || null"
+        [attr.aria-describedby]="
+          isInvalid(form().controls.observation)
+            ? 'application-authorized-dialog-observation-error'
+            : null
+        "
         pTextarea
       ></textarea>
+      @if (isInvalid(form().controls.observation)) {
+        <p
+          id="application-authorized-dialog-observation-error"
+          class="mb-0 mt-1 text-sm text-red-600"
+          role="alert"
+        >
+          {{ textMaxBytesError }}
+        </p>
+      }
     </div>
 
     <div class="md:col-span-2">

@@ -804,8 +804,15 @@ async function expectEditActions(page: Page, actions: DialogActions): Promise<vo
   await expect(page.getByRole('button', { name: actions.save, exact: true })).toBeVisible();
 }
 
+// View mode renders the selection as static text labelled by "<inputId>-label" or
+// "<inputId>-view-label".
 async function expectSelectedOption(page: Page, inputId: string, value: string): Promise<void> {
-  await expect(page.locator(`#${inputId}`).locator('..')).toContainText(value);
+  const staticValue = page.locator(
+    `p[aria-labelledby="${inputId}-label"], p[aria-labelledby="${inputId}-view-label"]`,
+  );
+  const field =
+    (await staticValue.count()) > 0 ? staticValue : page.locator(`#${inputId}`).locator('..');
+  await expect(field).toContainText(value);
 }
 
 async function expectToast(page: Page, title: string): Promise<void> {

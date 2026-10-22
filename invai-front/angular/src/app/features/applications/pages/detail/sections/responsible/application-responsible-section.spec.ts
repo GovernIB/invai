@@ -9,6 +9,7 @@ import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { AutoComplete } from 'primeng/autocomplete';
+import { Dialog } from 'primeng/dialog';
 import { of, Subject, throwError } from 'rxjs';
 
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
@@ -151,6 +152,9 @@ describe('ApplicationResponsibleSection', () => {
       of(dir3Validation),
     ),
   };
+  const applicationsService = {
+    checkDir3Mismatch: vi.fn(() => of({ id: 7, name: 'Invai', dir3Mismatch: true })),
+  };
   const peopleService = {
     checkDir3: vi.fn<(email: string, unit: string) => Observable<PersonDir3Check>>(() =>
       of({ personGroup: 'group', groupDir3: 'A1', admUnitCode: 'A1', matches: true }),
@@ -166,7 +170,7 @@ describe('ApplicationResponsibleSection', () => {
         ApplicationDetailState,
         MessageService,
         { provide: ApplicationDir3ValidationService, useValue: dir3Service },
-        { provide: ApplicationsService, useValue: {} },
+        { provide: ApplicationsService, useValue: applicationsService },
         { provide: ApplicationDevelopmentService, useValue: {} },
         { provide: ApplicationResponsiblesService, useValue: responsiblesService },
         { provide: ApplicationAuthorizedService, useValue: authorizedService },
@@ -208,7 +212,7 @@ describe('ApplicationResponsibleSection', () => {
   });
 
   it('renders every fixed responsibility and marks an unassigned one as incomplete', () => {
-    const headings = Array.from(fixture.nativeElement.querySelectorAll('h4')).map((element) =>
+    const headings = Array.from(fixture.nativeElement.querySelectorAll('h3')).map((element) =>
       (element as HTMLElement).textContent?.trim(),
     );
     expect(headings).toEqual(['Responsables', 'Autoritzats']);
@@ -221,6 +225,123 @@ describe('ApplicationResponsibleSection', () => {
       '.application-responsible__divider',
     ) as HTMLElement;
     expect(divider.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  describe('application DIR3 check', () => {
+    const checkButton = () => findButton("Validar el DIR3 de l'aplicació");
+
+    beforeEach(() => {
+      detailState.application.set({
+        id: '7',
+        status: ApplicationStatus.ACTIVE,
+        admUnitCode: 'A04003003',
+      } as never);
+      fixture.detectChanges();
+    });
+
+    it('audits the application, refreshes both tables and reports discrepancies', () => {
+      const addSpy = vi.spyOn(messageService, 'add');
+      responsiblesService.getPage.mockClear();
+      authorizedService.getPage.mockClear();
+
+      checkButton()!.click();
+      fixture.detectChanges();
+
+      expect(applicationsService.checkDir3Mismatch).toHaveBeenCalledWith(7);
+      expect(responsiblesService.getPage).toHaveBeenCalledOnce();
+      expect(authorizedService.getPage).toHaveBeenCalledOnce();
+      expect(addSpy).toHaveBeenCalledWith({
+        severity: 'warn',
+        summary: 'Validació DIR3 completada',
+        detail: "L'aplicació té responsables o autoritzats amb discrepàncies DIR3.",
+      });
+    });
+
+    it('is available outside edit mode and confirms when every DIR3 matches', () => {
+      applicationsService.checkDir3Mismatch.mockReturnValueOnce(
+        of({ id: 7, name: 'Invai', dir3Mismatch: false }),
+      );
+      const addSpy = vi.spyOn(messageService, 'add');
+
+      expect(detailState.isEditing('responsible')).toBe(false);
+      checkButton()!.click();
+
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'success',
+          detail:
+            "El DIR3 de tots els responsables i autoritzats coincideix amb el de l'aplicació.",
+        }),
+      );
+    });
+
+    it('announces the check while it runs and blocks a second request', () => {
+      const pending = new Subject<{ id: number; name: string; dir3Mismatch: boolean }>();
+      applicationsService.checkDir3Mismatch.mockReturnValueOnce(pending);
+
+      checkButton()!.click();
+      fixture.detectChanges();
+
+      const status = fixture.nativeElement.querySelector(
+        '.application-responsible__panel-actions [role="status"]',
+      ) as HTMLElement;
+      expect(status.textContent).toContain('Validant el DIR3 dels responsables i autoritzats');
+      expect(checkButton()!.disabled).toBe(true);
+      const section = fixture.componentInstance as unknown as { checkApplicationDir3(): void };
+      section.checkApplicationDir3();
+      expect(applicationsService.checkDir3Mismatch).toHaveBeenCalledOnce();
+
+      pending.next({ id: 7, name: 'Invai', dir3Mismatch: false });
+      pending.complete();
+      fixture.detectChanges();
+      expect(status.textContent?.trim()).toBe('');
+      expect(checkButton()!.disabled).toBe(false);
+    });
+
+    it('explains why an application without administrative unit cannot be checked', () => {
+      detailState.application.set({ id: '7', status: ApplicationStatus.ACTIVE } as never);
+      fixture.detectChanges();
+      const addSpy = vi.spyOn(messageService, 'add');
+
+      checkButton()!.click();
+
+      expect(applicationsService.checkDir3Mismatch).not.toHaveBeenCalled();
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'warn',
+          detail: "L'aplicació no té unitat administrativa, per això no es pot validar el DIR3.",
+        }),
+      );
+    });
+
+    it('reports a failed check and keeps the tables as they were', () => {
+      applicationsService.checkDir3Mismatch.mockReturnValueOnce(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+      const addSpy = vi.spyOn(messageService, 'add');
+      responsiblesService.getPage.mockClear();
+
+      checkButton()!.click();
+
+      expect(responsiblesService.getPage).not.toHaveBeenCalled();
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          detail: "No s'ha pogut completar la validació DIR3 de l'aplicació. Torna-ho a provar.",
+        }),
+      );
+    });
+
+    it('is not offered on inactive applications', () => {
+      detailState.application.set({
+        id: '7',
+        status: ApplicationStatus.INACTIVE,
+        admUnitCode: 'A04003003',
+      } as never);
+      fixture.detectChanges();
+
+      expect(checkButton()).toBeNull();
+    });
   });
 
   it('shows consultation columns in view mode and add controls only while editing', () => {
@@ -825,6 +946,17 @@ describe('ApplicationResponsibleSection', () => {
       fixture.nativeElement.querySelector('#application-assignment-deactivate-observation-error')
         .textContent,
     ).toContain('Les observacions són obligatòries.');
+
+    textarea.value = 'à'.repeat(2001);
+    textarea.dispatchEvent(new Event('input'));
+    component.confirmDeactivate();
+    fixture.detectChanges();
+
+    expect(responsiblesService.deactivate).not.toHaveBeenCalled();
+    expect(
+      fixture.nativeElement.querySelector('#application-assignment-deactivate-observation-error')
+        .textContent,
+    ).toContain('El text supera la mida màxima permesa');
   });
 
   it('keeps the deactivation dialog and observation available after a request error', () => {
@@ -1110,19 +1242,62 @@ describe('ApplicationResponsibleSection', () => {
     });
   });
 
-  it('disables the add control when the responsibility catalog is complete', () => {
+  it('keeps add enabled when the responsibility catalog is complete and explains it in a modal', () => {
+    const add = vi.spyOn(messageService, 'add');
     startEditing();
-    const component = harness(fixture);
-    component.responsibleAssignments.set([
-      ...RESPONSIBLES,
-      { ...RESPONSIBLES[0], id: 23, responsibleType: RESPONSIBLE_TYPES[2] },
-    ]);
-    component.rebuildResponsibleRows();
-    fixture.detectChanges();
+    completeResponsibilities();
 
     const addResponsible = button('Afegeix un responsable');
-    expect(addResponsible.disabled).toBe(true);
-    expect(addResponsible.getAttribute('aria-disabled')).toBe('true');
+    expect(addResponsible.disabled).toBe(false);
+    expect(addResponsible.hasAttribute('aria-disabled')).toBe(false);
+
+    addResponsible.click();
+    fixture.detectChanges();
+
+    const dialog = responsibilitiesCompleteDialog()!;
+    expect(dialog).not.toBeNull();
+    const titleId = dialog.getAttribute('aria-labelledby')!;
+    expect(document.getElementById(titleId)?.tagName).toBe('H2');
+    expect(document.getElementById(titleId)?.textContent?.trim()).toBe(
+      'Totes les responsabilitats estan assignades',
+    );
+    expect(dialog.textContent).toContain(
+      "Per afegir un responsable nou, primer has de donar de baixa una de les assignacions actuals des del menú d'accions de la taula.",
+    );
+    expect(harness(fixture).responsibleDialogVisible()).toBe(false);
+    expect(add).not.toHaveBeenCalled();
+  });
+
+  it('closes the complete-catalog modal and returns focus to the add trigger', async () => {
+    startEditing();
+    completeResponsibilities();
+    button('Afegeix un responsable').click();
+    fixture.detectChanges();
+    const dialog = fixture.debugElement.query(By.directive(Dialog)).componentInstance as Dialog;
+    expect(dialog.focusOnShow).toBe(true);
+    expect(dialog.closeOnEscape).toBe(true);
+
+    const accept = Array.from(
+      responsibilitiesCompleteDialog()!.querySelectorAll<HTMLButtonElement>('button'),
+    ).find((element) => element.textContent?.trim() === 'Entesos')!;
+    expect(accept).toBeDefined();
+    accept.click();
+    fixture.detectChanges();
+
+    expect(harness(fixture).responsibilitiesCompleteDialogVisible()).toBe(false);
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(responsibilitiesCompleteDialog()).toBeNull();
+      expect(document.activeElement).toBe(button('Afegeix un responsable'));
+    });
+  });
+
+  it('keeps add disabled when there is no responsibility catalog to assign', () => {
+    startEditing();
+    harness(fixture).responsibleTypes.set([]);
+    fixture.detectChanges();
+
+    expect(button('Afegeix un responsable').disabled).toBe(true);
   });
 
   it('allows add and opens a forced CAIB dialog when only CAIB responsibilities remain vacant', () => {
@@ -1591,6 +1766,24 @@ describe('ApplicationResponsibleSection', () => {
     button("Editar Responsables de l'aplicació").click();
     fixture.detectChanges();
   }
+
+  function completeResponsibilities(): void {
+    const component = harness(fixture);
+    component.responsibleAssignments.set([
+      ...RESPONSIBLES,
+      { ...RESPONSIBLES[0], id: 23, responsibleType: RESPONSIBLE_TYPES[2] },
+    ]);
+    component.rebuildResponsibleRows();
+    fixture.detectChanges();
+  }
+
+  function responsibilitiesCompleteDialog(): HTMLElement | null {
+    return (
+      Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).find((dialog) =>
+        dialog.textContent?.includes('Totes les responsabilitats estan assignades'),
+      ) ?? null
+    );
+  }
 });
 
 function row(assignment: ApplicationAssignedResponsibleOutput): ApplicationResponsibleTableRow {
@@ -1618,6 +1811,8 @@ interface SectionHarness {
   responsibleTypeOptions: () => { id: number; label: string; disabled?: boolean }[];
   authorizationTypeOptions: () => { id: number; label: string }[];
   responsibleDialogVisible: () => boolean;
+  responsibilitiesCompleteDialogVisible: () => boolean;
+  responsibleTypes: { set(value: unknown[]): void };
   authorizedDialogVisible: () => boolean;
   soffidOptions: () => (typeof SOFFID_PERSON)[];
   soffidTotal: () => number;

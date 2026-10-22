@@ -22,16 +22,20 @@
   gap: 1rem;
 }
 
-.application-security__role-filter {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 0.5rem;
-  width: min(100%, 24rem);
-  margin-inline-start: auto;
+// The roles header also hosts the quick search, filters and add toolbar.
+.application-security__resource-header--toolbar {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .application-security__resource-header--toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .application-security h3,
+.application-security h4,
 .application-security__resource-header h3 {
   margin: 0;
   font-size: 1rem;

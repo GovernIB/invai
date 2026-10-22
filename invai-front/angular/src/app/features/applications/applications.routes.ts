@@ -16,6 +16,8 @@ import {
   applicationDetailResolver,
 } from './pages/detail/application-detail.resolver';
 import { applicationDetailCanDeactivate } from './pages/detail/application-detail.guard';
+import { applicationDocumentDetailCanDeactivate } from './pages/document-detail/application-document-detail.guard';
+import { applicationDocumentDetailResolver, DOCUMENT_DETAIL_RESOLVE_KEY } from './pages/document-detail/application-document-detail.resolver';
 import {
   APPLICATION_SYSTEMS_DATABASES_RESOLVE_KEY,
   applicationSystemsDatabasesResolver,
@@ -36,6 +38,10 @@ import {
   APPLICATION_INTEGRATIONS_RESOLVE_KEY,
   applicationIntegrationsResolver,
 } from './pages/detail/sections/integrations/application-integrations-section.resolver';
+import {
+  APPLICATION_DOCUMENTATION_RESOLVE_KEY,
+  applicationDocumentationResolver,
+} from './pages/detail/sections/documentation/application-documentation-section.resolver';
 import {
   APPLICATION_DATA_RESOLVE_KEY,
   applicationDataResolver,
@@ -59,6 +65,12 @@ export const APPLICATIONS_ROUTES: Routes = [
     resolve: {
       [APPLICATION_OPTIONS_RESOLVE_KEY]: applicationOptionsResolver,
     },
+  },
+  {
+    path: ':id/documentation/:documentId',
+    loadComponent: () => import('./pages/document-detail/application-document-detail').then((m) => m.ApplicationDocumentDetail),
+    canDeactivate: [applicationDocumentDetailCanDeactivate],
+    resolve: { [DOCUMENT_DETAIL_RESOLVE_KEY]: applicationDocumentDetailResolver },
   },
   {
     path: ':id',
@@ -175,6 +187,19 @@ export const APPLICATIONS_ROUTES: Routes = [
         },
         resolve: {
           [APPLICATION_INTEGRATIONS_RESOLVE_KEY]: applicationIntegrationsResolver,
+        },
+      },
+      {
+        path: 'documentation',
+        loadComponent: () =>
+          import('./pages/detail/sections/documentation/application-documentation-section').then(
+            (m) => m.ApplicationDocumentationSection,
+          ),
+        data: {
+          breadcrumb: $localize`:@@applicationDocumentationTitle:Documentació`,
+        },
+        resolve: {
+          [APPLICATION_DOCUMENTATION_RESOLVE_KEY]: applicationDocumentationResolver,
         },
       },
     ],

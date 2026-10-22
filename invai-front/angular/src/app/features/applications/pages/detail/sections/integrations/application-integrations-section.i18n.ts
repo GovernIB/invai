@@ -46,7 +46,8 @@ export const APPLICATION_INTEGRATIONS_ROLES_TEXTS = {
   mismatchDetail: $localize`:@@applicationIntegrationsRolesMismatchDetail:Els rols atorgats a Soffid no coincideixen amb els rols requerits.`,
   match: $localize`:@@applicationIntegrationsRolesMatch:Coincideixen`,
   unknown: $localize`:@@applicationIntegrationsRolesUnknown:No s'ha pogut comprovar`,
-  grantedUnavailable: $localize`:@@applicationIntegrationsGrantedUnavailable:No disponible`,
+  unavailable: $localize`:@@applicationIntegrationsGrantedUnavailable:No disponible`,
+  unavailableDetail: $localize`:@@applicationIntegrationsRolesUnavailableDetail:No s'han pogut consultar els rols a Soffid. Torna a carregar la pestanya per poder editar la connexió.`,
 };
 
 export const APPLICATION_INTEGRATIONS_COLUMNS: KeyLabel[] = [
@@ -84,11 +85,6 @@ export const APPLICATION_INTEGRATIONS_COLUMNS: KeyLabel[] = [
     minWidth: '12rem',
     wrap: true,
     maxWidth: '24rem',
-  },
-  {
-    key: 'rolesMismatch',
-    label: $localize`:@@applicationIntegrationsRolesMatchColumn:Coincidència de rols`,
-    minWidth: '10rem',
   },
 ];
 

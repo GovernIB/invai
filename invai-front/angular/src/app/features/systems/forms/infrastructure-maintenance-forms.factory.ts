@@ -1,4 +1,6 @@
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { maxUtf8BytesValidator } from '@shared/utils/text-length.utils';
 
 import {
   DatabaseVendorCatalogOption,
@@ -48,7 +50,7 @@ export function createSystemHostForm(
       ...REQUIRED_TEXT,
       Validators.maxLength(20),
     ]),
-    description: formBuilder.nonNullable.control(''),
+    description: formBuilder.nonNullable.control('', maxUtf8BytesValidator(TEXT_FIELD_MAX_BYTES)),
   });
 }
 
@@ -69,6 +71,6 @@ export function createDatabaseHostForm(
       null,
       Validators.required,
     ),
-    description: formBuilder.nonNullable.control(''),
+    description: formBuilder.nonNullable.control('', maxUtf8BytesValidator(TEXT_FIELD_MAX_BYTES)),
   });
 }

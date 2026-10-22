@@ -15,7 +15,7 @@
     [lazyLoadOnInit]="false"
     [paginator]="true"
     [paginatorStyleClass]="PAGINATOR_STYLE_CLASS"
-    [rowHover]="isConsultable()"
+    [rowHover]="true"
     [rows]="PAGINATOR_ROWS"
     [rowsPerPageOptions]="ROWS_PER_PAGE_OPTIONS"
     [scrollable]="true"
@@ -51,11 +51,12 @@
     </ng-template>
     <ng-template let-columns="columns" let-rowData pTemplate="body">
       <tr
-        [class.invai-table-consultable-row]="isConsultable()"
+        class="invai-table-consultable-row"
+        tabindex="0"
         [attr.data-web-context-id]="kind() === 'web-context' ? rowData.id : null"
-        [attr.tabindex]="isConsultable() ? 0 : null"
-        (dblclick)="activateRow($event, rowData)"
-        (keydown.enter)="activateRow($event, rowData)"
+        [attr.data-role-id]="kind() === 'role' ? rowData.id : null"
+        (dblclick)="onRowActivate($event, ApplicationSecurityTableAction.View, rowData)"
+        (keydown.enter)="onRowActivate($event, ApplicationSecurityTableAction.View, rowData)"
       >
         @for (column of columns; track column.key) {
           <td [style.min-width]="column.minWidth" [style.width]="column.width">
@@ -64,6 +65,31 @@
               [class.invai-table-cell-content--wrap]="column.wrap"
               [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
               >{{ cellValue(rowData, column.key) }}
+              @if (column.key === 'role') {
+                @if (roleValidationStatus(rowData); as status) {
+                  <span
+                    class="application-security-role-validation"
+                    role="img"
+                    tabindex="0"
+                    [attr.aria-label]="roleValidationLabel(rowData)"
+                    [pTooltip]="roleValidationLabel(rowData)"
+                    [autoHide]="false"
+                    tooltipEvent="both"
+                    tooltipPosition="top"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (dblclick)="$event.stopPropagation()"
+                  >
+                    <i
+                      class="pi"
+                      aria-hidden="true"
+                      [class.pi-check-circle]="status === 'MANUAL'"
+                      [class.text-green-700]="status === 'MANUAL'"
+                      [class.pi-exclamation-circle]="status === 'NOT_VALIDATED'"
+                      [class.text-orange-600]="status === 'NOT_VALIDATED'"
+                    ></i>
+                  </span>
+                }
+              }
               @if (kind() === 'web-context' && column.key === 'webContext' && rowData.validated) {
                 @if (showVerifiedReason()) {
                   <span

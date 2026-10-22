@@ -9,12 +9,12 @@
     <p-button [text]="true" [label]="retryLabel" (onClick)="menuOptionsResource.reload()" />
   </div>
 } @else {
-  <nav class="flex flex-row items-center gap-1">
+  <nav class="flex flex-row items-center gap-1" [attr.aria-label]="navigationAriaLabel">
     @for (menuItem of menuItems(); track $index) {
       <p-button
         [attr.data-testid]="'button-' + menuItem.id?.toLowerCase() + '-testid'"
         [ariaLabel]="menuItem.label"
-        [attr.aria-expanded]="isExpanded(menuItem)"
+        [pt]="{ root: { 'aria-expanded': isExpanded(menuItem) } }"
         [severity]="getSeverity(menuItem)"
         [text]="true"
         (onClick)="toggleSidebarMenu(menuItem)"

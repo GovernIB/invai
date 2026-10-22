@@ -15,15 +15,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { RichTextAria } from '@shared/directives/rich-text-aria.directive';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Editor } from 'primeng/editor';
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { EditorInitEvent } from 'primeng/types/editor';
-import { TabListPassThrough } from 'primeng/types/tabs';
 import { finalize } from 'rxjs';
 
-import { ApplicationDataSource } from '../../../../forms/application-data-form.factory';
+import { ApplicationDataSource } from '../../../../applications.model';
 import { ApplicationDataService } from '../../../../services/application-data.service';
 import { ApplicationsService } from '../../../../services/applications.service';
 import {
@@ -38,30 +38,28 @@ import { ApplicationDetailSectionLayout } from '../../components/application-det
 import {
   APPLICATION_DATA_LABELS,
   APPLICATION_DATA_MESSAGES,
+  APPLICATION_DATA_SAVED_INVALID_URLS_MESSAGE,
   APPLICATION_DATA_SECTION_TITLE,
+  APPLICATION_DATA_URL_MESSAGES,
 } from './application-data-section.i18n';
 import {
   APPLICATION_DATA_RESOLVE_KEY,
   ApplicationDataLoadResult,
   loadApplicationData,
 } from './application-data-section.resolver';
-import { ApplicationDataSourcePanel } from './application-data-source';
+import { ApplicationDataUrlPanel } from './application-data-url-panel';
 
 @Component({
   selector: 'app-application-data-section',
   standalone: true,
   imports: [
-    ApplicationDataSourcePanel,
+    ApplicationDataUrlPanel,
     ApplicationDetailSectionActions,
     ApplicationDetailSectionLayout,
     Button,
     Editor,
     ReactiveFormsModule,
-    Tab,
-    TabList,
-    TabPanel,
-    TabPanels,
-    Tabs,
+    RichTextAria,
   ],
   templateUrl: './application-data-section.html',
   styleUrl: './application-data-section.scss',
@@ -80,13 +78,13 @@ export class ApplicationDataSection implements OnInit {
   protected readonly sectionTitle = APPLICATION_DATA_SECTION_TITLE;
   protected readonly labels = APPLICATION_DATA_LABELS;
   protected readonly messages = APPLICATION_DATA_MESSAGES;
+  protected readonly urlMessages = APPLICATION_DATA_URL_MESSAGES;
   protected readonly icons = PrimeIcons;
   protected readonly isSaving = signal(false);
   protected readonly dataLoading = signal(false);
   protected readonly observationsLabelId = 'application-data-observations-label';
-  protected readonly tabListPassThrough: TabListPassThrough = {
-    tabList: { 'aria-label': APPLICATION_DATA_LABELS.sources },
-  };
+  protected readonly observationsErrorId = 'application-data-observations-error';
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly showContent = computed(() =>
     ['loaded', 'absent', 'deleted'].includes(this.detailState.dataStatus()),
   );
@@ -96,11 +94,6 @@ export class ApplicationDataSection implements OnInit {
     if (status === 'failed') return this.detailState.dataErrorMessage() ?? this.messages.failed;
     return this.messages[status];
   });
-
-  // A loaded record carries null endpoints only for a source whose live fetch failed.
-  protected sourceUnavailable(source: ApplicationDataSource): boolean {
-    return this.detailState.dataStatus() === 'loaded' && this.detailState.data()?.[source] === null;
-  }
 
   ngOnInit(): void {
     const result: ApplicationDataLoadResult = this.route.snapshot.data[
@@ -113,12 +106,6 @@ export class ApplicationDataSection implements OnInit {
       errorMessage: null,
     };
     this.detailState.initializeData(result);
-  }
-
-  protected onSourceChange(value: string | number | undefined): void {
-    if (value === 'openData' || value === 'reuse') {
-      this.detailState.dataActiveSource.set(value satisfies ApplicationDataSource);
-    }
   }
 
   protected retry(): void {
@@ -138,7 +125,7 @@ export class ApplicationDataSection implements OnInit {
       .subscribe((result) => {
         this.detailState.initializeData(result);
         // The retry button disappears on success; keep keyboard users inside the tab.
-        if (retryHadFocus && this.showContent() && !this.problem()) this.focusActiveSource();
+        if (retryHadFocus && this.showContent() && !this.problem()) this.focusFirstSource();
       });
   }
 
@@ -172,10 +159,13 @@ export class ApplicationDataSection implements OnInit {
         next: (result) => {
           this.isSaving.set(false);
           if (result.status !== 'saved') return;
+          const invalidUrls = result.invalidDataUrls ?? [];
           this.messageService.add({
-            severity: 'success',
+            severity: invalidUrls.length ? 'warn' : 'success',
             summary: APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE,
-            detail: APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE(this.sectionTitle),
+            detail: invalidUrls.length
+              ? APPLICATION_DATA_SAVED_INVALID_URLS_MESSAGE(invalidUrls.map((source) => this.sourceLabel(source)))
+              : APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE(this.sectionTitle),
           });
         },
         error: (error: unknown) => {
@@ -198,16 +188,22 @@ export class ApplicationDataSection implements OnInit {
     return value.trim() || this.labels.noValue;
   }
 
+  protected observationsInvalid(): boolean {
+    const control = this.detailState.dataForm.controls.observations;
+    return control.invalid && (control.dirty || control.touched);
+  }
+
   protected labelEditor(event: EditorInitEvent): void {
     event.editor.root.setAttribute('aria-labelledby', this.observationsLabelId);
   }
 
-  private focusActiveSource(): void {
+  private sourceLabel(source: ApplicationDataSource): string {
+    return source === 'openData' ? this.labels.openData : this.labels.reuse;
+  }
+
+  private focusFirstSource(): void {
     afterNextRender(
-      () =>
-        this.host.nativeElement
-          .querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
-          ?.focus(),
+      () => this.host.nativeElement.querySelector<HTMLElement>('.application-data-url__title')?.focus(),
       { injector: this.injector },
     );
   }

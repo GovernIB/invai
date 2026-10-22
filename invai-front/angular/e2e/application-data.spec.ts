@@ -2,53 +2,24 @@ import { expect, test, type Page, type Route } from '@playwright/test';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const DETECTED_URL = 'https://intranet.caib.es/testapi/externa/swagger.json';
-const UNAVAILABLE_MESSAGE = "No s'ha pogut consultar el catàleg d'API REST externa d'aquesta aplicació.";
+const OPEN_DATA_URL = 'https://intranet.caib.es/testapi/externa';
+const REUSE_URL = 'https://intranet.caib.es/testapi/interna';
+const LOAD_ERROR = 'No se ha encontrado ningún anclaje de datos con el identificador especificado.';
+const NEW_TAB = "(s'obre en una pestanya nova)";
 
 const RECORD = {
   id: 5,
   application: { id: 1 },
   observation: '<p>Notes de dades obertes</p>',
-  openDataUrl: DETECTED_URL,
-  useOpenDataUrl: false,
-  openData: [
-    {
-      path: '/api/aplicacions',
-      method: 'GET',
-      operation: {
-        operationId: 'list',
-        summary: 'Llista aplicacions',
-        description: 'Retorna les aplicacions publicades.',
-        parameters: [
-          {
-            name: 'page',
-            in: 'query',
-            required: false,
-            description: 'Pàgina',
-            type: 'integer',
-            format: 'int32',
-            defaultValue: 0,
-            enumValues: null,
-          },
-        ],
-      },
-    },
-  ],
-  reuseUrl: null,
-  useReuseUrl: false,
-  reuse: [
-    {
-      path: '/api/reutilitzacio',
-      method: 'GET',
-      operation: { operationId: 'reuse', summary: 'Conjunt reutilitzable', description: null, parameters: [] },
-    },
-  ],
+  openDataUrl: OPEN_DATA_URL,
+  reuseUrl: REUSE_URL,
   deletedAt: null,
 };
 
 interface DataMock {
   failuresBeforeSuccess: number;
-  puts: unknown[];
+  writes: { path: string; body: unknown }[];
+  checks: (string | null)[];
 }
 
 async function openDataTab(
@@ -56,7 +27,7 @@ async function openDataTab(
   failuresBeforeSuccess = 0,
   initial: Record<string, unknown> = RECORD,
 ): Promise<DataMock> {
-  const mock: DataMock = { failuresBeforeSuccess, puts: [] };
+  const mock: DataMock = { failuresBeforeSuccess, writes: [], checks: [] };
   let record = { ...RECORD, ...initial };
   await page.route('**/invaiback/**', async (route: Route) => {
     const request = route.request();
@@ -69,18 +40,31 @@ async function openDataTab(
         json: { id: 1, code: 'TEST', name: 'Dades test', status: 'ACTIVE', appDataId: 5 },
       });
     }
+    // Every URL answers but the reuse one of RECORD.
+    if (path.endsWith('/application/data/check-url')) {
+      const url = new URL(request.url()).searchParams.get('url');
+      mock.checks.push(url);
+      return route.fulfill({ json: { url, validUrl: url !== REUSE_URL } });
+    }
+    const source = path.match(/\/application\/data\/5\/(open-data|reuse)$/)?.[1];
+    if (source && request.method() === 'PUT') {
+      const body = request.postDataJSON() as { url: string | null };
+      mock.writes.push({ path: source, body });
+      record = { ...record, [source === 'reuse' ? 'reuseUrl' : 'openDataUrl']: body.url };
+      return route.fulfill({ json: { url: body.url, validUrl: false } });
+    }
     if (path.endsWith('/application/data/5') && request.method() === 'PUT') {
       const body = request.postDataJSON();
-      mock.puts.push(body);
-      record = { ...record, ...body, observation: body.observation };
-      return route.fulfill({ json: { ...record, openData: null, reuse: null } });
+      mock.writes.push({ path: 'data', body });
+      record = { ...record, observation: body.observation };
+      return route.fulfill({ json: { ...record, openDataUrl: null, reuseUrl: null } });
     }
     if (path.endsWith('/application/data/5')) {
       if (mock.failuresBeforeSuccess > 0) {
         mock.failuresBeforeSuccess--;
         return route.fulfill({
           status: 400,
-          json: { error: 'Error de validació', message: UNAVAILABLE_MESSAGE },
+          json: { error: 'Error de validació', message: LOAD_ERROR },
         });
       }
       return route.fulfill({ json: record });
@@ -94,144 +78,112 @@ async function openDataTab(
   return mock;
 }
 
-test('shows the published endpoints of each source with expandable parameters', async ({
+test('shows the URL of each source as a link and warns about one that does not answer', async ({
   page,
 }, testInfo) => {
   await openDataTab(page);
 
-  const sources = page.getByRole('tablist', { name: 'Fonts de dades' });
-  await expect(sources.getByRole('tab')).toHaveText(['Open Data', 'Reutilització']);
-  await expect(page.getByRole('tab', { name: 'Open Data' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('textbox', { name: 'URL de consulta' })).toHaveValue(DETECTED_URL);
-  await expect(page.getByRole('textbox', { name: 'URL de consulta' })).toHaveAttribute('readonly', '');
+  const openData = page.getByRole('region', { name: 'Dades obertes' });
+  const reuse = page.getByRole('region', { name: 'Reutilització' });
+  const openDataLink = openData.getByRole('link', { name: `${OPEN_DATA_URL} ${NEW_TAB}` });
+  await expect(openDataLink).toHaveAttribute('href', OPEN_DATA_URL);
+  await expect(openDataLink).toHaveAttribute('target', '_blank');
+  await expect(openData.getByRole('status')).toHaveText('Aquesta URL respon.');
+  await expect(openData.getByText('Aquesta URL no respon.')).toHaveCount(0);
 
-  const endpoints = page.getByRole('table', { name: 'Open Data: Endpoints GET publicats' });
-  await expect(endpoints.getByRole('row', { name: /\/api\/aplicacions/ })).toBeVisible();
-  const toggle = page.getByRole('button', { name: 'Paràmetres de /api/aplicacions' });
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  const parameters = page.getByRole('table', { name: 'Paràmetres de /api/aplicacions' });
-  await expect(parameters.getByRole('row', { name: /page/ })).toContainText('integer');
-  await page.screenshot({ path: testInfo.outputPath('data-open-data.png'), fullPage: true });
-
-  await page.getByRole('tab', { name: 'Reutilització' }).click();
+  await expect(reuse.getByRole('link', { name: `${REUSE_URL} ${NEW_TAB}` })).toBeVisible();
   await expect(
-    page
-      .getByRole('table', { name: 'Reutilització: Endpoints GET publicats' })
-      .getByRole('row', { name: /\/api\/reutilitzacio/ }),
+    reuse.getByText('Aquesta URL no respon. Edita les dades per indicar-ne una manualment.'),
   ).toBeVisible();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
   await expect(page.locator('.application-data__observations')).toContainText(
     'Notes de dades obertes',
   );
+  await page.screenshot({ path: testInfo.outputPath('data-view.png'), fullPage: true });
 });
 
-test('saves a custom Open Data URL and reloads the endpoints', async ({ page }, testInfo) => {
+test('does not check the URLs again when the tab is opened again', async ({ page }) => {
+  const mock = await openDataTab(page);
+  const openData = page.getByRole('region', { name: 'Dades obertes' });
+  await expect(openData.getByRole('status')).toHaveText('Aquesta URL respon.');
+  expect(mock.checks).toEqual([OPEN_DATA_URL, REUSE_URL]);
+
+  const tabs = page.locator('.application-detail-tabs');
+  await tabs.getByRole('link', { name: /^Integracions/ }).click();
+  await expect(openData).toHaveCount(0);
+  await tabs.getByRole('link', { name: /^Dades/ }).click();
+
+  await expect(openData.getByRole('status')).toHaveText('Aquesta URL respon.');
+  await expect(
+    page.getByRole('region', { name: 'Reutilització' }).getByText('Aquesta URL no respon.'),
+  ).toBeVisible();
+  expect(mock.checks).toEqual([OPEN_DATA_URL, REUSE_URL]);
+});
+
+test('saves a URL typed in by hand for one source and warns when it does not answer', async ({
+  page,
+}, testInfo) => {
   const mock = await openDataTab(page);
 
   await page.getByRole('button', { name: 'Editar Dades', exact: true }).click();
-  const openData = page.getByRole('tabpanel', { name: 'Open Data' });
-  const url = openData.getByRole('textbox', { name: 'URL de consulta' });
-  await expect(url).toHaveAttribute('readonly', '');
-  await expect(openData.getByText('URL detectada automàticament')).toBeVisible();
-  await expect(
-    page.getByRole('tabpanel', { name: 'Reutilització', includeHidden: true }),
-  ).toBeHidden();
-
-  await page.getByRole('switch', { name: 'Utilitza una URL pròpia' }).click();
-  await expect(url).not.toHaveAttribute('readonly', '');
-  await url.fill('');
-  await page.getByRole('button', { name: 'Desar els canvis de Dades' }).click();
-  await expect(page.getByText('Indica la URL de consulta quan utilitzes una URL pròpia.')).toBeVisible();
-  await expect(url).toHaveAttribute('aria-invalid', 'true');
-  expect(mock.puts).toHaveLength(0);
-
-  await url.fill('https://custom.example/openapi.json');
-  await page.screenshot({ path: testInfo.outputPath('data-edit.png'), fullPage: true });
-  const reload = page.waitForRequest(
-    (request) => request.method() === 'GET' && request.url().endsWith('/application/data/5'),
+  const reuse = page.getByRole('region', { name: 'Reutilització' });
+  const manual = reuse.getByRole('checkbox', { name: 'Indicar la URL manualment' });
+  await expect(manual).not.toBeChecked();
+  await expect(manual).toHaveAccessibleDescription(
+    'Aquesta URL no respon. Marca «Indicar la URL manualment» per indicar-ne una altra.',
   );
-  await page.getByRole('button', { name: 'Desar els canvis de Dades' }).click();
-  await reload;
+  await expect(reuse.getByRole('textbox', { name: 'Nova URL' })).toHaveCount(0);
 
-  expect(mock.puts).toEqual([
-    expect.objectContaining({
-      applicationId: 1,
-      openDataUrl: 'https://custom.example/openapi.json',
-      useOpenDataUrl: true,
-      reuseUrl: null,
-      useReuseUrl: false,
-    }),
-  ]);
+  await manual.check();
+  const url = reuse.getByRole('textbox', { name: 'Nova URL' });
+  await page.getByRole('button', { name: 'Desar els canvis de Dades' }).click();
+  await expect(reuse.getByText('Indica la nova URL o desmarca «Indicar la URL manualment».')).toBeVisible();
+  await expect(url).toHaveAttribute('aria-invalid', 'true');
+  expect(mock.writes).toHaveLength(0);
+
+  await url.fill('https://reuse.example/api');
+  await page.screenshot({ path: testInfo.outputPath('data-edit.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Desar els canvis de Dades' }).click();
+
   await expect(page.getByRole('button', { name: 'Editar Dades', exact: true })).toBeVisible();
-  await expect(url).toHaveValue('https://custom.example/openapi.json');
+  expect(mock.writes).toEqual([{ path: 'reuse', body: { url: 'https://reuse.example/api' } }]);
   await expect(
-    page.getByRole('table', { name: 'Open Data: Endpoints GET publicats' }).getByRole('row', {
-      name: /\/api\/aplicacions/,
-    }),
+    page.getByText(
+      "S'han desat les dades, però la URL de Reutilització no respon. Comprova-la o indica'n una altra.",
+    ),
   ).toBeVisible();
+  await expect(
+    reuse.getByRole('link', { name: `https://reuse.example/api ${NEW_TAB}` }),
+  ).toBeVisible();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
 });
 
-test('reflows at 320 px keeping the endpoint table scroll inside its container', async ({
-  page,
-}, testInfo) => {
+test('reflows a long URL at 320 px without horizontal scrolling', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 800 });
-  await openDataTab(page);
+  const longUrl = `https://intranet.caib.es/${'segment/'.repeat(20)}api/externa`;
+  await openDataTab(page, 0, { openDataUrl: longUrl });
 
-  const table = page.getByRole('table', { name: 'Open Data: Endpoints GET publicats' });
-  await expect(table).toBeAttached();
+  await expect(page.getByRole('link', { name: `${longUrl} ${NEW_TAB}` })).toBeVisible();
   const pageOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
   expect(pageOverflow).toBeLessThanOrEqual(0);
-  const tableWrapper = page.locator('app-application-data-endpoints-table .p-datatable-table-container').first();
-  const wrapperBox = await tableWrapper.boundingBox();
-  expect(wrapperBox?.width).toBeLessThanOrEqual(320);
-
-  // The tablist itself may overflow its scroll container, so measure the visible host.
-  const sources = await page.locator('app-application-data-section p-tablist').boundingBox();
-  const reuseTab = await page.getByRole('tab', { name: 'Reutilització' }).boundingBox();
-  expect(reuseTab!.x + reuseTab!.width).toBeLessThanOrEqual(sources!.x + sources!.width + 1);
-  await page.screenshot({ path: testInfo.outputPath('data-mobile.png') });
+  await page.screenshot({ path: testInfo.outputPath('data-mobile.png'), fullPage: true });
 });
 
-test('reports an unavailable document inside the tab and recovers on retry', async ({
-  page,
-}, testInfo) => {
+test('reports a load failure inside the tab and recovers on retry', async ({ page }, testInfo) => {
   await openDataTab(page, 1);
 
-  await expect(page.getByRole('alert')).toHaveText(UNAVAILABLE_MESSAGE);
+  await expect(page.getByRole('alert')).toHaveText(LOAD_ERROR);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('tablist', { name: 'Fonts de dades' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Dades obertes' })).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('data-error.png'), fullPage: true });
 
   await page.getByRole('button', { name: 'Torna a carregar les dades' }).click();
 
   await expect(page.getByRole('alert')).toHaveCount(0);
-  await expect(page.getByRole('tab', { name: 'Open Data' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Dades obertes' })).toBeFocused();
   await expect(
-    page.getByRole('table', { name: 'Open Data: Endpoints GET publicats' }).getByRole('row', {
-      name: /\/api\/aplicacions/,
-    }),
+    page.getByRole('link', { name: `${OPEN_DATA_URL} ${NEW_TAB}` }),
   ).toBeVisible();
-});
-
-test('keeps the available source and reports the one the backend could not fetch', async ({
-  page,
-}, testInfo) => {
-  await openDataTab(page, 0, { reuse: null });
-
-  await expect(
-    page.getByRole('table', { name: 'Open Data: Endpoints GET publicats' }).getByRole('row', {
-      name: /\/api\/aplicacions/,
-    }),
-  ).toBeVisible();
-  await page.getByRole('tab', { name: 'Reutilització' }).click();
-  const reuse = page.getByRole('tabpanel', { name: 'Reutilització' });
-  await expect(reuse.getByRole('status')).toHaveText(
-    "No s'ha pogut consultar el catàleg d'aquesta font en aquest moment. Torna-ho a provar.",
-  );
-  await expect(reuse.getByText("L'aplicació no publica cap endpoint GET.")).toHaveCount(0);
-  await expect(page.getByRole('alert')).toHaveCount(0);
-  await page.screenshot({ path: testInfo.outputPath('data-partial.png'), fullPage: true });
 });

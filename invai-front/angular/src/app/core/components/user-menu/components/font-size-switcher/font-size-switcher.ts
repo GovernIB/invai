@@ -22,7 +22,7 @@ const FONT_SIZE_SWITCHER_LABELS = {
   imports: [Button],
   selector: 'app-font-size-switcher',
   template: `
-    <h3 class="text-primary font-semibold mb-4">{{ labels.TITLE }}</h3>
+    <h2 class="text-primary font-semibold mb-4">{{ labels.TITLE }}</h2>
 
     <section>
       <p-button

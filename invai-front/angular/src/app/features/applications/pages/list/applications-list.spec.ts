@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,17 +10,17 @@ import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { MessageService } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject, concat, of } from 'rxjs';
 import { ApplicationTableAction, ApplicationsTable } from '../../components/applications-table/applications-table';
 import { APPLICATION_GENERAL_EDIT_NAVIGATION } from '../detail/application-detail-navigation';
 
 import { APPLICATIONS_TABLE_COLUMNS } from '../../applications.constants';
 import {
   Application,
-  ApplicationDir3MismatchOutput,
   ApplicationInfrastructureFilterOptions,
   ApplicationPageParams,
   ApplicationStatus,
+  Dir3AuditStatus,
 } from '../../applications.model';
 import { ApplicationFiltersFormGroup } from '../../forms/application-form.factory';
 import {
@@ -59,6 +60,7 @@ const APPLICATIONS: Application[] = [
     modificationDate: '',
     withdrawalDate: '',
     appResponsibleAuthorizedId: null,
+    dir3Mismatch: false,
     incomplete: false,
     missingResponsibleTypes: false,
     missingAuthorized: false,
@@ -86,6 +88,7 @@ const APPLICATIONS: Application[] = [
     modificationDate: '',
     withdrawalDate: '',
     appResponsibleAuthorizedId: null,
+    dir3Mismatch: false,
     incomplete: false,
     missingResponsibleTypes: false,
     missingAuthorized: false,
@@ -152,13 +155,17 @@ describe('ApplicationsList', () => {
   let pendingPages: Subject<SpringPage<Application>>[];
   let getPeoplePage: ReturnType<typeof vi.fn>;
   let pendingPeoplePages: Subject<SpringPage<ResponsiblePerson>>[];
-  let pendingDir3Checks: Subject<ApplicationDir3MismatchOutput[]>[];
-  let checkDir3MismatchForAllApplications: ReturnType<typeof vi.fn>;
+  let pendingDir3Starts: Subject<Dir3AuditStatus>[];
+  let dir3AuditUpdates: Subject<Dir3AuditStatus>[];
+  let startDir3Audit: ReturnType<typeof vi.fn>;
+  let getDir3AuditStatus: ReturnType<typeof vi.fn>;
+  let watchDir3Audit: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     pendingPages = [];
     pendingPeoplePages = [];
-    pendingDir3Checks = [];
+    pendingDir3Starts = [];
+    dir3AuditUpdates = [];
     getPage = vi.fn((_params?: ApplicationPageParams): Observable<SpringPage<Application>> => {
       const request = new Subject<SpringPage<Application>>();
       pendingPages.push(request);
@@ -170,10 +177,17 @@ describe('ApplicationsList', () => {
       pendingPeoplePages.push(request);
       return request;
     });
-    checkDir3MismatchForAllApplications = vi.fn(() => {
-      const request = new Subject<ApplicationDir3MismatchOutput[]>();
-      pendingDir3Checks.push(request);
+    startDir3Audit = vi.fn(() => {
+      const request = new Subject<Dir3AuditStatus>();
+      pendingDir3Starts.push(request);
       return request;
+    });
+    getDir3AuditStatus = vi.fn(() => of(dir3AuditStatus({ state: 'IDLE' })));
+    // Like the real watch: the given status first, then whatever the polling reads.
+    watchDir3Audit = vi.fn((status: Dir3AuditStatus) => {
+      const updates = new Subject<Dir3AuditStatus>();
+      dir3AuditUpdates.push(updates);
+      return concat(of(status), updates);
     });
     activatedRoute = {
       snapshot: {
@@ -189,7 +203,7 @@ describe('ApplicationsList', () => {
         MessageService,
         {
           provide: ApplicationsService,
-          useValue: { getPage, checkDir3MismatchForAllApplications },
+          useValue: { getPage, startDir3Audit, getDir3AuditStatus, watchDir3Audit },
         },
         {
           provide: ApplicationOptionsService,
@@ -229,12 +243,11 @@ describe('ApplicationsList', () => {
     ).toBe('false');
   });
 
-  it('shows the DIR3 action before search and prevents repeated checks while loading', () => {
-    const button = fixture.nativeElement.querySelector(
-      '.section-actions__text-button',
-    ) as HTMLButtonElement;
+  it('shows the DIR3 action before search, launches the audit once and shows its progress', () => {
+    const button = dir3Button();
     const search = fixture.nativeElement.querySelector('.section-actions__search') as HTMLElement;
     const toolbar = fixture.nativeElement.querySelector('.section-actions') as HTMLElement;
+    const status = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
 
     expect(button).toBeTruthy();
     expect(button.textContent).toContain('Validar DIR3 de totes');
@@ -243,23 +256,50 @@ describe('ApplicationsList', () => {
 
     button.click();
     fixture.detectChanges();
-    expect(checkDir3MismatchForAllApplications).toHaveBeenCalledOnce();
+    expect(startDir3Audit).toHaveBeenCalledOnce();
     expect(button.disabled).toBe(true);
-    expect(button.textContent).toContain('Validar DIR3 de totes');
     expect(button.querySelector('.p-button-loading-icon')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('[role="status"]').textContent).toContain(
-      'Validant el DIR3',
-    );
+    expect(status.textContent).toContain('Validant el DIR3');
     button.click();
-    expect(checkDir3MismatchForAllApplications).toHaveBeenCalledOnce();
+    expect(startDir3Audit).toHaveBeenCalledOnce();
 
-    pendingDir3Checks[0].next([]);
-    pendingDir3Checks[0].complete();
+    const running = dir3AuditStatus({ state: 'RUNNING', totalApplications: 2 });
+    pendingDir3Starts[0].next(running);
+    pendingDir3Starts[0].complete();
+    fixture.detectChanges();
+    expect(watchDir3Audit).toHaveBeenCalledExactlyOnceWith(running);
+    expect(button.disabled).toBe(true);
+    expect(button.textContent).toContain('Validant DIR3: 0 de 2');
+
+    const announcement = status.textContent;
+    dir3AuditUpdates[0].next(
+      dir3AuditStatus({ state: 'RUNNING', totalApplications: 2, processedApplications: 1 }),
+    );
+    fixture.detectChanges();
+    expect(button.textContent).toContain('Validant DIR3: 1 de 2');
+    expect(status.textContent).toBe(announcement);
+
+    dir3AuditUpdates[0].next(
+      dir3AuditStatus({ state: 'COMPLETED', totalApplications: 2, processedApplications: 2 }),
+    );
+    dir3AuditUpdates[0].complete();
     fixture.detectChanges();
     expect(button.disabled).toBe(false);
+    expect(button.textContent).toContain('Validar DIR3 de totes');
+    expect(status.textContent?.trim()).toBe('');
   });
 
-  it('reports the current mismatch count and refreshes the same table query', () => {
+  it('shows a starting label while the audit has not loaded the applications yet', () => {
+    const button = dir3Button();
+
+    button.click();
+    pendingDir3Starts[0].next(dir3AuditStatus({ state: 'RUNNING', totalApplications: 0 }));
+    fixture.detectChanges();
+
+    expect(button.textContent).toContain('Validant DIR3…');
+  });
+
+  it('reports the mismatch count and refreshes the same table query when the audit completes', () => {
     const add = vi.spyOn(messageService, 'add');
     accessList().onPageChange({
       first: 20,
@@ -269,14 +309,16 @@ describe('ApplicationsList', () => {
     } as TableLazyLoadEvent);
     const params = getPage.mock.lastCall?.[0];
 
-    fixture.nativeElement.querySelector('.section-actions__text-button').click();
-    pendingDir3Checks[0].next([
-      { id: 1, name: 'Invai', dir3Mismatch: true },
-      { id: 2, name: 'Portal', dir3Mismatch: true },
-    ]);
-    pendingDir3Checks[0].complete();
+    runDir3Audit({
+      state: 'COMPLETED',
+      processedApplications: 2,
+      mismatchedApplications: [
+        { id: 1, name: 'Invai', dir3Mismatch: true },
+        { id: 2, name: 'Portal', dir3Mismatch: true },
+      ],
+    });
 
-    expect(add).toHaveBeenCalledWith({
+    expect(add).toHaveBeenCalledExactlyOnceWith({
       severity: 'warn',
       summary: 'Validació DIR3 completada',
       detail: 'Aplicacions amb discrepàncies DIR3: 2.',
@@ -285,31 +327,117 @@ describe('ApplicationsList', () => {
     expect(accessList().tableFirst()).toBe(20);
   });
 
-  it('reports zero mismatches and restores the button after a failed check', () => {
+  it('reports a completed audit without mismatches as a success', () => {
     const add = vi.spyOn(messageService, 'add');
-    const button = fixture.nativeElement.querySelector(
-      '.section-actions__text-button',
-    ) as HTMLButtonElement;
 
-    button.click();
-    pendingDir3Checks[0].next([]);
-    pendingDir3Checks[0].complete();
-    expect(add).toHaveBeenCalledWith({
+    runDir3Audit({ state: 'COMPLETED', processedApplications: 2 });
+
+    expect(add).toHaveBeenCalledExactlyOnceWith({
       severity: 'success',
       summary: 'Validació DIR3 completada',
       detail: 'Aplicacions amb discrepàncies DIR3: 0.',
     });
+  });
+
+  it('reports the applications whose audit failed as a warning', () => {
+    const add = vi.spyOn(messageService, 'add');
+
+    runDir3Audit({ state: 'COMPLETED', processedApplications: 2, failedApplicationIds: [5] });
+
+    expect(add).toHaveBeenCalledExactlyOnceWith({
+      severity: 'warn',
+      summary: 'Validació DIR3 completada',
+      detail:
+        "Aplicacions amb discrepàncies DIR3: 0. Aplicacions que no s'han pogut validar: 1.",
+    });
+  });
+
+  it.each([
+    [
+      'exception.dir3audit.session',
+      "La validació DIR3 s'ha aturat perquè la teva sessió ha caducat o no es pot renovar. Tanca la sessió, torna a entrar i torna-ho a provar.",
+    ],
+    [
+      'exception.dir3audit.soffid',
+      "La validació DIR3 no ha pogut començar perquè no s'han pogut consultar les dades de Soffid. Torna-ho a provar més tard.",
+    ],
+    ['exception.unknown', "No s'ha pogut completar la validació DIR3."],
+    [null, "No s'ha pogut completar la validació DIR3."],
+    ['constructor', "No s'ha pogut completar la validació DIR3."],
+  ])('explains a failed audit with reason %s', (failureReason, detail) => {
+    const add = vi.spyOn(messageService, 'add');
+
+    runDir3Audit({ state: 'FAILED', failureReason });
+
+    expect(add).toHaveBeenCalledExactlyOnceWith({ severity: 'error', summary: 'Error', detail });
+    expect(getPage).not.toHaveBeenCalled();
+    expect(dir3Button().disabled).toBe(false);
+  });
+
+  it('reloads the table when an audit fails after changing some applications', () => {
+    runDir3Audit({ state: 'FAILED', processedApplications: 1 });
+
+    expect(getPage).toHaveBeenCalledOnce();
+  });
+
+  it('leaves a structured 400 to the server error dialog when the audit cannot be launched', () => {
+    const add = vi.spyOn(messageService, 'add');
+    const button = dir3Button();
 
     button.click();
-    pendingDir3Checks[1].error(new Error('Check failed'));
+    pendingDir3Starts[0].error(
+      new HttpErrorResponse({
+        status: 400,
+        error: { error: 'Bad Request', message: 'La sessió no es pot renovar.' },
+      }),
+    );
     fixture.detectChanges();
-    expect(add).toHaveBeenLastCalledWith({
+
+    expect(add).not.toHaveBeenCalled();
+    expect(watchDir3Audit).not.toHaveBeenCalled();
+    expect(button.disabled).toBe(false);
+  });
+
+  it('reports any other launch failure and restores the button', () => {
+    const add = vi.spyOn(messageService, 'add');
+    const button = dir3Button();
+
+    button.click();
+    pendingDir3Starts[0].error(new HttpErrorResponse({ status: 500 }));
+    fixture.detectChanges();
+
+    expect(add).toHaveBeenCalledExactlyOnceWith({
       severity: 'error',
       summary: 'Error',
       detail: "No s'ha pogut completar la validació DIR3.",
     });
     expect(button.disabled).toBe(false);
-    expect(getPage).toHaveBeenCalledOnce();
+  });
+
+  it('reports a failure to read the progress and lets the audit be followed again', () => {
+    const add = vi.spyOn(messageService, 'add');
+    const button = dir3Button();
+
+    button.click();
+    pendingDir3Starts[0].next(dir3AuditStatus({ state: 'RUNNING' }));
+    pendingDir3Starts[0].complete();
+    dir3AuditUpdates[0].error(new HttpErrorResponse({ status: 500 }));
+    fixture.detectChanges();
+
+    expect(add).toHaveBeenCalledExactlyOnceWith({
+      severity: 'error',
+      summary: 'Error',
+      detail: "No s'ha pogut consultar el progrés de la validació DIR3.",
+    });
+    expect(button.disabled).toBe(false);
+    button.click();
+    expect(startDir3Audit).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not read the DIR3 audit status until the audit is launched', () => {
+    expect(getDir3AuditStatus).not.toHaveBeenCalled();
+    expect(watchDir3Audit).not.toHaveBeenCalled();
+    expect(dir3Button().disabled).toBe(false);
   });
 
   it('should expose the server page and total in the table', () => {
@@ -814,6 +942,20 @@ describe('ApplicationsList', () => {
     return component as unknown as ApplicationsListAccess;
   }
 
+  function dir3Button(): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('.section-actions__text-button');
+  }
+
+  // Launches the audit from the button and lets it end with the given status.
+  function runDir3Audit(outcome: Partial<Dir3AuditStatus>): void {
+    dir3Button().click();
+    pendingDir3Starts[0].next(dir3AuditStatus({ state: 'RUNNING' }));
+    pendingDir3Starts[0].complete();
+    dir3AuditUpdates[0].next(dir3AuditStatus(outcome));
+    dir3AuditUpdates[0].complete();
+    fixture.detectChanges();
+  }
+
   function resolvePage(index: number, content: Application[], total = content.length): void {
     pendingPages[index].next(applicationPage(content, total));
     pendingPages[index].complete();
@@ -831,6 +973,21 @@ describe('ApplicationsList', () => {
     fixture.detectChanges();
   }
 });
+
+function dir3AuditStatus(overrides: Partial<Dir3AuditStatus>): Dir3AuditStatus {
+  return {
+    state: 'IDLE',
+    startedBy: 'admin',
+    startedAt: '2026-10-08T08:00:00',
+    finishedAt: null,
+    totalApplications: 2,
+    processedApplications: 0,
+    mismatchedApplications: [],
+    failureReason: null,
+    failedApplicationIds: [],
+    ...overrides,
+  };
+}
 
 function resolvedData(content: Application[], totalElements: number): ApplicationsListResolvedData {
   return {

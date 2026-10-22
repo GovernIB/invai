@@ -32,6 +32,7 @@ import { ApplicationOptionsService } from '../../services/application-options.se
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityService,
+  ApplicationSoffidRolesAssignmentService,
   ApplicationWebContextsService,
 } from '../../services/application-security.service';
 import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
@@ -115,7 +116,13 @@ const DEVELOPMENT_OUTPUT: ApplicationDevelopmentOutput = {
 describe('ApplicationDetailState', () => {
   let state: ApplicationDetailState;
   const accessibility = { create: vi.fn(), update: vi.fn() };
-  const dataService = { create: vi.fn(), update: vi.fn(), refreshById: vi.fn() };
+  const dataService = {
+    create: vi.fn(),
+    update: vi.fn(),
+    refreshById: vi.fn(),
+    updateUrl: vi.fn(),
+    checkUrl: vi.fn(),
+  };
   const integrationService = { create: vi.fn(), update: vi.fn() };
   let updateApplication: ReturnType<typeof vi.fn>;
   let createDevelopment: ReturnType<typeof vi.fn>;
@@ -130,16 +137,23 @@ describe('ApplicationDetailState', () => {
   let hasUnverified: ReturnType<typeof vi.fn>;
   let createClassification: ReturnType<typeof vi.fn>;
   let updateClassification: ReturnType<typeof vi.fn>;
+  let assignRoles: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    assignRoles = vi.fn(() => of([]));
     hasUnverified = vi.fn(() => of(false));
     accessibility.create.mockReset().mockImplementation((input) => of(accessibilityFromInput(input)));
     accessibility.update.mockReset().mockImplementation((_id, input) => of(accessibilityFromInput(input)));
     dataService.create.mockReset().mockImplementation((input) => of(dataFromInput(12, input)));
     dataService.update.mockReset().mockImplementation((id, input) => of(dataFromInput(id, input)));
-    dataService.refreshById.mockReset().mockImplementation((id) =>
-      of({ ...DATA_RECORD, id, openData: [ENDPOINT], reuse: [] }),
-    );
+    dataService.refreshById.mockReset().mockImplementation((id) => of({ ...DATA_RECORD, id }));
+    dataService.updateUrl
+      .mockReset()
+      .mockImplementation((_id, _source, url) => of({ url, validUrl: true }));
+    // The open data URL of DATA_RECORD answers; its reuse URL does not.
+    dataService.checkUrl
+      .mockReset()
+      .mockImplementation((url: string) => of({ url, validUrl: url === DATA_RECORD.openDataUrl }));
     integrationService.create
       .mockReset()
       .mockImplementation((input) => of({ id: 14, ...input, deletedAt: null }));
@@ -241,6 +255,7 @@ describe('ApplicationDetailState', () => {
           provide: ApplicationEnsClassificationsService,
           useValue: { create: createClassification, update: updateClassification },
         },
+        { provide: ApplicationSoffidRolesAssignmentService, useValue: { assign: assignRoles } },
       ],
     });
     state = TestBed.inject(ApplicationDetailState);
@@ -578,89 +593,7 @@ describe('ApplicationDetailState', () => {
       });
     }
 
-    it('initializes the saved snapshot and the anchor ID from the loaded record', () => {
-      loadData();
-
-      expect(state.dataForm.getRawValue()).toEqual({
-        useOpenDataUrl: false,
-        openDataUrl: DATA_RECORD.openDataUrl,
-        useReuseUrl: true,
-        reuseUrl: DATA_RECORD.reuseUrl,
-        observations: '<p>Notes</p>',
-      });
-      expect(state.dataForm.pristine).toBe(true);
-      expect(state.appDataId()).toBe(5);
-      expect(state.application()?.appDataId).toBe(5);
-      expect(state.canEditData()).toBe(true);
-    });
-
-    it('discards URL edits when its flag is turned off and requires it while on', () => {
-      loadData();
-      state.startEditing('data');
-      const { useOpenDataUrl, openDataUrl } = state.dataForm.controls;
-
-      useOpenDataUrl.setValue(true);
-      openDataUrl.setValue('');
-      expect(openDataUrl.hasError('required')).toBe(true);
-
-      openDataUrl.setValue('https://custom.example/swagger.json');
-      useOpenDataUrl.setValue(false);
-
-      expect(openDataUrl.value).toBe(DATA_RECORD.openDataUrl);
-      expect(openDataUrl.valid).toBe(true);
-    });
-
-    it('stays in edit mode and selects the source with the first invalid URL', async () => {
-      loadData();
-      state.startEditing('data');
-      state.dataForm.controls.useOpenDataUrl.setValue(true);
-      state.dataForm.controls.openDataUrl.setValue('');
-      state.dataForm.markAsDirty();
-      state.dataActiveSource.set('reuse');
-
-      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
-        status: 'invalid',
-        section: 'data',
-      });
-
-      expect(state.dataActiveSource()).toBe('openData');
-      expect(state.dataForm.controls.openDataUrl.touched).toBe(true);
-      expect(state.isEditing('data')).toBe(true);
-      expect(dataService.update).not.toHaveBeenCalled();
-    });
-
-    it('updates the anchor and reloads its published endpoints after saving', async () => {
-      loadData();
-      state.startEditing('data');
-      state.dataForm.patchValue({
-        reuseUrl: '  https://reuse.example/openapi.json  ',
-        observations: '<p><br></p>',
-      });
-      state.dataForm.markAsDirty();
-
-      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
-        status: 'saved',
-        section: 'data',
-      });
-
-      expect(dataService.create).not.toHaveBeenCalled();
-      expect(dataService.update).toHaveBeenCalledWith(5, {
-        applicationId: 1,
-        observation: null,
-        openDataUrl: DATA_RECORD.openDataUrl,
-        useOpenDataUrl: false,
-        reuseUrl: 'https://reuse.example/openapi.json',
-        useReuseUrl: true,
-      } satisfies ApplicationDataInput);
-      expect(dataService.refreshById).toHaveBeenCalledWith(5);
-      expect(state.data()?.openData).toEqual([ENDPOINT]);
-      expect(state.dataStatus()).toBe('loaded');
-      expect(state.isEditing('data')).toBe(false);
-      expect(state.dataForm.pristine).toBe(true);
-      expect(state.dataForm.enabled).toBe(true);
-    });
-
-    it('creates the anchor when the application has none', async () => {
+    function loadAbsentData(): void {
       state.initialize(APPLICATION_OUTPUT);
       state.initializeData({
         applicationId: 1,
@@ -669,34 +602,249 @@ describe('ApplicationDetailState', () => {
         status: 'absent',
         errorMessage: null,
       });
+    }
+
+    it('starts every edit with no URL typed in by hand and the saved observation', () => {
+      loadData();
+
+      expect(state.dataForm.getRawValue()).toEqual({
+        manualOpenDataUrl: false,
+        openDataUrl: '',
+        manualReuseUrl: false,
+        reuseUrl: '',
+        observations: '<p>Notes</p>',
+      });
+      expect(state.dataForm.pristine).toBe(true);
+      expect(state.data()).toEqual(DATA_RECORD);
+      expect(state.appDataId()).toBe(5);
+      expect(state.application()?.appDataId).toBe(5);
+      expect(state.canEditData()).toBe(true);
+    });
+
+    it('checks the URL of each source on its own once the anchor is read', () => {
+      loadData();
+
+      expect(dataService.checkUrl.mock.calls).toEqual([[DATA_RECORD.openDataUrl], [DATA_RECORD.reuseUrl]]);
+      expect(state.dataUrls()).toEqual({
+        openData: { url: DATA_RECORD.openDataUrl, check: 'valid' },
+        reuse: { url: DATA_RECORD.reuseUrl, check: 'invalid' },
+      });
+    });
+
+    it('shows each URL while it is checked and keeps one check failing apart from the other', () => {
+      const openData = new Subject<{ url: string; validUrl: boolean }>();
+      dataService.checkUrl.mockImplementation((url: string) =>
+        url === DATA_RECORD.openDataUrl ? openData : throwError(() => new Error('Unavailable')),
+      );
+
+      loadData();
+      expect(state.dataUrls()).toEqual({
+        openData: { url: DATA_RECORD.openDataUrl, check: 'checking' },
+        reuse: { url: DATA_RECORD.reuseUrl, check: 'failed' },
+      });
+
+      openData.next({ url: DATA_RECORD.openDataUrl!, validUrl: true });
+      expect(state.dataUrls().openData).toEqual({ url: DATA_RECORD.openDataUrl, check: 'valid' });
+    });
+
+    it('ignores a check that ends after the URL of its source was saved again', async () => {
+      const reuse = new Subject<{ url: string; validUrl: boolean }>();
+      dataService.checkUrl.mockImplementation((url: string) =>
+        url === DATA_RECORD.reuseUrl ? reuse : of({ url, validUrl: true }),
+      );
+      loadData();
       state.startEditing('data');
-      state.dataForm.controls.observations.setValue('<p>Nova</p>');
+      state.dataForm.patchValue({ manualReuseUrl: true, reuseUrl: 'https://reuse.example/api' });
+      state.dataForm.markAsDirty();
+
+      await firstValueFrom(state.save('data'));
+      reuse.next({ url: DATA_RECORD.reuseUrl!, validUrl: false });
+
+      expect(state.dataUrls().reuse).toEqual({ url: 'https://reuse.example/api', check: 'valid' });
+    });
+
+    it('checks no URL while the application has no anchor', () => {
+      loadAbsentData();
+
+      expect(dataService.checkUrl).not.toHaveBeenCalled();
+      expect(state.dataUrls()).toEqual({ openData: null, reuse: null });
+    });
+
+    it('requires a URL while it is typed in by hand and discards it when unchecked', () => {
+      loadData();
+      state.startEditing('data');
+      const { manualOpenDataUrl, openDataUrl } = state.dataForm.controls;
+
+      manualOpenDataUrl.setValue(true);
+      expect(openDataUrl.hasError('required')).toBe(true);
+
+      openDataUrl.setValue('https://manual.example/api');
+      openDataUrl.markAsTouched();
+      manualOpenDataUrl.setValue(false);
+
+      expect(openDataUrl.value).toBe('');
+      expect(openDataUrl.valid).toBe(true);
+      expect(openDataUrl.touched).toBe(false);
+    });
+
+    it('stays in edit mode and sends nothing while a URL typed in by hand is missing', async () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.controls.manualReuseUrl.setValue(true);
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'invalid',
+        section: 'data',
+      });
+
+      expect(state.dataForm.controls.reuseUrl.touched).toBe(true);
+      expect(state.isEditing('data')).toBe(true);
+      expect(dataService.update).not.toHaveBeenCalled();
+      expect(dataService.updateUrl).not.toHaveBeenCalled();
+    });
+
+    it('finishes without requests when a checkbox was checked and unchecked again', async () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.controls.manualOpenDataUrl.setValue(true);
+      state.dataForm.controls.manualOpenDataUrl.markAsDirty();
+      state.dataForm.controls.manualOpenDataUrl.setValue(false);
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'unchanged',
+        section: 'data',
+      });
+
+      expect(dataService.update).not.toHaveBeenCalled();
+      expect(dataService.updateUrl).not.toHaveBeenCalled();
+      expect(state.dataForm.pristine).toBe(true);
+      expect(state.isEditing('data')).toBe(false);
+    });
+
+    it('saves only the observation and keeps the URLs already checked', async () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.controls.observations.setValue('<p><br></p>');
+      state.dataForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'saved',
+        section: 'data',
+        invalidDataUrls: [],
+      });
+
+      expect(dataService.update).toHaveBeenCalledWith(5, {
+        applicationId: 1,
+        observation: null,
+      } satisfies ApplicationDataInput);
+      expect(dataService.updateUrl).not.toHaveBeenCalled();
+      expect(dataService.refreshById).not.toHaveBeenCalled();
+      expect(state.data()).toEqual({ ...DATA_RECORD, observation: null });
+      expect(state.dataForm.controls.observations.value).toBe('');
+      expect(state.isEditing('data')).toBe(false);
+      expect(state.dataForm.pristine).toBe(true);
+      expect(state.dataForm.enabled).toBe(true);
+    });
+
+    it('saves the URLs typed in by hand after the observation and reports those that do not answer', async () => {
+      loadData();
+      dataService.updateUrl.mockImplementation((_id, source, url) =>
+        of({ url, validUrl: source === 'openData' }),
+      );
+      state.startEditing('data');
+      state.dataForm.patchValue({
+        manualOpenDataUrl: true,
+        openDataUrl: '  https://open.example/api  ',
+        manualReuseUrl: true,
+        reuseUrl: 'https://reuse.example/api',
+        observations: '<p>Noves</p>',
+      });
+      state.dataForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
+        status: 'saved',
+        section: 'data',
+        invalidDataUrls: ['reuse'],
+      });
+
+      expect(dataService.update).toHaveBeenCalledWith(5, { applicationId: 1, observation: '<p>Noves</p>' });
+      expect(dataService.updateUrl.mock.calls).toEqual([
+        [5, 'openData', 'https://open.example/api'],
+        [5, 'reuse', 'https://reuse.example/api'],
+      ]);
+      expect(dataService.update.mock.invocationCallOrder[0]).toBeLessThan(
+        dataService.updateUrl.mock.invocationCallOrder[0],
+      );
+      expect(dataService.refreshById).not.toHaveBeenCalled();
+      expect(state.data()).toEqual({
+        ...DATA_RECORD,
+        observation: '<p>Noves</p>',
+        openDataUrl: 'https://open.example/api',
+        reuseUrl: 'https://reuse.example/api',
+      });
+      expect(state.dataUrls()).toEqual({
+        openData: { url: 'https://open.example/api', check: 'valid' },
+        reuse: { url: 'https://reuse.example/api', check: 'invalid' },
+      });
+      expect(state.dataForm.getRawValue()).toEqual({
+        manualOpenDataUrl: false,
+        openDataUrl: '',
+        manualReuseUrl: false,
+        reuseUrl: '',
+        observations: '<p>Noves</p>',
+      });
+      expect(state.isEditing('data')).toBe(false);
+    });
+
+    it('sets a URL without touching an unchanged observation', async () => {
+      loadData();
+      state.startEditing('data');
+      state.dataForm.patchValue({ manualReuseUrl: true, reuseUrl: 'https://reuse.example/api' });
       state.dataForm.markAsDirty();
 
       await firstValueFrom(state.save('data'));
 
-      expect(dataService.create).toHaveBeenCalledWith(
-        expect.objectContaining({ applicationId: 1, observation: '<p>Nova</p>' }),
-      );
+      expect(dataService.update).not.toHaveBeenCalled();
+      expect(dataService.updateUrl).toHaveBeenCalledExactlyOnceWith(5, 'reuse', 'https://reuse.example/api');
+    });
+
+    it('creates the anchor first and then reads the URLs it uses by default', async () => {
+      loadAbsentData();
+      state.startEditing('data');
+      state.dataForm.patchValue({
+        manualOpenDataUrl: true,
+        openDataUrl: 'https://open.example/api',
+        observations: '<p>Nova</p>',
+      });
+      state.dataForm.markAsDirty();
+
+      await firstValueFrom(state.save('data'));
+
+      expect(dataService.create).toHaveBeenCalledWith({ applicationId: 1, observation: '<p>Nova</p>' });
+      expect(dataService.updateUrl).toHaveBeenCalledWith(12, 'openData', 'https://open.example/api');
       expect(dataService.refreshById).toHaveBeenCalledWith(12);
       expect(state.appDataId()).toBe(12);
       expect(state.application()?.appDataId).toBe(12);
+      expect(state.dataStatus()).toBe('loaded');
+      expect(state.data()).toEqual({ ...DATA_RECORD, id: 12 });
     });
 
-    it.each([400, 504])('reports the save but keeps the tab in error when the reload fails with %s', async (status) => {
-      loadData();
-      const message = 'No se ha podido consultar el catálogo de reutilización.';
+    it.each([400, 504])('reports the save but keeps the tab in error when reading a new anchor fails with %s', async (status) => {
+      loadAbsentData();
+      const message = 'No se ha encontrado ningún anclaje de datos con el identificador especificado.';
       dataService.refreshById.mockReturnValueOnce(
         throwError(
           () => new HttpErrorResponse({ status, error: { error: 'Error', message } }),
         ),
       );
       state.startEditing('data');
+      state.dataForm.controls.observations.setValue('<p>Nova</p>');
       state.dataForm.markAsDirty();
 
       await expect(firstValueFrom(state.save('data'))).resolves.toEqual({
         status: 'saved',
         section: 'data',
+        invalidDataUrls: [],
       });
 
       expect(state.dataStatus()).toBe('failed');
@@ -704,7 +852,49 @@ describe('ApplicationDetailState', () => {
       expect(state.canEditData()).toBe(false);
     });
 
-    it('keeps the draft in edit mode when the update fails', async () => {
+    it('keeps only the pending changes in edit mode when a later write fails', async () => {
+      loadData();
+      dataService.updateUrl.mockImplementation((_id, source, url) =>
+        source === 'reuse'
+          ? throwError(() => new Error('Unavailable'))
+          : of({ url, validUrl: true }),
+      );
+      state.startEditing('data');
+      state.dataForm.patchValue({
+        manualOpenDataUrl: true,
+        openDataUrl: 'https://open.example/api',
+        manualReuseUrl: true,
+        reuseUrl: 'https://reuse.example/api',
+        observations: '<p>Noves</p>',
+      });
+      for (const control of Object.values(state.dataForm.controls)) control.markAsDirty();
+
+      await expect(firstValueFrom(state.save('data'))).rejects.toThrow('Unavailable');
+
+      expect(state.data()).toEqual({
+        ...DATA_RECORD,
+        observation: '<p>Noves</p>',
+        openDataUrl: 'https://open.example/api',
+      });
+      const { observations, manualOpenDataUrl, openDataUrl, manualReuseUrl, reuseUrl } =
+        state.dataForm.controls;
+      expect([observations.pristine, manualOpenDataUrl.value, openDataUrl.value]).toEqual([
+        true,
+        false,
+        '',
+      ]);
+      expect([manualReuseUrl.value, reuseUrl.value]).toEqual([true, 'https://reuse.example/api']);
+      expect(state.dirtySections()).toContain('data');
+      expect(state.isEditing('data')).toBe(true);
+      expect(state.dataForm.enabled).toBe(true);
+
+      dataService.updateUrl.mockImplementation((_id, _source, url) => of({ url, validUrl: true }));
+      await firstValueFrom(state.save('data'));
+      expect(dataService.update).toHaveBeenCalledOnce();
+      expect(dataService.updateUrl).toHaveBeenLastCalledWith(5, 'reuse', 'https://reuse.example/api');
+    });
+
+    it('keeps the draft in edit mode when the observation update fails', async () => {
       loadData();
       dataService.update.mockReturnValueOnce(throwError(() => new Error('Unavailable')));
       state.startEditing('data');
@@ -716,18 +906,29 @@ describe('ApplicationDetailState', () => {
       expect(state.dataForm.controls.observations.value).toBe('Draft');
       expect(state.dataForm.enabled).toBe(true);
       expect(state.isEditing('data')).toBe(true);
+      expect(dataService.updateUrl).not.toHaveBeenCalled();
     });
 
     it('cancels data changes back to the saved snapshot and tracks them as dirty', () => {
       loadData();
       state.startEditing('data');
-      state.dataForm.controls.observations.setValue('Draft');
+      state.dataForm.patchValue({
+        manualOpenDataUrl: true,
+        openDataUrl: 'https://open.example/api',
+        observations: 'Draft',
+      });
       state.dataForm.markAsDirty();
 
       expect(state.dirtySections()).toContain('data');
       state.cancelEditing('data');
 
-      expect(state.dataForm.controls.observations.value).toBe('<p>Notes</p>');
+      expect(state.dataForm.getRawValue()).toEqual({
+        manualOpenDataUrl: false,
+        openDataUrl: '',
+        manualReuseUrl: false,
+        reuseUrl: '',
+        observations: '<p>Notes</p>',
+      });
       expect(state.dataForm.pristine).toBe(true);
       expect(state.isEditing('data')).toBe(false);
     });
@@ -744,6 +945,7 @@ describe('ApplicationDetailState', () => {
         expect((await firstValueFrom(state.save('data'))).status).toBe('invalid');
         expect(dataService.update).not.toHaveBeenCalled();
         expect(dataService.create).not.toHaveBeenCalled();
+        expect(dataService.updateUrl).not.toHaveBeenCalled();
       },
     );
 
@@ -804,6 +1006,7 @@ describe('ApplicationDetailState', () => {
     await expect(firstValueFrom(state.save('general'))).resolves.toEqual({
       status: 'saved',
       section: 'general',
+      assignedSoffidRoles: 0,
     });
 
     expect(updateApplication).toHaveBeenCalledTimes(1);
@@ -834,6 +1037,64 @@ describe('ApplicationDetailState', () => {
     await firstValueFrom(state.save('general'));
 
     expect(updateApplication).toHaveBeenCalledWith(1, expect.objectContaining({ description: '' }));
+  });
+
+  it('assigns the Soffid roles of a new prefix before re-reading the application', async () => {
+    initializeAll();
+    state.startEditing('general');
+    state.form.controls.prefix.setValue('INV');
+    state.form.controls.prefix.markAsDirty();
+    assignRoles.mockReturnValueOnce(of([{ id: 5 }, { id: 6 }]));
+
+    await expect(firstValueFrom(state.save('general'))).resolves.toEqual({
+      status: 'saved',
+      section: 'general',
+      assignedSoffidRoles: 2,
+    });
+
+    expect(assignRoles).toHaveBeenCalledExactlyOnceWith(1);
+    expect(updateApplication.mock.invocationCallOrder[0]).toBeLessThan(
+      assignRoles.mock.invocationCallOrder[0],
+    );
+    expect(assignRoles.mock.invocationCallOrder[0]).toBeLessThan(
+      refreshById.mock.invocationCallOrder[0],
+    );
+    expect(state.isEditing('general')).toBe(false);
+  });
+
+  it('does not assign Soffid roles when General keeps the same prefix', async () => {
+    initializeAll();
+    state.startEditing('general');
+    state.form.controls.application.setValue('Invai updated');
+    state.form.controls.application.markAsDirty();
+
+    await expect(firstValueFrom(state.save('general'))).resolves.toEqual({
+      status: 'saved',
+      section: 'general',
+      assignedSoffidRoles: undefined,
+    });
+
+    expect(assignRoles).not.toHaveBeenCalled();
+  });
+
+  it('still saves General with a new prefix when its Soffid roles cannot be assigned', async () => {
+    initializeAll();
+    state.startEditing('general');
+    state.form.controls.prefix.setValue('INV');
+    state.form.controls.prefix.markAsDirty();
+    assignRoles.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 504, statusText: 'Gateway Timeout' })),
+    );
+
+    await expect(firstValueFrom(state.save('general'))).resolves.toEqual({
+      status: 'saved',
+      section: 'general',
+      assignedSoffidRoles: null,
+    });
+
+    expect(refreshById).toHaveBeenCalledWith(1);
+    expect(state.isEditing('general')).toBe(false);
+    expect(state.form.pristine).toBe(true);
   });
 
   it('preserves authoritative completeness if the GET after a general update fails', async () => {
@@ -1055,6 +1316,40 @@ describe('ApplicationDetailState', () => {
     });
   });
 
+  it('keeps over-limit Systems and Databases observations unsaved in edit mode', async () => {
+    state.initialize(APPLICATION_OUTPUT);
+    state.initializeSystemsDatabases(SYSTEM_DATABASE_OUTPUT);
+    state.startEditing('systems-databases');
+    state.systemsDatabasesForm.controls.observations.setValue(`<p>${'a'.repeat(4000)}</p>`);
+    state.systemsDatabasesForm.markAsDirty();
+
+    await expect(firstValueFrom(state.save('systems-databases'))).resolves.toEqual({
+      status: 'invalid',
+      section: 'systems-databases',
+    });
+
+    expect(updateSystemDatabase).not.toHaveBeenCalled();
+    expect(state.systemsDatabasesForm.controls.observations.touched).toBe(true);
+    expect(state.isEditing('systems-databases')).toBe(true);
+  });
+
+  it('saves Systems and Databases observations with compacted Quill spaces', async () => {
+    state.initialize(APPLICATION_OUTPUT);
+    state.initializeSystemsDatabases(SYSTEM_DATABASE_OUTPUT);
+    state.startEditing('systems-databases');
+    state.systemsDatabasesForm.controls.observations.setValue(
+      '<p>Servidor&nbsp;de&nbsp;proves</p>',
+    );
+    state.systemsDatabasesForm.markAsDirty();
+
+    await firstValueFrom(state.save('systems-databases'));
+
+    expect(updateSystemDatabase).toHaveBeenCalledWith(70, {
+      applicationId: 1,
+      observation: '<p>Servidor de proves</p>',
+    });
+  });
+
   it('creates Systems and Databases observations when no aggregate exists', async () => {
     state.initialize({ ...APPLICATION_OUTPUT, appInformationSystemDbId: null });
     state.initializeSystemsDatabases(null);
@@ -1195,6 +1490,22 @@ describe('ApplicationDetailState', () => {
       expect(state.isEditing('integrations')).toBe(true);
       expect(state.integrationsForm.controls.observations.value).toBe('<p>Esborrany</p>');
       expect(state.integrationsForm.enabled).toBe(true);
+    });
+
+    it('keeps over-limit observations in edit mode without saving them', async () => {
+      loadIntegration();
+      state.startEditing('integrations');
+      state.integrationsForm.controls.observations.setValue(`<p>${'a'.repeat(4000)}</p>`);
+      state.integrationsForm.markAsDirty();
+
+      await expect(firstValueFrom(state.save('integrations'))).resolves.toEqual({
+        status: 'invalid',
+        section: 'integrations',
+      });
+
+      expect(integrationService.update).not.toHaveBeenCalled();
+      expect(state.integrationsForm.controls.observations.touched).toBe(true);
+      expect(state.isEditing('integrations')).toBe(true);
     });
 
     it('finishes an unchanged edit without saving', async () => {
@@ -1383,11 +1694,54 @@ describe('ApplicationDetailState', () => {
     expect(state.isEditing('general')).toBe(false);
     expect(state.form.enabled).toBe(true);
 
-    await expect(firstValueFrom(state.activate())).resolves.toBe(true);
+    await expect(firstValueFrom(state.activate())).resolves.toEqual({
+      activated: true,
+      assignedSoffidRoles: 0,
+    });
     await expect(firstValueFrom(state.withdraw())).resolves.toBe(true);
 
     expect(reactivate).toHaveBeenCalledWith(1);
     expect(deleteApplication).toHaveBeenCalledWith(1);
+  });
+
+  it('assigns the Soffid roles of a restored application before re-reading it', async () => {
+    state.initialize({ ...APPLICATION_OUTPUT, status: ApplicationStatusCode.INACTIVE });
+    assignRoles.mockReturnValueOnce(of([{ id: 5 }]));
+
+    await expect(firstValueFrom(state.activate())).resolves.toEqual({
+      activated: true,
+      assignedSoffidRoles: 1,
+    });
+
+    expect(assignRoles).toHaveBeenCalledExactlyOnceWith(1);
+    expect(reactivate.mock.invocationCallOrder[0]).toBeLessThan(
+      assignRoles.mock.invocationCallOrder[0],
+    );
+    expect(assignRoles.mock.invocationCallOrder[0]).toBeLessThan(
+      refreshById.mock.invocationCallOrder[0],
+    );
+    expect(state.application()?.status).toBe(ApplicationStatus.ACTIVE);
+  });
+
+  it('still restores the application when its Soffid roles cannot be assigned', async () => {
+    state.initialize({ ...APPLICATION_OUTPUT, status: ApplicationStatusCode.INACTIVE });
+    assignRoles.mockReturnValueOnce(
+      throwError(() => new HttpErrorResponse({ status: 504, statusText: 'Gateway Timeout' })),
+    );
+
+    await expect(firstValueFrom(state.activate())).resolves.toEqual({
+      activated: true,
+      assignedSoffidRoles: null,
+    });
+
+    expect(state.application()?.status).toBe(ApplicationStatus.ACTIVE);
+  });
+
+  it('does not reactivate nor assign Soffid roles without a loaded application', async () => {
+    await expect(firstValueFrom(state.activate())).resolves.toEqual({ activated: false });
+
+    expect(reactivate).not.toHaveBeenCalled();
+    expect(assignRoles).not.toHaveBeenCalled();
   });
 
   it('restores the saved DIR3 code and label when cancelling general edits', () => {
@@ -1436,6 +1790,7 @@ function toApplication(response: ApplicationOutput): Application {
     informationSystemDbId: response.appInformationSystemDbId,
     appDevelopmentId: response.appDevelopmentId,
     appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
+    dir3Mismatch: response.dir3Mismatch ?? false,
     incomplete: response.incomplete,
     missingResponsibleTypes: response.missingResponsibleTypes,
     missingAuthorized: response.missingAuthorized,
@@ -1469,22 +1824,12 @@ function classificationFromInput(
   };
 }
 
-const ENDPOINT = {
-  path: '/api/aplicacions',
-  method: 'GET',
-  operation: { operationId: 'list', summary: 'Llista', description: null, parameters: [] },
-};
-
 const DATA_RECORD: ApplicationDataOutput = {
   id: 5,
   application: { id: 1 },
   observation: '<p>Notes</p>',
-  openDataUrl: 'https://intranet.caib.es/0001api/externa/swagger.json',
-  useOpenDataUrl: false,
-  openData: [ENDPOINT],
-  reuseUrl: 'https://reuse.example/api-docs.json',
-  useReuseUrl: true,
-  reuse: [],
+  openDataUrl: 'https://intranet.caib.es/0001api/externa',
+  reuseUrl: 'https://intranet.caib.es/0001api/interna',
   deletedAt: null,
 };
 
@@ -1493,12 +1838,8 @@ function dataFromInput(id: number, input: ApplicationDataInput): ApplicationData
     id,
     application: { id: input.applicationId },
     observation: input.observation,
-    openDataUrl: input.openDataUrl,
-    useOpenDataUrl: input.useOpenDataUrl,
-    openData: null,
-    reuseUrl: input.reuseUrl,
-    useReuseUrl: input.useReuseUrl,
-    reuse: null,
+    openDataUrl: null,
+    reuseUrl: null,
     deletedAt: null,
   };
 }

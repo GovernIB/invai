@@ -7,6 +7,7 @@ import {
   CrudEntityDialogAriaLabels,
   CrudEntityDialogMode,
 } from '@components/crud-entity-dialog/crud-entity-dialog';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
 import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 import { MultiSelect } from 'primeng/multiselect';
@@ -76,6 +77,7 @@ export class ApplicationAuthorizedDialog {
   );
   protected readonly actionAriaLabels: CrudEntityDialogAriaLabels = this.copy.authorizedActions;
   protected readonly requiredError = $localize`Aquest camp és obligatori.`;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly companyLabelId = 'application-authorized-dialog-company-label';
   protected readonly personLabelId = 'application-authorized-dialog-person-label';
   protected readonly authorizationLabelId = 'application-authorized-dialog-authorization-label';

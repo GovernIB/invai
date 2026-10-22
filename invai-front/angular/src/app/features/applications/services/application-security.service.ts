@@ -1,5 +1,6 @@
-import { HttpParams } from '@angular/common/http';
+import { HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { SKIP_SERVER_ERROR_DIALOG } from '@core/interceptors/http-error-logging.interceptor';
 import { BaseApiService } from '@core/services/base-api.service';
 import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
@@ -18,6 +19,7 @@ import {
   ApplicationSecurityPageParams,
   ApplicationSecurityRiskInput,
   ApplicationSecurityRiskOutput,
+  ApplicationSecurityRoleInput,
   ApplicationSecurityRoleOutput,
   ApplicationSecurityRolePageParams,
   ApplicationWebContextOutput,
@@ -124,13 +126,51 @@ abstract class MutableApplicationSecurityPageService<
 }
 
 @Injectable({ providedIn: 'root' })
-export class ApplicationSecurityRolesService extends ApplicationSecurityPageService<
+export class ApplicationSecurityRolesService extends MutableApplicationSecurityPageService<
   ApplicationSecurityRoleOutput,
+  ApplicationSecurityRoleInput,
   ApplicationSecurityRolePageParams
 > {
   protected override readonly ENTITY_URI = 'application/security/role';
   protected override criteria(params: ApplicationSecurityRolePageParams): Record<string, string | undefined> {
-    return { system: params.system?.trim() || undefined };
+    return {
+      search: params.search?.trim() || undefined,
+      securityRoleName: params.securityRoleName?.trim() || undefined,
+      system: params.system?.trim() || undefined,
+    };
+  }
+
+  // Moves a NOT_VALIDATED assignment to MANUAL on behalf of the current user; it takes no reason.
+  validate(id: number): Observable<void> {
+    return this.http.put<void>(this.url('validate', id), {}).pipe(
+      tap(() => {
+        this.clearCache();
+        this.applicationsService.clearCache();
+      }),
+    );
+  }
+}
+
+// Assigns to an application the Soffid roles named `<prefix>_*`; the back-end skips the roles the
+// application already has active, so the response only holds the assignments created by the call.
+@Injectable({ providedIn: 'root' })
+export class ApplicationSoffidRolesAssignmentService extends BaseApiService {
+  protected override readonly ENTITY_URI = 'application/assign-roles';
+  private readonly applicationsService = inject(ApplicationsService);
+  private readonly rolesService = inject(ApplicationSecurityRolesService);
+
+  assign(applicationId: number): Observable<ApplicationSecurityRoleOutput[]> {
+    return this.http
+      .put<ApplicationSecurityRoleOutput[]>(this.url(applicationId), {}, {
+        // Callers report the failure themselves: the application already exists by then.
+        context: new HttpContext().set(SKIP_SERVER_ERROR_DIALOG, true),
+      })
+      .pipe(
+        tap(() => {
+          this.rolesService.clearCache();
+          this.applicationsService.clearCache();
+        }),
+      );
   }
 }
 

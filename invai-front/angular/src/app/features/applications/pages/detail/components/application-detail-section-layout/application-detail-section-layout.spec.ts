@@ -42,6 +42,8 @@ describe('ApplicationDetailSectionLayout', () => {
     ) as HTMLButtonElement;
 
     expect(section.getAttribute('aria-labelledby')).toBe('section-title');
+    // Sections sit directly below the page h1, so skipping to h3 breaks heading order.
+    expect(title.tagName).toBe('H2');
     expect(title.id).toBe('section-title');
     expect(title.textContent?.trim()).toBe('Títol de secció');
     expect(action.closest('.application-detail-section-layout__header')).not.toBeNull();

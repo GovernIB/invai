@@ -8,6 +8,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { ButtonPassThrough } from 'primeng/types/button';
@@ -20,10 +21,12 @@ import {
   SEARCH_FILTERS_TITLE,
 } from './search-filters.i18n';
 
+export type SearchFiltersHeadingLevel = 2 | 3 | 4;
+
 @Component({
   selector: 'app-search-filters',
   standalone: true,
-  imports: [Button],
+  imports: [Button, NgTemplateOutlet],
   templateUrl: './search-filters.component.html',
   styleUrl: './search-filters.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -31,6 +34,8 @@ import {
 })
 export class SearchFiltersComponent {
   title = input(SEARCH_FILTERS_TITLE);
+  // One level below the heading of the region that owns the filters.
+  headingLevel = input<SearchFiltersHeadingLevel>(2);
   hideMoreFiltersButton = input(false);
   isLoading = input<boolean>(false);
   isDisable = input<boolean>(false);

@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -7,11 +8,16 @@ import { SpringPage } from '@models/page.model';
 import { MessageService } from 'primeng/api';
 import { Select } from 'primeng/select';
 import { of, Subject, throwError } from 'rxjs';
-import { ApplicationSecurityRoleOutput, ApplicationWebContextOutput } from '../../../../applications.model';
+import {
+  ApplicationSecurityRole,
+  ApplicationSecurityRoleOutput,
+  ApplicationWebContextOutput,
+} from '../../../../applications.model';
 import { ApplicationSecurityTableAction } from './application-security-resource-table';
 
 import { createApplicationSecurityForm } from '../../../../forms/application-security-form.factory';
 import { ApplicationDevelopmentWebContextsService } from '../../../../services/application-development-web-contexts.service';
+import { SoffidRolesService } from '../../../../services/soffid-roles.service';
 import {
   ApplicationSecurityMeasuresService,
   ApplicationSecurityRisksService,
@@ -58,6 +64,10 @@ describe('ApplicationSecuritySection', () => {
         { provide: ApplicationDevelopmentWebContextsService, useValue: { clearCache: vi.fn() } },
         { provide: ApplicationSecurityRisksService, useValue: resourceServiceStub() },
         { provide: ApplicationSecurityMeasuresService, useValue: resourceServiceStub() },
+        {
+          provide: SoffidRolesService,
+          useValue: { search: vi.fn(() => of(emptyPage<ApplicationSecurityRole>())) },
+        },
       ],
     }).compileComponents();
 
@@ -114,14 +124,23 @@ describe('ApplicationSecuritySection', () => {
     const second = new Subject<SpringPage<ApplicationSecurityRoleOutput>>();
     vi.mocked(service.getPage).mockReturnValueOnce(first).mockReturnValueOnce(second);
     expect(service.getPage).not.toHaveBeenCalled();
-    component.roleFilters.patchValue({ system: ' weblogic ' });
+    component.roleFilters.patchValue({ securityRoleName: ' INV_ ', system: ' weblogic ' });
     component.applyRoleFilters();
-    expect(service.getPage).toHaveBeenLastCalledWith(expect.objectContaining({ page: 0, system: 'weblogic' }));
-    component.roleFilters.patchValue({ system: 'unapplied' });
+    expect(service.getPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 0, securityRoleName: 'INV_', system: 'weblogic', search: undefined }),
+    );
+    component.roleFilters.patchValue({ securityRoleName: 'unapplied', system: 'unapplied' });
     component.onPageChange('role', { first: 10, rows: 10, sortField: 'securityRole.system', sortOrder: -1 });
     expect(first.observed).toBe(false);
     expect(component.rolesLoading()).toBe(true);
-    expect(service.getPage).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, system: 'weblogic', sort: 'securityRole.system,desc' }));
+    expect(service.getPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        page: 1,
+        securityRoleName: 'INV_',
+        system: 'weblogic',
+        sort: 'securityRole.system,desc',
+      }),
+    );
     const row = { id: 2, securityRole: { name: 'Current', system: 'weblogic' } } as ApplicationSecurityRoleOutput;
     second.next({ content: [row], totalElements: 1, number: 0 } as SpringPage<ApplicationSecurityRoleOutput>);
     second.complete();
@@ -135,35 +154,185 @@ describe('ApplicationSecuritySection', () => {
     expect(component.rolesLoading()).toBe(false);
     expect(showMessage).toHaveBeenCalledWith(expect.objectContaining({ severity: 'error' }));
     vi.mocked(service.getPage).mockReturnValue(of(emptyPage<ApplicationSecurityRoleOutput>()));
-    component.roleFilters.patchValue({ system: '   ' });
+    component.roleFilters.patchValue({ securityRoleName: '', system: '   ' });
     component.applyRoleFilters();
-    expect(service.getPage).toHaveBeenLastCalledWith(expect.objectContaining({ page: 0, system: undefined, sort: 'securityRole.system,desc' }));
+    expect(service.getPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        page: 0,
+        securityRoleName: undefined,
+        system: undefined,
+        sort: 'securityRole.system,desc',
+      }),
+    );
     expect(component.roles().items).toEqual([]);
   });
 
-  it('renders only the system filter and submits via the form or its accessible icon button', () => {
+  it('searches roles from the toolbar and reveals the code and system filters on demand', async () => {
+    vi.useFakeTimers();
+    try {
+      const service = TestBed.inject(ApplicationSecurityRolesService);
+      vi.mocked(service.getPage).mockReturnValue(of(emptyPage<ApplicationSecurityRoleOutput>()));
+      const header = fixture.nativeElement.querySelector(
+        '.application-security__resource-header--toolbar',
+      ) as HTMLElement;
+      const search = header.querySelector('input[type="text"]') as HTMLInputElement;
+      const filtersButton = header.querySelector('button[aria-expanded]') as HTMLButtonElement;
+      expect(search.getAttribute('aria-label')).toBe("Cerca rols de l'aplicació per codi o descripció");
+      expect(search.placeholder).toBe('Cerca per codi o descripció');
+      expect(filtersButton.getAttribute('aria-label')).toBe(
+        'Mostra o oculta els filtres de rols (1 filtre aplicat)',
+      );
+      expect(filtersButton.getAttribute('aria-expanded')).toBe('false');
+      expect(header.querySelector('.p-badge')?.textContent?.trim()).toBe('1');
+      expect(header.querySelector('button[aria-label="Afegeix un rol de l\'aplicació"]')).toBeNull();
+      expect(fixture.nativeElement.querySelector('app-search-filters')).toBeNull();
+
+      search.value = ' admin ';
+      search.dispatchEvent(new Event('input'));
+      vi.advanceTimersByTime(399);
+      expect(service.getPage).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(service.getPage).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ page: 0, search: 'admin', system: 'weblogic' }),
+      );
+      search.value = 'admin';
+      search.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(search.getAttribute('aria-busy')).toBe('true');
+      vi.advanceTimersByTime(400);
+      fixture.detectChanges();
+      expect(service.getPage).toHaveBeenCalledOnce();
+      expect(search.getAttribute('aria-busy')).toBe('false');
+
+      filtersButton.click();
+      fixture.detectChanges();
+      expect(filtersButton.getAttribute('aria-expanded')).toBe('true');
+      const code = fixture.nativeElement.querySelector(
+        '#application-security-role-filter-code',
+      ) as HTMLInputElement;
+      const system = fixture.nativeElement.querySelector(
+        '#application-security-role-filter-system',
+      ) as HTMLInputElement;
+      expect(code.labels?.[0].textContent).toContain('Codi');
+      expect(system.labels?.[0].textContent).toContain('Sistema');
+      expect(system.value).toBe('weblogic');
+      code.value = 'INV_';
+      code.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(header.querySelector('.p-badge')?.textContent?.trim()).toBe('2');
+      expect(filtersButton.getAttribute('aria-label')).toBe(
+        'Mostra o oculta els filtres de rols (2 filtres aplicats)',
+      );
+      expect(service.getPage).toHaveBeenCalledOnce();
+
+      const [searchButton, resetButton] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-search-filters footer button'),
+      ) as HTMLButtonElement[];
+      searchButton.click();
+      expect(service.getPage).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 0, search: 'admin', securityRoleName: 'INV_', system: 'weblogic' }),
+      );
+      system.value = '';
+      system.dispatchEvent(new Event('input'));
+      resetButton.click();
+      fixture.detectChanges();
+      expect(code.value).toBe('');
+      expect(system.value).toBe('weblogic');
+      expect(header.querySelector('.p-badge')?.textContent?.trim()).toBe('1');
+      expect(service.getPage).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 0, search: 'admin', securityRoleName: undefined, system: 'weblogic' }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('assigns, consults, changes and removes application roles with Soffid candidates', () => {
     const service = TestBed.inject(ApplicationSecurityRolesService);
+    const soffid = TestBed.inject(SoffidRolesService);
     vi.mocked(service.getPage).mockReturnValue(of(emptyPage<ApplicationSecurityRoleOutput>()));
-    const input = fixture.nativeElement.querySelector('#application-security-role-system') as HTMLInputElement;
-    const form = input.form!;
-    const button = form.querySelector('button')!;
-    expect(input.value).toBe('weblogic');
-    expect(input.labels?.[0].textContent).toContain('Sistema');
-    expect(button.type).toBe('submit');
-    expect(button.getAttribute('aria-label')).toBe('Cerca rols per sistema');
-    expect(form.querySelectorAll('input')).toHaveLength(1);
-    expect(fixture.nativeElement.querySelector('app-search-filters')).toBeNull();
-    input.value = ' other ';
-    input.dispatchEvent(new Event('input'));
-    expect(service.getPage).not.toHaveBeenCalled();
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    expect(service.getPage).toHaveBeenCalledTimes(1);
-    expect(service.getPage).toHaveBeenLastCalledWith(expect.objectContaining({ system: 'other' }));
-    input.value = '';
-    input.dispatchEvent(new Event('input'));
-    button.click();
-    expect(service.getPage).toHaveBeenCalledTimes(2);
-    expect(service.getPage).toHaveBeenLastCalledWith(expect.objectContaining({ system: undefined }));
+    vi.mocked(service.create).mockReturnValue(of({} as ApplicationSecurityRoleOutput));
+    vi.mocked(service.update).mockReturnValue(of({} as ApplicationSecurityRoleOutput));
+    vi.mocked(service.delete).mockReturnValue(of(void 0));
+    const component = fixture.componentInstance as unknown as RoleHarness;
+
+    component.openCreateDialog('role');
+    expect(component.resourceDialogVisible()).toBe(false);
+    state.editing.set(true);
+    fixture.detectChanges();
+    const add = fixture.nativeElement.querySelector(
+      'button[aria-label="Afegeix un rol de l\'aplicació"]',
+    ) as HTMLButtonElement;
+    expect(add.disabled).toBe(false);
+    add.click();
+    fixture.detectChanges();
+    expect(component.resourceDialogVisible()).toBe(true);
+    expect(component.resourceDialogMode()).toBe('create');
+    const roleSelect = selectById('application-security-dialog-role');
+    expect(roleSelect.filter).toBe(true);
+    expect(roleSelect.ariaFilterLabel).toBe('Codi');
+    component.submitResource();
+    fixture.detectChanges();
+    expect(service.create).not.toHaveBeenCalled();
+    expect(document.querySelector('#application-security-dialog-role-error')?.textContent).toContain(
+      'Selecciona un rol de Soffid.',
+    );
+
+    vi.mocked(soffid.search).mockReturnValueOnce(
+      of(pageOf<ApplicationSecurityRole>([
+        { id: null, roleId: 501, name: 'INV_ADMIN', system: 'weblogic', description: 'Administració' },
+        { id: null, roleId: null, name: 'Without id', system: null, description: null },
+      ], 35)),
+    );
+    component.searchSoffidRoles('INV');
+    expect(soffid.search).toHaveBeenCalledExactlyOnceWith('INV');
+    expect(component.roleSearch()).toEqual({
+      options: [{ roleId: 501, name: 'INV_ADMIN', system: 'weblogic', description: 'Administració' }],
+      loading: false,
+      searched: true,
+      error: false,
+      total: 35,
+    });
+    component.resourceForm.controls['role'].setValue(component.roleSearch().options[0]);
+    component.submitResource();
+    expect(service.create).toHaveBeenCalledExactlyOnceWith({ appSecurityId: 9, securityRoleId: 501 });
+    expect(component.resourceDialogVisible()).toBe(false);
+    expect(service.getPage).toHaveBeenLastCalledWith(expect.objectContaining({ page: 0, system: 'weblogic' }));
+    expect(state.refreshCompletenessAfterMutation).toHaveBeenCalledOnce();
+
+    const row = {
+      id: 12,
+      securityRole: { id: 3, roleId: 501, name: 'INV_ADMIN', system: 'weblogic', description: 'Administració' },
+      deletedAt: null,
+    } as ApplicationSecurityRoleOutput;
+    component.onTableAction('role', { action: ApplicationSecurityTableAction.View, params: row });
+    fixture.detectChanges();
+    expect(component.resourceDialogMode()).toBe('view');
+    expect(fixture.nativeElement.querySelector('#application-security-dialog-role')).toBeNull();
+    const dialogText = document.querySelector('app-application-security-resource-dialog')?.textContent;
+    expect(dialogText).toContain('INV_ADMIN');
+    expect(dialogText).toContain('weblogic');
+    expect(dialogText).toContain('Administració');
+    component.startResourceEdit();
+    fixture.detectChanges();
+    expect(component.roleSearch().options).toEqual([
+      { roleId: 501, name: 'INV_ADMIN', system: 'weblogic', description: 'Administració' },
+    ]);
+    vi.mocked(soffid.search).mockReturnValueOnce(throwError(() => new Error('Soffid')));
+    component.searchSoffidRoles('');
+    expect(component.roleSearch()).toMatchObject({ loading: false, error: true });
+    expect(component.roleSearch().options).toHaveLength(1);
+    component.resourceForm.controls['role'].setValue({
+      roleId: 502, name: 'INV_USER', system: 'weblogic', description: null,
+    });
+    component.submitResource();
+    expect(service.update).toHaveBeenCalledExactlyOnceWith(12, { appSecurityId: 9, securityRoleId: 502 });
+
+    component.onTableAction('role', { action: ApplicationSecurityTableAction.Delete, params: row });
+    expect(component.deleteDialogVisible()).toBe(true);
+    component.confirmDelete();
+    expect(service.delete).toHaveBeenCalledExactlyOnceWith(12);
+    expect(component.deleteDialogVisible()).toBe(false);
   });
 
   it('paginates web contexts without search criteria', () => {
@@ -306,6 +475,185 @@ describe('ApplicationSecuritySection', () => {
     expect(document.activeElement).toBe(button);
   });
 
+  describe('manual role validation', () => {
+    const pendingRole = {
+      id: 12,
+      securityRole: { id: 3, roleId: 501, name: 'ADM_ROOT', system: 'weblogic', description: null },
+      deletedAt: null,
+      validationStatus: 'NOT_VALIDATED',
+      manualValidatedAt: null,
+      manualValidatedBy: null,
+    } as ApplicationSecurityRoleOutput;
+
+    function roleValidation() {
+      return fixture.componentInstance as unknown as {
+        roles: { set(value: { items: ApplicationSecurityRoleOutput[]; total: number }): void };
+        onTableAction(kind: string, event: object): void;
+        validateRole(): void;
+        closeRoleValidationDialog(): void;
+        roleValidationDialogVisible(): boolean;
+      };
+    }
+
+    function requestValidation(role: ApplicationSecurityRoleOutput = pendingRole): void {
+      roleValidation().onTableAction('role', {
+        action: ApplicationSecurityTableAction.Verify,
+        params: role,
+      });
+      fixture.detectChanges();
+    }
+
+    beforeEach(() => {
+      roleValidation().roles.set({ items: [pendingRole], total: 1 });
+      state.editing.set(true);
+      fixture.detectChanges();
+    });
+
+    it('confirms the validation, then reloads the roles, reports it and refocuses the row', async () => {
+      const service = TestBed.inject(ApplicationSecurityRolesService);
+      const add = vi.spyOn(TestBed.inject(MessageService), 'add');
+      vi.mocked(service.getPage).mockReturnValue(
+        of(pageOf([{ ...pendingRole, validationStatus: 'MANUAL' } as ApplicationSecurityRoleOutput], 1)),
+      );
+
+      requestValidation();
+      expect(roleValidation().roleValidationDialogVisible()).toBe(true);
+      const dialogText = document.querySelector('app-confirmation-dialog')?.textContent;
+      expect(dialogText).toContain('Validar manualment el rol?');
+      expect(dialogText).toContain(
+        "El rol «ADM_ROOT» no comença pel prefix de l'aplicació. Si el valides, quedarà registrat al teu nom.",
+      );
+      expect(service.validate).not.toHaveBeenCalled();
+
+      roleValidation().validateRole();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(service.validate).toHaveBeenCalledExactlyOnceWith(12);
+      expect(roleValidation().roleValidationDialogVisible()).toBe(false);
+      expect(service.getPage).toHaveBeenCalledOnce();
+      expect(add).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ severity: 'success', detail: "El rol s'ha validat manualment." }),
+      );
+      expect(document.activeElement?.getAttribute('data-role-id')).toBe('12');
+    });
+
+    it('returns focus to the row without validating when the confirmation is cancelled', async () => {
+      const service = TestBed.inject(ApplicationSecurityRolesService);
+
+      requestValidation();
+      roleValidation().closeRoleValidationDialog();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(roleValidation().roleValidationDialogVisible()).toBe(false);
+      expect(service.validate).not.toHaveBeenCalled();
+      expect(document.activeElement?.getAttribute('data-role-id')).toBe('12');
+    });
+
+    it('ignores the request outside edit mode and for roles not pending validation', () => {
+      state.editing.set(false);
+      requestValidation();
+      expect(roleValidation().roleValidationDialogVisible()).toBe(false);
+
+      state.editing.set(true);
+      requestValidation({ ...pendingRole, validationStatus: 'MANUAL' });
+      requestValidation({ ...pendingRole, deletedAt: '2026-10-01T10:00:00' });
+      expect(roleValidation().roleValidationDialogVisible()).toBe(false);
+    });
+
+    it('sends a single request while the validation is pending', () => {
+      const service = TestBed.inject(ApplicationSecurityRolesService);
+      const request = new Subject<void>();
+      vi.mocked(service.validate).mockReturnValueOnce(request);
+
+      requestValidation();
+      roleValidation().validateRole();
+      roleValidation().validateRole();
+      roleValidation().closeRoleValidationDialog();
+
+      expect(service.validate).toHaveBeenCalledOnce();
+      expect(roleValidation().roleValidationDialogVisible()).toBe(true);
+      request.next();
+      request.complete();
+      expect(roleValidation().roleValidationDialogVisible()).toBe(false);
+    });
+
+    it('leaves a structured 400 to the server error dialog and reloads the current roles', () => {
+      const service = TestBed.inject(ApplicationSecurityRolesService);
+      const add = vi.spyOn(TestBed.inject(MessageService), 'add');
+      vi.mocked(service.validate).mockReturnValueOnce(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { error: 'Bad Request', message: 'Només es pot validar un rol no validat.' },
+            }),
+        ),
+      );
+
+      requestValidation();
+      roleValidation().validateRole();
+
+      expect(add).not.toHaveBeenCalled();
+      expect(roleValidation().roleValidationDialogVisible()).toBe(false);
+      expect(service.getPage).toHaveBeenCalledOnce();
+    });
+
+    it('reports any other validation failure', () => {
+      const service = TestBed.inject(ApplicationSecurityRolesService);
+      const add = vi.spyOn(TestBed.inject(MessageService), 'add');
+      vi.mocked(service.validate).mockReturnValueOnce(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      requestValidation();
+      roleValidation().validateRole();
+
+      expect(add).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          severity: 'error',
+          detail: "No s'ha pogut validar manualment el rol. Revisa el seu estat i torna-ho a provar.",
+        }),
+      );
+    });
+
+    it('warns in the role dialog that a role outside the prefix is saved as validated manually', () => {
+      const component = fixture.componentInstance as unknown as RoleHarness;
+      const note = () =>
+        document.querySelector('#application-security-dialog-role-prefix-note') as HTMLElement;
+
+      component.openCreateDialog('role');
+      fixture.detectChanges();
+      expect(note().getAttribute('role')).toBe('status');
+      expect(note().textContent?.trim()).toBe('');
+      expect(
+        document
+          .querySelector('[aria-describedby*="application-security-dialog-role-prefix-note"]'),
+      ).not.toBeNull();
+
+      component.resourceForm.controls['role'].setValue({
+        roleId: 7, name: 'ADM_ROOT', system: 'weblogic', description: null,
+      });
+      fixture.detectChanges();
+      expect(note().textContent?.trim()).toBe(
+        'Aquest rol no comença per «INV_». Es desarà com a validat manualment al teu nom.',
+      );
+
+      for (const name of ['INV_ADMIN', 'inv_admin']) {
+        component.resourceForm.controls['role'].setValue({
+          roleId: 8, name, system: 'weblogic', description: null,
+        });
+        fixture.detectChanges();
+        expect(note().textContent?.trim()).toBe(
+          name === 'INV_ADMIN'
+            ? ''
+            : 'Aquest rol no comença per «INV_». Es desarà com a validat manualment al teu nom.',
+        );
+      }
+    });
+  });
+
   function selectById(inputId: string): Select {
     const select = fixture.debugElement
       .queryAll(By.directive(Select))
@@ -321,7 +669,27 @@ describe('ApplicationSecuritySection', () => {
 });
 
 interface ApplicationSecuritySectionHarness {
-  openCreateDialog(kind: 'web-context' | 'risk' | 'measure'): void;
+  openCreateDialog(kind: 'role' | 'web-context' | 'risk' | 'measure'): void;
+}
+
+interface RoleHarness {
+  resourceForm: FormGroup;
+  roleSearch(): {
+    options: { roleId: number; name: string; system: string | null; description: string | null }[];
+    loading: boolean;
+    searched: boolean;
+    error: boolean;
+    total: number;
+  };
+  openCreateDialog(kind: string): void;
+  onTableAction(kind: string, event: object): void;
+  searchSoffidRoles(query: string): void;
+  startResourceEdit(): void;
+  submitResource(): void;
+  confirmDelete(): void;
+  resourceDialogVisible(): boolean;
+  resourceDialogMode(): string;
+  deleteDialogVisible(): boolean;
 }
 
 function createState() {
@@ -329,6 +697,7 @@ function createState() {
   const editing = signal(false);
 
   return {
+    application: signal({ prefix: 'INV' }),
     appSecurityId: signal<number | null>(9),
     canEdit: signal(true),
     editing,
@@ -401,10 +770,14 @@ function emptyWebContextPage(): SpringPage<ApplicationWebContextOutput> {
 }
 
 function emptyPage<T>(): SpringPage<T> {
+  return pageOf<T>([], 0);
+}
+
+function pageOf<T>(content: T[], totalElements: number): SpringPage<T> {
   const sort = { empty: true, sorted: false, unsorted: true };
   return {
-    content: [], totalElements: 0, number: 0, empty: true, first: true, last: true,
-    numberOfElements: 0, size: 10, totalPages: 0, sort,
+    content, totalElements, number: 0, empty: content.length === 0, first: true, last: true,
+    numberOfElements: content.length, size: 10, totalPages: totalElements ? 1 : 0, sort,
     pageable: { offset: 0, pageNumber: 0, pageSize: 10, paged: true, unpaged: false, sort },
   };
 }

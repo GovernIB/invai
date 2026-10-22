@@ -27,6 +27,8 @@ import { createDatabaseFiltersForm } from '@features/systems/forms/database-filt
 import { ServerCatalogService } from '@features/systems/services/server-catalog.service';
 import { DatabaseVendorCatalogService } from '@features/systems/services/database-vendor-catalog.service';
 import { ActionParams, PaginatedList } from '@models/table.model';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { RichTextAria } from '@shared/directives/rich-text-aria.directive';
 import { fnCountSelectedFilters } from '@shared/utils/table.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
@@ -176,6 +178,7 @@ interface PendingRelationDelete {
     ConfirmationDialogComponent,
     Editor,
     ReactiveFormsModule,
+    RichTextAria,
   ],
   templateUrl: './application-systems-databases-section.html',
   styleUrl: './application-systems-databases-section.scss',
@@ -310,6 +313,8 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
   protected readonly documentationIcon = PrimeIcons.EXTERNAL_LINK;
   protected readonly observationsId = 'application-systems-databases-observations';
   protected readonly observationsLabelId = `${this.observationsId}-label`;
+  protected readonly observationsErrorId = `${this.observationsId}-error`;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly servers = signal<PaginatedList<ApplicationServer>>({ items: [], total: 0 });
   protected readonly isServersLoading = signal(false);
   protected readonly serverColumns = APPLICATION_SERVERS_TABLE_COLUMNS;
@@ -642,6 +647,11 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
     this.detailState.startEditing('systems-databases');
   }
 
+  protected observationsInvalid(): boolean {
+    const control = this.detailState.systemsDatabasesForm.controls.observations;
+    return control.invalid && (control.dirty || control.touched);
+  }
+
   protected cancelEditing(): void {
     this.detailState.cancelEditing('systems-databases');
   }
@@ -658,7 +668,10 @@ export class ApplicationSystemsDatabasesSection implements OnInit {
         next: (result) => {
           this.isSaving.set(false);
           if (result.status === 'invalid') {
-            this.showError(APPLICATION_SYSTEMS_DATABASES_SYSTEM_DATABASE_REQUIRED);
+            // An invalid observation already shows its own error next to the editor.
+            if (this.detailState.systemsDatabasesForm.valid) {
+              this.showError(APPLICATION_SYSTEMS_DATABASES_SYSTEM_DATABASE_REQUIRED);
+            }
             return;
           }
           if (result.status !== 'saved') return;

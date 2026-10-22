@@ -16,6 +16,7 @@ import { SvgMenuCollapsedComponent } from './assets/svg-menu-collapsed.component
 import {
   SIDEBAR_COLLAPSE_CLOSE,
   SIDEBAR_COLLAPSE_OPEN,
+  SIDEBAR_DRAWER_NAVIGATION_ARIA_LABEL,
   SIDEBAR_NAVIGATION_ARIA_LABEL,
 } from './sidebar.i18n';
 import { SidebarService } from './sidebar.service';
@@ -60,6 +61,9 @@ export class Sidebar {
   protected readonly sidebarCollapseOpenName = SIDEBAR_COLLAPSE_OPEN;
   protected readonly sidebarCollapseCloseName = SIDEBAR_COLLAPSE_CLOSE;
   protected readonly navigationAriaLabel = SIDEBAR_NAVIGATION_ARIA_LABEL;
+  protected readonly landmarkAriaLabel = computed(() =>
+    this.isDrawerVariant() ? SIDEBAR_DRAWER_NAVIGATION_ARIA_LABEL : SIDEBAR_NAVIGATION_ARIA_LABEL,
+  );
 
   protected readonly toggleCollapsed = () => this._sidebarService.toggleCollapsed();
 

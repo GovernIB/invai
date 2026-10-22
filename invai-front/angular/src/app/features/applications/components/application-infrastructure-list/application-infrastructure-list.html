@@ -18,6 +18,7 @@
 
   @if (!isFiltersCollapsed()) {
     <app-search-filters
+      [headingLevel]="4"
       [hideMoreFiltersButton]="true"
       [isLoading]="isLoading()"
       (onSearch)="onFilterSearch()"

@@ -15,10 +15,15 @@ const APPLICATION_API_PATH = '/invaiback/application';
 const ACTIVE_STATUS_ID = 1;
 const INACTIVE_STATUS_ID = 2;
 
+// List rows and the POST/PUT/reactivate responses carry only the summary fields; status and
+// description come with the detail (GET /application/{id}).
 interface ApplicationResponse {
   id: number;
   code: string | null;
   name: string | null;
+}
+
+interface ApplicationDetailResponse extends ApplicationResponse {
   description: string | null;
   status: 'ACTIVE' | 'INACTIVE' | null;
 }
@@ -111,13 +116,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       });
       expect(richTextVisible(requestBody.description)).toBe(initialDescription);
       expectPositiveReferenceIds(requestBody);
-      expect(created).toMatchObject({
-        id: expect.any(Number),
-        code,
-        name: initialName,
-        status: 'ACTIVE',
-      });
-      expect(richTextVisible(created.description)).toBe(initialDescription);
+      expect(created).toMatchObject({ id: expect.any(Number), code, name: initialName });
 
       await expect(page).toHaveURL(/\/aplicacions$/);
     });
@@ -135,9 +134,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       const response = await responsePromise;
       const body = await expectJsonResponse<ApplicationPageResponse>(response);
 
-      expect(body.content).toContainEqual(
-        expect.objectContaining({ id: createdId, code, status: 'ACTIVE' }),
-      );
+      expect(body.content).toContainEqual(expect.objectContaining({ id: createdId, code }));
       await expect(applicationRow(page, code)).toBeVisible();
     });
 
@@ -150,8 +147,9 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       await applicationRow(page, code).dblclick();
 
       const detailResponse = await detailResponsePromise;
-      const detail = await expectJsonResponse<ApplicationResponse>(detailResponse);
+      const detail = await expectJsonResponse<ApplicationDetailResponse>(detailResponse);
       expect(detail).toMatchObject({ id: createdId, code, name: initialName, status: 'ACTIVE' });
+      expect(richTextVisible(detail.description)).toBe(initialDescription);
 
       await page.getByRole('button', { name: "Editar Dades generals de l'aplicació" }).click();
       await page.locator('#detail-application-application').fill(updatedName);
@@ -180,15 +178,10 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       });
       expect(richTextVisible(requestBody.description)).toBe(updatedDescription);
       expectPositiveReferenceIds(requestBody);
-      expect(updated).toMatchObject({
-        id: createdId,
-        code,
-        name: updatedName,
-        status: 'ACTIVE',
-      });
-      expect(richTextVisible(updated.description)).toBe(updatedDescription);
+      expect(updated).toMatchObject({ id: createdId, code, name: updatedName });
       await expect(page.locator('#detail-application-application')).toHaveValue(updatedName);
-      await expect(page.locator('#detail-application-application')).toBeDisabled();
+      await expect(page.locator('#detail-application-application')).not.toBeEditable();
+      await expect(page.getByText(updatedDescription)).toBeVisible();
     });
 
     await test.step('DELETE withdraws the application', async () => {
@@ -235,9 +228,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
 
       const inactiveListResponse = await inactiveListResponsePromise;
       const inactivePage = await expectJsonResponse<ApplicationPageResponse>(inactiveListResponse);
-      expect(inactivePage.content).toContainEqual(
-        expect.objectContaining({ id: createdId, code, status: 'INACTIVE' }),
-      );
+      expect(inactivePage.content).toContainEqual(expect.objectContaining({ id: createdId, code }));
 
       const detailResponsePromise = waitForApplicationResponse(
         page,
@@ -245,7 +236,10 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
         `${APPLICATION_API_PATH}/${createdId}`,
       );
       await applicationRow(page, code).dblclick();
-      await expectJsonResponse<ApplicationResponse>(await detailResponsePromise);
+      const inactiveDetail = await expectJsonResponse<ApplicationDetailResponse>(
+        await detailResponsePromise,
+      );
+      expect(inactiveDetail.status).toBe('INACTIVE');
 
       await expect(page.getByText("L'aplicació està donada de baixa")).toBeVisible();
       await page.getByRole('button', { name: "Donar d'alta l'aplicació" }).click();
@@ -262,12 +256,7 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       isActive = true;
 
       expect(response.request().postDataJSON()).toEqual({});
-      expect(reactivated).toMatchObject({
-        id: createdId,
-        code,
-        name: updatedName,
-        status: 'ACTIVE',
-      });
+      expect(reactivated).toMatchObject({ id: createdId, code, name: updatedName });
       await expect(page.getByText("L'aplicació està donada de baixa")).toBeHidden();
       await expect(
         page.getByRole('button', { name: "Editar Dades generals de l'aplicació" }),

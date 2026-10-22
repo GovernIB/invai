@@ -11,15 +11,13 @@ describe('ApplicationDataService', () => {
   let http: HttpTestingController;
   const clearCache = vi.fn();
   const url = '/invaiback/application/data';
-  const record = { id: 5, application: { id: 7 }, openData: [], reuse: [] };
-  const payload: ApplicationDataInput = {
-    applicationId: 7,
-    observation: '<p>Notes</p>',
-    openDataUrl: 'https://intranet.caib.es/invaiapi/externa/swagger.json',
-    useOpenDataUrl: true,
-    reuseUrl: null,
-    useReuseUrl: false,
+  const record = {
+    id: 5,
+    application: { id: 7 },
+    openDataUrl: 'https://intranet.caib.es/invaiapi/externa',
+    reuseUrl: 'https://intranet.caib.es/invaiapi/interna',
   };
+  const payload: ApplicationDataInput = { applicationId: 7, observation: '<p>Notes</p>' };
 
   beforeEach(() => {
     clearCache.mockClear();
@@ -109,10 +107,129 @@ describe('ApplicationDataService', () => {
       http.expectNone(`${url}/5`);
 
       send().subscribe();
-      http.expectOne(requestUrl).flush({ ...record, openData: null, reuse: null });
+      http.expectOne(requestUrl).flush({ ...record, openDataUrl: null, reuseUrl: null });
       expect(clearCache).toHaveBeenCalledOnce();
       service.getById(5).subscribe();
       http.expectOne(`${url}/5`).flush(record);
     },
   );
+
+  it.each([
+    ['openData', 'open-data'],
+    ['reuse', 'reuse'],
+  ] as const)('sets the %s URL on its own and invalidates the caches after it', (source, path) => {
+    service.getById(5).subscribe();
+    http.expectOne(`${url}/5`).flush(record);
+    const result = vi.fn();
+    const answer = { url: 'https://manual.example/api', validUrl: false };
+
+    service.updateUrl(5, source, 'https://manual.example/api').subscribe(result);
+    const request = http.expectOne(`${url}/5/${path}`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual({ url: 'https://manual.example/api' });
+    expect(request.request.context.get(SKIP_SERVER_ERROR_DIALOG)).toBe(false);
+    request.flush(answer);
+
+    expect(result).toHaveBeenCalledWith(answer);
+    expect(clearCache).toHaveBeenCalledOnce();
+    service.getById(5).subscribe();
+    http.expectOne(`${url}/5`).flush(record);
+  });
+
+  describe('URL checks', () => {
+    const checkUrl = `${url}/check-url`;
+    const checks = () => http.match((request) => request.url === checkUrl);
+
+    it('checks a URL once, encoding it and opting out of the global error dialog', () => {
+      const checked = 'https://intranet.caib.es/app/api?q=a+b&v=2';
+      const first = vi.fn();
+      const second = vi.fn();
+
+      service.checkUrl(checked).subscribe(first);
+      service.checkUrl(checked).subscribe(second);
+
+      const request = http.expectOne((pending) => pending.url === checkUrl);
+      expect(request.request.method).toBe('GET');
+      expect(request.request.params.get('url')).toBe(checked);
+      // A `+` left as is would reach the back-end as a space.
+      expect(request.request.urlWithParams).toBe(
+        `${checkUrl}?url=https%3A%2F%2Fintranet.caib.es%2Fapp%2Fapi%3Fq%3Da%2Bb%26v%3D2`,
+      );
+      expect(request.request.context.get(SKIP_SERVER_ERROR_DIALOG)).toBe(true);
+      request.flush({ url: checked, validUrl: true });
+
+      // Opening the tab again gives the answer at once.
+      const again = vi.fn();
+      service.checkUrl(checked).subscribe(again);
+      expect(checks()).toHaveLength(0);
+      expect([first, second, again].map((result) => result.mock.calls)).toEqual(
+        Array.from({ length: 3 }, () => [[{ url: checked, validUrl: true }]]),
+      );
+      expect(clearCache).not.toHaveBeenCalled();
+    });
+
+    it('checks each URL apart', () => {
+      service.checkUrl('https://a.example').subscribe();
+      service.checkUrl('https://b.example').subscribe();
+
+      expect(checks().map((request) => request.request.params.get('url'))).toEqual([
+        'https://a.example',
+        'https://b.example',
+      ]);
+    });
+
+    it('checks a URL again once its answer is five minutes old', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(0);
+      try {
+        service.checkUrl('https://a.example').subscribe();
+        http.expectOne((request) => request.url === checkUrl).flush({ url: 'https://a.example', validUrl: true });
+
+        vi.advanceTimersByTime(299999);
+        service.checkUrl('https://a.example').subscribe();
+        expect(checks()).toHaveLength(0);
+
+        vi.advanceTimersByTime(1);
+        service.checkUrl('https://a.example').subscribe();
+        http.expectOne((request) => request.url === checkUrl).flush({ url: 'https://a.example', validUrl: false });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('queries a URL again after a check that could not be carried out', () => {
+      service.checkUrl('https://a.example').subscribe({ error: () => undefined });
+      http
+        .expectOne((request) => request.url === checkUrl)
+        .flush({}, { status: 400, statusText: 'Bad Request' });
+
+      service.checkUrl('https://a.example').subscribe();
+      http.expectOne((request) => request.url === checkUrl).flush({ url: 'https://a.example', validUrl: true });
+    });
+
+    it('takes the answer of saving the URL of a source as its check', () => {
+      service.updateUrl(5, 'reuse', 'https://manual.example/api').subscribe();
+      http.expectOne(`${url}/5/reuse`).flush({ url: 'https://manual.example/api', validUrl: false });
+
+      const result = vi.fn();
+      service.checkUrl('https://manual.example/api').subscribe(result);
+
+      expect(checks()).toHaveLength(0);
+      expect(result).toHaveBeenCalledWith({ url: 'https://manual.example/api', validUrl: false });
+    });
+  });
+
+  it('keeps the caches when setting a URL fails', () => {
+    service.getById(5).subscribe();
+    http.expectOne(`${url}/5`).flush(record);
+
+    service.updateUrl(5, 'reuse', null).subscribe({ error: () => undefined });
+    const request = http.expectOne(`${url}/5/reuse`);
+    expect(request.request.body).toEqual({ url: null });
+    request.flush({}, { status: 504, statusText: 'Gateway Timeout' });
+
+    expect(clearCache).not.toHaveBeenCalled();
+    service.getById(5).subscribe();
+    http.expectNone(`${url}/5`);
+  });
 });

@@ -60,6 +60,7 @@ export class CrudEntityDialog implements OnDestroy {
   submitDisabled = input(false);
   submitLabel = input<string | null>(null);
   submitIcon = input<string | null>(null);
+  cancelLabel = input<string | null>(null);
   isDeleting = input(false);
   canRestore = input(false);
   canEdit = input(true);

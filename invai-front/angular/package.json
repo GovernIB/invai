@@ -1,6 +1,6 @@
 {
   "name": "invai-front",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config=proxy.dev.conf.json",
@@ -57,6 +57,7 @@
     "@angular/cli": "^21.1.5",
     "@angular/compiler-cli": "^21.1.0",
     "@angular/localize": "^21.1.5",
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^24.13.3",

@@ -16,7 +16,13 @@ import {
 describe('application data resolver', () => {
   const data = { getById: vi.fn(), refreshById: vi.fn() };
   const applications = { getById: vi.fn(), refreshById: vi.fn() };
-  const record = { id: 5, application: { id: 7 }, deletedAt: null, openData: [], reuse: [] };
+  const record = {
+    id: 5,
+    application: { id: 7 },
+    deletedAt: null,
+    openData: { url: 'https://intranet.caib.es/appapi/externa', validUrl: true },
+    reuse: { url: 'https://intranet.caib.es/appapi/interna', validUrl: false },
+  };
 
   beforeEach(() => {
     data.getById.mockReset().mockReturnValue(of(record));
@@ -62,8 +68,8 @@ describe('application data resolver', () => {
     expect((await resolve()).status).toBe('unavailable');
   });
 
-  it('keeps the localized backend message when a published document is unavailable', async () => {
-    const message = "No s'ha pogut consultar el catàleg d'API REST externa.";
+  it('keeps the localized backend message when the anchor cannot be read', async () => {
+    const message = 'No se ha encontrado ningún anclaje de datos con el identificador especificado.';
     data.getById.mockReturnValue(
       throwError(
         () =>
@@ -80,7 +86,7 @@ describe('application data resolver', () => {
     });
   });
 
-  it('keeps the localized timeout message when both published documents time out', async () => {
+  it('keeps the localized timeout message when the read times out', async () => {
     const message = "L'aplicació ha trigat massa a respondre. Torneu-ho a provar d'aquí uns instants.";
     data.getById.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 504, error: { error: 'Error', message } })),

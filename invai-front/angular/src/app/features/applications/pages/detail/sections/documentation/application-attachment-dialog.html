@@ -1,0 +1,212 @@
+<app-crud-entity-dialog
+  width="44rem"
+  [(visible)]="visible"
+  [ariaLabels]="texts.ariaLabels"
+  [canEdit]="canEdit()"
+  [cancelLabel]="texts.actions.cancel"
+  [submitLabel]="texts.actions.save"
+  [submitIcon]="icons.SAVE"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="onSubmit()"
+>
+    <p id="application-attachment-instructions" class="application-attachment-instructions">
+      {{ texts.requiredHint }}
+    </p>
+    <form
+      class="application-attachment-form"
+      novalidate
+      aria-describedby="application-attachment-instructions"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+    >
+      <div>
+        <label for="application-attachment-title">{{ texts.labels.title }}</label>
+        <input
+          id="application-attachment-title"
+          class="w-full"
+          formControlName="title"
+          pInputText
+          required
+          type="text"
+          [attr.aria-describedby]="describedBy(form().controls.title, 'application-attachment-title')"
+          [attr.aria-invalid]="isInvalid(form().controls.title)"
+          [attr.maxlength]="titleMaxLength"
+        />
+        @if (isInvalid(form().controls.title)) {
+          <p id="application-attachment-title-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ errorOf(form().controls.title, titleMaxLength) }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label id="application-attachment-section-label" for="application-attachment-section">
+          {{ texts.labels.section }}
+        </label>
+        <p-select
+          appendTo="body"
+          ariaLabelledBy="application-attachment-section-label"
+          formControlName="sectionId"
+          inputId="application-attachment-section"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          [invalid]="isInvalid(form().controls.sectionId)"
+          [loading]="isCatalogsLoading()"
+          [options]="sectionOptions()"
+          [pt]="selectPassThrough(form().controls.sectionId, 'application-attachment-section')"
+        />
+        @if (isInvalid(form().controls.sectionId)) {
+          <p id="application-attachment-section-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ common.required }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label id="application-attachment-category-label" for="application-attachment-category">
+          {{ texts.labels.category }}
+        </label>
+        <p-select
+          appendTo="body"
+          ariaLabelledBy="application-attachment-category-label"
+          formControlName="categoryId"
+          inputId="application-attachment-category"
+          optionLabel="label"
+          optionValue="id"
+          styleClass="w-full"
+          [ariaFilterLabel]="texts.labels.category"
+          [filter]="true"
+          [invalid]="isInvalid(form().controls.categoryId)"
+          [loading]="isCategoriesLoading()"
+          [options]="categoryOptions()"
+          [pt]="selectPassThrough(form().controls.categoryId, 'application-attachment-category')"
+          (onChange)="onCategoryChange()"
+        />
+        @if (isInvalid(form().controls.categoryId)) {
+          <p id="application-attachment-category-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ common.required }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label id="application-attachment-subcategory-label" for="application-attachment-subcategory">
+          {{ texts.labels.subcategory }}
+        </label>
+        <p-select
+          appendTo="body"
+          ariaLabelledBy="application-attachment-subcategory-label"
+          formControlName="subcategoryId"
+          inputId="application-attachment-subcategory"
+          optionLabel="label"
+          optionValue="id"
+          styleClass="w-full"
+          [options]="subcategoryOptions()"
+          [showClear]="true"
+        />
+      </div>
+
+      <div>
+        <label for="application-attachment-version">{{ texts.labels.version }}</label>
+        <input
+          id="application-attachment-version"
+          class="w-full"
+          formControlName="versionLabel"
+          pInputText
+          required
+          type="text"
+          [attr.aria-describedby]="describedBy(form().controls.versionLabel, 'application-attachment-version')"
+          [attr.aria-invalid]="isInvalid(form().controls.versionLabel)"
+          [attr.maxlength]="versionMaxLength"
+        />
+        @if (isInvalid(form().controls.versionLabel)) {
+          <p id="application-attachment-version-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ errorOf(form().controls.versionLabel, versionMaxLength) }}
+          </p>
+        }
+      </div>
+
+      <div class="application-attachment-upload-field">
+        <input
+          #fileInput
+          id="application-attachment-file"
+          type="file"
+          hidden
+          [attr.accept]="accept()"
+          [attr.aria-label]="texts.labels.file"
+          [disabled]="isAttachDisabled()"
+          (change)="onFileChange($event)"
+        />
+        <div
+          class="application-attachment-upload"
+          [class.application-attachment-upload--dragging]="isDraggingFile()"
+          [class.application-attachment-upload--invalid]="hasFileError()"
+          [attr.aria-busy]="isBusy()"
+          (dragover)="onFileDragOver($event)"
+          (dragleave)="onFileDragLeave($event)"
+          (drop)="onFileDrop($event)"
+        >
+          <div class="application-attachment-upload__toolbar">
+            <p-button
+              #attachButton
+              type="button"
+              [ariaLabel]="texts.actions.attach"
+              [disabled]="isAttachDisabled()"
+              [icon]="icons.PAPERCLIP"
+              [label]="texts.actions.attach"
+              [style]="{ maxWidth: '100%', whiteSpace: 'normal' }"
+              [pt]="{
+                icon: { 'aria-hidden': true },
+                label: { style: { overflowWrap: 'anywhere', minWidth: '0' } },
+                root: {
+                  'aria-describedby': fileDescribedBy(),
+                  'aria-invalid': hasFileError()
+                }
+              }"
+              (onClick)="fileInput.click()"
+            />
+          </div>
+          <div class="application-attachment-upload__content">
+            <i aria-hidden="true" [class]="form().controls.file.value ? icons.FILE : icons.CLOUD_UPLOAD"></i>
+            <p id="application-attachment-file-hint" role="status">
+              @if (form().controls.file.value; as file) {
+                {{ file.name }}
+                <span class="application-attachment-upload__type">
+                  {{ texts.labels.documentType }}: {{ documentType() }}
+                </span>
+              } @else {
+                {{ fileHint() }}
+              }
+            </p>
+            @if (form().controls.file.value) {
+              <p-button
+                type="button"
+                severity="secondary"
+                [ariaLabel]="texts.actions.removeFile"
+                [disabled]="isBusy()"
+                [icon]="icons.TIMES"
+                [text]="true"
+                (onClick)="removeFile()"
+              />
+            }
+          </div>
+        </div>
+        <p id="application-attachment-file-limits" class="mb-0 mt-1 text-sm">{{ texts.fileLimitsHint }}</p>
+        <!-- A new element per refusal, so that refusing the same file twice is announced twice. -->
+        @for (alert of fileAlerts(); track alert.key) {
+          <p id="application-attachment-file-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ alert.message }}
+          </p>
+        }
+      </div>
+    </form>
+</app-crud-entity-dialog>

@@ -349,9 +349,24 @@
         <p-editor
           id="application-development-observation"
           [formControl]="detailState.developmentForm.controls.observation"
-          [attr.aria-labelledby]="'application-development-observation-label'"
           [style]="{ height: '10rem' }"
+          [invalid]="isInvalid(detailState.developmentForm.controls.observation)"
+          [appRichTextAria]="
+            isInvalid(detailState.developmentForm.controls.observation)
+              ? 'application-development-observation-error'
+              : null
+          "
+          appRichTextLabelledBy="application-development-observation-label"
         />
+        @if (isInvalid(detailState.developmentForm.controls.observation)) {
+          <p
+            id="application-development-observation-error"
+            class="application-development__error"
+            role="alert"
+          >
+            {{ textMaxBytesError }}
+          </p>
+        }
       } @else {
         <div
           class="invai-form-static-value invai-form-static-value--rich"

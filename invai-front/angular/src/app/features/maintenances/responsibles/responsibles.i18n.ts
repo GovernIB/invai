@@ -209,8 +209,9 @@ export const ROLE_TRANSFER_COPY = {
   confirmDiscard: $localize`Descarta el lot`,
   transferConfirmMessage: (count: number, source: string, destination: string) =>
     $localize`Vols transferir ${count} assignacions de «${source}» a «${destination}»?`,
+  // Revoking deactivates each assignment and clears its observations.
   revokeConfirmMessage: (count: number, source: string) =>
-    $localize`Vols revocar ${count} assignacions de «${source}»?`,
+    $localize`:@@roleTransferRevokeConfirmMessage:Vols revocar ${count} assignacions de «${source}»? Es donaran de baixa i se n'esborraran les observacions.`,
   discardConfirmMessage: (source: string) =>
     $localize`Si canvies a «${source}», es descartaran els rols que has preparat.`,
   discardClearMessage: $localize`Si elimines la persona d'origen, es descartaran els rols que has preparat.`,

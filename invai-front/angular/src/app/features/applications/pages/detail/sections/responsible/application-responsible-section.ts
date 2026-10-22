@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   Injector,
   afterNextRender,
   viewChild,
@@ -24,12 +25,15 @@ import { isStructuredBadRequest } from '@core/models/api-error.model';
 import { CrudEntityDialogMode } from '@components/crud-entity-dialog/crud-entity-dialog';
 import { ActionParams, KeyLabel, PaginatedList } from '@models/table.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
 import { localizedName } from '@shared/utils/localized-name.utils';
+import { MAX_BYTES_ERROR } from '@shared/utils/text-length.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { ButtonPassThrough } from 'primeng/types/button';
+import { Dialog } from 'primeng/dialog';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { Textarea } from 'primeng/textarea';
+import { Tooltip } from 'primeng/tooltip';
 import { catchError, EMPTY, finalize, map, Observable, of, Subject, switchMap } from 'rxjs';
 
 import {
@@ -59,6 +63,7 @@ import {
 } from '../../../../forms/application-responsible-form.factory';
 import { ApplicationAuthorizedService } from '../../../../services/application-authorized.service';
 import { ApplicationResponsiblesService } from '../../../../services/application-responsibles.service';
+import { ApplicationsService } from '../../../../services/applications.service';
 import {
   ResponsibleAuthorization,
   ResponsibleCompanyOption,
@@ -128,8 +133,10 @@ type PendingDeactivate =
     ApplicationResponsibleDialog,
     Button,
     ConfirmationDialogComponent,
+    Dialog,
     ReactiveFormsModule,
     Textarea,
+    Tooltip,
   ],
   templateUrl: './application-responsible-section.html',
   styleUrl: './application-responsible-section.scss',
@@ -138,6 +145,9 @@ type PendingDeactivate =
 export class ApplicationResponsibleSection implements OnInit {
   private readonly injector = inject(Injector);
   private readonly responsibleTable = viewChild(ApplicationResponsiblesTable);
+  private readonly responsibleAddButton = viewChild('responsibleAddButton', {
+    read: ElementRef<HTMLElement>,
+  });
   private focusResponsibleTypeAfterRefresh: number | null = null;
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -226,6 +236,7 @@ export class ApplicationResponsibleSection implements OnInit {
   protected readonly isSaving = signal(false);
 
   protected readonly responsibleDialogVisible = signal(false);
+  protected readonly responsibilitiesCompleteDialogVisible = signal(false);
   protected readonly consultedAssignment = signal<ApplicationAssignmentDetail | null>(null);
   protected readonly responsibleDialogSaving = signal(false);
   protected readonly responsibleDialogMode = signal<AssignmentDialogMode>('create');
@@ -274,12 +285,6 @@ export class ApplicationResponsibleSection implements OnInit {
   protected readonly responsibilitiesComplete = computed(
     () => this.responsibleTypes().length > 0 && this.vacantResponsibleTypes().length === 0,
   );
-  protected readonly responsibleAddButtonPassThrough = computed<ButtonPassThrough>(() => ({
-    root: {
-      'aria-disabled': this.responsibilitiesComplete() ? 'true' : undefined,
-      class: this.responsibilitiesComplete() ? 'application-responsible__add-complete' : undefined,
-    },
-  }));
   protected readonly responsibleTypeOptions = computed<ApplicationResponsibleSelectOption[]>(() => {
     const selectedTypeId = this.selectedResponsible()?.responsibleType.id;
     return this.responsibleTypes()
@@ -355,6 +360,8 @@ export class ApplicationResponsibleSection implements OnInit {
 
   protected readonly dir3Copy = DIR3_COPY;
   private readonly dir3Service = inject(ApplicationDir3ValidationService);
+  private readonly applicationsService = inject(ApplicationsService);
+  protected readonly applicationDir3Checking = signal(false);
   private readonly assignmentChanges = inject(ResponsibleDataChangesService);
   protected readonly responsibleDir3 = new ApplicationDir3CheckState((email, unit) =>
     this.peopleService.checkDir3(email, unit),
@@ -516,11 +523,7 @@ export class ApplicationResponsibleSection implements OnInit {
 
   protected openResponsibleDialog(): void {
     if (this.responsibilitiesComplete() && this.canAttemptResponsibleAdd()) {
-      this.messageService.add({
-        severity: 'info',
-        summary: this.copy.allResponsibilitiesAssignedTitle,
-        detail: this.copy.allResponsibilitiesAssignedDetail,
-      });
+      this.responsibilitiesCompleteDialogVisible.set(true);
       return;
     }
     if (!this.canAttemptResponsibleAdd() || this.assignableVacantResponsibleTypes().length === 0) {
@@ -530,6 +533,16 @@ export class ApplicationResponsibleSection implements OnInit {
     const fixedCaibType =
       vacantTypes.length === 1 && vacantTypes[0].requiresPersonalCaib ? vacantTypes[0] : null;
     this.prepareResponsibleDialog(null, 'create', fixedCaibType);
+  }
+
+  protected closeResponsibilitiesCompleteDialog(): void {
+    this.responsibilitiesCompleteDialogVisible.set(false);
+  }
+
+  protected onResponsibilitiesCompleteDialogHidden(): void {
+    this.responsibilitiesCompleteDialogVisible.set(false);
+    // PrimeNG does not restore focus, so return it to the add trigger once the dialog is gone.
+    this.responsibleAddButton()?.nativeElement.querySelector('button')?.focus();
   }
 
   protected closeResponsibleDialog(): void {
@@ -787,6 +800,17 @@ export class ApplicationResponsibleSection implements OnInit {
     this.deactivateDialogVisible.set(false);
     this.pendingDeactivate.set(null);
     this.deactivateForm.reset();
+  }
+
+  protected deactivateObservationInvalid(): boolean {
+    const control = this.deactivateForm.controls.observation;
+    return control.invalid && (control.dirty || control.touched);
+  }
+
+  protected deactivateObservationError(): string {
+    return this.deactivateForm.controls.observation.hasError(MAX_BYTES_ERROR)
+      ? TEXT_FIELD_MAX_BYTES_ERROR
+      : this.copy.deactivateObservationRequired;
   }
 
   protected confirmDeactivate(): void {
@@ -1383,6 +1407,43 @@ export class ApplicationResponsibleSection implements OnInit {
           this.refreshResponsibles();
           this.refreshAuthorized();
         },
+      });
+  }
+
+  protected checkApplicationDir3(): void {
+    if (this.applicationDir3Checking()) return;
+    const application = this.detailState.application();
+    const id = Number(application?.id);
+    if (!application || !Number.isInteger(id) || id <= 0) return;
+    if (!application.admUnitCode?.trim()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: this.dir3Copy.applicationCheck,
+        detail: this.dir3Copy.applicationCheckNoUnit,
+      });
+      return;
+    }
+
+    this.applicationDir3Checking.set(true);
+    this.applicationsService
+      .checkDir3Mismatch(id)
+      .pipe(
+        finalize(() => this.applicationDir3Checking.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: ({ dir3Mismatch }) => {
+          this.refreshResponsibles();
+          this.refreshAuthorized();
+          this.messageService.add({
+            severity: dir3Mismatch ? 'warn' : 'success',
+            summary: this.dir3Copy.applicationCheckDone,
+            detail: dir3Mismatch
+              ? this.dir3Copy.applicationCheckMismatch
+              : this.dir3Copy.applicationCheckOk,
+          });
+        },
+        error: (error) => this.handleError(error, this.dir3Copy.applicationCheckError),
       });
   }
 

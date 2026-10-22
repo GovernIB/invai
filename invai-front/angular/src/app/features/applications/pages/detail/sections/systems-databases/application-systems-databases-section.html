@@ -91,7 +91,15 @@
             [id]="observationsId"
             [formControl]="detailState.systemsDatabasesForm.controls.observations"
             [style]="{ height: '10rem' }"
+            [invalid]="observationsInvalid()"
+            [appRichTextAria]="observationsInvalid() ? observationsErrorId : null"
+            [appRichTextLabelledBy]="observationsLabelId"
           />
+          @if (observationsInvalid()) {
+            <p [id]="observationsErrorId" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+              {{ textMaxBytesError }}
+            </p>
+          }
         } @else {
           <div
             class="invai-form-static-value invai-form-static-value--rich"

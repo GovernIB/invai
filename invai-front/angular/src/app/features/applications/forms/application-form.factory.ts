@@ -1,6 +1,8 @@
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CommissionType } from '@features/commissions/commissions.model';
 import { ResponsiblePersonOption } from '@features/maintenances/responsibles/responsibles.model';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { richTextMaxBytesValidator } from '@shared/utils/text-length.utils';
 
 import { ApplicationStatus } from '../applications.model';
 
@@ -121,7 +123,7 @@ export function createApplicationSystemsDatabasesForm(
   formBuilder: FormBuilder,
 ): ApplicationSystemsDatabasesFormGroup {
   return formBuilder.nonNullable.group({
-    observations: [''],
+    observations: ['', richTextMaxBytesValidator(TEXT_FIELD_MAX_BYTES)],
   });
 }
 
@@ -129,7 +131,7 @@ export function createApplicationIntegrationsForm(
   formBuilder: FormBuilder,
 ): ApplicationIntegrationsFormGroup {
   return formBuilder.nonNullable.group({
-    observations: [''],
+    observations: ['', richTextMaxBytesValidator(TEXT_FIELD_MAX_BYTES)],
   });
 }
 
@@ -154,6 +156,9 @@ function createCommonControls(formBuilder: FormBuilder): ApplicationCommonFormCo
       null,
       Validators.required,
     ),
-    description: formBuilder.nonNullable.control(''),
+    description: formBuilder.nonNullable.control(
+      '',
+      richTextMaxBytesValidator(TEXT_FIELD_MAX_BYTES),
+    ),
   };
 }

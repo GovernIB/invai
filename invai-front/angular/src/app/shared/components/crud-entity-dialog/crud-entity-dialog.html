@@ -96,7 +96,7 @@
             [ariaLabel]="ariaLabels().cancel"
             [disabled]="isBusy()"
             [icon]="icons.TIMES"
-            [label]="labels.cancel"
+            [label]="cancelLabel() ?? labels.cancel"
             [outlined]="true"
             (onClick)="onCancel()"
           />

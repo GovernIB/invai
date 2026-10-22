@@ -1,0 +1,85 @@
+<div class="invai-table-loading-container" [attr.aria-busy]="isLoading()">
+  @if (isLoading()) {
+    <div class="invai-table-loading-shield" aria-hidden="true">
+      <span class="invai-table-refresh-indicator"></span>
+    </div>
+  }
+  <p-table
+    dataKey="id"
+    styleClass="invai-scrollable-table"
+    [columns]="columns()"
+    [pt]="tablePassThrough()"
+    [rowHover]="true"
+    [scrollable]="true"
+    [stripedRows]="true"
+    [value]="value()"
+  >
+    <ng-template let-columns pTemplate="header">
+      <tr>
+        @for (column of columns; track column.key) {
+          <th [pSortableColumn]="column.sortBy" [style.min-width]="column.minWidth">
+            <div class="invai-table-header-content">
+              <span class="invai-table-header-label">{{ column.label }}</span>
+              <p-sortIcon [field]="column.sortBy" />
+            </div>
+          </th>
+        }
+        <th class="invai-table-actions-column">
+          <span class="sr-only">{{ rowTexts.actionsHeader }}</span>
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template let-columns="columns" let-subcategory pTemplate="body">
+      <tr
+        class="invai-table-consultable-row"
+        tabindex="0"
+        (dblclick)="onRowActivate($event, Action.View, subcategory)"
+        (keydown.enter)="onRowActivate($event, Action.View, subcategory)"
+      >
+        @for (column of columns; track column.key) {
+          <td [style.min-width]="column.minWidth">
+            <span
+              class="invai-table-cell-content"
+              [class.invai-table-cell-content--wrap]="column.wrap"
+              [style.max-width]="column.wrap ? (column.maxWidth ?? '24rem') : null"
+            >
+              {{ cellText(subcategory, column.key) }}
+            </span>
+          </td>
+        }
+        <td class="invai-table-actions-column">
+          <p-button
+            severity="secondary"
+            [ariaLabel]="actionsLabel(subcategory)"
+            [icon]="icons.ELLIPSIS_H"
+            [pt]="{
+              root: {
+                'aria-haspopup': 'menu',
+                'aria-expanded': menuVisible() && selectedRow()?.id === subcategory.id,
+                'aria-controls': rowMenu.id
+              }
+            }"
+            [text]="true"
+            (onClick)="openActionsMenu($event, subcategory, rowMenu)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="columns().length + 1">{{ texts.empty }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+<p-menu
+  #rowMenu
+  appendTo="body"
+  styleClass="maintenance-row-menu"
+  [model]="rowActions()"
+  [popup]="true"
+  (onHide)="menuVisible.set(false)"
+  (onShow)="menuVisible.set(true)"
+/>

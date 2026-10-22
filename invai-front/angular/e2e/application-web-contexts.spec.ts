@@ -171,13 +171,15 @@ test('manages web contexts in Development and only consults or verifies them in 
   await reason.fill('Context comprovat');
   await dialog.getByRole('button', { name: 'Verificar', exact: true }).click();
   await expect(dialog).toHaveCount(0);
-  await expect(row.getByText('Verificat')).toBeVisible();
+  // Security shows a verified context as an icon whose name carries the verification reason.
+  const verifiedIcon = row.getByRole('img', { name: 'Verificat: Context comprovat' });
+  await expect(verifiedIcon).toBeVisible();
   await expect(verify).toHaveCount(0);
   await expect(pendingIcon).toHaveCount(0);
   await expect(securityTab).not.toContainText('contextos web pendents de verificar');
   for (const width of [320, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    await expect(row.getByText('Verificat')).toBeVisible();
+    await expect(verifiedIcon).toBeVisible();
   }
   await page.screenshot({ path: 'test-results/web-context-security.png', fullPage: true });
   expect(mutations).toEqual(['POST', 'PUT', 'VALIDATE']);
@@ -185,8 +187,8 @@ test('manages web contexts in Development and only consults or verifies them in 
     .getByRole('button', { name: 'Cancel·lar els canvis de Seguretat', exact: true })
     .click();
   await expect(security.locator('.application-security-verification-column')).toHaveCount(0);
-  await expect(row.getByText('Verificat')).toBeVisible();
-  await page.getByRole('link', { name: 'Desenvolupament', exact: true }).click();
+  await expect(verifiedIcon).toBeVisible();
+  await page.getByRole('link', { name: /^Desenvolupament/ }).click();
   await page
     .getByRole('button', { name: 'Editar Configuració del desenvolupament', exact: true })
     .click();

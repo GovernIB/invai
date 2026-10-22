@@ -1,0 +1,63 @@
+app-document-categories-table {
+  display: block;
+  min-width: 0;
+
+  // The first column of a category starts with its toggle, or the same room when it has no
+  // subcategories, so the names of every category line up.
+  .document-categories-table__cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .document-categories-table__cell > .invai-table-cell-content {
+    min-width: 0;
+  }
+
+  .document-categories-table__toggle-space {
+    flex: none;
+    width: 2rem;
+  }
+
+  .document-categories-table__toggle {
+    display: inline-flex;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--p-primary-color);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: var(--p-border-radius-md, 0.375rem);
+  }
+
+  .document-categories-table__toggle:hover {
+    background: var(--p-surface-100);
+  }
+
+  .document-categories-table__toggle:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: 2px;
+  }
+
+  // A subcategory row hangs from its category: its first column is indented past the toggle of the
+  // category and its separator starts under that toggle, except under the last subcategory, which
+  // closes the group with a full separator.
+  .document-categories-table__subcategory > td:first-child {
+    padding-inline-start: 4.5rem;
+  }
+
+  .document-categories-table__subcategory:not(.document-categories-table__subcategory--last)
+    > td:first-child {
+    border-bottom-color: transparent;
+    background: linear-gradient(
+        var(--p-datatable-body-cell-border-color),
+        var(--p-datatable-body-cell-border-color)
+      )
+      right bottom / calc(100% - 1rem) 1px no-repeat border-box;
+  }
+}

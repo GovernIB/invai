@@ -7,6 +7,7 @@ export const MAINTENANCE_PANEL_DESCRIPTIONS = {
   layers: $localize`Gestiona les capes d'arquitectura disponibles per classificar tecnologies.`,
   technologies: $localize`Gestiona el catàleg de tecnologies i la capa associada a cadascuna.`,
   externalSystems: $localize`:@@maintenanceExternalSystemsDescription:Gestiona els sistemes aliens a l'inventari amb què s'integren les aplicacions i l'empresa responsable de cadascun.`,
+  documentCategories: $localize`:@@maintenanceDocumentCategoriesDescription:Gestiona les categories i subcategories amb què es classifica la documentació de les aplicacions.`,
 };
 
 export const INTEGRATIONS_COMPANY_OPTIONS_LOAD_ERROR = $localize`:@@maintenanceIntegrationsCompaniesError:No s'han pogut carregar les empreses disponibles per als sistemes externs.`;

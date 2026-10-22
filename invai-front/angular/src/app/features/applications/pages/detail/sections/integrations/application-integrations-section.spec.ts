@@ -39,6 +39,7 @@ const ROW: ApplicationIntegrationConnectionOutput = {
   requiredRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: null }],
   grantedRoles: [],
   rolesMismatch: true,
+  rolesUnavailable: false,
   deletedAt: null,
 };
 
@@ -125,6 +126,19 @@ describe('ApplicationIntegrationsSection', () => {
       root().querySelector('.application-integrations__observations .invai-form-static-value')?.innerHTML,
     ).toContain('Notes');
     expect(root().querySelector('.application-integrations__connections-header p-button')).toBeNull();
+  });
+
+  it('nests its headings below the page h1 without skipping levels', async () => {
+    await create();
+
+    const headings = [...root().querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, h6')].map(
+      (heading) => [heading.tagName, heading.textContent?.trim()],
+    );
+    expect(headings).toEqual([
+      ['H2', 'Integracions'],
+      ['H3', 'Connexions'],
+      ['H3', 'Observacions'],
+    ]);
   });
 
   it('enables adding connections only while the section is edited', async () => {

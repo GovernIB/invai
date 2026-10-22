@@ -20,6 +20,8 @@ import { RoleCatalogOption } from '@features/roles/roles.model';
 import { TechnologyCatalogOption } from '@features/technologies/technologies.model';
 import { ActionParams } from '@models/table.model';
 import { PAGINATOR_ROWS } from '@shared/constants/table.constants';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { RichTextAria } from '@shared/directives/rich-text-aria.directive';
 import { localizedName } from '@shared/utils/localized-name.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
@@ -154,6 +156,7 @@ import {
     Editor,
     InputText,
     ReactiveFormsModule,
+    RichTextAria,
     Select,
     TooltipModule,
   ],
@@ -183,6 +186,7 @@ export class ApplicationDevelopmentSection implements OnInit {
   protected readonly detailState = inject(ApplicationDetailState);
   protected readonly sectionTitle = APPLICATION_DEVELOPMENT_SECTION_TITLE;
   protected readonly labels = APPLICATION_DEVELOPMENT_LABELS;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly providerTitle = APPLICATION_DEVELOPMENT_PROVIDER_TITLE;
   protected readonly technologyTitle = APPLICATION_DEVELOPMENT_TECHNOLOGY_TITLE;
   protected readonly addProviderAriaLabel = APPLICATION_DEVELOPMENT_ADD_PROVIDER_ARIA_LABEL;

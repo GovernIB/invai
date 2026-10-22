@@ -1,5 +1,7 @@
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SoffidPersonControlValue } from '@features/maintenances/responsibles/responsibles.model';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { maxUtf8BytesValidator } from '@shared/utils/text-length.utils';
 import { selectedSoffidPersonValidator } from './application-responsible-form.factory';
 
 export interface ApplicationAuthorizedFormControls {
@@ -23,7 +25,7 @@ export function createApplicationAuthorizedForm(
     personId: formBuilder.control<number | null>(null, Validators.required),
     soffidPerson: formBuilder.control<SoffidPersonControlValue>({ value: null, disabled: true }),
     email: formBuilder.nonNullable.control(''),
-    observation: formBuilder.nonNullable.control(''),
+    observation: formBuilder.nonNullable.control('', maxUtf8BytesValidator(TEXT_FIELD_MAX_BYTES)),
     authorizationTypeIds: formBuilder.nonNullable.control<number[]>([], Validators.required),
   });
 }

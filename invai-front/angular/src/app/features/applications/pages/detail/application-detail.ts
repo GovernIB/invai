@@ -154,6 +154,12 @@ export class ApplicationDetail implements OnDestroy {
         : '',
       warning: false,
     },
+    {
+      label: APPLICATION_DETAIL_TABS.documentation,
+      route: 'documentation' as const,
+      incompleteMessage: '',
+      warning: false,
+    },
   ]);
   private readonly sectionLabels: Record<ApplicationDetailSection, string> = {
     general: APPLICATION_DETAIL_TABS.general,

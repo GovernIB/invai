@@ -12,7 +12,7 @@ const LANGUAGE_SWITCHER_LABELS = {
   imports: [Button],
   selector: 'app-language-switcher',
   template: `
-    <h3 class="text-primary font-semibold mb-3">{{ labels.TITLE }}</h3>
+    <h2 class="text-primary font-semibold mb-3">{{ labels.TITLE }}</h2>
 
     <section>
       @for (language of availableLanguages; track language) {

@@ -1,12 +1,18 @@
 <div class="invai-filter-panel flex flex-column gap-5">
   <div class="flex flex-column gap-4">
-    <h3 class="font-semibold text-xl text-color">{{ title() }}</h3>
+    <ng-container
+      [ngTemplateOutlet]="filterHeading"
+      [ngTemplateOutletContext]="{ $implicit: title() }"
+    />
     <ng-content />
   </div>
 
   @if (!isMoreFiltersCollapsed()) {
     <div class="flex flex-column gap-4">
-      <h3 class="font-semibold text-xl text-color">{{ moreFiltersTitle }}</h3>
+      <ng-container
+        [ngTemplateOutlet]="filterHeading"
+        [ngTemplateOutletContext]="{ $implicit: moreFiltersTitle }"
+      />
       <ng-content select="[more-filters]" />
     </div>
   }
@@ -42,3 +48,17 @@
     }
   </footer>
 </div>
+
+<ng-template #filterHeading let-text>
+  @switch (headingLevel()) {
+    @case (3) {
+      <h3 class="font-semibold text-xl text-color">{{ text }}</h3>
+    }
+    @case (4) {
+      <h4 class="font-semibold text-xl text-color">{{ text }}</h4>
+    }
+    @default {
+      <h2 class="font-semibold text-xl text-color">{{ text }}</h2>
+    }
+  }
+</ng-template>

@@ -87,4 +87,19 @@ describe('MainLayout', () => {
     expect(progress.getAttribute('aria-label')).toBe('Carregant la pàgina');
     expect(progress.hasAttribute('aria-valuenow')).toBe(false);
   });
+
+  it('should name the complementary landmark PrimeNG renders for the navigation drawer', async () => {
+    isMobile.set(true);
+    isDrawerVisible.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const drawer = document.querySelector('.sidebar-navigation-drawer') as HTMLElement;
+
+    expect(drawer.getAttribute('role')).toBe('complementary');
+    expect(drawer.getAttribute('aria-label')).toBe('Navegació lateral');
+
+    isDrawerVisible.set(false);
+    isMobile.set(false);
+  });
 });

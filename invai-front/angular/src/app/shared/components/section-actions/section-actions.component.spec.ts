@@ -71,6 +71,43 @@ describe('SectionActionsComponent', () => {
     expect(filtersButton.getAttribute('aria-expanded')).toBe('true');
   });
 
+  it('keeps the expanded state off the selected-filters badge', () => {
+    fixture.componentRef.setInput('isFiltersCollapsed', true);
+    fixture.componentRef.setInput('filtersSelected', 2);
+    fixture.detectChanges();
+    const filtersButton = fixture.nativeElement.querySelector(
+      '.section-actions__buttons button',
+    ) as HTMLButtonElement;
+    const badge = fixture.nativeElement.querySelector('.p-badge') as HTMLElement;
+
+    expect(badge.textContent?.trim()).toBe('2');
+    expect(badge.hasAttribute('aria-expanded')).toBe(false);
+    expect(badge.getAttribute('aria-hidden')).toBe('true');
+    expect(filtersButton.contains(badge)).toBe(false);
+    expect(filtersButton.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('announces the number of applied filters in the filters button name', () => {
+    fixture.componentRef.setInput('filtersButtonAriaLabel', 'Mostra o amaga els filtres de rols');
+    fixture.detectChanges();
+    const filtersButton = fixture.nativeElement.querySelector(
+      '.section-actions__buttons button',
+    ) as HTMLButtonElement;
+    expect(filtersButton.getAttribute('aria-label')).toBe('Mostra o amaga els filtres de rols');
+
+    fixture.componentRef.setInput('filtersSelected', 1);
+    fixture.detectChanges();
+    expect(filtersButton.getAttribute('aria-label')).toBe(
+      'Mostra o amaga els filtres de rols (1 filtre aplicat)',
+    );
+
+    fixture.componentRef.setInput('filtersSelected', 3);
+    fixture.detectChanges();
+    expect(filtersButton.getAttribute('aria-label')).toBe(
+      'Mostra o amaga els filtres de rols (3 filtres aplicats)',
+    );
+  });
+
   it('preserves accessible actions, search and disabled behavior on a primary frame', () => {
     fixture.componentRef.setInput('appearance', 'on-primary');
     fixture.componentRef.setInput('disableAddButton', true);

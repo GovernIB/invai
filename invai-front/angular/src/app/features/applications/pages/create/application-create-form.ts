@@ -7,7 +7,7 @@ import { AdministrativeUnitSearchState } from '@features/administrative-units/ad
 import { normalizeQuillHtml } from '@shared/utils/rich-text.utils';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { finalize } from 'rxjs';
+import { Observable, catchError, finalize, map, of, switchMap } from 'rxjs';
 
 import { APPLICATION_STATUS_ACTIVE_ID } from '../../applications.constants';
 import { ApplicationInput } from '../../applications.model';
@@ -17,6 +17,7 @@ import {
   ApplicationCommissionOption,
   ApplicationSelectOptions
 } from '../../services/application-options.service';
+import { ApplicationSoffidRolesAssignmentService } from '../../services/application-security.service';
 import { ApplicationsService } from '../../services/applications.service';
 import {
   APPLICATION_CREATE_BACK_ARIA_LABEL,
@@ -28,6 +29,7 @@ import {
   APPLICATION_CREATE_LABELS,
   APPLICATION_CREATE_PREFIX_MAX_LENGTH_ERROR,
   APPLICATION_CREATE_REQUIRED_ERROR,
+  APPLICATION_CREATE_ROLES_ERROR_MESSAGE,
   APPLICATION_CREATE_SELECT_PLACEHOLDER,
   APPLICATION_CREATE_SUBMIT_ARIA_LABEL,
   APPLICATION_CREATE_SUBMIT_LABEL,
@@ -45,6 +47,7 @@ import {
 export class ApplicationCreateForm {
   private readonly _formBuilder = inject(FormBuilder);
   private readonly _applicationsService = inject(ApplicationsService);
+  private readonly _rolesAssignment = inject(ApplicationSoffidRolesAssignmentService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _messageService = inject(MessageService);
   private readonly _route = inject(ActivatedRoute);
@@ -76,20 +79,30 @@ export class ApplicationCreateForm {
       return;
     }
 
+    const payload = this.toApplicationInput();
     this.isSaving.set(true);
     this._applicationsService
-      .create(this.toApplicationInput())
+      .create(payload)
       .pipe(
+        switchMap((application) => this.assignSoffidRoles(application.id)),
         takeUntilDestroyed(this._destroyRef),
         finalize(() => this.isSaving.set(false)),
       )
       .subscribe({
-        next: () => {
-          this._messageService.add({
-            severity: 'success',
-            summary: APPLICATION_CREATE_SUCCESS_TITLE,
-            detail: APPLICATION_CREATE_SUCCESS_MESSAGE,
-          });
+        next: (assignedRoles) => {
+          this._messageService.add(
+            assignedRoles === null
+              ? {
+                  severity: 'warn',
+                  summary: APPLICATION_CREATE_SUCCESS_TITLE,
+                  detail: APPLICATION_CREATE_ROLES_ERROR_MESSAGE,
+                }
+              : {
+                  severity: 'success',
+                  summary: APPLICATION_CREATE_SUCCESS_TITLE,
+                  detail: APPLICATION_CREATE_SUCCESS_MESSAGE(assignedRoles, payload.prefix),
+                },
+          );
           void this._router.navigate(['..'], { relativeTo: this._route });
         },
         error: (error: unknown) => {
@@ -114,6 +127,15 @@ export class ApplicationCreateForm {
       commissionApprovalDate: commission?.approvalDate ?? '',
       commissionType: commission?.commissionType ?? null,
     });
+  }
+
+  // The application already exists at this point, so a failed assignment (null) must not be
+  // reported as a failed creation.
+  private assignSoffidRoles(applicationId: number): Observable<number | null> {
+    return this._rolesAssignment.assign(applicationId).pipe(
+      map((roles) => roles.length),
+      catchError(() => of(null)),
+    );
   }
 
   private toApplicationInput(): ApplicationInput {

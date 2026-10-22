@@ -109,7 +109,7 @@ test.describe('application development', () => {
     await expect(page.getByRole('button', { name: 'Afegeix un proveïdor' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Afegeix una tecnologia' })).toHaveCount(0);
     await expect(page.locator('#application-development-code')).toHaveValue('');
-    await expect(page.locator('#application-development-code')).toBeDisabled();
+    await expect(page.locator('#application-development-code')).not.toBeEditable();
     await expect(providerPanel(page).getByText("No s'han trobat resultats")).toBeVisible();
     await expect(technologyPanel(page).getByText("No s'han trobat resultats")).toBeVisible();
   });
@@ -182,7 +182,7 @@ test.describe('application development', () => {
       standardAdaption: { id: 1 },
     });
     await expect(page.getByRole('button', { name: EDIT_SECTION, exact: true })).toBeVisible();
-    await expect(page.locator('#application-development-code')).toBeDisabled();
+    await expect(page.locator('#application-development-code')).not.toBeEditable();
     const sourceLink = page.getByRole('link', { name: 'Obrir el repositori de codi font' });
     await expect(sourceLink).toHaveAttribute('href', initialCode);
     await expect(sourceLink).toHaveAttribute('target', '_blank');
@@ -191,7 +191,10 @@ test.describe('application development', () => {
     await page.goto(developmentRoute(disposableApplication.id));
     await waitForDevelopmentSection(page);
     await expect(page.locator('#application-development-code')).toHaveValue(initialCode);
-    await expect(developmentEditor(page)).toContainText(initialObservation);
+    // Outside edit mode the observation is rendered as static rich text, not in the editor.
+    await expect(page.locator('.application-development__observations')).toContainText(
+      initialObservation,
+    );
 
     await page.getByRole('button', { name: EDIT_SECTION, exact: true }).click();
     await selectOption(page, 'application-development-modality', 'Desenvolupament Mixt');
@@ -216,7 +219,9 @@ test.describe('application development', () => {
     await page.goto(developmentRoute(disposableApplication.id));
     await waitForDevelopmentSection(page);
     await expect(page.locator('#application-development-code')).toHaveValue(updatedCode);
-    await expect(developmentEditor(page)).toContainText(updatedObservation);
+    await expect(page.locator('.application-development__observations')).toContainText(
+      updatedObservation,
+    );
     await expect(
       page.getByRole('link', { name: 'Obrir el repositori de codi font' }),
     ).toHaveAttribute('href', updatedCode);
@@ -328,7 +333,7 @@ test.describe('application development', () => {
     await expect(page.locator('#application-provider-dialog-company-name')).toHaveValue(
       initialName,
     );
-    await expect(page.locator('#application-provider-dialog-company-name')).toBeDisabled();
+    await expect(page.locator('#application-provider-dialog-company-name')).not.toBeEditable();
     await page.getByRole('button', { name: 'Tanca el formulari del proveïdor' }).click();
     await expectFocusReturnOrRecord(initialRow, testInfo, 'application provider');
 

@@ -16,6 +16,25 @@ describe('SearchFiltersComponent', () => {
     expect(fixture.nativeElement.querySelector('p-button[aria-expanded]')).toBeNull();
   });
 
+  it('titles the panel one level below the page heading by default', () => {
+    const fixture = TestBed.createComponent(SearchFiltersComponent);
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('button[aria-expanded]').click();
+    fixture.detectChanges();
+    const headings = [...fixture.nativeElement.querySelectorAll('h1, h2, h3, h4, h5, h6')];
+    expect(headings.map((heading: HTMLElement) => heading.tagName)).toEqual(['H2', 'H2']);
+  });
+
+  it('nests the panel headings under the heading of the region that owns it', () => {
+    const fixture = TestBed.createComponent(SearchFiltersComponent);
+    fixture.componentRef.setInput('headingLevel', 4);
+    fixture.componentRef.setInput('title', 'Filtres de rols');
+    fixture.detectChanges();
+    const headings = [...fixture.nativeElement.querySelectorAll('h1, h2, h3, h4, h5, h6')];
+    expect(headings.map((heading: HTMLElement) => heading.tagName)).toEqual(['H4']);
+    expect(headings[0].textContent.trim()).toBe('Filtres de rols');
+  });
+
   it('keeps search and reset outputs inside the filter panel', () => {
     const fixture = TestBed.createComponent(SearchFiltersComponent);
     const search = vi.fn();

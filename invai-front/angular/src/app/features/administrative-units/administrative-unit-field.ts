@@ -1,52 +1,63 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, Injector, afterNextRender, inject, input, output, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import { FloatLabel } from 'primeng/floatlabel';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { AdministrativeUnitSearchAction, AdministrativeUnitSearchState } from './administrative-unit-search.state';
 
 @Component({
   selector: 'app-administrative-unit-field',
-  imports: [ReactiveFormsModule, Select, InputText, Button],
+  imports: [NgTemplateOutlet, ReactiveFormsModule, Select, InputText, Button, FloatLabel],
   template: `
     <div class="flex flex-col gap-1.5 min-w-0">
-      <label class="text-xs text-muted-color" [id]="inputId() + '-label'" [for]="inputId()">{{ label() }}</label>
       @if (readOnly()) {
+        <label class="text-xs text-muted-color" [id]="inputId() + '-label'" [for]="inputId()">{{ label() }}</label>
         <p class="invai-form-static-value" [attr.aria-labelledby]="inputId() + '-label'">{{ state().selectedLabel() }}</p>
+      } @else if (labelMode() === 'float') {
+        <p-floatlabel class="w-full">
+          <ng-container [ngTemplateOutlet]="selectField" />
+          <label [id]="inputId() + '-label'" [for]="inputId()">{{ label() }}</label>
+        </p-floatlabel>
       } @else {
-        <p-select #select styleClass="w-full" [inputId]="inputId()" [formControl]="control()"
-          [ariaLabelledBy]="inputId() + '-label'" [ariaFilterLabel]="searchLabel"
-          [options]="displayOptions()" optionLabel="label" optionValue="code" [filter]="true"
-          [showClear]="allowClear()" [resetFilterOnHide]="true" [loading]="state().loading()"
-          [pt]="{ label: { 'aria-invalid': invalid(), 'aria-describedby': inputId() + '-status' } }"
-          (onShow)="open()" (onHide)="action.emit({kind: 'close'})">
-          <ng-template #selectedItem>{{ state().selectedLabel() }}</ng-template>
-          <ng-template #item let-unit><span class="whitespace-normal break-words">{{ unit.name }} ({{ unit.code }})</span></ng-template>
-          <ng-template #filter>
-            <input #searchInput pInputText type="search" role="combobox" aria-expanded="true" aria-autocomplete="list"
-              [attr.aria-controls]="select.id + '_list'" [attr.aria-activedescendant]="select.focusedOptionId" class="w-full" [value]="state().query()"
-              [attr.aria-label]="searchLabel" (input)="search($event)"
-              (keydown)="select.onFilterKeyDown($event)" />
-          </ng-template>
-          <ng-template #footer>
-            <div class="p-3 text-sm" aria-live="polite">
-              @if (state().failed()) {
-                <p class="m-0" role="alert">{{ errorLabel }}</p>
-                <p-button type="button" [label]="retryLabel" [text]="true" (onClick)="action.emit({kind: 'retry'})" />
-              } @else if (state().loading()) {
-                <p class="m-0">{{ loadingLabel }}</p>
-              } @else {
-                <p class="m-0">{{ resultMessage(state().total()) }}</p>
-              }
-            </div>
-          </ng-template>
-        </p-select>
+        <label class="text-xs text-muted-color" [id]="inputId() + '-label'" [for]="inputId()">{{ label() }}</label>
+        <ng-container [ngTemplateOutlet]="selectField" />
       }
       <div [id]="inputId() + '-status'" aria-live="polite">
         @if (invalid()) { <p class="text-sm text-red-600 m-0">{{ requiredError }}</p> }
         @if (state().loading()) { <p class="text-sm m-0">{{ loadingLabel }}</p> }
       </div>
     </div>
+    <ng-template #selectField>
+      <p-select #select styleClass="w-full" [inputId]="inputId()" [formControl]="control()"
+        [ariaLabelledBy]="inputId() + '-label'" [ariaFilterLabel]="searchLabel"
+        [options]="displayOptions()" optionLabel="label" optionValue="code" [filter]="true"
+        [showClear]="allowClear()" [resetFilterOnHide]="true" [loading]="state().loading()"
+        [pt]="{ label: { 'aria-invalid': invalid(), 'aria-describedby': inputId() + '-status' } }"
+        (onShow)="open()" (onHide)="action.emit({kind: 'close'})">
+        <ng-template #selectedItem>{{ state().selectedLabel() }}</ng-template>
+        <ng-template #item let-unit><span class="whitespace-normal break-words">{{ unit.name }} ({{ unit.code }})</span></ng-template>
+        <ng-template #filter>
+          <input #searchInput pInputText type="search" role="combobox" aria-expanded="true" aria-autocomplete="list"
+            [attr.aria-controls]="select.id + '_list'" [attr.aria-activedescendant]="select.focusedOptionId" class="w-full" [value]="state().query()"
+            [attr.aria-label]="searchLabel" (input)="search($event)"
+            (keydown)="select.onFilterKeyDown($event)" />
+        </ng-template>
+        <ng-template #footer>
+          <div class="p-3 text-sm" aria-live="polite">
+            @if (state().failed()) {
+              <p class="m-0" role="alert">{{ errorLabel }}</p>
+              <p-button type="button" [label]="retryLabel" [text]="true" (onClick)="action.emit({kind: 'retry'})" />
+            } @else if (state().loading()) {
+              <p class="m-0">{{ loadingLabel }}</p>
+            } @else {
+              <p class="m-0">{{ resultMessage(state().total()) }}</p>
+            }
+          </div>
+        </ng-template>
+      </p-select>
+    </ng-template>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -57,6 +68,7 @@ export class AdministrativeUnitField {
   label = input.required<string>();
   readOnly = input(false);
   allowClear = input(false);
+  labelMode = input<'static' | 'float'>('static');
   action = output<AdministrativeUnitSearchAction>();
   protected readonly displayOptions = computed(() => this.state().options().map(unit => ({ ...unit, label: `${unit.name} (${unit.code})` })));
   private readonly injector = inject(Injector);
@@ -65,7 +77,7 @@ export class AdministrativeUnitField {
     this.action.emit({ kind: 'open' });
     afterNextRender(() => this.searchInput()?.nativeElement.focus(), { injector: this.injector });
   }
-  protected readonly searchLabel = $localize`:@@dir3Search:Cerca unitats administratives per nom`;
+  protected readonly searchLabel = $localize`:@@dir3Search:Cerca unitats administratives per nom o codi`;
   protected readonly requiredError = $localize`Aquest camp és obligatori.`;
   protected readonly loadingLabel = $localize`:@@dir3Loading:Carregant unitats administratives.`;
   protected readonly errorLabel = $localize`:@@dir3Error:No s'han pogut carregar les unitats administratives.`;

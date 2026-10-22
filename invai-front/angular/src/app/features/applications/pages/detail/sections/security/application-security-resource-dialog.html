@@ -21,6 +21,86 @@
     (ngSubmit)="onSubmit()"
     novalidate
   >
+    @if (kind() === 'role') {
+      <div class="md:col-span-12">
+        <label [id]="roleIds.label" [for]="roleIds.input">{{ labels.roleCode }}</label>
+        @if (mode() === 'view') {
+          <p class="invai-form-static-value" [attr.aria-labelledby]="roleIds.label">
+            {{ selectedRole()?.name || emptyValue }}
+          </p>
+        } @else {
+          <span class="sr-only" [id]="roleIds.instruction">{{ roleCopy.instruction }}</span>
+          <p-select
+            appendTo="body"
+            dataKey="roleId"
+            filterBy="name"
+            formControlName="role"
+            optionLabel="name"
+            [ariaFilterLabel]="labels.roleCode"
+            [ariaLabelledBy]="roleIds.label"
+            [emptyFilterMessage]="rolePanelMessage()"
+            [emptyMessage]="rolePanelMessage()"
+            [filter]="true"
+            [fluid]="true"
+            [inputId]="roleIds.input"
+            [invalid]="isInvalid(form().controls.role)"
+            [loading]="roleSearch().loading"
+            [options]="roleSearch().options"
+            [pt]="rolePassThrough()"
+            [resetFilterOnHide]="true"
+            (onFilter)="onRoleFilter($event)"
+            (onShow)="onRolePanelOpen()"
+          >
+            <ng-template #item let-role>
+              <div class="flex flex-col">
+                <span>{{ role.name }}</span>
+                @if (role.system || role.description) {
+                  <span class="text-sm text-color-secondary">
+                    {{ role.system || emptyValue }}
+                    @if (role.description) {
+                      · {{ role.description }}
+                    }
+                  </span>
+                }
+              </div>
+            </ng-template>
+          </p-select>
+          <span class="sr-only" role="status" [id]="roleIds.status">{{ roleStatusMessage() }}</span>
+          <div role="status" [id]="roleIds.prefixNote">
+            @if (rolePrefixNote(); as note) {
+              <p class="m-0 mt-2 flex items-start gap-2 text-sm">
+                <i class="pi pi-info-circle mt-0.5" aria-hidden="true"></i>
+                <span>{{ note }}</span>
+              </p>
+            }
+          </div>
+        }
+        @if (isInvalid(form().controls.role)) {
+          <p class="mt-1 text-sm text-red-600" role="alert" [id]="roleIds.error">
+            {{ roleCopy.required }}
+          </p>
+        }
+      </div>
+      <div class="md:col-span-4">
+        <span id="application-security-dialog-role-system-label">{{ labels.system }}</span>
+        <p
+          class="invai-form-static-value"
+          aria-labelledby="application-security-dialog-role-system-label"
+        >
+          {{ selectedRole()?.system || emptyValue }}
+        </p>
+      </div>
+      <div class="md:col-span-8">
+        <span id="application-security-dialog-role-description-label">{{ labels.description }}</span>
+        <p
+          class="invai-form-static-value"
+          aria-labelledby="application-security-dialog-role-description-label"
+        >
+          {{ selectedRole()?.description || emptyValue }}
+        </p>
+      </div>
+    }
+
     @if (kind() === 'web-context') {
       <div class="md:col-span-8">
         <label
@@ -118,8 +198,16 @@
           formControlName="observation"
           [readOnly]="mode() === 'view'"
           [class.invai-form-readonly-control]="mode() === 'view'"
+          [invalid]="isInvalid(form().controls.observation)"
+          [attr.aria-invalid]="isInvalid(form().controls.observation)"
+          [attr.aria-describedby]="isInvalid(form().controls.observation) ? 'application-security-dialog-observation-error' : null"
           pTextarea
         ></textarea>
+        @if (isInvalid(form().controls.observation)) {
+          <p id="application-security-dialog-observation-error" class="mt-1 text-sm text-red-600" role="alert">
+            {{ textMaxBytesError }}
+          </p>
+        }
       </div>
     }
 
@@ -191,8 +279,16 @@
           formControlName="description"
           [readOnly]="mode() === 'view'"
           [class.invai-form-readonly-control]="mode() === 'view'"
+          [invalid]="isInvalid(form().controls.description)"
+          [attr.aria-invalid]="isInvalid(form().controls.description)"
+          [attr.aria-describedby]="isInvalid(form().controls.description) ? 'application-security-dialog-description-error' : null"
           pTextarea
         ></textarea>
+        @if (isInvalid(form().controls.description)) {
+          <p id="application-security-dialog-description-error" class="mt-1 text-sm text-red-600" role="alert">
+            {{ textMaxBytesError }}
+          </p>
+        }
       </div>
     }
 
@@ -266,8 +362,16 @@
           formControlName="description"
           [readOnly]="mode() === 'view'"
           [class.invai-form-readonly-control]="mode() === 'view'"
+          [invalid]="isInvalid(form().controls.description)"
+          [attr.aria-invalid]="isInvalid(form().controls.description)"
+          [attr.aria-describedby]="isInvalid(form().controls.description) ? 'application-security-dialog-measure-description-error' : null"
           pTextarea
         ></textarea>
+        @if (isInvalid(form().controls.description)) {
+          <p id="application-security-dialog-measure-description-error" class="mt-1 text-sm text-red-600" role="alert">
+            {{ textMaxBytesError }}
+          </p>
+        }
       </div>
     }
   </form>

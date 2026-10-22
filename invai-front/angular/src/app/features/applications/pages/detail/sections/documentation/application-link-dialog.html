@@ -1,0 +1,143 @@
+<app-crud-entity-dialog
+  width="44rem"
+  [(visible)]="visible"
+  [ariaLabels]="texts.ariaLabels"
+  [canEdit]="canEdit()"
+  [cancelLabel]="texts.actions.cancel"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isDeleting]="isDeleting()"
+  [isSaving]="isSaving()"
+  [mode]="mode()"
+  [submitIcon]="icons.SAVE"
+  [submitLabel]="texts.actions.save"
+  [title]="title()"
+  (cancelEdit)="cancelEdit.emit()"
+  (closed)="closed.emit()"
+  (deactivate)="deactivate.emit()"
+  (edit)="edit.emit()"
+  (submitForm)="onSubmit()"
+>
+  @if (mode() === 'view') {
+    <dl class="invai-dialog-form-grid invai-grid m-0 grid-cols-1 gap-5 md:grid-cols-2">
+      <div class="invai-dialog-static-field">
+        <dt class="invai-dialog-static-field__label">{{ texts.labels.title }}</dt>
+        <dd class="invai-form-static-value m-0">{{ form().controls.title.value }}</dd>
+      </div>
+      <div class="invai-dialog-static-field">
+        <dt class="invai-dialog-static-field__label">{{ texts.labels.section }}</dt>
+        <dd class="invai-form-static-value m-0">{{ sectionLabel() }}</dd>
+      </div>
+      <div class="invai-dialog-static-field md:col-span-2">
+        <dt class="invai-dialog-static-field__label">{{ texts.labels.description }}</dt>
+        <dd class="invai-form-static-value m-0 whitespace-pre-line">
+          {{ form().controls.description.value || '—' }}
+        </dd>
+      </div>
+      <div class="invai-dialog-static-field md:col-span-2">
+        <dt class="invai-dialog-static-field__label">{{ texts.labels.url }}</dt>
+        <dd class="invai-form-static-value m-0 break-all">
+          <a [href]="form().controls.url.value" rel="noopener noreferrer" target="_blank">
+            {{ form().controls.url.value }}<span class="sr-only"> {{ opensInNewTab }}</span>
+          </a>
+        </dd>
+      </div>
+    </dl>
+  } @else {
+    <p id="application-link-instructions" class="application-link-instructions">
+      {{ texts.requiredHint }}
+    </p>
+    <form
+      class="application-link-form"
+      novalidate
+      aria-describedby="application-link-instructions"
+      [formGroup]="form()"
+      (ngSubmit)="onSubmit()"
+    >
+      <div>
+        <label for="application-link-title">{{ texts.labels.title }}</label>
+        <input
+          id="application-link-title"
+          class="w-full"
+          formControlName="title"
+          pInputText
+          required
+          type="text"
+          [attr.aria-describedby]="isInvalid(form().controls.title) ? 'application-link-title-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.title)"
+          [attr.maxlength]="titleMaxLength"
+        />
+        @if (isInvalid(form().controls.title)) {
+          <p id="application-link-title-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ errorOf(form().controls.title, titleMaxLength) }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label id="application-link-section-label" for="application-link-section">
+          {{ texts.labels.section }}
+        </label>
+        <p-select
+          appendTo="body"
+          ariaLabelledBy="application-link-section-label"
+          formControlName="sectionId"
+          inputId="application-link-section"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          [invalid]="isInvalid(form().controls.sectionId)"
+          [loading]="isSectionsLoading()"
+          [options]="sectionOptions()"
+          [pt]="sectionPassThrough()"
+        />
+        @if (isInvalid(form().controls.sectionId)) {
+          <p id="application-link-section-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ common.required }}
+          </p>
+        }
+      </div>
+
+      <div class="application-link-field--full">
+        <label for="application-link-description">{{ texts.labels.description }}</label>
+        <input
+          id="application-link-description"
+          class="w-full"
+          formControlName="description"
+          pInputText
+          type="text"
+          [attr.aria-describedby]="
+            isInvalid(form().controls.description) ? 'application-link-description-error' : null
+          "
+          [attr.aria-invalid]="isInvalid(form().controls.description)"
+          [attr.maxlength]="descriptionMaxLength"
+        />
+        @if (isInvalid(form().controls.description)) {
+          <p id="application-link-description-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ errorOf(form().controls.description, descriptionMaxLength) }}
+          </p>
+        }
+      </div>
+
+      <div class="application-link-field--full">
+        <label for="application-link-url">{{ texts.labels.url }}</label>
+        <input
+          id="application-link-url"
+          autocomplete="url"
+          class="w-full"
+          formControlName="url"
+          pInputText
+          required
+          type="url"
+          [attr.aria-describedby]="isInvalid(form().controls.url) ? 'application-link-url-error' : null"
+          [attr.aria-invalid]="isInvalid(form().controls.url)"
+          [attr.maxlength]="urlMaxLength"
+        />
+        @if (isInvalid(form().controls.url)) {
+          <p id="application-link-url-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+            {{ errorOf(form().controls.url, urlMaxLength) }}
+          </p>
+        }
+      </div>
+    </form>
+  }
+</app-crud-entity-dialog>

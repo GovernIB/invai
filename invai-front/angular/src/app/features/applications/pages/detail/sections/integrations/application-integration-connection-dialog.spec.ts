@@ -26,6 +26,7 @@ const ROW: ApplicationIntegrationConnectionOutput = {
   requiredRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: null }],
   grantedRoles: null,
   rolesMismatch: null,
+  rolesUnavailable: false,
   deletedAt: null,
 };
 const EMPTY_SEARCH = { options: [], loading: false, searched: false, error: false, total: 0 };
@@ -105,6 +106,33 @@ describe('ApplicationIntegrationConnectionDialog', () => {
     };
     expect(value('required-roles')).toBe('INV_ADMIN');
     expect(value('granted-roles')).toBe('No disponible');
+    expect(byId('application-integration-dialog-roles-unavailable')).toBeNull();
+  });
+
+  it('explains why a connection whose roles Soffid could not resolve cannot be edited', async () => {
+    await create('view', {
+      ...ROW,
+      requiredRoles: null,
+      grantedRoles: null,
+      rolesMismatch: null,
+      rolesUnavailable: true,
+    });
+    fixture.componentRef.setInput('canEdit', false);
+    fixture.detectChanges();
+
+    const requiredRoles = body().querySelector(
+      '[aria-labelledby="application-integration-dialog-required-roles-view-label"]',
+    );
+    const note = byId('application-integration-dialog-roles-unavailable');
+    expect(requiredRoles?.textContent?.trim()).toBe('No disponible');
+    expect(requiredRoles?.getAttribute('aria-describedby')).toBe(note?.id);
+    expect(note?.textContent?.trim()).toBe(
+      "No s'han pogut consultar els rols a Soffid. Torna a carregar la pestanya per poder editar la connexió.",
+    );
+    expect(note?.querySelector('.pi-info-circle')?.getAttribute('aria-hidden')).toBe('true');
+    expect(
+      [...body().querySelectorAll('button')].some((button) => button.textContent?.trim() === 'Edita'),
+    ).toBe(false);
   });
 
   it('groups the system kind radios under a legend and swaps the matching selector', async () => {
@@ -180,6 +208,41 @@ describe('ApplicationIntegrationConnectionDialog', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('hides background loading until the user opens a picker that is still loading', async () => {
+    await create('create');
+    fixture.componentRef.setInput('applicationSearch', { ...EMPTY_SEARCH, loading: true });
+    fixture.componentRef.setInput('roleSearch', { ...EMPTY_SEARCH, loading: true });
+    fixture.componentRef.setInput('catalogsLoading', true);
+    fixture.detectChanges();
+
+    const loadingIcons = () =>
+      [...body().querySelectorAll('.p-select-loading-icon, .p-multiselect-loading-icon')].map(
+        (icon) => icon.closest('p-select, p-multiselect')?.querySelector('[role="combobox"]')?.id,
+      );
+    // A loading PrimeNG picker ignores clicks, so a background load must not block opening it.
+    expect(loadingIcons()).toEqual([]);
+
+    const dialog = fixture.componentInstance as unknown as {
+      onApplicationPanelOpen: () => void;
+      onPanelShow: (picker: string) => void;
+      onPanelHide: (picker: string) => void;
+      onRolePanelOpen: () => void;
+    };
+    dialog.onApplicationPanelOpen();
+    fixture.detectChanges();
+    expect(loadingIcons()).toEqual(['application-integration-dialog-application']);
+
+    dialog.onPanelHide('application');
+    dialog.onRolePanelOpen();
+    fixture.detectChanges();
+    expect(loadingIcons()).toEqual(['application-integration-dialog-roles']);
+
+    dialog.onPanelHide('roles');
+    dialog.onPanelShow('technology');
+    fixture.detectChanges();
+    expect(loadingIcons()).toEqual(['application-integration-dialog-technology']);
   });
 
   it('guards only dirty drafts and never submits from view mode', async () => {

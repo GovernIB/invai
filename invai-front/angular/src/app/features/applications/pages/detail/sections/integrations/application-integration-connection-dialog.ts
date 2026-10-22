@@ -8,6 +8,7 @@ import {
   input,
   model,
   output,
+  signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
@@ -47,8 +48,8 @@ import {
   connectionSystemKind,
   connectionSystemName,
   grantedRoleNames,
+  requiredRoleNames,
   rolesMatch,
-  soffidRoleNames,
 } from './application-integrations-table';
 
 export interface ApplicationIntegrationSearchView<TOption> {
@@ -58,6 +59,8 @@ export interface ApplicationIntegrationSearchView<TOption> {
   error: boolean;
   total: number;
 }
+
+type ApplicationIntegrationPicker = 'application' | 'externalSystem' | 'technology' | 'roles';
 
 const ID = 'application-integration-dialog';
 const FILTER_DEBOUNCE_MS = 300;
@@ -81,6 +84,7 @@ const FILTER_DEBOUNCE_MS = 300;
 export class ApplicationIntegrationConnectionDialog {
   private readonly applicationFilters = new Subject<string>();
   private readonly roleFilters = new Subject<string>();
+  private readonly openPicker = signal<ApplicationIntegrationPicker | null>(null);
 
   visible = model(false);
   form = input.required<ApplicationIntegrationConnectionFormGroup>();
@@ -125,6 +129,7 @@ export class ApplicationIntegrationConnectionDialog {
     rolesInstruction: `${ID}-roles-instruction`,
     rolesStatus: `${ID}-roles-status`,
     rolesError: `${ID}-roles-error`,
+    rolesUnavailable: `${ID}-roles-unavailable`,
     view: (field: string) => `${ID}-${field}-view`,
     viewLabel: (field: string) => `${ID}-${field}-view-label`,
   };
@@ -174,9 +179,10 @@ export class ApplicationIntegrationConnectionDialog {
       systemKind: connectionSystemKind(row) || this.emptyValue,
       technology: row.technology?.name?.trim() || this.emptyValue,
       user: row.username?.trim() || this.emptyValue,
-      requiredRoles: soffidRoleNames(row.requiredRoles),
+      requiredRoles: requiredRoleNames(row),
       grantedRoles: grantedRoleNames(row),
       rolesMatch: this.rolesTexts[rolesMatch(row)],
+      rolesUnavailable: Boolean(row.rolesUnavailable),
     };
   });
 
@@ -239,11 +245,26 @@ export class ApplicationIntegrationConnectionDialog {
     } as MultiSelectPassThrough;
   }
 
+  // Options load in the background when the dialog opens, so the spinner only shows while
+  // the user waits on an open panel; PrimeNG also ignores clicks on a picker that is loading.
+  protected pickerLoading(picker: ApplicationIntegrationPicker, loading: boolean): boolean {
+    return loading && this.openPicker() === picker;
+  }
+
+  protected onPanelShow(picker: ApplicationIntegrationPicker): void {
+    this.openPicker.set(picker);
+  }
+
+  protected onPanelHide(picker: ApplicationIntegrationPicker): void {
+    if (this.openPicker() === picker) this.openPicker.set(null);
+  }
+
   protected onApplicationFilter(event: SelectFilterEvent): void {
     this.applicationFilters.next(String(event.filter ?? '').trim());
   }
 
   protected onApplicationPanelOpen(): void {
+    this.onPanelShow('application');
     this.applicationSearchRequested.emit('');
   }
 
@@ -252,6 +273,7 @@ export class ApplicationIntegrationConnectionDialog {
   }
 
   protected onRolePanelOpen(): void {
+    this.onPanelShow('roles');
     this.roleSearchRequested.emit('');
   }
 

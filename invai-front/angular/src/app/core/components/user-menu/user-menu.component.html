@@ -3,7 +3,7 @@
   severity="secondary"
   [text]="true"
   [ariaLabel]="userMenuAriaLabel"
-  [attr.aria-expanded]="popoverRef.overlayVisible"
+  [pt]="{ root: { 'aria-expanded': popoverRef.overlayVisible } }"
   (onClick)="popoverRef.toggle($event)"
 >
   <section class="flex items-center gap-2">
@@ -34,7 +34,7 @@
     <app-font-size-switcher />
 
     <section>
-      <h3 class="text-primary font-semibold mb-4">{{ helpTitle }}</h3>
+      <h2 class="text-primary font-semibold mb-4">{{ helpTitle }}</h2>
 
       <p-button
         [outlined]="true"

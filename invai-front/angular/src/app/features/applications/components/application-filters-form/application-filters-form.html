@@ -90,7 +90,7 @@
     </div>
     <app-administrative-unit-field [control]="form().controls.administrativeUnit" [state]="dir3()"
       inputId="applications-filter-administrative-unit" [label]="labels().administrativeUnit"
-      [allowClear]="true" (action)="dir3Action.emit($event)" />
+      [allowClear]="true" labelMode="float" (action)="dir3Action.emit($event)" />
   </div>
   <div class="application-filter-row application-filter-row--resources" appSearchFilterGrid>
     <div>

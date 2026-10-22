@@ -1,0 +1,19 @@
+<app-application-detail-section-layout
+  titleId="application-documentation-section-title"
+  [title]="title"
+>
+  @if (applicationId(); as applicationId) {
+    <div class="application-documentation">
+      <app-application-attachments-list
+        [applicationId]="applicationId"
+        [canManage]="detailState.canEdit()"
+        [initialPage]="attachments()"
+      />
+      <app-application-links-list
+        [applicationId]="applicationId"
+        [canManage]="detailState.canEdit()"
+        [initialPage]="links()"
+      />
+    </div>
+  }
+</app-application-detail-section-layout>

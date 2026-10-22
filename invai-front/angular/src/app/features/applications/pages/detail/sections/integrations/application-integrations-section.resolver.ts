@@ -45,7 +45,7 @@ export interface ApplicationIntegrationsLoadResult {
   errorMessage: string | null;
   connectionsPage: SpringPage<ApplicationIntegrationConnectionOutput> | null;
   connectionsLoadFailed: boolean;
-  // Localized backend message, e.g. when Soffid cannot resolve the roles of a row.
+  // Localized backend message for the connections read.
   connectionsErrorMessage: string | null;
 }
 

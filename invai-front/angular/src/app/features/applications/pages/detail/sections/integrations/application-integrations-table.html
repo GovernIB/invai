@@ -69,40 +69,30 @@
                   class="invai-table-cell-content invai-table-cell-content--wrap application-integrations-system"
                   [style.max-width]="column.maxWidth ?? '24rem'"
                 >
-                  <span>{{ systemName(rowData) }}</span>
+                  <span class="application-integrations-system__name">
+                    <span>{{ systemName(rowData) }}</span>
+                    @if (rolesMatch(rowData) === 'mismatch') {
+                      <span
+                        class="application-integrations-roles-mismatch"
+                        role="img"
+                        tabindex="0"
+                        [attr.aria-label]="rolesTexts.mismatchDetail"
+                        [autoHide]="false"
+                        [pTooltip]="rolesTexts.mismatchDetail"
+                        tooltipEvent="both"
+                        tooltipPosition="top"
+                        (dblclick)="$event.stopPropagation()"
+                        (keydown.enter)="$event.stopPropagation()"
+                      >
+                        <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+                      </span>
+                    }
+                  </span>
                   @if (systemKind(rowData); as kind) {
                     <span class="sr-only">, </span>
                     <span class="application-integrations-system__kind">{{ kind }}</span>
                   }
                 </span>
-              }
-              @case ('rolesMismatch') {
-                @switch (rolesMatch(rowData)) {
-                  @case ('mismatch') {
-                    <span
-                      class="invai-table-cell-content application-integrations-roles-state application-integrations-roles-state--mismatch"
-                      [attr.title]="rolesTexts.mismatchDetail"
-                    >
-                      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-                      <span>{{ rolesTexts.mismatch }}</span>
-                      <span class="sr-only">: {{ rolesTexts.mismatchDetail }}</span>
-                    </span>
-                  }
-                  @case ('match') {
-                    <span class="invai-table-cell-content application-integrations-roles-state">
-                      <i class="pi pi-check-circle" aria-hidden="true"></i>
-                      <span>{{ rolesTexts.match }}</span>
-                    </span>
-                  }
-                  @default {
-                    <span
-                      class="invai-table-cell-content application-integrations-roles-state application-integrations-roles-state--unknown"
-                    >
-                      <i class="pi pi-question-circle" aria-hidden="true"></i>
-                      <span>{{ rolesTexts.unknown }}</span>
-                    </span>
-                  }
-                }
               }
               @default {
                 <span

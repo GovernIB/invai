@@ -11,6 +11,8 @@ import {
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CrudEntityDialog } from '@components/crud-entity-dialog/crud-entity-dialog';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { MAX_BYTES_ERROR } from '@shared/utils/text-length.utils';
 import { PrimeIcons } from 'primeng/api';
 import { Textarea } from 'primeng/textarea';
 import { ApplicationWebContextVerificationForm } from '../../../../forms/application-security-form.factory';
@@ -59,5 +61,11 @@ export class ApplicationWebContextVerificationDialog implements AfterViewInit, O
   protected reasonInvalid(): boolean {
     const control = this.form().controls.reason;
     return control.invalid && (control.touched || control.dirty);
+  }
+
+  protected reasonError(): string {
+    return this.form().controls.reason.hasError(MAX_BYTES_ERROR)
+      ? TEXT_FIELD_MAX_BYTES_ERROR
+      : this.copy.reasonRequired;
   }
 }

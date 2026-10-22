@@ -30,6 +30,7 @@ describe('CrudEntityDialog', () => {
     fixture.componentRef.setInput('submitDisabled', true);
     fixture.componentRef.setInput('submitLabel', 'Validar manualment');
     fixture.componentRef.setInput('submitIcon', 'pi pi-check');
+    fixture.componentRef.setInput('cancelLabel', 'Cancel·la');
     fixture.detectChanges();
     const submit = vi.fn();
     const closed = vi.fn();
@@ -38,6 +39,7 @@ describe('CrudEntityDialog', () => {
     const button = buttonByLabel(fixture, 'Validar manualment');
     expect(button.disabled).toBe(true);
     expect(button.icon).toBe('pi pi-check');
+    expect(buttonByLabel(fixture, 'Cancel·la').icon).toBe('pi pi-times');
     button.onClick.emit(new MouseEvent('click'));
     expect(submit).not.toHaveBeenCalled();
     const component = fixture.componentInstance as unknown as {

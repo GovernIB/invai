@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
-import { MessageService, PrimeIcons } from 'primeng/api';
+import { MessageService, PrimeIcons, ToastMessageOptions } from 'primeng/api';
 import { Button } from 'primeng/button';
 
 import { ApplicationStatus } from '../../../../applications.model';
@@ -12,7 +12,7 @@ import {
   APPLICATION_OPTIONS_RESOLVE_KEY,
   ApplicationOptionsResolvedData,
 } from '../../../../resolvers/application-options.resolver';
-import { ApplicationDetailState } from '../../application-detail-state';
+import { ApplicationDetailState, SoffidRolesAssignment } from '../../application-detail-state';
 import {
   APPLICATION_DETAIL_ACTIVATION_ARIA_LABEL,
   APPLICATION_DETAIL_ACTIVATION_DIALOG_CANCEL_ARIA_LABEL,
@@ -23,12 +23,15 @@ import {
   APPLICATION_DETAIL_ACTIVATION_DIALOG_TITLE,
   APPLICATION_DETAIL_ACTIVATION_ERROR_MESSAGE,
   APPLICATION_DETAIL_ACTIVATION_ERROR_TITLE,
+  APPLICATION_DETAIL_ACTIVATION_ROLES_ERROR_MESSAGE,
   APPLICATION_DETAIL_ACTIVATION_SUCCESS_MESSAGE,
   APPLICATION_DETAIL_ACTIVATION_SUCCESS_TITLE,
   APPLICATION_DETAIL_INACTIVE_NOTE,
   APPLICATION_DETAIL_RESTORE_LABEL,
+  APPLICATION_DETAIL_ROLES_ASSIGNED_MESSAGE,
   APPLICATION_DETAIL_SAVE_ERROR_MESSAGE,
   APPLICATION_DETAIL_SAVE_ERROR_TITLE,
+  APPLICATION_DETAIL_SAVE_ROLES_ERROR_MESSAGE,
   APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE,
   APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE,
   APPLICATION_DETAIL_WITHDRAWAL_ARIA_LABEL,
@@ -137,11 +140,14 @@ export class ApplicationGeneralSection {
           this.isSaving.set(false);
           if (result.status !== 'saved') return;
 
-          this.messageService.add({
-            severity: 'success',
-            summary: APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE,
-            detail: APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE(this.sectionTitle),
-          });
+          this.messageService.add(
+            this.successMessage(
+              APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_TITLE,
+              APPLICATION_DETAIL_SECTION_SAVE_SUCCESS_MESSAGE(this.sectionTitle),
+              result.assignedSoffidRoles,
+              APPLICATION_DETAIL_SAVE_ROLES_ERROR_MESSAGE,
+            ),
+          );
         },
         error: (error: unknown) => {
           this.isSaving.set(false);
@@ -173,15 +179,18 @@ export class ApplicationGeneralSection {
       .activate()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (activated) => {
+        next: (result) => {
           this.isActivating.set(false);
-          if (!activated) return;
+          if (!result.activated) return;
 
-          this.messageService.add({
-            severity: 'success',
-            summary: APPLICATION_DETAIL_ACTIVATION_SUCCESS_TITLE,
-            detail: APPLICATION_DETAIL_ACTIVATION_SUCCESS_MESSAGE,
-          });
+          this.messageService.add(
+            this.successMessage(
+              APPLICATION_DETAIL_ACTIVATION_SUCCESS_TITLE,
+              APPLICATION_DETAIL_ACTIVATION_SUCCESS_MESSAGE,
+              result.assignedSoffidRoles,
+              () => APPLICATION_DETAIL_ACTIVATION_ROLES_ERROR_MESSAGE,
+            ),
+          );
         },
         error: (error: unknown) => {
           this.isActivating.set(false);
@@ -243,4 +252,24 @@ export class ApplicationGeneralSection {
       });
   }
 
+  // `assignedSoffidRoles` is undefined when the change did not request PUT application/assign-roles.
+  // A failed assignment is only a warning: the change itself was saved.
+  private successMessage(
+    summary: string,
+    detail: string,
+    assignedSoffidRoles: SoffidRolesAssignment | undefined,
+    rolesErrorMessage: (prefix: string) => string,
+  ): ToastMessageOptions {
+    if (assignedSoffidRoles === undefined) return { severity: 'success', summary, detail };
+
+    const prefix = this.detailState.application()?.prefix ?? '';
+    if (assignedSoffidRoles === null) {
+      return { severity: 'warn', summary, detail: rolesErrorMessage(prefix) };
+    }
+    return {
+      severity: 'success',
+      summary,
+      detail: `${detail} ${APPLICATION_DETAIL_ROLES_ASSIGNED_MESSAGE(assignedSoffidRoles, prefix)}`,
+    };
+  }
 }

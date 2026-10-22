@@ -159,12 +159,17 @@ test('lists the backend connections with their role comparison', async ({ page }
     "Usuari d'integració",
     'Rols requerits',
     'Rols atorgats',
-    'Coincidència de rols',
   ]);
   await expect(rows(page).first()).toContainText('Soffid');
   await expect(rows(page).first()).toContainText('Sistema extern');
   await expect(rows(page).first()).toContainText('INV_ADMIN, INV_READ');
-  await expect(rows(page).first()).toContainText('No coincideixen');
+  await expect(
+    rows(page)
+      .first()
+      .getByRole('img', {
+        name: 'Els rols atorgats a Soffid no coincideixen amb els rols requerits.',
+      }),
+  ).toBeVisible();
   expect(mock.listRequests[0].searchParams.get('appIntegrationId')).toBe('13');
   expect(mock.listRequests[0].searchParams.get('statusId')).toBe('1');
   await page.screenshot({ path: testInfo.outputPath('integrations-view.png'), fullPage: true });
@@ -244,7 +249,9 @@ test('adds a connection to an external system and deactivates another one', asyn
   await expect(rows(page)).toHaveCount(1);
 });
 
-test('reports a Soffid outage inline and recovers on retry', async ({ page }) => {
+// A Soffid outage no longer fails the list (rows come back with rolesUnavailable); this covers any
+// other structured error on the listing.
+test('reports a listing error inline and recovers on retry', async ({ page }) => {
   const mock = await openApplication(page, 'integrations');
   await expect(rows(page)).toHaveCount(1);
   mock.failListing = true;

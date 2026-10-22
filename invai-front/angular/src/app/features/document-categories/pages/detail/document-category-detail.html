@@ -1,0 +1,228 @@
+<app-section-container [header]="title()">
+  @if (category(); as current) {
+    <form
+      class="document-category-detail"
+      novalidate
+      [formGroup]="form"
+      (ngSubmit)="save()"
+    >
+      <div class="document-category-detail__toolbar">
+        @if (!isActive()) {
+          <p class="document-category-detail__notice" role="status">
+            <i aria-hidden="true" [class]="icons.INFO_CIRCLE"></i>
+            <span>{{ texts.inactive }}</span>
+          </p>
+        } @else if (isEditing()) {
+          <p-button
+            type="button"
+            severity="secondary"
+            [ariaLabel]="texts.cancelAriaLabel"
+            [disabled]="isSaving()"
+            [icon]="icons.TIMES"
+            [label]="texts.cancel"
+            [outlined]="true"
+            [pt]="{ root: { id: 'document-category-detail-cancel' } }"
+            (onClick)="cancelEditing()"
+          />
+        } @else {
+          <p-button
+            type="button"
+            [ariaLabel]="texts.editAriaLabel(title())"
+            [icon]="icons.PENCIL"
+            [label]="texts.edit"
+            [pt]="{ root: { id: 'document-category-detail-edit' } }"
+            (onClick)="startEditing()"
+          />
+        }
+      </div>
+
+      <div class="invai-grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div>
+          <p-floatlabel class="w-full">
+            <input
+              id="document-category-detail-name"
+              class="w-full"
+              formControlName="name"
+              pInputText
+              type="text"
+              [attr.aria-describedby]="
+                isInvalid(form.controls.name) ? 'document-category-detail-name-error' : null
+              "
+              [attr.aria-invalid]="isInvalid(form.controls.name)"
+              [attr.maxlength]="nameMaxLength"
+              [class.invai-form-readonly-control]="!isEditing()"
+              [readOnly]="!isEditing()"
+            />
+            <label for="document-category-detail-name">{{ labels.name }}</label>
+          </p-floatlabel>
+          @if (isInvalid(form.controls.name)) {
+            <p
+              id="document-category-detail-name-error"
+              class="mb-0 mt-1 text-sm text-red-600"
+              role="alert"
+            >
+              {{ nameError(form.controls.name, errors.nameMaxLength) }}
+            </p>
+          }
+        </div>
+        <div>
+          <p-floatlabel class="w-full">
+            <input
+              id="document-category-detail-name-es"
+              class="w-full"
+              formControlName="nameEs"
+              pInputText
+              type="text"
+              [attr.aria-describedby]="
+                isInvalid(form.controls.nameEs) ? 'document-category-detail-name-es-error' : null
+              "
+              [attr.aria-invalid]="isInvalid(form.controls.nameEs)"
+              [attr.maxlength]="nameMaxLength"
+              [class.invai-form-readonly-control]="!isEditing()"
+              [readOnly]="!isEditing()"
+            />
+            <label for="document-category-detail-name-es">{{ labels.nameEs }}</label>
+          </p-floatlabel>
+          @if (isInvalid(form.controls.nameEs)) {
+            <p
+              id="document-category-detail-name-es-error"
+              class="mb-0 mt-1 text-sm text-red-600"
+              role="alert"
+            >
+              {{ nameError(form.controls.nameEs, errors.nameEsMaxLength) }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <section
+        class="document-category-detail__section"
+        aria-labelledby="document-category-detail-subcategories-title"
+      >
+        <div class="document-category-detail__section-header">
+          <h2 id="document-category-detail-subcategories-title">{{ texts.subcategoriesTitle }}</h2>
+          @if (isActive()) {
+            <p-button
+              type="button"
+              [ariaLabel]="texts.addSubcategoryAriaLabel(title())"
+              [disabled]="isSubcategoryDialogVisible()"
+              [icon]="icons.PLUS"
+              [label]="texts.addSubcategory"
+              (onClick)="openNewSubcategoryDialog()"
+            />
+          }
+        </div>
+        <app-document-subcategories-table
+          [categoryName]="title()"
+          [columns]="subcategoryColumns"
+          [isCategoryActive]="isActive()"
+          [isLoading]="isSubcategoriesRefreshing()"
+          [itemsList]="subcategoriesList()"
+          (onSelectAction)="onSubcategoryAction($event)"
+        />
+      </section>
+
+      <section
+        class="document-category-detail__section"
+        aria-labelledby="document-category-detail-permissions-title"
+      >
+        <h2 id="document-category-detail-permissions-title">{{ texts.permissionsTitle }}</h2>
+        <p class="document-category-detail__info">
+          <i aria-hidden="true" [class]="icons.INFO_CIRCLE"></i>
+          <span>{{ texts.permissionsInfo }}</span>
+        </p>
+        <app-document-category-permissions-table [form]="permissionsForm" />
+      </section>
+
+      <div class="document-category-detail__actions">
+        @if (isEditing()) {
+          <p-button
+            type="submit"
+            [ariaLabel]="texts.saveAriaLabel"
+            [disabled]="isSaving()"
+            [icon]="icons.SAVE"
+            [label]="texts.save"
+            [loading]="isSaving()"
+          />
+        }
+        <p-button
+          type="button"
+          styleClass="document-category-detail__back"
+          [ariaLabel]="texts.backAriaLabel"
+          [icon]="icons.ARROW_LEFT"
+          [label]="texts.back"
+          [text]="true"
+          (onClick)="goBack()"
+        />
+      </div>
+    </form>
+
+    @if (isSubcategoryDialogVisible()) {
+      <app-document-category-dialog
+        kind="subcategory"
+        [(visible)]="isSubcategoryDialogVisible"
+        [canEdit]="!selectedSubcategory()?.deletedAt"
+        [canRestore]="canRestoreSelectedSubcategory()"
+        [categoryLabel]="title()"
+        [categoryOptions]="categoryOptions()"
+        [form]="subcategoryForm"
+        [isDeleting]="isDeleting()"
+        [isLoading]="isSubcategoryLoading()"
+        [isSaving]="isSubcategorySaving()"
+        [mode]="subcategoryDialogMode()"
+        (cancelEdit)="cancelSubcategoryEdit()"
+        (closed)="closeSubcategoryDialog()"
+        (deactivate)="deactivateSelectedSubcategory()"
+        (edit)="startSubcategoryEdit()"
+        (restore)="restoreSelectedSubcategory()"
+        (submitForm)="submitSubcategory()"
+      />
+    }
+    @if (isDeleteDialogVisible()) {
+      <app-confirmation-dialog
+        confirmIcon="pi pi-trash"
+        [(visible)]="isDeleteDialogVisible"
+        [cancelAriaLabel]="subcategoryTexts.deleteDialogCancelAriaLabel"
+        [cancelLabel]="deleteDialogCancelLabel"
+        [confirmAriaLabel]="subcategoryTexts.deleteDialogConfirmAriaLabel"
+        [confirmLabel]="deleteDialogConfirmLabel"
+        [message]="deleteDialogMessage()"
+        [title]="subcategoryTexts.deleteDialogTitle"
+        (cancel)="closeDeleteDialog()"
+        (confirm)="confirmDelete()"
+      />
+    }
+  } @else {
+    <div class="document-category-detail">
+      <p class="document-category-detail__notice" role="alert">
+        <i aria-hidden="true" [class]="icons.EXCLAMATION_CIRCLE"></i>
+        <span>{{ texts.loadError }}</span>
+      </p>
+      <div class="document-category-detail__actions">
+        <p-button
+          type="button"
+          styleClass="document-category-detail__back"
+          [ariaLabel]="texts.backAriaLabel"
+          [icon]="icons.ARROW_LEFT"
+          [label]="texts.back"
+          [text]="true"
+          (onClick)="goBack()"
+        />
+      </div>
+    </div>
+  }
+
+  @if (isLeaveDialogVisible()) {
+    <app-confirmation-dialog
+      [visible]="true"
+      [cancelAriaLabel]="texts.leaveCancelAriaLabel"
+      [cancelLabel]="texts.leaveCancel"
+      [confirmAriaLabel]="texts.leaveConfirmAriaLabel"
+      [confirmLabel]="texts.leaveConfirm"
+      [message]="texts.leaveMessage"
+      [title]="texts.leaveTitle"
+      (cancel)="decideLeave(false)"
+      (confirm)="decideLeave(true)"
+    />
+  }
+</app-section-container>

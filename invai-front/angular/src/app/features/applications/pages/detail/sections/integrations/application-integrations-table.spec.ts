@@ -32,6 +32,7 @@ const CONNECTIONS: ApplicationIntegrationConnectionOutput[] = [
     ],
     grantedRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: 'SEYCON' }],
     rolesMismatch: true,
+    rolesUnavailable: false,
     deletedAt: null,
   },
   {
@@ -44,6 +45,7 @@ const CONNECTIONS: ApplicationIntegrationConnectionOutput[] = [
     requiredRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: null }],
     grantedRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: null }],
     rolesMismatch: false,
+    rolesUnavailable: false,
     deletedAt: null,
   },
   {
@@ -56,9 +58,19 @@ const CONNECTIONS: ApplicationIntegrationConnectionOutput[] = [
     requiredRoles: [],
     grantedRoles: null,
     rolesMismatch: null,
+    rolesUnavailable: false,
     deletedAt: null,
   },
 ];
+
+const UNAVAILABLE_ROLES_CONNECTION: ApplicationIntegrationConnectionOutput = {
+  ...CONNECTIONS[0],
+  id: 4,
+  requiredRoles: null,
+  grantedRoles: null,
+  rolesMismatch: null,
+  rolesUnavailable: true,
+};
 
 describe('ApplicationIntegrationsTable', () => {
   let component: ApplicationIntegrationsTable;
@@ -90,7 +102,6 @@ describe('ApplicationIntegrationsTable', () => {
       "Usuari d'integració",
       'Rols requerits',
       'Rols atorgats',
-      'Coincidència de rols',
     ]);
     expect(headers.map((header) => header.querySelector('p-sorticon') != null)).toEqual([
       false,
@@ -98,19 +109,17 @@ describe('ApplicationIntegrationsTable', () => {
       true,
       false,
       false,
-      false,
     ]);
     expect(root().querySelector('.p-datatable-striped')).not.toBeNull();
   });
 
-  it('renders the system kind, roles and the three role comparison states as text', () => {
+  it('renders the system kind and the required and granted roles', () => {
     expect(cells(rows()[0])).toEqual([
       'Soffid, Sistema extern',
       'Spring Boot',
       'u00004',
       'INV_ADMIN, INV_READ',
       'INV_ADMIN',
-      'No coincideixen: Els rols atorgats a Soffid no coincideixen amb els rols requerits.',
     ]);
     expect(cells(rows()[1])).toEqual([
       "Portal Salut, Aplicació de l'inventari",
@@ -118,10 +127,64 @@ describe('ApplicationIntegrationsTable', () => {
       'u00005',
       'INV_ADMIN',
       'INV_ADMIN',
-      'Coincideixen',
     ]);
-    expect(cells(rows()[2]).slice(3)).toEqual(['-', 'No disponible', "No s'ha pogut comprovar"]);
-    expect(rows()[0].querySelector('.pi-exclamation-triangle')?.getAttribute('aria-hidden')).toBe('true');
+    expect(cells(rows()[2]).slice(3)).toEqual(['-', 'No disponible']);
+  });
+
+  it('marks both role lists unavailable when Soffid could not resolve them', () => {
+    fixture.componentRef.setInput('itemsList', {
+      items: [UNAVAILABLE_ROLES_CONNECTION],
+      total: 1,
+    });
+    fixture.detectChanges();
+
+    expect(cells(rows()[0]).slice(3)).toEqual(['No disponible', 'No disponible']);
+    expect(rows()[0].querySelector('.application-integrations-roles-mismatch')).toBeNull();
+  });
+
+  it('disables editing only for a row whose roles Soffid could not resolve', () => {
+    const table = component as unknown as {
+      openActionsMenu: (event: Event, row: ApplicationIntegrationConnectionOutput, menu: Menu) => void;
+      rowActions: () => MenuItem[];
+    };
+    const menu = { toggle: vi.fn() } as unknown as Menu;
+    fixture.componentRef.setInput('showActions', true);
+    fixture.detectChanges();
+
+    table.openActionsMenu(new MouseEvent('click'), UNAVAILABLE_ROLES_CONNECTION, menu);
+    expect(table.rowActions().map((action) => [action.label, !!action.disabled])).toEqual([
+      ['Consulta', false],
+      ['Edita', true],
+      ['Dona de baixa', false],
+    ]);
+
+    table.openActionsMenu(new MouseEvent('click'), CONNECTIONS[0], menu);
+    expect(table.rowActions()[1].disabled).toBe(false);
+  });
+
+  it('flags only mismatching roles with a focusable warning next to the system name', () => {
+    const warnings = rows().map((row) => row.querySelector<HTMLElement>('.application-integrations-roles-mismatch'));
+
+    expect(warnings.map((warning) => warning != null)).toEqual([true, false, false]);
+    const warning = warnings[0]!;
+    expect(warning.closest('.application-integrations-system__name')?.textContent?.trim()).toBe('Soffid');
+    expect(warning.getAttribute('role')).toBe('img');
+    expect(warning.getAttribute('tabindex')).toBe('0');
+    expect(warning.getAttribute('aria-label')).toBe(
+      'Els rols atorgats a Soffid no coincideixen amb els rols requerits.',
+    );
+    expect(warning.querySelector('.pi-exclamation-circle')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('does not open the row when the warning receives Enter or a double click', () => {
+    const emitted: ActionParams<ApplicationIntegrationConnectionOutput>[] = [];
+    component.onSelectAction.subscribe((action) => emitted.push(action));
+    const warning = rows()[0].querySelector<HTMLElement>('.application-integrations-roles-mismatch')!;
+
+    warning.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    warning.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+
+    expect(emitted).toEqual([]);
   });
 
   it('keeps rows consultable by double click and Enter without the action column', () => {

@@ -89,6 +89,22 @@ describe('ApplicationFiltersForm', () => {
     expect(toggleDebug.nativeElement.parentElement.classList.contains('items-center')).toBe(true);
   });
 
+  it('should float the administrative unit label like the other filters', () => {
+    const label = fixture.nativeElement.querySelector('#applications-filter-administrative-unit-label') as HTMLLabelElement;
+    const select = fixture.nativeElement.querySelector('p-select:has(#applications-filter-administrative-unit)') as HTMLElement;
+
+    expect(label.parentElement?.tagName).toBe('P-FLOATLABEL');
+    expect(label.classList.contains('text-xs')).toBe(false);
+    expect(label.getAttribute('for')).toBe('applications-filter-administrative-unit');
+    expect(select.parentElement).toBe(label.parentElement);
+    expect(select.classList.contains('p-inputwrapper-filled')).toBe(false);
+
+    fixture.componentInstance.form().controls.administrativeUnit.setValue('A04003003');
+    fixture.detectChanges();
+
+    expect(select.classList.contains('p-inputwrapper-filled')).toBe(true);
+  });
+
   it('should use the application and infrastructure catalog options', () => {
     const selects = fixture.debugElement
       .queryAll(By.directive(Select))

@@ -3,9 +3,9 @@
   [attr.aria-labelledby]="titleId()"
 >
   <div class="application-detail-section-layout__header">
-    <h3 [id]="titleId()" class="application-detail-section-layout__title">
+    <h2 [id]="titleId()" class="application-detail-section-layout__title">
       {{ title() }}
-    </h3>
+    </h2>
 
     <ng-content select="[section-actions]" />
   </div>

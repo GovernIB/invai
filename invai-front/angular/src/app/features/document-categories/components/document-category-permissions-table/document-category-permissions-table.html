@@ -1,0 +1,68 @@
+<p-table
+  dataKey="roleId"
+  styleClass="invai-scrollable-table"
+  [scrollable]="true"
+  [stripedRows]="true"
+  [tableStyle]="{ 'min-width': '52rem' }"
+  [value]="form().controls"
+  [pt]="{ table: { 'aria-label': texts.caption } }"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th scope="col" class="document-category-permissions__role">
+        <div class="invai-table-header-content">
+          <span class="invai-table-header-label">{{ texts.role }}</span>
+        </div>
+      </th>
+      @for (permission of permissions; track permission) {
+        <th scope="col">
+          <div class="invai-table-header-content">
+            <span class="invai-table-header-label">{{ labels[permission] }}</span>
+          </div>
+        </th>
+      }
+      <th scope="col">
+        <div class="invai-table-header-content">
+          <span class="invai-table-header-label">{{ texts.all }}</span>
+        </div>
+      </th>
+    </tr>
+  </ng-template>
+
+  <ng-template let-row pTemplate="body">
+    <tr>
+      <th scope="row" class="document-category-permissions__role">
+        {{ row.controls.roleName.value }}
+      </th>
+      @for (permission of permissions; track permission) {
+        <td>
+          <div class="document-category-permissions__choice">
+            <p-checkbox
+              [ariaLabel]="texts.checkbox(labels[permission], row.controls.roleName.value)"
+              [binary]="true"
+              [formControl]="row.controls[permission]"
+              [inputId]="checkboxId(row, permission)"
+            />
+            <label [for]="checkboxId(row, permission)">
+              {{ row.controls[permission].value ? texts.granted : texts.denied }}
+            </label>
+          </div>
+        </td>
+      }
+      <td>
+        <div class="document-category-permissions__choice">
+          <p-checkbox
+            [ariaLabel]="texts.checkbox(texts.all, row.controls.roleName.value)"
+            [binary]="true"
+            [disabled]="row.disabled"
+            [inputId]="checkboxId(row, 'all')"
+            [ngModel]="hasAll(row)"
+            [ngModelOptions]="{ standalone: true }"
+            (onChange)="setAll(row, $event)"
+          />
+          <label [for]="checkboxId(row, 'all')">{{ texts.fullAccess }}</label>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

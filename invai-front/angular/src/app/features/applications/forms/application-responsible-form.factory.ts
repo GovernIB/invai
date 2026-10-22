@@ -7,6 +7,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { SoffidPersonControlValue } from '@features/maintenances/responsibles/responsibles.model';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { maxUtf8BytesValidator } from '@shared/utils/text-length.utils';
 
 export interface ApplicationResponsibleFormControls {
   personalCaib: FormControl<boolean>;
@@ -32,7 +34,7 @@ export function createApplicationResponsibleForm(
     soffidPerson: formBuilder.control<SoffidPersonControlValue>({ value: null, disabled: true }),
     email: formBuilder.nonNullable.control(''),
     cargo: formBuilder.nonNullable.control({ value: '', disabled: true }),
-    observation: formBuilder.nonNullable.control(''),
+    observation: formBuilder.nonNullable.control('', maxUtf8BytesValidator(TEXT_FIELD_MAX_BYTES)),
   });
 }
 

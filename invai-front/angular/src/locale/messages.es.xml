@@ -194,6 +194,14 @@
           <context context-type="linenumber">1</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="8244167793043174518" datatype="html">
+        <source>Ruta de navegació</source>
+        <target>Ruta de navegación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/breadcrumbs/breadcrumbs.i18n.ts</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="8030440494045207134" datatype="html">
         <source>Obre el menú</source>
         <target>Abrir el menú</target>
@@ -218,6 +226,14 @@
           <context context-type="linenumber">3</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="1884553794298554681" datatype="html">
+        <source>Navegació lateral desplegable</source>
+        <target>Navegación lateral desplegable</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/sidebar/sidebar.i18n.ts</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="3819174265199824373" datatype="html">
         <source>Carregant la pàgina</source>
         <target>Cargando la página</target>
@@ -240,6 +256,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/main-layout/components/top-menu/top-menu.i18n.ts</context>
           <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="322823969273820970" datatype="html">
+        <source>Navegació principal</source>
+        <target>Navegación principal</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/main-layout/components/top-menu/top-menu.i18n.ts</context>
+          <context context-type="linenumber">2</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1519954996184640001" datatype="html">
@@ -1722,6 +1746,14 @@
           <context context-type="linenumber">2</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="3700544988914475699" datatype="html">
+        <source>Temes d&apos;ajuda</source>
+        <target>Temas de ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="3837851089154424816" datatype="html">
         <source>Cercar en tota l&apos;ajuda...</source>
         <target>Buscar en toda la ayuda...</target>
@@ -2514,6 +2546,22 @@
           <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="4050834046027383267" datatype="html">
+        <source><x id="label" equiv-text="label"/> (1 filtre aplicat)</source>
+        <target><x id="label" equiv-text="label"/> (1 filtro aplicado)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="691184675982657595" datatype="html">
+        <source><x id="label" equiv-text="label"/> (<x id="count" equiv-text="count"/> filtres aplicats)</source>
+        <target><x id="label" equiv-text="label"/> (<x id="count" equiv-text="count"/> filtros aplicados)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/section-actions/section-actions.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="1694484243257851899" datatype="html">
         <source>Mostra o oculta columnes</source>
         <target>Mostrar u ocultar columnas</target>
@@ -2606,9 +2654,21 @@
         <source>Aplicació afegida</source>
         <target>Aplicación añadida</target>
       </trans-unit>
-      <trans-unit id="3175640910469299377" datatype="html">
-        <source>Aplicació afegida correctament.</source>
-        <target>Aplicación añadida correctamente.</target>
+      <trans-unit id="3882328576956347753" datatype="html">
+        <source>Aplicació afegida correctament. No hi ha cap rol de Soffid amb el prefix <x id="prefix" equiv-text="prefix"/>.</source>
+        <target>Aplicación añadida correctamente. No hay ningún rol de Soffid con el prefijo <x id="prefix" equiv-text="prefix"/>.</target>
+      </trans-unit>
+      <trans-unit id="3072058455962120341" datatype="html">
+        <source>Aplicació afegida correctament amb 1 rol de Soffid assignat.</source>
+        <target>Aplicación añadida correctamente con 1 rol de Soffid asignado.</target>
+      </trans-unit>
+      <trans-unit id="91243308496619728" datatype="html">
+        <source>Aplicació afegida correctament amb <x id="assignedRoles" equiv-text="assignedRoles"/> rols de Soffid assignats.</source>
+        <target>Aplicación añadida correctamente con <x id="assignedRoles" equiv-text="assignedRoles"/> roles de Soffid asignados.</target>
+      </trans-unit>
+      <trans-unit id="8484828048533326443" datatype="html">
+        <source>L&apos;aplicació s&apos;ha afegit, però no s&apos;han pogut assignar els seus rols de Soffid.</source>
+        <target>La aplicación se ha añadido, pero no se han podido asignar sus roles de Soffid.</target>
       </trans-unit>
       <trans-unit id="462200911009917777" datatype="html">
         <source>No s&apos;ha pogut afegir l&apos;aplicació.</source>
@@ -2728,6 +2788,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
           <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3251428796688578589" datatype="html">
+        <source>Els canvis s&apos;han desat, però no s&apos;han pogut assignar els rols de Soffid del prefix <x id="prefix" equiv-text="prefix"/>.</source>
+        <target>Los cambios se han guardado, pero no se han podido asignar los roles de Soffid del prefijo <x id="prefix" equiv-text="prefix"/>.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2424204837645803303" datatype="html">
@@ -3044,6 +3112,38 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
           <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1518107423901959541" datatype="html">
+        <source>L&apos;aplicació s&apos;ha donat d&apos;alta, però no s&apos;han pogut assignar els seus rols de Soffid.</source>
+        <target>La aplicación se ha dado de alta, pero no se han podido asignar sus roles de Soffid.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6551480959044435992" datatype="html">
+        <source>No s&apos;ha assignat cap rol nou de Soffid amb el prefix <x id="prefix" equiv-text="prefix"/>.</source>
+        <target>No se ha asignado ningún rol nuevo de Soffid con el prefijo <x id="prefix" equiv-text="prefix"/>.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8158667352818358957" datatype="html">
+        <source>S&apos;ha assignat 1 rol de Soffid amb el prefix <x id="prefix" equiv-text="prefix"/>.</source>
+        <target>Se ha asignado 1 rol de Soffid con el prefijo <x id="prefix" equiv-text="prefix"/>.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="977570670721447362" datatype="html">
+        <source>S&apos;han assignat <x id="assignedRoles" equiv-text="assignedRoles"/> rols de Soffid amb el prefix <x id="prefix" equiv-text="prefix"/>.</source>
+        <target>Se han asignado <x id="assignedRoles" equiv-text="assignedRoles"/> roles de Soffid con el prefijo <x id="prefix" equiv-text="prefix"/>.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/application-detail.i18n.ts</context>
+          <context context-type="linenumber">26</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3757869692285153060" datatype="html">
@@ -5479,7 +5579,7 @@
       <trans-unit id="5855501516267521817" datatype="html"><source>Personal CAIB</source><target>Personal CAIB</target></trans-unit>
       <trans-unit id="applicationAssignmentCaibRequiredByResponsibility" datatype="html"><source>Aquesta responsabilitat requereix personal CAIB.</source><target>Esta responsabilidad requiere personal CAIB.</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidPerson" datatype="html"><source>Persona CAIB</source><target>Persona CAIB</target></trans-unit>
-      <trans-unit id="applicationAssignmentSoffidPlaceholder" datatype="html"><source>Cerca per nom o codi d’usuari</source><target>Busca por nombre o código de usuario</target></trans-unit>
+      <trans-unit id="applicationAssignmentSoffidPlaceholder" datatype="html"><source>Cerca per nom, codi d’usuari o correu electrònic</source><target>Busca por nombre, código de usuario o correo electrónico</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidInstruction" datatype="html"><source>Escriu almenys 3 caràcters i selecciona una persona de Soffid.</source><target>Escribe al menos 3 caracteres y selecciona una persona de Soffid.</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidSearching" datatype="html"><source>Cercant persones a Soffid…</source><target>Buscando personas en Soffid…</target></trans-unit>
       <trans-unit id="applicationAssignmentSoffidEmpty" datatype="html"><source>No s&apos;han trobat persones a Soffid.</source><target>No se han encontrado personas en Soffid.</target></trans-unit>
@@ -5543,7 +5643,7 @@
       <trans-unit id="2731334482216363698" datatype="html"><source>No s&apos;ha pogut actualitzar la persona autoritzada.</source><target>No se ha podido actualizar la persona autorizada.</target></trans-unit>
       <trans-unit id="4187411163244585728" datatype="html"><source>Filtra tipus d&apos;autorització</source><target>Filtra tipos de autorización</target></trans-unit>
       <trans-unit id="2725942142173965438" datatype="html"><source>Totes les responsabilitats estan assignades</source><target>Todas las responsabilidades están asignadas</target></trans-unit>
-      <trans-unit id="applicationAllResponsibilitiesAssignedDetail" datatype="html"><source>Dona de baixa l&apos;assignació actual i crea&apos;n una de nova si vols substituir la persona responsable.</source><target>Da de baja la asignación actual y crea una nueva si quieres sustituir a la persona responsable.</target></trans-unit>
+      <trans-unit id="applicationAllResponsibilitiesAssignedDetail" datatype="html"><source>Per afegir un responsable nou, primer has de donar de baixa una de les assignacions actuals des del menú d&apos;accions de la taula.</source><target>Para añadir un responsable nuevo, primero tienes que dar de baja una de las asignaciones actuales desde el menú de acciones de la tabla.</target></trans-unit>
       <trans-unit id="3780532370075144584" datatype="html"><source>Camps no desats</source><target>Campos no guardados</target></trans-unit>
       <trans-unit id="9195329232852450016" datatype="html"><source>El càrrec i les observacions no s&apos;han desat perquè l&apos;API actual no admet aquests camps.</source><target>El cargo y las observaciones no se han guardado porque la API actual no admite estos campos.</target></trans-unit>
       <trans-unit id="4822694041087292712" datatype="html"><source>La responsabilitat, el càrrec i les observacions no s&apos;han desat perquè l&apos;API actual no admet aquests camps.</source><target>La responsabilidad, el cargo y las observaciones no se han guardado porque la API actual no admite estos campos.</target></trans-unit>
@@ -5597,7 +5697,7 @@
       <trans-unit id="5573371473277078765" datatype="html"><source>Descarta el lot preparat</source><target>Descarta el lote preparado</target></trans-unit>
       <trans-unit id="8568918028070214439" datatype="html"><source>Descarta el lot</source><target>Descarta el lote</target></trans-unit>
       <trans-unit id="3004871337639430958" datatype="html"><source>Vols transferir <x id="PH" equiv-text="count"/> assignacions de «<x id="PH_1" equiv-text="source"/>» a «<x id="PH_2" equiv-text="destination"/>»?</source><target>¿Quieres transferir <x id="PH" equiv-text="count"/> asignaciones de «<x id="PH_1" equiv-text="source"/>» a «<x id="PH_2" equiv-text="destination"/>»?</target></trans-unit>
-      <trans-unit id="3502176433705258782" datatype="html"><source>Vols revocar <x id="PH" equiv-text="count"/> assignacions de «<x id="PH_1" equiv-text="source"/>»?</source><target>¿Quieres revocar <x id="PH" equiv-text="count"/> asignaciones de «<x id="PH_1" equiv-text="source"/>»?</target></trans-unit>
+      <trans-unit id="roleTransferRevokeConfirmMessage" datatype="html"><source>Vols revocar <x id="PH" equiv-text="count"/> assignacions de «<x id="PH_1" equiv-text="source"/>»? Es donaran de baixa i se n&apos;esborraran les observacions.</source><target>¿Quieres revocar <x id="PH" equiv-text="count"/> asignaciones de «<x id="PH_1" equiv-text="source"/>»? Se darán de baja y se borrarán sus observaciones.</target></trans-unit>
       <trans-unit id="3560248416188684793" datatype="html"><source>Si canvies a «<x id="PH" equiv-text="source"/>», es descartaran els rols que has preparat.</source><target>Si cambias a «<x id="PH" equiv-text="source"/>», se descartarán los roles que has preparado.</target></trans-unit>
       <trans-unit id="2328986803857741546" datatype="html"><source>Mou tots els rols de l&apos;aplicació <x id="PH" equiv-text="application"/> al lot</source><target>Mueve todos los roles de la aplicación <x id="PH" equiv-text="application"/> al lote</target></trans-unit>
       <trans-unit id="5670408763203488380" datatype="html"><source>Retorna tots els rols de l&apos;aplicació <x id="PH" equiv-text="application"/> a l&apos;origen</source><target>Devuelve todos los roles de la aplicación <x id="PH" equiv-text="application"/> al origen</target></trans-unit>
@@ -6310,12 +6410,18 @@
       <trans-unit id="applicationsDir3CheckSuccess" datatype="html"><source>Validació DIR3 completada</source><target>Validación DIR3 completada</target></trans-unit>
       <trans-unit id="applicationsDir3CheckMismatches" datatype="html"><source>Aplicacions amb discrepàncies DIR3: <x id="PH" equiv-text="count"/>.</source><target>Aplicaciones con discrepancias DIR3: <x id="PH" equiv-text="count"/>.</target></trans-unit>
       <trans-unit id="applicationsDir3CheckError" datatype="html"><source>No s&apos;ha pogut completar la validació DIR3.</source><target>No se ha podido completar la validación DIR3.</target></trans-unit>
+      <trans-unit id="applicationsDir3AuditStartingLabel" datatype="html"><source>Validant DIR3…</source><target>Validando DIR3…</target></trans-unit>
+      <trans-unit id="applicationsDir3AuditProgressLabel" datatype="html"><source>Validant DIR3: <x id="PH" equiv-text="processed"/> de <x id="PH_1" equiv-text="total"/></source><target>Validando DIR3: <x id="PH" equiv-text="processed"/> de <x id="PH_1" equiv-text="total"/></target></trans-unit>
+      <trans-unit id="applicationsDir3AuditResultWithFailures" datatype="html"><source>Aplicacions amb discrepàncies DIR3: <x id="PH" equiv-text="mismatches"/>. Aplicacions que no s&apos;han pogut validar: <x id="PH_1" equiv-text="failed"/>.</source><target>Aplicaciones con discrepancias DIR3: <x id="PH" equiv-text="mismatches"/>. Aplicaciones que no se han podido validar: <x id="PH_1" equiv-text="failed"/>.</target></trans-unit>
+      <trans-unit id="applicationsDir3AuditStatusError" datatype="html"><source>No s&apos;ha pogut consultar el progrés de la validació DIR3.</source><target>No se ha podido consultar el progreso de la validación DIR3.</target></trans-unit>
+      <trans-unit id="applicationsDir3AuditSessionFailure" datatype="html"><source>La validació DIR3 s&apos;ha aturat perquè la teva sessió ha caducat o no es pot renovar. Tanca la sessió, torna a entrar i torna-ho a provar.</source><target>La validación DIR3 se ha detenido porque tu sesión ha caducado o no se puede renovar. Cierra la sesión, vuelve a entrar e inténtalo de nuevo.</target></trans-unit>
+      <trans-unit id="applicationsDir3AuditSoffidFailure" datatype="html"><source>La validació DIR3 no ha pogut començar perquè no s&apos;han pogut consultar les dades de Soffid. Torna-ho a provar més tard.</source><target>La validación DIR3 no ha podido empezar porque no se han podido consultar los datos de Soffid. Inténtalo de nuevo más tarde.</target></trans-unit>
       <trans-unit id="applicationAssignmentResponsibleDetailTitle" datatype="html"><source>Consulta del responsable</source><target>Consulta del responsable</target></trans-unit>
       <trans-unit id="applicationAssignmentAuthorizedDetailTitle" datatype="html"><source>Consulta de la persona autoritzada</source><target>Consulta de la persona autorizada</target></trans-unit>
       <trans-unit id="applicationAssignmentDetailClose" datatype="html"><source>Tanca la consulta de l'assignació</source><target>Cerrar la consulta de la asignación</target></trans-unit>
       <trans-unit id="dir3Search" datatype="html">
-        <source>Cerca unitats administratives per nom</source>
-        <target>Busca unidades administrativas por nombre</target>
+        <source>Cerca unitats administratives per nom o codi</source>
+        <target>Busca unidades administrativas por nombre o código</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/administrative-units/administrative-unit-field.ts</context>
           <context context-type="linenumber">55</context>
@@ -6365,12 +6471,136 @@
           <context context-type="linenumber">88</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="applicationSecurityRoleSearch" datatype="html">
-        <source>Cerca rols per sistema</source>
-        <target>Buscar roles por sistema</target>
+      <trans-unit id="applicationSecurityRoleCode" datatype="html">
+        <source>Codi</source>
+        <target>Código</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
           <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleQuickSearchPlaceholder" datatype="html">
+        <source>Cerca per codi o descripció</source>
+        <target>Busca por código o descripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleQuickSearchAriaLabel" datatype="html">
+        <source>Cerca rols de l&apos;aplicació per codi o descripció</source>
+        <target>Busca roles de la aplicación por código o descripción</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleQuickSearchClear" datatype="html">
+        <source>Esborra la cerca de rols</source>
+        <target>Borra la búsqueda de roles</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleFiltersButton" datatype="html">
+        <source>Mostra o oculta els filtres de rols</source>
+        <target>Muestra u oculta los filtros de roles</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleFilterCode" datatype="html">
+        <source>Codi</source>
+        <target>Código</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleFilterSystem" datatype="html">
+        <source>Sistema</source>
+        <target>Sistema</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleSearchInstruction" datatype="html">
+        <source>Obre la llista i escriu el codi del rol, per exemple amb el prefix INV_.</source>
+        <target>Abre la lista y escribe el código del rol, por ejemplo con el prefijo INV_.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleSearching" datatype="html">
+        <source>Cercant rols a Soffid…</source>
+        <target>Buscando roles en Soffid…</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleSearchEmpty" datatype="html">
+        <source>No s&apos;han trobat rols a Soffid.</source>
+        <target>No se han encontrado roles en Soffid.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleSearchError" datatype="html">
+        <source>No s&apos;ha pogut consultar Soffid. Torna-ho a provar.</source>
+        <target>No se ha podido consultar Soffid. Inténtalo de nuevo.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleRequired" datatype="html">
+        <source>Selecciona un rol de Soffid.</source>
+        <target>Selecciona un rol de Soffid.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleSearchRefine" datatype="html">
+        <source>Es mostren <x id="SHOWN" equiv-text="shown"/> de <x id="TOTAL" equiv-text="total"/> rols. Escriu més text per acotar la cerca.</source>
+        <target>Se muestran <x id="SHOWN" equiv-text="shown"/> de <x id="TOTAL" equiv-text="total"/> roles. Escribe más texto para acotar la búsqueda.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleAdd" datatype="html">
+        <source>Afegeix un rol de l&apos;aplicació</source>
+        <target>Añade un rol de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">208</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">219</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleView" datatype="html">
+        <source>Consulta el rol de l&apos;aplicació</source>
+        <target>Consulta el rol de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">220</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleEdit" datatype="html">
+        <source>Edita el rol de l&apos;aplicació</source>
+        <target>Edita el rol de la aplicación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/security/application-security-section.i18n.ts</context>
+          <context context-type="linenumber">221</context>
         </context-group>
       </trans-unit>
       <trans-unit id="webContextUrlError" datatype="html">
@@ -6469,6 +6699,54 @@
         <source>Context web pendent de verificar.</source>
         <target>Contexto web pendiente de verificar.</target>
       </trans-unit>
+      <trans-unit id="applicationSecurityRoleNotValidated" datatype="html">
+        <source>Rol no validat: el codi no comença pel prefix de l&apos;aplicació.</source>
+        <target>Rol no validado: el código no empieza por el prefijo de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleManual" datatype="html">
+        <source>Rol validat manualment</source>
+        <target>Rol validado manualmente</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleManualBy" datatype="html">
+        <source>Rol validat manualment per <x id="PH" equiv-text="user"/> el <x id="PH_1" equiv-text="date"/></source>
+        <target>Rol validado manualmente por <x id="PH" equiv-text="user"/> el <x id="PH_1" equiv-text="date"/></target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidate" datatype="html">
+        <source>Validar manualment</source>
+        <target>Validar manualmente</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateTitle" datatype="html">
+        <source>Validar manualment el rol?</source>
+        <target>¿Validar manualmente el rol?</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateMessage" datatype="html">
+        <source>El rol «<x id="PH" equiv-text="role"/>» no comença pel prefix de l&apos;aplicació. Si el valides, quedarà registrat al teu nom.</source>
+        <target>El rol «<x id="PH" equiv-text="role"/>» no empieza por el prefijo de la aplicación. Si lo validas, quedará registrado a tu nombre.</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateConfirm" datatype="html">
+        <source>Validar</source>
+        <target>Validar</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateConfirmAria" datatype="html">
+        <source>Confirma la validació manual del rol</source>
+        <target>Confirma la validación manual del rol</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateCancelAria" datatype="html">
+        <source>Cancel·la la validació manual del rol</source>
+        <target>Cancela la validación manual del rol</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateSuccess" datatype="html">
+        <source>El rol s&apos;ha validat manualment.</source>
+        <target>El rol se ha validado manualmente.</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRoleValidateError" datatype="html">
+        <source>No s&apos;ha pogut validar manualment el rol. Revisa el seu estat i torna-ho a provar.</source>
+        <target>No se ha podido validar manualmente el rol. Revisa su estado e inténtalo de nuevo.</target>
+      </trans-unit>
+      <trans-unit id="applicationSecurityRolePrefixNote" datatype="html">
+        <source>Aquest rol no comença per «<x id="PH" equiv-text="prefix"/>_». Es desarà com a validat manualment al teu nom.</source>
+        <target>Este rol no empieza por «<x id="PH" equiv-text="prefix"/>_». Se guardará como validado manualmente a tu nombre.</target>
+      </trans-unit>
       <trans-unit id="applicationSecurityUnverifiedContexts" datatype="html">
         <source>La secció Seguretat té contextos web pendents de verificar.</source>
         <target>La sección Seguridad tiene contextos web pendientes de verificar.</target>
@@ -6532,6 +6810,34 @@
       <trans-unit id="dir3StateChanged" datatype="html">
         <source>L'estat DIR3 ha canviat. S'han actualitzat les dades; tanca aquest diàleg i revisa el responsable.</source>
         <target>El estado DIR3 ha cambiado. Se han actualizado los datos; cierra este diálogo y revisa el responsable.</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheck" datatype="html">
+        <source>Validar el DIR3 de l'aplicació</source>
+        <target>Validar el DIR3 de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheckProgress" datatype="html">
+        <source>Validant el DIR3 dels responsables i autoritzats…</source>
+        <target>Validando el DIR3 de los responsables y autorizados…</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheckDone" datatype="html">
+        <source>Validació DIR3 completada</source>
+        <target>Validación DIR3 completada</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheckMismatch" datatype="html">
+        <source>L'aplicació té responsables o autoritzats amb discrepàncies DIR3.</source>
+        <target>La aplicación tiene responsables o autorizados con discrepancias DIR3.</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheckOk" datatype="html">
+        <source>El DIR3 de tots els responsables i autoritzats coincideix amb el de l'aplicació.</source>
+        <target>El DIR3 de todos los responsables y autorizados coincide con el de la aplicación.</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheckNoUnit" datatype="html">
+        <source>L'aplicació no té unitat administrativa, per això no es pot validar el DIR3.</source>
+        <target>La aplicación no tiene unidad administrativa, por eso no se puede validar el DIR3.</target>
+      </trans-unit>
+      <trans-unit id="dir3ApplicationCheckError" datatype="html">
+        <source>No s'ha pogut completar la validació DIR3 de l'aplicació. Torna-ho a provar.</source>
+        <target>No se ha podido completar la validación DIR3 de la aplicación. Vuelve a intentarlo.</target>
       </trans-unit>
       <trans-unit id="dir3ManualCancel" datatype="html">
         <source>Cancel·la la validació manual</source>
@@ -6604,10 +6910,6 @@
       <trans-unit id="applicationIntegrationsIncomplete" datatype="html">
         <source>La secció Integracions està incompleta: no hi ha cap connexió activa.</source>
         <target>La sección Integraciones está incompleta: no hay ninguna conexión activa.</target>
-      </trans-unit>
-      <trans-unit id="applicationDataSourceUnavailable" datatype="html">
-        <source>No s&apos;ha pogut consultar el catàleg d&apos;aquesta font en aquest moment. Torna-ho a provar.</source>
-        <target>No se ha podido consultar el catálogo de esta fuente en este momento. Inténtalo de nuevo.</target>
       </trans-unit>
       <trans-unit id="applicationIntegrationsConnectionsTitle" datatype="html">
         <source>Connexions</source>
@@ -6696,6 +6998,10 @@
       <trans-unit id="applicationIntegrationsGrantedUnavailable" datatype="html">
         <source>No disponible</source>
         <target>No disponible</target>
+      </trans-unit>
+      <trans-unit id="applicationIntegrationsRolesUnavailableDetail" datatype="html">
+        <source>No s&apos;han pogut consultar els rols a Soffid. Torna a carregar la pestanya per poder editar la connexió.</source>
+        <target>No se han podido consultar los roles en Soffid. Vuelve a cargar la pestaña para poder editar la conexión.</target>
       </trans-unit>
       <trans-unit id="applicationIntegrationsRequiredRolesColumn" datatype="html">
         <source>Rols requerits</source>
@@ -6993,53 +7299,77 @@
         <source>Integracions</source>
         <target>Integraciones</target>
       </trans-unit>
-      <trans-unit id="applicationDataSources" datatype="html">
-        <source>Fonts de dades</source>
-        <target>Fuentes de datos</target>
-      </trans-unit>
       <trans-unit id="applicationDataOpenData" datatype="html">
-        <source>Open Data</source>
-        <target>Open Data</target>
+        <source>Dades obertes</source>
+        <target>Datos abiertos</target>
       </trans-unit>
       <trans-unit id="applicationDataReuse" datatype="html">
         <source>Reutilització</source>
         <target>Reutilización</target>
       </trans-unit>
-      <trans-unit id="applicationDataUseCustomUrl" datatype="html">
-        <source>Utilitza una URL pròpia</source>
-        <target>Utiliza una URL propia</target>
+      <trans-unit id="applicationDataCurrentUrl" datatype="html">
+        <source>URL</source>
+        <target>URL</target>
       </trans-unit>
-      <trans-unit id="applicationDataUrl" datatype="html">
-        <source>URL de consulta</source>
-        <target>URL de consulta</target>
+      <trans-unit id="applicationDataNoUrl" datatype="html">
+        <source>No disponible</source>
+        <target>No disponible</target>
       </trans-unit>
-      <trans-unit id="applicationDataEndpoints" datatype="html">
-        <source>Endpoints GET publicats</source>
-        <target>Endpoints GET publicados</target>
+      <trans-unit id="applicationDataOpensInNewTab" datatype="html">
+        <source>(s&apos;obre en una pestanya nova)</source>
+        <target>(se abre en una pestaña nueva)</target>
+      </trans-unit>
+      <trans-unit id="applicationDataManualUrl" datatype="html">
+        <source>Indicar la URL manualment</source>
+        <target>Indicar la URL manualmente</target>
+      </trans-unit>
+      <trans-unit id="applicationDataNewUrl" datatype="html">
+        <source>Nova URL</source>
+        <target>Nueva URL</target>
       </trans-unit>
       <trans-unit id="applicationDataObservations" datatype="html">
         <source>Observacions</source>
         <target>Observaciones</target>
       </trans-unit>
-      <trans-unit id="applicationDataYes" datatype="html">
-        <source>Sí</source>
-        <target>Sí</target>
-      </trans-unit>
-      <trans-unit id="applicationDataNo" datatype="html">
-        <source>No</source>
-        <target>No</target>
-      </trans-unit>
       <trans-unit id="applicationDataNoValue" datatype="html">
         <source>No informat</source>
         <target>No informado</target>
       </trans-unit>
-      <trans-unit id="applicationDataDetectedUrlHelp" datatype="html">
-        <source>URL detectada automàticament a partir del codi de l'aplicació. Activa «Utilitza una URL pròpia» per indicar-ne una altra.</source>
-        <target>URL detectada automáticamente a partir del código de la aplicación. Activa «Utiliza una URL propia» para indicar otra.</target>
+      <trans-unit id="applicationDataUrlChecking" datatype="html">
+        <source>Comprovant si aquesta URL respon…</source>
+        <target>Comprobando si esta URL responde…</target>
       </trans-unit>
-      <trans-unit id="applicationDataUrlRequired" datatype="html">
-        <source>Indica la URL de consulta quan utilitzes una URL pròpia.</source>
-        <target>Indica la URL de consulta cuando utilices una URL propia.</target>
+      <trans-unit id="applicationDataUrlResponding" datatype="html">
+        <source>Aquesta URL respon.</source>
+        <target>Esta URL responde.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlNotResponding" datatype="html">
+        <source>Aquesta URL no respon.</source>
+        <target>Esta URL no responde.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlNotChecked" datatype="html">
+        <source>No s&apos;ha pogut comprovar la URL d&apos;aquesta font.</source>
+        <target>No se ha podido comprobar la URL de esta fuente.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlManualHint" datatype="html">
+        <source>Edita les dades per indicar-ne una manualment.</source>
+        <target>Edita los datos para indicar una manualmente.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlManualHintEditing" datatype="html">
+        <source>Marca «Indicar la URL manualment» per indicar-ne una altra.</source>
+        <target>Marca «Indicar la URL manualmente» para indicar otra.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlPending" datatype="html">
+        <source>Es coneixerà quan es desin les dades de la pestanya.</source>
+        <target>Se conocerá cuando se guarden los datos de la pestaña.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlHelp" datatype="html">
+        <source>Ha de començar per http:// o https://. En desar es comprovarà si respon.</source>
+        <target>Debe empezar por http:// o https://. Al guardar se comprobará si responde.</target>
+      </trans-unit>
+      <trans-unit id="applicationDataUrlRequiredManual" datatype="html">
+        <source>Indica la nova URL o desmarca «Indicar la URL manualment».</source>
+        <target>Indica la nueva URL o desmarca «Indicar la URL manualmente».</target>
       </trans-unit>
       <trans-unit id="applicationDataUrlMaxLength" datatype="html">
         <source>La URL no pot superar els 500 caràcters.</source>
@@ -7050,11 +7380,11 @@
         <target>Introduce una URL HTTP o HTTPS válida.</target>
       </trans-unit>
       <trans-unit id="applicationDataLoadFailed" datatype="html">
-        <source>No s'han pogut carregar les dades de l'aplicació. Torna-ho a provar.</source>
+        <source>No s&apos;han pogut carregar les dades de l&apos;aplicació. Torna-ho a provar.</source>
         <target>No se han podido cargar los datos de la aplicación. Vuelve a intentarlo.</target>
       </trans-unit>
       <trans-unit id="applicationDataUnavailable" datatype="html">
-        <source>No es pot identificar el registre de dades d'aquesta aplicació. Torna a carregar les dades.</source>
+        <source>No es pot identificar el registre de dades d&apos;aquesta aplicació. Torna a carregar les dades.</source>
         <target>No se puede identificar el registro de datos de esta aplicación. Vuelve a cargar los datos.</target>
       </trans-unit>
       <trans-unit id="applicationDataForbidden" datatype="html">
@@ -7065,10 +7395,6 @@
         <source>El registre de dades està donat de baixa i no es pot modificar.</source>
         <target>El registro de datos está dado de baja y no se puede modificar.</target>
       </trans-unit>
-      <trans-unit id="applicationDataAbsentEndpoints" datatype="html">
-        <source>Els endpoints publicats es consultaran quan es desin les dades de la pestanya.</source>
-        <target>Los endpoints publicados se consultarán cuando se guarden los datos de la pestaña.</target>
-      </trans-unit>
       <trans-unit id="applicationDataRetry" datatype="html">
         <source>Torna a carregar les dades</source>
         <target>Vuelve a cargar los datos</target>
@@ -7077,69 +7403,13 @@
         <source>Informació</source>
         <target>Información</target>
       </trans-unit>
-      <trans-unit id="applicationDataToggleHeader" datatype="html">
-        <source>Paràmetres de l'endpoint</source>
-        <target>Parámetros del endpoint</target>
+      <trans-unit id="applicationDataSavedInvalidUrl" datatype="html">
+        <source>S&apos;han desat les dades, però la URL de <x id="source" equiv-text="sources[0]"/> no respon. Comprova-la o indica&apos;n una altra.</source>
+        <target>Se han guardado los datos, pero la URL de <x id="source" equiv-text="sources[0]"/> no responde. Compruébala o indica otra.</target>
       </trans-unit>
-      <trans-unit id="applicationDataParametersOf" datatype="html">
-        <source>Paràmetres de <x id="path" equiv-text="path"/></source>
-        <target>Parámetros de <x id="path" equiv-text="path"/></target>
-      </trans-unit>
-      <trans-unit id="applicationDataNoParameters" datatype="html">
-        <source>Sense paràmetres</source>
-        <target>Sin parámetros</target>
-      </trans-unit>
-      <trans-unit id="applicationDataEndpointsEmpty" datatype="html">
-        <source>L'aplicació no publica cap endpoint GET.</source>
-        <target>La aplicación no publica ningún endpoint GET.</target>
-      </trans-unit>
-      <trans-unit id="applicationDataColumnPath" datatype="html">
-        <source>Ruta</source>
-        <target>Ruta</target>
-      </trans-unit>
-      <trans-unit id="applicationDataColumnSummary" datatype="html">
-        <source>Resum</source>
-        <target>Resumen</target>
-      </trans-unit>
-      <trans-unit id="applicationDataColumnDescription" datatype="html">
-        <source>Descripció</source>
-        <target>Descripción</target>
-      </trans-unit>
-      <trans-unit id="applicationDataColumnParameters" datatype="html">
-        <source>Paràmetres</source>
-        <target>Parámetros</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterName" datatype="html">
-        <source>Nom</source>
-        <target>Nombre</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterIn" datatype="html">
-        <source>Ubicació</source>
-        <target>Ubicación</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterRequired" datatype="html">
-        <source>Obligatori</source>
-        <target>Obligatorio</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterType" datatype="html">
-        <source>Tipus</source>
-        <target>Tipo</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterFormat" datatype="html">
-        <source>Format</source>
-        <target>Formato</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterDefault" datatype="html">
-        <source>Valor per defecte</source>
-        <target>Valor por defecto</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterEnum" datatype="html">
-        <source>Valors permesos</source>
-        <target>Valores permitidos</target>
-      </trans-unit>
-      <trans-unit id="applicationDataParameterDescription" datatype="html">
-        <source>Descripció</source>
-        <target>Descripción</target>
+      <trans-unit id="applicationDataSavedInvalidUrls" datatype="html">
+        <source>S&apos;han desat les dades, però les URL de <x id="first" equiv-text="sources[0]"/> i de <x id="second" equiv-text="sources[1]"/> no responen. Comprova-les o indica&apos;n unes altres.</source>
+        <target>Se han guardado los datos, pero las URL de <x id="first" equiv-text="sources[0]"/> y de <x id="second" equiv-text="sources[1]"/> no responden. Compruébalas o indica otras.</target>
       </trans-unit>
       <trans-unit id="appFooterVersion" datatype="html">
         <source>Versió</source>
@@ -7160,6 +7430,1134 @@
       <trans-unit id="accessibilityStatementPendingAudit" datatype="html">
         <source>La primera auditoria d'accessibilitat d'aquesta aplicació encara està pendent de realitzar. La declaració d'accessibilitat es publicarà en aquest apartat un cop finalitzada.</source>
         <target>La primera auditoría de accesibilidad de esta aplicación todavía está pendiente de realizar. La declaración de accesibilidad se publicará en este apartado una vez finalizada.</target>
+      </trans-unit>
+      <trans-unit id="textFieldMaxBytes" datatype="html">
+        <source>El text supera la mida màxima permesa. Redueix-lo (els accents i el format també ocupen espai).</source>
+        <target>El texto supera el tamaño máximo permitido. Redúcelo (los acentos y el formato también ocupan espacio).</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesActionsHeader" datatype="html">
+        <source>Accions</source>
+        <target>Acciones</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesSubcategoriesOf" datatype="html">
+        <source>Subcategories de «<x id="name" equiv-text="name"/>»</source>
+        <target>Subcategorías de «<x id="name" equiv-text="name"/>»</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesCategoryActions" datatype="html">
+        <source>Accions de la categoria «<x id="name" equiv-text="name"/>»</source>
+        <target>Acciones de la categoría «<x id="name" equiv-text="name"/>»</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesSubcategoryActions" datatype="html">
+        <source>Accions de la subcategoria «<x id="name" equiv-text="name"/>»</source>
+        <target>Acciones de la subcategoría «<x id="name" equiv-text="name"/>»</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesActionView" datatype="html">
+        <source>Consulta</source>
+        <target>Consulta</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesActionEdit" datatype="html">
+        <source>Edita</source>
+        <target>Edita</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesActionDelete" datatype="html">
+        <source>Elimina</source>
+        <target>Elimina</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesActionRestore" datatype="html">
+        <source>Restaura</source>
+        <target>Restaura</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCreateCategory" datatype="html">
+        <source>Nova categoria documental</source>
+        <target>Nueva categoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogViewCategory" datatype="html">
+        <source>Consulta de la categoria documental</source>
+        <target>Consulta de la categoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogEditCategory" datatype="html">
+        <source>Edició de la categoria documental</source>
+        <target>Edición de la categoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCreateSubcategory" datatype="html">
+        <source>Nova subcategoria documental</source>
+        <target>Nueva subcategoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogViewSubcategory" datatype="html">
+        <source>Consulta de la subcategoria documental</source>
+        <target>Consulta de la subcategoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogEditSubcategory" datatype="html">
+        <source>Edició de la subcategoria documental</source>
+        <target>Edición de la subcategoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogName" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogNameEs" datatype="html">
+        <source>Nom en castellà</source>
+        <target>Nombre en castellano</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogRequired" datatype="html">
+        <source>Camp obligatori</source>
+        <target>Campo obligatorio</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogNameMaxLength" datatype="html">
+        <source>El nom ha de tenir com a màxim 150 caràcters</source>
+        <target>El nombre debe tener como máximo 150 caracteres</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogNameEsMaxLength" datatype="html">
+        <source>El nom en castellà ha de tenir com a màxim 150 caràcters</source>
+        <target>El nombre en castellano debe tener como máximo 150 caracteres</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogLoading" datatype="html">
+        <source>Carregant la categoria documental</source>
+        <target>Cargando la categoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogAcceptCategory" datatype="html">
+        <source>Accepta la consulta de la categoria</source>
+        <target>Acepta la consulta de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogAddCategory" datatype="html">
+        <source>Afegeix la categoria</source>
+        <target>Añade la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCancelCategory" datatype="html">
+        <source>Cancel·la els canvis de la categoria</source>
+        <target>Cancela los cambios de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCloseCategory" datatype="html">
+        <source>Tanca el formulari de la categoria</source>
+        <target>Cierra el formulario de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogDeactivateCategory" datatype="html">
+        <source>Dona de baixa la categoria</source>
+        <target>Da de baja la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogEditCategoryAction" datatype="html">
+        <source>Edita la categoria</source>
+        <target>Edita la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogRestoreCategory" datatype="html">
+        <source>Restaura la categoria</source>
+        <target>Restaura la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogSaveCategory" datatype="html">
+        <source>Desa els canvis de la categoria</source>
+        <target>Guarda los cambios de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogAcceptSubcategory" datatype="html">
+        <source>Accepta la consulta de la subcategoria</source>
+        <target>Acepta la consulta de la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogAddSubcategory" datatype="html">
+        <source>Afegeix la subcategoria</source>
+        <target>Añade la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCancelSubcategory" datatype="html">
+        <source>Cancel·la els canvis de la subcategoria</source>
+        <target>Cancela los cambios de la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogCloseSubcategory" datatype="html">
+        <source>Tanca el formulari de la subcategoria</source>
+        <target>Cierra el formulario de la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogDeactivateSubcategory" datatype="html">
+        <source>Dona de baixa la subcategoria</source>
+        <target>Da de baja la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogEditSubcategoryAction" datatype="html">
+        <source>Edita la subcategoria</source>
+        <target>Edita la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogRestoreSubcategory" datatype="html">
+        <source>Restaura la subcategoria</source>
+        <target>Restaura la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDialogSaveSubcategory" datatype="html">
+        <source>Desa els canvis de la subcategoria</source>
+        <target>Guarda los cambios de la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesColumnName" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesColumnNameEs" datatype="html">
+        <source>Nom en castellà</source>
+        <target>Nombre en castellano</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesColumnSubcategories" datatype="html">
+        <source>Subcategories actives</source>
+        <target>Subcategorías activas</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesTitle" datatype="html">
+        <source>Categories documentals</source>
+        <target>Categorías documentales</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesFilterName" datatype="html">
+        <source>Nom</source>
+        <target>Nombre</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesFilterStatus" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesQuickSearchPlaceholder" datatype="html">
+        <source>Cerca per nom de categoria o subcategoria</source>
+        <target>Buscar por nombre de categoría o subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesQuickSearchAriaLabel" datatype="html">
+        <source>Cerca ràpida de categories documentals</source>
+        <target>Búsqueda rápida de categorías documentales</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesAddAriaLabel" datatype="html">
+        <source>Afegeix una categoria documental</source>
+        <target>Añade una categoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesErrorSummary" datatype="html">
+        <source>Error</source>
+        <target>Error</target>
+      </trans-unit>
+      <trans-unit id="documentCategoriesLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les categories documentals.</source>
+        <target>No se han podido cargar las categorías documentales.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryOptionsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les categories on es pot moure la subcategoria.</source>
+        <target>No se han podido cargar las categorías a las que se puede mover la subcategoría.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryLoadError" datatype="html">
+        <source>No s&apos;ha pogut carregar la categoria documental.</source>
+        <target>No se ha podido cargar la categoría documental.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryCreatedTitle" datatype="html">
+        <source>Categoria afegida</source>
+        <target>Categoría añadida</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryCreatedDetail" datatype="html">
+        <source>La categoria s&apos;ha afegit correctament.</source>
+        <target>La categoría se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryUpdatedTitle" datatype="html">
+        <source>Categoria actualitzada</source>
+        <target>Categoría actualizada</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryUpdatedDetail" datatype="html">
+        <source>La categoria s&apos;ha actualitzat correctament.</source>
+        <target>La categoría se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeletedTitle" datatype="html">
+        <source>Categoria eliminada</source>
+        <target>Categoría eliminada</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeletedDetail" datatype="html">
+        <source>La categoria s&apos;ha eliminat correctament.</source>
+        <target>La categoría se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryRestoredTitle" datatype="html">
+        <source>Categoria restaurada</source>
+        <target>Categoría restaurada</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryRestoredDetail" datatype="html">
+        <source>La categoria s&apos;ha restaurat correctament.</source>
+        <target>La categoría se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentCategorySaveError" datatype="html">
+        <source>No s&apos;ha pogut desar la categoria.</source>
+        <target>No se ha podido guardar la categoría.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteError" datatype="html">
+        <source>No s&apos;ha pogut eliminar la categoria.</source>
+        <target>No se ha podido eliminar la categoría.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryRestoreError" datatype="html">
+        <source>No s&apos;ha pogut restaurar la categoria.</source>
+        <target>No se ha podido restaurar la categoría.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteDialogTitle" datatype="html">
+        <source>Eliminar la categoria?</source>
+        <target>¿Eliminar la categoría?</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteDialogMessage" datatype="html">
+        <source>Estàs a punt d&apos;eliminar la categoria «<x id="name" equiv-text="name"/>».</source>
+        <target>Estás a punto de eliminar la categoría «<x id="name" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteDialogCancel" datatype="html">
+        <source>Cancel·la l&apos;eliminació de la categoria</source>
+        <target>Cancela la eliminación de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteDialogConfirm" datatype="html">
+        <source>Confirma l&apos;eliminació de la categoria</source>
+        <target>Confirma la eliminación de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryLoadError" datatype="html">
+        <source>No s&apos;ha pogut carregar la subcategoria documental.</source>
+        <target>No se ha podido cargar la subcategoría documental.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryCreatedTitle" datatype="html">
+        <source>Subcategoria afegida</source>
+        <target>Subcategoría añadida</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryCreatedDetail" datatype="html">
+        <source>La subcategoria s&apos;ha afegit correctament.</source>
+        <target>La subcategoría se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryUpdatedTitle" datatype="html">
+        <source>Subcategoria actualitzada</source>
+        <target>Subcategoría actualizada</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryUpdatedDetail" datatype="html">
+        <source>La subcategoria s&apos;ha actualitzat correctament.</source>
+        <target>La subcategoría se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeletedTitle" datatype="html">
+        <source>Subcategoria eliminada</source>
+        <target>Subcategoría eliminada</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeletedDetail" datatype="html">
+        <source>La subcategoria s&apos;ha eliminat correctament.</source>
+        <target>La subcategoría se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryRestoredTitle" datatype="html">
+        <source>Subcategoria restaurada</source>
+        <target>Subcategoría restaurada</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryRestoredDetail" datatype="html">
+        <source>La subcategoria s&apos;ha restaurat correctament.</source>
+        <target>La subcategoría se ha restaurado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategorySaveError" datatype="html">
+        <source>No s&apos;ha pogut desar la subcategoria.</source>
+        <target>No se ha podido guardar la subcategoría.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeleteError" datatype="html">
+        <source>No s&apos;ha pogut eliminar la subcategoria.</source>
+        <target>No se ha podido eliminar la subcategoría.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryRestoreError" datatype="html">
+        <source>No s&apos;ha pogut restaurar la subcategoria.</source>
+        <target>No se ha podido restaurar la subcategoría.</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeleteDialogTitle" datatype="html">
+        <source>Eliminar la subcategoria?</source>
+        <target>¿Eliminar la subcategoría?</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeleteDialogMessage" datatype="html">
+        <source>Estàs a punt d&apos;eliminar la subcategoria «<x id="name" equiv-text="name"/>».</source>
+        <target>Estás a punto de eliminar la subcategoría «<x id="name" equiv-text="name"/>».</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeleteDialogCancel" datatype="html">
+        <source>Cancel·la l&apos;eliminació de la subcategoria</source>
+        <target>Cancela la eliminación de la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoryDeleteDialogConfirm" datatype="html">
+        <source>Confirma l&apos;eliminació de la subcategoria</source>
+        <target>Confirma la eliminación de la subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteDialogCancelLabel" datatype="html">
+        <source>Cancel·lar</source>
+        <target>Cancelar</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDeleteDialogConfirmLabel" datatype="html">
+        <source>Eliminar</source>
+        <target>Eliminar</target>
+      </trans-unit>
+      <trans-unit id="maintenanceDocumentCategoriesDescription" datatype="html">
+        <source>Gestiona les categories i subcategories amb què es classifica la documentació de les aplicacions.</source>
+        <target>Gestiona las categorías y subcategorías con las que se clasifica la documentación de las aplicaciones.</target>
+      </trans-unit>
+      <trans-unit id="maintenanceDocumentationRoute" datatype="html">
+        <source>documentacio</source>
+        <target>documentacion</target>
+      </trans-unit>
+      <trans-unit id="maintenanceDocumentationLabel" datatype="html">
+        <source>Documentació</source>
+        <target>Documentación</target>
+      </trans-unit>
+      <trans-unit id="maintenanceDocumentCategoriesRoute" datatype="html">
+        <source>categories-documentals</source>
+        <target>categorias-documentales</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsCaption" datatype="html">
+        <source>Permisos d&apos;accés de cada rol</source>
+        <target>Permisos de acceso de cada rol</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsRole" datatype="html">
+        <source>Rol</source>
+        <target>Rol</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsAll" datatype="html">
+        <source>Tots els permisos</source>
+        <target>Todos los permisos</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsGranted" datatype="html">
+        <source>Permès</source>
+        <target>Permitido</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsDenied" datatype="html">
+        <source>Denegat</source>
+        <target>Denegado</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsFullAccess" datatype="html">
+        <source>Accés total</source>
+        <target>Acceso total</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryPermissionsCheckbox" datatype="html">
+        <source><x id="permission" equiv-text="permission"/> per a <x id="role" equiv-text="role"/></source>
+        <target><x id="permission" equiv-text="permission"/> para <x id="role" equiv-text="role"/></target>
+      </trans-unit>
+      <trans-unit id="documentPermissionRead" datatype="html">
+        <source>Lectura</source>
+        <target>Lectura</target>
+      </trans-unit>
+      <trans-unit id="documentPermissionUpload" datatype="html">
+        <source>Càrrega</source>
+        <target>Carga</target>
+      </trans-unit>
+      <trans-unit id="documentPermissionModify" datatype="html">
+        <source>Modificació</source>
+        <target>Modificación</target>
+      </trans-unit>
+      <trans-unit id="documentPermissionDelete" datatype="html">
+        <source>Eliminació (baixa lògica)</source>
+        <target>Eliminación (baja lógica)</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoriesTableCaption" datatype="html">
+        <source>Subcategories de «<x id="name" equiv-text="name"/>»</source>
+        <target>Subcategorías de «<x id="name" equiv-text="name"/>»</target>
+      </trans-unit>
+      <trans-unit id="documentSubcategoriesTableEmpty" datatype="html">
+        <source>Aquesta categoria no té subcategories.</source>
+        <target>Esta categoría no tiene subcategorías.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailFallbackTitle" datatype="html">
+        <source>Categoria documental</source>
+        <target>Categoría documental</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLoadError" datatype="html">
+        <source>No s&apos;ha pogut carregar la categoria documental.</source>
+        <target>No se ha podido cargar la categoría documental.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailInactive" datatype="html">
+        <source>Aquesta categoria està donada de baixa. Restaura-la des del llistat per modificar-la.</source>
+        <target>Esta categoría está dada de baja. Restáurala desde el listado para modificarla.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailSubcategories" datatype="html">
+        <source>Subcategories</source>
+        <target>Subcategorías</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailPermissions" datatype="html">
+        <source>Permisos d&apos;accés</source>
+        <target>Permisos de acceso</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailPermissionsInfo" datatype="html">
+        <source>Defineix què pot fer cada rol amb els documents d&apos;aquesta categoria. Les subcategories hereten aquests permisos, excepte si es personalitzen.</source>
+        <target>Define qué puede hacer cada rol con los documentos de esta categoría. Las subcategorías heredan estos permisos, excepto si se personalizan.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailSave" datatype="html">
+        <source>Desa</source>
+        <target>Guardar</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailSaveAriaLabel" datatype="html">
+        <source>Desa els canvis de la categoria</source>
+        <target>Guarda los cambios de la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailBack" datatype="html">
+        <source>Tornar</source>
+        <target>Volver</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailBackAriaLabel" datatype="html">
+        <source>Torna al llistat de categories documentals</source>
+        <target>Vuelve al listado de categorías documentales</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLeaveTitle" datatype="html">
+        <source>Sortir sense desar?</source>
+        <target>¿Salir sin guardar?</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLeaveMessage" datatype="html">
+        <source>Hi ha canvis de la categoria que no s&apos;han desat. Si surts, es perdran.</source>
+        <target>Hay cambios de la categoría que no se han guardado. Si sales, se perderán.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLeaveConfirm" datatype="html">
+        <source>Surt sense desar</source>
+        <target>Salir sin guardar</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLeaveConfirmAriaLabel" datatype="html">
+        <source>Surt de la categoria sense desar els canvis</source>
+        <target>Sal de la categoría sin guardar los cambios</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLeaveCancel" datatype="html">
+        <source>Continua editant</source>
+        <target>Seguir editando</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailLeaveCancelAriaLabel" datatype="html">
+        <source>Continua editant la categoria</source>
+        <target>Sigue editando la categoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailAddSubcategory" datatype="html">
+        <source>Afegeix subcategoria</source>
+        <target>Añadir subcategoría</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailAddSubcategoryAriaLabel" datatype="html">
+        <source>Afegeix una subcategoria a «<x id="name" equiv-text="name"/>»</source>
+        <target>Añade una subcategoría a «<x id="name" equiv-text="name"/>»</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailEdit" datatype="html">
+        <source>Editar</source>
+        <target>Editar</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailEditAriaLabel" datatype="html">
+        <source>Edita la categoria «<x id="name" equiv-text="name"/>»</source>
+        <target>Edita la categoría «<x id="name" equiv-text="name"/>»</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailCancel" datatype="html">
+        <source>Cancel·lar</source>
+        <target>Cancelar</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailCancelAriaLabel" datatype="html">
+        <source>Cancel·la els canvis de la categoria</source>
+        <target>Cancela los cambios de la categoría</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationTitle" datatype="html">
+        <source>Documentació</source>
+        <target>Documentación</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnTitle" datatype="html">
+        <source>Títol</source>
+        <target>Título</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnSection" datatype="html">
+        <source>Secció</source>
+        <target>Sección</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnDocumentType" datatype="html">
+        <source>Tipus doc.</source>
+        <target>Tipo doc.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnSubcategory" datatype="html">
+        <source>Subcategoria</source>
+        <target>Subcategoría</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnVersion" datatype="html">
+        <source>Versió</source>
+        <target>Versión</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnState" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksColumnTitle" datatype="html">
+        <source>Títol</source>
+        <target>Título</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksColumnDescription" datatype="html">
+        <source>Descripció</source>
+        <target>Descripción</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksColumnSection" datatype="html">
+        <source>Secció</source>
+        <target>Sección</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksColumnUrl" datatype="html">
+        <source>URL</source>
+        <target>URL</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationErrorSummary" datatype="html">
+        <source>Error</source>
+        <target>Error</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationInfoSummary" datatype="html">
+        <source>Informació</source>
+        <target>Información</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationExportUnavailable" datatype="html">
+        <source>L&apos;exportació encara no està implementada.</source>
+        <target>La exportación todavía no está implementada.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationActionView" datatype="html">
+        <source>Consulta</source>
+        <target>Consultar</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationActionDownload" datatype="html">
+        <source>Descarrega</source>
+        <target>Descargar</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationActionDelete" datatype="html">
+        <source>Elimina</source>
+        <target>Eliminar</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationActionsHeader" datatype="html">
+        <source>Accions</source>
+        <target>Acciones</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFilterSection" datatype="html">
+        <source>Secció</source>
+        <target>Sección</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationRequired" datatype="html">
+        <source>Camp obligatori</source>
+        <target>Campo obligatorio</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationMaxLength" datatype="html">
+        <source>Ha de tenir com a màxim <x id="max" equiv-text="max"/> caràcters</source>
+        <target>Debe tener como máximo <x id="max" equiv-text="max"/> caracteres</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationDeleteCancel" datatype="html">
+        <source>Cancel·lar</source>
+        <target>Cancelar</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationDeleteConfirm" datatype="html">
+        <source>Eliminar</source>
+        <target>Eliminar</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationDownloadError" datatype="html">
+        <source>No s&apos;ha pogut descarregar el fitxer.</source>
+        <target>No se ha podido descargar el fichero.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFileTooLarge" datatype="html">
+        <source>El fitxer supera la mida màxima de 5 MB.</source>
+        <target>El fichero supera el tamaño máximo de 5 MB.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFileTypeNotAllowed" datatype="html">
+        <source>El format del fitxer no està admès.</source>
+        <target>El formato del fichero no está admitido.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFileTooLargeRejected" datatype="html">
+        <source>No s&apos;ha adjuntat «<x id="fileName" equiv-text="fileName"/>»: supera la mida màxima de 5 MB.</source>
+        <target>No se ha adjuntado «<x id="fileName" equiv-text="fileName"/>»: supera el tamaño máximo de 5 MB.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFileTypeRejected" datatype="html">
+        <source>No s&apos;ha adjuntat «<x id="fileName" equiv-text="fileName"/>»: el format del fitxer no està admès.</source>
+        <target>No se ha adjuntado «<x id="fileName" equiv-text="fileName"/>»: el formato del fichero no está admitido.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFormatsLoading" datatype="html">
+        <source>S&apos;estan carregant els formats admesos.</source>
+        <target>Se están cargando los formatos admitidos.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationFormatsUnavailable" datatype="html">
+        <source>No s&apos;han pogut carregar els formats admesos: ara no es pot adjuntar cap fitxer.</source>
+        <target>No se han podido cargar los formatos admitidos: ahora no se puede adjuntar ningún fichero.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsTitle" datatype="html">
+        <source>Adjunts</source>
+        <target>Adjuntos</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsQuickSearchPlaceholder" datatype="html">
+        <source>Cerca per títol</source>
+        <target>Busca por título</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsQuickSearchAriaLabel" datatype="html">
+        <source>Cerca ràpida d&apos;adjunts</source>
+        <target>Búsqueda rápida de adjuntos</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsAddAriaLabel" datatype="html">
+        <source>Afegeix un adjunt</source>
+        <target>Añade un adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsExportAriaLabel" datatype="html">
+        <source>Exporta els adjunts</source>
+        <target>Exporta los adjuntos</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsColumnsAriaLabel" datatype="html">
+        <source>Columnes dels adjunts</source>
+        <target>Columnas de los adjuntos</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsFiltersAriaLabel" datatype="html">
+        <source>Filtres dels adjunts</source>
+        <target>Filtros de los adjuntos</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsFilterState" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsFilterDocumentType" datatype="html">
+        <source>Tipus de document</source>
+        <target>Tipo de documento</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsFilterCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsFilterSubcategory" datatype="html">
+        <source>Subcategoria</source>
+        <target>Subcategoría</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsCaption" datatype="html">
+        <source>Adjunts de l&apos;aplicació</source>
+        <target>Adjuntos de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsEmpty" datatype="html">
+        <source>No hi ha cap adjunt.</source>
+        <target>No hay ningún adjunto.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsRowActions" datatype="html">
+        <source>Accions de l&apos;adjunt «<x id="title" equiv-text="title"/>»</source>
+        <target>Acciones del adjunto «<x id="title" equiv-text="title"/>»</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar els adjunts.</source>
+        <target>No se han podido cargar los adjuntos.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentCreatedTitle" datatype="html">
+        <source>Adjunt afegit</source>
+        <target>Adjunto añadido</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentCreatedDetail" datatype="html">
+        <source>L&apos;adjunt s&apos;ha afegit correctament.</source>
+        <target>El adjunto se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentUpdatedTitle" datatype="html">
+        <source>Adjunt actualitzat</source>
+        <target>Adjunto actualizado</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentUpdatedDetail" datatype="html">
+        <source>L&apos;adjunt s&apos;ha actualitzat correctament.</source>
+        <target>El adjunto se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeletedTitle" datatype="html">
+        <source>Adjunt eliminat</source>
+        <target>Adjunto eliminado</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeletedDetail" datatype="html">
+        <source>L&apos;adjunt s&apos;ha eliminat correctament.</source>
+        <target>El adjunto se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentSaveError" datatype="html">
+        <source>No s&apos;ha pogut desar l&apos;adjunt.</source>
+        <target>No se ha podido guardar el adjunto.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeleteError" datatype="html">
+        <source>No s&apos;ha pogut eliminar l&apos;adjunt.</source>
+        <target>No se ha podido eliminar el adjunto.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentCategoriesLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les categories documentals.</source>
+        <target>No se han podido cargar las categorías documentales.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentCatalogsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les seccions, els estats i els formats dels documents.</source>
+        <target>No se han podido cargar las secciones, los estados y los formatos de los documentos.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeleteDialogTitle" datatype="html">
+        <source>Eliminar l&apos;adjunt?</source>
+        <target>¿Eliminar el adjunto?</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeleteDialogMessage" datatype="html">
+        <source>Estàs a punt d&apos;eliminar l&apos;adjunt «<x id="title" equiv-text="title"/>».</source>
+        <target>Estás a punto de eliminar el adjunto «<x id="title" equiv-text="title"/>».</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeleteDialogCancel" datatype="html">
+        <source>Cancel·la l&apos;eliminació de l&apos;adjunt</source>
+        <target>Cancela la eliminación del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDeleteDialogConfirm" datatype="html">
+        <source>Confirma l&apos;eliminació de l&apos;adjunt</source>
+        <target>Confirma la eliminación del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogCreate" datatype="html">
+        <source>Afegeix un adjunt</source>
+        <target>Añade un adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogView" datatype="html">
+        <source>Consulta de l&apos;adjunt</source>
+        <target>Consulta del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogEdit" datatype="html">
+        <source>Edició de l&apos;adjunt</source>
+        <target>Edición del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogAccept" datatype="html">
+        <source>Accepta la consulta de l&apos;adjunt</source>
+        <target>Acepta la consulta del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogAdd" datatype="html">
+        <source>Afegeix l&apos;adjunt</source>
+        <target>Añade el adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogCancel" datatype="html">
+        <source>Cancel·la els canvis de l&apos;adjunt</source>
+        <target>Cancela los cambios del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogClose" datatype="html">
+        <source>Tanca el formulari de l&apos;adjunt</source>
+        <target>Cierra el formulario del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogDeactivate" datatype="html">
+        <source>Elimina l&apos;adjunt</source>
+        <target>Elimina el adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogEditAction" datatype="html">
+        <source>Edita l&apos;adjunt</source>
+        <target>Edita el adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogRestore" datatype="html">
+        <source>Restaura l&apos;adjunt</source>
+        <target>Restaura el adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogSave" datatype="html">
+        <source>Desa els canvis de l&apos;adjunt</source>
+        <target>Guarda los cambios del adjunto</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogTitleLabel" datatype="html">
+        <source>Títol</source>
+        <target>Título</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogSection" datatype="html">
+        <source>Secció</source>
+        <target>Sección</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogFile" datatype="html">
+        <source>Fitxer</source>
+        <target>Fichero</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogDocumentType" datatype="html">
+        <source>Tipus de document</source>
+        <target>Tipo de documento</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogSubcategory" datatype="html">
+        <source>Subcategoria (opcional)</source>
+        <target>Subcategoría (opcional)</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogSubcategoryView" datatype="html">
+        <source>Subcategoria</source>
+        <target>Subcategoría</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogVersion" datatype="html">
+        <source>Versió</source>
+        <target>Versión</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogState" datatype="html">
+        <source>Estat</source>
+        <target>Estado</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogRequiredHint" datatype="html">
+        <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
+        <target>Todos los campos son obligatorios, excepto los indicados como opcionales.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogDropHint" datatype="html">
+        <source>Arrossega el fitxer aquí per carregar-lo.</source>
+        <target>Arrastra el fichero aquí para cargarlo.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogFileLimitsHint" datatype="html">
+        <source>Mida màxima: 5 MB.</source>
+        <target>Tamaño máximo: 5 MB.</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogAttach" datatype="html">
+        <source>Adjunta</source>
+        <target>Adjunta</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogCancelLabel" datatype="html">
+        <source>Cancel·la</source>
+        <target>Cancela</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogSaveLabel" datatype="html">
+        <source>Desa</source>
+        <target>Guarda</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogRemoveFile" datatype="html">
+        <source>Elimina el fitxer seleccionat</source>
+        <target>Elimina el fichero seleccionado</target>
+      </trans-unit>
+      <trans-unit id="applicationAttachmentDialogNoSubcategory" datatype="html">
+        <source>Sense subcategoria</source>
+        <target>Sin subcategoría</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksTitle" datatype="html">
+        <source>Enllaços</source>
+        <target>Enlaces</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksQuickSearchPlaceholder" datatype="html">
+        <source>Cerca per títol, descripció, URL o secció</source>
+        <target>Busca por título, descripción, URL o sección</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksQuickSearchAriaLabel" datatype="html">
+        <source>Cerca ràpida d&apos;enllaços</source>
+        <target>Búsqueda rápida de enlaces</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksAddAriaLabel" datatype="html">
+        <source>Afegeix un enllaç</source>
+        <target>Añade un enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksColumnsAriaLabel" datatype="html">
+        <source>Columnes dels enllaços</source>
+        <target>Columnas de los enlaces</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksFiltersAriaLabel" datatype="html">
+        <source>Filtres dels enllaços</source>
+        <target>Filtros de los enlaces</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksCaption" datatype="html">
+        <source>Enllaços de l&apos;aplicació</source>
+        <target>Enlaces de la aplicación</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksEmpty" datatype="html">
+        <source>No hi ha cap enllaç.</source>
+        <target>No hay ningún enlace.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksRowActions" datatype="html">
+        <source>Accions de l&apos;enllaç «<x id="title" equiv-text="title"/>»</source>
+        <target>Acciones del enlace «<x id="title" equiv-text="title"/>»</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksOpensInNewTab" datatype="html">
+        <source>(s&apos;obre en una pestanya nova)</source>
+        <target>(se abre en una pestaña nueva)</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar els enllaços.</source>
+        <target>No se han podido cargar los enlaces.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksSectionsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les seccions dels enllaços.</source>
+        <target>No se han podido cargar las secciones de los enlaces.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkCreatedTitle" datatype="html">
+        <source>Enllaç afegit</source>
+        <target>Enlace añadido</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkCreatedDetail" datatype="html">
+        <source>L&apos;enllaç s&apos;ha afegit correctament.</source>
+        <target>El enlace se ha añadido correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkUpdatedTitle" datatype="html">
+        <source>Enllaç actualitzat</source>
+        <target>Enlace actualizado</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkUpdatedDetail" datatype="html">
+        <source>L&apos;enllaç s&apos;ha actualitzat correctament.</source>
+        <target>El enlace se ha actualizado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeletedTitle" datatype="html">
+        <source>Enllaç eliminat</source>
+        <target>Enlace eliminado</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeletedDetail" datatype="html">
+        <source>L&apos;enllaç s&apos;ha eliminat correctament.</source>
+        <target>El enlace se ha eliminado correctamente.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkSaveError" datatype="html">
+        <source>No s&apos;ha pogut desar l&apos;enllaç.</source>
+        <target>No se ha podido guardar el enlace.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeleteError" datatype="html">
+        <source>No s&apos;ha pogut eliminar l&apos;enllaç.</source>
+        <target>No se ha podido eliminar el enlace.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeleteDialogTitle" datatype="html">
+        <source>Eliminar l&apos;enllaç?</source>
+        <target>¿Eliminar el enlace?</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeleteDialogMessage" datatype="html">
+        <source>Estàs a punt d&apos;eliminar l&apos;enllaç «<x id="title" equiv-text="title"/>».</source>
+        <target>Estás a punto de eliminar el enlace «<x id="title" equiv-text="title"/>».</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeleteDialogCancel" datatype="html">
+        <source>Cancel·la l&apos;eliminació de l&apos;enllaç</source>
+        <target>Cancela la eliminación del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDeleteDialogConfirm" datatype="html">
+        <source>Confirma l&apos;eliminació de l&apos;enllaç</source>
+        <target>Confirma la eliminación del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogCreate" datatype="html">
+        <source>Afegeix un Enllaç</source>
+        <target>Añade un enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogView" datatype="html">
+        <source>Consulta de l&apos;enllaç</source>
+        <target>Consulta del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogEdit" datatype="html">
+        <source>Edició de l&apos;enllaç</source>
+        <target>Edición del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogAccept" datatype="html">
+        <source>Accepta la consulta de l&apos;enllaç</source>
+        <target>Acepta la consulta del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogAdd" datatype="html">
+        <source>Afegeix l&apos;enllaç</source>
+        <target>Añade el enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogCancel" datatype="html">
+        <source>Cancel·la els canvis de l&apos;enllaç</source>
+        <target>Cancela los cambios del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogClose" datatype="html">
+        <source>Tanca el formulari de l&apos;enllaç</source>
+        <target>Cierra el formulario del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogDeactivate" datatype="html">
+        <source>Elimina l&apos;enllaç</source>
+        <target>Elimina el enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogEditAction" datatype="html">
+        <source>Edita l&apos;enllaç</source>
+        <target>Edita el enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogRestore" datatype="html">
+        <source>Restaura l&apos;enllaç</source>
+        <target>Restaura el enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogSave" datatype="html">
+        <source>Desa els canvis de l&apos;enllaç</source>
+        <target>Guarda los cambios del enlace</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogTitleLabel" datatype="html">
+        <source>Títol</source>
+        <target>Título</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogDescription" datatype="html">
+        <source>Descripció (opcional)</source>
+        <target>Descripción (opcional)</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogSection" datatype="html">
+        <source>Secció</source>
+        <target>Sección</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogUrl" datatype="html">
+        <source>URL</source>
+        <target>URL</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogUrlError" datatype="html">
+        <source>Indica una URL que comenci per http:// o https://</source>
+        <target>Indica una URL que empiece por http:// o https://</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogRequiredHint" datatype="html">
+        <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
+        <target>Todos los campos son obligatorios, excepto los indicados como opcionales.</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogCancelLabel" datatype="html">
+        <source>Cancel·la</source>
+        <target>Cancela</target>
+      </trans-unit>
+      <trans-unit id="applicationLinkDialogSaveLabel" datatype="html">
+        <source>Desa</source>
+        <target>Guarda</target>
+      </trans-unit>
+      <trans-unit id="documentDetailFallback" datatype="html">
+        <source>Document</source>
+        <target>Documento</target>
+      </trans-unit>
+      <trans-unit id="documentDetailVersions" datatype="html">
+        <source>Versions</source>
+        <target>Versiones</target>
+      </trans-unit>
+      <trans-unit id="documentDetailVersionsCaption" datatype="html">
+        <source>Versions del document</source>
+        <target>Versiones del documento</target>
+      </trans-unit>
+      <trans-unit id="documentDetailNewVersion" datatype="html">
+        <source>Nova versió</source>
+        <target>Nueva versión</target>
+      </trans-unit>
+      <trans-unit id="documentDetailSave" datatype="html">
+        <source>Desa</source>
+        <target>Guarda</target>
+      </trans-unit>
+      <trans-unit id="documentDetailBack" datatype="html">
+        <source>Tornar</source>
+        <target>Volver</target>
+      </trans-unit>
+      <trans-unit id="documentDetailRequiredHint" datatype="html">
+        <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
+        <target>Todos los campos son obligatorios, excepto los indicados como opcionales.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailUploadedAt" datatype="html">
+        <source>Data pujada</source>
+        <target>Fecha de subida</target>
+      </trans-unit>
+      <trans-unit id="documentDetailUploadedBy" datatype="html">
+        <source>Pujat per</source>
+        <target>Subido por</target>
+      </trans-unit>
+      <trans-unit id="documentDetailSize" datatype="html">
+        <source>Mida</source>
+        <target>Tamaño</target>
+      </trans-unit>
+      <trans-unit id="documentDetailViewVersion" datatype="html">
+        <source>Veure</source>
+        <target>Ver</target>
+      </trans-unit>
+      <trans-unit id="documentDetailDownloadVersion" datatype="html">
+        <source>Descarregar</source>
+        <target>Descargar</target>
+      </trans-unit>
+      <trans-unit id="documentDetailEmptyVersions" datatype="html">
+        <source>No hi ha versions del document.</source>
+        <target>No hay versiones del documento.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailLoadError" datatype="html">
+        <source>No s&apos;ha pogut carregar el document.</source>
+        <target>No se ha podido cargar el documento.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailRetry" datatype="html">
+        <source>Torna-ho a provar</source>
+        <target>Volver a intentarlo</target>
+      </trans-unit>
+      <trans-unit id="documentDetailSaved" datatype="html">
+        <source>Document desat</source>
+        <target>Documento guardado</target>
+      </trans-unit>
+      <trans-unit id="documentDetailSaveError" datatype="html">
+        <source>No s&apos;ha pogut desar el document.</source>
+        <target>No se ha podido guardar el documento.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailVersionAdded" datatype="html">
+        <source>Versió afegida</source>
+        <target>Versión añadida</target>
+      </trans-unit>
+      <trans-unit id="documentDetailVersionError" datatype="html">
+        <source>No s&apos;ha pogut afegir la versió.</source>
+        <target>No se ha podido añadir la versión.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailDuplicateVersion" datatype="html">
+        <source>Ja existeix aquesta versió.</source>
+        <target>Esta versión ya existe.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailFileError" datatype="html">
+        <source>No s&apos;ha pogut obrir el fitxer.</source>
+        <target>No se ha podido abrir el fichero.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailStay" datatype="html">
+        <source>Continua editant</source>
+        <target>Seguir editando</target>
+      </trans-unit>
+      <trans-unit id="documentDetailDiscard" datatype="html">
+        <source>Descarta els canvis</source>
+        <target>Descarta los cambios</target>
+      </trans-unit>
+      <trans-unit id="documentDetailUnsavedTitle" datatype="html">
+        <source>Canvis sense desar</source>
+        <target>Cambios sin guardar</target>
+      </trans-unit>
+      <trans-unit id="documentDetailUnsavedMessage" datatype="html">
+        <source>Hi ha canvis sense desar. Vols sortir sense desar-los?</source>
+        <target>Hay cambios sin guardar. ¿Quieres salir sin guardarlos?</target>
+      </trans-unit>
+      <trans-unit id="documentDetailCancel" datatype="html">
+        <source>Cancel·la</source>
+        <target>Cancela</target>
+      </trans-unit>
+      <trans-unit id="documentDetailReadOnly" datatype="html">
+        <source>Aquest document és de només lectura.</source>
+        <target>Este documento es de solo lectura.</target>
+      </trans-unit>
+      <trans-unit id="documentDetailVersionActions" datatype="html">
+        <source>Accions de la versió</source>
+        <target>Acciones de la versión</target>
       </trans-unit>
     </body>
   </file>

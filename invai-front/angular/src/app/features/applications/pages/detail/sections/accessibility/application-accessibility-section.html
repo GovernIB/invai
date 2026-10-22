@@ -302,15 +302,26 @@
       class="application-accessibility__rich-text"
       aria-labelledby="application-accessibility-inaccessible-content-label"
     >
-      <h4 id="application-accessibility-inaccessible-content-label">
+      <h3 id="application-accessibility-inaccessible-content-label">
         {{ labels.inaccessibleContent }}
-      </h4>
+      </h3>
       @if (detailState.isEditing('accessibility')) {
         <p-editor
           [formControl]="detailState.accessibilityForm.controls.inaccessibleContent"
           [style]="{ height: '10rem' }"
+          [invalid]="isInvalid(detailState.accessibilityForm.controls.inaccessibleContent)"
+          [appRichTextAria]="
+            isInvalid(detailState.accessibilityForm.controls.inaccessibleContent)
+              ? 'application-accessibility-inaccessible-content-error'
+              : null
+          "
           (onInit)="labelEditor($event, 'application-accessibility-inaccessible-content-label')"
         />
+        @if (isInvalid(detailState.accessibilityForm.controls.inaccessibleContent)) {
+          <p id="application-accessibility-inaccessible-content-error" class="application-accessibility__error" role="alert">
+            {{ textMaxBytesError }}
+          </p>
+        }
       } @else {
         <div
           class="application-accessibility__rich-text-value invai-form-static-value invai-form-static-value--rich"
@@ -337,13 +348,24 @@
       class="application-accessibility__rich-text"
       aria-labelledby="application-accessibility-observations-label"
     >
-      <h4 id="application-accessibility-observations-label">{{ labels.observations }}</h4>
+      <h3 id="application-accessibility-observations-label">{{ labels.observations }}</h3>
       @if (detailState.isEditing('accessibility')) {
         <p-editor
           [formControl]="detailState.accessibilityForm.controls.observations"
           [style]="{ height: '10rem' }"
+          [invalid]="isInvalid(detailState.accessibilityForm.controls.observations)"
+          [appRichTextAria]="
+            isInvalid(detailState.accessibilityForm.controls.observations)
+              ? 'application-accessibility-observations-error'
+              : null
+          "
           (onInit)="labelEditor($event, 'application-accessibility-observations-label')"
         />
+        @if (isInvalid(detailState.accessibilityForm.controls.observations)) {
+          <p id="application-accessibility-observations-error" class="application-accessibility__error" role="alert">
+            {{ textMaxBytesError }}
+          </p>
+        }
       } @else {
         <div
           class="application-accessibility__rich-text-value invai-form-static-value invai-form-static-value--rich"

@@ -7,6 +7,7 @@ import {
   output,
 } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
 import {
   CrudEntityDialog,
   CrudEntityDialogAriaLabels,
@@ -75,6 +76,7 @@ export class DatabaseMaintenanceDialog {
   );
   protected readonly labels = DATABASE_MAINTENANCE_DIALOG_LABELS;
   protected readonly requiredError = DATABASE_MAINTENANCE_DIALOG_REQUIRED;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly portError = DATABASE_MAINTENANCE_DIALOG_PORT;
   protected readonly actionAriaLabels: CrudEntityDialogAriaLabels = {
     accept: DATABASE_MAINTENANCE_DIALOG_ACCEPT_ARIA_LABEL,

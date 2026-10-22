@@ -10,10 +10,24 @@ import {
 describe('application security forms', () => {
   const formBuilder = new FormBuilder();
 
-  it('defaults the role system to weblogic and allows an empty filter', () => {
+  it('defaults the role system to weblogic, allows empty filters and restores the default on reset', () => {
     const form = createApplicationSecurityRoleFiltersForm(formBuilder);
-    expect(form.getRawValue()).toEqual({ system: 'weblogic' });
-    form.controls.system.setValue('');
+    expect(form.getRawValue()).toEqual({ securityRoleName: '', system: 'weblogic' });
+    form.setValue({ securityRoleName: 'INV_', system: '' });
+    expect(form.valid).toBe(true);
+    form.reset();
+    expect(form.getRawValue()).toEqual({ securityRoleName: '', system: 'weblogic' });
+  });
+
+  it('requires a Soffid role only for role assignments', () => {
+    const form = createApplicationSecurityResourceForm(formBuilder);
+    configureApplicationSecurityResourceForm(form, 'role');
+    expect(form.controls.role.hasError('required')).toBe(true);
+    form.controls.role.setValue({ roleId: 5, name: 'INV_ADMIN', system: 'weblogic', description: null });
+    expect(form.valid).toBe(true);
+
+    configureApplicationSecurityResourceForm(form, 'risk');
+    expect(form.controls.role.value).toBeNull();
     expect(form.valid).toBe(true);
   });
 

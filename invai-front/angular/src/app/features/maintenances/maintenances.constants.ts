@@ -74,6 +74,13 @@ export const MAINTENANCE_TABS: MaintenanceTab[] = [
     path: MAINTENANCES_ROUTES_LOC.INTEGRATIONS,
     routerLink: `/${MAINTENANCES_ROUTES_LOC.BASE}/${MAINTENANCES_ROUTES_LOC.INTEGRATIONS}`,
   },
+  {
+    id: 'maintenance-documentation',
+    icon: PrimeIcons.FOLDER,
+    label: MAINTENANCES_ROUTES_LABELS.DOCUMENTATION,
+    path: MAINTENANCES_ROUTES_LOC.DOCUMENTATION,
+    routerLink: `/${MAINTENANCES_ROUTES_LOC.BASE}/${MAINTENANCES_ROUTES_LOC.DOCUMENTATION}`,
+  },
 ];
 
 export const INTEGRATIONS_MAINTENANCE_PANELS: MaintenancePanel[] = [
@@ -81,6 +88,14 @@ export const INTEGRATIONS_MAINTENANCE_PANELS: MaintenancePanel[] = [
     id: 'external-systems',
     title: MAINTENANCES_ROUTES_LABELS.EXTERNAL_SYSTEMS,
     description: MAINTENANCE_PANEL_DESCRIPTIONS.externalSystems,
+  },
+];
+
+export const DOCUMENTATION_MAINTENANCE_PANELS: MaintenancePanel[] = [
+  {
+    id: 'document-categories',
+    title: MAINTENANCES_ROUTES_LABELS.DOCUMENT_CATEGORIES,
+    description: MAINTENANCE_PANEL_DESCRIPTIONS.documentCategories,
   },
 ];
 

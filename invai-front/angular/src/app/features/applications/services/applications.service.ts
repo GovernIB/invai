@@ -1,12 +1,13 @@
-import { HttpParams } from '@angular/common/http';
+import { HttpContext, HttpParams } from '@angular/common/http';
 import { Injectable, LOCALE_ID, inject } from '@angular/core';
+import { SKIP_SERVER_ERROR_DIALOG } from '@core/interceptors/http-error-logging.interceptor';
 import { BaseApiService } from '@core/services/base-api.service';
 import { ResponsibleDataChangesService } from '@features/maintenances/responsibles/services/responsible-data-changes.service';
 import { SpringPage } from '@models/page.model';
 import { toPageHttpParams } from '@shared/utils/http-params.utils';
 import { cachedRequest } from '@shared/utils/service-cache.utils';
 import { localizedName } from '@shared/utils/localized-name.utils';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, concat, exhaustMap, map, of, takeWhile, tap, timer } from 'rxjs';
 import { readApplicationCompleteness } from '../application-completeness';
 import { APPLICATION_DETAIL_CACHE_TTL_MS } from './application-cache.constants';
 
@@ -18,12 +19,15 @@ import {
   ApplicationPageParams,
   ApplicationStatus,
   ApplicationStatusCode,
+  Dir3AuditStatus,
 } from '../applications.model';
 
 const APPLICATION_STATUS_BY_CODE: Record<ApplicationStatusCode, ApplicationStatus> = {
   [ApplicationStatusCode.ACTIVE]: ApplicationStatus.ACTIVE,
   [ApplicationStatusCode.INACTIVE]: ApplicationStatus.INACTIVE,
 };
+
+export const DIR3_AUDIT_POLL_INTERVAL_MS = 3000;
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationsService extends BaseApiService {
@@ -100,9 +104,52 @@ export class ApplicationsService extends BaseApiService {
       .pipe(tap(() => this.clearCache()));
   }
 
-  checkDir3MismatchForAllApplications(): Observable<ApplicationDir3MismatchOutput[]> {
+  /**
+   * Launches the DIR3 audit of every application in the background. If one is already running,
+   * the back-end returns its status instead of starting another. Nothing has changed yet, so no
+   * cache is invalidated here: see `watchDir3Audit`.
+   */
+  startDir3Audit(): Observable<Dir3AuditStatus> {
+    return this.http.put<Dir3AuditStatus>(this.url('dir3', 'check-all'), {});
+  }
+
+  // Progress of the running DIR3 audit, or the outcome of the last one; callers report failures.
+  getDir3AuditStatus(): Observable<Dir3AuditStatus> {
+    return this.http.get<Dir3AuditStatus>(this.url('dir3', 'check-all', 'status'), {
+      context: new HttpContext().set(SKIP_SERVER_ERROR_DIALOG, true),
+    });
+  }
+
+  /**
+   * Emits `status` and, while the audit runs, reads its status every `intervalMs` until it ends,
+   * emitting the final status too. Only an audit seen running and then ending invalidates the
+   * assignment and application caches it may have changed.
+   */
+  watchDir3Audit(
+    status: Dir3AuditStatus,
+    intervalMs = DIR3_AUDIT_POLL_INTERVAL_MS,
+  ): Observable<Dir3AuditStatus> {
+    if (status.state !== 'RUNNING') return of(status);
+
+    return concat(
+      of(status),
+      timer(intervalMs, intervalMs).pipe(
+        exhaustMap(() => this.getDir3AuditStatus()),
+        takeWhile((current) => current.state === 'RUNNING', true),
+        tap((current) => {
+          if (current.state !== 'RUNNING') this.responsibleChanges.assignmentsChanged();
+        }),
+      ),
+    );
+  }
+
+  /**
+   * Audits a single application: refreshes the DIR3 status of its active assignments and its
+   * persisted `dir3Mismatch` flag, which is always returned, whether or not it mismatches.
+   */
+  checkDir3Mismatch(id: number): Observable<ApplicationDir3MismatchOutput> {
     return this.http
-      .put<ApplicationDir3MismatchOutput[]>(this.url('dir3-check-all'), {})
+      .put<ApplicationDir3MismatchOutput>(this.url('dir3', 'check', id), {})
       .pipe(tap(() => this.responsibleChanges.assignmentsChanged()));
   }
 
@@ -148,6 +195,7 @@ export class ApplicationsService extends BaseApiService {
       appDataId: response.appDataId ?? null,
       appIntegrationId: response.appIntegrationId ?? null,
       appResponsibleAuthorizedId: response.appResponsibleAuthorizedId,
+      dir3Mismatch: response.dir3Mismatch ?? false,
       ...readApplicationCompleteness(response),
     };
   }

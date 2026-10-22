@@ -1,0 +1,26 @@
+export const DOCUMENT_CATEGORY_DETAIL_TEXTS = {
+  fallbackTitle: $localize`:@@documentCategoryDetailFallbackTitle:Categoria documental`,
+  loadError: $localize`:@@documentCategoryDetailLoadError:No s'ha pogut carregar la categoria documental.`,
+  edit: $localize`:@@documentCategoryDetailEdit:Editar`,
+  editAriaLabel: (name: string) =>
+    $localize`:@@documentCategoryDetailEditAriaLabel:Edita la categoria «${name}:name:»`,
+  cancel: $localize`:@@documentCategoryDetailCancel:Cancel·lar`,
+  cancelAriaLabel: $localize`:@@documentCategoryDetailCancelAriaLabel:Cancel·la els canvis de la categoria`,
+  inactive: $localize`:@@documentCategoryDetailInactive:Aquesta categoria està donada de baixa. Restaura-la des del llistat per modificar-la.`,
+  subcategoriesTitle: $localize`:@@documentCategoryDetailSubcategories:Subcategories`,
+  addSubcategory: $localize`:@@documentCategoryDetailAddSubcategory:Afegeix subcategoria`,
+  addSubcategoryAriaLabel: (name: string) =>
+    $localize`:@@documentCategoryDetailAddSubcategoryAriaLabel:Afegeix una subcategoria a «${name}:name:»`,
+  permissionsTitle: $localize`:@@documentCategoryDetailPermissions:Permisos d'accés`,
+  permissionsInfo: $localize`:@@documentCategoryDetailPermissionsInfo:Defineix què pot fer cada rol amb els documents d'aquesta categoria. Les subcategories hereten aquests permisos, excepte si es personalitzen.`,
+  save: $localize`:@@documentCategoryDetailSave:Desa`,
+  saveAriaLabel: $localize`:@@documentCategoryDetailSaveAriaLabel:Desa els canvis de la categoria`,
+  back: $localize`:@@documentCategoryDetailBack:Tornar`,
+  backAriaLabel: $localize`:@@documentCategoryDetailBackAriaLabel:Torna al llistat de categories documentals`,
+  leaveTitle: $localize`:@@documentCategoryDetailLeaveTitle:Sortir sense desar?`,
+  leaveMessage: $localize`:@@documentCategoryDetailLeaveMessage:Hi ha canvis de la categoria que no s'han desat. Si surts, es perdran.`,
+  leaveConfirm: $localize`:@@documentCategoryDetailLeaveConfirm:Surt sense desar`,
+  leaveConfirmAriaLabel: $localize`:@@documentCategoryDetailLeaveConfirmAriaLabel:Surt de la categoria sense desar els canvis`,
+  leaveCancel: $localize`:@@documentCategoryDetailLeaveCancel:Continua editant`,
+  leaveCancelAriaLabel: $localize`:@@documentCategoryDetailLeaveCancelAriaLabel:Continua editant la categoria`,
+};

@@ -30,6 +30,7 @@
       <div class="mb-4">
         <app-search-filters
           class="application-infrastructure-catalog-filters"
+          [headingLevel]="3"
           [hideMoreFiltersButton]="true"
           [isLoading]="isLoading()"
           (onSearch)="filterSearch.emit()"

@@ -56,7 +56,7 @@ export const APPLICATION_RESPONSIBLE_COPY = {
   personalCaib: $localize`Personal CAIB`,
   caibRequiredByResponsibility: $localize`:@@applicationAssignmentCaibRequiredByResponsibility:Aquesta responsabilitat requereix personal CAIB.`,
   soffidPerson: $localize`:@@applicationAssignmentSoffidPerson:Persona CAIB`,
-  soffidPlaceholder: $localize`:@@applicationAssignmentSoffidPlaceholder:Cerca per nom o codi d’usuari`,
+  soffidPlaceholder: $localize`:@@applicationAssignmentSoffidPlaceholder:Cerca per nom, codi d’usuari o correu electrònic`,
   soffidInstruction: $localize`:@@applicationAssignmentSoffidInstruction:Escriu almenys 3 caràcters i selecciona una persona de Soffid.`,
   soffidSearching: $localize`:@@applicationAssignmentSoffidSearching:Cercant persones a Soffid…`,
   soffidEmpty: $localize`:@@applicationAssignmentSoffidEmpty:No s'han trobat persones a Soffid.`,
@@ -79,7 +79,8 @@ export const APPLICATION_RESPONSIBLE_COPY = {
   personFilterAriaLabel: $localize`Filtra persones disponibles`,
   authorizationFilterAriaLabel: $localize`Filtra tipus d'autorització`,
   allResponsibilitiesAssignedTitle: $localize`Totes les responsabilitats estan assignades`,
-  allResponsibilitiesAssignedDetail: $localize`:@@applicationAllResponsibilitiesAssignedDetail:Dona de baixa l'assignació actual i crea'n una de nova si vols substituir la persona responsable.`,
+  allResponsibilitiesAssignedDetail: $localize`:@@applicationAllResponsibilitiesAssignedDetail:Per afegir un responsable nou, primer has de donar de baixa una de les assignacions actuals des del menú d'accions de la taula.`,
+  allResponsibilitiesAssignedClose: $localize`Entesos`,
   actions: {
     accept: $localize`Accepta la consulta del responsable`,
     add: $localize`Afegeix el responsable`,

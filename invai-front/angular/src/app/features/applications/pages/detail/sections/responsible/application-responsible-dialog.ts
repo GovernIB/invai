@@ -10,6 +10,8 @@ import {
   CrudEntityDialogAriaLabels,
   CrudEntityDialogMode,
 } from '@components/crud-entity-dialog/crud-entity-dialog';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { MAX_BYTES_ERROR } from '@shared/utils/text-length.utils';
 import { FloatLabel } from 'primeng/floatlabel';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
@@ -80,9 +82,14 @@ export class ApplicationResponsibleDialog {
   protected manualReasonInvalid(): boolean {
     const form = this.manualForm();
     return Boolean(
-      form?.hasError('manualReasonRequired') &&
+      (form?.hasError('manualReasonRequired') || form?.hasError(MAX_BYTES_ERROR)) &&
       (form.controls.reason.touched || form.controls.reason.dirty),
     );
+  }
+  protected manualReasonError(): string {
+    return this.manualForm()?.hasError(MAX_BYTES_ERROR)
+      ? TEXT_FIELD_MAX_BYTES_ERROR
+      : this.dir3Copy.reasonRequired;
   }
   form = input.required<ApplicationResponsibleFormGroup>();
   mode = input.required<Extract<CrudEntityDialogMode, 'create' | 'edit'>>();
@@ -106,6 +113,7 @@ export class ApplicationResponsibleDialog {
   soffidSearch = output<string>();
 
   protected readonly copy = APPLICATION_RESPONSIBLE_COPY;
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly title = computed(() =>
     this.manualOnly()
       ? this.dir3Copy.confirmDiscrepancy

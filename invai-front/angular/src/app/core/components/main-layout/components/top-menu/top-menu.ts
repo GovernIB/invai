@@ -4,7 +4,7 @@ import { MenuItem, MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Skeleton } from 'primeng/skeleton';
 import { SidebarService } from '../sidebar/sidebar.service';
-import { TOP_MENU_RETRY } from './top-menu.i18n';
+import { TOP_MENU_NAVIGATION_ARIA_LABEL, TOP_MENU_RETRY } from './top-menu.i18n';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +20,7 @@ export class TopMenu {
   protected readonly menuItems = this._menuService.menuItems;
   protected readonly menuOptionsResource = this._menuService.menuOptionsResource;
   protected readonly retryLabel = TOP_MENU_RETRY;
+  protected readonly navigationAriaLabel = TOP_MENU_NAVIGATION_ARIA_LABEL;
 
   private _selectedSidebarItems = computed(() => this._sidebarService.menuItems());
 

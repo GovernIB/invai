@@ -42,6 +42,15 @@ import {
   securityMaintenanceResolver,
 } from './security/pages/security-maintenance/security-maintenance.resolver';
 
+import {
+  DOCUMENT_CATEGORIES_LIST_RESOLVE_KEY,
+  documentCategoriesListResolver,
+} from '@features/document-categories/pages/list/document-categories-list.resolver';
+import {
+  DOCUMENT_CATEGORY_DETAIL_RESOLVE_KEY,
+  documentCategoryDetailResolver,
+} from '@features/document-categories/pages/detail/document-category-detail.resolver';
+import { documentCategoryDetailCanDeactivate } from '@features/document-categories/pages/detail/document-category-detail.guard';
 import { MAINTENANCES_ROUTES } from './maintenances.routes';
 import { MAINTENANCES_ROUTES_LOC } from './maintenances.routes.i18n';
 
@@ -88,6 +97,32 @@ describe('MAINTENANCES_ROUTES', () => {
     expect(children[securityIndex].resolve).toEqual({
       [SECURITY_MAINTENANCE_RESOLVE_KEY]: securityMaintenanceResolver,
     });
+  });
+
+  it('registers documentation after integrations and preloads the document categories', () => {
+    const integrationsIndex = children.findIndex(
+      ({ path }) => path === MAINTENANCES_ROUTES_LOC.INTEGRATIONS,
+    );
+    const documentationIndex = children.findIndex(
+      ({ path }) => path === MAINTENANCES_ROUTES_LOC.DOCUMENTATION,
+    );
+
+    expect(documentationIndex).toBe(integrationsIndex + 1);
+    expect(children[documentationIndex].resolve).toEqual({
+      [DOCUMENT_CATEGORIES_LIST_RESOLVE_KEY]: documentCategoriesListResolver,
+    });
+  });
+
+  it('registers the detail of a document category outside the maintenance tabs', () => {
+    const route = MAINTENANCES_ROUTES.find(
+      ({ path }) => path === 'documentacio/categories-documentals/:id',
+    );
+
+    expect(MAINTENANCES_ROUTES.indexOf(route!)).toBeGreaterThan(0);
+    expect(route?.resolve).toEqual({
+      [DOCUMENT_CATEGORY_DETAIL_RESOLVE_KEY]: documentCategoryDetailResolver,
+    });
+    expect(route?.canDeactivate).toEqual([documentCategoryDetailCanDeactivate]);
   });
 
   it('registers systems after responsibles and preloads the environments page', () => {

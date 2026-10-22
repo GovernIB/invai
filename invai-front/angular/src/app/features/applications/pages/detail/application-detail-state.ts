@@ -12,6 +12,7 @@ import {
   Observable,
   Subject,
   catchError,
+  concat,
   defaultIfEmpty,
   defer,
   filter,
@@ -21,6 +22,7 @@ import {
   switchMap,
   tap,
   throwError,
+  toArray,
 } from 'rxjs';
 import { readApplicationCompleteness } from '../../application-completeness';
 import { hasPendingResponsibleDir3 } from '../../application-dir3.utils';
@@ -28,7 +30,13 @@ import { ApplicationResponsibleOutput } from '../../applications.model';
 import { ApplicationAccessibilityInput, ApplicationAccessibilityOutput } from '../../applications.model';
 import { ApplicationAccessibilityService } from '../../services/application-accessibility.service';
 import type { AccessibilityLoadStatus, ApplicationAccessibilityLoadResult } from './sections/accessibility/application-accessibility-section.resolver';
-import { ApplicationDataInput, ApplicationDataOutput } from '../../applications.model';
+import {
+  ApplicationDataInput,
+  ApplicationDataOutput,
+  ApplicationDataSource,
+  ApplicationDataUrlOutput,
+  ApplicationDataUrlState,
+} from '../../applications.model';
 import { ApplicationDataService } from '../../services/application-data.service';
 import {
   ApplicationIntegrationInput,
@@ -44,9 +52,9 @@ import type {
   ApplicationDataLoadStatus,
 } from './sections/data/application-data-section.resolver';
 import {
+  APPLICATION_DATA_SOURCES,
   APPLICATION_DATA_SOURCE_CONTROLS,
   ApplicationDataFormValue,
-  ApplicationDataSource,
   EMPTY_APPLICATION_DATA_VALUE,
   createApplicationDataForm,
 } from '../../forms/application-data-form.factory';
@@ -94,6 +102,7 @@ import { ApplicationCommissionOption } from '../../services/application-options.
 import {
   ApplicationEnsClassificationsService,
   ApplicationSecurityService,
+  ApplicationSoffidRolesAssignmentService,
   ApplicationWebContextsService,
 } from '../../services/application-security.service';
 import { ApplicationSystemDatabaseService } from '../../services/application-system-database.service';
@@ -110,11 +119,26 @@ export type ApplicationDetailSection =
   | 'data'
   | 'integrations';
 
+// Number of Soffid roles PUT application/assign-roles has just assigned, or null when that request
+// failed although the application change that triggered it was saved.
+export type SoffidRolesAssignment = number | null;
+
 export type ApplicationDetailSaveResult =
-  | { status: 'saved'; section: ApplicationDetailSection }
+  | {
+      status: 'saved';
+      section: ApplicationDetailSection;
+      // Only set when General saved a different prefix.
+      assignedSoffidRoles?: SoffidRolesAssignment;
+      // Data sources whose URL typed in by hand was saved although it does not answer.
+      invalidDataUrls?: ApplicationDataSource[];
+    }
   | { status: 'mocked'; section: ApplicationDetailSection }
   | { status: 'unchanged'; section: ApplicationDetailSection }
   | { status: 'invalid'; section: ApplicationDetailSection };
+
+export type ApplicationActivationResult =
+  | { activated: false }
+  | { activated: true; assignedSoffidRoles: SoffidRolesAssignment };
 
 type ApplicationDevelopmentFormValue = ReturnType<ApplicationDevelopmentFormGroup['getRawValue']>;
 type ApplicationSystemsDatabasesFormValue = ReturnType<
@@ -171,6 +195,15 @@ const EMPTY_SECURITY_FORM_VALUE: ApplicationSecurityFormValue = {
   observation: '',
 };
 const EMPTY_RESOURCES_PAGE = { items: [], total: 0 };
+const EMPTY_DATA_URLS: Record<ApplicationDataSource, ApplicationDataUrlState | null> = {
+  openData: null,
+  reuse: null,
+};
+// Field of the data anchor holding the URL each source uses.
+const DATA_RECORD_URL_FIELDS = {
+  openData: 'openDataUrl',
+  reuse: 'reuseUrl',
+} as const satisfies Record<ApplicationDataSource, keyof ApplicationDataOutput>;
 const DETAIL_SECTIONS: ApplicationDetailSection[] = [
   'general',
   'responsible',
@@ -206,12 +239,17 @@ export class ApplicationDetailState {
   private readonly securityService = inject(ApplicationSecurityService);
   private readonly webContextsService = inject(ApplicationWebContextsService);
   private readonly ensClassificationsService = inject(ApplicationEnsClassificationsService);
+  private readonly soffidRolesAssignment = inject(ApplicationSoffidRolesAssignmentService);
   private readonly responsibleChanges = inject(ResponsibleDataChangesService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private initializedApplicationId: number | null = null;
   private completenessRequestVersion = 0;
   private webContextVerificationRequestVersion = 0;
+  private readonly dataUrlCheckVersions: Record<ApplicationDataSource, number> = {
+    openData: 0,
+    reuse: 0,
+  };
   readonly completenessRefreshFailed = signal(false);
   readonly completenessRefreshing = signal(false);
   // Derived from the validation state of active web contexts.
@@ -246,9 +284,10 @@ export class ApplicationDetailState {
     (this.accessibilityStatus() === 'loaded' || this.accessibilityStatus() === 'absent'));
   readonly appDataId = signal<number | null>(null);
   readonly data = signal<ApplicationDataOutput | null>(null);
+  // URL each source uses and whether it answers; null while no anchor has given it.
+  readonly dataUrls = signal({ ...EMPTY_DATA_URLS });
   readonly dataStatus = signal<ApplicationDataLoadStatus>('unavailable');
   readonly dataErrorMessage = signal<string | null>(null);
-  readonly dataActiveSource = signal<ApplicationDataSource>('openData');
   readonly canEditData = computed(() => this.canEdit() &&
     (this.dataStatus() === 'loaded' || this.dataStatus() === 'absent'));
   readonly appIntegrationId = signal<number | null>(null);
@@ -279,9 +318,9 @@ export class ApplicationDetailState {
   readonly dataForm = createApplicationDataForm(this.formBuilder);
 
   constructor() {
-    for (const source of ['openData', 'reuse'] as const) {
-      const { useUrl } = APPLICATION_DATA_SOURCE_CONTROLS[source];
-      this.dataForm.controls[useUrl].valueChanges
+    for (const source of APPLICATION_DATA_SOURCES) {
+      const { manual } = APPLICATION_DATA_SOURCE_CONTROLS[source];
+      this.dataForm.controls[manual].valueChanges
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.configureDataUrl(source));
     }
@@ -388,16 +427,12 @@ export class ApplicationDetailState {
     this.application.update((current) =>
       current ? { ...current, appDataId: result.appDataId } : current,
     );
-    this.savedDataValue = result.record
-      ? {
-          useOpenDataUrl: result.record.useOpenDataUrl,
-          openDataUrl: result.record.openDataUrl ?? '',
-          useReuseUrl: result.record.useReuseUrl,
-          reuseUrl: result.record.reuseUrl ?? '',
-          observations: result.record.observation ?? '',
-        }
-      : { ...EMPTY_APPLICATION_DATA_VALUE };
+    this.savedDataValue = {
+      ...EMPTY_APPLICATION_DATA_VALUE,
+      observations: result.record?.observation ?? '',
+    };
     this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
+    this.checkDataUrls(result.record);
   }
 
   initializeIntegrations(result: ApplicationIntegrationsLoadResult): void {
@@ -676,15 +711,15 @@ export class ApplicationDetailState {
     }
   }
 
-  activate(): Observable<boolean> {
+  activate(): Observable<ApplicationActivationResult> {
     const current = this.application();
     const id = Number(current?.id);
-    if (!current || Number.isNaN(id)) return of(false);
+    if (!current || Number.isNaN(id)) return of({ activated: false });
 
     return this.applicationsService.reactivate(id).pipe(
-      switchMap((response) => this.refreshAfterApplicationMutation(id, response)),
-      tap((response) => this.setApplication(response)),
-      map(() => true),
+      switchMap((response) => this.assignSoffidRolesAndRefresh(id, response)),
+      tap(({ response }) => this.setApplication(response)),
+      map(({ assignedSoffidRoles }) => ({ activated: true, assignedSoffidRoles })),
     );
   }
 
@@ -721,14 +756,20 @@ export class ApplicationDetailState {
     if (!current || Number.isNaN(id)) return of({ status: 'invalid', section });
 
     return this.applicationsService.update(id, this.toApplicationInput(current)).pipe(
-      switchMap((response) => this.refreshAfterApplicationMutation(id, response)),
-      tap((response) => {
+      switchMap((response) =>
+        (response.prefix ?? '') === current.prefix
+          ? this.refreshAfterApplicationMutation(id, response).pipe(
+              map((fresh) => ({ response: fresh, assignedSoffidRoles: undefined })),
+            )
+          : this.assignSoffidRolesAndRefresh(id, response),
+      ),
+      tap(({ response }) => {
         this.applyGeneralResponse(response);
         if (current.admUnitCode !== this.application()?.admUnitCode) {
           this.responsibleChanges.assignmentsChanged();
         }
       }),
-      map(() => ({ status: 'saved', section }) as const),
+      map(({ assignedSoffidRoles }) => ({ status: 'saved', section, assignedSoffidRoles }) as const),
     );
   }
 
@@ -740,6 +781,10 @@ export class ApplicationDetailState {
 
   private saveSystemsDatabases(): Observable<ApplicationDetailSaveResult> {
     const section: ApplicationDetailSection = 'systems-databases';
+    if (this.systemsDatabasesForm.invalid) {
+      this.systemsDatabasesForm.markAllAsTouched();
+      return of({ status: 'invalid', section });
+    }
     if (this.systemsDatabasesForm.pristine) {
       this.finishUnchanged(section);
       return of({ status: 'unchanged', section });
@@ -916,52 +961,142 @@ export class ApplicationDetailState {
     );
   }
 
+  // Saves the observation first, creating the anchor when the application has none, and then each
+  // URL typed in by hand, one request at a time. Every write is committed as soon as it succeeds,
+  // so a later failure leaves only the pending changes in edit mode.
   private saveData(): Observable<ApplicationDetailSaveResult> {
     const section: ApplicationDetailSection = 'data';
     if (!this.canEditData()) return of({ status: 'invalid', section });
     if (this.dataForm.invalid) {
       this.dataForm.markAllAsTouched();
-      this.dataActiveSource.set(this.firstInvalidDataSource());
       return of({ status: 'invalid', section });
-    }
-    if (this.dataForm.pristine) {
-      this.finishUnchanged(section);
-      return of({ status: 'unchanged', section });
     }
     const applicationId = Number(this.application()?.id);
     if (!Number.isInteger(applicationId) || applicationId <= 0) {
       return of({ status: 'invalid', section });
     }
     const value = this.dataForm.getRawValue();
-    const payload: ApplicationDataInput = {
-      applicationId,
-      observation: normalizeQuillHtml(value.observations) || null,
-      openDataUrl: value.openDataUrl.trim() || null,
-      useOpenDataUrl: value.useOpenDataUrl,
-      reuseUrl: value.reuseUrl.trim() || null,
-      useReuseUrl: value.useReuseUrl,
-    };
+    const observation = normalizeQuillHtml(value.observations) || null;
+    const observationChanged =
+      observation !== (normalizeQuillHtml(this.savedDataValue.observations) || null);
+    const urls = APPLICATION_DATA_SOURCES.filter(
+      (source) => value[APPLICATION_DATA_SOURCE_CONTROLS[source].manual],
+    ).map((source) => ({ source, url: value[APPLICATION_DATA_SOURCE_CONTROLS[source].url].trim() }));
+    if (!observationChanged && urls.length === 0) {
+      this.finishUnchanged(section);
+      return of({ status: 'unchanged', section });
+    }
+
     const id = this.appDataId();
-    const request = id == null
-      ? this.dataService.create(payload)
-      : this.dataService.update(id, payload);
+    const payload: ApplicationDataInput = { applicationId, observation };
+    const anchor$: Observable<number> = id != null && !observationChanged
+      ? of(id)
+      : (id == null ? this.dataService.create(payload) : this.dataService.update(id, payload)).pipe(
+          map((record) => this.commitDataAnchor(applicationId, id, record)),
+        );
+    const invalidDataUrls: ApplicationDataSource[] = [];
     return defer(() => {
       this.dataForm.disable({ emitEvent: false });
-      return request;
+      return anchor$;
     }).pipe(
-      tap((record) => {
-        if (!record || record.application?.id !== applicationId || !Number.isInteger(record.id) ||
-          record.id <= 0 || (id != null && record.id !== id) || record.deletedAt) {
-          throw new Error('Invalid data response');
-        }
+      switchMap((appDataId) =>
+        concat(
+          ...urls.map(({ source, url }) =>
+            this.dataService.updateUrl(appDataId, source, url).pipe(
+              tap((result) => {
+                this.commitDataUrl(source, result);
+                if (!result.validUrl) invalidDataUrls.push(source);
+              }),
+            ),
+          ),
+        ).pipe(
+          toArray(),
+          map(() => appDataId),
+        ),
+      ),
+      tap(() => {
+        this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
         this.setEditing(section, false);
       }),
-      // Write responses omit the published endpoints and the URLs may have changed.
-      switchMap((record) => this.reloadData(applicationId, record.id)),
-      tap((result) => this.initializeData(result)),
-      map(() => ({ status: 'saved', section }) as const),
-      finalize(() => this.dataForm.enable({ emitEvent: false })),
+      // A new anchor has not been read yet: read the URLs its sources use by default.
+      switchMap((appDataId) =>
+        id == null
+          ? this.reloadData(applicationId, appDataId).pipe(tap((result) => this.initializeData(result)))
+          : of(null),
+      ),
+      map(() => ({ status: 'saved', section, invalidDataUrls }) as const),
+      finalize(() => {
+        this.dataForm.enable({ emitEvent: false });
+        // A disabled group ignores its controls when a commit resets one of them, so it may have
+        // turned pristine while changes are still pending after a failed write.
+        if (Object.values(this.dataForm.controls).some((control) => control.dirty)) {
+          this.dataForm.markAsDirty();
+        }
+      }),
     );
+  }
+
+  // Write responses carry no URL, so the URLs already known are kept.
+  private commitDataAnchor(
+    applicationId: number,
+    id: number | null,
+    record: ApplicationDataOutput,
+  ): number {
+    if (!record || record.application?.id !== applicationId || !Number.isInteger(record.id) ||
+      record.id <= 0 || (id != null && record.id !== id) || record.deletedAt) {
+      throw new Error('Invalid data response');
+    }
+    const current = this.data();
+    this.data.set(
+      current ? { ...current, observation: record.observation } : record,
+    );
+    this.appDataId.set(record.id);
+    this.dataStatus.set('loaded');
+    this.application.update((application) =>
+      application ? { ...application, appDataId: record.id } : application,
+    );
+    this.savedDataValue = { ...this.savedDataValue, observations: record.observation ?? '' };
+    this.dataForm.controls.observations.reset(this.savedDataValue.observations, { emitEvent: false });
+    return record.id;
+  }
+
+  // The PUT checks the URL it saves, so its answer replaces any check still pending.
+  private commitDataUrl(source: ApplicationDataSource, result: ApplicationDataUrlOutput): void {
+    const { manual, url } = APPLICATION_DATA_SOURCE_CONTROLS[source];
+    this.dataUrlCheckVersions[source]++;
+    this.setDataUrl(source, { url: result.url, check: result.validUrl ? 'valid' : 'invalid' });
+    this.data.update((current) =>
+      current ? { ...current, [DATA_RECORD_URL_FIELDS[source]]: result.url } : current,
+    );
+    this.dataForm.controls[manual].reset(false, { emitEvent: false });
+    this.dataForm.controls[url].reset('', { emitEvent: false });
+  }
+
+  // Each source is checked on its own, so a URL that cannot be checked leaves the other one alone.
+  private checkDataUrls(record: ApplicationDataOutput | null): void {
+    for (const source of APPLICATION_DATA_SOURCES) {
+      const version = ++this.dataUrlCheckVersions[source];
+      const url = record?.[DATA_RECORD_URL_FIELDS[source]] ?? null;
+      this.setDataUrl(source, record ? { url, check: url ? 'checking' : 'failed' } : null);
+      if (!url) continue;
+      this.dataService
+        .checkUrl(url)
+        .pipe(
+          map((result): ApplicationDataUrlState => ({
+            url,
+            check: result.validUrl ? 'valid' : 'invalid',
+          })),
+          catchError(() => of<ApplicationDataUrlState>({ url, check: 'failed' })),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe((state) => {
+          if (version === this.dataUrlCheckVersions[source]) this.setDataUrl(source, state);
+        });
+    }
+  }
+
+  private setDataUrl(source: ApplicationDataSource, state: ApplicationDataUrlState | null): void {
+    this.dataUrls.update((current) => ({ ...current, [source]: state }));
   }
 
   private reloadData(applicationId: number, appDataId: number): Observable<ApplicationDataLoadResult> {
@@ -985,20 +1120,11 @@ export class ApplicationDetailState {
     );
   }
 
-  private firstInvalidDataSource(): ApplicationDataSource {
-    const invalid = (['openData', 'reuse'] as const).find(
-      (source) => this.dataForm.controls[APPLICATION_DATA_SOURCE_CONTROLS[source].url].invalid,
-    );
-    return invalid ?? this.dataActiveSource();
-  }
-
-  // With its flag off an URL only shows the backend-detected value, so edits are discarded.
+  // Unchecking a URL typed in by hand discards it: the source keeps the URL it already uses.
   private configureDataUrl(source: ApplicationDataSource): void {
-    const { useUrl, url } = APPLICATION_DATA_SOURCE_CONTROLS[source];
+    const { manual, url } = APPLICATION_DATA_SOURCE_CONTROLS[source];
     const control = this.dataForm.controls[url];
-    if (!this.dataForm.controls[useUrl].value) {
-      control.setValue(this.savedDataValue[url], { emitEvent: false });
-    }
+    if (!this.dataForm.controls[manual].value) control.reset('', { emitEvent: false });
     control.updateValueAndValidity({ emitEvent: false });
   }
 
@@ -1006,6 +1132,10 @@ export class ApplicationDetailState {
   private saveIntegrations(): Observable<ApplicationDetailSaveResult> {
     const section: ApplicationDetailSection = 'integrations';
     if (!this.canEditIntegrations()) return of({ status: 'invalid', section });
+    if (this.integrationsForm.invalid) {
+      this.integrationsForm.markAllAsTouched();
+      return of({ status: 'invalid', section });
+    }
     if (this.integrationsForm.pristine) {
       this.finishUnchanged(section);
       return of({ status: 'unchanged', section });
@@ -1065,6 +1195,8 @@ export class ApplicationDetailState {
         this.configureEnsControls();
         break;
       case 'data':
+        // A checkbox checked and unchecked again leaves nothing to save but the form dirty.
+        this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
         this.dataForm.enable({ emitEvent: false });
         break;
       case 'integrations':
@@ -1155,6 +1287,24 @@ export class ApplicationDetailState {
       defaultIfEmpty(null),
       filter(() => Number(this.application()?.id) === id),
       map((fresh) => fresh ?? this.withCurrentDetailData(response)),
+    );
+  }
+
+  // A new prefix or a restored application may match Soffid roles named `<prefix>_*`, so ask the
+  // back-end to assign them before re-reading the application. The change is already saved by then,
+  // which is why a failed assignment yields null instead of an error.
+  private assignSoffidRolesAndRefresh(
+    id: number,
+    response: ApplicationOutput,
+  ): Observable<{ response: ApplicationOutput; assignedSoffidRoles: SoffidRolesAssignment }> {
+    return this.soffidRolesAssignment.assign(id).pipe(
+      map((roles): SoffidRolesAssignment => roles.length),
+      catchError(() => of(null)),
+      switchMap((assignedSoffidRoles) =>
+        this.refreshAfterApplicationMutation(id, response).pipe(
+          map((fresh) => ({ response: fresh, assignedSoffidRoles })),
+        ),
+      ),
     );
   }
 
@@ -1400,9 +1550,10 @@ export class ApplicationDetailState {
   private resetDataState(): void {
     this.appDataId.set(this.application()?.appDataId ?? null);
     this.data.set(null);
+    APPLICATION_DATA_SOURCES.forEach((source) => this.dataUrlCheckVersions[source]++);
+    this.dataUrls.set({ ...EMPTY_DATA_URLS });
     this.dataStatus.set('unavailable');
     this.dataErrorMessage.set(null);
-    this.dataActiveSource.set('openData');
     this.savedDataValue = { ...EMPTY_APPLICATION_DATA_VALUE };
     this.dataForm.reset({ ...this.savedDataValue }, { emitEvent: false });
   }

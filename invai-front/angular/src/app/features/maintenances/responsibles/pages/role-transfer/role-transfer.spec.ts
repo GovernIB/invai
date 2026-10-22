@@ -87,6 +87,7 @@ interface RoleTransferTestApi {
   preparedAssignments: WritableSignal<RoleAssignmentOutput[]>;
   sourceGroups: () => AssignmentGroupTest[];
   confirmationVisible: WritableSignal<boolean>;
+  confirmationMessage: () => string;
   moveAll(fromSource: boolean): void;
   moveSubgroup(subgroup: AssignmentSubgroupTest, fromSource: boolean): void;
   openApplyConfirmation(): void;
@@ -404,6 +405,9 @@ describe('RoleTransfer', () => {
     component.moveAll(true);
     component.form.controls.revoke.setValue(true);
     component.openApplyConfirmation();
+    expect(component.confirmationMessage()).toContain(
+      "Es donaran de baixa i se n'esborraran les observacions.",
+    );
     component.confirmAction();
 
     expect(apply).toHaveBeenCalledWith(

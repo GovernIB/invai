@@ -19,39 +19,81 @@
       class="application-security__resource"
       aria-labelledby="application-security-roles-title"
     >
-      <div class="application-security__resource-header">
+      <div class="application-security__resource-header application-security__resource-header--toolbar">
         <h3 id="application-security-roles-title">{{ rolesTitle }}</h3>
-      </div>
-      <form
-        class="application-security__role-filter"
-        [formGroup]="roleFilters"
-        (ngSubmit)="applyRoleFilters()"
-      >
-        <div class="application-security__field">
-          <label for="application-security-role-system">{{ labels.system }}</label>
-          <input
-            pInputText
-            id="application-security-role-system"
-            class="w-full"
-            type="text"
-            formControlName="system"
-          />
-        </div>
-        <p-button
-          type="submit"
-          [icon]="icons.SEARCH"
-          [ariaLabel]="labels.applyRoleFilters"
-          [pTooltip]="labels.applyRoleFilters"
-          tooltipPosition="top"
+        <app-section-actions
+          [(isFiltersCollapsed)]="roleFiltersCollapsed"
+          [(quickSearchValue)]="roleQuickSearch"
+          [addButtonAriaLabel]="addAriaLabels.role"
+          [disableAddButton]="!canManageResources()"
+          [filtersButtonAriaLabel]="roleListCopy.filtersButtonAriaLabel"
+          [filtersSelected]="selectedRoleFilters()"
+          [hideAddButton]="!showResourceActions()"
+          [hideColumnsButton]="true"
+          [hideExportButton]="true"
+          [isSearchLoading]="isRoleSearchIndicatorLoading()"
+          [quickSearchAriaLabel]="roleListCopy.quickSearchAriaLabel"
+          [quickSearchClearAriaLabel]="roleListCopy.quickSearchClearAriaLabel"
+          [quickSearchPlaceholder]="roleListCopy.quickSearchPlaceholder"
+          (onAdd)="openCreateDialog('role')"
+          (onQuickSearchChange)="onRoleQuickSearchChange($event)"
         />
-      </form>
+      </div>
+      @if (!roleFiltersCollapsed()) {
+        <app-search-filters
+          [headingLevel]="4"
+          [hideMoreFiltersButton]="true"
+          [isLoading]="rolesLoading()"
+          (onReset)="resetRoleFilters()"
+          (onSearch)="applyRoleFilters()"
+        >
+          <form
+            class="invai-search-filter-grid--semantic"
+            appSearchFilterGrid
+            [formGroup]="roleFilters"
+            (ngSubmit)="applyRoleFilters()"
+          >
+            <div class="invai-filter-field--standard">
+              <p-floatlabel class="w-full">
+                <input
+                  id="application-security-role-filter-code"
+                  class="w-full"
+                  type="text"
+                  formControlName="securityRoleName"
+                  pInputText
+                />
+                <label for="application-security-role-filter-code">{{
+                  roleFilterLabels.securityRoleName
+                }}</label>
+              </p-floatlabel>
+            </div>
+            <div class="invai-filter-field--standard">
+              <p-floatlabel class="w-full">
+                <input
+                  id="application-security-role-filter-system"
+                  class="w-full"
+                  type="text"
+                  formControlName="system"
+                  pInputText
+                />
+                <label for="application-security-role-filter-system">{{
+                  roleFilterLabels.system
+                }}</label>
+              </p-floatlabel>
+            </div>
+          </form>
+        </app-search-filters>
+      }
       <app-application-security-resource-table
         kind="role"
         [columns]="roleColumns"
         [first]="roleFirst()"
         [isLoading]="rolesLoading()"
+        [isReadOnly]="!canManageResources()"
         [itemsList]="roles()"
+        [showActions]="showResourceActions()"
         (onPageChange)="onPageChange('role', $event)"
+        (onSelectAction)="onTableAction('role', $event)"
       />
     </section>
 
@@ -512,9 +554,20 @@
         <p-editor
           id="application-security-observation"
           [formControl]="detailState.securityForm.controls.observation"
-          [attr.aria-labelledby]="'application-security-observation-label'"
           [style]="{ height: '10rem' }"
+          [invalid]="observationInvalid()"
+          [appRichTextAria]="observationInvalid() ? 'application-security-observation-error' : null"
+          appRichTextLabelledBy="application-security-observation-label"
         />
+        @if (observationInvalid()) {
+          <p
+            id="application-security-observation-error"
+            class="mb-0 mt-1 text-sm text-red-600"
+            role="alert"
+          >
+            {{ textMaxBytesError }}
+          </p>
+        }
       } @else {
         <div
           class="invai-form-static-value invai-form-static-value--rich"
@@ -549,13 +602,32 @@
     [kind]="resourceKind()"
     [measureTypeOptions]="measureTypeOptions()"
     [mode]="resourceDialogMode()"
+    [rolePrefix]="applicationPrefix()"
+    [roleSearch]="roleSearch()"
     [securityLevelOptions]="securityLevelOptions()"
     [webContextOptions]="webContextOptions()"
     (cancelEdit)="cancelResourceEdit()"
     (closed)="closeResourceDialog()"
     (deactivate)="requestDelete()"
     (edit)="startResourceEdit()"
+    (roleSearchRequested)="searchSoffidRoles($event)"
     (submitForm)="submitResource()"
+  />
+}
+
+@if (roleValidationDialogVisible()) {
+  <app-confirmation-dialog
+    severity="primary"
+    [(visible)]="roleValidationDialogVisible"
+    [cancelAriaLabel]="roleValidationCopy.cancelAriaLabel"
+    [closeOnConfirm]="false"
+    [confirmAriaLabel]="roleValidationCopy.confirmAriaLabel"
+    [confirmLabel]="roleValidationCopy.confirmLabel"
+    [message]="roleValidationMessage()"
+    [pending]="isValidatingRole()"
+    [title]="roleValidationCopy.confirmTitle"
+    (cancel)="closeRoleValidationDialog()"
+    (confirm)="validateRole()"
   />
 }
 

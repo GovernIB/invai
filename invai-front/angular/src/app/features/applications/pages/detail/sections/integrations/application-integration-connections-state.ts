@@ -71,13 +71,20 @@ interface SearchState<TOption> {
   searched: boolean;
   error: boolean;
   total: number;
+  // Query the options answer; null before any search.
+  query: string | null;
 }
 
 const APPLICATION_SEARCH_SIZE = 20;
 const SOFFID_MIN_QUERY_LENGTH = 3;
 
 function emptySearch<TOption>(): SearchState<TOption> {
-  return { options: [], loading: false, searched: false, error: false, total: 0 };
+  return { options: [], loading: false, searched: false, error: false, total: 0, query: null };
+}
+
+// A query already loaded, or still loading, is reused; failed ones are retried.
+function answers(search: SearchState<unknown>, query: string): boolean {
+  return search.query === query && !search.error && (search.loading || search.searched);
 }
 
 export function toIntegrationRoleOption(
@@ -143,7 +150,11 @@ export class ApplicationIntegrationConnectionsState {
       !this.saving() &&
       !this.deleting(),
   );
-  readonly canEdit = computed(() => this.canManage() && !this.selected()?.deletedAt);
+  // A row whose roles Soffid could not resolve has no required roles to start editing from, and
+  // saving replaces the whole set.
+  readonly canEdit = computed(
+    () => this.canManage() && !this.selected()?.deletedAt && !this.selected()?.rolesUnavailable,
+  );
   readonly technologyOptions = computed(() => {
     const selected = this.selected()?.technology;
     const options = this.technologyCatalogOptions().map(({ id, label }) => ({ id, label }));
@@ -203,7 +214,12 @@ export class ApplicationIntegrationConnectionsState {
   onAction(event: ActionParams<ApplicationIntegrationConnectionOutput>): void {
     const row = event.params;
     if (event.action === ApplicationIntegrationsTableAction.View) this.open(row, 'view');
-    if (event.action === ApplicationIntegrationsTableAction.Edit && this.canManage() && !row.deletedAt) {
+    if (
+      event.action === ApplicationIntegrationsTableAction.Edit &&
+      this.canManage() &&
+      !row.deletedAt &&
+      !row.rolesUnavailable
+    ) {
       this.open(row, 'edit');
     }
     if (event.action === ApplicationIntegrationsTableAction.Delete) this.requestDelete(row);
@@ -217,13 +233,13 @@ export class ApplicationIntegrationConnectionsState {
     configureApplicationIntegrationSystemKind(this.form);
     this.mode.set('create');
     this.visible.set(true);
-    this.ensureCatalogs();
+    this.loadEditOptions();
   }
 
   edit(): void {
     if (!this.canEdit()) return;
     this.mode.set('edit');
-    this.ensureCatalogs();
+    this.loadEditOptions();
   }
 
   cancelEdit(): void {
@@ -240,7 +256,8 @@ export class ApplicationIntegrationConnectionsState {
   }
 
   searchApplications(query: string): void {
-    this.applicationQueries.next(query);
+    const term = query.trim();
+    if (!answers(this.applicationSearch(), term)) this.applicationQueries.next(term);
   }
 
   searchUsers(query: string): void {
@@ -248,7 +265,8 @@ export class ApplicationIntegrationConnectionsState {
   }
 
   searchRoles(query: string): void {
-    this.roleQueries.next(query);
+    const term = query.trim();
+    if (!answers(this.roleSearch(), term)) this.roleQueries.next(term);
   }
 
   save(): void {
@@ -397,7 +415,7 @@ export class ApplicationIntegrationConnectionsState {
     this.roleSearch.set({ ...emptySearch(), options: this.form.controls.requiredRoles.value });
     this.mode.set(mode);
     this.visible.set(true);
-    if (mode === 'edit') this.ensureCatalogs();
+    if (mode === 'edit') this.loadEditOptions();
   }
 
   // An existing connection only stores the Soffid user code, not the person's name.
@@ -413,6 +431,13 @@ export class ApplicationIntegrationConnectionsState {
       userName,
     };
     return { ...candidate, label: userName };
+  }
+
+  // The pickers' unfiltered lists are requested with the dialog, not when a panel opens.
+  private loadEditOptions(): void {
+    this.ensureCatalogs();
+    this.searchApplications('');
+    this.searchRoles('');
   }
 
   private ensureCatalogs(): void {
@@ -439,7 +464,12 @@ export class ApplicationIntegrationConnectionsState {
   private loadApplications(query: string): Observable<unknown> {
     const selectedId = this.form.controls.applicationId.value;
     const selected = this.applicationSearch().options.find((option) => option.id === selectedId);
-    this.applicationSearch.set({ ...emptySearch(), options: selected ? [selected] : [], loading: true });
+    this.applicationSearch.set({
+      ...emptySearch(),
+      options: selected ? [selected] : [],
+      loading: true,
+      query,
+    });
     const ownId = Number(this.detail.application()?.id);
     return this.applicationsService
       .getPage({
@@ -447,7 +477,7 @@ export class ApplicationIntegrationConnectionsState {
         size: APPLICATION_SEARCH_SIZE,
         sort: 'name,asc',
         statusId: ApplicationStatus.ACTIVE,
-        quickSearch: query.trim() || undefined,
+        quickSearch: query || undefined,
       })
       .pipe(
         map((page) => {
@@ -463,6 +493,7 @@ export class ApplicationIntegrationConnectionsState {
             searched: true,
             error: false,
             total: page.totalElements,
+            query,
           });
         }),
         catchError(() => {
@@ -475,7 +506,7 @@ export class ApplicationIntegrationConnectionsState {
   private loadUsers(query: string): Observable<unknown> {
     this.userSearch.set(emptySearch());
     if (query.trim().length < SOFFID_MIN_QUERY_LENGTH) return EMPTY;
-    this.userSearch.set({ ...emptySearch(), loading: true });
+    this.userSearch.set({ ...emptySearch(), loading: true, query });
     return this.peopleService.searchSoffid(query).pipe(
       map((page) =>
         this.userSearch.set({
@@ -489,6 +520,7 @@ export class ApplicationIntegrationConnectionsState {
           searched: true,
           error: false,
           total: page.totalElements,
+          query,
         }),
       ),
       catchError(() => {
@@ -500,7 +532,7 @@ export class ApplicationIntegrationConnectionsState {
 
   private loadRoles(query: string): Observable<unknown> {
     const selected = this.form.controls.requiredRoles.value;
-    this.roleSearch.set({ ...emptySearch(), options: selected, loading: true });
+    this.roleSearch.set({ ...emptySearch(), options: selected, loading: true, query });
     return this.soffidRoles.search(query).pipe(
       map((page) => {
         const found = page.content
@@ -514,6 +546,7 @@ export class ApplicationIntegrationConnectionsState {
           searched: true,
           error: false,
           total: page.totalElements,
+          query,
         });
       }),
       catchError(() => {

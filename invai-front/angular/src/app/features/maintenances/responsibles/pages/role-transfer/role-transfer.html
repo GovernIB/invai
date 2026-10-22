@@ -82,7 +82,7 @@
         </div>
       }
       <header class="role-transfer-list-header">
-        <h3 id="role-transfer-source-list-title">{{ copy.assignedRoles }}</h3>
+        <h2 id="role-transfer-source-list-title">{{ copy.assignedRoles }}</h2>
         <span aria-hidden="true">{{ sourceAssignments().length }}</span>
       </header>
 
@@ -105,7 +105,7 @@
           @for (group of sourceGroups(); track group.applicationId) {
             <article class="role-transfer-application">
               <header class="role-transfer-application-header">
-                <h4>{{ group.applicationName }}</h4>
+                <h3>{{ group.applicationName }}</h3>
                 <p-button
                   type="button"
                   [ariaLabel]="groupActionLabel(group, true)"
@@ -119,7 +119,7 @@
               @for (subgroup of group.subgroups; track subgroup.type) {
                 <section class="role-transfer-subgroup">
                   <header class="role-transfer-subgroup-header">
-                    <h5>{{ subgroup.label }}</h5>
+                    <h4>{{ subgroup.label }}</h4>
                     <p-button
                       type="button"
                       [ariaLabel]="subgroupActionLabel(subgroup, group.applicationName, true)"
@@ -209,7 +209,7 @@
         </div>
       }
       <header class="role-transfer-list-header">
-        <h3 id="role-transfer-prepared-list-title">{{ preparedTitle() }}</h3>
+        <h2 id="role-transfer-prepared-list-title">{{ preparedTitle() }}</h2>
         <span aria-hidden="true">{{ preparedAssignments().length }}</span>
       </header>
 
@@ -220,7 +220,7 @@
           @for (group of preparedGroups(); track group.applicationId) {
             <article class="role-transfer-application">
               <header class="role-transfer-application-header">
-                <h4>{{ group.applicationName }}</h4>
+                <h3>{{ group.applicationName }}</h3>
                 <p-button
                   type="button"
                   [ariaLabel]="groupActionLabel(group, false)"
@@ -235,7 +235,7 @@
               @for (subgroup of group.subgroups; track subgroup.type) {
                 <section class="role-transfer-subgroup">
                   <header class="role-transfer-subgroup-header">
-                    <h5>{{ subgroup.label }}</h5>
+                    <h4>{{ subgroup.label }}</h4>
                     <p-button
                       type="button"
                       [ariaLabel]="subgroupActionLabel(subgroup, group.applicationName, false)"

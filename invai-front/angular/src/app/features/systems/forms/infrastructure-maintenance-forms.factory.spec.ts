@@ -1,4 +1,6 @@
 import { FormBuilder } from '@angular/forms';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { MAX_BYTES_ERROR } from '@shared/utils/text-length.utils';
 
 import {
   createDatabaseHostForm,
@@ -67,5 +69,15 @@ describe('infrastructure maintenance form factories', () => {
     expect(databaseVendor.valid).toBe(true);
     databaseVendor.controls.defaultPort.setValue(0);
     expect(databaseVendor.controls.defaultPort.hasError('min')).toBe(true);
+  });
+
+  it('limits host descriptions to the back-end storage size in UTF-8 bytes', () => {
+    for (const form of [createSystemHostForm(formBuilder), createDatabaseHostForm(formBuilder)]) {
+      const description = form.controls.description;
+      description.setValue('ç'.repeat(TEXT_FIELD_MAX_BYTES / 2));
+      expect(description.hasError(MAX_BYTES_ERROR)).toBe(false);
+      description.setValue(`${description.value}a`);
+      expect(description.hasError(MAX_BYTES_ERROR)).toBe(true);
+    }
   });
 });

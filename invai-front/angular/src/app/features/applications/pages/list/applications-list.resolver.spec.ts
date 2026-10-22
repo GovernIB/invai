@@ -38,6 +38,7 @@ const APPLICATION: Application = {
   modificationDate: '',
   withdrawalDate: '',
   appResponsibleAuthorizedId: null,
+  dir3Mismatch: false,
   incomplete: false,
   missingResponsibleTypes: false,
   missingAuthorized: false,

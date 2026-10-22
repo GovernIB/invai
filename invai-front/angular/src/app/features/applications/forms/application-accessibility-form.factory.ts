@@ -1,4 +1,6 @@
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { TEXT_FIELD_MAX_BYTES } from '@shared/constants/text-field.constants';
+import { richTextMaxBytesValidator } from '@shared/utils/text-length.utils';
 
 export type ApplicationAccessibilityClassificationSegment = number | null;
 
@@ -58,9 +60,11 @@ export function createApplicationAccessibilityForm(
     ]),
     inaccessibleContent: formBuilder.nonNullable.control(
       EMPTY_APPLICATION_ACCESSIBILITY_VALUE.inaccessibleContent,
+      richTextMaxBytesValidator(TEXT_FIELD_MAX_BYTES),
     ),
     observations: formBuilder.nonNullable.control(
       EMPTY_APPLICATION_ACCESSIBILITY_VALUE.observations,
+      richTextMaxBytesValidator(TEXT_FIELD_MAX_BYTES),
     ),
   });
 }

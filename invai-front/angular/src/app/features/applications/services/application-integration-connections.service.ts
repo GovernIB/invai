@@ -42,7 +42,8 @@ export class ApplicationIntegrationConnectionsService extends BaseApiService {
       () =>
         this.http.get<SpringPage<ApplicationIntegrationConnectionOutput>>(this.url(), {
           params: httpParams,
-          // A Soffid outage fails the whole page; the tab reports it inline.
+          // The tab reports a failed page inline. A Soffid outage no longer fails it: the rows
+          // come back flagged with rolesUnavailable.
           context: new HttpContext().set(SKIP_SERVER_ERROR_DIALOG, true),
         }),
       APPLICATION_DETAIL_CACHE_TTL_MS,

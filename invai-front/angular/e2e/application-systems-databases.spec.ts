@@ -84,7 +84,7 @@ test.describe('application systems and databases', () => {
     expect(aggregate.observation).toContain(disposableApplication.code);
     await expect(page.getByRole('button', { name: EDIT_SECTION, exact: true })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Responsables', exact: true }).click();
+    await page.getByRole('link', { name: /^Responsables/ }).click();
     await expect(
       page.getByRole('button', {
         name: "Editar Responsables de l'aplicació",
@@ -119,7 +119,10 @@ test.describe('application systems and databases', () => {
     );
     expect(countPath(requests, SYSTEMS_API.systems)).toBeGreaterThan(0);
     expect(countPath(requests, SYSTEMS_API.databases)).toBeGreaterThan(0);
-    await expect(editor).toContainText(observation);
+    // Outside edit mode the observation is rendered as static rich text, not in the editor.
+    await expect(page.locator('.application-systems-databases__observations')).toContainText(
+      observation,
+    );
   });
 
   test('server relation supports create, immutable view, delete, filters, paging and sorting', async ({
@@ -585,7 +588,8 @@ async function selectCatalogRow(dialog: Locator, text: string): Promise<void> {
 async function showFilters(panel: Locator, toggleName: string): Promise<void> {
   const search = panel.getByRole('button', { name: 'Cerca' });
   if (!(await search.isVisible())) {
-    await panel.getByRole('button', { name: toggleName, exact: true }).click();
+    // The toggle name gains an "(N filtres aplicats)" suffix while filters are applied.
+    await panel.getByRole('button', { name: toggleName }).click();
   }
   await expect(search).toBeVisible();
 }

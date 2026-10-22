@@ -577,7 +577,7 @@ test.describe('systems CRUD lifecycles through the UI', () => {
         await expect(page.getByRole('heading', { name: 'Consultar base de dades' })).toBeVisible();
         await expectSelectedOption(page, 'database-host-server', serverLabel);
         await expect(page.locator('#database-host-service')).toHaveValue(initialService);
-        await expect(page.locator('#database-host-port')).toHaveValue(String(initialPort));
+        await expectSelectedOption(page, 'database-host-port', String(initialPort));
         await expectSelectedOption(page, 'database-host-type', vendor.name);
         await expect(page.locator('#database-host-description')).toHaveValue(description);
         await expectViewActions(page, DATABASE_ACTIONS);
@@ -743,8 +743,15 @@ async function expectEditActions(page: Page, actions: DialogActions): Promise<vo
   await expect(page.getByRole('button', { name: actions.save, exact: true })).toBeVisible();
 }
 
+// View mode renders the selection as static text labelled by "<inputId>-label" or
+// "<inputId>-view-label".
 async function expectSelectedOption(page: Page, inputId: string, value: string): Promise<void> {
-  await expect(page.locator(`#${inputId}`).locator('..')).toContainText(value);
+  const staticValue = page.locator(
+    `p[aria-labelledby="${inputId}-label"], p[aria-labelledby="${inputId}-view-label"]`,
+  );
+  const field =
+    (await staticValue.count()) > 0 ? staticValue : page.locator(`#${inputId}`).locator('..');
+  await expect(field).toContainText(value);
 }
 
 function hasQuery(url: URL, expected: Record<string, string | number | boolean>): boolean {

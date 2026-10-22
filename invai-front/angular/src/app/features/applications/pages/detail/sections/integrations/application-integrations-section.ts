@@ -16,6 +16,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationDialogComponent } from '@components/confirmation-dialog/confirmation-dialog.component';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
+import { TEXT_FIELD_MAX_BYTES_ERROR } from '@shared/constants/text-field.i18n';
+import { RichTextAria } from '@shared/directives/rich-text-aria.directive';
 import { MessageService, PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Editor } from 'primeng/editor';
@@ -64,6 +66,7 @@ import { ApplicationIntegrationsTable } from './application-integrations-table';
     ConfirmationDialogComponent,
     Editor,
     ReactiveFormsModule,
+    RichTextAria,
   ],
   providers: [ApplicationIntegrationConnectionsState],
   templateUrl: './application-integrations-section.html',
@@ -87,6 +90,8 @@ export class ApplicationIntegrationsSection implements OnInit {
   protected readonly addAriaLabel = APPLICATION_INTEGRATIONS_ADD_ARIA_LABEL;
   protected readonly observationsLabel = APPLICATION_INTEGRATIONS_OBSERVATIONS_LABEL;
   protected readonly observationsLabelId = 'application-integrations-observations-label';
+  protected readonly observationsErrorId = 'application-integrations-observations-error';
+  protected readonly textMaxBytesError = TEXT_FIELD_MAX_BYTES_ERROR;
   protected readonly connectionsTitleId = 'application-integrations-connections-title';
   protected readonly columns = APPLICATION_INTEGRATIONS_COLUMNS;
   protected readonly messages = APPLICATION_INTEGRATIONS_MESSAGES;
@@ -202,6 +207,11 @@ export class ApplicationIntegrationsSection implements OnInit {
 
   protected richTextValue(value: string): string {
     return value.trim() || '-';
+  }
+
+  protected observationsInvalid(): boolean {
+    const control = this.detailState.integrationsForm.controls.observations;
+    return control.invalid && (control.dirty || control.touched);
   }
 
   protected labelEditor(event: EditorInitEvent): void {

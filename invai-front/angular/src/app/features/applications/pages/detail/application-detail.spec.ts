@@ -186,7 +186,7 @@ describe('ApplicationDetail', () => {
     expect(recreateWithNavigation({ mode: 'edit', section: 'security' }).isEditing('general')).toBe(false);
   });
 
-  it('renders the eight tabs without a global edit toolbar', () => {
+  it('renders the nine tabs without a global edit toolbar', () => {
     const tabs = [
       ...fixture.nativeElement.querySelectorAll('.application-detail-tab'),
     ] as HTMLAnchorElement[];
@@ -200,6 +200,7 @@ describe('ApplicationDetail', () => {
       'SeguretatLa secció Seguretat està incompleta: falta almenys un context web, una classificació ENS o un risc actiu.',
       'Dades',
       'Integracions',
+      'Documentació',
     ]);
     expect(fixture.nativeElement.querySelector('.application-detail-toolbar')).toBeNull();
   });
@@ -422,6 +423,7 @@ function toApplication(response: ApplicationOutput): Application {
     appSecurityId: response.appSecurityId ?? null,
     appAccessibilityId: response.appAccessibilityId ?? null,
     appDataId: response.appDataId ?? null,
+    dir3Mismatch: response.dir3Mismatch ?? false,
     incomplete: response.incomplete,
     missingResponsibleTypes: response.missingResponsibleTypes,
     missingAuthorized: response.missingAuthorized,

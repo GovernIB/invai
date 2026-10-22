@@ -23,24 +23,12 @@
   gap: 0.4rem;
 }
 
-.application-data__observations > h4 {
+.application-data__observations > h3 {
   margin: 0;
-  color: var(--p-text-muted-color);
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 :host ::ng-deep .application-data__observations > p-editor {
   width: 100%;
-}
-
-:host ::ng-deep .application-data .p-tabpanels {
-  padding: 1.5rem 0 0;
-}
-
-// Keep both source tabs visible at 320 px; PrimeNG navigators remain the fallback at larger text sizes.
-@media (max-width: 767px) {
-  :host ::ng-deep .application-data .p-tab {
-    padding-inline: 0.75rem;
-  }
 }

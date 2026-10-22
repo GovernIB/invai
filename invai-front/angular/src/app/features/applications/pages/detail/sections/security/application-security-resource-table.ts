@@ -1,3 +1,4 @@
+import { formatDate } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -27,6 +28,7 @@ import {
 } from '../../../../applications.model';
 import {
   APPLICATION_SECURITY_EMPTY_VALUE,
+  APPLICATION_SECURITY_ROLE_VALIDATION,
   APPLICATION_SECURITY_TABLE_ACTIONS,
   APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION,
 } from './application-security-section.i18n';
@@ -71,13 +73,21 @@ export class ApplicationSecurityResourceTable extends TableComponentBase<Applica
   protected readonly pendingVerificationLabel = APPLICATION_WEB_CONTEXT_PENDING_VERIFICATION;
   protected readonly emptyValue = APPLICATION_SECURITY_EMPTY_VALUE;
   protected readonly ApplicationSecurityTableAction = ApplicationSecurityTableAction;
-  protected readonly isConsultable = computed(() => this.kind() !== 'role');
   protected readonly rowActions = computed<MenuItem[]>(() => [
     {
       label: this.actions.view,
       icon: PrimeIcons.EYE,
       command: () => this.emitRowAction(ApplicationSecurityTableAction.View),
     },
+    ...(!this.isReadOnly() && this.roleValidationStatus(this.selectedRow()) === 'NOT_VALIDATED'
+      ? [
+          {
+            label: APPLICATION_SECURITY_ROLE_VALIDATION.validate,
+            icon: PrimeIcons.CHECK_CIRCLE,
+            command: () => this.emitRowAction(ApplicationSecurityTableAction.Verify),
+          },
+        ]
+      : []),
     {
       label: this.actions.edit,
       icon: PrimeIcons.PENCIL,
@@ -127,9 +137,25 @@ export class ApplicationSecurityResourceTable extends TableComponentBase<Applica
     }
   }
 
-  protected activateRow(event: Event, row: ApplicationSecurityResourceOutput): void {
-    if (!this.isConsultable()) return;
-    this.onRowActivate(event, ApplicationSecurityTableAction.View, row);
+  // Only the states that need attention get an indicator; VALIDATED and NOT_APPLY show nothing.
+  protected roleValidationStatus(
+    row: ApplicationSecurityResourceOutput | null,
+  ): 'NOT_VALIDATED' | 'MANUAL' | null {
+    if (this.kind() !== 'role' || !row || row.deletedAt) return null;
+    const status = (row as ApplicationSecurityRoleOutput).validationStatus;
+    return status === 'NOT_VALIDATED' || status === 'MANUAL' ? status : null;
+  }
+
+  protected roleValidationLabel(row: ApplicationSecurityResourceOutput): string {
+    const copy = APPLICATION_SECURITY_ROLE_VALIDATION;
+    if (this.roleValidationStatus(row) !== 'MANUAL') return copy.notValidated;
+    const { manualValidatedAt, manualValidatedBy } = row as ApplicationSecurityRoleOutput;
+    return manualValidatedAt && manualValidatedBy?.trim()
+      ? copy.manualBy(
+          manualValidatedBy.trim(),
+          formatDate(manualValidatedAt, 'dd/MM/yyyy HH:mm', this.locale),
+        )
+      : copy.manual;
   }
 
   protected openActionsMenu(event: Event, row: ApplicationSecurityResourceOutput): void {
