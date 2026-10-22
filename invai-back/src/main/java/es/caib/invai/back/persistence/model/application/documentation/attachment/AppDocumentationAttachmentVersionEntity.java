@@ -2,6 +2,7 @@ package es.caib.invai.back.persistence.model.application.documentation.attachmen
 
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.catalog.mimeType.LkupMimeTypeEntity;
+import es.caib.invai.back.persistence.model.type.StreamBlobJdbcType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +16,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
 
 import java.io.Serial;
 import java.sql.Blob;
@@ -78,6 +80,7 @@ public class AppDocumentationAttachmentVersionEntity extends BaseEntity {
 
     /** Bytes of the uploaded file; immutable once stored. */
     @Lob
+    @JdbcType(StreamBlobJdbcType.class)
     @Column(name = "CONTENT", nullable = false, updatable = false)
     private Blob content;
 }
