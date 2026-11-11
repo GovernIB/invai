@@ -1,0 +1,203 @@
+[
+  {
+    "label": "Primeros pasos",
+    "icon": "pi pi-compass",
+    "items": [
+      {
+        "label": "Cómo usar la ayuda",
+        "icon": "pi pi-question-circle",
+        "document": "getting-started/using-help.md"
+      },
+      {
+        "label": "Cabecera y menú de usuario",
+        "icon": "pi pi-user",
+        "document": "getting-started/header-and-user-menu.md"
+      },
+      {
+        "label": "Trucos de la interfaz",
+        "icon": "pi pi-lightbulb",
+        "document": "getting-started/interface-tips.md"
+      }
+    ]
+  },
+  {
+    "label": "Aplicaciones",
+    "icon": "pi pi-th-large",
+    "items": [
+      {
+        "label": "Lista de aplicaciones",
+        "icon": "pi pi-list",
+        "document": "applications/list.md"
+      },
+      {
+        "label": "Alta de una aplicación",
+        "icon": "pi pi-plus",
+        "document": "applications/create.md"
+      },
+      {
+        "label": "Ficha de aplicación",
+        "icon": "pi pi-id-card",
+        "items": [
+          {
+            "label": "Cómo funciona la ficha",
+            "icon": "pi pi-info-circle",
+            "document": "application-detail/overview.md"
+          },
+          {
+            "label": "General",
+            "icon": "pi pi-cog",
+            "document": "application-detail/general.md"
+          },
+          {
+            "label": "Responsables",
+            "icon": "pi pi-users",
+            "document": "application-detail/responsible.md"
+          },
+          {
+            "label": "Sistemas y BD",
+            "icon": "pi pi-server",
+            "document": "application-detail/systems-databases.md"
+          },
+          {
+            "label": "Desarrollo",
+            "icon": "pi pi-code",
+            "document": "application-detail/development.md"
+          },
+          {
+            "label": "Accesibilidad",
+            "icon": "pi pi-eye",
+            "document": "application-detail/accessibility.md"
+          },
+          {
+            "label": "Seguridad",
+            "icon": "pi pi-shield",
+            "document": "application-detail/security.md"
+          },
+          {
+            "label": "Datos",
+            "icon": "pi pi-database",
+            "document": "application-detail/data.md"
+          },
+          {
+            "label": "Integraciones",
+            "icon": "pi pi-share-alt",
+            "document": "application-detail/integrations.md"
+          },
+          {
+            "label": "Documentación",
+            "icon": "pi pi-folder",
+            "document": "application-detail/documentation.md"
+          },
+          {
+            "label": "Detalle de un documento",
+            "icon": "pi pi-file-edit",
+            "document": "application-detail/document-detail.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Mantenimientos",
+    "icon": "pi pi-wrench",
+    "items": [
+      {
+        "label": "General",
+        "icon": "pi pi-cog",
+        "items": [
+          {
+            "label": "Cómo funciona General",
+            "icon": "pi pi-info-circle",
+            "document": "maintenances/general.md"
+          },
+          {
+            "label": "Categorías",
+            "icon": "pi pi-tags",
+            "document": "maintenances/categories.md"
+          },
+          {
+            "label": "Sistemas de información",
+            "icon": "pi pi-desktop",
+            "document": "maintenances/system-types.md"
+          },
+          {
+            "label": "Ámbitos",
+            "icon": "pi pi-globe",
+            "document": "maintenances/fields.md"
+          },
+          {
+            "label": "Comisión informática",
+            "icon": "pi pi-briefcase",
+            "document": "maintenances/commissions.md"
+          }
+        ]
+      },
+      {
+        "label": "Responsables",
+        "icon": "pi pi-users",
+        "items": [
+          {
+            "label": "Cómo funciona Responsables",
+            "icon": "pi pi-info-circle",
+            "document": "maintenances/responsibles.md"
+          },
+          {
+            "label": "Transferencia y revocación de roles",
+            "icon": "pi pi-arrows-h",
+            "document": "maintenances/role-transfer.md"
+          },
+          {
+            "label": "Personal externo",
+            "icon": "pi pi-user",
+            "document": "maintenances/people.md"
+          },
+          {
+            "label": "Autorizaciones",
+            "icon": "pi pi-key",
+            "document": "maintenances/authorizations.md"
+          },
+          {
+            "label": "Empresas",
+            "icon": "pi pi-building",
+            "document": "maintenances/companies.md"
+          }
+        ]
+      },
+      {
+        "label": "Sistemas y BD",
+        "icon": "pi pi-server",
+        "document": "maintenances/systems.md"
+      },
+      {
+        "label": "Desarrollo",
+        "icon": "pi pi-code",
+        "document": "maintenances/development.md"
+      },
+      {
+        "label": "Accesibilidad",
+        "icon": "pi pi-eye",
+        "document": "maintenances/accessibility.md"
+      },
+      {
+        "label": "Seguridad",
+        "icon": "pi pi-shield",
+        "document": "maintenances/security.md"
+      },
+      {
+        "label": "Integraciones",
+        "icon": "pi pi-sitemap",
+        "document": "maintenances/integrations.md"
+      },
+      {
+        "label": "Documentación",
+        "icon": "pi pi-folder",
+        "document": "maintenances/documentation.md"
+      },
+      {
+        "label": "Detalle de una categoría documental",
+        "icon": "pi pi-file-edit",
+        "document": "maintenances/document-category.md"
+      }
+    ]
+  }
+]

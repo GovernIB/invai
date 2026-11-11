@@ -2,13 +2,11 @@ export const APPLICATION_DOCUMENTATION_TEXTS = {
   title: $localize`:@@applicationDocumentationTitle:Documentació`,
   errorSummary: $localize`:@@applicationDocumentationErrorSummary:Error`,
   infoSummary: $localize`:@@applicationDocumentationInfoSummary:Informació`,
-  exportUnavailable: $localize`:@@applicationDocumentationExportUnavailable:L'exportació encara no està implementada.`,
   downloadError: $localize`:@@applicationDocumentationDownloadError:No s'ha pogut descarregar el fitxer.`,
   view: $localize`:@@applicationDocumentationActionView:Consulta`,
   download: $localize`:@@applicationDocumentationActionDownload:Descarrega`,
   delete: $localize`:@@applicationDocumentationActionDelete:Elimina`,
   actionsHeader: $localize`:@@applicationDocumentationActionsHeader:Accions`,
-  sectionFilter: $localize`:@@applicationDocumentationFilterSection:Secció`,
   required: $localize`:@@applicationDocumentationRequired:Camp obligatori`,
   maxLength: (max: number) =>
     $localize`:@@applicationDocumentationMaxLength:Ha de tenir com a màxim ${max}:max: caràcters`,
@@ -29,7 +27,6 @@ export const APPLICATION_ATTACHMENTS_TEXTS = {
   quickSearchPlaceholder: $localize`:@@applicationAttachmentsQuickSearchPlaceholder:Cerca per títol`,
   quickSearchAriaLabel: $localize`:@@applicationAttachmentsQuickSearchAriaLabel:Cerca ràpida d'adjunts`,
   addAriaLabel: $localize`:@@applicationAttachmentsAddAriaLabel:Afegeix un adjunt`,
-  exportAriaLabel: $localize`:@@applicationAttachmentsExportAriaLabel:Exporta els adjunts`,
   columnsAriaLabel: $localize`:@@applicationAttachmentsColumnsAriaLabel:Columnes dels adjunts`,
   filtersAriaLabel: $localize`:@@applicationAttachmentsFiltersAriaLabel:Filtres dels adjunts`,
   stateFilter: $localize`:@@applicationAttachmentsFilterState:Estat`,
@@ -50,7 +47,7 @@ export const APPLICATION_ATTACHMENTS_TEXTS = {
   saveError: $localize`:@@applicationAttachmentSaveError:No s'ha pogut desar l'adjunt.`,
   deleteError: $localize`:@@applicationAttachmentDeleteError:No s'ha pogut eliminar l'adjunt.`,
   categoriesLoadError: $localize`:@@applicationAttachmentCategoriesLoadError:No s'han pogut carregar les categories documentals.`,
-  catalogsLoadError: $localize`:@@applicationAttachmentCatalogsLoadError:No s'han pogut carregar les seccions, els estats i els formats dels documents.`,
+  catalogsLoadError: $localize`:@@applicationAttachmentCatalogsLoadError:No s'han pogut carregar els estats i els formats dels documents.`,
   deleteDialogTitle: $localize`:@@applicationAttachmentDeleteDialogTitle:Eliminar l'adjunt?`,
   deleteDialogMessage: (title: string) =>
     $localize`:@@applicationAttachmentDeleteDialogMessage:Estàs a punt d'eliminar l'adjunt «${title}:title:».`,
@@ -76,7 +73,6 @@ export const APPLICATION_ATTACHMENT_DIALOG_TEXTS = {
   },
   labels: {
     title: $localize`:@@applicationAttachmentDialogTitleLabel:Títol`,
-    section: $localize`:@@applicationAttachmentDialogSection:Secció`,
     file: $localize`:@@applicationAttachmentDialogFile:Fitxer`,
     documentType: $localize`:@@applicationAttachmentDialogDocumentType:Tipus de document`,
     category: $localize`:@@applicationAttachmentDialogCategory:Categoria`,
@@ -99,18 +95,19 @@ export const APPLICATION_ATTACHMENT_DIALOG_TEXTS = {
 
 export const APPLICATION_LINKS_TEXTS = {
   title: $localize`:@@applicationLinksTitle:Enllaços`,
-  quickSearchPlaceholder: $localize`:@@applicationLinksQuickSearchPlaceholder:Cerca per títol, descripció, URL o secció`,
+  quickSearchPlaceholder: $localize`:@@applicationLinksQuickSearchPlaceholder:Cerca per títol, descripció, URL o categoria`,
   quickSearchAriaLabel: $localize`:@@applicationLinksQuickSearchAriaLabel:Cerca ràpida d'enllaços`,
   addAriaLabel: $localize`:@@applicationLinksAddAriaLabel:Afegeix un enllaç`,
   columnsAriaLabel: $localize`:@@applicationLinksColumnsAriaLabel:Columnes dels enllaços`,
   filtersAriaLabel: $localize`:@@applicationLinksFiltersAriaLabel:Filtres dels enllaços`,
+  categoryFilter: $localize`:@@applicationLinksFilterCategory:Categoria`,
   caption: $localize`:@@applicationLinksCaption:Enllaços de l'aplicació`,
   empty: $localize`:@@applicationLinksEmpty:No hi ha cap enllaç.`,
   rowActions: (title: string) =>
     $localize`:@@applicationLinksRowActions:Accions de l'enllaç «${title}:title:»`,
   opensInNewTab: $localize`:@@applicationLinksOpensInNewTab:(s'obre en una pestanya nova)`,
   loadError: $localize`:@@applicationLinksLoadError:No s'han pogut carregar els enllaços.`,
-  sectionsLoadError: $localize`:@@applicationLinksSectionsLoadError:No s'han pogut carregar les seccions dels enllaços.`,
+  categoriesLoadError: $localize`:@@applicationLinksCategoriesLoadError:No s'han pogut carregar les categories documentals.`,
   createdTitle: $localize`:@@applicationLinkCreatedTitle:Enllaç afegit`,
   createdDetail: $localize`:@@applicationLinkCreatedDetail:L'enllaç s'ha afegit correctament.`,
   updatedTitle: $localize`:@@applicationLinkUpdatedTitle:Enllaç actualitzat`,
@@ -145,7 +142,7 @@ export const APPLICATION_LINK_DIALOG_TEXTS = {
   labels: {
     title: $localize`:@@applicationLinkDialogTitleLabel:Títol`,
     description: $localize`:@@applicationLinkDialogDescription:Descripció (opcional)`,
-    section: $localize`:@@applicationLinkDialogSection:Secció`,
+    category: $localize`:@@applicationLinkDialogCategory:Categoria`,
     url: $localize`:@@applicationLinkDialogUrl:URL`,
   },
   requiredHint: $localize`:@@applicationLinkDialogRequiredHint:Tots els camps són obligatoris, excepte els indicats com a opcionals.`,
@@ -154,4 +151,64 @@ export const APPLICATION_LINK_DIALOG_TEXTS = {
     save: $localize`:@@applicationLinkDialogSaveLabel:Desa`,
   },
   urlError: $localize`:@@applicationLinkDialogUrlError:Indica una URL que comenci per http:// o https://`,
+};
+
+// Dialog that sends versions of the attachments of an application by e-mail.
+export const APPLICATION_DOCUMENTATION_EMAIL_TEXTS = {
+  title: $localize`:@@applicationDocumentationEmailTitle:Envia per correu`,
+  openAriaLabel: $localize`:@@applicationDocumentationEmailOpen:Envia adjunts per correu`,
+  requiredHint: $localize`:@@applicationDocumentationEmailRequiredHint:Tots els camps són obligatoris, excepte els indicats com a opcionals.`,
+  labels: {
+    recipients: $localize`:@@applicationDocumentationEmailRecipients:Destinataris`,
+    subject: $localize`:@@applicationDocumentationEmailSubject:Assumpte`,
+    message: $localize`:@@applicationDocumentationEmailMessage:Missatge (opcional)`,
+  },
+  recipientsHint: $localize`:@@applicationDocumentationEmailRecipientsHint:Escriu cada adreça i prem Retorn, espai o una coma per afegir-la. Fes doble clic en una adreça per canviar-la.`,
+  recipientEditAriaLabel: (address: string) =>
+    $localize`:@@applicationDocumentationEmailRecipientEdit:Canvia l'adreça ${address}:address:`,
+  defaultSubject: (application: string) =>
+    $localize`:@@applicationDocumentationEmailDefaultSubject:Documentació de l'aplicació ${application}:application:`,
+  selectionTitle: $localize`:@@applicationDocumentationEmailSelectionTitle:Què vols enviar?`,
+  selectedCount: (count: number) =>
+    count === 1
+      ? $localize`:@@applicationDocumentationEmailSelectedOne:1 element seleccionat`
+      : $localize`:@@applicationDocumentationEmailSelectedMany:${count}:count: elements seleccionats`,
+  quickSearchPlaceholder: $localize`:@@applicationDocumentationEmailQuickSearchPlaceholder:Cerca ràpida`,
+  quickSearchAriaLabel: $localize`:@@applicationDocumentationEmailQuickSearchAriaLabel:Cerca adjunts per enviar pel títol`,
+  columns: {
+    selection: $localize`:@@applicationDocumentationEmailColumnSelection:Selecció`,
+    document: $localize`:@@applicationDocumentationEmailColumnDocument:Document`,
+    format: $localize`:@@applicationDocumentationEmailColumnFormat:Format`,
+    version: $localize`:@@applicationDocumentationEmailColumnVersion:Versió`,
+  },
+  selectAriaLabel: (title: string) =>
+    $localize`:@@applicationDocumentationEmailSelectDocument:Envia «${title}:title:»`,
+  versionAriaLabel: (title: string) =>
+    $localize`:@@applicationDocumentationEmailVersionOf:Versió de «${title}:title:» que s'envia`,
+  empty: $localize`:@@applicationDocumentationEmailEmpty:No hi ha cap adjunt per enviar.`,
+  errors: {
+    recipientsRequired: $localize`:@@applicationDocumentationEmailRecipientsRequired:Indica com a mínim un destinatari.`,
+    recipientsInvalid: (addresses: string) =>
+      $localize`:@@applicationDocumentationEmailRecipientsInvalid:Aquestes adreces no són vàlides: ${addresses}:addresses:.`,
+    recipientsTooMany: (max: number) =>
+      $localize`:@@applicationDocumentationEmailRecipientsTooMany:No es pot enviar a més de ${max}:max: destinataris alhora.`,
+    subjectLineBreak: $localize`:@@applicationDocumentationEmailSubjectLineBreak:L'assumpte no pot contenir salts de línia.`,
+    attachmentsRequired: $localize`:@@applicationDocumentationEmailAttachmentsRequired:Selecciona com a mínim un adjunt.`,
+    attachmentsTooLarge: $localize`:@@applicationDocumentationEmailAttachmentsTooLarge:Els adjunts seleccionats superen la mida màxima de 15 MB.`,
+  },
+  versionsLoadError: (title: string) =>
+    $localize`:@@applicationDocumentationEmailVersionsLoadError:No s'han pogut carregar les versions de «${title}:title:»: s'enviarà la versió vigent.`,
+  sentTitle: $localize`:@@applicationDocumentationEmailSentTitle:Correu enviat`,
+  sentDetail: (count: number) =>
+    count === 1
+      ? $localize`:@@applicationDocumentationEmailSentOne:S'ha enviat el correu a 1 destinatari.`
+      : $localize`:@@applicationDocumentationEmailSentMany:S'ha enviat el correu a ${count}:count: destinataris.`,
+  sendError: $localize`:@@applicationDocumentationEmailSendError:No s'ha pogut enviar el correu.`,
+  forbidden: $localize`:@@applicationDocumentationEmailForbidden:No tens permís per enviar algun dels adjunts seleccionats.`,
+  actions: {
+    cancel: $localize`:@@applicationDocumentationEmailCancelLabel:Cancel·la`,
+    send: $localize`:@@applicationDocumentationEmailSendLabel:Envia`,
+  },
+  cancelAriaLabel: $localize`:@@applicationDocumentationEmailCancel:Cancel·la l'enviament per correu`,
+  closeAriaLabel: $localize`:@@applicationDocumentationEmailClose:Tanca l'enviament per correu`,
 };

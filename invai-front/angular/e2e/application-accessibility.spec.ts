@@ -1,41 +1,11 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
+import { type DisposableApplication, expect, test } from './support/application.fixture';
+import { apiUrl, expectApiJsonResponse, failApiRequest } from './support/http';
 import { selectOption } from './support/ui';
 
-test.use({ storageState: { cookies: [], origins: [] } });
-
-const SEGMENTS = [
-  { id: 11, name: 'Segment A', nameEs: 'Segmento A', deletedAt: null },
-  { id: 12, name: 'Segment B', nameEs: 'Segmento B', deletedAt: null },
-];
-const COMPLIANCES = [
-  { id: 21, name: 'Totalment conforme', nameEs: 'Totalmente conforme', deletedAt: null },
-  { id: 22, name: 'Parcialment conforme', nameEs: 'Parcialmente conforme', deletedAt: null },
-];
-const RECORD = {
-  id: 7,
-  application: { id: 1 },
-  classificationSegment: SEGMENTS[0],
-  compliance: COMPLIANCES[1],
-  publicUrl: 'https://www.caib.es/invai',
-  mobileApplication: true,
-  mobileApplicationName: 'InvAI mòbil',
-  nonAccessibleContent: '<p>Vídeos sense subtítols</p>',
-  observations: '<p>Revisió anual</p>',
-  expireDate: '2027-03-15T00:00:00',
-  deletedAt: null as string | null,
-};
-const SAVED_PAYLOAD = {
-  applicationId: 1,
-  complianceId: 22,
-  classificationSegmentId: 11,
-  publicUrl: RECORD.publicUrl,
-  mobileApplication: true,
-  mobileApplicationName: RECORD.mobileApplicationName,
-  nonAccessibleContent: RECORD.nonAccessibleContent,
-  observations: RECORD.observations,
-  expireDate: RECORD.expireDate,
-};
+const ACCESSIBILITY_API = '/invaiback/application/accessibility';
+const PUBLIC_URL = 'https://www.caib.es/invai';
 
 const SECTION = 'Accessibilitat';
 const EDIT = 'Editar Accessibilitat';
@@ -51,116 +21,90 @@ const TEXT_TOO_LONG =
   'El text supera la mida màxima permesa. Redueix-lo (els accents i el format també ocupen espai).';
 const RETRY_RECORD = "Torna a carregar l'accessibilitat";
 const RETRY_CATALOGS = 'Torna a carregar els catàlegs';
-const CATALOG_FAILED =
-  "No s'han pogut carregar els catàlegs d'accessibilitat. Torna-ho a provar.";
+const CATALOG_FAILED = "No s'han pogut carregar els catàlegs d'accessibilitat. Torna-ho a provar.";
 
 type Catalog = 'classification-segment' | 'compliance-situation';
 
-interface MockOptions {
-  status?: 'ACTIVE' | 'INACTIVE';
-  appAccessibilityId?: number | null;
-  record?: Partial<typeof RECORD>;
-  // Statuses answered, in order, before the record or a catalog is served.
-  recordFailures?: number[];
-  catalogFailures?: Partial<Record<Catalog, number[]>>;
-}
-
-interface AccessibilityMock {
+interface AccessibilityTab {
+  recordPath: string;
+  segments: Record<string, number>;
+  compliances: Record<string, number>;
   writes: { method: string; path: string; body: unknown }[];
   reads: string[];
   catalogParams: URLSearchParams[];
 }
 
-const pageOf = (content: unknown[]) => ({
-  content,
-  totalElements: content.length,
-  totalPages: 1,
-  last: true,
-  number: 0,
-});
+async function catalogIds(page: Page, catalog: Catalog): Promise<Record<string, number>> {
+  const body = await expectApiJsonResponse<{ content: Array<{ id: number; name: string }> }>(
+    await page.request.get(apiUrl(page, `/invaiback/${catalog}`), {
+      params: { page: 0, size: 100, statusId: 1 },
+    }),
+    `GET /invaiback/${catalog}`,
+  );
+  return Object.fromEntries(body.content.map(({ id, name }) => [name, id]));
+}
+
+// The record the tests start from, saved through the API on the record of the application.
+function savedPayload(application: DisposableApplication, tab: AccessibilityTab) {
+  return {
+    applicationId: application.id,
+    complianceId: tab.compliances['Parcialment'],
+    classificationSegmentId: tab.segments['Segment I'],
+    publicUrl: PUBLIC_URL,
+    mobileApplication: true,
+    mobileApplicationName: 'InvAI mòbil',
+    nonAccessibleContent: '<p>Vídeos sense subtítols</p>',
+    observations: '<p>Revisió anual</p>',
+    expireDate: '2027-03-15T00:00:00',
+  };
+}
 
 async function openAccessibilityTab(
   page: Page,
-  options: MockOptions = {},
-): Promise<AccessibilityMock> {
-  const mock: AccessibilityMock = { writes: [], reads: [], catalogParams: [] };
-  const recordFailures = [...(options.recordFailures ?? [])];
-  const catalogFailures: Record<Catalog, number[]> = {
-    'classification-segment': [...(options.catalogFailures?.['classification-segment'] ?? [])],
-    'compliance-situation': [...(options.catalogFailures?.['compliance-situation'] ?? [])],
+  application: DisposableApplication,
+  {
+    filled = true,
+    before,
+  }: { filled?: boolean; before?: (tab: AccessibilityTab) => Promise<void> } = {},
+): Promise<AccessibilityTab> {
+  const recordPath = `${ACCESSIBILITY_API}/${application.appAccessibilityId}`;
+  const [segments, compliances] = await Promise.all([
+    catalogIds(page, 'classification-segment'),
+    catalogIds(page, 'compliance-situation'),
+  ]);
+  const tab: AccessibilityTab = {
+    recordPath,
+    segments,
+    compliances,
+    writes: [],
+    reads: [],
+    catalogParams: [],
   };
-  let appAccessibilityId =
-    options.appAccessibilityId === undefined ? RECORD.id : options.appAccessibilityId;
-  let record: Record<string, unknown> = { ...RECORD, ...options.record };
-
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const request = route.request();
+  if (filled) {
+    await expectApiJsonResponse(
+      await page.request.put(apiUrl(page, recordPath), { data: savedPayload(application, tab) }),
+      `PUT ${recordPath}`,
+    );
+  }
+  await before?.(tab);
+  page.on('request', (request) => {
     const url = new URL(request.url());
-    const path = url.pathname;
-    const method = request.method();
-    if (path.endsWith('/auth/me')) {
-      return route.fulfill({ json: { authenticated: true, username: 'accessibility-test' } });
-    }
-    if (path.endsWith('/application/1')) {
-      return route.fulfill({
-        json: {
-          id: 1,
-          code: 'TEST',
-          name: 'Accessibilitat test',
-          status: options.status ?? 'ACTIVE',
-          appAccessibilityId,
-        },
-      });
-    }
-    const catalog = path.match(/\/(classification-segment|compliance-situation)$/)?.[1] as
-      | Catalog
-      | undefined;
+    const catalog = url.pathname.match(/\/(classification-segment|compliance-situation)$/)?.[1];
     if (catalog) {
-      mock.reads.push(catalog);
-      mock.catalogParams.push(url.searchParams);
-      const failure = catalogFailures[catalog].shift();
-      if (failure) {
-        return route.fulfill({ status: failure, json: { message: 'Catalog test failure' } });
-      }
-      return route.fulfill({
-        json: pageOf(catalog === 'classification-segment' ? SEGMENTS : COMPLIANCES),
-      });
+      tab.reads.push(catalog);
+      tab.catalogParams.push(url.searchParams);
+    } else if (url.pathname.startsWith(ACCESSIBILITY_API)) {
+      const path = url.pathname.replace('/invaiback/', '');
+      if (request.method() === 'GET') tab.reads.push(path);
+      else tab.writes.push({ method: request.method(), path, body: request.postDataJSON() });
     }
-    if (/\/application\/accessibility(\/\d+)?$/.test(path)) {
-      if (method === 'GET') {
-        mock.reads.push(path.slice(path.indexOf('application/')));
-        const failure = recordFailures.shift();
-        if (failure) {
-          return route.fulfill({ status: failure, json: { message: 'Record test failure' } });
-        }
-        return route.fulfill({ json: record });
-      }
-      const body = request.postDataJSON();
-      mock.writes.push({ method, path: path.slice(path.indexOf('application/')), body });
-      record = {
-        id: RECORD.id,
-        application: { id: body.applicationId },
-        classificationSegment:
-          SEGMENTS.find((item) => item.id === body.classificationSegmentId) ?? null,
-        compliance: COMPLIANCES.find((item) => item.id === body.complianceId) ?? null,
-        publicUrl: body.publicUrl,
-        mobileApplication: body.mobileApplication,
-        mobileApplicationName: body.mobileApplicationName,
-        nonAccessibleContent: body.nonAccessibleContent,
-        observations: body.observations,
-        expireDate: body.expireDate,
-        deletedAt: null,
-      };
-      appAccessibilityId = RECORD.id;
-      return route.fulfill({ json: record });
-    }
-    return route.fulfill({ json: pageOf([]) });
   });
-
-  await page.goto('/aplicacions/1/accessibility');
+  await page.goto(`/aplicacions/${application.id}/accessibility`);
   await expect(page.getByRole('heading', { name: SECTION, exact: true })).toBeVisible();
-  return mock;
+  return tab;
 }
+
+const recordRead = (tab: AccessibilityTab) => tab.recordPath.replace('/invaiback/', '');
 
 const section = (page: Page) => page.locator('app-application-accessibility-section');
 const value = (page: Page, label: string) => section(page).getByLabel(label, { exact: true });
@@ -190,31 +134,30 @@ async function save(page: Page): Promise<void> {
 
 test('shows a saved record as read-only values with a link to its public URL', async ({
   page,
+  disposableApplication,
 }) => {
-  const mock = await openAccessibilityTab(page);
+  const tab = await openAccessibilityTab(page, disposableApplication);
 
-  await expect(value(page, 'Segment de classificació')).toHaveText('Segment A');
-  await expect(value(page, 'Situació de compliment')).toHaveText('Parcialment conforme');
+  await expect(value(page, 'Segment de classificació')).toHaveText('Segment I');
+  await expect(value(page, 'Situació de compliment')).toHaveText('Parcialment');
   await expect(value(page, 'Caducitat del darrer informe')).toHaveText('15/03/2027');
   await expect(value(page, 'Aplicació mòbil')).toHaveText('Sí');
   await expect(value(page, 'Nom aplicació mòbil')).toHaveText('InvAI mòbil');
-  await expect(richTextValue(page, 'Contingut no accessible')).toHaveText(
-    'Vídeos sense subtítols',
-  );
+  await expect(richTextValue(page, 'Contingut no accessible')).toHaveText('Vídeos sense subtítols');
   await expect(richTextValue(page, 'Observacions')).toHaveText('Revisió anual');
-  await expect(publicUrl(page)).toHaveValue(RECORD.publicUrl);
+  await expect(publicUrl(page)).toHaveValue(PUBLIC_URL);
   await expect(publicUrl(page)).not.toBeEditable();
   const link = section(page).getByRole('link', { name: PUBLIC_URL_LINK });
-  await expect(link).toHaveAttribute('href', RECORD.publicUrl);
+  await expect(link).toHaveAttribute('href', PUBLIC_URL);
   await expect(link).toHaveAttribute('target', '_blank');
   await expect(section(page).getByRole('combobox')).toHaveCount(0);
   await expect(section(page).locator('.ql-editor')).toHaveCount(0);
-  expect([...mock.reads].sort()).toEqual([
-    'application/accessibility/7',
+  expect([...tab.reads].sort()).toEqual([
+    recordRead(tab),
     'classification-segment',
     'compliance-situation',
   ]);
-  for (const params of mock.catalogParams) {
+  for (const params of tab.catalogParams) {
     expect(Object.fromEntries(params)).toEqual({
       page: '0',
       size: '100',
@@ -231,12 +174,14 @@ test('shows a saved record as read-only values with a link to its public URL', a
   ).toBeVisible();
 });
 
-test('creates the record with a POST on the first save and updates it with a PUT', async ({
+// The record is created with its application, empty: creating it with a POST when an older
+// application has none is covered by the unit tests of ApplicationDetailState.
+test('fills the empty record on the first save and updates it afterwards', async ({
   page,
+  disposableApplication,
 }) => {
-  const mock = await openAccessibilityTab(page, { appAccessibilityId: null });
+  const tab = await openAccessibilityTab(page, disposableApplication, { filled: false });
 
-  expect(mock.reads).not.toContain('application/accessibility/7');
   for (const label of [
     'Segment de classificació',
     'Situació de compliment',
@@ -254,8 +199,8 @@ test('creates the record with a POST on the first save and updates it with a PUT
   await startEditing(page);
   await expect(mobileName(page)).toBeDisabled();
   await expect(mobileName(page)).toHaveAccessibleDescription(MOBILE_NAME_UNAVAILABLE);
-  await selectOption(page, 'application-accessibility-classification', 'Segment B');
-  await selectOption(page, 'application-accessibility-compliance', 'Totalment conforme');
+  await selectOption(page, 'application-accessibility-classification', 'Segment II');
+  await selectOption(page, 'application-accessibility-compliance', 'Totalment');
   // The date picker only parses typed keys, so the date is typed in rather than filled.
   const date = page.locator('#application-accessibility-publication-date');
   await date.click();
@@ -280,9 +225,9 @@ test('creates the record with a POST on the first save and updates it with a PUT
   await expect(toast(page, SAVED)).toBeVisible();
   await expect(page.getByRole('button', { name: EDIT, exact: true })).toBeVisible();
   const created = {
-    applicationId: 1,
-    complianceId: 21,
-    classificationSegmentId: 12,
+    applicationId: disposableApplication.id,
+    complianceId: tab.compliances['Totalment'],
+    classificationSegmentId: tab.segments['Segment II'],
     publicUrl: 'https://invai.caib.es/app',
     mobileApplication: true,
     mobileApplicationName: 'App CAIB',
@@ -290,10 +235,8 @@ test('creates the record with a POST on the first save and updates it with a PUT
     observations: '<p>Revisat</p>',
     expireDate: '2027-12-31T00:00:00',
   };
-  expect(mock.writes).toEqual([
-    { method: 'POST', path: 'application/accessibility', body: created },
-  ]);
-  await expect(value(page, 'Segment de classificació')).toHaveText('Segment B');
+  expect(tab.writes).toEqual([{ method: 'PUT', path: recordRead(tab), body: created }]);
+  await expect(value(page, 'Segment de classificació')).toHaveText('Segment II');
   await expect(value(page, 'Caducitat del darrer informe')).toHaveText('31/12/2027');
   await expect(value(page, 'Nom aplicació mòbil')).toHaveText('App CAIB');
 
@@ -305,11 +248,11 @@ test('creates the record with a POST on the first save and updates it with a PUT
   await save(page);
 
   await expect(page.getByRole('button', { name: EDIT, exact: true })).toBeVisible();
-  expect(mock.writes).toEqual([
-    { method: 'POST', path: 'application/accessibility', body: created },
+  expect(tab.writes).toEqual([
+    { method: 'PUT', path: recordRead(tab), body: created },
     {
       method: 'PUT',
-      path: 'application/accessibility/7',
+      path: recordRead(tab),
       body: { ...created, mobileApplication: false, mobileApplicationName: null },
     },
   ]);
@@ -317,8 +260,11 @@ test('creates the record with a POST on the first save and updates it with a PUT
   await expect(value(page, 'Nom aplicació mòbil')).toHaveText(NO_VALUE);
 });
 
-test('validates the public URL and the length of the texts before saving', async ({ page }) => {
-  const mock = await openAccessibilityTab(page);
+test('validates the public URL and the length of the texts before saving', async ({
+  page,
+  disposableApplication,
+}) => {
+  const tab = await openAccessibilityTab(page, disposableApplication);
   await startEditing(page);
 
   for (const invalid of ['ftp://files.caib.es', 'www.caib.es']) {
@@ -343,19 +289,19 @@ test('validates the public URL and the length of the texts before saving', async
   await expect(observationsEditor(page)).toHaveAccessibleDescription(TEXT_TOO_LONG);
   await save(page);
   await expect(page.getByRole('button', { name: SAVE, exact: true })).toBeVisible();
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 
   await observationsEditor(page).fill('Correcte');
   await expect(section(page).getByText(TEXT_TOO_LONG)).toHaveCount(0);
   await save(page);
 
   await expect(toast(page, SAVED)).toBeVisible();
-  expect(mock.writes).toEqual([
+  expect(tab.writes).toEqual([
     {
       method: 'PUT',
-      path: 'application/accessibility/7',
+      path: recordRead(tab),
       body: {
-        ...SAVED_PAYLOAD,
+        ...savedPayload(disposableApplication, tab),
         publicUrl: longUrl.slice(0, 255),
         mobileApplicationName: 'n'.repeat(255),
         observations: '<p>Correcte</p>',
@@ -364,13 +310,16 @@ test('validates the public URL and the length of the texts before saving', async
   ]);
 });
 
-test('keeps a saved catalog value that is cleared and explains why', async ({ page }) => {
-  const mock = await openAccessibilityTab(page);
+test('keeps a saved catalog value that is cleared and explains why', async ({
+  page,
+  disposableApplication,
+}) => {
+  const tab = await openAccessibilityTab(page, disposableApplication);
   await startEditing(page);
 
   for (const [id, label] of [
-    ['application-accessibility-classification', 'Segment A'],
-    ['application-accessibility-compliance', 'Parcialment conforme'],
+    ['application-accessibility-classification', 'Segment I'],
+    ['application-accessibility-compliance', 'Parcialment'],
   ]) {
     await page.locator(`p-select:has(#${id}) .p-select-clear-icon`).click();
     const message = toast(page, CLEAR_BLOCKED);
@@ -381,44 +330,62 @@ test('keeps a saved catalog value that is cleared and explains why', async ({ pa
     await expect(message).toHaveCount(0);
   }
 
-  await selectOption(page, 'application-accessibility-classification', 'Segment B');
+  await selectOption(page, 'application-accessibility-classification', 'Segment II');
   await save(page);
   await expect(toast(page, SAVED)).toBeVisible();
-  expect(mock.writes).toEqual([
+  expect(tab.writes).toEqual([
     {
       method: 'PUT',
-      path: 'application/accessibility/7',
-      body: { ...SAVED_PAYLOAD, classificationSegmentId: 12 },
+      path: recordRead(tab),
+      body: {
+        ...savedPayload(disposableApplication, tab),
+        classificationSegmentId: tab.segments['Segment II'],
+      },
     },
   ]);
 });
 
-const LOAD_PROBLEMS = [
-  {
-    title: 'a failed load',
-    options: { recordFailures: [500] },
-    message: "No s'han pogut carregar les dades d'accessibilitat. Torna-ho a provar.",
-    recovers: true,
-  },
-  {
-    title: 'a forbidden load',
-    options: { recordFailures: [403] },
-    message: "El teu perfil no té permisos per fer aquesta operació d'accessibilitat.",
-    recovers: true,
-  },
-  {
-    title: 'a deleted record',
-    options: { record: { deletedAt: '2026-09-01T00:00:00' } },
-    message: "El registre d'accessibilitat està donat de baixa i no es pot modificar.",
-    recovers: false,
-  },
-];
+// Failed and forbidden loads answer only the first read of the record with the error; a deleted
+// record is deleted for real.
+const LOAD_PROBLEMS: Array<{ title: string; status?: number; message: string; recovers: boolean }> =
+  [
+    {
+      title: 'a failed load',
+      status: 500,
+      message: "No s'han pogut carregar les dades d'accessibilitat. Torna-ho a provar.",
+      recovers: true,
+    },
+    {
+      title: 'a forbidden load',
+      status: 403,
+      message: "El teu perfil no té permisos per fer aquesta operació d'accessibilitat.",
+      recovers: true,
+    },
+    {
+      title: 'a deleted record',
+      message: "El registre d'accessibilitat està donat de baixa i no es pot modificar.",
+      recovers: false,
+    },
+  ];
 
 for (const problem of LOAD_PROBLEMS) {
   test(`blocks editing after ${problem.title} and reloads the record on retry`, async ({
     page,
+    disposableApplication,
   }) => {
-    const mock = await openAccessibilityTab(page, problem.options);
+    const tab = await openAccessibilityTab(page, disposableApplication, {
+      before: async ({ recordPath }) => {
+        if (problem.status) {
+          await failApiRequest(page, 'GET', recordPath, {
+            status: problem.status,
+            json: { message: 'Record test failure' },
+          });
+          return;
+        }
+        const deleted = await page.request.delete(apiUrl(page, recordPath));
+        expect(deleted.ok(), await deleted.text()).toBeTruthy();
+      },
+    });
 
     const error = toast(page, problem.message);
     await expect(error).toBeVisible();
@@ -431,19 +398,17 @@ for (const problem of LOAD_PROBLEMS) {
     await expect(page.getByRole('button', { name: SAVE, exact: true })).toHaveCount(0);
 
     await section(page).getByRole('button', { name: RETRY_RECORD }).click();
-    await expect
-      .poll(() => mock.reads.filter((read) => read === 'application/accessibility/7').length)
-      .toBe(2);
+    await expect.poll(() => tab.reads.filter((read) => read === recordRead(tab)).length).toBe(2);
     if (problem.recovers) {
       await expect(section(page).getByText(problem.message)).toHaveCount(0);
       await expect(section(page).getByRole('button', { name: RETRY_RECORD })).toHaveCount(0);
-      await expect(value(page, 'Segment de classificació')).toHaveText('Segment A');
+      await expect(value(page, 'Segment de classificació')).toHaveText('Segment I');
       await startEditing(page);
     } else {
       await expect(section(page).getByText(problem.message)).toBeVisible();
       await expect(section(page).getByRole('button', { name: RETRY_RECORD })).toBeEnabled();
     }
-    expect(mock.writes).toEqual([]);
+    expect(tab.writes).toEqual([]);
   });
 }
 
@@ -458,40 +423,54 @@ const CATALOG_PROBLEMS = [
 for (const problem of CATALOG_PROBLEMS) {
   test(`shows a catalog answering ${problem.status} as text and retries only that catalog`, async ({
     page,
+    disposableApplication,
   }) => {
-    const mock = await openAccessibilityTab(page, {
-      catalogFailures: { 'classification-segment': [problem.status] },
+    const tab = await openAccessibilityTab(page, disposableApplication, {
+      before: async () => {
+        await failApiRequest(page, 'GET', '/invaiback/classification-segment', {
+          status: problem.status,
+          json: { message: 'Catalog test failure' },
+        });
+      },
     });
 
     await expect(toast(page, problem.toast)).toBeVisible();
     await expect(section(page).getByText(CATALOG_FAILED)).toBeVisible();
-    await expect(value(page, 'Segment de classificació')).toHaveText('Segment A');
+    await expect(value(page, 'Segment de classificació')).toHaveText('Segment I');
 
     await startEditing(page);
     await expect(page.locator('#application-accessibility-classification')).toHaveCount(0);
-    await expect(value(page, 'Segment de classificació')).toHaveText('Segment A');
-    await expect(page.locator('#application-accessibility-compliance')).toHaveText(
-      'Parcialment conforme',
-    );
+    await expect(value(page, 'Segment de classificació')).toHaveText('Segment I');
+    await expect(page.locator('#application-accessibility-compliance')).toHaveText('Parcialment');
 
     await section(page).getByRole('button', { name: RETRY_CATALOGS }).click();
     await expect(section(page).getByText(CATALOG_FAILED)).toHaveCount(0);
-    await expect(page.locator('#application-accessibility-classification')).toHaveText('Segment A');
-    expect(mock.reads.filter((read) => read === 'classification-segment')).toHaveLength(2);
-    expect(mock.reads.filter((read) => read === 'compliance-situation')).toHaveLength(1);
+    await expect(page.locator('#application-accessibility-classification')).toHaveText('Segment I');
+    expect(tab.reads.filter((read) => read === 'classification-segment')).toHaveLength(2);
+    expect(tab.reads.filter((read) => read === 'compliance-situation')).toHaveLength(1);
   });
 }
 
-test('keeps the tab read-only for an inactive application', async ({ page }) => {
-  await openAccessibilityTab(page, { status: 'INACTIVE' });
+test('keeps the tab read-only for an inactive application', async ({
+  page,
+  disposableApplication,
+}) => {
+  await openAccessibilityTab(page, disposableApplication, {
+    before: async () => {
+      const deactivated = await page.request.delete(
+        apiUrl(page, `/invaiback/application/${disposableApplication.id}`),
+      );
+      expect(deactivated.ok(), await deactivated.text()).toBeTruthy();
+    },
+  });
 
-  await expect(value(page, 'Segment de classificació')).toHaveText('Segment A');
+  await expect(value(page, 'Segment de classificació')).toHaveText('Segment I');
   await expect(page.getByRole('button', { name: EDIT, exact: true })).toHaveCount(0);
   await expect(publicUrl(page)).not.toBeEditable();
   await expect(section(page).getByRole('combobox')).toHaveCount(0);
   await expect(section(page).locator('.ql-editor')).toHaveCount(0);
   await expect(section(page).getByRole('link', { name: PUBLIC_URL_LINK })).toHaveAttribute(
     'href',
-    RECORD.publicUrl,
+    PUBLIC_URL,
   );
 });

@@ -1,0 +1,2 @@
+import{b as p}from"./chunk-6YVN4OB7.js";import{K as a,aa as c}from"./chunk-DMGFOOAC.js";import{a as i,b as o}from"./chunk-IN2LPUTO.js";var l=20,n=class e extends p{ENTITY_URI="security-role";search(r){let t=r.trim();return this.http.get(this.url("soffid-search"),{params:o(i({},t?{name:t}:{}),{page:0,size:l})})}static \u0275fac=(()=>{let r;return function(s){return(r||(r=c(e)))(s||e)}})();static \u0275prov=a({token:e,factory:e.\u0275fac,providedIn:"root"})};export{n as a};
+/**i18n:9fa542c6f17f570893e5bfce6175f9bb9e1d1bb7ee096369aaf6dc5812a678f2*/

@@ -201,4 +201,29 @@ describe('SectionActionsComponent', () => {
     expect(onQuickSearchChange).toHaveBeenCalledWith('');
     expect(fixture.nativeElement.querySelector('.section-actions-search__clear')).toBeFalsy();
   });
+
+  it('keeps the e-mail button hidden unless a list asks for it', () => {
+    expect(fixture.nativeElement.querySelector('.pi-envelope')).toBeNull();
+  });
+
+  it('offers a named e-mail button before the add button and emits when pressed', () => {
+    const emitted = vi.fn();
+    fixture.componentInstance.onEmail.subscribe(emitted);
+    fixture.componentRef.setInput('showEmailButton', true);
+    fixture.componentRef.setInput('emailButtonAriaLabel', 'Envia adjunts per correu');
+    fixture.detectChanges();
+
+    const buttons = [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+        '.section-actions__buttons button',
+      ),
+    ];
+    const email = buttons.find((button) => button.getAttribute('aria-label') === 'Envia adjunts per correu');
+    const add = buttons.find((button) => button.getAttribute('aria-label') === 'Afegeix');
+
+    expect(email?.querySelector('.pi-envelope')).toBeTruthy();
+    expect(buttons.indexOf(email!)).toBeLessThan(buttons.indexOf(add!));
+    email!.click();
+    expect(emitted).toHaveBeenCalledOnce();
+  });
 });

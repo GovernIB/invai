@@ -36,6 +36,15 @@
   overflow-wrap: anywhere;
 }
 
+.section-container__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
 @media (max-width: 767px) {
   .section-container__header {
     align-items: stretch;

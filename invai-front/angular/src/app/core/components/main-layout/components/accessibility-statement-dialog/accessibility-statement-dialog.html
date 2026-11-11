@@ -10,7 +10,7 @@
   [focusOnShow]="false"
   [modal]="true"
   [resizable]="false"
-  [style]="{ width: '32rem', maxWidth: 'calc(100vw - 2rem)' }"
+  [style]="{ width: '48rem', maxWidth: 'calc(100vw - 2rem)' }"
   (onShow)="focusStart()"
   (onHide)="hidden.emit()"
 >
@@ -19,9 +19,195 @@
   </ng-template>
 
   <div class="accessibility-statement">
-    <p #statementStart class="accessibility-statement__start" tabindex="-1" i18n="@@accessibilityStatementPendingAudit">
-      La primera auditoria d'accessibilitat d'aquesta aplicació encara està pendent de realitzar.
-      La declaració d'accessibilitat es publicarà en aquest apartat un cop finalitzada.
-    </p>
+    <div class="accessibility-statement__block">
+      <p
+        #statementStart
+        class="accessibility-statement__start"
+        tabindex="-1"
+        i18n="@@accessibilityStatementCommitment"
+      >
+        El Govern de les Illes Balears s'ha compromès a fer accessible l'aplicació
+        {{ evaluation.app }}, de conformitat amb el
+        <a [href]="links.royalDecree" rel="noopener noreferrer" target="_blank"
+          >Reial Decret 1112/2018</a
+        >, de 7 de setembre, d'accessibilitat dels llocs web i aplicacions mòbils del sector públic.
+      </p>
+
+      <p i18n="@@accessibilityStatementScope">
+        La present declaració d'accessibilitat s'aplica a l'entorn de l'aplicació:
+        <a [href]="evaluation.urlApp" rel="noopener noreferrer" target="_blank">{{
+          evaluation.urlApp
+        }}</a
+        >. S'exclouen de l'abast les pàgines que condueixen a enllaços externs.
+      </p>
+
+      <p i18n="@@accessibilityStatementExternalLinks">
+        Els enllaços externs d'aquesta declaració s'obren en una pestanya nova.
+      </p>
+    </div>
+
+    <div class="accessibility-statement__block">
+      <h3 i18n="@@accessibilityStatementComplianceTitle">Situació de compliment</h3>
+      <p i18n="@@accessibilityStatementComplianceText">
+        L'aplicació és parcialment conforme amb el
+        <a [href]="links.royalDecree" rel="noopener noreferrer" target="_blank"
+          >Reial Decret 1112/2018</a
+        >, a causa de les mancances de conformitat que s'indiquen a continuació.
+      </p>
+    </div>
+
+    <div class="accessibility-statement__block">
+      <h3 i18n="@@accessibilityStatementInaccessibleTitle">Contingut no accessible</h3>
+      <p i18n="@@accessibilityStatementInaccessibleIntro">
+        El contingut que es recull a continuació no és accessible pels següents motius (manca de
+        conformitat amb el Reial Decret 1112/2018):
+      </p>
+      <ul>
+        <li i18n="@@accessibilityStatementInaccessibleDisabledLink">
+          L'enllaç al codi font, quan no està disponible, és un element no interactiu amb l'atribut
+          aria-label, que ARIA no permet en elements genèrics.
+        </li>
+        <li i18n="@@accessibilityStatementInaccessibleNumberFields">
+          En alguns formularis, l'estat d'error dels camps numèrics (aria-invalid) no arriba a
+          l'element d'entrada.
+        </li>
+      </ul>
+    </div>
+
+    <div class="accessibility-statement__block">
+      <h3 i18n="@@accessibilityStatementPreparationTitle">
+        Preparació de la present declaració d'accessibilitat
+      </h3>
+      <p i18n="@@accessibilityStatementPreparedOn">
+        La present declaració va ser preparada el {{ evaluation.dateText }}.
+      </p>
+      <p i18n="@@accessibilityStatementMethod">
+        El mètode emprat per preparar la declaració ha estat una validació manual amb eines
+        assistides (Google Lighthouse i axe devTools) sobre una mostra representativa de pantalles.
+      </p>
+      @if (evaluation.dateTextAntReview) {
+        <p>{{ evaluation.dateTextAntReview }}</p>
+      }
+    </div>
+
+    <div class="accessibility-statement__block">
+      <h3 i18n="@@accessibilityStatementContactTitle">Observacions i dades de contacte</h3>
+      <p i18n="@@accessibilityStatementContactIntro">
+        Podeu comunicar qualsevol possible incompliment o dificultat d'accés al contingut i formular
+        suggeriments de millora.
+      </p>
+      <p i18n="@@accessibilityStatementContactChannels">
+        Mitjançant el formulari de
+        <a [href]="links.contactForm" rel="noopener noreferrer" target="_blank">contacte</a>
+        o trucant al telèfon 971177140.
+      </p>
+      <p i18n="@@accessibilityStatementContactSubmit">Podeu presentar:</p>
+      <ul>
+        <li i18n="@@accessibilityStatementContactComplaint">
+          Una queixa relativa al compliment dels requisits del Reial Decret 1112/2018 o
+        </li>
+        <li>
+          <span i18n="@@accessibilityStatementContactRequest"
+            >Una sol·licitud d'informació accessible relativa a:</span
+          >
+          <ul>
+            <li i18n="@@accessibilityStatementContactExcluded">
+              Continguts exclosos de l'àmbit d'aplicació del Reial Decret 1112/2018 (article 3,
+              apartat 4), o
+            </li>
+            <li i18n="@@accessibilityStatementContactExempt">
+              Continguts exempts per càrrega desproporcionada.
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <p i18n="@@accessibilityStatementContactProcedure">
+        Mitjançant el procediment:
+        <a [href]="links.informationRequests" rel="noopener noreferrer" target="_blank"
+          >Peticions d'informació accessible i queixes relatives a accessibilitat de llocs web i
+          aplicacions mòbils</a
+        >
+      </p>
+    </div>
+
+    <div class="accessibility-statement__block">
+      <h3 i18n="@@accessibilityStatementEnforcementTitle">Procediment d'aplicació</h3>
+      <p i18n="@@accessibilityStatementEnforcementInForce">
+        El procediment de reclamació que recull l'article 13 del
+        <a [href]="links.royalDecree" rel="noopener noreferrer" target="_blank"
+          >Reial Decret 1112/2018</a
+        >
+        va entrar en vigor el 20 de setembre de 2020.
+      </p>
+      <p i18n="@@accessibilityStatementEnforcementClaim">
+        Si un cop realitzada una sol·licitud d'informació accessible o queixa, aquesta hagués estat
+        desestimada, no s'estigués d'acord amb la decisió adoptada, o la resposta no complís els
+        requisits previstos a l'article 12.5, la persona interessada podrà iniciar una reclamació.
+        Igualment, es podrà iniciar una reclamació en el cas que hagi passat el termini de vint dies
+        hàbils sense haver obtingut resposta.
+      </p>
+      <p i18n="@@accessibilityStatementEnforcementProcedure">
+        La reclamació pot ser presentada a través del procediment
+        <a [href]="links.claims" rel="noopener noreferrer" target="_blank"
+          >Reclamacions relatives a accessibilitat de llocs web i aplicacions mòbils</a
+        >
+      </p>
+    </div>
+
+    <div class="accessibility-statement__block">
+      <h3
+        id="accessibility-statement-additional-title"
+        i18n="@@accessibilityStatementAdditionalTitle"
+      >
+        Informació addicional
+      </h3>
+      <p i18n="@@accessibilityStatementLastReview">
+        L'última revisió d'accessibilitat s'ha fet el <b>{{ evaluation.dateText }}.</b>
+      </p>
+      <p i18n="@@accessibilityStatementReviewTools">
+        S'han utilitzat eines automàtiques i una revisió manual de pantalles. El resultat estimat és
+        el següent:
+      </p>
+
+      <div class="accessibility-statement__table-wrapper">
+        <table
+          class="accessibility-statement__table"
+          aria-labelledby="accessibility-statement-additional-title"
+        >
+          <thead>
+            <tr>
+              <th scope="col" i18n="@@accessibilityStatementIndicatorHeader">Indicador</th>
+              <th scope="col" i18n="@@accessibilityStatementResultHeader">Resultat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" i18n="@@accessibilityStatementScoreLabel">
+                Puntuació mitjana del lloc web
+              </th>
+              <td>{{ evaluation.score }}</td>
+            </tr>
+            <tr>
+              <th scope="row" i18n="@@accessibilityStatementLevelLabel">
+                Nivell d'adequació estimat
+              </th>
+              <td>{{ evaluation.level }}</td>
+            </tr>
+            <tr>
+              <th scope="row" i18n="@@accessibilityStatementComplianceLabel">
+                Situació d'acompliment estimada
+              </th>
+              <td>{{ evaluation.complianceStatus }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p i18n="@@accessibilityStatementWcagLevel">Nivell {{ evaluation.level }} WCAG 2.1</p>
+      <p i18n="@@accessibilityStatementResponsive">
+        L'aplicació està dissenyada per a la visualització responsive, optimitzada per a tauletes i
+        dispositius mòbils.
+      </p>
+    </div>
   </div>
 </p-dialog>

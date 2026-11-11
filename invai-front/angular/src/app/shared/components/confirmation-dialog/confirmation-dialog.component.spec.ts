@@ -26,6 +26,15 @@ describe('ConfirmationDialogComponent', () => {
     expect(dialog.focusOnShow).toBe(true);
   });
 
+  it('names the close button as the cancellation it triggers, or as a close when it does not cancel', () => {
+    const dialog = fixture.debugElement.query(By.directive(Dialog)).componentInstance as Dialog;
+    expect(dialog.closeAriaLabel).toBe("Cancel·la l'acció");
+
+    fixture.componentRef.setInput('cancelOnHide', false);
+    fixture.detectChanges();
+    expect(dialog.closeAriaLabel).toBe('Tanca el diàleg');
+  });
+
   it('keeps text and icons on every action and supports domain-specific icons', () => {
     fixture.componentRef.setInput('auxiliaryLabel', 'Transfereix');
     fixture.componentRef.setInput('confirmIcon', 'pi pi-save');

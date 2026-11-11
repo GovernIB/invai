@@ -9,7 +9,7 @@ import {
   expectSuccessfulResponse,
   waitForApiResponse as waitForApplicationResponse,
 } from './support/http';
-import { selectOption } from './support/ui';
+import { selectFirstOption, selectOption } from './support/ui';
 
 const APPLICATION_API_PATH = '/invaiback/application';
 const ACTIVE_STATUS_ID = 1;
@@ -88,13 +88,13 @@ test('covers the applications API lifecycle through the UI', async ({ page }, te
       await expect(page.getByRole('heading', { name: 'Afegir aplicació' })).toBeVisible();
 
       await page.locator('#create-application-application').fill(initialName);
-      await selectOption(page, 'create-application-category');
-      await selectOption(page, 'create-application-information-system');
-      await selectOption(page, 'create-application-scope');
+      await selectFirstOption(page, 'create-application-category');
+      await selectFirstOption(page, 'create-application-information-system');
+      await selectFirstOption(page, 'create-application-scope');
       await page.locator('#create-application-prefix').fill(prefix);
       await page.locator('#create-application-code').fill(code);
-      await selectOption(page, 'create-application-administrative-unit');
-      await selectOption(page, 'create-application-commission');
+      await selectFirstOption(page, 'create-application-administrative-unit');
+      await selectFirstOption(page, 'create-application-commission');
       await page.locator('#create-application-description').fill(initialDescription);
 
       const responsePromise = waitForApplicationResponse(page, 'POST', APPLICATION_API_PATH);

@@ -19,7 +19,8 @@
 }
 
 .maintenance-panel-description {
-  color: var(--p-text-muted-color, #4b5563);
+  // PrimeNG's muted text (#64748b) falls to 4.34:1 on the hovered header (#f1f5f9).
+  color: var(--text-color);
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.35;

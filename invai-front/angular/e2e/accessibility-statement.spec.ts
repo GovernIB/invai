@@ -1,17 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
-
 import { version } from '../package.json';
-
-test.use({ storageState: { cookies: [], origins: [] } });
+import { expect, test } from './support/auth.fixture';
+import type { Page } from '@playwright/test';
 
 async function openHome(page: Page) {
-  await page.route('**/invaiback/**', async (route) => {
-    const path = new URL(route.request().url()).pathname;
-    const json = path.endsWith('/auth/me')
-      ? { authenticated: true, username: 'u12345' }
-      : { content: [], totalElements: 0, totalPages: 1, last: true, number: 0 };
-    await route.fulfill({ json });
-  });
   await page.goto('/');
 }
 

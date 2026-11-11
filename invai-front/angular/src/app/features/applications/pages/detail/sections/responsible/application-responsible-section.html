@@ -160,6 +160,7 @@
       styleClass="invai-dialog"
       [(visible)]="responsibilitiesCompleteDialogVisible"
       [closable]="true"
+      [closeAriaLabel]="copy.allResponsibilitiesAssignedCloseAriaLabel"
       [closeOnEscape]="true"
       [dismissableMask]="true"
       [draggable]="false"
@@ -169,9 +170,12 @@
       (onHide)="onResponsibilitiesCompleteDialogHidden()"
     >
       <ng-template #header let-titleId="ariaLabelledBy">
-        <h2 class="m-0 min-w-0 text-base font-semibold" [id]="titleId">
-          {{ copy.allResponsibilitiesAssignedTitle }}
-        </h2>
+        <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <h2 class="m-0 min-w-0 text-base font-semibold" [id]="titleId">
+            {{ copy.allResponsibilitiesAssignedTitle }}
+          </h2>
+          <app-help-button />
+        </div>
       </ng-template>
 
       <div class="flex items-start gap-3 text-sm leading-5 text-color-secondary">

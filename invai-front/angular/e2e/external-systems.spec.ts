@@ -1,93 +1,127 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-import { selectOption, selectRowAction } from './support/ui';
+import { expect, test } from './support/auth.fixture';
+import { findApiCatalogItem } from './support/catalog';
+import { CleanupRegistry } from './support/cleanup-registry';
+import { uniqueToken } from './support/data';
+import { expectJsonResponse, expectSuccessfulResponse, waitForApiResponse } from './support/http';
+import {
+  expectToast,
+  findRow,
+  openMaintenancePanel,
+  REQUIRED_ERROR,
+  waitForInitialLoader,
+} from './support/maintenance-resources';
+import { ACTIVE_STATUS_ID, registerSoftDeleteCleanup } from './support/systems';
+import { selectFilteredOption, selectRowAction } from './support/ui';
 
-test.use({ storageState: { cookies: [], origins: [] } });
+const API = {
+  externalSystems: '/invaiback/external-system',
+  companies: '/invaiback/company',
+} as const;
+const PANEL_TITLE = 'Sistemes externs';
 
-const pageOf = (content: unknown[]) => ({
-  content,
-  totalElements: content.length,
-  totalPages: 1,
-  last: true,
-  number: 0,
-});
-
-const PLEXUS = { id: 3, name: 'Plexus Tech', nif: 'B00000000', deletedAt: null };
-const SOFFID = { id: 1, name: 'Soffid', company: PLEXUS, deletedAt: null };
-
-interface ExternalSystemsMock {
-  systems: Array<typeof SOFFID>;
-  posts: unknown[];
-  deletes: string[];
+interface CompanyRecord {
+  id: number;
+  name: string;
+  deletedAt: string | null;
 }
 
-async function openExternalSystems(page: Page): Promise<ExternalSystemsMock> {
-  const mock: ExternalSystemsMock = { systems: [SOFFID], posts: [], deletes: [] };
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const request = route.request();
-    const path = new URL(request.url()).pathname;
-    const method = request.method();
-    if (path.endsWith('/auth/me')) {
-      return route.fulfill({ json: { authenticated: true, username: 'external-systems-test' } });
-    }
-    if (path.endsWith('/company')) return route.fulfill({ json: pageOf([PLEXUS]) });
-    if (path.endsWith('/external-system') && method === 'POST') {
-      const body = request.postDataJSON();
-      mock.posts.push(body);
-      const created = { id: 5, name: body.name, company: PLEXUS, deletedAt: null };
-      mock.systems = [...mock.systems, created];
-      return route.fulfill({ status: 201, json: created });
-    }
-    if (/\/external-system\/\d+$/.test(path) && method === 'DELETE') {
-      mock.deletes.push(path);
-      mock.systems = mock.systems.filter((system) => !path.endsWith(`/${system.id}`));
-      return route.fulfill({ status: 204 });
-    }
-    if (/\/external-system\/\d+$/.test(path)) {
-      const id = Number(path.split('/').pop());
-      return route.fulfill({ json: mock.systems.find((system) => system.id === id) });
-    }
-    if (path.endsWith('/external-system')) return route.fulfill({ json: pageOf(mock.systems) });
-    return route.fulfill({ json: pageOf([]) });
-  });
+interface ExternalSystemRecord {
+  id: number;
+  name: string | null;
+  company: CompanyRecord | null;
+  deletedAt: string | null;
+}
+
+async function openExternalSystems(page: Page) {
   await page.goto('/manteniments/integracions#external-systems');
-  return mock;
+  await waitForInitialLoader(page);
+  return openMaintenancePanel(page, PANEL_TITLE);
 }
-
-const rows = (page: Page) => page.locator('app-external-systems-table tbody tr');
 
 test('adds the Integracions maintenance tab with the external systems panel', async ({ page }) => {
-  await openExternalSystems(page);
+  const panel = await openExternalSystems(page);
 
   await expect(page.locator('.maintenances-tabs a', { hasText: 'Integracions' })).toHaveAttribute(
     'aria-current',
     'page',
   );
-  await expect(page.getByRole('button', { name: /Sistemes externs/ })).toHaveAttribute('aria-expanded', 'true');
-  await expect(rows(page)).toHaveCount(1);
-  await expect(rows(page).first()).toContainText('Soffid');
-  await expect(rows(page).first()).toContainText('Plexus Tech');
+  await expect(page.getByRole('button', { name: /Sistemes externs/ })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  // Soffid is part of the reference data of every environment.
+  const soffid = findRow(panel, 'Soffid');
+  await expect(soffid).toBeVisible();
+  await expect(soffid.locator('td').nth(1)).not.toBeEmpty();
 });
 
 test('creates and deactivates an external system', async ({ page }, testInfo) => {
-  const mock = await openExternalSystems(page);
-  await expect(rows(page)).toHaveCount(1);
+  test.setTimeout(120_000);
+  const cleanup = new CleanupRegistry(testInfo);
+  const name = `E2E DIR3CAIB ${uniqueToken(testInfo)}`;
+  const created: { id?: number; matches: (item: ExternalSystemRecord) => boolean } = {
+    matches: (item) => item.name === name,
+  };
+  registerSoftDeleteCleanup<ExternalSystemRecord>({
+    page,
+    cleanup,
+    label: `external system ${name}`,
+    pathname: API.externalSystems,
+    target: created,
+  });
 
-  await page.getByRole('button', { name: 'Afegeix un sistema extern' }).click();
-  await page.getByRole('button', { name: 'Afegeix el sistema extern' }).click();
-  await expect(page.getByText('Camp obligatori').first()).toBeVisible();
-  expect(mock.posts).toHaveLength(0);
+  try {
+    const panel = await openExternalSystems(page);
+    const company = await findApiCatalogItem<CompanyRecord>({
+      page,
+      pathname: API.companies,
+      params: { statusId: ACTIVE_STATUS_ID },
+      matches: (item) => !item.deletedAt && !item.name.startsWith('E2E'),
+    });
+    if (!company) throw new Error('An active non-E2E company is required');
 
-  await page.locator('#external-system-dialog-name').fill('  DIR3CAIB  ');
-  await selectOption(page, 'external-system-dialog-company', 'Plexus Tech');
-  await page.screenshot({ path: testInfo.outputPath('external-systems-create.png'), fullPage: true });
-  await page.getByRole('button', { name: 'Afegeix el sistema extern' }).click();
+    const posts: unknown[] = [];
+    page.on('request', (request) => {
+      if (request.method() === 'POST' && new URL(request.url()).pathname === API.externalSystems) {
+        posts.push(request.postDataJSON());
+      }
+    });
+    await panel.getByRole('button', { name: 'Afegeix un sistema extern' }).click();
+    await page.getByRole('button', { name: 'Afegeix el sistema extern' }).click();
+    await expect(page.getByText(REQUIRED_ERROR).first()).toBeVisible();
+    expect(posts).toHaveLength(0);
 
-  await expect.poll(() => mock.posts).toEqual([{ name: 'DIR3CAIB', companyId: 3 }]);
-  await expect(page.getByText("El sistema extern s'ha afegit correctament.")).toBeVisible();
-  await expect(rows(page)).toHaveCount(2);
+    await page.locator('#external-system-dialog-name').fill(`  ${name}  `);
+    await selectFilteredOption(page, 'external-system-dialog-company', company.name, company.name);
+    await page.screenshot({
+      path: testInfo.outputPath('external-systems-create.png'),
+      fullPage: true,
+    });
+    const createPromise = waitForApiResponse(page, 'POST', API.externalSystems);
+    await page.getByRole('button', { name: 'Afegeix el sistema extern' }).click();
 
-  await selectRowAction(page, rows(page).first(), 'Dona de baixa', 'Obrir les accions del sistema extern');
-  await page.getByRole('button', { name: 'Confirma la baixa del sistema extern' }).click();
-  await expect.poll(() => mock.deletes).toEqual(['/invaiback/external-system/1']);
+    const response = await createPromise;
+    expect(response.request().postDataJSON()).toEqual({ name, companyId: company.id });
+    created.id = (await expectJsonResponse<ExternalSystemRecord>(response)).id;
+    await expectToast(page, "El sistema extern s'ha afegit correctament.");
+
+    await panel.getByRole('textbox', { name: 'Cerca ràpida de sistemes externs' }).fill(name);
+    const row = findRow(panel, name);
+    await expect(row).toBeVisible();
+    await expect(row).toContainText(company.name);
+
+    const deletePromise = waitForApiResponse(
+      page,
+      'DELETE',
+      `${API.externalSystems}/${created.id}`,
+    );
+    await selectRowAction(page, row, 'Dona de baixa', 'Obrir les accions del sistema extern');
+    await page.getByRole('button', { name: 'Confirma la baixa del sistema extern' }).click();
+    await expectSuccessfulResponse(await deletePromise);
+    await expect(row).toHaveCount(0);
+  } finally {
+    await cleanup.runAll();
+  }
 });

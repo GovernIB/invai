@@ -1,5 +1,10 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, InjectionToken, computed, inject, signal } from '@angular/core';
+import {
+  NO_USER_PERMISSIONS,
+  UserPermissions,
+  toUserPermissions,
+} from '@core/auth/user-permissions.model';
 import { environment } from '@environments/environment';
 import {
   EMPTY,
@@ -21,7 +26,7 @@ export interface AuthUser {
   fullName?: string;
   email?: string;
   roles?: string[];
-  permissions?: string[];
+  permissions: UserPermissions;
 }
 
 interface LoginConfiguration {
@@ -37,6 +42,7 @@ interface UserAuthResponse {
   authenticated: boolean;
   username?: string | null;
   fullName?: string | null;
+  permissions?: unknown;
 }
 
 class UnauthenticatedSessionError extends Error {}
@@ -64,6 +70,11 @@ export class OAuthService {
   readonly isLoading = this._isLoading.asReadonly();
 
   readonly isAuthenticated = computed(() => this._currentUser() != null);
+
+  // What the logged-in user can use; nothing while nobody is logged in.
+  readonly permissions = computed<UserPermissions>(
+    () => this._currentUser()?.permissions ?? NO_USER_PERMISSIONS,
+  );
 
   //http://10.1.8.36:30066/invaiback/api/auth/login
   login(): Observable<void> {
@@ -160,12 +171,6 @@ export class OAuthService {
     return Boolean(user?.roles?.includes(role));
   }
 
-  hasPermission(permission: string): boolean {
-    const user = this.currentUser();
-
-    return Boolean(user?.permissions?.includes(permission));
-  }
-
   private clearSession(): void {
     this._currentUser.set(null);
   }
@@ -185,6 +190,7 @@ export class OAuthService {
       id: response.username,
       username: response.username,
       ...(fullName ? { fullName } : {}),
+      permissions: toUserPermissions(response.permissions),
     };
   }
 

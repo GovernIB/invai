@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { OAuthService } from '@core/services/auth.service';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel } from 'primeng/accordion';
 
-import { RESPONSIBLES_MAINTENANCE_PANELS } from '../../maintenances.constants';
 import {
   ResponsiblePerson,
   RoleTransferSourceRequest,
@@ -16,6 +16,7 @@ import {
   RESPONSIBLES_MAINTENANCE_RESOLVE_KEY,
   ResponsiblesMaintenanceResolvedData,
 } from './responsibles-maintenance.resolver';
+import { responsiblesMaintenancePanels } from './responsibles-maintenance.permissions';
 
 type AccordionValue = string | number | string[] | number[] | null | undefined;
 
@@ -40,9 +41,10 @@ export class ResponsiblesMaintenance {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly panelIds = new Set(RESPONSIBLES_MAINTENANCE_PANELS.map(({ id }) => id));
 
-  protected readonly panels = RESPONSIBLES_MAINTENANCE_PANELS;
+  // Only the panels the user can open: the others would answer with HTTP 403.
+  protected readonly panels = responsiblesMaintenancePanels(inject(OAuthService).permissions());
+  private readonly panelIds = new Set(this.panels.map(({ id }) => id));
   protected readonly resolved = (this.route.snapshot.data?.[
     RESPONSIBLES_MAINTENANCE_RESOLVE_KEY
   ] as ResponsiblesMaintenanceResolvedData | undefined) ?? {
@@ -78,6 +80,8 @@ export class ResponsiblesMaintenance {
   }
 
   protected onTransferRequested(person: ResponsiblePerson): void {
+    if (!this.panelIds.has('role-transfer')) return;
+
     this.transferRequestId += 1;
     this.transferSourceRequest.set({ requestId: this.transferRequestId, person });
     this.activatePanel('role-transfer');

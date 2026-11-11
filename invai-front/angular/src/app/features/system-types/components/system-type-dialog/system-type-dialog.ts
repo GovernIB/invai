@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -42,6 +43,7 @@ export type SystemTypeDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SystemTypeDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceSystemTypes;
   visible = model(false);
   form = input.required<SystemTypeFormGroup>();
   mode = input.required<SystemTypeDialogMode>();

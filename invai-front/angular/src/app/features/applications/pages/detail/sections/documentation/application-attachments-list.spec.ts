@@ -9,7 +9,6 @@ import { of, throwError } from 'rxjs';
 import { ApplicationAttachment } from '../../../../application-documentation.model';
 import {
   DOCUMENT_MIME_TYPES,
-  DOCUMENT_SECTIONS,
   DOCUMENT_STATUSES,
   documentationPage,
   documentRow,
@@ -19,7 +18,6 @@ import {
   ApplicationAttachmentFormGroup,
 } from '../../../../forms/application-documentation-form.factory';
 import { ApplicationDocumentMimeTypeCatalogService } from '../../../../services/application-document-mime-type-catalog.service';
-import { ApplicationDocumentSectionCatalogService } from '../../../../services/application-document-section-catalog.service';
 import { ApplicationDocumentStatusCatalogService } from '../../../../services/application-document-status-catalog.service';
 import { ApplicationDocumentationService } from '../../../../services/application-documentation.service';
 import { ApplicationAttachmentsList } from './application-attachments-list';
@@ -42,15 +40,16 @@ interface ListInternals {
   subcategoryFilterOptions: () => { id: number; label: string }[];
   isDialogVisible: () => boolean;
   isDeleteDialogVisible: () => boolean;
+  isEmailDialogVisible: () => boolean;
   categoryOptions: () => typeof TREE;
-  sectionOptions: () => { value: number; label: string }[];
   stateOptions: () => { value: number; label: string }[];
   openCreateDialog(): void;
+  openEmailDialog(): void;
+  closeEmailDialog(): void;
   onTableAction(event: { action: number; params: ApplicationAttachment }): void;
   onFilterSearch(): void;
   submit(): void;
   confirmDelete(): void;
-  onExport(): void;
 }
 
 describe('ApplicationAttachmentsList', () => {
@@ -59,7 +58,7 @@ describe('ApplicationAttachmentsList', () => {
   let add: ReturnType<typeof vi.spyOn>;
   let navigate: ReturnType<typeof vi.spyOn>;
   const getActiveCategoryTree = vi.fn();
-  const getSections = vi.fn();
+  const getStatuses = vi.fn();
   const documents = {
     getAttachments: vi.fn(),
     createDocument: vi.fn(),
@@ -81,7 +80,6 @@ describe('ApplicationAttachmentsList', () => {
   const fillForm = (file = new File(['%PDF'], 'pla.pdf')) =>
     list.entityForm.setValue({
       title: ' Pla de proves ',
-      sectionId: 3,
       file,
       categoryId: 1,
       subcategoryId: 11,
@@ -90,7 +88,7 @@ describe('ApplicationAttachmentsList', () => {
 
   beforeEach(async () => {
     getActiveCategoryTree.mockReset().mockReturnValue(of(TREE));
-    getSections.mockReset().mockReturnValue(of(DOCUMENT_SECTIONS));
+    getStatuses.mockReset().mockReturnValue(of(DOCUMENT_STATUSES));
     documents.getAttachments.mockReset().mockReturnValue(of(documentationPage(ROWS)));
     documents.createDocument.mockReset().mockReturnValue(of({ id: 9 }));
     documents.deleteDocument.mockReset().mockReturnValue(of(undefined));
@@ -103,8 +101,7 @@ describe('ApplicationAttachmentsList', () => {
         { provide: LOCALE_ID, useValue: 'ca' },
         { provide: ApplicationDocumentationService, useValue: documents },
         { provide: DocumentCategoryCatalogService, useValue: { getActiveCategoryTree } },
-        { provide: ApplicationDocumentSectionCatalogService, useValue: { getAll: getSections } },
-        { provide: ApplicationDocumentStatusCatalogService, useValue: { getAll: () => of(DOCUMENT_STATUSES) } },
+        { provide: ApplicationDocumentStatusCatalogService, useValue: { getAll: getStatuses } },
         { provide: ApplicationDocumentMimeTypeCatalogService, useValue: { getAll: () => of(DOCUMENT_MIME_TYPES) } },
       ],
     })
@@ -130,10 +127,9 @@ describe('ApplicationAttachmentsList', () => {
     expect(items().total).toBe(2);
   });
 
-  it('offers the sections and states of the catalogs, sorted by their label', async () => {
+  it('offers the states of the catalog, sorted by their label', async () => {
     await create();
 
-    expect(list.sectionOptions().map(({ label }) => label)).toEqual(['Base de dades', 'General', 'Sistemes']);
     expect(list.stateOptions()).toEqual([
       { value: 2, label: 'En revisió' },
       { value: 3, label: 'Obsolet' },
@@ -141,12 +137,13 @@ describe('ApplicationAttachmentsList', () => {
     ]);
   });
 
-  it('filters by section and state and sorts by the keys of the back-end', async () => {
+  it('filters by state and sorts by the keys of the back-end', async () => {
     await create();
 
-    list.filtersForm.patchValue({ sectionId: 3, statusId: 2 });
+    list.filtersForm.patchValue({ statusId: 2 });
     list.onFilterSearch();
-    expect(lastQuery()?.[1]).toMatchObject({ sectionId: 3, statusId: 2, deleted: false });
+    expect(lastQuery()?.[1]).toMatchObject({ statusId: 2, deleted: false });
+    expect(lastQuery()?.[1]).not.toHaveProperty('sectionId');
 
     fixture.componentInstance.onSearch({ first: 10, rows: 10, sortField: 'versionLabel', sortOrder: -1 });
     expect(lastQuery()?.[1]).toMatchObject({ page: 1, sort: 'versionLabel,desc', deleted: false });
@@ -171,7 +168,7 @@ describe('ApplicationAttachmentsList', () => {
     expect(getActiveCategoryTree).toHaveBeenCalledTimes(1);
   });
 
-  it('filters by format and by the most specific category chosen', async () => {
+  it('filters by format and by the category and the subcategory, each in its own criterion', async () => {
     await create();
     fixture.componentInstance.isFiltersCollapsed.set(false);
     fixture.detectChanges();
@@ -182,7 +179,7 @@ describe('ApplicationAttachmentsList', () => {
     expect(list.subcategoryFilterOptions()).toEqual([{ id: 11, label: 'Manuals' }]);
     list.filtersForm.patchValue({ mimeTypeId: 3, subcategoryId: 11 });
     list.onFilterSearch();
-    expect(lastQuery()?.[1]).toMatchObject({ mimeTypeId: 3, categoryId: 11, deleted: false });
+    expect(lastQuery()?.[1]).toMatchObject({ mimeTypeId: 3, categoryId: 1, subcategoryId: 11, deleted: false });
     expect(fixture.componentInstance.selectedFilters()).toBe(3);
 
     // A category without subcategories discards the one chosen and leaves none to choose.
@@ -190,6 +187,7 @@ describe('ApplicationAttachmentsList', () => {
     expect([subcategoryId.value, subcategoryId.disabled]).toEqual([null, true]);
     list.onFilterSearch();
     expect(lastQuery()?.[1]).toMatchObject({ categoryId: 2 });
+    expect(lastQuery()?.[1]).not.toHaveProperty('subcategoryId', expect.anything());
 
     fixture.componentInstance.reset();
     expect(lastQuery()?.[1]).not.toHaveProperty('categoryId', expect.anything());
@@ -197,7 +195,7 @@ describe('ApplicationAttachmentsList', () => {
     expect(subcategoryId.disabled).toBe(true);
   });
 
-  it('creates an active document in the most specific category with its file', async () => {
+  it('creates an active document in its category and subcategory with its file', async () => {
     await create();
     list.openCreateDialog();
     expect(list.categoryOptions()).toEqual(TREE);
@@ -211,7 +209,7 @@ describe('ApplicationAttachmentsList', () => {
     list.submit();
 
     expect(documents.createDocument).toHaveBeenCalledWith(
-      { applicationId: 1, title: 'Pla de proves', sectionId: 3, categoryId: 11, statusId: 1, versionLabel: '1.0' },
+      { applicationId: 1, title: 'Pla de proves', categoryId: 1, subcategoryId: 11, statusId: 1, versionLabel: '1.0' },
       file,
     );
     expect(list.isDialogVisible()).toBe(false);
@@ -247,16 +245,16 @@ describe('ApplicationAttachmentsList', () => {
   });
 
   it('reads the catalogs again when the dialog opens after they failed', async () => {
-    getSections.mockReturnValueOnce(throwError(() => new Error('offline')));
+    getStatuses.mockReturnValueOnce(throwError(() => new Error('offline')));
     await create();
     expect(add).toHaveBeenCalledWith(
-      expect.objectContaining({ detail: "No s'han pogut carregar les seccions, els estats i els formats dels documents." }),
+      expect.objectContaining({ detail: "No s'han pogut carregar els estats i els formats dels documents." }),
     );
-    expect(list.sectionOptions()).toEqual([]);
+    expect(list.stateOptions()).toEqual([]);
 
     list.openCreateDialog();
 
-    expect(list.sectionOptions()).toHaveLength(3);
+    expect(list.stateOptions()).toHaveLength(3);
   });
 
   it('navigates to the document page to consult it', async () => {
@@ -288,16 +286,14 @@ describe('ApplicationAttachmentsList', () => {
     }
   });
 
-  it('reports a failed download and that exporting is not available yet', async () => {
+  it('reports a failed download', async () => {
     documents.getDocumentVersionFile.mockReturnValue(throwError(() => new Error('offline')));
     await create();
 
     list.onTableAction({ action: ApplicationDocumentationAction.Download, params: ROWS[0] });
-    list.onExport();
 
     expect((add.mock.calls as [{ detail?: string }][]).map(([message]) => message.detail)).toEqual([
       "No s'ha pogut descarregar el fitxer.",
-      "L'exportació encara no està implementada.",
     ]);
   });
 
@@ -321,5 +317,15 @@ describe('ApplicationAttachmentsList', () => {
 
     expect(list.isDialogVisible()).toBe(false);
     expect(list.isDeleteDialogVisible()).toBe(false);
+  });
+
+  it('lets everyone who sees the attachments open and close the e-mail dialog', async () => {
+    await create(false);
+
+    list.openEmailDialog();
+    expect(list.isEmailDialogVisible()).toBe(true);
+
+    list.closeEmailDialog();
+    expect(list.isEmailDialogVisible()).toBe(false);
   });
 });

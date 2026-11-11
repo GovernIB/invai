@@ -6,6 +6,72 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- Noto Sans is declared here, not in the theme SCSS, so its URLs resolve against the
+         locale's base href and stay unhashed: the preloads below must match them exactly.
+         Only the most used weights are preloaded; the rest download when text needs them. -->
+    <link
+      rel="preload"
+      href="assets/fonts/NotoSans-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="assets/fonts/NotoSans-SemiBold.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <style>
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('assets/fonts/NotoSans-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('assets/fonts/NotoSans-Italic.woff2') format('woff2');
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('assets/fonts/NotoSans-Medium.woff2') format('woff2');
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('assets/fonts/NotoSans-SemiBold.woff2') format('woff2');
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('assets/fonts/NotoSans-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Noto Sans';
+        src: url('assets/fonts/NotoSans-BoldItalic.woff2') format('woff2');
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
+      }
+    </style>
   </head>
   <body class="antialiased">
     <app-root>

@@ -81,6 +81,7 @@ export const APPLICATION_RESPONSIBLE_COPY = {
   allResponsibilitiesAssignedTitle: $localize`Totes les responsabilitats estan assignades`,
   allResponsibilitiesAssignedDetail: $localize`:@@applicationAllResponsibilitiesAssignedDetail:Per afegir un responsable nou, primer has de donar de baixa una de les assignacions actuals des del menú d'accions de la taula.`,
   allResponsibilitiesAssignedClose: $localize`Entesos`,
+  allResponsibilitiesAssignedCloseAriaLabel: $localize`Tanca l'avís`,
   actions: {
     accept: $localize`Accepta la consulta del responsable`,
     add: $localize`Afegeix el responsable`,

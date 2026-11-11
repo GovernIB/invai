@@ -1,0 +1,159 @@
+<app-crud-entity-dialog
+  mode="create"
+  width="48rem"
+  [(visible)]="visible"
+  [ariaLabels]="ariaLabels"
+  [cancelLabel]="texts.actions.cancel"
+  [hasUnsavedChanges]="hasUnsavedChanges"
+  [isSaving]="isSending()"
+  [submitIcon]="icons.SEND"
+  [submitLabel]="texts.actions.send"
+  [title]="texts.title"
+  (closed)="close()"
+  (submitForm)="send()"
+>
+  <p [id]="ids.instructions" class="application-documentation-email__instructions">
+    {{ texts.requiredHint }}
+  </p>
+  <!-- Without ngSubmit: Return adds an address, and only the Envia action sends the e-mail. -->
+  <form
+    class="application-documentation-email__form"
+    novalidate
+    [attr.aria-describedby]="ids.instructions"
+    [formGroup]="form"
+  >
+    <!-- Double click on an address, or Return on the one reached with the arrows, edits it. -->
+    <div (dblclick)="onRecipientsDoubleClick($event)" (keydown)="onRecipientsKeydown($event)">
+      <label [for]="ids.recipients">{{ texts.labels.recipients }}</label>
+      <p-autocomplete
+        formControlName="recipients"
+        styleClass="w-full"
+        [addOnBlur]="true"
+        [inputId]="ids.recipients"
+        [invalid]="isInvalid(form.controls.recipients)"
+        [multiple]="true"
+        [pt]="recipientsPassThrough()"
+        [separator]="recipientSeparator"
+        [typeahead]="false"
+        (onAdd)="onRecipientAdded()"
+      >
+        <!-- The address being changed is a text field inside its own chip, in its place. -->
+        <ng-template #selecteditem let-address>
+          @if (address === editedRecipient()) {
+            <span
+              class="application-documentation-email__recipient-editor"
+              [attr.data-value]="recipientDraft()"
+            >
+              <input
+                #recipientEditor
+                autocomplete="off"
+                inputmode="email"
+                spellcheck="false"
+                type="text"
+                [attr.aria-label]="texts.recipientEditAriaLabel(address)"
+                [value]="address"
+                (blur)="commitRecipientEdit()"
+                (click)="$event.stopPropagation()"
+                (input)="onRecipientEditorInput($event)"
+                (keydown)="onRecipientEditorKeydown($event)"
+              />
+            </span>
+          } @else {
+            <span class="p-chip-label">{{ address }}</span>
+          }
+        </ng-template>
+      </p-autocomplete>
+      <p [id]="ids.recipients + '-hint'" class="application-documentation-email__hint">
+        {{ texts.recipientsHint }}
+      </p>
+      @if (isInvalid(form.controls.recipients)) {
+        <p [id]="ids.recipients + '-error'" class="application-documentation-email__error" role="alert">
+          {{ recipientsError() }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <label [for]="ids.subject">{{ texts.labels.subject }}</label>
+      <input
+        class="w-full"
+        formControlName="subject"
+        pInputText
+        required
+        type="text"
+        [attr.aria-describedby]="describedBy(form.controls.subject, ids.subject)"
+        [attr.aria-invalid]="isInvalid(form.controls.subject)"
+        [attr.maxlength]="subjectMaxLength"
+        [id]="ids.subject"
+      />
+      @if (isInvalid(form.controls.subject)) {
+        <p [id]="ids.subject + '-error'" class="application-documentation-email__error" role="alert">
+          {{ subjectError() }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <label [for]="ids.message">{{ texts.labels.message }}</label>
+      <textarea
+        class="w-full"
+        formControlName="message"
+        pTextarea
+        rows="3"
+        [attr.aria-describedby]="describedBy(form.controls.message, ids.message)"
+        [attr.aria-invalid]="isInvalid(form.controls.message)"
+        [attr.maxlength]="messageMaxLength"
+        [autoResize]="true"
+        [id]="ids.message"
+      ></textarea>
+      @if (isInvalid(form.controls.message)) {
+        <p [id]="ids.message + '-error'" class="application-documentation-email__error" role="alert">
+          {{ messageError() }}
+        </p>
+      }
+    </div>
+  </form>
+
+  <section class="application-documentation-email__selection" [attr.aria-labelledby]="ids.selectionTitle">
+    <div class="application-documentation-email__selection-header">
+      <h3 [id]="ids.selectionTitle">{{ texts.selectionTitle }}</h3>
+      <p class="application-documentation-email__count" role="status">
+        {{ texts.selectedCount(selectedCount()) }}
+      </p>
+    </div>
+
+    <app-section-actions
+      [hideAddButton]="true"
+      [hideCollapseButton]="true"
+      [hideColumnsButton]="true"
+      [hideExportButton]="true"
+      [isSearchLoading]="isSearchIndicatorLoading()"
+      [quickSearchAriaLabel]="texts.quickSearchAriaLabel"
+      [quickSearchPlaceholder]="texts.quickSearchPlaceholder"
+      [quickSearchValue]="quickSearch()"
+      (onQuickSearchChange)="onQuickSearchChange($event)"
+    />
+
+    <div
+      role="group"
+      [attr.aria-describedby]="selectionError() ? ids.selectionError : null"
+      [attr.aria-invalid]="selectionError() ? true : null"
+      [attr.aria-labelledby]="ids.selectionTitle"
+    >
+      <app-application-documentation-email-table
+        [first]="first()"
+        [isLoading]="isLoading()"
+        [itemsList]="page()"
+        [selection]="selection()"
+        (pageChange)="onPageChange($event)"
+        (selectionChange)="toggle($event)"
+        (versionChange)="changeVersion($event)"
+      />
+      @if (selectionError(); as error) {
+        <p [id]="ids.selectionError" class="application-documentation-email__error" role="alert">
+          {{ error }}
+        </p>
+      }
+    </div>
+  </section>
+</app-crud-entity-dialog>

@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { HelpModalService } from '@core/components/help-modal/help-modal.service';
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 
@@ -23,6 +25,75 @@ const ARIA_LABELS: CrudEntityDialogAriaLabels = {
 describe('CrudEntityDialog', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [CrudEntityDialog] }).compileComponents();
+  });
+
+  describe('help', () => {
+    it('keeps the form open when Escape is pressed while help is opening', () => {
+      const fixture = createFixture('view');
+      const closed = vi.fn();
+      fixture.componentInstance.closed.subscribe(closed);
+      const help = TestBed.inject(HelpModalService);
+      help.open();
+      const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+
+      harness(fixture.componentInstance).dialogPassThrough.root!['onkeydown'](event);
+
+      expect(closed).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(false);
+      help.close();
+      harness(fixture.componentInstance).dialogPassThrough.root!['onkeydown'](event);
+      expect(closed).toHaveBeenCalledOnce();
+    });
+
+    const helpButton = (): HTMLButtonElement | null =>
+      document.querySelector('button[aria-label="Obrir ajuda"]');
+
+    function requestedTopics(): string[] {
+      const help = TestBed.inject(HelpModalService);
+      const requested: string[] = [];
+      const subscription = help.topicRequests.subscribe((topic) => requested.push(topic));
+      help.open();
+      help.close();
+      subscription.unsubscribe();
+      return requested;
+    }
+
+    it('shows a help button only when the dialog has a document', () => {
+      const fixture = createFixture('view');
+      expect(helpButton()).toBeNull();
+
+      fixture.componentRef.setInput('helpTopic', HELP_TOPICS.applicationCreate);
+      fixture.detectChanges();
+
+      expect(helpButton()?.getAttribute('aria-keyshortcuts')).toBe('Control+K');
+    });
+
+    it('opens the help on its document while it is visible', () => {
+      const fixture = createFixture('view');
+      fixture.componentRef.setInput('helpTopic', HELP_TOPICS.applicationCreate);
+      fixture.detectChanges();
+      const open = vi.spyOn(TestBed.inject(HelpModalService), 'open').mockImplementation(() => {});
+
+      helpButton()!.click();
+
+      expect(open).toHaveBeenCalledOnce();
+      open.mockRestore();
+      expect(requestedTopics()).toEqual([HELP_TOPICS.applicationCreate]);
+
+      fixture.componentRef.setInput('visible', false);
+      fixture.detectChanges();
+      expect(requestedTopics()).toEqual([]);
+    });
+
+    it('withdraws its document when it is destroyed', () => {
+      const fixture = createFixture('view');
+      fixture.componentRef.setInput('helpTopic', HELP_TOPICS.applicationCreate);
+      fixture.detectChanges();
+
+      fixture.destroy();
+
+      expect(requestedTopics()).toEqual([]);
+    });
   });
 
   it('blocks submission independently of closing and supports an explicit action label and icon', () => {
@@ -210,6 +281,32 @@ describe('CrudEntityDialog', () => {
     harness(component).requestClose();
     harness(component).discardAndClose();
     expect(closed).toHaveBeenCalledOnce();
+  });
+
+  it('ignores a click outside a new entity that holds data, and closes it through its actions', () => {
+    let dirty = true;
+    const fixture = createFixture('create', false, () => dirty);
+    const component = fixture.componentInstance;
+    const closed = vi.fn();
+    component.closed.subscribe(closed);
+    const mask = document.createElement('div');
+    const clickOutside = () =>
+      harness(component).dialogPassThrough.mask?.['onclick']?.({
+        target: mask,
+        currentTarget: mask,
+      } as unknown as MouseEvent);
+
+    clickOutside();
+    expect(closed).not.toHaveBeenCalled();
+    expect(harness(component).isUnsavedChangesDialogVisible()).toBe(false);
+
+    dirty = false;
+    clickOutside();
+    expect(closed).toHaveBeenCalledOnce();
+
+    dirty = true;
+    buttonByLabel(fixture, 'Cancel·lar').onClick.emit(new MouseEvent('click'));
+    expect(closed).toHaveBeenCalledTimes(2);
   });
 
   it('closes directly when the current edit has no changes', () => {

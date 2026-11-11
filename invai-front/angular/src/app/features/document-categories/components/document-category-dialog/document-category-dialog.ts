@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { CrudEntityDialog } from '@components/crud-entity-dialog/crud-entity-dialog';
@@ -30,6 +31,11 @@ export type DocumentCategoryKind = 'category' | 'subcategory';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentCategoryDialog {
+  protected readonly helpTopic = computed(() =>
+    this.kind() === 'subcategory'
+      ? HELP_TOPICS.maintenanceDocumentCategory
+      : HELP_TOPICS.maintenanceDocumentation,
+  );
   visible = model(false);
   form = input.required<DocumentCategoryFormGroup>();
   mode = input.required<DocumentCategoryDialogMode>();

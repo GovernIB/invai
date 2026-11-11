@@ -7,7 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
 import { PopoverModule } from 'primeng/popover';
 import { FontSizeSwitcher } from './components/font-size-switcher/font-size-switcher';
-import { HelpModalService } from './components/help-modal/help-modal.service';
+import { HelpModalService } from '@core/components/help-modal/help-modal.service';
 import { LanguageSwitcher } from './components/language-switcher/language-switcher';
 import {
   USER_MENU_ARIA_LABEL,
@@ -35,6 +35,8 @@ export class UserMenuComponent {
   protected readonly userMenuAriaLabel = USER_MENU_ARIA_LABEL;
   protected readonly helpTitle = USER_MENU_HELP_TITLE;
   protected readonly openHelpLabel = USER_MENU_OPEN_HELP;
+  // The button does what Ctrl + K does; screen readers announce the shortcut with it.
+  protected readonly openHelpPassThrough = { root: { 'aria-keyshortcuts': 'Control+K' } };
   protected readonly logoutLabel = USER_MENU_LOGOUT;
 
   private readonly _oAuthService = inject(OAuthService);

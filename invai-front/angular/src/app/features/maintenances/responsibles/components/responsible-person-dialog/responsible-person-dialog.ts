@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -21,6 +22,7 @@ import { ResponsibleCompanyOption } from '../../responsibles.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResponsiblePersonDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenancePeople;
   visible = model(false);
   form = input.required<ResponsiblePersonFormGroup>();
   mode = input.required<CrudEntityDialogMode>();

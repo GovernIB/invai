@@ -66,7 +66,6 @@ export function applicationAttachmentFileValidator(
 
 // The subcategory is chosen among those of the category, so it starts disabled.
 export interface ApplicationAttachmentFiltersFormControls {
-  sectionId: FormControl<number | null>;
   mimeTypeId: FormControl<number | null>;
   categoryId: FormControl<number | null>;
   subcategoryId: FormControl<number | null>;
@@ -80,7 +79,6 @@ export function createApplicationAttachmentFiltersForm(
   formBuilder: FormBuilder,
 ): ApplicationAttachmentFiltersFormGroup {
   return formBuilder.group({
-    sectionId: formBuilder.control<number | null>(null),
     mimeTypeId: formBuilder.control<number | null>(null),
     categoryId: formBuilder.control<number | null>(null),
     subcategoryId: formBuilder.control<number | null>({ value: null, disabled: true }),
@@ -91,7 +89,6 @@ export function createApplicationAttachmentFiltersForm(
 // A new document is created active; its state changes from the document detail.
 export interface ApplicationAttachmentFormControls {
   title: FormControl<string>;
-  sectionId: FormControl<number | null>;
   file: FormControl<File | null>;
   categoryId: FormControl<number | null>;
   subcategoryId: FormControl<number | null>;
@@ -106,7 +103,6 @@ export function createApplicationAttachmentForm(
 ): ApplicationAttachmentFormGroup {
   return formBuilder.group({
     title: formBuilder.nonNullable.control('', TITLE_VALIDATORS),
-    sectionId: formBuilder.control<number | null>(null, Validators.required),
     file: formBuilder.control<File | null>(null, [
       Validators.required,
       applicationAttachmentFileValidator(allowedExtensions),
@@ -118,7 +114,7 @@ export function createApplicationAttachmentForm(
 }
 
 export interface ApplicationLinkFiltersFormControls {
-  sectionId: FormControl<number | null>;
+  categoryId: FormControl<number | null>;
 }
 
 export type ApplicationLinkFiltersFormGroup = FormGroup<ApplicationLinkFiltersFormControls>;
@@ -127,14 +123,14 @@ export function createApplicationLinkFiltersForm(
   formBuilder: FormBuilder,
 ): ApplicationLinkFiltersFormGroup {
   return formBuilder.group({
-    sectionId: formBuilder.control<number | null>(null),
+    categoryId: formBuilder.control<number | null>(null),
   });
 }
 
 export interface ApplicationLinkFormControls {
   title: FormControl<string>;
   description: FormControl<string>;
-  sectionId: FormControl<number | null>;
+  categoryId: FormControl<number | null>;
   url: FormControl<string>;
 }
 
@@ -151,7 +147,7 @@ export function createApplicationLinkForm(formBuilder: FormBuilder): Application
       '',
       Validators.maxLength(APPLICATION_LINK_DESCRIPTION_MAX_LENGTH),
     ),
-    sectionId: formBuilder.control<number | null>(null, Validators.required),
+    categoryId: formBuilder.control<number | null>(null, Validators.required),
     url: formBuilder.nonNullable.control('', [
       Validators.required,
       Validators.pattern(APPLICATION_LINK_URL_PATTERN),

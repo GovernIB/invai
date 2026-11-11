@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -53,6 +54,7 @@ export type CommissionDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CommissionDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceCommissions;
   visible = model(false);
   form = input.required<CommissionFormGroup>();
   mode = input.required<CommissionDialogMode>();

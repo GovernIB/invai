@@ -50,7 +50,6 @@ import {
   ApplicationDocumentCategoryOption,
   ApplicationDocumentInput,
   ApplicationDocumentMimeType,
-  ApplicationDocumentSection,
   ApplicationDocumentStatus,
 } from '../../../../application-documentation.model';
 import {
@@ -58,7 +57,6 @@ import {
   createApplicationAttachmentForm,
 } from '../../../../forms/application-documentation-form.factory';
 import { ApplicationDocumentMimeTypeCatalogService } from '../../../../services/application-document-mime-type-catalog.service';
-import { ApplicationDocumentSectionCatalogService } from '../../../../services/application-document-section-catalog.service';
 import { ApplicationDocumentStatusCatalogService } from '../../../../services/application-document-status-catalog.service';
 import { ApplicationDocumentationService } from '../../../../services/application-documentation.service';
 import {
@@ -66,9 +64,11 @@ import {
   ApplicationDocumentationDialogMode,
 } from './application-attachment-dialog';
 import { ApplicationAttachmentsTable } from './application-attachments-table';
+import { ApplicationDocumentationEmailDialog } from './application-documentation-email-dialog';
 import { APPLICATION_ATTACHMENTS_COLUMNS } from './application-documentation.constants';
 import {
   APPLICATION_ATTACHMENTS_TEXTS,
+  APPLICATION_DOCUMENTATION_EMAIL_TEXTS,
   APPLICATION_DOCUMENTATION_TEXTS,
 } from './application-documentation.i18n';
 import { ApplicationDocumentationAction } from './application-documentation-table-action';
@@ -78,27 +78,29 @@ import {
   saveDocumentFile,
 } from './application-documentation.utils';
 
-// `categoryId` is the most specific category chosen: the back-end also lists the documents of the
-// subcategories of a category.
+// A category alone also lists the documents of its subcategories; a subcategory narrows the
+// listing to the documents filed under it.
 export interface ApplicationAttachmentFilters {
-  sectionId: number | null;
   mimeTypeId: number | null;
   categoryId: number | null;
+  subcategoryId: number | null;
   statusId: number | null;
 }
 
 
 const QUICK_SEARCH_DEBOUNCE_MS = 400;
 
-// Attachments of an application: search, filters, paging, downloading the current version, and
-// the dialogs to add and delete them; a document is consulted on its own page. The listing only
-// shows the documents that are not deleted. Exporting is not available yet.
+// Attachments of an application: search, filters, paging, downloading the current version, the
+// dialogs to add and delete them, and the one to send them by e-mail, open to everyone who sees
+// them; a document is consulted on its own page. The listing only shows the documents that are
+// not deleted. The toolbar offers the e-mail instead of the export, which isn't available yet.
 @Component({
   selector: 'app-application-attachments-list',
   standalone: true,
   imports: [
     ApplicationAttachmentDialog,
     ApplicationAttachmentsTable,
+    ApplicationDocumentationEmailDialog,
     ConfirmationDialogComponent,
     FloatLabel,
     ReactiveFormsModule,
@@ -116,6 +118,8 @@ export class ApplicationAttachmentsList
   implements OnInit
 {
   applicationId = input.required<number>();
+  // Code of the application, to propose the subject of an e-mail.
+  applicationCode = input<string | null>(null);
   canManage = input(false);
   // First page read by the route resolver, with the default criteria.
   initialPage = input<SpringPage<ApplicationAttachment> | null>(null);
@@ -124,14 +128,13 @@ export class ApplicationAttachmentsList
   protected override filtersForm = createApplicationAttachmentFiltersForm(this.fb);
   protected readonly texts = APPLICATION_ATTACHMENTS_TEXTS;
   protected readonly common = APPLICATION_DOCUMENTATION_TEXTS;
-  protected readonly sections = signal<ApplicationDocumentSection[]>([]);
+  protected readonly email = APPLICATION_DOCUMENTATION_EMAIL_TEXTS;
   protected readonly statuses = signal<ApplicationDocumentStatus[]>([]);
   protected readonly mimeTypes = signal<ApplicationDocumentMimeType[]>([]);
   protected readonly isCatalogsLoading = signal(false);
   protected readonly entityForm = createApplicationAttachmentForm(this.fb, () =>
     this.mimeTypes().map(({ extension }) => extension),
   );
-  protected readonly sectionOptions = computed(() => this.toOptions(this.sections()));
   protected readonly stateOptions = computed(() => this.toOptions(this.statuses()));
   // Each format is named with its extension: several share a name (Word for .doc and .docx) and
   // the back-end filters by one of them.
@@ -150,6 +153,7 @@ export class ApplicationAttachmentsList
   protected readonly isSaving = signal(false);
   protected readonly isDeleting = signal(false);
   protected readonly isDeleteDialogVisible = signal(false);
+  protected readonly isEmailDialogVisible = signal(false);
   protected readonly pendingDelete = signal<ApplicationAttachment | null>(null);
   protected readonly categoryOptions = signal<ApplicationDocumentCategoryOption[]>([]);
   protected readonly isCategoriesLoading = signal(false);
@@ -171,7 +175,6 @@ export class ApplicationAttachmentsList
   private readonly locale = inject(LOCALE_ID);
   private readonly service = inject(ApplicationDocumentationService);
   private readonly catalog = inject(DocumentCategoryCatalogService);
-  private readonly sectionCatalog = inject(ApplicationDocumentSectionCatalogService);
   private readonly statusCatalog = inject(ApplicationDocumentStatusCatalogService);
   private readonly mimeTypeCatalog = inject(ApplicationDocumentMimeTypeCatalogService);
   private readonly destroyRef = inject(DestroyRef);
@@ -214,14 +217,6 @@ export class ApplicationAttachmentsList
     this.requestPage(this.toPageParams(filters, event));
   }
 
-  protected override exportExcel(): void {
-    this.messageService.add({
-      severity: 'info',
-      summary: this.common.infoSummary,
-      detail: this.common.exportUnavailable,
-    });
-  }
-
   protected onQuickSearchChange(value: string): void {
     this.quickSearchTerm = value;
     this.isQuickSearchPending.set(true);
@@ -250,6 +245,14 @@ export class ApplicationAttachmentsList
     this.isDialogVisible.set(true);
     this.loadCategories().subscribe();
     if (!this.catalogsLoaded) this.loadCatalogs().subscribe();
+  }
+
+  protected openEmailDialog(): void {
+    this.isEmailDialogVisible.set(true);
+  }
+
+  protected closeEmailDialog(): void {
+    this.isEmailDialogVisible.set(false);
   }
 
   protected onTableAction(event: ActionParams<ApplicationAttachment>): void {
@@ -284,12 +287,12 @@ export class ApplicationAttachmentsList
       this.showError(this.texts.catalogsLoadError);
       return;
     }
-    if (value.sectionId == null || value.categoryId == null || !value.file) return;
+    if (value.categoryId == null || !value.file) return;
     const input: ApplicationDocumentInput = {
       applicationId: this.applicationId(),
       title: value.title.trim(),
-      sectionId: value.sectionId,
-      categoryId: value.subcategoryId ?? value.categoryId,
+      categoryId: value.categoryId,
+      subcategoryId: value.subcategoryId,
       statusId: active.id,
       versionLabel: value.versionLabel.trim(),
     };
@@ -351,9 +354,9 @@ export class ApplicationAttachmentsList
   protected override parseFormToFilters(): ApplicationAttachmentFilters {
     const value = this.filtersForm.getRawValue();
     return {
-      sectionId: value.sectionId,
       mimeTypeId: value.mimeTypeId,
-      categoryId: value.subcategoryId ?? value.categoryId,
+      categoryId: value.categoryId,
+      subcategoryId: value.subcategoryId,
       statusId: value.statusId,
     };
   }
@@ -369,25 +372,21 @@ export class ApplicationAttachmentsList
       });
   }
 
-  private toOptions(
-    entries: ApplicationDocumentSection[] | ApplicationDocumentStatus[],
-  ): ApplicationDocumentationOption[] {
+  private toOptions(entries: ApplicationDocumentStatus[]): ApplicationDocumentationOption[] {
     return entries
       .map((entry) => ({ value: entry.id, label: documentationLabel(entry, this.locale) }))
       .sort((left, right) => left.label.localeCompare(right.label, this.locale));
   }
 
-  // Sections, states and file formats of the documents, for the filters and the add dialog.
+  // States and file formats of the documents, for the filters and the add dialog.
   private loadCatalogs(): Observable<void> {
     this.isCatalogsLoading.set(true);
     return forkJoin({
-      sections: this.sectionCatalog.getAll(),
       statuses: this.statusCatalog.getAll(),
       mimeTypes: this.mimeTypeCatalog.getAll(),
     }).pipe(
-      map(({ sections, statuses, mimeTypes }) => {
+      map(({ statuses, mimeTypes }) => {
         this.catalogsLoaded = true;
-        this.sections.set(sections);
         this.statuses.set(statuses);
         this.mimeTypes.set(mimeTypes);
         this.entityForm.controls.file.updateValueAndValidity();
@@ -492,9 +491,9 @@ export class ApplicationAttachmentsList
       page: Math.floor(first / size),
       size,
       sort: sortField && sortDirection ? `${sortField},${sortDirection}` : undefined,
-      sectionId: filters.sectionId ?? undefined,
       mimeTypeId: filters.mimeTypeId ?? undefined,
       categoryId: filters.categoryId ?? undefined,
+      subcategoryId: filters.subcategoryId ?? undefined,
       statusId: filters.statusId ?? undefined,
       search: search || undefined,
       deleted: false,

@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -42,6 +43,7 @@ export type CategoryDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoryDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceCategories;
   visible = model(false);
   form = input.required<CategoryFormGroup>();
   mode = input.required<CategoryDialogMode>();

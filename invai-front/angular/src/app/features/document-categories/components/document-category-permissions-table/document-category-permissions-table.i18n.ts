@@ -7,6 +7,7 @@ export const DOCUMENT_CATEGORY_PERMISSIONS_TABLE_TEXTS = {
   granted: $localize`:@@documentCategoryPermissionsGranted:Permès`,
   denied: $localize`:@@documentCategoryPermissionsDenied:Denegat`,
   fullAccess: $localize`:@@documentCategoryPermissionsFullAccess:Accés total`,
+  empty: $localize`:@@documentCategoryPermissionsEmpty:Cap rol de l'aplicació té permisos en aquesta categoria.`,
   // Accessible name of each checkbox: the permission and the role it applies to.
   checkbox: (permission: string, role: string) =>
     $localize`:@@documentCategoryPermissionsCheckbox:${permission}:permission: per a ${role}:role:`,

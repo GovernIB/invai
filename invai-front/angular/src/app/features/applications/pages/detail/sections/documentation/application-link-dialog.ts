@@ -13,13 +13,14 @@ import {
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { CrudEntityDialog } from '@components/crud-entity-dialog/crud-entity-dialog';
+import { DocumentCategoryOption } from '@features/document-categories/document-categories.model';
 import { PrimeIcons } from 'primeng/api';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { SelectPassThrough } from 'primeng/types/select';
 import { switchMap } from 'rxjs';
 
-import { ApplicationDocumentSection } from '../../../../application-documentation.model';
+import { ApplicationDocumentCategory } from '../../../../application-documentation.model';
 import { ApplicationLinkFormGroup } from '../../../../forms/application-documentation-form.factory';
 import { ApplicationDocumentationDialogMode } from './application-attachment-dialog';
 import {
@@ -32,7 +33,7 @@ import {
   APPLICATION_LINK_DIALOG_TEXTS,
   APPLICATION_LINKS_TEXTS,
 } from './application-documentation.i18n';
-import { ApplicationDocumentationOption, documentationLabel } from './application-documentation.utils';
+import { documentationLabel } from './application-documentation.utils';
 
 // Form of a link. The owner keeps the form and the persistence; this component only renders it,
 // as static values while consulting.
@@ -48,10 +49,10 @@ export class ApplicationLinkDialog {
   visible = model(false);
   form = input.required<ApplicationLinkFormGroup>();
   mode = input.required<ApplicationDocumentationDialogMode>();
-  sectionOptions = input<ApplicationDocumentationOption[]>([]);
-  isSectionsLoading = input(false);
-  // Section of the link being consulted, as the back-end names it.
-  section = input<ApplicationDocumentSection | null>(null);
+  categoryOptions = input<DocumentCategoryOption[]>([]);
+  isCategoriesLoading = input(false);
+  // Category of the link being consulted, as the back-end names it.
+  category = input<ApplicationDocumentCategory | null>(null);
   canEdit = input(true);
   isSaving = input(false);
   isDeleting = input(false);
@@ -69,7 +70,7 @@ export class ApplicationLinkDialog {
   protected readonly descriptionMaxLength = APPLICATION_LINK_DESCRIPTION_MAX_LENGTH;
   protected readonly urlMaxLength = APPLICATION_LINK_URL_MAX_LENGTH;
   private readonly locale = inject(LOCALE_ID);
-  protected readonly sectionLabel = computed(() => documentationLabel(this.section(), this.locale));
+  protected readonly categoryLabel = computed(() => documentationLabel(this.category(), this.locale));
   protected readonly title = computed(() => this.texts.titles[this.mode()]);
   protected readonly hasUnsavedChanges = () => this.mode() !== 'view' && this.form().dirty;
 
@@ -93,11 +94,11 @@ export class ApplicationLinkDialog {
     return this.common.required;
   }
 
-  protected sectionPassThrough(): SelectPassThrough {
-    const invalid = this.isInvalid(this.form().controls.sectionId);
+  protected categoryPassThrough(): SelectPassThrough {
+    const invalid = this.isInvalid(this.form().controls.categoryId);
     return {
       label: {
-        'aria-describedby': invalid ? 'application-link-section-error' : undefined,
+        'aria-describedby': invalid ? 'application-link-category-error' : undefined,
         'aria-invalid': invalid,
         'aria-required': true,
       },

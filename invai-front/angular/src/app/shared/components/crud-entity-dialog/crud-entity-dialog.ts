@@ -1,16 +1,22 @@
 import { DOCUMENT } from '@angular/common';
+import { HelpButton } from '@core/components/help-modal/help-button';
 import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  effect,
   inject,
   input,
   model,
   output,
   signal,
 } from '@angular/core';
+import { HELP_MODAL_LABELS } from '@core/components/help-modal/help-modal.i18n';
+import { HelpModalService } from '@core/components/help-modal/help-modal.service';
+import { HelpTopicPath } from '@core/components/help-modal/help-topics';
 import { PrimeIcons } from 'primeng/api';
 import { Button } from 'primeng/button';
+import { ButtonPassThrough } from 'primeng/types/button';
 import { Dialog } from 'primeng/dialog';
 import { DialogPassThrough } from 'primeng/types/dialog';
 
@@ -41,12 +47,13 @@ export interface CrudEntityDialogAriaLabels {
 @Component({
   selector: 'app-crud-entity-dialog',
   standalone: true,
-  imports: [Button, ConfirmationDialogComponent, Dialog],
+  imports: [Button, ConfirmationDialogComponent, Dialog, HelpButton],
   templateUrl: './crud-entity-dialog.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CrudEntityDialog implements OnDestroy {
   private readonly document = inject(DOCUMENT);
+  private readonly helpModal = inject(HelpModalService);
   private readonly focusReturnTarget = this.captureFocusReturnTarget();
 
   visible = model(false);
@@ -67,6 +74,8 @@ export class CrudEntityDialog implements OnDestroy {
   canDeactivate = input(true);
   showDeactivate = input(true);
   viewPrimaryAction = input<CrudEntityDialogViewPrimaryAction>('accept');
+  /** Help document of the dialog: Ctrl + K and the help button open it while it is visible. */
+  helpTopic = input<HelpTopicPath | null>(null);
 
   edit = output<void>();
   cancelEdit = output<void>();
@@ -92,6 +101,19 @@ export class CrudEntityDialog implements OnDestroy {
       onkeydown: (event: KeyboardEvent) => this.onDialogKeydown(event),
     },
   };
+  protected readonly helpLabel = HELP_MODAL_LABELS.openHelp;
+  // The button does what Ctrl + K does; screen readers announce the shortcut with it.
+  protected readonly helpButtonPassThrough: ButtonPassThrough = {
+    root: { 'aria-keyshortcuts': 'Control+K' },
+  };
+
+  constructor() {
+    effect((onCleanup) => {
+      const topic = this.helpTopic();
+      if (!topic || !this.visible()) return;
+      onCleanup(this.helpModal.registerDialogTopic(topic));
+    });
+  }
 
   ngOnDestroy(): void {
     const target = this.focusReturnTarget;
@@ -108,6 +130,10 @@ export class CrudEntityDialog implements OnDestroy {
 
       target.focus();
     });
+  }
+
+  protected openHelp(): void {
+    this.helpModal.open();
   }
 
   protected isBusy(): boolean {
@@ -185,11 +211,17 @@ export class CrudEntityDialog implements OnDestroy {
 
   private onMaskClick(event: MouseEvent): void {
     if (event.target !== event.currentTarget) return;
+    // A new entity has no warning that offers to save it: once it holds data, a click outside
+    // would lose it, so only the actions of the dialog close it.
+    if (this.mode() === 'create' && this.hasUnsavedChanges()()) return;
     this.requestClose();
   }
 
   private onDialogKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Escape') return;
+    // During the help opening animation, focus may still be on this dialog's button.
+    // Let the help consume Escape instead of closing the underlying form.
+    if (this.helpModal.visible()) return;
     event.preventDefault();
     event.stopPropagation();
     this.requestClose();

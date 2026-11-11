@@ -9,15 +9,17 @@
       [addButtonAriaLabel]="texts.addAriaLabel"
       [availableColumns]="selectableColumns()"
       [columnsButtonAriaLabel]="texts.columnsAriaLabel"
-      [exportButtonAriaLabel]="texts.exportAriaLabel"
+      [emailButtonAriaLabel]="email.openAriaLabel"
       [filtersButtonAriaLabel]="texts.filtersAriaLabel"
       [filtersSelected]="selectedFilters()"
       [hideAddButton]="!canManage()"
+      [hideExportButton]="true"
+      [showEmailButton]="true"
       [isSearchLoading]="isSearchIndicatorLoading()"
       [quickSearchAriaLabel]="texts.quickSearchAriaLabel"
       [quickSearchPlaceholder]="texts.quickSearchPlaceholder"
       (onAdd)="openCreateDialog()"
-      (onExport)="onExport()"
+      (onEmail)="openEmailDialog()"
       (onQuickSearchChange)="onQuickSearchChange($event)"
     />
   </div>
@@ -32,27 +34,6 @@
       (onSearch)="onFilterSearch()"
     >
       <form class="invai-search-filter-grid--semantic" appSearchFilterGrid [formGroup]="filtersForm">
-        <div class="invai-filter-field--compact">
-          <p-floatlabel class="w-full">
-            <p-select
-              ariaLabelledBy="application-attachments-filter-section-label"
-              formControlName="sectionId"
-              inputId="application-attachments-filter-section"
-              optionLabel="label"
-              optionValue="value"
-              styleClass="w-full"
-              [loading]="isCatalogsLoading()"
-              [options]="sectionOptions()"
-              [showClear]="true"
-            />
-            <label
-              id="application-attachments-filter-section-label"
-              for="application-attachments-filter-section"
-            >
-              {{ common.sectionFilter }}
-            </label>
-          </p-floatlabel>
-        </div>
         <div class="invai-filter-field--compact">
           <p-floatlabel class="w-full">
             <p-select
@@ -165,12 +146,19 @@
     [isCategoriesLoading]="isCategoriesLoading()"
     [isCatalogsLoading]="isCatalogsLoading()"
     [mimeTypes]="mimeTypes()"
-    [sectionOptions]="sectionOptions()"
     [isDeleting]="isDeleting()"
     [isSaving]="isSaving()"
     mode="create"
     (closed)="closeDialog()"
     (submitForm)="submit()"
+  />
+}
+@if (isEmailDialogVisible()) {
+  <app-application-documentation-email-dialog
+    [(visible)]="isEmailDialogVisible"
+    [applicationCode]="applicationCode()"
+    [applicationId]="applicationId()"
+    (closed)="closeEmailDialog()"
   />
 }
 @if (isDeleteDialogVisible()) {

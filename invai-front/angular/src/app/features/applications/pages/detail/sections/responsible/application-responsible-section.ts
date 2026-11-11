@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { HelpButton } from '@core/components/help-modal/help-button';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -124,6 +125,7 @@ type PendingDeactivate =
   standalone: true,
   selector: 'app-application-responsible-section',
   imports: [
+    HelpButton,
     ApplicationAssignmentDetailDialog,
     ApplicationAuthorizedDialog,
     ApplicationAuthorizedTable,

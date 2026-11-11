@@ -16,6 +16,8 @@ import { SearchFilterGridDirective } from '@components/search-filters/search-fil
 import { SearchFiltersComponent } from '@components/search-filters/search-filters.component';
 import { SectionActionsComponent } from '@components/section-actions/section-actions.component';
 import { isStructuredBadRequest } from '@core/models/api-error.model';
+import { DocumentCategoryOption } from '@features/document-categories/document-categories.model';
+import { DocumentCategoryCatalogService } from '@features/document-categories/services/document-category-catalog.service';
 import { SpringPage } from '@models/page.model';
 import { ActionParams } from '@models/table.model';
 import { SearchComponentBase } from '@shared/classes/search-component-base';
@@ -37,7 +39,6 @@ import {
 } from 'rxjs';
 
 import {
-  ApplicationDocumentSection,
   ApplicationLink,
   ApplicationLinkInput,
   ApplicationLinkPageParams,
@@ -46,7 +47,6 @@ import {
   createApplicationLinkFiltersForm,
   createApplicationLinkForm,
 } from '../../../../forms/application-documentation-form.factory';
-import { ApplicationDocumentSectionCatalogService } from '../../../../services/application-document-section-catalog.service';
 import { ApplicationLinksService } from '../../../../services/application-links.service';
 import { ApplicationDocumentationDialogMode } from './application-attachment-dialog';
 import { APPLICATION_LINKS_COLUMNS } from './application-documentation.constants';
@@ -56,12 +56,12 @@ import {
   APPLICATION_LINKS_TEXTS,
 } from './application-documentation.i18n';
 import { ApplicationDocumentationAction } from './application-documentation-table-action';
-import { ApplicationDocumentationOption, documentationLabel } from './application-documentation.utils';
+import { documentationLabel } from './application-documentation.utils';
 import { ApplicationLinkDialog } from './application-link-dialog';
 import { ApplicationLinksTable } from './application-links-table';
 
 export interface ApplicationLinkFilters {
-  sectionId: number | null;
+  categoryId: number | null;
 }
 
 const QUICK_SEARCH_DEBOUNCE_MS = 400;
@@ -100,13 +100,9 @@ export class ApplicationLinksList
   protected readonly entityForm = createApplicationLinkForm(this.fb);
   protected readonly texts = APPLICATION_LINKS_TEXTS;
   protected readonly common = APPLICATION_DOCUMENTATION_TEXTS;
-  protected readonly sections = signal<ApplicationDocumentSection[]>([]);
-  protected readonly isSectionsLoading = signal(false);
-  protected readonly sectionOptions = computed<ApplicationDocumentationOption[]>(() =>
-    this.sections()
-      .map((entry) => ({ value: entry.id, label: documentationLabel(entry, this.locale) }))
-      .sort((left, right) => left.label.localeCompare(right.label, this.locale)),
-  );
+  // Active categories, the ones a link can be filed under.
+  protected readonly categories = signal<DocumentCategoryOption[]>([]);
+  protected readonly isCategoriesLoading = signal(false);
 
   quickSearchTerm = '';
   protected readonly tableFirst = signal(0);
@@ -129,20 +125,28 @@ export class ApplicationLinksList
   );
 
   private readonly selected = signal<ApplicationLink | null>(null);
-  protected readonly selectedSection = computed(() => this.selected()?.section ?? null);
+  protected readonly selectedCategory = computed(() => this.selected()?.category ?? null);
+  // The category of the link being edited stays selectable after its deactivation, as the
+  // back-end keeps it while it does not change.
+  protected readonly dialogCategoryOptions = computed<DocumentCategoryOption[]>(() => {
+    const options = this.categories();
+    const current = this.selectedCategory();
+    if (!current || options.some(({ id }) => id === current.id)) return options;
+    return [...options, { id: current.id, label: documentationLabel(current, this.locale) }];
+  });
   private readonly locale = inject(LOCALE_ID);
   private readonly service = inject(ApplicationLinksService);
-  private readonly sectionCatalog = inject(ApplicationDocumentSectionCatalogService);
+  private readonly categoryCatalog = inject(DocumentCategoryCatalogService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly quickSearchChanges = new Subject<string>();
   private readonly searchRequests = new Subject<ApplicationLinkPageParams>();
-  private sectionsLoaded = false;
+  private categoriesLoaded = false;
   private lastParams: ApplicationLinkPageParams = { ...APPLICATION_LINKS_INITIAL_PARAMS };
 
   override ngOnInit(): void {
     this.observeSearchRequests();
     this.observeQuickSearch();
-    this.loadSections().subscribe();
+    this.loadCategories().subscribe();
     super.ngOnInit();
   }
 
@@ -190,7 +194,7 @@ export class ApplicationLinksList
     this.entityForm.reset();
     this.dialogMode.set('create');
     this.isDialogVisible.set(true);
-    if (!this.sectionsLoaded) this.loadSections().subscribe();
+    if (!this.categoriesLoaded) this.loadCategories().subscribe();
   }
 
   protected onTableAction(event: ActionParams<ApplicationLink>): void {
@@ -237,11 +241,11 @@ export class ApplicationLinksList
       return;
     }
     const value = this.entityForm.getRawValue();
-    if (value.sectionId == null) return;
+    if (value.categoryId == null) return;
     const input: ApplicationLinkInput = {
       title: value.title.trim(),
       description: value.description.trim() || null,
-      sectionId: value.sectionId,
+      categoryId: value.categoryId,
       url: value.url.trim(),
     };
     const selected = this.selected();
@@ -316,7 +320,7 @@ export class ApplicationLinksList
   }
 
   protected override parseFormToFilters(): ApplicationLinkFilters {
-    return { sectionId: this.filtersForm.getRawValue().sectionId };
+    return { categoryId: this.filtersForm.getRawValue().categoryId };
   }
 
   private requestDelete(link: ApplicationLink): void {
@@ -329,24 +333,24 @@ export class ApplicationLinksList
     this.entityForm.reset({
       title: link.title,
       description: link.description ?? '',
-      sectionId: link.section?.id ?? null,
+      categoryId: link.category?.id ?? null,
       url: link.url,
     });
   }
 
-  // Sections a link can be filed under, for the filter and the dialog.
-  private loadSections(): Observable<void> {
-    this.isSectionsLoading.set(true);
-    return this.sectionCatalog.getAll().pipe(
-      map((sections) => {
-        this.sectionsLoaded = true;
-        this.sections.set(sections);
+  // Categories a link can be filed under, for the filter and the dialog.
+  private loadCategories(): Observable<void> {
+    this.isCategoriesLoading.set(true);
+    return this.categoryCatalog.getActiveCategoryOptions().pipe(
+      map((categories) => {
+        this.categoriesLoaded = true;
+        this.categories.set(categories);
       }),
       catchError(() => {
-        this.showError(this.texts.sectionsLoadError);
+        this.showError(this.texts.categoriesLoadError);
         return EMPTY;
       }),
-      finalize(() => this.isSectionsLoading.set(false)),
+      finalize(() => this.isCategoriesLoading.set(false)),
       takeUntilDestroyed(this.destroyRef),
     );
   }
@@ -415,7 +419,7 @@ export class ApplicationLinksList
       page: Math.floor(first / size),
       size,
       sort: sortField && sortDirection ? `${sortField},${sortDirection}` : undefined,
-      sectionId: filters.sectionId ?? undefined,
+      categoryId: filters.categoryId ?? undefined,
       quickSearch: search || undefined,
       deleted: false,
     };

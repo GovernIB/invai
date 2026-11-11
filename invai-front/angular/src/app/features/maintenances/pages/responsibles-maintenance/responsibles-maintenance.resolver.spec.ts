@@ -1,7 +1,15 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  ALL_USER_PERMISSIONS,
+  NO_USER_PERMISSIONS,
+  UserPermissions,
+} from '@core/auth/user-permissions.model';
+import { provideUserPermissions } from '@core/auth/user-permissions.testing';
+import { OAuthService } from '@core/services/auth.service';
 import { SpringPage } from '@models/page.model';
 import { SoftDeleteStatus } from '@models/soft-delete-status.model';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
@@ -26,9 +34,11 @@ describe('responsiblesMaintenanceResolver', () => {
     searchCombined: vi.fn(() => of({ database: page([]), soffid: page([]) })),
   };
   const authorizations = { getPage: vi.fn(() => of(page([]))) };
+  let permissions: WritableSignal<UserPermissions>;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    permissions = signal<UserPermissions>(ALL_USER_PERMISSIONS);
     companies.getPage.mockReturnValue(of(page([])));
     companies.getOptions.mockReturnValue(of([]));
     people.getPage.mockReturnValue(of(page([])));
@@ -39,6 +49,7 @@ describe('responsiblesMaintenanceResolver', () => {
         { provide: ResponsibleCompaniesService, useValue: companies },
         { provide: ResponsiblePeopleService, useValue: people },
         { provide: ResponsibleAuthorizationTypesService, useValue: authorizations },
+        { provide: OAuthService, useValue: { permissions } },
       ],
     });
   });
@@ -81,6 +92,31 @@ describe('responsiblesMaintenanceResolver', () => {
     expect(result.peopleLoadFailed).toBe(false);
   });
 
+  it('does not load the transfer catalog for a user who is not INV_SUPER', async () => {
+    permissions.set({ ...NO_USER_PERMISSIONS, responsibleRead: true, responsibleWrite: true });
+
+    const result = await resolve();
+
+    expect(people.searchCombined).not.toHaveBeenCalled();
+    expect(result.transferPeopleSearch).toBeNull();
+    expect(result.transferPeopleSearchFailed).toBe(false);
+    expect(people.getPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads neither the people nor the transfer catalog for a user who cannot change the responsibles', async () => {
+    permissions.set({ ...NO_USER_PERMISSIONS, responsibleRead: true });
+
+    const result = await resolve();
+
+    expect(people.getPage).not.toHaveBeenCalled();
+    expect(people.searchCombined).not.toHaveBeenCalled();
+    expect(result.peoplePage).toBeNull();
+    expect(result.peopleLoadFailed).toBe(false);
+    expect(result.transferPeopleSearchFailed).toBe(false);
+    expect(companies.getPage).toHaveBeenCalledTimes(1);
+    expect(authorizations.getPage).toHaveBeenCalledTimes(1);
+  });
+
   function resolve(): Promise<ResponsiblesMaintenanceResolvedData> {
     return firstValueFrom(
       TestBed.runInInjectionContext(
@@ -99,7 +135,7 @@ describe('responsiblesMaintenanceResolver HTTP cache', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideUserPermissions()],
     });
     http = TestBed.inject(HttpTestingController);
   });

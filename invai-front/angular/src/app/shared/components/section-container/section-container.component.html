@@ -8,7 +8,10 @@
   @if (header()) {
     <header class="section-container__header">
       <h1 class="section-container__title">{{ header() }}</h1>
-      <ng-content select="[right-top]"></ng-content>
+      <div class="section-container__actions">
+        <ng-content select="[right-top]"></ng-content>
+        <app-help-button [onPrimary]="true" />
+      </div>
     </header>
   }
   <div class="section-container__body flex flex-column gap-4">

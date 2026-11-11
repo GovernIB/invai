@@ -21,7 +21,6 @@ describe('ApplicationDocumentDetailLoader', () => {
       id: 9,
       applicationId: 7,
       title: 'Manual',
-      section: { id: 1, code: 'GENERAL', name: 'General', nameEs: 'General' },
       category: { id: 1, name: 'Tècnica', nameEs: 'Técnica', parentId: null },
       subcategory: { id: 11, name: 'Manuals', nameEs: 'Manuales', parentId: 1 },
       status: STATUSES[0],

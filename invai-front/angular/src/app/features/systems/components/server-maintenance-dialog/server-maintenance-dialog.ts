@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -54,6 +55,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServerMaintenanceDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceSystems;
   visible = model(false);
   mode = input.required<InfrastructureDialogMode>();
   form = input.required<SystemHostFormGroup>();

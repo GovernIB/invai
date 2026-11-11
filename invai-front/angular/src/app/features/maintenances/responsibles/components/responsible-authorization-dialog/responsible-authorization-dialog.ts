@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -18,6 +19,7 @@ import { RESPONSIBLE_AUTHORIZATION_COPY, RESPONSIBLE_COMMON_COPY } from '../../r
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResponsibleAuthorizationDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceAuthorizations;
   visible = model(false);
   form = input.required<ResponsibleAuthorizationFormGroup>();
   mode = input.required<CrudEntityDialogMode>();

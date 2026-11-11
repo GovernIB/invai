@@ -4,7 +4,7 @@ import { Breadcrumbs } from '@core/components/breadcrumbs';
 import { FULL_ROUTES } from '@core/components/main-layout/routes/full.routes';
 import { ServerErrorDialog } from '@core/components/server-error-dialog/server-error-dialog';
 import { InitialNavigationLoadingService } from '@core/services/initial-navigation-loading.service';
-import HelpModalComponent from '@core/components/user-menu/components/help-modal/help-modal';
+import { HelpModal } from '@core/components/help-modal/help-modal';
 import { UserMenuComponent } from '@core/components/user-menu/user-menu.component';
 import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -18,7 +18,7 @@ import { MainLayout } from './core/components/main-layout/main-layout';
   imports: [
     ButtonModule,
     DividerModule,
-    HelpModalComponent,
+    HelpModal,
     ServerErrorDialog,
     MainLayout,
     RouterLink,

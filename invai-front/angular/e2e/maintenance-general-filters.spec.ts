@@ -1,4 +1,4 @@
-import { expect as baseExpect, test as base, type Page, type Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './support/auth.fixture';
 import { CleanupRegistry } from './support/cleanup-registry';
@@ -152,13 +152,11 @@ test.describe('environments restore', () => {
   });
 });
 
-base.describe('general maintenance filters (mocked)', () => {
-  base.use({ storageState: { cookies: [], origins: [] } });
-
-  base('commission filters validate the date range and send dates, type and quick search', async ({
+test.describe('general maintenance filters', () => {
+  test('commission filters validate the date range and send dates, type and quick search', async ({
     page,
   }) => {
-    const requests = await mockGeneralMaintenance(page);
+    const requests = recordApiRequests(page);
     const commissionRequests = () =>
       requests.filter((url) => url.pathname === '/invaiback/commission');
     await page.goto(`${GENERAL_ROUTE}#commissions`);
@@ -170,23 +168,23 @@ base.describe('general maintenance filters (mocked)', () => {
     await fillDate(page, 'commissions-filter-date-to', '01/05/2026');
     const before = commissionRequests().length;
     await panel.getByRole('button', { name: SEARCH_BUTTON }).click();
-    await baseExpect(
+    await expect(
       panel.getByRole('alert').filter({
         hasText: 'La data inicial no pot ser posterior a la data final.',
       }),
     ).toBeVisible();
-    await baseExpect(page.locator('#commissions-filter-date-from')).toHaveAttribute(
+    await expect(page.locator('#commissions-filter-date-from')).toHaveAttribute(
       'aria-invalid',
       'true',
     );
-    await baseExpect(page.locator('#commissions-filter-date-from')).toHaveAttribute(
+    await expect(page.locator('#commissions-filter-date-from')).toHaveAttribute(
       'aria-describedby',
       'commissions-filter-date-range-error',
     );
     expect(commissionRequests()).toHaveLength(before);
 
     await fillDate(page, 'commissions-filter-date-to', '31/05/2026');
-    await baseExpect(panel.getByRole('alert')).toHaveCount(0);
+    await expect(panel.getByRole('alert')).toHaveCount(0);
     await selectOption(page, 'commissions-filter-type', 'Tècnica');
     const filtered = {
       approvalDateFrom: '2026-05-10',
@@ -199,8 +197,8 @@ base.describe('general maintenance filters (mocked)', () => {
     );
     await panel.getByRole('button', { name: SEARCH_BUTTON }).click();
     const filteredUrl = new URL((await filteredPromise).url());
-    baseExpect(filteredUrl.searchParams.has('quickSearch')).toBe(false);
-    await baseExpect(
+    expect(filteredUrl.searchParams.has('quickSearch')).toBe(false);
+    await expect(
       panel.getByRole('button', { name: `${FILTERS_BUTTON} (4 filtres aplicats)`, exact: true }),
     ).toBeVisible();
 
@@ -212,15 +210,15 @@ base.describe('general maintenance filters (mocked)', () => {
   });
 
   for (const list of UNSUPPORTED_STATUS_LISTS) {
-    base(`${list.panelId}: selecting an unsupported status informs and never requests it`, async ({
+    test(`${list.panelId}: selecting an unsupported status informs and never requests it`, async ({
       page,
     }) => {
-      const requests = await mockGeneralMaintenance(page);
+      const requests = recordApiRequests(page);
       await page.goto(`${GENERAL_ROUTE}#${list.panelId}`);
       await waitForInitialLoader(page);
       const panel = await openMaintenancePanel(page, list.title);
       await showFilters(panel, FILTERS_BUTTON);
-      await baseExpect(page.locator(`#${list.prefix}-filter-status`)).toHaveText('Actiu');
+      await expect(page.locator(`#${list.prefix}-filter-status`)).toHaveText('Actiu');
 
       await selectOption(page, `${list.prefix}-filter-status`, 'Inactiu');
       await expectToast(page, UNSUPPORTED_STATUS);
@@ -231,35 +229,30 @@ base.describe('general maintenance filters (mocked)', () => {
           url.pathname === list.apiPath &&
           url.searchParams.get('statusId') === String(INACTIVE_STATUS_ID),
       );
-      baseExpect(inactiveRequests.map(String)).toEqual([]);
+      expect(inactiveRequests.map(String)).toEqual([]);
     });
   }
 
-  base.fixme(
+  test.fixme(
     'categories: the status select keeps showing Actiu after the unsupported status is rejected',
     // The form control is reset to Actiu, but PrimeNG Select still renders "Inactiu".
     async ({ page }) => {
-      await mockGeneralMaintenance(page);
       await page.goto(`${GENERAL_ROUTE}#categories`);
       await waitForInitialLoader(page);
       const panel = await openMaintenancePanel(page, 'Categories');
       await showFilters(panel, FILTERS_BUTTON);
       await selectOption(page, 'categories-filter-status', 'Inactiu');
       await expectToast(page, UNSUPPORTED_STATUS);
-      await baseExpect(page.locator('#categories-filter-status')).toHaveText('Actiu');
+      await expect(page.locator('#categories-filter-status')).toHaveText('Actiu');
     },
   );
 });
 
-async function mockGeneralMaintenance(page: Page): Promise<URL[]> {
+function recordApiRequests(page: Page): URL[] {
   const requests: URL[] = [];
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const url = new URL(route.request().url());
-    if (url.pathname.endsWith('/auth/me')) {
-      return route.fulfill({ json: { authenticated: true, username: 'general-filters-test' } });
-    }
-    requests.push(url);
-    return route.fulfill({ json: pageOf([]) });
+  page.on('request', (request) => {
+    const url = new URL(request.url());
+    if (url.pathname.startsWith('/invaiback/')) requests.push(url);
   });
   return requests;
 }
@@ -270,9 +263,5 @@ async function fillDate(page: Page, inputId: string, value: string): Promise<voi
   // The datepicker only parses typed input that comes with key events.
   await input.pressSequentially(value);
   await input.press('Escape');
-  await baseExpect(input).toHaveValue(value);
-}
-
-function pageOf(content: unknown[]) {
-  return { content, totalElements: content.length, totalPages: 1, last: true, number: 0 };
+  await expect(input).toHaveValue(value);
 }

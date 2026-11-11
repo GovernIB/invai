@@ -1,5 +1,9 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
+import { expect, test } from './support/application.fixture';
+import type { CleanupRegistry } from './support/cleanup-registry';
+import { uniqueToken } from './support/data';
+import { apiUrl, expectApiJsonResponse, waitForApiResponse } from './support/http';
 import {
   expectToast,
   findRow,
@@ -10,9 +14,8 @@ import {
   showFilters,
   waitForInitialLoader,
 } from './support/maintenance-resources';
+import { type DatabaseVendorRecord, registerSoftDeleteCleanup, SYSTEMS_API } from './support/systems';
 import { selectOption, selectRowAction } from './support/ui';
-
-test.use({ storageState: { cookies: [], origins: [] } });
 
 const WEB_CONTEXTS_API = '/invaiback/web-context';
 const FILTERS_BUTTON = 'Mostra o amaga els filtres de contexts web';
@@ -41,32 +44,21 @@ interface CapturedRequest {
   method: string;
   path: string;
   params: URLSearchParams;
-  body: unknown;
 }
-
-const INTRANET: WebContext = { id: 7, name: 'Intranet', nameEs: 'Intranet', deletedAt: null };
-const LONG_NAME: WebContext = {
-  id: 8,
-  name: `Context ${'x'.repeat(143)}`,
-  nameEs: 'Contexto largo',
-  deletedAt: null,
-};
-const RETIRED: WebContext = {
-  id: 9,
-  name: 'Extranet retirada',
-  nameEs: 'Extranet retirada',
-  deletedAt: '2026-01-15T10:00:00',
-};
 
 test.describe('shared CRUD entity dialog', () => {
   test('Escape on a clean edit closes at once; on a dirty edit Descartar drops the changes', async ({
     page,
-  }) => {
-    const { requests } = await mockWebContexts(page);
+    cleanupRegistry,
+  }, testInfo) => {
+    const requests = recordWebContextRequests(page);
     const panel = await openWebContexts(page);
+    const token = uniqueToken(testInfo);
+    const intranet = await createWebContext(page, cleanupRegistry, `E2E ${token} Intranet`);
+    await quickSearch(panel, token);
     const dialog = editDialog(page);
 
-    await findRow(panel, INTRANET.name).dblclick();
+    await findRow(panel, intranet.name).dblclick();
     await expect(dialog.getByRole('heading', { name: 'Consultar context web' })).toBeVisible();
     await dialog.getByRole('button', { name: ACTIONS.edit, exact: true }).click();
     await expect(dialog.getByRole('heading', { name: 'Editar context web' })).toBeVisible();
@@ -75,9 +67,9 @@ test.describe('shared CRUD entity dialog', () => {
     await expect(dialog).toHaveCount(0);
     await expect(unsavedDialog(page)).toHaveCount(0);
 
-    await selectRowAction(page, findRow(panel, INTRANET.name), 'Edita');
+    await selectRowAction(page, findRow(panel, intranet.name), 'Edita');
     await expect(dialog.getByRole('heading', { name: 'Editar context web' })).toBeVisible();
-    await page.locator('#security-web-context-dialog-name').fill('Intranet modificada');
+    await page.locator('#security-web-context-dialog-name').fill(`${intranet.name} modificada`);
     await page.keyboard.press('Escape');
 
     const prompt = unsavedDialog(page);
@@ -88,20 +80,24 @@ test.describe('shared CRUD entity dialog', () => {
     await expect(prompt).toHaveCount(0);
     await expect(dialog).toHaveCount(0);
 
-    await findRow(panel, INTRANET.name).dblclick();
-    await expect(page.locator('#security-web-context-dialog-name')).toHaveValue(INTRANET.name);
+    await findRow(panel, intranet.name).dblclick();
+    await expect(page.locator('#security-web-context-dialog-name')).toHaveValue(intranet.name);
     expect(requests.filter(({ method }) => method === 'PUT')).toEqual([]);
   });
 
   test('the close button on a dirty edit can be dismissed or saved with Desar', async ({
     page,
-  }) => {
-    const { requests } = await mockWebContexts(page);
+    cleanupRegistry,
+  }, testInfo) => {
+    const requests = recordWebContextRequests(page);
     const panel = await openWebContexts(page);
+    const token = uniqueToken(testInfo);
+    const intranet = await createWebContext(page, cleanupRegistry, `E2E ${token} Intranet`);
+    await quickSearch(panel, token);
     const dialog = editDialog(page);
     const prompt = unsavedDialog(page);
 
-    await selectRowAction(page, findRow(panel, INTRANET.name), 'Edita');
+    await selectRowAction(page, findRow(panel, intranet.name), 'Edita');
     await page.locator('#security-web-context-dialog-name-es').fill('Intranet corporativa');
     await dialog.getByRole('button', { name: ACTIONS.close, exact: true }).click();
     await expect(prompt.getByRole('button', { name: UNSAVED.discard })).toBeFocused();
@@ -115,24 +111,22 @@ test.describe('shared CRUD entity dialog', () => {
     );
 
     await dialog.getByRole('button', { name: ACTIONS.close, exact: true }).click();
+    const savePromise = waitForApiResponse(page, 'PUT', `${WEB_CONTEXTS_API}/${intranet.id}`);
     await prompt.getByRole('button', { name: UNSAVED.save }).click();
-    await expect.poll(() => requests.filter(({ method }) => method === 'PUT')).toEqual([
-      {
-        method: 'PUT',
-        path: `${WEB_CONTEXTS_API}/${INTRANET.id}`,
-        params: new URLSearchParams(),
-        body: { name: INTRANET.name, nameEs: 'Intranet corporativa' },
-      },
-    ]);
+    const saved = await savePromise;
+    expect(saved.ok(), await saved.text()).toBe(true);
+    expect(saved.request().postDataJSON()).toEqual({
+      name: intranet.name,
+      nameEs: 'Intranet corporativa',
+    });
+    expect(requests.filter(({ method }) => method === 'PUT')).toHaveLength(1);
     await expectToast(page, "El registre s'ha actualitzat correctament.");
     await expect(dialog).toHaveCount(0);
     await expect(prompt).toHaveCount(0);
   });
 
-  test('required and max-length messages block create and edit submissions', async ({
-    page,
-  }) => {
-    const { requests } = await mockWebContexts(page);
+  test('required messages and length limits block a create submission', async ({ page }) => {
+    const requests = recordWebContextRequests(page);
     const panel = await openWebContexts(page);
     const dialog = editDialog(page);
     const name = page.locator('#security-web-context-dialog-name');
@@ -152,6 +146,8 @@ test.describe('shared CRUD entity dialog', () => {
       'security-web-context-dialog-name-error',
     );
 
+    // The back-end caps the names at the same lengths, so a longer value can never be loaded
+    // for editing; the maxlength validators are covered by security-resource-forms.factory.spec.ts.
     await expect(name).toHaveAttribute('maxlength', '150');
     await expect(nameEs).toHaveAttribute('maxlength', '100');
     await name.fill('Nou context');
@@ -159,32 +155,30 @@ test.describe('shared CRUD entity dialog', () => {
     await expect(name).toHaveAttribute('aria-invalid', 'false');
     await dialog.getByRole('button', { name: 'Cancel·la els canvis del context web' }).click();
     await expect(dialog).toHaveCount(0);
-
-    // Values longer than the limit can only come from the backend.
-    await selectRowAction(page, findRow(panel, 'Context xxx'), 'Edita');
-    await expect(name).toHaveValue(LONG_NAME.name);
-    await dialog.getByRole('button', { name: ACTIONS.save, exact: true }).click();
-    await expect(page.locator('#security-web-context-dialog-name-error')).toHaveText(
-      'El nom ha de tenir com a màxim 150 caràcters',
-    );
-    await expect(dialog.getByRole('heading', { name: 'Editar context web' })).toBeVisible();
     expect(requests.filter(({ method }) => method === 'POST' || method === 'PUT')).toEqual([]);
   });
 
-  test('Neteja resets the filters to the active default and searches again', async ({ page }) => {
-    const { requests } = await mockWebContexts(page);
+  test('Neteja resets the filters to the active default and searches again', async ({
+    page,
+    cleanupRegistry,
+  }, testInfo) => {
+    const requests = recordWebContextRequests(page);
     const panel = await openWebContexts(page);
+    const token = uniqueToken(testInfo);
+    const retired = await createWebContext(page, cleanupRegistry, `E2E ${token} Extranet`, {
+      inactive: true,
+    });
     const listRequests = () =>
       requests.filter(({ method, path }) => method === 'GET' && path === WEB_CONTEXTS_API);
 
     await showFilters(panel, FILTERS_BUTTON);
-    await page.locator('#security-web-context-filter-name').fill('  Extranet ');
+    await page.locator('#security-web-context-filter-name').fill(`  ${retired.name} `);
     await selectOption(page, 'security-web-context-filter-status', 'Inactiu');
     await panel.getByRole('button', { name: SEARCH_BUTTON }).click();
-    await expect.poll(() => listRequests().at(-1)?.params.toString()).toBe(
-      'page=0&size=10&name=Extranet&statusId=2',
-    );
-    await expect(findRow(panel, RETIRED.name)).toBeVisible();
+    await expect
+      .poll(() => paramsOf(listRequests().at(-1)))
+      .toEqual({ page: '0', size: '10', name: retired.name, statusId: '2' });
+    await expect(findRow(panel, retired.name)).toBeVisible();
     await expect(
       panel.getByRole('button', { name: `${FILTERS_BUTTON} (2 filtres aplicats)`, exact: true }),
     ).toBeVisible();
@@ -192,24 +186,30 @@ test.describe('shared CRUD entity dialog', () => {
     const before = listRequests().length;
     await panel.getByRole('button', { name: RESET_BUTTON }).click();
     await expect.poll(() => listRequests().length).toBe(before + 1);
-    expect(listRequests().at(-1)?.params.toString()).toBe('page=0&size=10&statusId=1');
+    expect(paramsOf(listRequests().at(-1))).toEqual({ page: '0', size: '10', statusId: '1' });
     await expect(page.locator('#security-web-context-filter-name')).toHaveValue('');
     await expect(page.locator('#security-web-context-filter-status')).toHaveText('Actiu');
     await expect(
       panel.getByRole('button', { name: `${FILTERS_BUTTON} (1 filtre aplicat)`, exact: true }),
     ).toBeVisible();
-    await expect(findRow(panel, INTRANET.name)).toBeVisible();
-    await expect(findRow(panel, RETIRED.name)).toHaveCount(0);
+    await expect(findRow(panel, retired.name)).toHaveCount(0);
   });
 
   test('the deactivation prompt can be cancelled and inactive rows only offer Restaura', async ({
     page,
-  }) => {
-    const { requests } = await mockWebContexts(page);
+    cleanupRegistry,
+  }, testInfo) => {
+    const requests = recordWebContextRequests(page);
     const panel = await openWebContexts(page);
+    const token = uniqueToken(testInfo);
+    const intranet = await createWebContext(page, cleanupRegistry, `E2E ${token} Intranet`);
+    const retired = await createWebContext(page, cleanupRegistry, `E2E ${token} Extranet`, {
+      inactive: true,
+    });
+    await quickSearch(panel, token);
     const confirmation = page.getByRole('dialog');
 
-    await selectRowAction(page, findRow(panel, INTRANET.name), 'Dona de baixa');
+    await selectRowAction(page, findRow(panel, intranet.name), 'Dona de baixa');
     await expect(
       confirmation.getByRole('heading', { name: 'Donar de baixa el registre?' }),
     ).toBeVisible();
@@ -218,7 +218,7 @@ test.describe('shared CRUD entity dialog', () => {
       .click();
     await expect(confirmation).toHaveCount(0);
 
-    await selectRowAction(page, findRow(panel, INTRANET.name), 'Dona de baixa');
+    await selectRowAction(page, findRow(panel, intranet.name), 'Dona de baixa');
     await expect(
       confirmation.getByRole('button', { name: 'Cancel·la la baixa del registre', exact: true }),
     ).toBeFocused();
@@ -229,7 +229,7 @@ test.describe('shared CRUD entity dialog', () => {
     await showFilters(panel, FILTERS_BUTTON);
     await selectOption(page, 'security-web-context-filter-status', 'Inactiu');
     await panel.getByRole('button', { name: SEARCH_BUTTON }).click();
-    const row = findRow(panel, RETIRED.name);
+    const row = findRow(panel, retired.name);
     await expect(
       row.getByRole('button', { name: 'Obrir les accions del registre', exact: true }),
     ).toHaveCount(0);
@@ -237,32 +237,38 @@ test.describe('shared CRUD entity dialog', () => {
     await expect(page.locator('.p-menu-overlay:visible').getByRole('menuitem')).toHaveText([
       'Restaura',
     ]);
+    const restorePromise = waitForApiResponse(
+      page,
+      'PUT',
+      `${WEB_CONTEXTS_API}/reactivate/${retired.id}`,
+    );
     await page.getByRole('menuitem', { name: 'Restaura' }).click();
-    await expect.poll(() => requests.filter(({ method }) => method === 'PUT')).toEqual([
-      {
-        method: 'PUT',
-        path: `${WEB_CONTEXTS_API}/reactivate/${RETIRED.id}`,
-        params: new URLSearchParams(),
-        body: null,
-      },
-    ]);
+    const restored = await restorePromise;
+    expect(restored.ok(), await restored.text()).toBe(true);
+    expect(restored.request().postDataJSON()).toBeNull();
     await expectToast(page, "El registre s'ha restaurat correctament.");
   });
 
-  test('the database vendor port is required and kept within 1-65535', async ({ page }) => {
+  test('the database vendor port is required and kept within 1-65535', async ({
+    page,
+    cleanupRegistry,
+  }, testInfo) => {
+    const vendorName = `E2E PostgreSQL ${uniqueToken(testInfo)}`;
+    registerSoftDeleteCleanup<DatabaseVendorRecord>({
+      page,
+      cleanup: cleanupRegistry,
+      label: `database vendor ${vendorName}`,
+      pathname: SYSTEMS_API.databaseVendors,
+      target: { matches: (item) => item.name === vendorName },
+    });
     const posts: unknown[] = [];
-    await page.route('**/invaiback/**', async (route: Route) => {
-      const request = route.request();
-      const path = new URL(request.url()).pathname;
-      if (path.endsWith('/auth/me')) return fulfillMe(route);
-      if (path === '/invaiback/database-vendor' && request.method() === 'POST') {
+    page.on('request', (request) => {
+      if (
+        request.method() === 'POST' &&
+        new URL(request.url()).pathname === SYSTEMS_API.databaseVendors
+      ) {
         posts.push(request.postDataJSON());
-        return route.fulfill({
-          status: 201,
-          json: { id: 4, ...request.postDataJSON(), deletedAt: null },
-        });
       }
-      return route.fulfill({ json: pageOf([]) });
     });
     await page.goto('/manteniments/sistemes#database-vendors');
     await waitForInitialLoader(page);
@@ -283,7 +289,7 @@ test.describe('shared CRUD entity dialog', () => {
     expect(posts).toEqual([]);
 
     // The input number clamps out-of-range ports on blur instead of showing the message.
-    await page.locator('#database-vendor-name').fill('PostgreSQL E2E');
+    await page.locator('#database-vendor-name').fill(vendorName);
     for (const [typed, clamped] of [
       ['0', '1'],
       ['70000', '65535'],
@@ -296,45 +302,64 @@ test.describe('shared CRUD entity dialog', () => {
 
     await port.fill('5432');
     await port.blur();
+    const createPromise = waitForApiResponse(page, 'POST', SYSTEMS_API.databaseVendors);
     await add.click();
-    await expect.poll(() => posts).toEqual([{ name: 'PostgreSQL E2E', defaultPort: 5432 }]);
+    const created = await createPromise;
+    expect(created.ok(), await created.text()).toBe(true);
+    expect(posts).toEqual([{ name: vendorName, defaultPort: 5432 }]);
     await expectToast(page, "El proveïdor s'ha afegit correctament.");
   });
 });
 
-async function mockWebContexts(page: Page): Promise<{ requests: CapturedRequest[] }> {
-  const records = [INTRANET, LONG_NAME, RETIRED].map((record) => ({ ...record }));
+function recordWebContextRequests(page: Page): CapturedRequest[] {
   const requests: CapturedRequest[] = [];
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const request = route.request();
+  page.on('request', (request) => {
     const url = new URL(request.url());
-    const path = url.pathname;
-    const method = request.method();
-    if (path.endsWith('/auth/me')) return fulfillMe(route);
-    if (!path.startsWith(WEB_CONTEXTS_API)) return route.fulfill({ json: pageOf([]) });
-
-    requests.push({ method, path, params: url.searchParams, body: request.postDataJSON() });
-    const id = Number(path.split('/').pop());
-    const record = records.find((item) => item.id === id);
-    if (method === 'GET' && path === WEB_CONTEXTS_API) {
-      const status = url.searchParams.get('statusId');
-      const name = url.searchParams.get('name')?.toLowerCase();
-      const content = records.filter(
-        (item) =>
-          (status === null || Boolean(item.deletedAt) === (status === '2')) &&
-          (!name || item.name.toLowerCase().includes(name)),
-      );
-      return route.fulfill({ json: pageOf(content) });
-    }
-    if (method === 'GET' && record) return route.fulfill({ json: record });
-    if (method === 'PUT' && record) {
-      if (path.includes('/reactivate/')) record.deletedAt = null;
-      else Object.assign(record, request.postDataJSON());
-      return route.fulfill({ json: record });
-    }
-    return route.fulfill({ status: 404, json: {} });
+    if (!url.pathname.startsWith(WEB_CONTEXTS_API)) return;
+    requests.push({ method: request.method(), path: url.pathname, params: url.searchParams });
   });
-  return { requests };
+  return requests;
+}
+
+async function createWebContext(
+  page: Page,
+  cleanup: CleanupRegistry,
+  name: string,
+  { inactive = false }: { inactive?: boolean } = {},
+): Promise<WebContext> {
+  const created = await expectApiJsonResponse<WebContext>(
+    await page.request.post(apiUrl(page, WEB_CONTEXTS_API), {
+      data: { name, nameEs: `${name} ES` },
+    }),
+    `POST ${WEB_CONTEXTS_API}`,
+  );
+  registerSoftDeleteCleanup<WebContext>({
+    page,
+    cleanup,
+    label: `web context ${name}`,
+    pathname: WEB_CONTEXTS_API,
+    target: { id: created.id, matches: (item) => item.id === created.id },
+  });
+  if (inactive) {
+    const response = await page.request.delete(apiUrl(page, `${WEB_CONTEXTS_API}/${created.id}`));
+    expect(response.ok(), await response.text()).toBeTruthy();
+  }
+  return created;
+}
+
+// Narrows the list to the records of the test, which may not be on the first page otherwise.
+async function quickSearch(panel: Locator, token: string): Promise<void> {
+  const listPromise = panel.page().waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === WEB_CONTEXTS_API &&
+      new URL(response.url()).searchParams.get('search') === token,
+  );
+  await panel.getByRole('textbox', { name: 'Cerca ràpida de contexts web' }).fill(token);
+  await listPromise;
+}
+
+function paramsOf(request: CapturedRequest | undefined): Record<string, string> | undefined {
+  return request && Object.fromEntries(request.params);
 }
 
 async function openWebContexts(page: Page) {
@@ -349,12 +374,4 @@ function editDialog(page: Page) {
 
 function unsavedDialog(page: Page) {
   return page.getByRole('dialog').filter({ has: page.getByText(UNSAVED.title, { exact: true }) });
-}
-
-function fulfillMe(route: Route) {
-  return route.fulfill({ json: { authenticated: true, username: 'crud-dialog-test' } });
-}
-
-function pageOf(content: unknown[]) {
-  return { content, totalElements: content.length, totalPages: 1, last: true, number: 0 };
 }

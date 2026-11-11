@@ -5,7 +5,7 @@ import {
   ApplicationAttachmentFormGroup,
   createApplicationAttachmentForm,
 } from '../../../../forms/application-documentation-form.factory';
-import { DOCUMENT_MIME_TYPES, DOCUMENT_SECTIONS } from '../../../../application-documentation.testing';
+import { DOCUMENT_MIME_TYPES } from '../../../../application-documentation.testing';
 import { ApplicationAttachmentDialog } from './application-attachment-dialog';
 
 describe('ApplicationAttachmentDialog', () => {
@@ -25,10 +25,6 @@ describe('ApplicationAttachmentDialog', () => {
     fixture.componentRef.setInput('categoryOptions', [
       { id: 1, label: 'Tècnica', subcategories: [{ id: 11, label: 'Manuals' }] },
     ]);
-    fixture.componentRef.setInput(
-      'sectionOptions',
-      DOCUMENT_SECTIONS.map(({ id, name }) => ({ value: id, label: name! })),
-    );
     fixture.componentRef.setInput('mimeTypes', DOCUMENT_MIME_TYPES);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -161,12 +157,14 @@ describe('ApplicationAttachmentDialog', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    for (const field of ['section', 'category']) {
-      const id = 'application-attachment-' + field;
-      expect(byId(id).getAttribute('aria-invalid')).toBe('true');
-      expect(byId(id).getAttribute('aria-describedby')).toBe(id + '-error');
-      expect(byId(id + '-error').textContent).toContain('Camp obligatori');
-    }
+    const category = byId('application-attachment-category');
+    expect(category.getAttribute('aria-invalid')).toBe('true');
+    expect(category.getAttribute('aria-describedby')).toBe('application-attachment-category-error');
+    expect(category.getAttribute('aria-required')).toBe('true');
+    expect(byId('application-attachment-category-error').textContent).toContain('Camp obligatori');
+    // The subcategory is optional, and a document is no longer filed under a section.
+    expect(byId('application-attachment-subcategory').getAttribute('aria-required')).not.toBe('true');
+    expect(document.getElementById('application-attachment-section')).toBeNull();
     const version = byId('application-attachment-version');
     expect([version.getAttribute('aria-invalid'), version.getAttribute('aria-describedby')]).toEqual([
       'true',

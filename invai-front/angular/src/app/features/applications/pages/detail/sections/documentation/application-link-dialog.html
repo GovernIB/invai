@@ -24,8 +24,8 @@
         <dd class="invai-form-static-value m-0">{{ form().controls.title.value }}</dd>
       </div>
       <div class="invai-dialog-static-field">
-        <dt class="invai-dialog-static-field__label">{{ texts.labels.section }}</dt>
-        <dd class="invai-form-static-value m-0">{{ sectionLabel() }}</dd>
+        <dt class="invai-dialog-static-field__label">{{ texts.labels.category }}</dt>
+        <dd class="invai-form-static-value m-0">{{ categoryLabel() }}</dd>
       </div>
       <div class="invai-dialog-static-field md:col-span-2">
         <dt class="invai-dialog-static-field__label">{{ texts.labels.description }}</dt>
@@ -74,24 +74,26 @@
       </div>
 
       <div>
-        <label id="application-link-section-label" for="application-link-section">
-          {{ texts.labels.section }}
+        <label id="application-link-category-label" for="application-link-category">
+          {{ texts.labels.category }}
         </label>
         <p-select
           appendTo="body"
-          ariaLabelledBy="application-link-section-label"
-          formControlName="sectionId"
-          inputId="application-link-section"
+          ariaLabelledBy="application-link-category-label"
+          formControlName="categoryId"
+          inputId="application-link-category"
           optionLabel="label"
-          optionValue="value"
+          optionValue="id"
           styleClass="w-full"
-          [invalid]="isInvalid(form().controls.sectionId)"
-          [loading]="isSectionsLoading()"
-          [options]="sectionOptions()"
-          [pt]="sectionPassThrough()"
+          [ariaFilterLabel]="texts.labels.category"
+          [filter]="true"
+          [invalid]="isInvalid(form().controls.categoryId)"
+          [loading]="isCategoriesLoading()"
+          [options]="categoryOptions()"
+          [pt]="categoryPassThrough()"
         />
-        @if (isInvalid(form().controls.sectionId)) {
-          <p id="application-link-section-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
+        @if (isInvalid(form().controls.categoryId)) {
+          <p id="application-link-category-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
             {{ common.required }}
           </p>
         }

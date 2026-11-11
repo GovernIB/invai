@@ -1,41 +1,20 @@
-import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-// Exercise the actual router, menu and form without depending on an IdP session
-// or changing backend records.
-test.use({ storageState: { cookies: [], origins: [] } });
+import { expect, test } from './support/auth.fixture';
+import { expectJsonResponse, waitForApiResponse } from './support/http';
 
-const application = {
-  id: 1,
-  name: 'Menu test application',
-  code: 'TEST',
-  prefix: 'TST',
-  status: 'ACTIVE',
-  category: { id: 1, name: 'Category' },
-  systemType: { id: 1, name: 'System type' },
-  field: { id: 1, name: 'Scope' },
-  department: { code: 'D1', name: 'Department' },
-  admUnit: { code: 'U1', name: 'Unit' },
-  csCommission: { id: 1, name: 'Commission' },
-  description: 'Action menu browser test',
-};
-
-test.beforeEach(async ({ page }) => {
-  await page.route('**/invaiback/**', async (route) => {
-    const path = new URL(route.request().url()).pathname;
-    let json: unknown = { content: [], totalElements: 0, totalPages: 0, last: true, number: 0 };
-    if (path.endsWith('/auth/me')) {
-      json = { authenticated: true, username: 'table-actions-test' };
-    } else if (path.endsWith('/application/1')) {
-      json = application;
-    } else if (path.endsWith('/application')) {
-      json = { content: [application], totalElements: 1, totalPages: 1, last: true, number: 0 };
-    }
-    await route.fulfill({ json });
-  });
-});
+// Uses the first application of the real list and never saves, so no record changes.
+async function openList(page: Page): Promise<{ id: number }> {
+  const listPromise = waitForApiResponse(page, 'GET', '/invaiback/application');
+  await page.goto('/');
+  const list = await expectJsonResponse<{ content: Array<{ id: number }> }>(await listPromise);
+  expect(list.content.length, 'The application list needs at least one record').toBeGreaterThan(0);
+  return list.content[0];
+}
 
 test('consults, enters editing once, cancels and reloads in consultation', async ({ page }) => {
-  await page.goto('/');
+  const first = await openList(page);
+  const generalUrl = new RegExp(`/${first.id}/general$`);
   const actions = page.locator('app-applications-table tbody .invai-table-actions-column button').first();
   await expect(actions).toBeVisible();
   const listUrl = page.url();
@@ -51,7 +30,7 @@ test('consults, enters editing once, cancels and reloads in consultation', async
 
   await actions.press('Space');
   await page.getByRole('menuitem', { name: 'Consulta', exact: true }).click();
-  await expect(page).toHaveURL(/\/1\/general$/);
+  await expect(page).toHaveURL(generalUrl);
   const name = page.getByRole('textbox', { name: "Nom de l'aplicació", exact: true });
   await expect(name).toBeVisible();
   await expect(name).toHaveAttribute('readonly', '');
@@ -61,7 +40,7 @@ test('consults, enters editing once, cancels and reloads in consultation', async
   await page.goto(listUrl);
   await actions.click();
   await page.getByRole('menuitem', { name: 'Edita', exact: true }).click();
-  await expect(page).toHaveURL(/\/1\/general$/);
+  await expect(page).toHaveURL(generalUrl);
   await expect(toolbar.getByRole('button', { name: /^Desar els canvis de / })).toBeVisible();
   await expect(name).not.toHaveAttribute('readonly');
   await toolbar.getByRole('button', { name: /^Cancel·lar els canvis de / }).click();
@@ -77,7 +56,7 @@ test('consults, enters editing once, cancels and reloads in consultation', async
 
 test('keeps the actions accessible at 320px and returns focus from the menu', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
-  await page.goto('/');
+  await openList(page);
   const actions = page.locator('app-applications-table tbody .invai-table-actions-column button').first();
   await expect(actions).toBeVisible();
   const box = await actions.boundingBox();

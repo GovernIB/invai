@@ -1,6 +1,15 @@
 {
   "name": "invai-front",
-  "version": "1.0.6",
+  "version": "1.0.7",
+  "accessibilityEvaluation": {
+    "app": "INVAI",
+    "urlApp": "https://intranet.caib.es/invaifront",
+    "dateText": "20 de febrer de 2027",
+    "dateTextAntReview": "",
+    "score": "8.9",
+    "level": "AA",
+    "complianceStatus": "Parcialment conforme"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config=proxy.dev.conf.json",
@@ -17,7 +26,10 @@
     "watch": "ng build --watch --configuration=development",
     "test": "ng test",
     "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "help:check": "node scripts/help/check.mjs",
+    "help:pending": "node scripts/help/pending.mjs",
+    "help:screenshots": "playwright test --project=help-screenshots"
   },
   "prettier": {
     "printWidth": 100,

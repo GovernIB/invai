@@ -1,0 +1,35 @@
+app-application-documentation-email-table {
+  display: block;
+}
+
+.application-documentation-email-table {
+  .p-datatable-table {
+    min-width: 100%;
+  }
+
+  :is(th, td) {
+    vertical-align: middle;
+  }
+
+  .application-documentation-email-table__selection {
+    width: 3rem;
+    min-width: 3rem;
+    text-align: center;
+  }
+
+  // Wide enough for the version select of a chosen document.
+  .application-documentation-email-table__version {
+    width: 11rem;
+    min-width: 9rem;
+  }
+
+  .application-documentation-email-table__selectable {
+    cursor: pointer;
+  }
+
+  // The chosen documents keep the selected catalog treatment over the stripes and the hover.
+  .application-documentation-email-table__selected > td {
+    background: var(--p-highlight-background);
+    color: var(--p-highlight-color);
+  }
+}

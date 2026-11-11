@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -35,6 +36,7 @@ export type LayerDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayerDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceDevelopment;
   visible = model(false);
   form = input.required<LayerFormGroup>();
   mode = input.required<LayerDialogMode>();

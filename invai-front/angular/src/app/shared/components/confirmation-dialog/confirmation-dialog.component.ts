@@ -5,6 +5,7 @@ import { Dialog } from 'primeng/dialog';
 import {
   CONFIRMATION_DIALOG_CANCEL_ARIA_LABEL,
   CONFIRMATION_DIALOG_CANCEL_LABEL,
+  CONFIRMATION_DIALOG_CLOSE_ARIA_LABEL,
   CONFIRMATION_DIALOG_CONFIRM_ARIA_LABEL,
   CONFIRMATION_DIALOG_CONFIRM_LABEL,
 } from './confirmation-dialog.i18n';
@@ -32,6 +33,8 @@ export class ConfirmationDialogComponent {
   confirmOutlined = input(true);
   width = input('24rem');
   cancelOnHide = input(true);
+  /** Name of the ✕ when closing does not cancel (`cancelOnHide` false); otherwise it cancels. */
+  closeAriaLabel = input(CONFIRMATION_DIALOG_CLOSE_ARIA_LABEL);
   closeOnConfirm = input(true);
   pending = input(false);
   severity = input<

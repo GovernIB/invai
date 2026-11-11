@@ -4,13 +4,11 @@ import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 
 import { ApplicationDocumentMimeTypeCatalogService } from './application-document-mime-type-catalog.service';
-import { ApplicationDocumentSectionCatalogService } from './application-document-section-catalog.service';
 import { ApplicationDocumentStatusCatalogService } from './application-document-status-catalog.service';
 
 type Catalog = { getAll(): Observable<unknown[]> };
 
 const CATALOGS: { name: string; url: string; service: new (...args: never[]) => Catalog }[] = [
-  { name: 'sections', url: '/invaiback/app-section', service: ApplicationDocumentSectionCatalogService },
   { name: 'statuses', url: '/invaiback/document-status', service: ApplicationDocumentStatusCatalogService },
   { name: 'file formats', url: '/invaiback/mime-type', service: ApplicationDocumentMimeTypeCatalogService },
 ];

@@ -1,8 +1,31 @@
+// Markers PrimeNG replaces with a number. They go in as placeholders: written inside a
+// translation, Angular would read the braces as its own syntax and drop them.
+const COUNT = '{0}';
+const STAR = '{star}';
+const PAGE = '{page}';
+
 export const primengLocale = {
   firstDayOfWeek: 1,
   today: $localize`Avui`,
   clear: $localize`Neteja`,
   emptyFilterMessage: $localize`No s'han trobat resultats`,
+  // Messages of selects, multiselects and autocompletes; most only reach screen readers.
+  emptyMessage: $localize`No s'han trobat resultats`,
+  emptySearchMessage: $localize`No s'han trobat resultats`,
+  searchMessage: $localize`${COUNT}:count: resultats disponibles`,
+  selectionMessage: $localize`${COUNT}:count: elements seleccionats`,
+  emptySelectionMessage: $localize`Cap element seleccionat`,
+  // Buttons of the date picker.
+  chooseYear: $localize`Tria l'any`,
+  chooseMonth: $localize`Tria el mes`,
+  chooseDate: $localize`Tria la data`,
+  prevDecade: $localize`Dècada anterior`,
+  nextDecade: $localize`Dècada següent`,
+  prevYear: $localize`Any anterior`,
+  nextYear: $localize`Any següent`,
+  prevMonth: $localize`Mes anterior`,
+  nextMonth: $localize`Mes següent`,
+  weekHeader: $localize`Setm.`,
   dayNames: [
     $localize`Diumenge`,
     $localize`Dilluns`,
@@ -38,6 +61,16 @@ export const primengLocale = {
     $localize`Desembre `,
   ],
 
+  dayNamesShort: [
+    $localize`Dg`,
+    $localize`Dl`,
+    $localize`Dt`,
+    $localize`Dc`,
+    $localize`Dj`,
+    $localize`Dv`,
+    $localize`Ds`,
+  ],
+
   monthNamesShort: [
     $localize`Ge `,
     $localize`Feb `,
@@ -52,4 +85,65 @@ export const primengLocale = {
     $localize`Nov `,
     $localize`Des `,
   ],
+
+  // Accessible names and announcements of every PrimeNG component. PrimeNG replaces the whole
+  // `aria` object instead of merging it, so every key it defines is listed, used by INVAI or not:
+  // a missing one would leave its control without a name.
+  aria: {
+    trueLabel: $localize`Cert`,
+    falseLabel: $localize`Fals`,
+    nullLabel: $localize`Sense seleccionar`,
+    star: $localize`1 estrella`,
+    stars: $localize`${STAR}:star: estrelles`,
+    selectAll: $localize`S'han seleccionat tots els elements`,
+    unselectAll: $localize`S'han desseleccionat tots els elements`,
+    close: $localize`Tanca`,
+    previous: $localize`Anterior`,
+    next: $localize`Següent`,
+    navigation: $localize`Navegació`,
+    scrollTop: $localize`Torna a dalt`,
+    moveTop: $localize`Mou al principi`,
+    moveUp: $localize`Mou amunt`,
+    moveDown: $localize`Mou avall`,
+    moveBottom: $localize`Mou al final`,
+    moveToTarget: $localize`Mou a la destinació`,
+    moveToSource: $localize`Mou a l'origen`,
+    moveAllToTarget: $localize`Mou-ho tot a la destinació`,
+    moveAllToSource: $localize`Mou-ho tot a l'origen`,
+    pageLabel: $localize`Pàgina ${PAGE}:page:`,
+    firstPageLabel: $localize`Primera pàgina`,
+    lastPageLabel: $localize`Última pàgina`,
+    nextPageLabel: $localize`Pàgina següent`,
+    prevPageLabel: $localize`Pàgina anterior`,
+    rowsPerPageLabel: $localize`Files per pàgina`,
+    previousPageLabel: $localize`Pàgina anterior`,
+    jumpToPageDropdownLabel: $localize`Ves a la pàgina`,
+    jumpToPageInputLabel: $localize`Número de pàgina`,
+    selectRow: $localize`Fila seleccionada`,
+    unselectRow: $localize`Fila desseleccionada`,
+    expandRow: $localize`Fila desplegada`,
+    collapseRow: $localize`Fila plegada`,
+    showFilterMenu: $localize`Mostra el menú del filtre`,
+    hideFilterMenu: $localize`Amaga el menú del filtre`,
+    filterOperator: $localize`Operador del filtre`,
+    filterConstraint: $localize`Condició del filtre`,
+    editRow: $localize`Edita la fila`,
+    saveEdit: $localize`Desa l'edició`,
+    cancelEdit: $localize`Cancel·la l'edició`,
+    listView: $localize`Vista de llista`,
+    gridView: $localize`Vista de quadrícula`,
+    slide: $localize`Diapositiva`,
+    slideNumber: '{slideNumber}',
+    zoomImage: $localize`Amplia la imatge`,
+    zoomIn: $localize`Amplia`,
+    zoomOut: $localize`Redueix`,
+    rotateRight: $localize`Gira a la dreta`,
+    rotateLeft: $localize`Gira a l'esquerra`,
+    listLabel: $localize`Llista d'opcions`,
+    selectColor: $localize`Tria un color`,
+    removeLabel: $localize`Elimina`,
+    browseFiles: $localize`Examina els fitxers`,
+    maximizeLabel: $localize`Maximitza`,
+    minimizeLabel: $localize`Restaura la mida`,
+  },
 };

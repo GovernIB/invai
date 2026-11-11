@@ -4,7 +4,7 @@ import { ActionParams } from '@models/table.model';
 import { MenuItem } from 'primeng/api';
 
 import { ApplicationAttachment, ApplicationLink } from '../../../../application-documentation.model';
-import { DOCUMENT_SECTIONS, DOCUMENT_STATUSES, documentRow } from '../../../../application-documentation.testing';
+import { DOCUMENT_STATUSES, documentRow } from '../../../../application-documentation.testing';
 import { ApplicationAttachmentsTable } from './application-attachments-table';
 import {
   APPLICATION_ATTACHMENTS_COLUMNS,
@@ -25,7 +25,6 @@ const attachment = (id: number, title: string, statusIndex: number): Application
   documentRow({
     id,
     title,
-    section: DOCUMENT_SECTIONS[1],
     subcategory: null,
     versionLabel: '1.0',
     status: DOCUMENT_STATUSES[statusIndex],
@@ -35,7 +34,7 @@ const LINK: ApplicationLink = {
   id: 9,
   title: 'Swagger',
   description: null,
-  section: { id: 9, code: 'INTEGRATIONS', name: 'Integracions', nameEs: 'Integraciones' },
+  category: { id: 9, name: 'Integracions', nameEs: 'Integraciones', parentId: null },
   url: 'https://swagger.io',
   deletedAt: null,
 };
@@ -99,7 +98,6 @@ describe('Application documentation tables', () => {
     const rows = [...root().querySelectorAll("table[aria-label=\"Adjunts de l'aplicació\"] tbody tr")];
     expect([...rows[0].querySelectorAll('td')].map((cell) => cell.textContent?.trim())).toEqual([
       'Manual',
-      'Sistemes',
       'PDF',
       'Tècnica',
       '—',
@@ -107,7 +105,9 @@ describe('Application documentation tables', () => {
       'Vigent',
       '',
     ]);
-    expect(rows[2].querySelectorAll('td')[2].textContent?.trim()).toBe('—');
+    expect(rows[2].querySelectorAll('td')[1].textContent?.trim()).toBe('—');
+    // A document is no longer filed under a section.
+    expect(root().querySelector("table[aria-label=\"Adjunts de l'aplicació\"] thead")?.textContent).not.toContain('Secció');
     expect(rows.map((row) => row.querySelector('.p-tag')?.className)).toEqual([
       expect.stringContaining('invai-status-tag--active'),
       expect.stringContaining('application-attachment-state-tag--review'),
@@ -128,10 +128,11 @@ describe('Application documentation tables', () => {
     ]);
   });
 
-  it('names the section of a link as the back-end does', () => {
-    const row = root().querySelector('table[aria-label="Enllaços de l\'aplicació"] tbody tr')!;
+  it('names the category of a link as the back-end does, in its own column', () => {
+    const table = root().querySelector('table[aria-label="Enllaços de l\'aplicació"]')!;
 
-    expect(row.textContent).toContain('Integracions');
+    expect(table.querySelector('thead')?.textContent).toContain('Categoria');
+    expect(table.querySelector('tbody tr')?.textContent).toContain('Integracions');
   });
 
   it('offers deleting only with permission to manage the application', async () => {

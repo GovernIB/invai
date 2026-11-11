@@ -28,10 +28,11 @@ export function isStructuredBadRequest(
   );
 }
 
-// Statuses whose structured body carries a localized message meant for the user.
-const USER_MESSAGE_STATUSES = new Set([400, 504]);
+// Statuses whose structured body carries a localized message meant for the user: a refused
+// request, a mail server that didn't accept a message (502) and a timeout (504).
+const USER_MESSAGE_STATUSES = new Set([400, 502, 504]);
 
-/** Reads the localized backend message of a structured 400 or 504 (timeout) response. */
+/** Reads the localized backend message of a structured 400, 502 or 504 response. */
 export function readApiErrorMessage(error: unknown): string | null {
   return error instanceof HttpErrorResponse &&
     USER_MESSAGE_STATUSES.has(error.status) &&

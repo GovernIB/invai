@@ -34,18 +34,20 @@
         <div class="invai-filter-field--compact">
           <p-floatlabel class="w-full">
             <p-select
-              ariaLabelledBy="application-links-filter-section-label"
-              formControlName="sectionId"
-              inputId="application-links-filter-section"
+              ariaLabelledBy="application-links-filter-category-label"
+              formControlName="categoryId"
+              inputId="application-links-filter-category"
               optionLabel="label"
-              optionValue="value"
+              optionValue="id"
               styleClass="w-full"
-              [loading]="isSectionsLoading()"
-              [options]="sectionOptions()"
+              [ariaFilterLabel]="texts.categoryFilter"
+              [filter]="true"
+              [loading]="isCategoriesLoading()"
+              [options]="categories()"
               [showClear]="true"
             />
-            <label id="application-links-filter-section-label" for="application-links-filter-section">
-              {{ common.sectionFilter }}
+            <label id="application-links-filter-category-label" for="application-links-filter-category">
+              {{ texts.categoryFilter }}
             </label>
           </p-floatlabel>
         </div>
@@ -69,13 +71,13 @@
   <app-application-link-dialog
     [(visible)]="isDialogVisible"
     [canEdit]="canManage()"
+    [category]="selectedCategory()"
+    [categoryOptions]="dialogCategoryOptions()"
     [form]="entityForm"
+    [isCategoriesLoading]="isCategoriesLoading()"
     [isDeleting]="isDeleting()"
     [isSaving]="isSaving()"
-    [isSectionsLoading]="isSectionsLoading()"
     [mode]="dialogMode()"
-    [section]="selectedSection()"
-    [sectionOptions]="sectionOptions()"
     (cancelEdit)="cancelEdit()"
     (closed)="closeDialog()"
     (deactivate)="deactivateSelected()"

@@ -27,7 +27,7 @@
       [formGroup]="form()"
       (ngSubmit)="onSubmit()"
     >
-      <div>
+      <div class="application-attachment-field--full">
         <label for="application-attachment-title">{{ texts.labels.title }}</label>
         <input
           id="application-attachment-title"
@@ -43,30 +43,6 @@
         @if (isInvalid(form().controls.title)) {
           <p id="application-attachment-title-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
             {{ errorOf(form().controls.title, titleMaxLength) }}
-          </p>
-        }
-      </div>
-
-      <div>
-        <label id="application-attachment-section-label" for="application-attachment-section">
-          {{ texts.labels.section }}
-        </label>
-        <p-select
-          appendTo="body"
-          ariaLabelledBy="application-attachment-section-label"
-          formControlName="sectionId"
-          inputId="application-attachment-section"
-          optionLabel="label"
-          optionValue="value"
-          styleClass="w-full"
-          [invalid]="isInvalid(form().controls.sectionId)"
-          [loading]="isCatalogsLoading()"
-          [options]="sectionOptions()"
-          [pt]="selectPassThrough(form().controls.sectionId, 'application-attachment-section')"
-        />
-        @if (isInvalid(form().controls.sectionId)) {
-          <p id="application-attachment-section-error" class="mb-0 mt-1 text-sm text-red-600" role="alert">
-            {{ common.required }}
           </p>
         }
       </div>

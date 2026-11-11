@@ -3,18 +3,16 @@ import { PageParams } from '@models/page.model';
 
 // Documentation of an application: the documents attached to it, served by
 // application/documentation, and links to external resources, served by
-// application/documentation/link.
+// application/documentation/link. Both are filed under a document category, on which the
+// permissions of the roles are set.
 
-// Entry of the app-section or document-status catalog.
+// Entry of the document-status catalog.
 export interface ApplicationDocumentationCatalogEntry {
   id: number;
   code: string;
   name: string | null;
   nameEs: string | null;
 }
-
-// Section of the application a document or a link is filed under (app-section).
-export type ApplicationDocumentSection = ApplicationDocumentationCatalogEntry;
 
 // Lifecycle of a document (document-status), unrelated to its deletion.
 export type ApplicationDocumentStatus = ApplicationDocumentationCatalogEntry;
@@ -53,7 +51,6 @@ export interface ApplicationDocumentCategory {
 export interface ApplicationAttachment {
   id: number;
   title: string;
-  section: ApplicationDocumentSection;
   mimeType: ApplicationDocumentFormat | null;
   category: ApplicationDocumentCategory;
   subcategory: ApplicationDocumentCategory | null;
@@ -88,7 +85,6 @@ export interface ApplicationDocument {
   id: number;
   applicationId: number;
   title: string;
-  section: ApplicationDocumentSection;
   category: ApplicationDocumentCategory;
   subcategory: ApplicationDocumentCategory | null;
   status: ApplicationDocumentStatus;
@@ -96,12 +92,13 @@ export interface ApplicationDocument {
   attachments: ApplicationDocumentVersion[];
 }
 
-// `categoryId` is the most specific category: the subcategory when there is one.
+// `categoryId` is always a category, never a subcategory; `subcategoryId` is one of its
+// subcategories, or null when the document only has a category.
 export interface ApplicationDocumentInput {
   applicationId: number;
   title: string;
-  sectionId: number;
   categoryId: number;
+  subcategoryId: number | null;
   statusId: number;
   versionLabel: string;
   changeNote?: string | null;
@@ -110,8 +107,8 @@ export interface ApplicationDocumentInput {
 
 export interface ApplicationDocumentUpdateInput {
   title: string;
-  sectionId: number;
   categoryId: number;
+  subcategoryId: number | null;
   statusId: number;
 }
 
@@ -127,12 +124,29 @@ export interface ApplicationDocumentFile {
   fileName: string;
 }
 
+// A file attached to an e-mail: one version of a document of the application.
+export interface ApplicationDocumentationEmailAttachment {
+  documentId: number;
+  versionId: number;
+}
+
+// Body of POST application/documentation/email. The back-end sends it from the address of
+// INVAI with the logged-in user as Reply-To, and only with documents the user can read.
+export interface ApplicationDocumentationEmailInput {
+  applicationId: number;
+  recipients: string[];
+  subject: string;
+  message: string | null;
+  attachments: ApplicationDocumentationEmailAttachment[];
+}
+
 // `search` matches the title of a document; `deleted` false keeps the documents not deleted.
+// The back-end only lists the documents of the categories the user can read.
 export interface ApplicationAttachmentPageParams extends PageParams {
   search?: string;
-  sectionId?: number;
   statusId?: number;
   categoryId?: number;
+  subcategoryId?: number;
   mimeTypeId?: number;
   deleted?: boolean;
 }
@@ -141,24 +155,25 @@ export interface ApplicationLink {
   id: number;
   title: string;
   description: string | null;
-  section: ApplicationDocumentSection;
+  category: ApplicationDocumentCategory;
   url: string;
   deletedAt: string | null;
 }
 
 // Body of PUT application/documentation/link/{id}; POST adds the `applicationId` of the link.
+// `categoryId` is always a category: a link has no subcategory.
 export interface ApplicationLinkInput {
   title: string;
   description: string | null;
-  sectionId: number;
+  categoryId: number;
   url: string;
 }
 
-// `quickSearch` matches the title, the description, the URL or the section of a link;
+// `quickSearch` matches the title, the description, the URL or the category of a link;
 // `deleted` false keeps the links not deleted.
 export interface ApplicationLinkPageParams extends PageParams {
   quickSearch?: string;
-  sectionId?: number;
+  categoryId?: number;
   deleted?: boolean;
 }
 

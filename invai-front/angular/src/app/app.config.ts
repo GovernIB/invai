@@ -44,6 +44,12 @@ export const appConfig: ApplicationConfig = {
       },
       overlayAppendTo: 'body',
       translation: primengLocale,
+      pt: {
+        // PrimeNG writes the arrow of every select as a button named «dropdown trigger», in English
+        // and outside the translations. It cannot take focus and the combobox already announces
+        // that it opens, so screen readers skip it.
+        select: { dropdown: { 'aria-hidden': 'true' } },
+      },
     }),
     provideMarkdown(),
     MessageService,

@@ -2,6 +2,7 @@
   styleClass="invai-dialog"
   [(visible)]="visible"
   [closable]="!pending()"
+  [closeAriaLabel]="cancelOnHide() ? cancelAriaLabel() : closeAriaLabel()"
   [closeOnEscape]="!pending()"
   [dismissableMask]="!pending()"
   [draggable]="false"

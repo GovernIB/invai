@@ -22,16 +22,16 @@ describe('ApplicationLinksService', () => {
 
   it('lists the links of an application with its filters, paging and sorting', () => {
     service
-      .getLinks(7, { page: 2, size: 10, sort: 'url,desc', quickSearch: '  wiki ', sectionId: 3, deleted: false })
+      .getLinks(7, { page: 2, size: 10, sort: 'url,desc', quickSearch: '  wiki ', categoryId: 3, deleted: false })
       .subscribe();
 
     const request = httpTesting.expectOne((req) => req.url === LINKS_URL);
     const params = request.request.params;
     expect(request.request.method).toBe('GET');
     expect(params.keys().sort()).toEqual(
-      ['applicationId', 'deleted', 'page', 'quickSearch', 'sectionId', 'size', 'sort'],
+      ['applicationId', 'categoryId', 'deleted', 'page', 'quickSearch', 'size', 'sort'],
     );
-    expect([params.get('applicationId'), params.get('quickSearch'), params.get('sectionId')]).toEqual(['7', 'wiki', '3']);
+    expect([params.get('applicationId'), params.get('quickSearch'), params.get('categoryId')]).toEqual(['7', 'wiki', '3']);
     expect([params.get('deleted'), params.get('page'), params.get('size'), params.get('sort')]).toEqual(
       ['false', '2', '10', 'url,desc'],
     );
@@ -47,7 +47,7 @@ describe('ApplicationLinksService', () => {
   });
 
   it('adds a link to an application, and changes and deletes it by its own id', () => {
-    const input = { title: 'Wiki', description: null, sectionId: 2, url: 'https://wiki.test' };
+    const input = { title: 'Wiki', description: null, categoryId: 2, url: 'https://wiki.test' };
 
     service.createLink(7, input).subscribe();
     const create = httpTesting.expectOne(LINKS_URL);

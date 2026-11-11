@@ -3,11 +3,24 @@
 @import url('tailwindcss');
 @import url('tailwindcss-primeui');
 @import url('primeicons/primeicons.css');
-@import url('github-markdown-css/github-markdown.css');
+@import url('github-markdown-css/github-markdown-light.css');
 
 html {
   scroll-behavior: smooth;
   font-size: var(--font-size);
+}
+
+// Help documents use the app font and follow its font-size switcher: github-markdown-css fixes
+// 16px and its own font stack.
+.markdown-body {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* Icon the help adds to links that open in a new tab (help-modal.ts). */
+.markdown-body a .pi-external-link {
+  margin-inline-start: 0.25em;
+  font-size: 0.75em;
 }
 
 .app-initial-loader {
@@ -185,6 +198,16 @@ html {
 
 .surface-table-bg .p-datatable-table th {
   background-color: var(--surface-50) !important;
+}
+
+// The field of a multiple autocomplete is a list, and the reset takes the padding of every list:
+// without it the field is lower than the other fields and its chips and text touch the border.
+.p-autocomplete-input-multiple {
+  padding: calc(var(--p-autocomplete-padding-y) / 2) var(--p-autocomplete-padding-x);
+}
+
+.p-autocomplete-input-multiple:has(.p-autocomplete-chip) {
+  padding-inline: calc(var(--p-autocomplete-padding-y) / 2);
 }
 
 .p-autocomplete.invai-composite-autocomplete {

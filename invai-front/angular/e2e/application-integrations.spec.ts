@@ -1,137 +1,62 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
+import {
+  CONNECTIONS_API,
+  type ConnectionRecord,
+  createConnection,
+  GRANTED_ROLE,
+  INTEGRATION_API,
+  MISSING_ROLE,
+  pickRoles,
+  pickSoffidPerson,
+  registerConnectionCleanup,
+  SOFFID_PERSON,
+} from './support/application-integrations';
+import { type DisposableApplication, expect, test } from './support/application.fixture';
+import type { CleanupRegistry } from './support/cleanup-registry';
+import { expectJsonResponse, failApiRequest, waitForApiResponse } from './support/http';
 import { selectOption } from './support/ui';
 
-test.use({ storageState: { cookies: [], origins: [] } });
-
-const pageOf = (content: unknown[]) => ({
-  content,
-  totalElements: content.length,
-  totalPages: 1,
-  last: true,
-  number: 0,
-});
-
-const CONNECTION = {
-  id: 1,
-  appIntegrationId: 13,
-  application: null,
-  externalSystem: { id: 2, name: 'Soffid', company: null, deletedAt: null },
-  technology: { id: 4, name: 'Spring Boot', layer: { id: 1, name: 'Backend', deletedAt: null }, deletedAt: null },
-  username: 'u00004',
-  requiredRoles: [
-    { id: 26, name: 'INV_ADMIN', description: null, system: 'SEYCON' },
-    { id: 33, name: 'INV_READ', description: null, system: 'SEYCON' },
-  ],
-  grantedRoles: [{ id: 26, name: 'INV_ADMIN', description: null, system: 'SEYCON' }],
-  rolesMismatch: true,
-  deletedAt: null,
-};
-
-interface IntegrationsMock {
-  connections: unknown[];
+interface IntegrationsTab {
+  connection: ConnectionRecord;
   listRequests: URL[];
   anchorPuts: unknown[];
   connectionPosts: unknown[];
-  connectionDeletes: string[];
-  failListing: boolean;
 }
 
-async function openApplication(page: Page, path: 'integrations' | 'data'): Promise<IntegrationsMock> {
-  const mock: IntegrationsMock = {
-    connections: [CONNECTION],
+// Opens the tab of the application with one connection whose required roles the Soffid person
+// only partly holds.
+async function openApplication(
+  page: Page,
+  cleanup: CleanupRegistry,
+  application: DisposableApplication,
+  path: 'integrations' | 'data',
+): Promise<IntegrationsTab> {
+  const connection = await createConnection(page, cleanup, application, [
+    GRANTED_ROLE,
+    MISSING_ROLE,
+  ]);
+  const tab: IntegrationsTab = {
+    connection,
     listRequests: [],
     anchorPuts: [],
     connectionPosts: [],
-    connectionDeletes: [],
-    failListing: false,
   };
-  let anchor = { id: 13, applicationId: 1, observation: null as string | null, deletedAt: null };
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const request = route.request();
+  page.on('request', (request) => {
     const url = new URL(request.url());
-    const path = url.pathname;
-    const method = request.method();
-    if (path.endsWith('/auth/me')) {
-      return route.fulfill({ json: { authenticated: true, username: 'integrations-test' } });
+    if (url.pathname === CONNECTIONS_API && request.method() === 'GET') {
+      tab.listRequests.push(url);
+    } else if (url.pathname === CONNECTIONS_API && request.method() === 'POST') {
+      tab.connectionPosts.push(request.postDataJSON());
+    } else if (
+      url.pathname === `${INTEGRATION_API}/${application.appIntegrationId}` &&
+      request.method() === 'PUT'
+    ) {
+      tab.anchorPuts.push(request.postDataJSON());
     }
-    if (path.endsWith('/application/1')) {
-      return route.fulfill({
-        json: {
-          id: 1,
-          code: 'TEST',
-          name: 'Integracions test',
-          status: 'ACTIVE',
-          appIntegrationId: 13,
-          missingIntegrationData: mock.connections.length === 0,
-        },
-      });
-    }
-    if (path.endsWith('/application/integration/13')) {
-      if (method === 'PUT') {
-        const body = request.postDataJSON();
-        mock.anchorPuts.push(body);
-        anchor = { ...anchor, observation: body.observation };
-      }
-      return route.fulfill({ json: anchor });
-    }
-    if (path.endsWith('/application/integration-connection') && method === 'GET') {
-      mock.listRequests.push(url);
-      if (mock.failListing) {
-        mock.failListing = false;
-        return route.fulfill({
-          status: 400,
-          json: {
-            error: 'Error',
-            message: "No s'ha pogut consultar els rols atorgats a aquest usuari en aquest moment.",
-          },
-        });
-      }
-      return route.fulfill({ json: pageOf(mock.connections) });
-    }
-    if (path.endsWith('/application/integration-connection') && method === 'POST') {
-      const body = request.postDataJSON();
-      mock.connectionPosts.push(body);
-      const created = { ...CONNECTION, id: 2, username: body.username, rolesMismatch: false };
-      mock.connections = [...mock.connections, created];
-      return route.fulfill({ status: 201, json: { ...created, requiredRoles: null, grantedRoles: null } });
-    }
-    if (/\/application\/integration-connection\/\d+$/.test(path) && method === 'DELETE') {
-      mock.connectionDeletes.push(path);
-      mock.connections = [];
-      return route.fulfill({ status: 204 });
-    }
-    if (path.endsWith('/technology')) {
-      return route.fulfill({ json: pageOf([CONNECTION.technology]) });
-    }
-    if (path.endsWith('/external-system')) {
-      return route.fulfill({ json: pageOf([CONNECTION.externalSystem]) });
-    }
-    if (path.endsWith('/person/soffid-search')) {
-      return route.fulfill({
-        json: pageOf([
-          {
-            id: null,
-            company: null,
-            firstName: 'Maria',
-            lastName: 'Tur',
-            email: 'maria@caib.es',
-            personalCaib: true,
-            deletedAt: null,
-            userName: 'u00009',
-          },
-        ]),
-      });
-    }
-    if (path.endsWith('/security-role/soffid-search')) {
-      return route.fulfill({
-        json: pageOf([{ id: null, roleId: 26, name: 'INV_ADMIN', system: 'SEYCON', description: null }]),
-      });
-    }
-    return route.fulfill({ json: pageOf([]) });
   });
-  await page.goto(`/aplicacions/1/${path}`);
-  return mock;
+  await page.goto(`/aplicacions/${application.id}/${path}`);
+  return tab;
 }
 
 const rows = (page: Page) => page.locator('app-application-integrations-table tbody tr');
@@ -140,17 +65,25 @@ const dialogTitled = (page: Page, title: string) =>
   page.getByRole('dialog').filter({ has: page.getByRole('heading', { name: title }) });
 
 // The Dades tab content is covered by application-data.spec.ts.
-test('shows the Dades and Integracions tabs', async ({ page }) => {
-  await openApplication(page, 'data');
+test('shows the Dades and Integracions tabs', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}) => {
+  await openApplication(page, cleanupRegistry, disposableApplication, 'data');
 
-  await expect(page.locator('.application-detail-tab')).toHaveCount(8);
+  await expect(page.locator('.application-detail-tab')).toHaveCount(9);
   await expect(page.locator('.application-detail-tab').nth(6)).toHaveText('Dades');
   await expect(page.locator('.application-detail-tab').nth(7)).toHaveText('Integracions');
   await expect(page.getByRole('heading', { name: 'Dades', exact: true })).toBeVisible();
 });
 
-test('lists the backend connections with their role comparison', async ({ page }, testInfo) => {
-  const mock = await openApplication(page, 'integrations');
+test('lists the backend connections with their role comparison', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const tab = await openApplication(page, cleanupRegistry, disposableApplication, 'integrations');
 
   await expect(rows(page)).toHaveCount(1);
   await expect(page.locator('app-application-integrations-table thead th')).toHaveText([
@@ -162,31 +95,38 @@ test('lists the backend connections with their role comparison', async ({ page }
   ]);
   await expect(rows(page).first()).toContainText('Soffid');
   await expect(rows(page).first()).toContainText('Sistema extern');
-  await expect(rows(page).first()).toContainText('INV_ADMIN, INV_READ');
+  // The back-end lists the required roles by their Soffid identifier.
+  await expect(rows(page).first()).toContainText(`${MISSING_ROLE.name}, ${GRANTED_ROLE.name}`);
   await expect(
-    rows(page)
-      .first()
-      .getByRole('img', {
-        name: 'Els rols atorgats a Soffid no coincideixen amb els rols requerits.',
-      }),
+    rows(page).first().getByRole('img', {
+      name: 'Els rols atorgats a Soffid no coincideixen amb els rols requerits.',
+    }),
   ).toBeVisible();
-  expect(mock.listRequests[0].searchParams.get('appIntegrationId')).toBe('13');
-  expect(mock.listRequests[0].searchParams.get('statusId')).toBe('1');
+  expect(tab.listRequests[0].searchParams.get('appIntegrationId')).toBe(
+    String(disposableApplication.appIntegrationId),
+  );
+  expect(tab.listRequests[0].searchParams.get('statusId')).toBe('1');
   await page.screenshot({ path: testInfo.outputPath('integrations-view.png'), fullPage: true });
 
   await page.getByRole('columnheader', { name: "Usuari d'integració" }).click();
-  await expect.poll(() => mock.listRequests.at(-1)?.searchParams.getAll('sort')).toEqual(['username,asc']);
+  await expect
+    .poll(() => tab.listRequests.at(-1)?.searchParams.getAll('sort'))
+    .toEqual(['username,asc']);
 
   await rows(page).first().dblclick();
   const dialog = dialogTitled(page, 'Consultar connexió');
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByLabel("Usuari d'integració")).toHaveValue('u00004');
+  await expect(dialog.getByLabel("Usuari d'integració")).toHaveValue(SOFFID_PERSON.userName);
   await expect(dialog.getByLabel('Coincidència de rols')).toHaveValue('No coincideixen');
   await dialog.screenshot({ path: testInfo.outputPath('integrations-connection-view.png') });
 });
 
-test('saves the observations through the integration anchor', async ({ page }) => {
-  const mock = await openApplication(page, 'integrations');
+test('saves the observations through the integration anchor', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}) => {
+  const tab = await openApplication(page, cleanupRegistry, disposableApplication, 'integrations');
   await expect(rows(page)).toHaveCount(1);
 
   await page.getByRole('button', { name: 'Editar Integracions', exact: true }).click();
@@ -195,10 +135,15 @@ test('saves the observations through the integration anchor', async ({ page }) =
   await editor.pressSequentially('Nota de prova');
   await page.getByRole('button', { name: 'Desar els canvis de Integracions' }).click();
 
-  await expect(page.getByText("S'han desat correctament els canvis de Integracions.")).toBeVisible();
+  await expect(
+    page.getByText("S'han desat correctament els canvis de Integracions."),
+  ).toBeVisible();
   // Quill stores typed spaces as non-breaking spaces.
-  expect(mock.anchorPuts).toEqual([
-    { applicationId: 1, observation: expect.stringMatching(/^<p>Nota(&nbsp;| )de(&nbsp;| )prova<\/p>$/) },
+  expect(tab.anchorPuts).toEqual([
+    {
+      applicationId: disposableApplication.id,
+      observation: expect.stringMatching(/^<p>Nota(&nbsp;| )de(&nbsp;| )prova<\/p>$/),
+    },
   ]);
   await expect(page.locator('p-editor')).toHaveCount(0);
   await expect(page.locator('.invai-form-static-value--rich')).toContainText('Nota de prova');
@@ -206,8 +151,11 @@ test('saves the observations through the integration anchor', async ({ page }) =
 
 test('adds a connection to an external system and deactivates another one', async ({
   page,
+  cleanupRegistry,
+  disposableApplication,
 }, testInfo) => {
-  const mock = await openApplication(page, 'integrations');
+  test.setTimeout(90_000);
+  const tab = await openApplication(page, cleanupRegistry, disposableApplication, 'integrations');
   await expect(rows(page)).toHaveCount(1);
   await page.getByRole('button', { name: 'Editar Integracions', exact: true }).click();
 
@@ -217,44 +165,56 @@ test('adds a connection to an external system and deactivates another one', asyn
   await dialog.getByRole('radio', { name: 'Sistema extern' }).check();
   await selectOption(page, 'application-integration-dialog-external-system', 'Soffid');
   await selectOption(page, 'application-integration-dialog-technology', 'Spring Boot');
-
-  const user = page.locator('#application-integration-dialog-soffid-person');
-  await user.pressSequentially('mar');
-  await page.getByRole('option', { name: /Maria Tur/ }).click();
-
-  await page.locator('#application-integration-dialog-roles').focus();
-  await page.keyboard.press('Enter');
-  await page.getByRole('option', { name: 'INV_ADMIN — SEYCON' }).click();
-  await page.keyboard.press('Escape');
+  await pickSoffidPerson(page);
+  await pickRoles(page, GRANTED_ROLE);
   await page.screenshot({ path: testInfo.outputPath('integrations-create.png'), fullPage: true });
 
+  const createPromise = waitForApiResponse(page, 'POST', CONNECTIONS_API);
   await dialog.getByRole('button', { name: 'Afegeix la connexió' }).click();
+  const created = await expectJsonResponse<{ id: number }>(await createPromise);
+  registerConnectionCleanup(page, cleanupRegistry, created.id);
   await expect(dialog).toBeHidden();
-  expect(mock.connectionPosts).toEqual([
+  expect(tab.connectionPosts).toEqual([
     {
-      appIntegrationId: 13,
+      appIntegrationId: disposableApplication.appIntegrationId,
       applicationId: null,
-      externalSystemId: 2,
-      technologyId: 4,
-      username: 'u00009',
-      requiredRoleIds: [26],
+      externalSystemId: expect.any(Number),
+      technologyId: expect.any(Number),
+      username: SOFFID_PERSON.userName,
+      requiredRoleIds: [GRANTED_ROLE.roleId],
     },
   ]);
   await expect(rows(page)).toHaveCount(2);
 
-  await rows(page).first().getByRole('button', { name: 'Obre les accions del registre' }).click();
+  const deletePromise = waitForApiResponse(
+    page,
+    'DELETE',
+    `${CONNECTIONS_API}/${tab.connection.id}`,
+  );
+  const existingRow = rows(page).filter({ hasText: MISSING_ROLE.name });
+  await existingRow.getByRole('button', { name: 'Obre les accions del registre' }).click();
   await page.getByRole('menuitem', { name: 'Dona de baixa' }).click();
   await page.getByRole('button', { name: 'Confirma la baixa de la connexió' }).click();
-  await expect.poll(() => mock.connectionDeletes).toEqual(['/invaiback/application/integration-connection/1']);
+  expect((await deletePromise).ok()).toBe(true);
   await expect(rows(page)).toHaveCount(1);
 });
 
 // A Soffid outage no longer fails the list (rows come back with rolesUnavailable); this covers any
 // other structured error on the listing.
-test('reports a listing error inline and recovers on retry', async ({ page }) => {
-  const mock = await openApplication(page, 'integrations');
+test('reports a listing error inline and recovers on retry', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}) => {
+  await openApplication(page, cleanupRegistry, disposableApplication, 'integrations');
   await expect(rows(page)).toHaveCount(1);
-  mock.failListing = true;
+  await failApiRequest(page, 'GET', CONNECTIONS_API, {
+    status: 400,
+    json: {
+      error: 'Error',
+      message: "No s'ha pogut consultar els rols atorgats a aquest usuari en aquest moment.",
+    },
+  });
 
   await page.getByRole('columnheader', { name: 'Tecnologia' }).click();
   await expect(page.getByRole('alert')).toHaveText(

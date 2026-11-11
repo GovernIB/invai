@@ -1530,43 +1530,43 @@
       <trans-unit id="4768286436551152077" datatype="html">
         <source>Ctrl + K</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.html</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.html</context>
           <context context-type="linenumber">16,17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5315782073930690406" datatype="html">
         <source>Centre d&apos;ajuda</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">1</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">2</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9144802843265396593" datatype="html">
         <source>Cerca en tota l&apos;ajuda</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">2</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3700544988914475699" datatype="html">
         <source>Temes d&apos;ajuda</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3837851089154424816" datatype="html">
         <source>Cercar en tota l&apos;ajuda...</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9115321636464642612" datatype="html">
         <source>No s&apos;han trobat resultats</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">7</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
@@ -1580,8 +1580,78 @@
       <trans-unit id="7315584262890229466" datatype="html">
         <source>Seleccioneu un tema d&apos;ajuda a la llista de l&apos;esquerra</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">5</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6017411832613633294" datatype="html">
+        <source>(s&apos;obre en una pestanya nova)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4030901574723894119" datatype="html">
+        <source>Tema obert</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8044125571857243326" datatype="html">
+        <source>1 tema trobat</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9088238858875426694" datatype="html">
+        <source><x id="count" equiv-text="count"/> temes trobats</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8232870802096540067" datatype="html">
+        <source>Tanca el centre d&apos;ajuda</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8643514409263022518" datatype="html">
+        <source>Carregant els temes d&apos;ajuda</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5538647063908320372" datatype="html">
+        <source>No s&apos;han pogut carregar els temes d&apos;ajuda.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7150460412241622427" datatype="html">
+        <source>Encara no hi ha temes d&apos;ajuda.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3448102828786452439" datatype="html">
+        <source>Carregant el tema d&apos;ajuda</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1785236987187464535" datatype="html">
+        <source>No s&apos;ha pogut carregar el tema d&apos;ajuda.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2932353828576119109" datatype="html">
@@ -12642,6 +12712,9 @@
       <trans-unit id="documentCategoryPermissionsFullAccess" datatype="html">
         <source>Accés total</source>
       </trans-unit>
+      <trans-unit id="documentCategoryPermissionsEmpty" datatype="html">
+        <source>Cap rol de l&apos;aplicació té permisos en aquesta categoria.</source>
+      </trans-unit>
       <trans-unit id="documentCategoryPermissionsCheckbox" datatype="html">
         <source><x id="permission" equiv-text="permission"/> per a <x id="role" equiv-text="role"/></source>
       </trans-unit>
@@ -12679,7 +12752,10 @@
         <source>Permisos d&apos;accés</source>
       </trans-unit>
       <trans-unit id="documentCategoryDetailPermissionsInfo" datatype="html">
-        <source>Defineix què pot fer cada rol amb els documents d&apos;aquesta categoria. Les subcategories hereten aquests permisos, excepte si es personalitzen.</source>
+        <source>Defineix què pot fer cada rol amb els documents d&apos;aquesta categoria i de les seves subcategories. Una categoria nova només dona permís de lectura a cada rol.</source>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailPermissionsInactive" datatype="html">
+        <source>Els permisos només es poden consultar i modificar en les categories actives.</source>
       </trans-unit>
       <trans-unit id="documentCategoryDetailSave" datatype="html">
         <source>Desa</source>
@@ -12738,9 +12814,6 @@
       <trans-unit id="applicationAttachmentsColumnTitle" datatype="html">
         <source>Títol</source>
       </trans-unit>
-      <trans-unit id="applicationAttachmentsColumnSection" datatype="html">
-        <source>Secció</source>
-      </trans-unit>
       <trans-unit id="applicationAttachmentsColumnDocumentType" datatype="html">
         <source>Tipus doc.</source>
       </trans-unit>
@@ -12762,8 +12835,8 @@
       <trans-unit id="applicationLinksColumnDescription" datatype="html">
         <source>Descripció</source>
       </trans-unit>
-      <trans-unit id="applicationLinksColumnSection" datatype="html">
-        <source>Secció</source>
+      <trans-unit id="applicationLinksColumnCategory" datatype="html">
+        <source>Categoria</source>
       </trans-unit>
       <trans-unit id="applicationLinksColumnUrl" datatype="html">
         <source>URL</source>
@@ -12773,9 +12846,6 @@
       </trans-unit>
       <trans-unit id="applicationDocumentationInfoSummary" datatype="html">
         <source>Informació</source>
-      </trans-unit>
-      <trans-unit id="applicationDocumentationExportUnavailable" datatype="html">
-        <source>L&apos;exportació encara no està implementada.</source>
       </trans-unit>
       <trans-unit id="applicationDocumentationActionView" datatype="html">
         <source>Consulta</source>
@@ -12788,9 +12858,6 @@
       </trans-unit>
       <trans-unit id="applicationDocumentationActionsHeader" datatype="html">
         <source>Accions</source>
-      </trans-unit>
-      <trans-unit id="applicationDocumentationFilterSection" datatype="html">
-        <source>Secció</source>
       </trans-unit>
       <trans-unit id="applicationDocumentationRequired" datatype="html">
         <source>Camp obligatori</source>
@@ -12836,9 +12903,6 @@
       </trans-unit>
       <trans-unit id="applicationAttachmentsAddAriaLabel" datatype="html">
         <source>Afegeix un adjunt</source>
-      </trans-unit>
-      <trans-unit id="applicationAttachmentsExportAriaLabel" datatype="html">
-        <source>Exporta els adjunts</source>
       </trans-unit>
       <trans-unit id="applicationAttachmentsColumnsAriaLabel" datatype="html">
         <source>Columnes dels adjunts</source>
@@ -12898,7 +12962,7 @@
         <source>No s&apos;han pogut carregar les categories documentals.</source>
       </trans-unit>
       <trans-unit id="applicationAttachmentCatalogsLoadError" datatype="html">
-        <source>No s&apos;han pogut carregar les seccions, els estats i els formats dels documents.</source>
+        <source>No s&apos;han pogut carregar els estats i els formats dels documents.</source>
       </trans-unit>
       <trans-unit id="applicationAttachmentDeleteDialogTitle" datatype="html">
         <source>Eliminar l&apos;adjunt?</source>
@@ -12947,9 +13011,6 @@
       </trans-unit>
       <trans-unit id="applicationAttachmentDialogTitleLabel" datatype="html">
         <source>Títol</source>
-      </trans-unit>
-      <trans-unit id="applicationAttachmentDialogSection" datatype="html">
-        <source>Secció</source>
       </trans-unit>
       <trans-unit id="applicationAttachmentDialogFile" datatype="html">
         <source>Fitxer</source>
@@ -13000,7 +13061,7 @@
         <source>Enllaços</source>
       </trans-unit>
       <trans-unit id="applicationLinksQuickSearchPlaceholder" datatype="html">
-        <source>Cerca per títol, descripció, URL o secció</source>
+        <source>Cerca per títol, descripció, URL o categoria</source>
       </trans-unit>
       <trans-unit id="applicationLinksQuickSearchAriaLabel" datatype="html">
         <source>Cerca ràpida d&apos;enllaços</source>
@@ -13013,6 +13074,9 @@
       </trans-unit>
       <trans-unit id="applicationLinksFiltersAriaLabel" datatype="html">
         <source>Filtres dels enllaços</source>
+      </trans-unit>
+      <trans-unit id="applicationLinksFilterCategory" datatype="html">
+        <source>Categoria</source>
       </trans-unit>
       <trans-unit id="applicationLinksCaption" datatype="html">
         <source>Enllaços de l&apos;aplicació</source>
@@ -13029,8 +13093,8 @@
       <trans-unit id="applicationLinksLoadError" datatype="html">
         <source>No s&apos;han pogut carregar els enllaços.</source>
       </trans-unit>
-      <trans-unit id="applicationLinksSectionsLoadError" datatype="html">
-        <source>No s&apos;han pogut carregar les seccions dels enllaços.</source>
+      <trans-unit id="applicationLinksCategoriesLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les categories documentals.</source>
       </trans-unit>
       <trans-unit id="applicationLinkCreatedTitle" datatype="html">
         <source>Enllaç afegit</source>
@@ -13107,14 +13171,128 @@
       <trans-unit id="applicationLinkDialogDescription" datatype="html">
         <source>Descripció (opcional)</source>
       </trans-unit>
-      <trans-unit id="applicationLinkDialogSection" datatype="html">
-        <source>Secció</source>
+      <trans-unit id="applicationLinkDialogCategory" datatype="html">
+        <source>Categoria</source>
       </trans-unit>
       <trans-unit id="applicationLinkDialogUrl" datatype="html">
         <source>URL</source>
       </trans-unit>
       <trans-unit id="applicationLinkDialogUrlError" datatype="html">
         <source>Indica una URL que comenci per http:// o https://</source>
+      </trans-unit>
+      <trans-unit id="sectionActionsEmailAriaLabel" datatype="html">
+        <source>Envia per correu</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailTitle" datatype="html">
+        <source>Envia per correu</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailOpen" datatype="html">
+        <source>Envia adjunts per correu</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRequiredHint" datatype="html">
+        <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipients" datatype="html">
+        <source>Destinataris</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSubject" datatype="html">
+        <source>Assumpte</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailMessage" datatype="html">
+        <source>Missatge (opcional)</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsHint" datatype="html">
+        <source>Escriu cada adreça i prem Retorn, espai o una coma per afegir-la. Fes doble clic en una adreça per canviar-la.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientEdit" datatype="html">
+        <source>Canvia l&apos;adreça <x id="address" equiv-text="address"/></source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailDefaultSubject" datatype="html">
+        <source>Documentació de l&apos;aplicació <x id="application" equiv-text="application"/></source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectionTitle" datatype="html">
+        <source>Què vols enviar?</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectedOne" datatype="html">
+        <source>1 element seleccionat</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectedMany" datatype="html">
+        <source><x id="count" equiv-text="count"/> elements seleccionats</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailQuickSearchPlaceholder" datatype="html">
+        <source>Cerca ràpida</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailQuickSearchAriaLabel" datatype="html">
+        <source>Cerca adjunts per enviar pel títol</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnSelection" datatype="html">
+        <source>Selecció</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnDocument" datatype="html">
+        <source>Document</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnFormat" datatype="html">
+        <source>Format</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnVersion" datatype="html">
+        <source>Versió</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectDocument" datatype="html">
+        <source>Envia «<x id="title" equiv-text="title"/>»</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailVersionOf" datatype="html">
+        <source>Versió de «<x id="title" equiv-text="title"/>» que s&apos;envia</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailEmpty" datatype="html">
+        <source>No hi ha cap adjunt per enviar.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsRequired" datatype="html">
+        <source>Indica com a mínim un destinatari.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsInvalid" datatype="html">
+        <source>Aquestes adreces no són vàlides: <x id="addresses" equiv-text="addresses"/>.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsTooMany" datatype="html">
+        <source>No es pot enviar a més de <x id="max" equiv-text="max"/> destinataris alhora.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSubjectLineBreak" datatype="html">
+        <source>L&apos;assumpte no pot contenir salts de línia.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailAttachmentsRequired" datatype="html">
+        <source>Selecciona com a mínim un adjunt.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailAttachmentsTooLarge" datatype="html">
+        <source>Els adjunts seleccionats superen la mida màxima de 15 MB.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailVersionsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les versions de «<x id="title" equiv-text="title"/>»: s&apos;enviarà la versió vigent.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSentTitle" datatype="html">
+        <source>Correu enviat</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSentOne" datatype="html">
+        <source>S&apos;ha enviat el correu a 1 destinatari.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSentMany" datatype="html">
+        <source>S&apos;ha enviat el correu a <x id="count" equiv-text="count"/> destinataris.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSendError" datatype="html">
+        <source>No s&apos;ha pogut enviar el correu.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailForbidden" datatype="html">
+        <source>No tens permís per enviar algun dels adjunts seleccionats.</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailCancelLabel" datatype="html">
+        <source>Cancel·la</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSendLabel" datatype="html">
+        <source>Envia</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailCancel" datatype="html">
+        <source>Cancel·la l&apos;enviament per correu</source>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailClose" datatype="html">
+        <source>Tanca l&apos;enviament per correu</source>
       </trans-unit>
       <trans-unit id="applicationLinkDialogRequiredHint" datatype="html">
         <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
@@ -13208,6 +13386,461 @@
       </trans-unit>
       <trans-unit id="documentDetailVersionActions" datatype="html">
         <source>Accions de la versió</source>
+      </trans-unit>
+      <trans-unit id="6058622090355517761" datatype="html">
+        <source>Cap element seleccionat</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9085519188944778021" datatype="html">
+        <source>Tria l&apos;any</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5359544360373045455" datatype="html">
+        <source>Tria el mes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7607021429621420703" datatype="html">
+        <source>Tria la data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3146021172346148507" datatype="html">
+        <source>Dècada anterior</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="257664018989408713" datatype="html">
+        <source>Dècada següent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4414801213482825839" datatype="html">
+        <source>Any anterior</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5575489577960859883" datatype="html">
+        <source>Any següent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1404571879946943597" datatype="html">
+        <source>Mes anterior</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7263801000352355396" datatype="html">
+        <source>Mes següent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6139209876277199208" datatype="html">
+        <source>Setm.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6274085861631014259" datatype="html">
+        <source>Cert</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4717095841261919088" datatype="html">
+        <source>Fals</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8423730875171557990" datatype="html">
+        <source>Sense seleccionar</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5601478909891159863" datatype="html">
+        <source>1 estrella</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8684148282056039129" datatype="html">
+        <source>S&apos;han seleccionat tots els elements</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1193344901616840815" datatype="html">
+        <source>S&apos;han desseleccionat tots els elements</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="452830638458584000" datatype="html">
+        <source>Anterior</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9026223044989784827" datatype="html">
+        <source>Següent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2010866751460011307" datatype="html">
+        <source>Navegació</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3720688558242605193" datatype="html">
+        <source>Torna a dalt</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5523171768786138826" datatype="html">
+        <source>Mou al principi</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2024857763129395253" datatype="html">
+        <source>Mou amunt</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3222627459728922726" datatype="html">
+        <source>Mou avall</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4011641598732473797" datatype="html">
+        <source>Mou al final</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6486364275607662473" datatype="html">
+        <source>Mou a la destinació</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1651794158346283546" datatype="html">
+        <source>Mou a l&apos;origen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6210743537714407223" datatype="html">
+        <source>Mou-ho tot a la destinació</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4789268356219999363" datatype="html">
+        <source>Mou-ho tot a l&apos;origen</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6338421950421783228" datatype="html">
+        <source>Primera pàgina</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3562364558728492982" datatype="html">
+        <source>Última pàgina</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3043652780271174307" datatype="html">
+        <source>Pàgina següent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5649884260086383031" datatype="html">
+        <source>Pàgina anterior</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5059764831375203082" datatype="html">
+        <source>Files per pàgina</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6652794412677173276" datatype="html">
+        <source>Ves a la pàgina</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9090327713931556414" datatype="html">
+        <source>Número de pàgina</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6338872571439109121" datatype="html">
+        <source>Fila seleccionada</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4696469049065246336" datatype="html">
+        <source>Fila desseleccionada</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1050805466597459509" datatype="html">
+        <source>Fila desplegada</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7292190454306488739" datatype="html">
+        <source>Fila plegada</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">120</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8746278765637788565" datatype="html">
+        <source>Mostra el menú del filtre</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1656172722752342961" datatype="html">
+        <source>Amaga el menú del filtre</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2844796027581429065" datatype="html">
+        <source>Operador del filtre</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5987540946524462321" datatype="html">
+        <source>Condició del filtre</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="276349104546289109" datatype="html">
+        <source>Edita la fila</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4927308675098607723" datatype="html">
+        <source>Desa l&apos;edició</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">126</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2673204721578847714" datatype="html">
+        <source>Cancel·la l&apos;edició</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">127</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1762601235129149192" datatype="html">
+        <source>Vista de llista</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">128</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4174181005902808264" datatype="html">
+        <source>Vista de quadrícula</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3488829378124674172" datatype="html">
+        <source>Diapositiva</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">130</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8209700086783794146" datatype="html">
+        <source>Amplia la imatge</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1491367647315746159" datatype="html">
+        <source>Amplia</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">133</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7163290323190073440" datatype="html">
+        <source>Redueix</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2664625022885328286" datatype="html">
+        <source>Gira a la dreta</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">135</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6672054104933751740" datatype="html">
+        <source>Gira a l&apos;esquerra</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="438129575848883600" datatype="html">
+        <source>Llista d&apos;opcions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6608912513183022251" datatype="html">
+        <source>Tria un color</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5351339046026813019" datatype="html">
+        <source>Examina els fitxers</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4445892036466842561" datatype="html">
+        <source>Maximitza</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4998757939266386465" datatype="html">
+        <source>Restaura la mida</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6828398184587011805" datatype="html">
+        <source>Tanca l&apos;avís</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/responsible/application-responsible-section.i18n.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7290980246983437700" datatype="html">
+        <source><x id="count" equiv-text="COUNT"/> resultats disponibles</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="964839581431107280" datatype="html">
+        <source><x id="count" equiv-text="COUNT"/> elements seleccionats</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4291842788290946148" datatype="html">
+        <source><x id="star" equiv-text="STAR"/> estrelles</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="237551998767842626" datatype="html">
+        <source>Pàgina <x id="page" equiv-text="PAGE"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
       </trans-unit>
     </body>
   </file>

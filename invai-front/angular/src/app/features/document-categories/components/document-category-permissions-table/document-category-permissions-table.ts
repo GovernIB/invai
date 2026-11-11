@@ -1,7 +1,17 @@
-import { ChangeDetectionStrategy, Component, input, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  ViewEncapsulation,
+} from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Checkbox, CheckboxChangeEvent } from 'primeng/checkbox';
 import { TableModule } from 'primeng/table';
+import { switchMap } from 'rxjs';
 
 import { DOCUMENT_PERMISSIONS } from '../../document-categories.model';
 import {
@@ -31,6 +41,15 @@ export class DocumentCategoryPermissionsTable {
   protected readonly texts = DOCUMENT_CATEGORY_PERMISSIONS_TABLE_TEXTS;
   protected readonly labels = DOCUMENT_PERMISSION_LABELS;
   protected readonly permissions = DOCUMENT_PERMISSIONS;
+
+  constructor() {
+    // The owner replaces the rows of the same form after reading or saving the permissions;
+    // reflect its events so the table shows the current rows.
+    const changeDetector = inject(ChangeDetectorRef);
+    toObservable(this.form)
+      .pipe(switchMap((form) => form.events), takeUntilDestroyed(inject(DestroyRef)))
+      .subscribe(() => changeDetector.markForCheck());
+  }
 
   protected checkboxId(row: DocumentRolePermissionsFormGroup, column: string): string {
     return `document-category-permission-${row.controls.roleId.value}-${column}`;

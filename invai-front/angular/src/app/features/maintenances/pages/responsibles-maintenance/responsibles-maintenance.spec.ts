@@ -1,7 +1,13 @@
-import { Component, input, output } from '@angular/core';
+import { Component, WritableSignal, input, output, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import {
+  ALL_USER_PERMISSIONS,
+  NO_USER_PERMISSIONS,
+  UserPermissions,
+} from '@core/auth/user-permissions.model';
+import { OAuthService } from '@core/services/auth.service';
 import { AccordionPanel } from 'primeng/accordion';
 import { BehaviorSubject } from 'rxjs';
 
@@ -74,13 +80,16 @@ describe('ResponsiblesMaintenance', () => {
   let fixture: ComponentFixture<ResponsiblesMaintenance>;
   let fragment: BehaviorSubject<string | null>;
   let navigate: ReturnType<typeof vi.fn>;
+  let permissions: WritableSignal<UserPermissions>;
 
   beforeEach(async () => {
     fragment = new BehaviorSubject<string | null>(null);
     navigate = vi.fn(() => Promise.resolve(true));
+    permissions = signal<UserPermissions>(ALL_USER_PERMISSIONS);
     await TestBed.configureTestingModule({
       imports: [ResponsiblesMaintenance],
       providers: [
+        { provide: OAuthService, useValue: { permissions } },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -207,6 +216,58 @@ describe('ResponsiblesMaintenance', () => {
     expect(transfer.initialPeopleSearch()).toBe(INITIAL_TRANSFER_PEOPLE);
     expect(transfer.initialPeopleSearchFailed()).toBe(false);
   });
+
+  it('leaves out role transfer for a user who can change the responsibles but is not INV_SUPER', () => {
+    recreate({ ...NO_USER_PERMISSIONS, responsibleRead: true, responsibleWrite: true });
+
+    expect(panelIds()).toEqual(['people', 'authorizations', 'companies']);
+    expect(fixture.debugElement.query(By.directive(RoleTransferStub))).toBeNull();
+  });
+
+  it('leaves out role transfer and the people for a user who cannot change the responsibles', () => {
+    recreate({ ...NO_USER_PERMISSIONS, responsibleRead: true });
+
+    expect(panelIds()).toEqual(['authorizations', 'companies']);
+    expect(fixture.debugElement.query(By.directive(ResponsiblePeopleListStub))).toBeNull();
+    expect(fixture.debugElement.query(By.directive(RoleTransferStub))).toBeNull();
+  });
+
+  it('ignores the URL fragment of a panel the user cannot open', () => {
+    recreate(NO_USER_PERMISSIONS);
+
+    fragment.next('people');
+    fixture.detectChanges();
+
+    expect(activePanels()).toEqual([]);
+  });
+
+  it('does not open a role transfer the user cannot see', () => {
+    recreate({ ...NO_USER_PERMISSIONS, responsibleWrite: true });
+    navigate.mockClear();
+
+    (
+      fixture.componentInstance as unknown as {
+        onTransferRequested(person: ResponsiblePerson): void;
+      }
+    ).onTransferRequested({ id: 12 } as ResponsiblePerson);
+    fixture.detectChanges();
+
+    expect(activePanels()).toEqual([]);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  function recreate(userPermissions: UserPermissions): void {
+    fixture.destroy();
+    permissions.set(userPermissions);
+    fixture = TestBed.createComponent(ResponsiblesMaintenance);
+    fixture.detectChanges();
+  }
+
+  function panelIds(): string[] {
+    return fixture.debugElement
+      .queryAll(By.directive(AccordionPanel))
+      .map(({ componentInstance }) => componentInstance.value());
+  }
 
   function activePanels(): string[] {
     return fixture.debugElement

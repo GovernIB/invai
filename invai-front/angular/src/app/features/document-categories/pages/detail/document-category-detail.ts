@@ -276,7 +276,10 @@ export class DocumentCategoryDetail implements OnDestroy {
       category: this.form.dirty
         ? this.categoriesService.update(category.id, payload)
         : of(category),
-      permissions: this.permissionsService.save(category.id, permissions),
+      // The back-end needs at least one role, and only writes the roles whose permissions change.
+      permissions: this.permissionsForm.dirty
+        ? this.permissionsService.save(category.id, permissions)
+        : of(this.savedPermissions),
     })
       .pipe(
         finalize(() => this.isSaving.set(false)),

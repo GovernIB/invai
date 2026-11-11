@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { accessibilityEvaluation } from '@pkg';
 import { Dialog } from 'primeng/dialog';
 
 import { AccessibilityStatementDialog } from './accessibility-statement-dialog';
@@ -39,15 +40,57 @@ describe('AccessibilityStatementDialog', () => {
     expect(closeButton?.getAttribute('aria-label')).toBe("Tanca la declaració d'accessibilitat");
   });
 
-  it('informs that the first accessibility audit is still pending', () => {
-    const notice = dialogElement().querySelector('.accessibility-statement__start');
+  it('names the application and its address from the evaluation data of package.json', () => {
+    const text = dialogElement().textContent ?? '';
+    const appLink = dialogElement().querySelector(`a[href="${accessibilityEvaluation.urlApp}"]`);
 
-    expect(notice?.textContent).toContain(
-      "La primera auditoria d'accessibilitat d'aquesta aplicació encara està pendent de realitzar.",
-    );
+    expect(text).toContain(`l'aplicació ${accessibilityEvaluation.app}`);
+    expect(appLink?.textContent?.trim()).toBe(accessibilityEvaluation.urlApp);
   });
 
-  it('starts focus on the notice when the dialog is shown', () => {
+  it('shows the evaluation date, score, level and compliance status in a labelled table', () => {
+    const table = dialogElement().querySelector('table') as HTMLTableElement;
+    const title = dialogElement().querySelector(`[id="${table.getAttribute('aria-labelledby')}"]`);
+    const rows = Array.from(table.querySelectorAll('tbody tr')).map((row) => [
+      row.querySelector('th')?.textContent?.trim(),
+      row.querySelector('td')?.textContent?.trim(),
+    ]);
+
+    expect(title?.tagName).toBe('H3');
+    expect(rows).toEqual([
+      ['Puntuació mitjana del lloc web', accessibilityEvaluation.score],
+      ["Nivell d'adequació estimat", accessibilityEvaluation.level],
+      ["Situació d'acompliment estimada", accessibilityEvaluation.complianceStatus],
+    ]);
+    expect(dialogElement().textContent).toContain(accessibilityEvaluation.dateText);
+  });
+
+  it('structures the statement with level-three headings under the dialog title', () => {
+    const headings = Array.from(dialogElement().querySelectorAll('h3')).map((heading) =>
+      heading.textContent?.trim(),
+    );
+
+    expect(headings).toEqual([
+      'Situació de compliment',
+      'Contingut no accessible',
+      "Preparació de la present declaració d'accessibilitat",
+      'Observacions i dades de contacte',
+      "Procediment d'aplicació",
+      'Informació addicional',
+    ]);
+  });
+
+  it('opens every external link in a new tab without leaking the opener', () => {
+    const links = Array.from(dialogElement().querySelectorAll('a'));
+
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    }
+  });
+
+  it('starts focus on the first paragraph when the dialog is shown', () => {
     fixture.debugElement.query(By.directive(Dialog)).componentInstance.onShow.emit({});
 
     expect(document.activeElement?.classList).toContain('accessibility-statement__start');

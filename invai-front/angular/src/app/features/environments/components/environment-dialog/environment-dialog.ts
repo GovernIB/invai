@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -43,6 +44,7 @@ export type EnvironmentDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EnvironmentDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceSystems;
   visible = model(false);
   form = input.required<EnvironmentFormGroup>();
   mode = input.required<EnvironmentDialogMode>();

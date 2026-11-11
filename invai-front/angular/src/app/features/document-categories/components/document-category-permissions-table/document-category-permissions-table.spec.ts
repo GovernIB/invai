@@ -115,4 +115,14 @@ describe('DocumentCategoryPermissionsTable', () => {
   it('stripes the rows', () => {
     expect(root().querySelector('p-table')?.classList).toContain('p-datatable-striped');
   });
+
+  it('says so when no role has permissions in the category, across every column', async () => {
+    resetDocumentCategoryPermissionsForm(fb, host.form, []);
+    await render();
+
+    const cell = root().querySelector('tbody td')!;
+    expect(cell.textContent?.trim()).toBe("Cap rol de l'aplicació té permisos en aquesta categoria.");
+    expect(cell.getAttribute('colspan')).toBe('6');
+    expect(root().querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
+  });
 });

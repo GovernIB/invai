@@ -1,47 +1,28 @@
-import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
+import type { Locator, Page, TestInfo } from '@playwright/test';
 
-test.use({ storageState: { cookies: [], origins: [] } });
+import {
+  activeCatalogItem,
+  assignAuthorized,
+  assignResponsible,
+  type AssignmentRecord,
+  authorizationTypes,
+  createExternalPerson,
+  DIR3_PERSON,
+  DIR3_UNIT,
+  fullName,
+  type NamedRecord,
+  OTHER_UNIT,
+  type PersonRecord,
+  responsibleTypes,
+  type ResponsibleType,
+  setApplicationUnit,
+  validateManually,
+} from './support/application-responsibles';
+import { type DisposableApplication, expect, test } from './support/application.fixture';
+import type { CleanupRegistry } from './support/cleanup-registry';
+import { apiUrl, failApiRequest } from './support/http';
 
-const UNIT = { code: 'A1', name: 'Unitat de prova' };
-const COMPANY = { id: 2, nif: null, name: 'Example company', deletedAt: null };
-const CAIB_PERSON = {
-  id: 12,
-  firstName: 'Joan',
-  lastName: 'Serra',
-  email: 'joan@caib.es',
-  personalCaib: true,
-  company: null,
-  deletedAt: null,
-  userName: 'u00012',
-};
-const EXTERNAL_PERSON = {
-  id: 14,
-  firstName: 'Marta',
-  lastName: 'Riera',
-  email: 'marta@example.test',
-  personalCaib: false,
-  company: COMPANY,
-  deletedAt: null,
-  userName: null,
-};
-const PEOPLE = [CAIB_PERSON, EXTERNAL_PERSON];
-const SOFFID_CANDIDATE = {
-  id: null,
-  company: null,
-  firstName: 'Aina',
-  lastName: 'Ferrer',
-  email: 'aina@caib.es',
-  personalCaib: true,
-  deletedAt: null,
-  userName: 'u00077',
-};
-const SECURITY = { id: 1, name: 'Seguretat', nameEs: 'Seguridad', requiresPersonalCaib: false };
-const SYSTEMS = { id: 2, name: 'Sistemes', nameEs: 'Sistemas', requiresPersonalCaib: false };
-const SIGNATURE = { id: 1, name: 'Signatura', nameEs: 'Firma', deletedAt: null };
-const QUERY = { id: 2, name: 'Consulta', nameEs: 'Consulta', deletedAt: null };
-const AUTHORIZATION_TYPES = [SIGNATURE, QUERY];
 const MANUAL_REASON = 'Responsabilitat transversal';
-
 const EDIT_SECTION = "Editar Responsables de l'aplicació";
 const CHECK_DIR3 = "Validar el DIR3 de l'aplicació";
 const CHECK_DIR3_PROGRESS = 'Validant el DIR3 dels responsables i autoritzats…';
@@ -49,9 +30,9 @@ const OBSERVATION_REQUIRED = 'Les observacions són obligatòries.';
 const TEXT_TOO_LONG =
   'El text supera la mida màxima permesa. Redueix-lo (els accents i el format també ocupen espai).';
 const REQUIRED = 'Aquest camp és obligatori.';
+const DIR3_CHECK = /^\/invaiback\/application\/dir3\/check\/\d+$/;
 
 type Kind = 'responsible' | 'authorized';
-type Assignment = Record<string, unknown> & { id: number };
 
 interface Write {
   method: string;
@@ -59,179 +40,113 @@ interface Write {
   body: unknown;
 }
 
-interface MockOptions {
-  admUnit?: typeof UNIT | null;
-  status?: 'ACTIVE' | 'INACTIVE';
-  failedDeletes?: number;
-  dir3Check?: { status?: number; dir3Mismatch?: boolean; gate?: Promise<void> };
+interface Seed {
+  types: ResponsibleType[];
+  security: ResponsibleType;
+  systems: ResponsibleType;
+  authorizations: NamedRecord[];
+  company: NamedRecord;
+  external: PersonRecord;
+  caibResponsible: AssignmentRecord;
+  externalResponsible: AssignmentRecord;
+  authorized: AssignmentRecord;
 }
 
-interface ResponsiblesMock {
+interface SeedOptions {
+  unit?: string | null;
+  // How the DIR3 of the CAIB responsible ends up: validated by a match, validated by hand over a
+  // mismatch, or pending.
+  caibDir3?: 'matches' | 'manual' | 'pending';
+  allTypes?: boolean;
+}
+
+// The responsibles the tests start from: Francisco Planas (CAIB staff) and an external person for two
+// responsibilities open to anybody, and the external person authorized for one authorization type.
+async function seedResponsibles(
+  page: Page,
+  cleanup: CleanupRegistry,
+  application: DisposableApplication,
+  testInfo: TestInfo,
+  { unit = OTHER_UNIT, caibDir3 = 'manual', allTypes = false }: SeedOptions = {},
+): Promise<Seed> {
+  const types = await responsibleTypes(page);
+  const [security, systems] = types.filter((type) => !type.requiresPersonalCaib);
+  const [authorizations, company] = await Promise.all([
+    authorizationTypes(page),
+    activeCatalogItem(page, '/invaiback/company'),
+  ]);
+  await setApplicationUnit(page, application, unit);
+  const external = await createExternalPerson(page, cleanup, testInfo, company);
+  const caibResponsible = await assignResponsible(page, application, DIR3_PERSON, security, {
+    jobTitle: 'Cap de servei',
+    observation: 'Observació inicial',
+    dir3Matches: caibDir3 === 'matches',
+  });
+  if (caibDir3 === 'manual') await validateManually(page, caibResponsible, MANUAL_REASON);
+  const externalResponsible = await assignResponsible(page, application, external, systems);
+  const authorized = await assignAuthorized(page, application, external, [authorizations[0]], {
+    observation: 'Autorització inicial',
+  });
+  if (allTypes) {
+    for (const type of types.filter(
+      (candidate) => candidate !== security && candidate !== systems,
+    )) {
+      await assignResponsible(
+        page,
+        application,
+        type.requiresPersonalCaib ? DIR3_PERSON : external,
+        type,
+        {
+          dir3Matches: caibDir3 === 'matches',
+        },
+      );
+    }
+  }
+  return {
+    types,
+    security,
+    systems,
+    authorizations,
+    company,
+    external,
+    caibResponsible,
+    externalResponsible,
+    authorized,
+  };
+}
+
+interface ResponsiblesTab {
   writes: Write[];
   reads: Kind[];
   soffidSearches: URLSearchParams[];
   dir3Checks: URLSearchParams[];
 }
 
-const pageOf = (content: unknown[]) => ({
-  content,
-  totalElements: content.length,
-  totalPages: 1,
-  last: true,
-  number: 0,
-});
-
-async function openResponsibles(page: Page, options: MockOptions = {}): Promise<ResponsiblesMock> {
-  const mock: ResponsiblesMock = { writes: [], reads: [], soffidSearches: [], dir3Checks: [] };
-  let failedDeletes = options.failedDeletes ?? 0;
-  const lists: Record<Kind, Assignment[]> = {
-    responsible: [
-      {
-        id: 21,
-        appResponsibleAuthorizedId: 91,
-        person: CAIB_PERSON,
-        responsibleType: SECURITY,
-        jobTitle: 'Cap de servei',
-        observation: 'Observació inicial',
-        deletedAt: null,
-        dir3Validation: {
-          id: 501,
-          dir3Status: 'MANUAL',
-          reason: MANUAL_REASON,
-          manualValidatedAt: '2026-10-01T10:00:00',
-          manualValidatedBy: 'admin',
-        },
-      },
-      {
-        id: 22,
-        appResponsibleAuthorizedId: 91,
-        person: EXTERNAL_PERSON,
-        responsibleType: SYSTEMS,
-        jobTitle: null,
-        observation: null,
-        deletedAt: null,
-        dir3Validation: null,
-      },
-    ],
-    authorized: [
-      {
-        id: 31,
-        appResponsibleAuthorizedId: 91,
-        person: EXTERNAL_PERSON,
-        authorizationTypes: [SIGNATURE],
-        observation: 'Autorització inicial',
-        deletedAt: null,
-        dir3Validation: null,
-      },
-    ],
-  };
-
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const request = route.request();
+async function openResponsibles(
+  page: Page,
+  application: DisposableApplication,
+  seed: Seed,
+  before?: () => Promise<void>,
+): Promise<ResponsiblesTab> {
+  const tab: ResponsiblesTab = { writes: [], reads: [], soffidSearches: [], dir3Checks: [] };
+  await before?.();
+  page.on('request', (request) => {
     const url = new URL(request.url());
-    const path = url.pathname;
+    const path = url.pathname.replace('/invaiback/', '');
     const method = request.method();
-    if (path.endsWith('/auth/me')) {
-      return route.fulfill({ json: { authenticated: true, username: 'responsibles-test' } });
+    const assignment = path.match(/^application\/(responsible|authorized)(?:\/\d+)?$/);
+    if (path === 'person/soffid-search') tab.soffidSearches.push(url.searchParams);
+    else if (path === 'person/dir3-check') tab.dir3Checks.push(url.searchParams);
+    else if (assignment && method === 'GET') tab.reads.push(assignment[1] as Kind);
+    else if ((assignment || DIR3_CHECK.test(url.pathname)) && method !== 'GET') {
+      tab.writes.push({ method, path, body: request.postDataJSON() });
     }
-    if (path.endsWith('/application/1')) {
-      return route.fulfill({
-        json: {
-          id: 1,
-          code: 'TEST',
-          name: 'Responsables test',
-          status: options.status ?? 'ACTIVE',
-          appResponsibleAuthorizedId: 91,
-          admUnit: options.admUnit === undefined ? UNIT : options.admUnit,
-        },
-      });
-    }
-    if (path.endsWith('/application/dir3/check/1')) {
-      mock.writes.push({ method, path: 'application/dir3/check/1', body: request.postDataJSON() });
-      await options.dir3Check?.gate;
-      const status = options.dir3Check?.status ?? 200;
-      if (status !== 200) {
-        return route.fulfill({ status, json: { message: 'DIR3 check test failure' } });
-      }
-      const dir3Mismatch = options.dir3Check?.dir3Mismatch ?? false;
-      if (dir3Mismatch) {
-        const responsible = lists.responsible[0];
-        responsible.dir3Validation = {
-          ...(responsible.dir3Validation as object),
-          dir3Status: 'NOT_VALIDATED',
-          reason: null,
-        };
-      }
-      return route.fulfill({ json: { id: 1, name: 'Responsables test', dir3Mismatch } });
-    }
-    const assignment = path.match(/\/application\/(responsible|authorized)(?:\/(\d+))?$/);
-    if (assignment) {
-      const kind = assignment[1] as Kind;
-      const id = Number(assignment[2]);
-      if (method === 'GET') {
-        mock.reads.push(kind);
-        return route.fulfill({ json: pageOf(lists[kind]) });
-      }
-      const body = request.postDataJSON();
-      mock.writes.push({ method, path: path.slice(path.indexOf('application/')), body });
-      if (method === 'DELETE') {
-        if (failedDeletes > 0) {
-          failedDeletes--;
-          return route.fulfill({ status: 500, json: { message: 'Delete test failure' } });
-        }
-        lists[kind] = lists[kind].filter((item) => item.id !== id);
-        return route.fulfill({ status: 204 });
-      }
-      const authorizationTypes = (body.authorizationTypeIds as number[] | undefined)?.map(
-        (typeId) => AUTHORIZATION_TYPES.find((type) => type.id === typeId),
-      );
-      if (method === 'PUT') {
-        const target = lists[kind].find((item) => item.id === id)!;
-        Object.assign(target, { observation: body.observation });
-        if (kind === 'responsible') target.jobTitle = body.jobTitle;
-        else target.authorizationTypes = authorizationTypes;
-        return route.fulfill({ json: target });
-      }
-      const created: Assignment = {
-        id: 32,
-        appResponsibleAuthorizedId: 91,
-        person: {
-          id: 15,
-          firstName: body.personFirstName,
-          lastName: body.personLastName,
-          email: body.personEmail,
-          personalCaib: true,
-          company: null,
-          deletedAt: null,
-          userName: body.personUserName,
-        },
-        authorizationTypes,
-        observation: body.observation,
-        deletedAt: null,
-        dir3Validation: null,
-      };
-      lists.authorized.push(created);
-      return route.fulfill({ json: created });
-    }
-    let json: unknown = pageOf([]);
-    if (path.endsWith('/responsible-type')) json = [SECURITY, SYSTEMS];
-    else if (path.endsWith('/company')) json = pageOf([COMPANY]);
-    else if (path.endsWith('/person/database-search')) json = pageOf(PEOPLE);
-    else if (path.endsWith('/authorization-type')) json = pageOf(AUTHORIZATION_TYPES);
-    else if (path.endsWith('/person/soffid-search')) {
-      mock.soffidSearches.push(url.searchParams);
-      json = pageOf([SOFFID_CANDIDATE]);
-    } else if (path.endsWith('/person/dir3-check')) {
-      mock.dir3Checks.push(url.searchParams);
-      json = { personGroup: 'CAIB', groupDir3: 'A1', admUnitCode: 'A1', matches: true };
-    }
-    return route.fulfill({ json });
   });
-
-  await page.goto('/aplicacions/1/responsible');
-  await expect(responsiblesTable(page).locator('tbody tr')).toHaveCount(2);
+  await page.goto(`/aplicacions/${application.id}/responsible`);
+  // One row per responsible type, assigned or vacant.
+  await expect(responsiblesTable(page).locator('tbody tr')).toHaveCount(seed.types.length);
   await expect(authorizedTable(page).locator('tbody tr')).toHaveCount(1);
-  return mock;
+  return tab;
 }
 
 const responsiblesTable = (page: Page) => page.locator('app-application-responsibles-table');
@@ -239,6 +154,7 @@ const authorizedTable = (page: Page) => page.locator('app-application-authorized
 const toast = (page: Page, detail: string) =>
   page.locator('.p-toast-message').filter({ hasText: detail });
 const dialogWith = (page: Page, text: string) => page.getByRole('dialog').filter({ hasText: text });
+const caibName = fullName(DIR3_PERSON);
 
 async function startEditing(page: Page): Promise<void> {
   await page.getByRole('button', { name: EDIT_SECTION, exact: true }).click();
@@ -251,15 +167,23 @@ async function openRowAction(page: Page, table: Locator, person: string, action:
 
 test('shows the Soffid user code below names and the reason of a manual DIR3 validation', async ({
   page,
-}) => {
-  await openResponsibles(page);
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  await openResponsibles(page, disposableApplication, seed);
 
-  const caibRow = responsiblesTable(page).locator('tbody tr').filter({ hasText: 'Joan Serra' });
-  await expect(caibRow.locator('.application-assignment-person-username')).toHaveText('u00012');
+  const caibRow = responsiblesTable(page).locator('tbody tr').filter({ hasText: caibName });
+  await expect(caibRow.locator('.application-assignment-person-username')).toHaveText(
+    DIR3_PERSON.userName,
+  );
   // External people have no Soffid user, so nothing is shown below their name.
   await expect(
-    responsiblesTable(page).locator('tbody tr').filter({ hasText: 'Marta Riera' }),
-  ).not.toContainText('u000');
+    responsiblesTable(page)
+      .locator('tbody tr')
+      .filter({ hasText: fullName(seed.external) })
+      .locator('.application-assignment-person-username'),
+  ).toHaveCount(0);
   await expect(
     authorizedTable(page).locator('.application-assignment-person-username'),
   ).toHaveCount(0);
@@ -277,14 +201,22 @@ test('shows the Soffid user code below names and the reason of a manual DIR3 val
 
 test('deactivates a responsible only with an observation, sent in the DELETE body', async ({
   page,
-}) => {
-  const mock = await openResponsibles(page, { failedDeletes: 1 });
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  const tab = await openResponsibles(page, disposableApplication, seed, async () => {
+    await failApiRequest(page, 'DELETE', /^\/invaiback\/application\/responsible\/\d+$/, {
+      status: 500,
+      json: { message: 'Delete test failure' },
+    });
+  });
   await startEditing(page);
-  await openRowAction(page, responsiblesTable(page), 'Joan Serra', 'Donar de baixa');
+  await openRowAction(page, responsiblesTable(page), caibName, 'Donar de baixa');
 
   const dialog = dialogWith(page, 'Donar de baixa aquest registre?');
   await expect(dialog).toContainText(
-    "Joan Serra deixarà d'estar activa en la responsabilitat de Seguretat.",
+    `${caibName} deixarà d'estar activa en la responsabilitat de ${seed.security.name}.`,
   );
   const observation = dialog.getByRole('textbox', { name: 'Observacions', exact: true });
   const confirm = dialog.getByRole('button', { name: 'Dona de baixa el responsable' });
@@ -302,7 +234,7 @@ test('deactivates a responsible only with an observation, sent in the DELETE bod
   await confirm.click();
   await observation.fill('à'.repeat(2000));
   await expect(observation).toHaveAttribute('aria-invalid', 'false');
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 
   await observation.fill('  Baixa per jubilació  ');
   await confirm.click();
@@ -315,31 +247,39 @@ test('deactivates a responsible only with an observation, sent in the DELETE bod
   await expect(toast(page, "El responsable s'ha donat de baixa correctament.")).toBeVisible();
   const request = {
     method: 'DELETE',
-    path: 'application/responsible/21',
+    path: `application/responsible/${seed.caibResponsible.id}`,
     body: { observation: 'Baixa per jubilació' },
   };
-  expect(mock.writes).toEqual([request, request]);
-  const vacant = responsiblesTable(page).locator('tbody tr').filter({ hasText: 'Seguretat' });
+  expect(tab.writes).toEqual([request, request]);
+  const vacant = responsiblesTable(page)
+    .locator('tbody tr')
+    .filter({ hasText: seed.security.name });
   await expect(vacant).toContainText('Incomplet');
   await expect(vacant.getByRole('button')).toHaveCount(0);
 });
 
 test('deactivates an authorized person with the observation in the DELETE body', async ({
   page,
-}) => {
-  const mock = await openResponsibles(page);
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  const tab = await openResponsibles(page, disposableApplication, seed);
+  const externalName = fullName(seed.external);
   await startEditing(page);
-  await openRowAction(page, authorizedTable(page), 'Marta Riera', 'Donar de baixa');
+  await openRowAction(page, authorizedTable(page), externalName, 'Donar de baixa');
 
   const dialog = dialogWith(page, 'Donar de baixa aquest registre?');
-  await expect(dialog).toContainText("Marta Riera deixarà d'estar autoritzada per a Signatura.");
+  await expect(dialog).toContainText(
+    `${externalName} deixarà d'estar autoritzada per a ${seed.authorizations[0].name}.`,
+  );
   const observation = dialog.getByRole('textbox', { name: 'Observacions', exact: true });
   await observation.fill('Ja no hi participa');
   await dialog.getByRole('button', { name: 'Cancel·la la baixa del registre' }).click();
   await expect(dialog).toBeHidden();
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 
-  await openRowAction(page, authorizedTable(page), 'Marta Riera', 'Donar de baixa');
+  await openRowAction(page, authorizedTable(page), externalName, 'Donar de baixa');
   await expect(observation).toHaveValue('');
   await observation.fill('Ja no hi participa');
   await dialog.getByRole('button', { name: 'Dona de baixa la persona autoritzada' }).click();
@@ -348,27 +288,32 @@ test('deactivates an authorized person with the observation in the DELETE body',
   await expect(
     toast(page, "La persona autoritzada s'ha donat de baixa correctament."),
   ).toBeVisible();
-  expect(mock.writes).toEqual([
+  expect(tab.writes).toEqual([
     {
       method: 'DELETE',
-      path: 'application/authorized/31',
+      path: `application/authorized/${seed.authorized.id}`,
       body: { observation: 'Ja no hi participa' },
     },
   ]);
   await expect(authorizedTable(page).locator('tbody tr')).toHaveText(["No s'han trobat resultats"]);
 });
 
-test('edits a CAIB and an external responsible with PUT payloads', async ({ page }) => {
-  const mock = await openResponsibles(page);
+test('edits a CAIB and an external responsible with PUT payloads', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  const tab = await openResponsibles(page, disposableApplication, seed);
   await startEditing(page);
-  await openRowAction(page, responsiblesTable(page), 'Joan Serra', 'Editar');
+  await openRowAction(page, responsiblesTable(page), caibName, 'Editar');
 
   let dialog = dialogWith(page, 'Edita el responsable');
   await expect(dialog.getByRole('switch', { name: 'Personal CAIB' })).toBeChecked();
   await expect(dialog.getByRole('switch', { name: 'Personal CAIB' })).toBeDisabled();
-  await expect(page.locator('#application-responsible-dialog-type')).toHaveText('Seguretat');
-  await expect(page.locator('#application-responsible-dialog-person')).toHaveText('Joan Serra');
-  await expect(dialog.getByRole('textbox', { name: 'E-mail' })).toHaveValue(CAIB_PERSON.email);
+  await expect(page.locator('#application-responsible-dialog-type')).toHaveText(seed.security.name);
+  await expect(page.locator('#application-responsible-dialog-person')).toHaveText(caibName);
+  await expect(dialog.getByRole('textbox', { name: 'E-mail' })).toHaveValue(DIR3_PERSON.email);
   await expect(dialog.getByRole('textbox', { name: 'E-mail' })).not.toBeEditable();
   const cargo = dialog.getByRole('textbox', { name: 'Càrrec' });
   await expect(cargo).toHaveValue('Cap de servei');
@@ -379,47 +324,47 @@ test('edits a CAIB and an external responsible with PUT payloads', async ({ page
   await observation.fill('à'.repeat(2001));
   await expect(observation).toHaveAccessibleDescription(TEXT_TOO_LONG);
   await dialog.getByRole('button', { name: 'Desa el responsable' }).click();
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 
   await observation.fill(' Nova observació ');
   await dialog.getByRole('button', { name: 'Desa el responsable' }).click();
   await expect(dialog).toBeHidden();
   await expect(toast(page, "El responsable s'ha actualitzat correctament.")).toBeVisible();
   await expect(
-    responsiblesTable(page).locator('tbody tr').filter({ hasText: 'Joan Serra' }),
+    responsiblesTable(page).locator('tbody tr').filter({ hasText: caibName }),
   ).toContainText('Cap de servei TIC');
 
-  await openRowAction(page, responsiblesTable(page), 'Marta Riera', 'Editar');
+  await openRowAction(page, responsiblesTable(page), fullName(seed.external), 'Editar');
   dialog = dialogWith(page, 'Edita el responsable');
   await expect(page.locator('#application-responsible-dialog-company')).toHaveText(
-    'Example company',
+    seed.company.name,
   );
   await expect(dialog.getByRole('textbox', { name: 'Càrrec' })).toHaveCount(0);
   await dialog.getByRole('textbox', { name: 'Observacions (Opcional)' }).fill('Proveïdor extern');
   await dialog.getByRole('button', { name: 'Desa el responsable' }).click();
   await expect(dialog).toBeHidden();
 
-  expect(mock.writes).toEqual([
+  expect(tab.writes).toEqual([
     {
       method: 'PUT',
-      path: 'application/responsible/21',
+      path: `application/responsible/${seed.caibResponsible.id}`,
       body: {
-        personId: 12,
+        personId: seed.caibResponsible.person.id,
         personalCaib: true,
-        appResponsibleAuthorizedId: 91,
-        responsibleTypeId: 1,
+        appResponsibleAuthorizedId: disposableApplication.appResponsibleAuthorizedId,
+        responsibleTypeId: seed.security.id,
         jobTitle: 'Cap de servei TIC',
         observation: 'Nova observació',
       },
     },
     {
       method: 'PUT',
-      path: 'application/responsible/22',
+      path: `application/responsible/${seed.externalResponsible.id}`,
       body: {
-        personId: 14,
+        personId: seed.external.id,
         personalCaib: false,
-        appResponsibleAuthorizedId: 91,
-        responsibleTypeId: 2,
+        appResponsibleAuthorizedId: disposableApplication.appResponsibleAuthorizedId,
+        responsibleTypeId: seed.systems.id,
         jobTitle: null,
         observation: 'Proveïdor extern',
       },
@@ -427,56 +372,73 @@ test('edits a CAIB and an external responsible with PUT payloads', async ({ page
   ]);
 });
 
-test('edits the authorizations of an authorized person with a PUT payload', async ({ page }) => {
-  const mock = await openResponsibles(page);
+test('edits the authorizations of an authorized person with a PUT payload', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  const [first, second] = seed.authorizations;
+  const tab = await openResponsibles(page, disposableApplication, seed);
   await startEditing(page);
-  await openRowAction(page, authorizedTable(page), 'Marta Riera', 'Editar');
+  await openRowAction(page, authorizedTable(page), fullName(seed.external), 'Editar');
 
   const dialog = dialogWith(page, 'Edita la persona autoritzada');
   await expect(dialog.getByRole('switch', { name: 'Personal CAIB' })).toBeDisabled();
-  await expect(page.locator('#application-authorized-dialog-person')).toHaveText('Marta Riera');
-  await expect(dialog.locator('.p-multiselect-chip')).toHaveText(['Signatura']);
+  await expect(page.locator('#application-authorized-dialog-person')).toHaveText(
+    fullName(seed.external),
+  );
+  await expect(dialog.locator('.p-multiselect-chip')).toHaveText([first.name]);
 
   const authorizations = page.locator('#application-authorized-dialog-authorization');
   await authorizations.focus();
   await page.keyboard.press('Enter');
-  await page.getByRole('option', { name: 'Signatura' }).click();
+  await page.getByRole('option', { name: first.name, exact: true }).click();
   await page.keyboard.press('Escape');
   await dialog.getByRole('button', { name: 'Desa la persona autoritzada' }).click();
   await expect(dialog.getByText(REQUIRED)).toBeVisible();
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 
   await authorizations.focus();
   await page.keyboard.press('Enter');
-  await page.getByRole('option', { name: 'Consulta' }).click();
-  await page.getByRole('option', { name: 'Signatura' }).click();
+  await page.getByRole('option', { name: second.name, exact: true }).click();
+  await page.getByRole('option', { name: first.name, exact: true }).click();
   await page.keyboard.press('Escape');
   await expect(dialog.getByText(REQUIRED)).toHaveCount(0);
   await dialog.getByRole('textbox', { name: 'Observacions (Opcional)' }).fill('');
   await dialog.getByRole('button', { name: 'Desa la persona autoritzada' }).click();
 
   await expect(dialog).toBeHidden();
-  await expect(
-    toast(page, "La persona autoritzada s'ha actualitzat correctament."),
-  ).toBeVisible();
-  expect(mock.writes).toEqual([
+  await expect(toast(page, "La persona autoritzada s'ha actualitzat correctament.")).toBeVisible();
+  expect(tab.writes).toEqual([
     {
       method: 'PUT',
-      path: 'application/authorized/31',
+      path: `application/authorized/${seed.authorized.id}`,
       body: {
-        personId: 14,
+        personId: seed.external.id,
         personalCaib: false,
-        appResponsibleAuthorizedId: 91,
-        authorizationTypeIds: [2, 1],
+        appResponsibleAuthorizedId: disposableApplication.appResponsibleAuthorizedId,
+        authorizationTypeIds: [second.id, first.id],
         observation: null,
       },
     },
   ]);
-  await expect(authorizedTable(page).locator('tbody tr')).toContainText('Consulta, Signatura');
+  const row = authorizedTable(page).locator('tbody tr');
+  await expect(row).toContainText(first.name);
+  await expect(row).toContainText(second.name);
 });
 
-test('adds an authorized CAIB person picked from Soffid with their user code', async ({ page }) => {
-  const mock = await openResponsibles(page);
+test('adds an authorized CAIB person picked from Soffid with their user code', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  // The unit of the application is the DIR3 of the person, so the check matches.
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo, {
+    unit: DIR3_UNIT,
+    caibDir3: 'matches',
+  });
+  const tab = await openResponsibles(page, disposableApplication, seed);
   await startEditing(page);
   await page.getByRole('button', { name: 'Afegeix una persona autoritzada', exact: true }).click();
 
@@ -487,52 +449,59 @@ test('adds an authorized CAIB person picked from Soffid with their user code', a
   await expect(add).toBeDisabled();
 
   const soffid = page.locator('#application-authorized-dialog-soffid-person');
-  await soffid.fill('Aina');
-  await page.getByRole('option', { name: /Aina Ferrer/ }).click();
-  await expect(dialog.getByRole('textbox', { name: 'E-mail' })).toHaveValue('aina@caib.es');
+  await soffid.fill(DIR3_PERSON.query);
+  await page.getByRole('option', { name: new RegExp(caibName) }).click();
+  await expect(dialog.getByRole('textbox', { name: 'E-mail' })).toHaveValue(DIR3_PERSON.email);
   await expect(add).toBeEnabled();
-  expect(mock.soffidSearches.map((params) => Object.fromEntries(params))).toEqual([
-    { search: 'Aina', page: '0', size: '20' },
+  expect(tab.soffidSearches.map((params) => Object.fromEntries(params))).toEqual([
+    { search: DIR3_PERSON.query, page: '0', size: '20' },
   ]);
-  expect(mock.dir3Checks.map((params) => Object.fromEntries(params))).toEqual([
-    { emailAddress: 'aina@caib.es', admUnitCode: 'A1' },
+  expect(tab.dir3Checks.map((params) => Object.fromEntries(params))).toEqual([
+    { emailAddress: DIR3_PERSON.email, admUnitCode: DIR3_UNIT },
   ]);
 
   await page.locator('#application-authorized-dialog-authorization').focus();
   await page.keyboard.press('Enter');
-  await page.getByRole('option', { name: 'Signatura' }).click();
+  await page.getByRole('option', { name: seed.authorizations[0].name, exact: true }).click();
   await page.keyboard.press('Escape');
   await add.click();
 
   await expect(dialog).toBeHidden();
   await expect(toast(page, "La persona autoritzada s'ha afegit correctament.")).toBeVisible();
-  expect(mock.writes).toEqual([
+  expect(tab.writes).toEqual([
     {
       method: 'POST',
       path: 'application/authorized',
       body: {
         personId: null,
-        personFirstName: 'Aina',
-        personLastName: 'Ferrer',
-        personEmail: 'aina@caib.es',
-        personUserName: 'u00077',
+        personFirstName: DIR3_PERSON.firstName,
+        personLastName: DIR3_PERSON.lastName,
+        personEmail: DIR3_PERSON.email,
+        personUserName: DIR3_PERSON.userName,
         companyId: null,
         personalCaib: true,
         dir3Status: true,
-        appResponsibleAuthorizedId: 91,
-        authorizationTypeIds: [1],
+        appResponsibleAuthorizedId: disposableApplication.appResponsibleAuthorizedId,
+        authorizationTypeIds: [seed.authorizations[0].id],
         observation: null,
       },
     },
   ]);
-  const added = authorizedTable(page).locator('tbody tr').filter({ hasText: 'Aina Ferrer' });
-  await expect(added.locator('.application-assignment-person-username')).toHaveText('u00077');
+  const added = authorizedTable(page).locator('tbody tr').filter({ hasText: caibName });
+  await expect(added.locator('.application-assignment-person-username')).toHaveText(
+    DIR3_PERSON.userName,
+  );
 });
 
 test('explains that every responsibility is assigned and returns focus to the add button', async ({
   page,
-}) => {
-  const mock = await openResponsibles(page);
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo, {
+    allTypes: true,
+  });
+  const tab = await openResponsibles(page, disposableApplication, seed);
   await startEditing(page);
   const add = page.getByRole('button', { name: 'Afegeix un responsable', exact: true });
   await expect(add).toBeEnabled();
@@ -554,51 +523,91 @@ test('explains that every responsibility is assigned and returns focus to the ad
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(add).toBeFocused();
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 });
 
-const DIR3_OUTCOMES = [
+// The real check runs for the mismatch and the match; the failures answer the check with an
+// error. Every answer is held back until the check in progress has been seen.
+const DIR3_OUTCOMES: Array<{
+  title: string;
+  seed: SeedOptions;
+  status?: number;
+  severity: string;
+  summary: string;
+  detail: string;
+  refreshed: boolean;
+  pending: number;
+}> = [
   {
     title: 'warns about a DIR3 mismatch',
-    dir3Check: { dir3Mismatch: true },
+    seed: { unit: OTHER_UNIT, caibDir3: 'pending' },
     severity: 'warn',
     summary: 'Validació DIR3 completada',
     detail: "L'aplicació té responsables o autoritzats amb discrepàncies DIR3.",
     refreshed: true,
+    pending: 1,
   },
   {
     title: 'confirms a matching DIR3',
-    dir3Check: { dir3Mismatch: false },
+    seed: { unit: DIR3_UNIT, caibDir3: 'matches' },
     severity: 'success',
     summary: 'Validació DIR3 completada',
-    detail:
-      "El DIR3 de tots els responsables i autoritzats coincideix amb el de l'aplicació.",
+    detail: "El DIR3 de tots els responsables i autoritzats coincideix amb el de l'aplicació.",
     refreshed: true,
+    pending: 0,
   },
   {
     title: 'reports a failed DIR3 check',
-    dir3Check: { status: 500 },
+    seed: { unit: DIR3_UNIT, caibDir3: 'matches' },
+    status: 500,
     severity: 'error',
     summary: 'Error',
     detail: "No s'ha pogut completar la validació DIR3 de l'aplicació. Torna-ho a provar.",
     refreshed: false,
+    pending: 0,
   },
   {
     title: 'reports a forbidden DIR3 check',
-    dir3Check: { status: 403 },
+    seed: { unit: DIR3_UNIT, caibDir3: 'matches' },
+    status: 403,
     severity: 'error',
     summary: 'Error',
     detail: 'No tens permisos per fer aquesta operació.',
     refreshed: false,
+    pending: 0,
   },
 ];
 
 for (const outcome of DIR3_OUTCOMES) {
-  test(`checks the DIR3 of the whole application and ${outcome.title}`, async ({ page }) => {
+  test(`checks the DIR3 of the whole application and ${outcome.title}`, async ({
+    page,
+    cleanupRegistry,
+    disposableApplication,
+  }, testInfo) => {
+    test.setTimeout(90_000);
+    const seed = await seedResponsibles(
+      page,
+      cleanupRegistry,
+      disposableApplication,
+      testInfo,
+      outcome.seed,
+    );
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));
-    const mock = await openResponsibles(page, { dir3Check: { ...outcome.dir3Check, gate } });
-    const reads = mock.reads.length;
+    const tab = await openResponsibles(page, disposableApplication, seed, async () => {
+      await page.route(
+        (url) => DIR3_CHECK.test(url.pathname),
+        async (route) => {
+          await gate;
+          if (!outcome.status) return route.fallback();
+          return route.fulfill({
+            status: outcome.status,
+            json: { message: 'DIR3 check test failure' },
+          });
+        },
+      );
+    });
+    const reads = tab.reads.length;
     const check = page.getByRole('button', { name: CHECK_DIR3, exact: true });
 
     await check.click();
@@ -607,29 +616,35 @@ for (const outcome of DIR3_OUTCOMES) {
     release();
 
     const message = toast(page, outcome.detail);
-    await expect(message).toBeVisible();
+    await expect(message).toBeVisible({ timeout: 30_000 });
     await expect(message).toHaveClass(new RegExp(`p-toast-message-${outcome.severity}`));
     await expect(message.locator('.p-toast-summary')).toHaveText(outcome.summary);
     await expect(check).toBeEnabled();
     await expect(page.getByRole('status').filter({ hasText: CHECK_DIR3_PROGRESS })).toHaveCount(0);
-    expect(mock.writes).toEqual([{ method: 'PUT', path: 'application/dir3/check/1', body: {} }]);
+    expect(tab.writes).toEqual([
+      { method: 'PUT', path: `application/dir3/check/${disposableApplication.id}`, body: {} },
+    ]);
     if (outcome.refreshed) {
       await expect
-        .poll(() => [...mock.reads.slice(reads)].sort())
+        .poll(() => [...tab.reads.slice(reads)].sort())
         .toEqual(['authorized', 'responsible']);
     } else {
-      expect(mock.reads.slice(reads)).toEqual([]);
+      expect(tab.reads.slice(reads)).toEqual([]);
     }
     await expect(responsiblesTable(page).getByRole('img', { name: 'DIR3 no validat' })).toHaveCount(
-      outcome.dir3Check.dir3Mismatch ? 1 : 0,
+      outcome.pending,
     );
   });
 }
 
 test('does not check the DIR3 of an application without an administrative unit', async ({
   page,
-}) => {
-  const mock = await openResponsibles(page, { admUnit: null });
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  await setApplicationUnit(page, disposableApplication, null);
+  const tab = await openResponsibles(page, disposableApplication, seed);
   await page.getByRole('button', { name: CHECK_DIR3, exact: true }).click();
 
   const message = toast(
@@ -639,11 +654,20 @@ test('does not check the DIR3 of an application without an administrative unit',
   await expect(message).toBeVisible();
   await expect(message).toHaveClass(/p-toast-message-warn/);
   await expect(message.locator('.p-toast-summary')).toHaveText(CHECK_DIR3);
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 });
 
-test('offers no DIR3 check nor edition for an inactive application', async ({ page }) => {
-  await openResponsibles(page, { status: 'INACTIVE' });
+test('offers no DIR3 check nor edition for an inactive application', async ({
+  page,
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
+  const seed = await seedResponsibles(page, cleanupRegistry, disposableApplication, testInfo);
+  const deactivated = await page.request.delete(
+    apiUrl(page, `/invaiback/application/${disposableApplication.id}`),
+  );
+  expect(deactivated.ok(), await deactivated.text()).toBeTruthy();
+  await openResponsibles(page, disposableApplication, seed);
   await expect(page.getByRole('button', { name: CHECK_DIR3, exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: EDIT_SECTION, exact: true })).toHaveCount(0);
 });

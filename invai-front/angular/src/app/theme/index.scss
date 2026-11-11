@@ -1,10 +1,10 @@
 /* Brand styling for PrimeNG Lara.
    Component theming is configured via `invai-preset.ts` (PrimeNG token engine).
-   This file provides the raw design tokens, fonts, resets and palette helpers.
+   This file provides the raw design tokens, resets and palette helpers.
+   The Noto Sans @font-face rules live in `src/index.html` so they can be preloaded.
    Loaded as a dedicated entry in angular.json (not via a CSS @import). */
 
 @use "./design-tokens";
-@use "./primeng/lara/blue/fonts";
 @use "./extended-blue-palette";
 @use "./extended-surface-palette";
 @use "./normalize";

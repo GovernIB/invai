@@ -1,6 +1,13 @@
+import { WritableSignal, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Navigation, provideRouter, Router } from '@angular/router';
+import {
+  ALL_USER_PERMISSIONS,
+  NO_USER_PERMISSIONS,
+  UserPermissions,
+} from '@core/auth/user-permissions.model';
 import { BreadcrumbService } from '@core/components/breadcrumbs';
+import { OAuthService } from '@core/services/auth.service';
 import { AdministrativeUnitsService } from '@features/administrative-units/services/administrative-units.service';
 import { firstValueFrom, of } from 'rxjs';
 import { APPLICATION_GENERAL_EDIT_NAVIGATION } from './application-detail-navigation';
@@ -66,12 +73,14 @@ describe('ApplicationDetail', () => {
     setCustomBreadcrumbs: ReturnType<typeof vi.fn>;
     clear: ReturnType<typeof vi.fn>;
   };
+  let permissions: WritableSignal<UserPermissions>;
 
   beforeEach(async () => {
     breadcrumbs = {
       setCustomBreadcrumbs: vi.fn(),
       clear: vi.fn(),
     };
+    permissions = signal<UserPermissions>(ALL_USER_PERMISSIONS);
     const resolved: ApplicationDetailResolvedData = {
       application: APPLICATION_OUTPUT,
       loadFailed: false,
@@ -96,6 +105,7 @@ describe('ApplicationDetail', () => {
           },
         },
         { provide: BreadcrumbService, useValue: breadcrumbs },
+        { provide: OAuthService, useValue: { permissions } },
         {
           provide: ApplicationOptionsService,
           useValue: { getAdministrativeUnitOptions: vi.fn(() => of([])) },
@@ -203,6 +213,28 @@ describe('ApplicationDetail', () => {
       'Documentació',
     ]);
     expect(fixture.nativeElement.querySelector('.application-detail-toolbar')).toBeNull();
+  });
+
+  it('renders only General and Documentation to a user without area permissions', () => {
+    permissions.set(NO_USER_PERMISSIONS);
+    fixture.detectChanges();
+
+    const nav = fixture.nativeElement.querySelector('nav.application-detail-tabs') as HTMLElement;
+    const tabs = [...nav.querySelectorAll<HTMLAnchorElement>('a.application-detail-tab')];
+    expect(nav.getAttribute('aria-label')).toBeTruthy();
+    expect(tabs.map((tab) => tab.textContent?.trim())).toEqual(['General', 'Documentació']);
+    expect(tabs.every((tab) => tab.getAttribute('href'))).toBe(true);
+  });
+
+  it('renders each area tab only with the permission of its area', () => {
+    permissions.set({ ...NO_USER_PERMISSIONS, responsibleRead: true, security: true, data: true });
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const labels = [...root.querySelectorAll('.application-detail-tab > span:first-child')].map(
+      (label) => label.textContent?.trim(),
+    );
+    expect(labels).toEqual(['General', 'Responsables', 'Seguretat', 'Dades', 'Documentació']);
   });
 
   it('renders one shared page heading above the detail tabs', () => {

@@ -1,13 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DocumentCategoryOption } from '@features/document-categories/document-categories.model';
+import { DocumentCategoryCatalogService } from '@features/document-categories/services/document-category-catalog.service';
 import { MessageService } from 'primeng/api';
 import { of, throwError } from 'rxjs';
 
 import { ApplicationLink } from '../../../../application-documentation.model';
-import { DOCUMENT_SECTIONS, documentationPage } from '../../../../application-documentation.testing';
+import { DOCUMENT_CATEGORIES, documentationPage } from '../../../../application-documentation.testing';
 import { ApplicationLinkFormGroup } from '../../../../forms/application-documentation-form.factory';
-import { ApplicationDocumentSectionCatalogService } from '../../../../services/application-document-section-catalog.service';
 import { ApplicationLinksService } from '../../../../services/application-links.service';
 import { ApplicationDocumentationAction } from './application-documentation-table-action';
 import { ApplicationLinksList } from './application-links-list';
@@ -17,7 +18,7 @@ const LINKS: ApplicationLink[] = [
     id: 1,
     title: 'Postman',
     description: "Proves i col·laboració d'API",
-    section: DOCUMENT_SECTIONS[0],
+    category: DOCUMENT_CATEGORIES[0],
     url: 'https://www.postman.com',
     deletedAt: null,
   },
@@ -25,10 +26,17 @@ const LINKS: ApplicationLink[] = [
     id: 2,
     title: 'Grafana',
     description: null,
-    section: DOCUMENT_SECTIONS[1],
+    category: DOCUMENT_CATEGORIES[1],
     url: 'https://grafana.com',
     deletedAt: null,
   },
+];
+
+// Active categories, as the catalog gives them: sorted by their label.
+const CATEGORY_OPTIONS: DocumentCategoryOption[] = [
+  { id: 4, label: 'Base de dades' },
+  { id: 1, label: 'General' },
+  { id: 3, label: 'Sistemes' },
 ];
 
 interface ListInternals {
@@ -36,8 +44,9 @@ interface ListInternals {
   filtersForm: { patchValue(value: object): void };
   dialogMode: () => string;
   isDialogVisible: () => boolean;
-  sectionOptions: () => { value: number; label: string }[];
-  selectedSection: () => ApplicationLink['section'] | null;
+  categories: () => DocumentCategoryOption[];
+  dialogCategoryOptions: () => DocumentCategoryOption[];
+  selectedCategory: () => ApplicationLink['category'] | null;
   openCreateDialog(): void;
   onTableAction(event: { action: number; params: ApplicationLink }): void;
   onFilterSearch(): void;
@@ -52,7 +61,7 @@ describe('ApplicationLinksList', () => {
   let fixture: ComponentFixture<ApplicationLinksList>;
   let list: ListInternals;
   let add: ReturnType<typeof vi.spyOn>;
-  const getSections = vi.fn();
+  const getActiveCategoryOptions = vi.fn();
   const links = {
     getLinks: vi.fn(),
     createLink: vi.fn(),
@@ -75,7 +84,7 @@ describe('ApplicationLinksList', () => {
     new HttpErrorResponse({ status: 400, error: { error: 'Bad Request', message: 'Enllaç repetit' } });
 
   beforeEach(async () => {
-    getSections.mockReset().mockReturnValue(of(DOCUMENT_SECTIONS));
+    getActiveCategoryOptions.mockReset().mockReturnValue(of(CATEGORY_OPTIONS));
     links.getLinks.mockReset().mockReturnValue(of(documentationPage(LINKS)));
     links.createLink.mockReset().mockReturnValue(of({ ...LINKS[0], id: 9 }));
     links.updateLink.mockReset().mockReturnValue(of(LINKS[0]));
@@ -86,7 +95,7 @@ describe('ApplicationLinksList', () => {
         MessageService,
         { provide: LOCALE_ID, useValue: 'ca' },
         { provide: ApplicationLinksService, useValue: links },
-        { provide: ApplicationDocumentSectionCatalogService, useValue: { getAll: getSections } },
+        { provide: DocumentCategoryCatalogService, useValue: { getActiveCategoryOptions } },
       ],
     })
       .overrideComponent(ApplicationLinksList, { set: { template: '' } })
@@ -108,42 +117,54 @@ describe('ApplicationLinksList', () => {
     expect(items().total).toBe(2);
   });
 
-  it('offers the sections of the catalog, sorted by their label', async () => {
+  it('offers the active categories, for the filter and the new links', async () => {
     await create();
 
-    expect(list.sectionOptions()).toEqual([
-      { value: 4, label: 'Base de dades' },
-      { value: 1, label: 'General' },
-      { value: 3, label: 'Sistemes' },
-    ]);
+    expect(getActiveCategoryOptions).toHaveBeenCalledTimes(1);
+    expect(list.categories()).toEqual(CATEGORY_OPTIONS);
+    list.openCreateDialog();
+    expect(list.dialogCategoryOptions()).toEqual(CATEGORY_OPTIONS);
   });
 
-  it('reads the sections again when the dialog opens after they failed', async () => {
-    getSections.mockReturnValueOnce(throwError(() => new Error('offline')));
+  it('reads the categories again when the dialog opens after they failed', async () => {
+    getActiveCategoryOptions.mockReturnValueOnce(throwError(() => new Error('offline')));
     await create();
     expect(add).toHaveBeenCalledWith(
-      expect.objectContaining({ detail: "No s'han pogut carregar les seccions dels enllaços." }),
+      expect.objectContaining({ detail: "No s'han pogut carregar les categories documentals." }),
     );
-    expect(list.sectionOptions()).toEqual([]);
+    expect(list.categories()).toEqual([]);
 
     list.openCreateDialog();
 
-    expect(list.sectionOptions()).toHaveLength(3);
+    expect(list.categories()).toHaveLength(3);
   });
 
-  it('filters by section, searches and sorts by the keys of the back-end', async () => {
+  it('keeps the deactivated category of a link selectable while consulting or editing it', async () => {
+    const archived = { id: 7, name: 'Arxiu', nameEs: 'Archivo', parentId: null };
+    await create();
+
+    list.onTableAction({ action: ApplicationDocumentationAction.View, params: { ...LINKS[0], category: archived } });
+    expect(list.dialogCategoryOptions()).toEqual([...CATEGORY_OPTIONS, { id: 7, label: 'Arxiu' }]);
+    expect(list.entityForm.controls.categoryId.value).toBe(7);
+
+    list.openCreateDialog();
+    expect(list.dialogCategoryOptions()).toEqual(CATEGORY_OPTIONS);
+  });
+
+  it('filters by category, searches and sorts by the keys of the back-end', async () => {
     vi.useFakeTimers();
     try {
       await create();
 
-      list.filtersForm.patchValue({ sectionId: 3 });
+      list.filtersForm.patchValue({ categoryId: 3 });
       list.onFilterSearch();
-      expect(lastQuery()?.[1]).toMatchObject({ sectionId: 3, deleted: false });
+      expect(lastQuery()?.[1]).toMatchObject({ categoryId: 3, deleted: false });
+      expect(lastQuery()?.[1]).not.toHaveProperty('sectionId');
       expect(fixture.componentInstance.selectedFilters()).toBe(1);
 
       list.onQuickSearchChange('  grafana ');
       vi.advanceTimersByTime(400);
-      expect(lastQuery()?.[1]).toMatchObject({ quickSearch: 'grafana', sectionId: 3, deleted: false });
+      expect(lastQuery()?.[1]).toMatchObject({ quickSearch: 'grafana', categoryId: 3, deleted: false });
 
       fixture.componentInstance.onSearch({ first: 10, rows: 10, sortField: 'url', sortOrder: -1 });
       expect(lastQuery()?.[1]).toMatchObject({ page: 1, sort: 'url,desc', deleted: false });
@@ -155,7 +176,7 @@ describe('ApplicationLinksList', () => {
   it('adds a link with a valid URL and an optional description', async () => {
     await create();
     list.openCreateDialog();
-    list.entityForm.setValue({ title: ' Portal ', description: '  ', sectionId: 1, url: 'portal.cat' });
+    list.entityForm.setValue({ title: ' Portal ', description: '  ', categoryId: 1, url: 'portal.cat' });
     list.submit();
     expect(links.createLink).not.toHaveBeenCalled();
     expect(list.isDialogVisible()).toBe(true);
@@ -166,7 +187,7 @@ describe('ApplicationLinksList', () => {
     expect(links.createLink).toHaveBeenCalledWith(3, {
       title: 'Portal',
       description: null,
-      sectionId: 1,
+      categoryId: 1,
       url: 'https://portal.cat',
     });
     expect(list.isDialogVisible()).toBe(false);
@@ -177,7 +198,7 @@ describe('ApplicationLinksList', () => {
   it('refuses an upper-case scheme, as the back-end does', async () => {
     await create();
     list.openCreateDialog();
-    list.entityForm.setValue({ title: 'Portal', description: '', sectionId: 1, url: 'HTTPS://portal.cat' });
+    list.entityForm.setValue({ title: 'Portal', description: '', categoryId: 1, url: 'HTTPS://portal.cat' });
 
     list.submit();
 
@@ -188,8 +209,8 @@ describe('ApplicationLinksList', () => {
   it('consults, edits, cancels and saves a link by its own id', async () => {
     await create();
     list.onTableAction({ action: ApplicationDocumentationAction.View, params: LINKS[0] });
-    expect([list.dialogMode(), list.entityForm.controls.sectionId.value]).toEqual(['view', 1]);
-    expect(list.selectedSection()).toEqual(DOCUMENT_SECTIONS[0]);
+    expect([list.dialogMode(), list.entityForm.controls.categoryId.value]).toEqual(['view', 1]);
+    expect(list.selectedCategory()).toEqual(DOCUMENT_CATEGORIES[0]);
 
     list.startEdit();
     list.entityForm.controls.title.setValue('Una altra');
@@ -197,13 +218,13 @@ describe('ApplicationLinksList', () => {
     expect([list.dialogMode(), list.entityForm.controls.title.value]).toEqual(['view', 'Postman']);
 
     list.startEdit();
-    list.entityForm.controls.sectionId.setValue(4);
+    list.entityForm.controls.categoryId.setValue(4);
     list.submit();
 
     expect(links.updateLink).toHaveBeenCalledWith(1, {
       title: 'Postman',
       description: "Proves i col·laboració d'API",
-      sectionId: 4,
+      categoryId: 4,
       url: 'https://www.postman.com',
     });
     expect(add).toHaveBeenCalledWith(expect.objectContaining({ summary: 'Enllaç actualitzat' }));
@@ -212,7 +233,7 @@ describe('ApplicationLinksList', () => {
   it('leaves the back-end message to the error dialog and reports other failures itself', async () => {
     await create();
     list.openCreateDialog();
-    list.entityForm.setValue({ title: 'Postman', description: '', sectionId: 1, url: 'https://www.postman.com' });
+    list.entityForm.setValue({ title: 'Postman', description: '', categoryId: 1, url: 'https://www.postman.com' });
     links.createLink.mockReturnValueOnce(throwError(badRequest));
     list.submit();
     expect(add).not.toHaveBeenCalled();

@@ -22,6 +22,7 @@ import {
   SECTION_ACTIONS_CLEAR_QUICK_SEARCH_ARIA_LABEL,
   SECTION_ACTIONS_COLUMNS_FILTER_PLACEHOLDER,
   SECTION_ACTIONS_COLUMNS_ARIA_LABEL,
+  SECTION_ACTIONS_EMAIL_ARIA_LABEL,
   SECTION_ACTIONS_EXPORT_ARIA_LABEL,
   SECTION_ACTIONS_FILTERS_APPLIED_ARIA_LABEL,
   SECTION_ACTIONS_FILTERS_ARIA_LABEL,
@@ -44,6 +45,8 @@ export class SectionActionsComponent {
   hideColumnsButton = input(false);
   hideExportButton = input(false);
   hideAddButton = input(false);
+  // Sending by e-mail is specific to some lists, so the button is hidden unless asked for.
+  showEmailButton = input(false);
   disableAddButton = input(false);
   isExportLoading = input(false);
   isSearchLoading = input(false);
@@ -56,6 +59,7 @@ export class SectionActionsComponent {
   columnsButtonAriaLabel = input(SECTION_ACTIONS_COLUMNS_ARIA_LABEL);
   columnsInputId = input('section-actions-columns');
   exportButtonAriaLabel = input(SECTION_ACTIONS_EXPORT_ARIA_LABEL);
+  emailButtonAriaLabel = input(SECTION_ACTIONS_EMAIL_ARIA_LABEL);
   addButtonAriaLabel = input(SECTION_ACTIONS_ADD_ARIA_LABEL);
   availableColumns = input<Partial<TableColumn>[]>();
   quickSearchValue = model('');
@@ -63,9 +67,11 @@ export class SectionActionsComponent {
   isFiltersCollapsed = model<boolean>();
   onAdd = output();
   onExport = output();
+  onEmail = output();
   onQuickSearchChange = output<string>();
 
   protected readonly PrimeIcons = PrimeIcons;
+  protected readonly emailTooltip = SECTION_ACTIONS_EMAIL_ARIA_LABEL;
   protected readonly filtersButtonPassThrough = computed<ButtonPassThrough>(() => ({
     root: { 'aria-expanded': String(!this.isFiltersCollapsed()) },
   }));
@@ -101,5 +107,9 @@ export class SectionActionsComponent {
 
   onAddItem() {
     this.onAdd.emit();
+  }
+
+  onEmailItems() {
+    this.onEmail.emit();
   }
 }

@@ -43,14 +43,27 @@ describe('documentCategoryDetailResolver', () => {
     expect(getByCategory).toHaveBeenCalledWith(7);
   });
 
+  it('does not ask for the permissions of an inactive category, which the back-end refuses', async () => {
+    const category = documentCategory({ id: 7, deletedAt: '2026-10-01T10:00:00' });
+    getById.mockReturnValue(of(category));
+
+    await expect(resolve('7')).resolves.toEqual({ category, permissions: [], loadFailed: false });
+    expect(getByCategory).not.toHaveBeenCalled();
+  });
+
   it('degrades an invalid ID, a subcategory or a failed load', async () => {
     await expect(resolve('abc')).resolves.toEqual(FAILED);
     expect(getById).not.toHaveBeenCalled();
 
     getById.mockReturnValueOnce(of(documentCategory({ id: 11, parentId: 1 })));
     await expect(resolve('11')).resolves.toEqual(FAILED);
+    expect(getByCategory).not.toHaveBeenCalled();
 
     getById.mockReturnValueOnce(throwError(() => new Error('offline')));
+    await expect(resolve('7')).resolves.toEqual(FAILED);
+
+    getById.mockReturnValueOnce(of(documentCategory({ id: 7 })));
+    getByCategory.mockReturnValueOnce(throwError(() => new Error('offline')));
     await expect(resolve('7')).resolves.toEqual(FAILED);
   });
 

@@ -14,17 +14,34 @@
   <ng-template #header>
     <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
       <h2 class="m-0 min-w-0 text-base font-semibold">{{ title() }}</h2>
-      <p-button
-        class="invai-dialog__close"
-        type="button"
-        severity="secondary"
-        [ariaLabel]="ariaLabels().close"
-        [disabled]="isBusy()"
-        [icon]="icons.TIMES"
-        [rounded]="true"
-        [text]="true"
-        (onClick)="requestClose()"
-      />
+      <div class="flex shrink-0 items-center gap-1">
+        @if (helpTopic()) {
+          <p-button
+            class="invai-dialog__help"
+            type="button"
+            severity="secondary"
+            [ariaLabel]="helpLabel"
+            [icon]="icons.QUESTION_CIRCLE"
+            [pt]="helpButtonPassThrough"
+            [rounded]="true"
+            [text]="true"
+            (onClick)="openHelp()"
+          />
+        } @else {
+          <app-help-button />
+        }
+        <p-button
+          class="invai-dialog__close"
+          type="button"
+          severity="secondary"
+          [ariaLabel]="ariaLabels().close"
+          [disabled]="isBusy()"
+          [icon]="icons.TIMES"
+          [rounded]="true"
+          [text]="true"
+          (onClick)="requestClose()"
+        />
+      </div>
     </div>
   </ng-template>
 

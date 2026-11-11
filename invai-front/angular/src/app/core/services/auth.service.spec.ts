@@ -1,6 +1,10 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import {
+  ALL_USER_PERMISSIONS,
+  NO_USER_PERMISSIONS,
+} from '@core/auth/user-permissions.model';
 import { environment } from '@environments/environment';
 
 import { AUTH_REDIRECT, OAuthService } from './auth.service';
@@ -139,12 +143,77 @@ describe('OAuthService', () => {
     expect(result).toHaveBeenCalledWith({
       id: 'mgarcia',
       username: 'mgarcia',
+      permissions: ALL_USER_PERMISSIONS,
     });
     expect(service.currentUser()).toEqual({
       id: 'mgarcia',
       username: 'mgarcia',
+      permissions: ALL_USER_PERMISSIONS,
     });
     expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('should read the permissions of the user returned by /auth/me', () => {
+    service.loadCurrentUser().subscribe();
+
+    httpTesting.expectOne(authMeUrl).flush({
+      authenticated: true,
+      username: 'mgarcia',
+      permissions: {
+        systems: false,
+        development: true,
+        security: false,
+        data: false,
+        accessibility: false,
+        integration: false,
+        documentation: true,
+        dir3: true,
+        responsibleRead: true,
+        responsibleWrite: false,
+        superUser: false,
+      },
+    });
+
+    expect(service.permissions()).toEqual({
+      ...NO_USER_PERMISSIONS,
+      development: true,
+      documentation: true,
+      dir3: true,
+      responsibleRead: true,
+    });
+  });
+
+  it('should deny the permissions /auth/me leaves out or does not set to true', () => {
+    service.loadCurrentUser().subscribe();
+
+    httpTesting.expectOne(authMeUrl).flush({
+      authenticated: true,
+      username: 'mgarcia',
+      permissions: { security: true, superUser: 'true', data: 1 },
+    });
+
+    expect(service.permissions()).toEqual({ ...NO_USER_PERMISSIONS, security: true });
+  });
+
+  it('should grant every permission when /auth/me predates them', () => {
+    service.loadCurrentUser().subscribe();
+
+    httpTesting.expectOne(authMeUrl).flush({ authenticated: true, username: 'mgarcia' });
+
+    expect(service.permissions()).toEqual(ALL_USER_PERMISSIONS);
+  });
+
+  it('should have no permissions while nobody is logged in', () => {
+    expect(service.permissions()).toEqual(NO_USER_PERMISSIONS);
+
+    service.loadCurrentUser().subscribe();
+    httpTesting.expectOne(authMeUrl).flush({ authenticated: true, username: 'mgarcia' });
+    service.logout();
+    httpTesting
+      .expectOne(`${environment.apiBasePath}/auth/logout`)
+      .flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(service.permissions()).toEqual(NO_USER_PERMISSIONS);
   });
 
   it('should include the full name returned by /auth/me', () => {
@@ -158,6 +227,7 @@ describe('OAuthService', () => {
       id: 'mgarcia',
       username: 'mgarcia',
       fullName: 'Mario García',
+      permissions: ALL_USER_PERMISSIONS,
     });
   });
 
@@ -171,6 +241,7 @@ describe('OAuthService', () => {
     expect(service.currentUser()).toEqual({
       id: 'mgarcia',
       username: 'mgarcia',
+      permissions: ALL_USER_PERMISSIONS,
     });
   });
 
@@ -186,6 +257,7 @@ describe('OAuthService', () => {
       user: {
         id: 'mgarcia',
         username: 'mgarcia',
+        permissions: ALL_USER_PERMISSIONS,
       },
     });
     expect(service.isAuthenticated()).toBe(true);

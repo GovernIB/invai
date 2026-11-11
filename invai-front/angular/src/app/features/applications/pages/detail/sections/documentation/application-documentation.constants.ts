@@ -8,6 +8,13 @@ export const APPLICATION_ATTACHMENT_MAX_FILE_BYTES = 5 * 1024 * 1024;
 export const APPLICATION_LINK_TITLE_MAX_LENGTH = 250;
 export const APPLICATION_LINK_DESCRIPTION_MAX_LENGTH = 1000;
 export const APPLICATION_LINK_URL_MAX_LENGTH = 500;
+// Limits the back-end sets on the sending of documents by e-mail.
+export const APPLICATION_EMAIL_MAX_RECIPIENTS = 20;
+export const APPLICATION_EMAIL_RECIPIENT_MAX_LENGTH = 320;
+export const APPLICATION_EMAIL_SUBJECT_MAX_LENGTH = 250;
+export const APPLICATION_EMAIL_MESSAGE_MAX_LENGTH = 4000;
+// Largest total size of the files attached to one e-mail.
+export const APPLICATION_EMAIL_MAX_ATTACHMENTS_BYTES = 15 * 1024 * 1024;
 
 export const APPLICATION_ATTACHMENTS_COLUMNS: KeyLabel[] = [
   {
@@ -17,12 +24,6 @@ export const APPLICATION_ATTACHMENTS_COLUMNS: KeyLabel[] = [
     minWidth: '14rem',
     wrap: true,
     maxWidth: '24rem',
-  },
-  {
-    key: 'section',
-    label: $localize`:@@applicationAttachmentsColumnSection:Secció`,
-    sortBy: 'section',
-    minWidth: '9rem',
   },
   {
     key: 'mimeType',
@@ -79,10 +80,12 @@ export const APPLICATION_LINKS_COLUMNS: KeyLabel[] = [
     maxWidth: '32rem',
   },
   {
-    key: 'section',
-    label: $localize`:@@applicationLinksColumnSection:Secció`,
-    sortBy: 'section',
+    key: 'category',
+    label: $localize`:@@applicationLinksColumnCategory:Categoria`,
+    sortBy: 'category',
     minWidth: '9rem',
+    wrap: true,
+    maxWidth: '24rem',
   },
   {
     key: 'url',

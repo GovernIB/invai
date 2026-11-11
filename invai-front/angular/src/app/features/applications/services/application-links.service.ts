@@ -42,10 +42,10 @@ export class ApplicationLinksService extends BaseApiService {
 
 function linkHttpParams(
   applicationId: number,
-  { quickSearch, sectionId, deleted, ...page }: ApplicationLinkPageParams,
+  { quickSearch, categoryId, deleted, ...page }: ApplicationLinkPageParams,
 ): HttpParams {
   let params = (toPageHttpParams(page) ?? new HttpParams()).set('applicationId', applicationId);
-  const filters = { quickSearch: quickSearch?.trim() || undefined, sectionId, deleted };
+  const filters = { quickSearch: quickSearch?.trim() || undefined, categoryId, deleted };
   for (const [key, value] of Object.entries(filters)) {
     if (value != null) params = params.set(key, String(value));
   }

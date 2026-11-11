@@ -1,4 +1,11 @@
 import { expect, test } from './support/auth.fixture';
+import { test as applicationTest } from './support/application.fixture';
+import {
+  activeCatalogItem,
+  assignResponsible,
+  createExternalPerson,
+  responsibleTypes,
+} from './support/application-responsibles';
 import type { Locator, Page, TestInfo } from '@playwright/test';
 
 import { CleanupRegistry } from './support/cleanup-registry';
@@ -48,15 +55,6 @@ interface RoleTransferRequest {
   items: { id: number; type: 'RESPONSIBLE' | 'AUTHORIZED' }[];
   toPersonEmailAddress: string | null;
   revoke: boolean;
-}
-
-interface RoleAssignmentResponse {
-  id: number;
-  type: 'RESPONSIBLE' | 'AUTHORIZED';
-  applicationId: number;
-  applicationName: string;
-  responsibleType: { id: number; name: string; nameEs: string } | null;
-  authorizationTypes: Array<{ id: number; name: string; nameEs: string }> | null;
 }
 
 interface QuickSearchConfig {
@@ -296,90 +294,58 @@ test.describe('maintenance section navigation', () => {
     await expect(companies).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('prepares and confirms a controlled role transfer without mutating test data', async ({
-    page,
-  }) => {
-    let postedBatch: RoleTransferRequest | null = null;
-    const people = [
-      {
-        id: 901,
-        firstName: 'E2E Persona',
-        lastName: 'origen',
-        email: 'origen@example.org',
-        personalCaib: false,
-        company: null,
-        deletedAt: null,
-      },
-      {
-        id: 902,
-        firstName: 'E2E Persona',
-        lastName: 'destí',
-        email: 'desti@example.org',
-        personalCaib: false,
-        company: null,
-        deletedAt: null,
-      },
-    ];
-
-    // The pickers search the database and Soffid at once through /person/all.
-    await page.route('**/invaiback/person/all**', (route) =>
-      route.fulfill({
-        json: {
-          database: { content: people, totalElements: people.length, number: 0, last: true },
-          soffid: { content: [], totalElements: 0, number: 0, last: true },
+  // Moves a real responsibility of a disposable application between two external people of the
+  // test. The transfer only reads Soffid, to look up a destination missing from the database.
+  applicationTest(
+    'prepares and confirms a role transfer between two people of the test',
+    async ({ page, cleanupRegistry, disposableApplication }, testInfo) => {
+      const company = await activeCatalogItem(page, '/invaiback/company');
+      const source = await createExternalPerson(page, cleanupRegistry, testInfo, company, 'Origen');
+      const destination = await createExternalPerson(
+        page,
+        cleanupRegistry,
+        testInfo,
+        company,
+        'Desti',
+      );
+      const type = (await responsibleTypes(page)).find(
+        (candidate) => !candidate.requiresPersonalCaib,
+      )!;
+      const responsible = await assignResponsible(page, disposableApplication, source, type);
+      // People with active assignments cannot be removed: the application, and with it the
+      // assignment, goes first.
+      cleanupRegistry.register(
+        `application ${disposableApplication.code} before its people`,
+        async () => {
+          await page.request.delete(
+            apiUrl(page, `/invaiback/application/${disposableApplication.id}`),
+          );
         },
-      }),
-    );
-    await page.route('**/invaiback/role-transfer**', async (route) => {
-      if (route.request().method() === 'POST') {
-        postedBatch = route.request().postDataJSON() as RoleTransferRequest;
-        await route.fulfill({ status: 204 });
-        return;
-      }
-      const assignments: RoleAssignmentResponse[] = route.request().url().endsWith('/901')
-        ? [
-            {
-              id: 7001,
-              type: 'RESPONSIBLE',
-              applicationId: 8001,
-              applicationName: 'E2E Aplicació',
-              responsibleType: {
-                id: 8002,
-                name: 'Responsable de servei',
-                nameEs: 'Responsable de servicio',
-              },
-              authorizationTypes: null,
-            },
-          ]
-        : [];
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(assignments),
-      });
-    });
+      );
 
-    await page.goto('/manteniments/responsables#role-transfer');
-    await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
-    await selectPerson(page, 'role-transfer-source', /^E2E Persona origen/);
-    await expect(page.getByRole('heading', { name: 'E2E Aplicació' })).toBeVisible();
-    await page.getByRole('checkbox', { name: /Responsable de servei/ }).check();
-    await page.getByRole('button', { name: 'Mou els rols seleccionats al lot' }).click();
-    await selectPerson(page, 'role-transfer-destination', /^E2E Persona destí/);
-    await page.getByRole('button', { name: 'Transfereix els rols preparats' }).click();
-    await page.getByRole('button', { name: "Confirma l'acció" }).click();
+      await page.goto('/manteniments/responsables#role-transfer');
+      await expect(page.locator('.app-initial-loader')).toBeHidden({ timeout: 30_000 });
+      await searchPerson(page, 'role-transfer-source', source);
+      await expect(page.getByRole('heading', { name: disposableApplication.name })).toBeVisible();
+      await page.getByRole('checkbox', { name: new RegExp(type.name) }).check();
+      await page.getByRole('button', { name: 'Mou els rols seleccionats al lot' }).click();
+      await searchPerson(page, 'role-transfer-destination', destination);
+      const transferPromise = waitForMaintenanceResponse(page, 'POST', '/invaiback/role-transfer');
+      await page.getByRole('button', { name: 'Transfereix els rols preparats' }).click();
+      await page.getByRole('button', { name: "Confirma l'acció" }).click();
 
-    await expect
-      .poll(() => postedBatch)
-      .toEqual({
-        items: [{ id: 7001, type: 'RESPONSIBLE' }],
-        toPersonEmailAddress: 'desti@example.org',
+      const transfer = await transferPromise;
+      await expectSuccessfulResponse(transfer);
+      expect(transfer.request().postDataJSON() as RoleTransferRequest).toEqual({
+        items: [{ id: responsible.id, type: 'RESPONSIBLE' }],
+        toPersonEmailAddress: destination.email,
         revoke: false,
       });
-    await expect(
-      page.locator('.role-transfer-status').getByText("Els rols s'han transferit correctament."),
-    ).toBeVisible();
-  });
+      await expect(
+        page.locator('.role-transfer-status').getByText("Els rols s'han transferit correctament."),
+      ).toBeVisible();
+    },
+  );
 
   test('keeps wide maintenance tables inside the expanded panel', async ({ page }) => {
     // Narrow enough for the commissions table to overflow and scroll inside its panel.
@@ -866,9 +832,25 @@ async function fillCommissionDialog(page: Page, input: MaintenanceInput): Promis
 }
 
 // Person options also show the e-mail and the source, so they are matched by their start.
-async function selectPerson(page: Page, inputId: string, name: RegExp): Promise<void> {
+// The pickers search the database and Soffid at once through /person/all.
+async function searchPerson(
+  page: Page,
+  inputId: string,
+  person: { firstName: string; lastName: string },
+): Promise<void> {
   await page.locator(`#${inputId}`).click();
-  await page.getByRole('option', { name }).click();
+  const search = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.pathname === '/invaiback/person/all' &&
+      [...url.searchParams.values()].includes(person.lastName)
+    );
+  });
+  await page.locator('.p-select-overlay:visible input.p-select-filter').fill(person.lastName);
+  await search;
+  await page
+    .getByRole('option', { name: new RegExp(`${person.firstName} ${person.lastName}`) })
+    .click();
 }
 
 async function expectDialogValues(
@@ -1109,28 +1091,39 @@ function displayDate(date: string): string {
 // browser locale, so it shows "7/21/2026" or "21/7/2026" instead of the picker's "21/07/2026".
 test.fixme('shows the commission approval date in the application format when consulting it', async ({
   page,
-}) => {
-  await page.route(/\/invaiback\/commission(?:\?.*)?$/, (route) =>
-    route.fulfill({
-      json: {
-        content: [
-          {
-            id: 9901,
-            name: 'E2E Comissió data',
-            nameEs: 'E2E Comisión fecha',
-            expedientNumber: 'E2E-DATA',
-            approvalDate: '2026-07-21',
-            commissionType: 'TECNICA',
-            deletedAt: null,
-          },
-        ],
-        totalElements: 1,
-      },
-    }),
-  );
-  await page.goto('/manteniments/general#commissions');
+}, testInfo) => {
+  const cleanup = new CleanupRegistry(testInfo);
+  const token = uniqueToken(testInfo);
+  try {
+    await page.goto('/manteniments/general#commissions');
+    const commission = await expectApiJsonResponse<MaintenanceResponse>(
+      await page.request.post(apiUrl(page, '/invaiback/commission'), {
+        data: {
+          name: `E2E Comissió data ${token}`,
+          nameEs: `E2E Comisión fecha ${token}`,
+          expedientNumber: `E2E-DATA-${token}`,
+          approvalDate: '2026-07-21',
+          commissionType: 'TECNICA',
+        },
+      }),
+      'POST /invaiback/commission',
+    );
+    registerSoftDeleteCleanup<MaintenanceResponse>({
+      page,
+      cleanup,
+      label: `commission E2E-DATA-${token}`,
+      pathname: '/invaiback/commission',
+      target: { id: commission.id, matches: (item) => item.id === commission.id },
+    });
+    await page.reload();
+    await page
+      .getByRole('textbox', { name: 'Cerca ràpida de comissions' })
+      .fill(`E2E-DATA-${token}`);
 
-  const row = page.getByRole('row').filter({ hasText: 'E2E-DATA' });
-  await selectRowAction(page, row, VIEW_ACTION);
-  await expect(page.locator('#commission-dialog-approval-date-view')).toHaveValue('21/07/2026');
+    const row = page.getByRole('row').filter({ hasText: `E2E-DATA-${token}` });
+    await selectRowAction(page, row, VIEW_ACTION);
+    await expect(page.locator('#commission-dialog-approval-date-view')).toHaveValue('21/07/2026');
+  } finally {
+    await cleanup.runAll();
+  }
 });

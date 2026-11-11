@@ -13,7 +13,7 @@ import {
 } from '../document-categories.model';
 
 // Categories and subcategories share the same endpoints; a page only lists categories, each one
-// with all its subcategories.
+// with the subcategories its filters match. `getById` returns every subcategory of a category.
 @Injectable({ providedIn: 'root' })
 export class DocumentCategoriesService extends BaseApiService {
   protected override readonly ENTITY_URI = 'documentation/category';

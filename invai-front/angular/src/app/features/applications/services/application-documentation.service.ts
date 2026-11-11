@@ -13,6 +13,7 @@ import {
   ApplicationDocumentInput,
   ApplicationDocumentUpdateInput,
   ApplicationDocumentVersionInput,
+  ApplicationDocumentationEmailInput,
 } from '../application-documentation.model';
 
 // Documents attached to the applications and their versions. Creating a document or adding a
@@ -56,6 +57,12 @@ export class ApplicationDocumentationService extends BaseApiService {
     return this.http.delete<void>(this.url(id));
   }
 
+  // Sends versions of documents by e-mail; answers with no content once the mail server has
+  // accepted the message, and with HTTP 502 when it hasn't.
+  sendByEmail(input: ApplicationDocumentationEmailInput): Observable<void> {
+    return this.http.post<void>(this.url('email'), input);
+  }
+
   // `inline` asks for the file to be shown in the browser instead of downloaded.
   getDocumentVersionFile(
     id: number,
@@ -79,10 +86,10 @@ export class ApplicationDocumentationService extends BaseApiService {
 
 function documentHttpParams(
   applicationId: number,
-  { search, sectionId, statusId, categoryId, mimeTypeId, deleted, ...page }: ApplicationAttachmentPageParams,
+  { search, statusId, categoryId, subcategoryId, mimeTypeId, deleted, ...page }: ApplicationAttachmentPageParams,
 ): HttpParams {
   let params = (toPageHttpParams(page) ?? new HttpParams()).set('applicationId', applicationId);
-  const filters = { search: search?.trim() || undefined, sectionId, statusId, categoryId, mimeTypeId, deleted };
+  const filters = { search: search?.trim() || undefined, statusId, categoryId, subcategoryId, mimeTypeId, deleted };
   for (const [key, value] of Object.entries(filters)) {
     if (value != null) params = params.set(key, String(value));
   }

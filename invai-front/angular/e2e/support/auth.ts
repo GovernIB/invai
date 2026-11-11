@@ -33,7 +33,7 @@ export async function authenticateAgainstRealIdp(page: Page, baseURL: string): P
       .locator('app-main-layout')
       .waitFor({ state: 'visible', timeout: idpNavigationTimeout })
       .then(() => 'authenticated' as const),
-  ]);
+  ]).catch((error: unknown) => failIdpLogin(page, 'reaching the IdP login form', error));
 
   if (authenticationState === 'credentials') {
     const username = process.env.E2E_USERNAME;
@@ -51,7 +51,8 @@ export async function authenticateAgainstRealIdp(page: Page, baseURL: string): P
     await passwordLoginButton.click();
     await page
       .locator('app-main-layout')
-      .waitFor({ state: 'visible', timeout: idpNavigationTimeout });
+      .waitFor({ state: 'visible', timeout: idpNavigationTimeout })
+      .catch((error: unknown) => failIdpLogin(page, 'signing in with E2E_USERNAME', error));
   }
 
   if (page.url().startsWith(canonicalAppOrigin)) {
@@ -69,6 +70,19 @@ export async function authenticateAgainstRealIdp(page: Page, baseURL: string): P
   }
 
   await expect(page.locator('app-main-layout')).toBeVisible();
+}
+
+// Ends the run with what the IdP showed, so a rejected login is not mistaken for a slow page.
+async function failIdpLogin(page: Page, step: string, cause: unknown): Promise<never> {
+  const shownText = await page
+    .locator('body')
+    .innerText({ timeout: 5_000 })
+    .catch(() => '');
+  const shown = shownText.replace(/\s+/g, ' ').trim().slice(0, 500);
+  throw new Error(
+    `IdP login failed while ${step} at ${page.url()}. The page showed: "${shown}"`,
+    { cause },
+  );
 }
 
 async function copyApiSessionToLocalOrigin(

@@ -1,3 +1,4 @@
+import { HELP_TOPICS, helpTopic } from '@core/components/help-modal/help-topics';
 import { ACCESSIBILITY_MAINTENANCE_RESOLVE_KEY, accessibilityMaintenanceResolver } from './accessibility/pages/accessibility-maintenance/accessibility-maintenance.resolver';
 import { inject } from '@angular/core';
 import { Route, Router, Routes } from '@angular/router';
@@ -85,6 +86,7 @@ export const MAINTENANCES_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: MAINTENANCES_ROUTES_LABELS.GENERAL,
+          ...helpTopic(HELP_TOPICS.maintenanceGeneral),
         },
         resolve: {
           [CATEGORIES_LIST_RESOLVE_KEY]: categoriesListResolver,
@@ -101,6 +103,7 @@ export const MAINTENANCES_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: MAINTENANCES_ROUTES_LABELS.RESPONSIBLES,
+          ...helpTopic(HELP_TOPICS.maintenanceResponsibles),
         },
         resolve: {
           [RESPONSIBLES_MAINTENANCE_RESOLVE_KEY]: responsiblesMaintenanceResolver,
@@ -111,6 +114,7 @@ export const MAINTENANCES_ROUTES: Routes = [
         loadComponent: () =>
           import('@features/systems/pages/systems-shell/systems-shell').then((m) => m.SystemsShell),
         data: {
+          ...helpTopic(HELP_TOPICS.maintenanceSystems),
           breadcrumb: SYSTEMS_ROUTES_LABELS.BASE,
         },
         resolve: {
@@ -124,6 +128,7 @@ export const MAINTENANCES_ROUTES: Routes = [
             (m) => m.DevelopmentMaintenance,
           ),
         data: {
+          ...helpTopic(HELP_TOPICS.maintenanceDevelopment),
           breadcrumb: MAINTENANCES_ROUTES_LABELS.DEVELOPMENT,
         },
         resolve: {
@@ -139,7 +144,10 @@ export const MAINTENANCES_ROUTES: Routes = [
           import('./accessibility/pages/accessibility-maintenance/accessibility-maintenance').then(
             (m) => m.AccessibilityMaintenance,
           ),
-        data: { breadcrumb: MAINTENANCES_ROUTES_LABELS.ACCESSIBILITY },
+        data: {
+          ...helpTopic(HELP_TOPICS.maintenanceAccessibility),
+          breadcrumb: MAINTENANCES_ROUTES_LABELS.ACCESSIBILITY,
+        },
         resolve: { [ACCESSIBILITY_MAINTENANCE_RESOLVE_KEY]: accessibilityMaintenanceResolver },
       },
       {
@@ -149,6 +157,7 @@ export const MAINTENANCES_ROUTES: Routes = [
             (m) => m.SecurityMaintenance,
           ),
         data: {
+          ...helpTopic(HELP_TOPICS.maintenanceSecurity),
           breadcrumb: MAINTENANCES_ROUTES_LABELS.SECURITY,
         },
         resolve: {
@@ -162,6 +171,7 @@ export const MAINTENANCES_ROUTES: Routes = [
             (m) => m.IntegrationsMaintenance,
           ),
         data: {
+          ...helpTopic(HELP_TOPICS.maintenanceIntegrations),
           breadcrumb: MAINTENANCES_ROUTES_LABELS.INTEGRATIONS,
         },
         resolve: {
@@ -176,6 +186,7 @@ export const MAINTENANCES_ROUTES: Routes = [
             (m) => m.DocumentationMaintenance,
           ),
         data: {
+          ...helpTopic(HELP_TOPICS.maintenanceDocumentation),
           breadcrumb: MAINTENANCES_ROUTES_LABELS.DOCUMENTATION,
         },
         resolve: {
@@ -211,6 +222,7 @@ export const MAINTENANCES_ROUTES: Routes = [
   {
     path: `${MAINTENANCES_ROUTES_LOC.DOCUMENTATION}/${MAINTENANCES_ROUTES_LOC.DOCUMENT_CATEGORIES}/:id`,
     canDeactivate: [documentCategoryDetailCanDeactivate],
+    data: helpTopic(HELP_TOPICS.maintenanceDocumentCategory),
     loadComponent: () =>
       import('@features/document-categories/pages/detail/document-category-detail').then(
         (m) => m.DocumentCategoryDetail,

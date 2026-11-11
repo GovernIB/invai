@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { HELP_TOPICS, helpTopic } from '@core/components/help-modal/help-topics';
 import {
   APPLICATION_ACCESSIBILITY_RESOLVE_KEY,
   applicationAccessibilityResolver,
@@ -16,6 +17,7 @@ import {
   applicationDetailResolver,
 } from './pages/detail/application-detail.resolver';
 import { applicationDetailCanDeactivate } from './pages/detail/application-detail.guard';
+import { applicationTabGuard } from './pages/detail/application-detail-permissions';
 import { applicationDocumentDetailCanDeactivate } from './pages/document-detail/application-document-detail.guard';
 import { applicationDocumentDetailResolver, DOCUMENT_DETAIL_RESOLVE_KEY } from './pages/document-detail/application-document-detail.resolver';
 import {
@@ -51,6 +53,7 @@ export const APPLICATIONS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/list/applications-list').then((m) => m.ApplicationsList),
+    data: helpTopic(HELP_TOPICS.applicationsList),
     resolve: {
       [APPLICATIONS_LIST_RESOLVE_KEY]: applicationsListResolver,
     },
@@ -61,6 +64,7 @@ export const APPLICATIONS_ROUTES: Routes = [
       import('./pages/create/application-create').then((m) => m.ApplicationCreate),
     data: {
       breadcrumb: $localize`Afegir aplicació`,
+      ...helpTopic(HELP_TOPICS.applicationCreate),
     },
     resolve: {
       [APPLICATION_OPTIONS_RESOLVE_KEY]: applicationOptionsResolver,
@@ -68,17 +72,21 @@ export const APPLICATIONS_ROUTES: Routes = [
   },
   {
     path: ':id/documentation/:documentId',
+    data: helpTopic(HELP_TOPICS.applicationDocumentDetail),
     loadComponent: () => import('./pages/document-detail/application-document-detail').then((m) => m.ApplicationDocumentDetail),
     canDeactivate: [applicationDocumentDetailCanDeactivate],
     resolve: { [DOCUMENT_DETAIL_RESOLVE_KEY]: applicationDocumentDetailResolver },
   },
   {
     path: ':id',
+    canActivateChild: [applicationTabGuard],
     canDeactivate: [applicationDetailCanDeactivate],
     loadComponent: () =>
       import('./pages/detail/application-detail').then((m) => m.ApplicationDetail),
+    // The tabs without a topic of their own fall back to the one about the whole detail.
     data: {
       breadcrumb: $localize`Detall`,
+      ...helpTopic(HELP_TOPICS.applicationDetail),
     },
     resolve: {
       [APPLICATION_DETAIL_RESOLVE_KEY]: applicationDetailResolver,
@@ -93,6 +101,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`General`,
+          ...helpTopic(HELP_TOPICS.applicationGeneral),
         },
         resolve: {
           [APPLICATION_OPTIONS_RESOLVE_KEY]: applicationOptionsResolver,
@@ -106,6 +115,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`Responsable`,
+          ...helpTopic(HELP_TOPICS.applicationResponsible),
         },
         resolve: {
           [APPLICATION_RESPONSIBLE_RESOLVE_KEY]: applicationResponsibleResolver,
@@ -119,6 +129,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`Sistemes i BD`,
+          ...helpTopic(HELP_TOPICS.applicationSystemsDatabases),
         },
         resolve: {
           [APPLICATION_SYSTEMS_DATABASES_RESOLVE_KEY]: applicationSystemsDatabasesResolver,
@@ -132,6 +143,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`Desenvolupament`,
+          ...helpTopic(HELP_TOPICS.applicationDevelopment),
         },
         resolve: {
           [APPLICATION_DEVELOPMENT_RESOLVE_KEY]: applicationDevelopmentResolver,
@@ -145,6 +157,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`Accessibilitat`,
+          ...helpTopic(HELP_TOPICS.applicationAccessibility),
         },
         resolve: {
           [APPLICATION_ACCESSIBILITY_RESOLVE_KEY]: applicationAccessibilityResolver,
@@ -158,6 +171,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`Seguretat`,
+          ...helpTopic(HELP_TOPICS.applicationSecurity),
         },
         resolve: {
           [APPLICATION_SECURITY_RESOLVE_KEY]: applicationSecurityResolver,
@@ -171,6 +185,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`:@@applicationDataTitle:Dades`,
+          ...helpTopic(HELP_TOPICS.applicationData),
         },
         resolve: {
           [APPLICATION_DATA_RESOLVE_KEY]: applicationDataResolver,
@@ -184,6 +199,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`:@@applicationIntegrationsTitle:Integracions`,
+          ...helpTopic(HELP_TOPICS.applicationIntegrations),
         },
         resolve: {
           [APPLICATION_INTEGRATIONS_RESOLVE_KEY]: applicationIntegrationsResolver,
@@ -197,6 +213,7 @@ export const APPLICATIONS_ROUTES: Routes = [
           ),
         data: {
           breadcrumb: $localize`:@@applicationDocumentationTitle:Documentació`,
+          ...helpTopic(HELP_TOPICS.applicationDocumentation),
         },
         resolve: {
           [APPLICATION_DOCUMENTATION_RESOLVE_KEY]: applicationDocumentationResolver,

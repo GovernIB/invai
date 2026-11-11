@@ -16,7 +16,6 @@ describe('application documentation forms', () => {
 
     expect(form.getRawValue()).toEqual({
       title: '',
-      sectionId: null,
       file: null,
       categoryId: null,
       subcategoryId: null,
@@ -26,7 +25,7 @@ describe('application documentation forms', () => {
       Object.entries(form.controls)
         .filter(([, control]) => control.invalid)
         .map(([key]) => key),
-    ).toEqual(['title', 'sectionId', 'file', 'categoryId', 'versionLabel']);
+    ).toEqual(['title', 'file', 'categoryId', 'versionLabel']);
 
     form.patchValue({ title: ' ', versionLabel: 'x'.repeat(21) });
     expect([form.controls.title.hasError('pattern'), form.controls.versionLabel.hasError('maxlength')]).toEqual([
@@ -36,7 +35,6 @@ describe('application documentation forms', () => {
 
     form.patchValue({
       title: 'Pla de proves',
-      sectionId: 2,
       file: new File(['%PDF'], 'pla.pdf'),
       categoryId: 1,
       versionLabel: '1.0',
@@ -97,6 +95,14 @@ describe('application documentation forms', () => {
     }
   });
 
+  it('requires the category of a link', () => {
+    const { categoryId } = createApplicationLinkForm(fb).controls;
+
+    expect(categoryId.hasError('required')).toBe(true);
+    categoryId.setValue(3);
+    expect(categoryId.valid).toBe(true);
+  });
+
   it('limits the fields of a link as the back-end does', () => {
     const { title, description, url } = createApplicationLinkForm(fb).controls;
     const longUrl = (length: number) => 'https://' + 'a'.repeat(length - 'https://'.length);
@@ -116,7 +122,6 @@ describe('application documentation forms', () => {
     const filters = createApplicationAttachmentFiltersForm(fb);
 
     expect(filters.getRawValue()).toEqual({
-      sectionId: null,
       mimeTypeId: null,
       categoryId: null,
       subcategoryId: null,

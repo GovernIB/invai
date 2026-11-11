@@ -1,0 +1,1 @@
+var e="El texto supera el tama\xF1o m\xE1ximo permitido. Red\xFAcelo (los acentos y el formato tambi\xE9n ocupan espacio).";export{e as a};/**i18n:9fa542c6f17f570893e5bfce6175f9bb9e1d1bb7ee096369aaf6dc5812a678f2*/

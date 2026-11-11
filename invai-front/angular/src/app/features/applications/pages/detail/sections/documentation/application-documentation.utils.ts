@@ -10,7 +10,7 @@ import {
 } from '../../../../forms/application-documentation-form.factory';
 import { APPLICATION_DOCUMENTATION_TEXTS } from './application-documentation.i18n';
 
-// Option of a select built from the app-section or document-status catalog.
+// Option of a select built from the document-status catalog.
 export interface ApplicationDocumentationOption {
   value: number;
   label: string;

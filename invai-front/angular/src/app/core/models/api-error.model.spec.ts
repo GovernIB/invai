@@ -39,10 +39,11 @@ describe('API error model', () => {
     expect(isStructuredBadRequest(new Error('Request failed'))).toBe(false);
   });
 
-  it('reads the user message of structured 400 and 504 responses only', () => {
+  it('reads the user message of structured 400, 502 and 504 responses only', () => {
     const body = { error: 'Error', message: 'La aplicació ha trigat massa a respondre.' };
 
     expect(readApiErrorMessage(new HttpErrorResponse({ status: 400, error: body }))).toBe(body.message);
+    expect(readApiErrorMessage(new HttpErrorResponse({ status: 502, error: body }))).toBe(body.message);
     expect(readApiErrorMessage(new HttpErrorResponse({ status: 504, error: body }))).toBe(body.message);
     expect(readApiErrorMessage(new HttpErrorResponse({ status: 500, error: body }))).toBeNull();
     expect(readApiErrorMessage(new HttpErrorResponse({ status: 504, error: 'Gateway Timeout' }))).toBeNull();

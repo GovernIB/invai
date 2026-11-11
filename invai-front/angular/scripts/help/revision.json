@@ -1,0 +1,201 @@
+{
+  "commit": "fc88aff",
+  "date": "2026-11-06",
+  "documents": {
+    "getting-started/using-help.md": [
+      "src/app/core/components/help-modal/"
+    ],
+    "getting-started/header-and-user-menu.md": [
+      "src/app/app.html",
+      "src/app/app.i18n.ts",
+      "src/app/app.ts",
+      "src/app/core/components/user-menu/",
+      "src/app/core/components/main-layout/",
+      "src/app/core/components/breadcrumbs/",
+      "src/app/features/applications/applications.routes.i18n.ts",
+      "src/app/features/maintenances/maintenances.routes.i18n.ts",
+      "src/app/features/maintenances/maintenances.constants.ts",
+      "src/app/features/maintenances/pages/maintenances-shell/"
+    ],
+    "getting-started/interface-tips.md": [
+      "src/app/shared/components/",
+      "src/app/shared/classes/",
+      "src/app/shared/constants/table",
+      "src/app/shared/constants/text-field",
+      "src/app/shared/constants/soft-delete-status",
+      "src/app/core/components/server-error-dialog/",
+      "src/app/primeng-locale.config.ts"
+    ],
+    "applications/list.md": [
+      "src/app/features/applications/pages/list/",
+      "src/app/features/applications/components/applications-table/",
+      "src/app/features/applications/components/application-filters-form/",
+      "src/app/features/applications/applications.constants.ts"
+    ],
+    "applications/create.md": [
+      "src/app/features/applications/pages/create/",
+      "src/app/features/applications/components/application-form-fields/",
+      "src/app/features/applications/forms/application-form.factory.ts",
+      "src/app/features/administrative-units/"
+    ],
+    "application-detail/overview.md": [
+      "src/app/features/applications/pages/detail/application-detail",
+      "src/app/features/applications/pages/detail/components/",
+      "src/app/features/applications/application-completeness.ts",
+      "src/app/features/applications/applications.routes.ts"
+    ],
+    "application-detail/general.md": [
+      "src/app/features/applications/pages/detail/sections/general/",
+      "src/app/features/applications/components/application-form-fields/",
+      "src/app/features/applications/forms/application-form.factory.ts",
+      "src/app/features/administrative-units/"
+    ],
+    "application-detail/responsible.md": [
+      "src/app/features/applications/pages/detail/sections/responsible/",
+      "src/app/features/applications/forms/application-responsible-form.factory.ts",
+      "src/app/features/applications/forms/application-authorized-form.factory.ts",
+      "src/app/features/applications/forms/application-assignment-deactivate-form.factory.ts",
+      "src/app/features/applications/forms/application-dir3-manual-form.factory.ts",
+      "src/app/features/applications/application-dir3.utils.ts"
+    ],
+    "application-detail/systems-databases.md": [
+      "src/app/features/applications/pages/detail/sections/systems-databases/",
+      "src/app/features/applications/components/application-infrastructure-",
+      "src/app/features/applications/components/application-system-relation-dialog/",
+      "src/app/features/applications/components/application-database-relation-dialog/",
+      "src/app/features/applications/components/application-server-filters-form/",
+      "src/app/features/applications/components/application-database-filters-form/",
+      "src/app/features/applications/forms/application-infrastructure-",
+      "src/app/features/applications/application-infrastructure.utils.ts"
+    ],
+    "application-detail/development.md": [
+      "src/app/features/applications/pages/detail/sections/development/",
+      "src/app/features/applications/components/application-provider-dialog/",
+      "src/app/features/applications/components/application-providers-table/",
+      "src/app/features/applications/components/application-technology-dialog/",
+      "src/app/features/applications/components/application-technologies-table/",
+      "src/app/features/applications/forms/application-development-form.factory.ts"
+    ],
+    "application-detail/accessibility.md": [
+      "src/app/features/applications/pages/detail/sections/accessibility/",
+      "src/app/features/applications/forms/application-accessibility-form.factory.ts"
+    ],
+    "application-detail/security.md": [
+      "src/app/features/applications/pages/detail/sections/security/",
+      "src/app/features/applications/forms/application-security-form.factory.ts"
+    ],
+    "application-detail/data.md": [
+      "src/app/features/applications/pages/detail/sections/data/",
+      "src/app/features/applications/forms/application-data-form.factory.ts"
+    ],
+    "application-detail/integrations.md": [
+      "src/app/features/applications/pages/detail/sections/integrations/",
+      "src/app/features/applications/forms/application-integration-connection-form.factory.ts"
+    ],
+    "application-detail/documentation.md": [
+      "src/app/features/applications/pages/detail/sections/documentation/",
+      "src/app/features/applications/forms/application-documentation-form.factory.ts",
+      "src/app/features/applications/forms/application-documentation-email-form.factory.ts",
+      "src/app/features/applications/application-documentation.model.ts"
+    ],
+    "application-detail/document-detail.md": [
+      "src/app/features/applications/pages/document-detail/",
+      "src/app/features/applications/forms/application-document-detail-form.factory.ts",
+      "src/app/features/applications/pages/detail/sections/documentation/application-documentation.constants.ts"
+    ],
+    "maintenances/general.md": [
+      "src/app/features/maintenances/pages/general-maintenance/",
+      "src/app/features/maintenances/maintenances.constants.ts",
+      "src/app/features/maintenances/maintenances.i18n.ts",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/categories.md": [
+      "src/app/features/categories/"
+    ],
+    "maintenances/system-types.md": [
+      "src/app/features/system-types/"
+    ],
+    "maintenances/fields.md": [
+      "src/app/features/fields/"
+    ],
+    "maintenances/commissions.md": [
+      "src/app/features/commissions/"
+    ],
+    "maintenances/responsibles.md": [
+      "src/app/features/maintenances/pages/responsibles-maintenance/",
+      "src/app/features/maintenances/maintenances.constants.ts",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/role-transfer.md": [
+      "src/app/features/maintenances/responsibles/pages/role-transfer/"
+    ],
+    "maintenances/people.md": [
+      "src/app/features/maintenances/responsibles/"
+    ],
+    "maintenances/authorizations.md": [
+      "src/app/features/maintenances/responsibles/"
+    ],
+    "maintenances/companies.md": [
+      "src/app/features/maintenances/responsibles/"
+    ],
+    "maintenances/systems.md": [
+      "src/app/features/systems/",
+      "src/app/features/environments/",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/development.md": [
+      "src/app/features/roles/",
+      "src/app/features/technologies/",
+      "src/app/features/layers/",
+      "src/app/features/maintenances/pages/development-maintenance/",
+      "src/app/features/maintenances/maintenances.constants.ts",
+      "src/app/features/maintenances/maintenances.i18n.ts",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/accessibility.md": [
+      "src/app/features/maintenances/accessibility/",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/security.md": [
+      "src/app/features/maintenances/security/",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/integrations.md": [
+      "src/app/features/external-systems/",
+      "src/app/features/maintenances/pages/integrations-maintenance/",
+      "src/app/features/maintenances/maintenances.constants.ts",
+      "src/app/features/maintenances/maintenances.i18n.ts",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/documentation.md": [
+      "src/app/features/document-categories/",
+      "src/app/features/maintenances/pages/documentation-maintenance/",
+      "src/app/features/maintenances/maintenances.constants.ts",
+      "src/app/features/maintenances/maintenances.i18n.ts",
+      "src/app/features/maintenances/maintenances.routes.ts"
+    ],
+    "maintenances/document-category.md": [
+      "src/app/features/document-categories/"
+    ]
+  },
+  "ignore": [
+    "src/app/features/applications/services/",
+    "src/app/features/applications/resolvers/",
+    "src/app/features/applications/applications.model.ts",
+    "src/app/features/applications/application-dir3.model.ts",
+    "src/app/features/applications/validation-status.model.ts",
+    "src/app/features/applications/components/index.ts",
+    "src/app/core/services/",
+    "src/app/core/interceptors/",
+    "src/app/core/models/",
+    "src/app/core/enums/",
+    "src/app/core/components/route-tester/",
+    "src/app/shared/models/",
+    "src/app/shared/utils/",
+    "src/app/shared/directives/",
+    "src/app/shared/styles/",
+    "src/app/theme/",
+    "src/app/app.config.ts",
+    "src/app/app.scss"
+  ]
+}

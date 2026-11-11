@@ -36,7 +36,6 @@ import {
   APPLICATION_DOCUMENTATION_TEXTS,
 } from './application-documentation.i18n';
 import {
-  ApplicationDocumentationOption,
   ApplicationDocumentFileRejection,
   documentFileRejectionMessage,
   documentTypeOf,
@@ -65,7 +64,6 @@ export class ApplicationAttachmentDialog {
   mode = input.required<ApplicationDocumentationDialogMode>();
   categoryOptions = input<ApplicationDocumentCategoryOption[]>([]);
   isCategoriesLoading = input(false);
-  sectionOptions = input<ApplicationDocumentationOption[]>([]);
   // Accepted file formats. Their extensions limit the file picker, and a file outside them is
   // refused before it reaches the form; without them no file can be attached.
   mimeTypes = input<ApplicationDocumentMimeType[]>([]);
@@ -123,7 +121,7 @@ export class ApplicationAttachmentDialog {
       label: {
         'aria-describedby': this.describedBy(control, id) ?? undefined,
         'aria-invalid': this.isInvalid(control),
-        'aria-required': control === this.form().controls.sectionId || control === this.form().controls.categoryId,
+        'aria-required': control === this.form().controls.categoryId,
       },
     };
   }

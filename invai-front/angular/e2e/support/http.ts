@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import type { APIResponse, Page, Response } from '@playwright/test';
+import type { APIResponse, Page, Request, Response } from '@playwright/test';
 
 export function waitForApiResponse(
   page: Page,
@@ -50,4 +50,37 @@ export async function expectApiJsonResponse<T>(
 
 export function apiUrl(page: Pick<Page, 'url'>, pathname: string): string {
   return new URL(pathname, page.url()).toString();
+}
+
+export interface InterceptedRequests {
+  /** Requests that received the simulated answer. */
+  readonly hits: Request[];
+}
+
+// Answers the next `times` matching requests with an error and lets every other request reach the
+// real back-end. Only for tests whose subject is that error answer.
+export async function failApiRequest(
+  page: Page,
+  method: string,
+  pathname: string | RegExp,
+  response: { status: number; json?: unknown; body?: string },
+  { times = 1, matchesUrl = () => true }: { times?: number; matchesUrl?: (url: URL) => boolean } = {},
+): Promise<InterceptedRequests> {
+  const intercepted: InterceptedRequests = { hits: [] };
+  await page.route(
+    (url) => matchesPath(url.pathname, pathname) && matchesUrl(url),
+    async (route) => {
+      const request = route.request();
+      if (request.method() !== method || intercepted.hits.length >= times) {
+        return route.fallback();
+      }
+      intercepted.hits.push(request);
+      return route.fulfill(response);
+    },
+  );
+  return intercepted;
+}
+
+function matchesPath(actual: string, expected: string | RegExp): boolean {
+  return typeof expected === 'string' ? actual === expected : expected.test(actual);
 }

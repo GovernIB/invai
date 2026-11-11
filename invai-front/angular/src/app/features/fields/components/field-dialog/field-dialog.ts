@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -42,6 +43,7 @@ export type FieldDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FieldDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceFields;
   visible = model(false);
   form = input.required<FieldFormGroup>();
   mode = input.required<FieldDialogMode>();

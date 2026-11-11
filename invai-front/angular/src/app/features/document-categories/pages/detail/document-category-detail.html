@@ -129,9 +129,11 @@
         <h2 id="document-category-detail-permissions-title">{{ texts.permissionsTitle }}</h2>
         <p class="document-category-detail__info">
           <i aria-hidden="true" [class]="icons.INFO_CIRCLE"></i>
-          <span>{{ texts.permissionsInfo }}</span>
+          <span>{{ isActive() ? texts.permissionsInfo : texts.permissionsInactive }}</span>
         </p>
-        <app-document-category-permissions-table [form]="permissionsForm" />
+        @if (isActive()) {
+          <app-document-category-permissions-table [form]="permissionsForm" />
+        }
       </section>
 
       <div class="document-category-detail__actions">

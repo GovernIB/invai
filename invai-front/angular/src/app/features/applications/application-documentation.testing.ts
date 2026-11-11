@@ -3,17 +3,18 @@ import { SpringPage } from '@models/page.model';
 import {
   ApplicationAttachment,
   ApplicationDocument,
+  ApplicationDocumentCategory,
   ApplicationDocumentMimeType,
-  ApplicationDocumentSection,
   ApplicationDocumentStatus,
   ApplicationDocumentVersion,
 } from './application-documentation.model';
 
 // Test fixtures shared by the application documentation specs, shaped as the back-end sends them.
-export const DOCUMENT_SECTIONS: ApplicationDocumentSection[] = [
-  { id: 1, code: 'GENERAL', name: 'General', nameEs: 'General' },
-  { id: 3, code: 'SYSTEMS', name: 'Sistemes', nameEs: 'Sistemas' },
-  { id: 4, code: 'DATABASE', name: 'Base de dades', nameEs: 'Base de datos' },
+// Categories a link can be filed under.
+export const DOCUMENT_CATEGORIES: ApplicationDocumentCategory[] = [
+  { id: 1, name: 'General', nameEs: 'General', parentId: null },
+  { id: 3, name: 'Sistemes', nameEs: 'Sistemas', parentId: null },
+  { id: 4, name: 'Base de dades', nameEs: 'Base de datos', parentId: null },
 ];
 
 export const DOCUMENT_STATUSES: ApplicationDocumentStatus[] = [
@@ -31,7 +32,6 @@ export function documentRow(overrides: Partial<ApplicationAttachment> = {}): App
   return {
     id: 1,
     title: 'Manual API v2',
-    section: DOCUMENT_SECTIONS[0],
     mimeType: { id: 1, name: 'PDF' },
     category: { id: 1, name: 'Tècnica', nameEs: 'Técnica', parentId: null },
     subcategory: { id: 11, name: 'Manuals', nameEs: 'Manuales', parentId: 1 },
@@ -65,7 +65,6 @@ export function documentDetail(overrides: Partial<ApplicationDocument> = {}): Ap
     id: row.id,
     applicationId: 1,
     title: row.title,
-    section: row.section,
     category: row.category,
     subcategory: row.subcategory,
     status: row.status,

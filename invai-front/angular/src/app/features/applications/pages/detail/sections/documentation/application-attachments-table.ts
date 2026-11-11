@@ -53,7 +53,6 @@ export class ApplicationAttachmentsTable extends TableComponentBase<ApplicationA
 
   protected cellText(row: ApplicationAttachment, key: string): string {
     switch (key) {
-      case 'section':
       case 'category':
       case 'subcategory':
         return documentationLabel(row[key], this.locale);

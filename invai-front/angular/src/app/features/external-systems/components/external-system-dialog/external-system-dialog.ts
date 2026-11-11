@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -44,6 +45,7 @@ export type ExternalSystemDialogMode = 'create' | 'view' | 'edit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExternalSystemDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceIntegrations;
   visible = model(false);
   form = input.required<ExternalSystemFormGroup>();
   mode = input.required<ExternalSystemDialogMode>();

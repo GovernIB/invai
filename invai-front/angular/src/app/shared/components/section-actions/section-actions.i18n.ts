@@ -10,3 +10,4 @@ export const SECTION_ACTIONS_FILTERS_APPLIED_ARIA_LABEL = (label: string, count:
 export const SECTION_ACTIONS_COLUMNS_ARIA_LABEL = $localize`Mostra o oculta columnes`;
 export const SECTION_ACTIONS_EXPORT_ARIA_LABEL = $localize`Exporta a Excel`;
 export const SECTION_ACTIONS_ADD_ARIA_LABEL = $localize`Afegeix`;
+export const SECTION_ACTIONS_EMAIL_ARIA_LABEL = $localize`:@@sectionActionsEmailAriaLabel:Envia per correu`;

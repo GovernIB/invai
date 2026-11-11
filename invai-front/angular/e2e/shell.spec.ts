@@ -1,77 +1,53 @@
-import { expect, test, type Page, type Route } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-test.use({ storageState: { cookies: [], origins: [] } });
+import { expect, test } from './support/auth.fixture';
+import { failApiRequest } from './support/http';
 
-const IDP_LOGIN_URL = 'https://idp.caib.es/e2e-login';
+const IDP_ORIGIN = /^https:\/\/idp\.caib\.es\//;
 const IDP_LOGOUT_URL = 'https://idp.caib.es/logout.jsp';
-
-const emptyPage = { content: [], totalElements: 0, totalPages: 1, last: true, number: 0 };
-
-interface ShellMock {
-  meRequests: number;
-  logoutPosts: number;
-  authenticated: boolean;
-  applicationListResponses: Array<{ status: number; json: unknown }>;
-}
-
-async function openShell(page: Page, options: { authenticated?: boolean } = {}): Promise<ShellMock> {
-  const mock: ShellMock = {
-    meRequests: 0,
-    logoutPosts: 0,
-    authenticated: options.authenticated ?? true,
-    applicationListResponses: [],
-  };
-  await page.route('https://idp.caib.es/**', (route) =>
-    route.fulfill({ contentType: 'text/html', body: '<h1>IdP</h1>' }),
-  );
-  await page.route('**/invaiapi/externa/config/url', (route) =>
-    route.fulfill({ json: { url: IDP_LOGIN_URL } }),
-  );
-  await page.route('**/invaiback/**', async (route: Route) => {
-    const request = route.request();
-    const path = new URL(request.url()).pathname;
-    if (path.endsWith('/auth/me')) {
-      mock.meRequests++;
-      return mock.authenticated
-        ? route.fulfill({ json: { authenticated: true, username: 'u12345' } })
-        : route.fulfill({ status: 401, json: {} });
-    }
-    if (path.endsWith('/auth/logout')) {
-      mock.logoutPosts++;
-      return route.fulfill({ status: 204 });
-    }
-    if (path.endsWith('/invaiback/application') && mock.applicationListResponses.length > 0) {
-      return route.fulfill(mock.applicationListResponses.shift()!);
-    }
-    return route.fulfill({ json: emptyPage });
-  });
-  return mock;
-}
+const APPLICATION_API_PATH = '/invaiback/application';
 
 const userMenu = (page: Page) => page.getByTestId('button-user-menu-testid');
 
-test('sends a visitor without a session to the IdP login', async ({ page }) => {
-  const mock = await openShell(page, { authenticated: false });
+test('sends a visitor without a session to the IdP login', async ({ browser, baseURL }) => {
+  const visitor = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+  try {
+    const page = await visitor.newPage();
+    const meStatuses: number[] = [];
+    page.on('response', (response) => {
+      if (new URL(response.url()).pathname === '/invaiback/auth/me') {
+        meStatuses.push(response.status());
+      }
+    });
 
-  await page.goto('/');
+    await page.goto('/');
 
-  await expect(page).toHaveURL(IDP_LOGIN_URL);
-  expect(mock.meRequests).toBe(1);
+    await expect(page).toHaveURL(IDP_ORIGIN, { timeout: 30_000 });
+    expect(meStatuses).toEqual([401]);
+  } finally {
+    await visitor.close();
+  }
 });
 
+// Ends the real session: the next test signs in again through the auth fixture.
 test('closes the session and leaves for the IdP logout', async ({ page }) => {
-  const mock = await openShell(page);
   await page.goto('/');
+  const logout = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname === '/invaiback/auth/logout',
+  );
 
   await userMenu(page).click();
   await page.getByRole('button', { name: 'Tancar sessió' }).click();
 
-  await expect(page).toHaveURL(IDP_LOGOUT_URL);
-  expect(mock.logoutPosts).toBe(1);
+  expect((await logout).status()).toBe(204);
+  await expect(page).toHaveURL((url) => url.href.startsWith(IDP_LOGOUT_URL));
+  const me = await page.request.get('/invaiback/auth/me');
+  expect(me.status()).toBe(401);
 });
 
 test('changes the font size and keeps it after reloading', async ({ page }) => {
-  await openShell(page);
   await page.goto('/');
   const fontSize = () =>
     page.evaluate(() => document.documentElement.style.getPropertyValue('--font-size'));
@@ -93,27 +69,8 @@ test('changes the font size and keeps it after reloading', async ({ page }) => {
   expect(await page.evaluate(() => localStorage.getItem('fontSize'))).toBe('0.9');
 });
 
-test('opens the help centre from the user menu and toggles it with Ctrl+K', async ({ page }) => {
-  await openShell(page);
-  await page.goto('/');
-  // The help dialog uses a custom header, so it has no accessible name; find it by its heading.
-  const help = page
-    .getByRole('dialog')
-    .filter({ has: page.getByRole('heading', { name: "Centre d'ajuda" }) });
-
-  await userMenu(page).click();
-  await page.getByRole('button', { name: 'Obrir ajuda' }).click();
-  await expect(help).toBeVisible();
-  await expect(help.getByRole('combobox', { name: "Cerca en tota l'ajuda" })).toBeVisible();
-
-  await page.keyboard.press('Control+k');
-  await expect(help).toBeHidden();
-  await page.keyboard.press('Control+k');
-  await expect(help).toBeVisible();
-});
-
 test('remembers the chosen language and loads its bundle', async ({ page }) => {
-  await openShell(page);
+  // The Spanish bundle only exists in the localized build, not in the dev server.
   await page.route('**/invaifront/es/**', (route) =>
     route.fulfill({ contentType: 'text/html', body: '<h1>ES</h1>' }),
   );
@@ -128,7 +85,6 @@ test('remembers the chosen language and loads its bundle', async ({ page }) => {
 });
 
 test('collapses and expands the side navigation', async ({ page }) => {
-  await openShell(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
 
@@ -146,8 +102,7 @@ test('collapses and expands the side navigation', async ({ page }) => {
 });
 
 test('shows a structured bad request in the server error dialog', async ({ page }) => {
-  const mock = await openShell(page);
-  mock.applicationListResponses.push({
+  await failApiRequest(page, 'GET', APPLICATION_API_PATH, {
     status: 400,
     json: { error: 'Petició incorrecta', message: 'El filtre E2E no és vàlid.' },
   });
@@ -163,22 +118,15 @@ test('shows a structured bad request in the server error dialog', async ({ page 
 test('keeps the user in the app when a 401 arrives with the session still alive', async ({
   page,
 }) => {
-  const mock = await openShell(page);
-  mock.applicationListResponses.push({ status: 401, json: {} });
+  const meStatuses: number[] = [];
+  page.on('response', (response) => {
+    if (new URL(response.url()).pathname === '/invaiback/auth/me') meStatuses.push(response.status());
+  });
+  const listing = await failApiRequest(page, 'GET', APPLICATION_API_PATH, { status: 401, json: {} });
   await page.goto('/');
 
-  await expect.poll(() => mock.meRequests).toBe(2);
+  await expect.poll(() => listing.hits.length).toBe(1);
+  await expect.poll(() => meStatuses).toEqual([200, 200]);
   await expect(page.locator('app-main-layout')).toBeVisible();
   await expect(page).toHaveURL(/localhost:4200\//);
-});
-
-// help-modal.html replaces the dialog header with a template, so PrimeNG no longer labels the
-// dialog with its title; every role="dialog" must have an accessible name.
-test.fixme('names the help centre dialog after its title', async ({ page }) => {
-  await openShell(page);
-  await page.goto('/');
-
-  await userMenu(page).click();
-  await page.getByRole('button', { name: 'Obrir ajuda' }).click();
-  await expect(page.getByRole('dialog', { name: "Centre d'ajuda" })).toBeVisible();
 });

@@ -223,11 +223,10 @@ export class ApplicationDocumentDetail implements OnDestroy {
     const value = this.form.getRawValue();
     if (value.categoryId == null || value.statusId == null) return;
     this.isSaving.set(true);
-    // The section is not edited here, but the back-end requires it.
     this.service.updateDocument(detail.document.id, {
       title: value.title.trim(),
-      sectionId: detail.document.section.id,
-      categoryId: value.subcategoryId ?? value.categoryId,
+      categoryId: value.categoryId,
+      subcategoryId: value.subcategoryId,
       statusId: value.statusId,
     }).pipe(finalize(() => this.isSaving.set(false)), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (document) => {

@@ -45,3 +45,19 @@ export async function selectRowAction(
   await row.getByRole('button', { name: rowActionsButton }).click();
   await page.getByRole('menuitem', { name: action, exact: true }).click();
 }
+
+// Picks the first option of an empty select and retries until the select shows a value: a list
+// that re-renders while it opens (another test changed its catalog) can swallow the click.
+export async function selectFirstOption(page: Page, inputId: string): Promise<void> {
+  const select = page.locator(`#${inputId}`);
+  const empty = (await select.textContent())?.trim() ?? '';
+  await expect(async () => {
+    if ((await select.getAttribute('aria-expanded')) !== 'true') await select.click();
+    const option = page.getByRole('option').first();
+    await expect(option, `No options are available for #${inputId}`).toBeVisible({
+      timeout: 5_000,
+    });
+    await option.click();
+    await expect(select).not.toHaveText(empty, { timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
+}

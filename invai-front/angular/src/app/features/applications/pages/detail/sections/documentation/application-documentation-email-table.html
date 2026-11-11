@@ -1,0 +1,100 @@
+<div class="invai-table-loading-container" [attr.aria-busy]="isLoading()">
+  @if (isLoading()) {
+    <div class="invai-table-loading-shield" aria-hidden="true">
+      <span class="invai-table-refresh-indicator"></span>
+    </div>
+  }
+  <p-table
+    dataKey="id"
+    paginatorDropdownAppendTo="body"
+    styleClass="application-documentation-email-table"
+    [currentPageReportTemplate]="currentPageReportTemplate"
+    [first]="first()"
+    [lazy]="true"
+    [lazyLoadOnInit]="false"
+    [paginator]="true"
+    [paginatorStyleClass]="paginatorStyleClass"
+    [rowHover]="true"
+    [rows]="paginatorRows"
+    [rowsPerPageOptions]="rowsPerPageOptions"
+    [scrollable]="true"
+    [showCurrentPageReport]="true"
+    [stripedRows]="true"
+    [totalRecords]="itemsList().total"
+    [value]="itemsList().items"
+    (onLazyLoad)="pageChange.emit($event)"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th class="application-documentation-email-table__selection">
+          <span class="sr-only">{{ texts.columns.selection }}</span>
+        </th>
+        <th style="min-width: 14rem">
+          <span class="invai-table-header-label">{{ texts.columns.document }}</span>
+        </th>
+        <th style="min-width: 5rem">
+          <span class="invai-table-header-label">{{ texts.columns.format }}</span>
+        </th>
+        <th class="application-documentation-email-table__version">
+          <span class="invai-table-header-label">{{ texts.columns.version }}</span>
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template let-attachment pTemplate="body">
+      @let selected = selection().get(attachment.id);
+      <tr
+        [class.application-documentation-email-table__selectable]="isSelectable(attachment)"
+        [class.application-documentation-email-table__selected]="selected"
+        [attr.tabindex]="isSelectable(attachment) ? 0 : null"
+        (click)="onRowToggle($event, attachment)"
+        (keydown.enter)="onRowToggle($event, attachment)"
+      >
+        <td class="application-documentation-email-table__selection">
+          <p-checkbox
+            [ariaLabel]="texts.selectAriaLabel(attachment.title)"
+            [binary]="true"
+            [disabled]="!isSelectable(attachment)"
+            [inputId]="'application-documentation-email-select-' + attachment.id"
+            [ngModel]="!!selected"
+            (onChange)="selectionChange.emit(attachment)"
+          />
+        </td>
+        <td>
+          <span
+            class="invai-table-cell-content invai-table-cell-content--wrap"
+            style="max-width: 24rem"
+          >
+            {{ attachment.title }}
+          </span>
+        </td>
+        <td>
+          <span class="invai-table-cell-content">{{ attachment.mimeType?.name || '—' }}</span>
+        </td>
+        <td class="application-documentation-email-table__version">
+          @if (selected) {
+            <p-select
+              appendTo="body"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [ariaLabel]="texts.versionAriaLabel(attachment.title)"
+              [loading]="selected.versions === null"
+              [ngModel]="selected.versionId"
+              [options]="versionOptions(attachment, selected)"
+              (ngModelChange)="onVersionChange(attachment.id, $event)"
+            />
+          } @else {
+            <span class="invai-table-cell-content">{{ attachment.versionLabel || '—' }}</span>
+          }
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4">{{ texts.empty }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

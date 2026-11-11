@@ -1,0 +1,2 @@
+import{a as s}from"./chunk-2VLQ7OQ4.js";import{jc as o}from"./chunk-DMGFOOAC.js";import{a as i}from"./chunk-IN2LPUTO.js";function g(e,r){let n=s(e)??new o;return Object.entries(r).forEach(([a,t])=>{t!==void 0&&t!==""&&(n=n.set(a,String(t)))}),n.keys().length?n:void 0}function u(e,r){return JSON.stringify(i({page:e?.page??null,size:e?.size??null,sort:Array.isArray(e?.sort)?e.sort.join("|"):e?.sort??""},r))}export{g as a,u as b};
+/**i18n:9fa542c6f17f570893e5bfce6175f9bb9e1d1bb7ee096369aaf6dc5812a678f2*/

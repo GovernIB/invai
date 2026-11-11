@@ -12,7 +12,8 @@ export const DOCUMENT_CATEGORY_DETAIL_TEXTS = {
   addSubcategoryAriaLabel: (name: string) =>
     $localize`:@@documentCategoryDetailAddSubcategoryAriaLabel:Afegeix una subcategoria a «${name}:name:»`,
   permissionsTitle: $localize`:@@documentCategoryDetailPermissions:Permisos d'accés`,
-  permissionsInfo: $localize`:@@documentCategoryDetailPermissionsInfo:Defineix què pot fer cada rol amb els documents d'aquesta categoria. Les subcategories hereten aquests permisos, excepte si es personalitzen.`,
+  permissionsInfo: $localize`:@@documentCategoryDetailPermissionsInfo:Defineix què pot fer cada rol amb els documents d'aquesta categoria i de les seves subcategories. Una categoria nova només dona permís de lectura a cada rol.`,
+  permissionsInactive: $localize`:@@documentCategoryDetailPermissionsInactive:Els permisos només es poden consultar i modificar en les categories actives.`,
   save: $localize`:@@documentCategoryDetailSave:Desa`,
   saveAriaLabel: $localize`:@@documentCategoryDetailSaveAriaLabel:Desa els canvis de la categoria`,
   back: $localize`:@@documentCategoryDetailBack:Tornar`,

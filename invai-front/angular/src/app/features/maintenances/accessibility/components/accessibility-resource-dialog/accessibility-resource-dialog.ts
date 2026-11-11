@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -27,6 +28,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccessibilityResourceDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceAccessibility;
   visible = model(false);
   form = input.required<AccessibilityResourceFormGroup>();
   mode = input.required<CrudEntityDialogMode>();

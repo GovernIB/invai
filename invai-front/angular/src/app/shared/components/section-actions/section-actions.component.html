@@ -103,6 +103,17 @@
         i18n-pTooltip
       />
     }
+    @if (showEmailButton()) {
+      <p-button
+        [icon]="PrimeIcons.ENVELOPE"
+        [outlined]="true"
+        [ariaLabel]="emailButtonAriaLabel()"
+        styleClass="invai-table-toolbar-button"
+        (onClick)="onEmailItems()"
+        [pTooltip]="emailTooltip"
+        tooltipPosition="top"
+      />
+    }
     @if (!hideAddButton()) {
       <p-button
         [disabled]="disableAddButton()"

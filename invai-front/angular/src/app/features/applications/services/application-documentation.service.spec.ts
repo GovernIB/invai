@@ -39,7 +39,8 @@ describe('ApplicationDocumentationService', () => {
         size: 10,
         sort: 'versionLabel,desc',
         search: '  manual ',
-        sectionId: 3,
+        categoryId: 1,
+        subcategoryId: 11,
         statusId: 1,
         deleted: false,
       })
@@ -49,9 +50,10 @@ describe('ApplicationDocumentationService', () => {
     const params = request.request.params;
     expect(request.request.method).toBe('GET');
     expect(params.keys().sort()).toEqual(
-      ['applicationId', 'deleted', 'page', 'search', 'sectionId', 'size', 'sort', 'statusId'],
+      ['applicationId', 'categoryId', 'deleted', 'page', 'search', 'size', 'sort', 'statusId', 'subcategoryId'],
     );
     expect([params.get('applicationId'), params.get('search'), params.get('deleted')]).toEqual(['7', 'manual', 'false']);
+    expect([params.get('categoryId'), params.get('subcategoryId')]).toEqual(['1', '11']);
     expect([params.get('page'), params.get('size'), params.get('sort')]).toEqual(['2', '10', 'versionLabel,desc']);
     request.flush({ content: [] });
   });
@@ -60,7 +62,7 @@ describe('ApplicationDocumentationService', () => {
     service.getDocument(4).subscribe();
     httpTesting.expectOne({ method: 'GET', url: `${DOCUMENTATION_URL}/4` }).flush({ id: 4 });
 
-    const input = { title: 'Manual', sectionId: 1, categoryId: 12, statusId: 2 };
+    const input = { title: 'Manual', categoryId: 1, subcategoryId: 12, statusId: 2 };
     service.updateDocument(4, input).subscribe();
     const update = httpTesting.expectOne({ method: 'PUT', url: `${DOCUMENTATION_URL}/4` });
     expect(update.request.body).toEqual(input);
@@ -70,13 +72,31 @@ describe('ApplicationDocumentationService', () => {
     httpTesting.expectOne({ method: 'DELETE', url: `${DOCUMENTATION_URL}/4` }).flush(null);
   });
 
+  it('sends versions of documents by e-mail as a JSON body', () => {
+    const input = {
+      applicationId: 7,
+      recipients: ['ana@example.org'],
+      subject: "Documentació de l'aplicació INVAI",
+      message: null,
+      attachments: [{ documentId: 4, versionId: 41 }],
+    };
+    const sent = vi.fn();
+
+    service.sendByEmail(input).subscribe(sent);
+
+    const request = httpTesting.expectOne({ method: 'POST', url: `${DOCUMENTATION_URL}/email` });
+    expect(request.request.body).toEqual(input);
+    request.flush(null, { status: 204, statusText: 'No Content' });
+    expect(sent).toHaveBeenCalledOnce();
+  });
+
   it('sends the data as a JSON part and the file as a second part', async () => {
     const file = new File(['%PDF'], 'manual.pdf', { type: 'application/pdf' });
     const input = {
       applicationId: 7,
       title: 'Manual',
-      sectionId: 1,
-      categoryId: 12,
+      categoryId: 1,
+      subcategoryId: null,
       statusId: 2,
       versionLabel: '1.0',
     };

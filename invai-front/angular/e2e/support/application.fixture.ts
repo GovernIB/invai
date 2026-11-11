@@ -4,7 +4,7 @@ import { CleanupRegistry } from './cleanup-registry';
 import { uniqueToken } from './data';
 import { findAvailableApplicationPrefix } from './application-prefix';
 import { apiUrl, expectApiJsonResponse, expectJsonResponse, waitForApiResponse } from './http';
-import { selectOption } from './ui';
+import { selectFirstOption } from './ui';
 import { expect, test as authenticatedTest } from './auth.fixture';
 
 const APPLICATION_API_PATH = '/invaiback/application';
@@ -14,9 +14,15 @@ interface ApplicationOutput {
   id: number;
   code: string | null;
   name: string | null;
+  prefix: string | null;
   status: 'ACTIVE' | 'INACTIVE' | null;
   appInformationSystemDbId: number | null;
   appDevelopmentId: number | null;
+  appResponsibleAuthorizedId: number | null;
+  appSecurityId: number | null;
+  appAccessibilityId: number | null;
+  appDataId: number | null;
+  appIntegrationId: number | null;
 }
 
 interface ApplicationPageResponse {
@@ -27,9 +33,15 @@ export interface DisposableApplication {
   id: number;
   code: string;
   name: string;
+  prefix: string;
   status: 'ACTIVE' | 'INACTIVE' | null;
   appInformationSystemDbId: number | null;
   appDevelopmentId: number | null;
+  appResponsibleAuthorizedId: number | null;
+  appSecurityId: number | null;
+  appAccessibilityId: number | null;
+  appDataId: number | null;
+  appIntegrationId: number | null;
 }
 
 interface ApplicationFixtures {
@@ -45,59 +57,69 @@ export const test = authenticatedTest.extend<ApplicationFixtures>({
     await registry.runAll();
   },
 
-  disposableApplication: async ({ page, cleanupRegistry }, use, testInfo) => {
-    const token = uniqueToken(testInfo, 7);
-    const code = `E2E${token}`;
-    const name = `E2E Playwright fixture ${code}`;
-    let createdId: number | undefined;
+  // Creating the application through the UI can take longer than a whole test under load.
+  disposableApplication: [
+    async ({ page, cleanupRegistry }, use, testInfo) => {
+      const token = uniqueToken(testInfo, 7);
+      const code = `E2E${token}`;
+      const name = `E2E Playwright fixture ${code}`;
+      let createdId: number | undefined;
 
-    cleanupRegistry.register(`application-${code}`, async () => {
-      const id = createdId ?? (await findActiveApplicationId(page, code));
-      if (!id) return;
+      cleanupRegistry.register(`application-${code}`, async () => {
+        const id = createdId ?? (await findActiveApplicationId(page, code));
+        if (!id) return;
 
-      await deactivateApplicationIfActive(page, id);
-    });
+        await deactivateApplicationIfActive(page, id);
+      });
 
-    await page.goto('/');
-    const prefix = await findAvailableApplicationPrefix(page, token);
-    await page.getByRole('button', { name: 'Afegeix una aplicació' }).click();
-    await expect(page.getByRole('heading', { name: 'Afegir aplicació' })).toBeVisible();
+      await page.goto('/');
+      const prefix = await findAvailableApplicationPrefix(page, token);
+      await page.getByRole('button', { name: 'Afegeix una aplicació' }).click();
+      await expect(page.getByRole('heading', { name: 'Afegir aplicació' })).toBeVisible();
 
-    await page.locator('#create-application-application').fill(name);
-    await selectOption(page, 'create-application-category');
-    await selectOption(page, 'create-application-information-system');
-    await selectOption(page, 'create-application-scope');
-    await page.locator('#create-application-prefix').fill(prefix);
-    await page.locator('#create-application-code').fill(code);
-    await selectOption(page, 'create-application-administrative-unit');
-    await selectOption(page, 'create-application-commission');
-    await page
-      .locator('#create-application-description')
-      .fill(`Created by the disposable Playwright fixture ${token}`);
+      await page.locator('#create-application-application').fill(name);
+      await selectFirstOption(page, 'create-application-category');
+      await selectFirstOption(page, 'create-application-information-system');
+      await selectFirstOption(page, 'create-application-scope');
+      await page.locator('#create-application-prefix').fill(prefix);
+      await page.locator('#create-application-code').fill(code);
+      await selectFirstOption(page, 'create-application-administrative-unit');
+      await selectFirstOption(page, 'create-application-commission');
+      await page
+        .locator('#create-application-description')
+        .fill(`Created by the disposable Playwright fixture ${token}`);
 
-    const createResponsePromise = waitForApiResponse(page, 'POST', APPLICATION_API_PATH);
-    await page.getByRole('button', { name: "Afegeix l'aplicació" }).click();
+      const createResponsePromise = waitForApiResponse(page, 'POST', APPLICATION_API_PATH);
+      await page.getByRole('button', { name: "Afegeix l'aplicació" }).click();
 
-    const created = await expectJsonResponse<ApplicationOutput>(await createResponsePromise);
-    createdId = created.id;
+      const created = await expectJsonResponse<ApplicationOutput>(await createResponsePromise);
+      createdId = created.id;
 
-    const detailResponse = await page.request.get(
-      apiUrl(page, `${APPLICATION_API_PATH}/${created.id}`),
-    );
-    const detail = await expectApiJsonResponse<ApplicationOutput>(
-      detailResponse,
-      `GET ${APPLICATION_API_PATH}/${created.id}`,
-    );
+      const detailResponse = await page.request.get(
+        apiUrl(page, `${APPLICATION_API_PATH}/${created.id}`),
+      );
+      const detail = await expectApiJsonResponse<ApplicationOutput>(
+        detailResponse,
+        `GET ${APPLICATION_API_PATH}/${created.id}`,
+      );
 
-    await use({
-      id: detail.id,
-      code: detail.code ?? code,
-      name: detail.name ?? name,
-      status: detail.status,
-      appInformationSystemDbId: detail.appInformationSystemDbId,
-      appDevelopmentId: detail.appDevelopmentId,
-    });
-  },
+      await use({
+        id: detail.id,
+        code: detail.code ?? code,
+        name: detail.name ?? name,
+        prefix: detail.prefix ?? prefix,
+        status: detail.status,
+        appInformationSystemDbId: detail.appInformationSystemDbId,
+        appDevelopmentId: detail.appDevelopmentId,
+        appResponsibleAuthorizedId: detail.appResponsibleAuthorizedId,
+        appSecurityId: detail.appSecurityId,
+        appAccessibilityId: detail.appAccessibilityId,
+        appDataId: detail.appDataId,
+        appIntegrationId: detail.appIntegrationId,
+      });
+    },
+    { timeout: 90_000 },
+  ],
 });
 
 export { expect };

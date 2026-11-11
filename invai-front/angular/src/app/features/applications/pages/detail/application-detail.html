@@ -44,6 +44,7 @@
   <p-dialog
     styleClass="invai-dialog"
     [closable]="true"
+    [closeAriaLabel]="unsavedChangesCloseAriaLabel"
     [closeOnEscape]="true"
     [dismissableMask]="true"
     [draggable]="false"
@@ -54,9 +55,12 @@
     (onHide)="closeUnsavedChangesDialog()"
   >
     <ng-template #header>
-      <h2 class="m-0 text-base font-semibold">
-        {{ unsavedChangesTitle }}
-      </h2>
+      <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
+        <h2 class="m-0 text-base font-semibold">
+          {{ unsavedChangesTitle }}
+        </h2>
+        <app-help-button />
+      </div>
     </ng-template>
 
     <p class="m-0 whitespace-pre-line text-sm leading-5 text-color-secondary">

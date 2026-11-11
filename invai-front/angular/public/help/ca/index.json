@@ -1,0 +1,203 @@
+[
+  {
+    "label": "Primers passos",
+    "icon": "pi pi-compass",
+    "items": [
+      {
+        "label": "Com fer servir l'ajuda",
+        "icon": "pi pi-question-circle",
+        "document": "getting-started/using-help.md"
+      },
+      {
+        "label": "Capçalera i menú d'usuari",
+        "icon": "pi pi-user",
+        "document": "getting-started/header-and-user-menu.md"
+      },
+      {
+        "label": "Trucs de la interfície",
+        "icon": "pi pi-lightbulb",
+        "document": "getting-started/interface-tips.md"
+      }
+    ]
+  },
+  {
+    "label": "Aplicacions",
+    "icon": "pi pi-th-large",
+    "items": [
+      {
+        "label": "Llista d'aplicacions",
+        "icon": "pi pi-list",
+        "document": "applications/list.md"
+      },
+      {
+        "label": "Alta d'una aplicació",
+        "icon": "pi pi-plus",
+        "document": "applications/create.md"
+      },
+      {
+        "label": "Fitxa d'aplicació",
+        "icon": "pi pi-id-card",
+        "items": [
+          {
+            "label": "Com funciona la fitxa",
+            "icon": "pi pi-info-circle",
+            "document": "application-detail/overview.md"
+          },
+          {
+            "label": "General",
+            "icon": "pi pi-cog",
+            "document": "application-detail/general.md"
+          },
+          {
+            "label": "Responsables",
+            "icon": "pi pi-users",
+            "document": "application-detail/responsible.md"
+          },
+          {
+            "label": "Sistemes i BD",
+            "icon": "pi pi-server",
+            "document": "application-detail/systems-databases.md"
+          },
+          {
+            "label": "Desenvolupament",
+            "icon": "pi pi-code",
+            "document": "application-detail/development.md"
+          },
+          {
+            "label": "Accessibilitat",
+            "icon": "pi pi-eye",
+            "document": "application-detail/accessibility.md"
+          },
+          {
+            "label": "Seguretat",
+            "icon": "pi pi-shield",
+            "document": "application-detail/security.md"
+          },
+          {
+            "label": "Dades",
+            "icon": "pi pi-database",
+            "document": "application-detail/data.md"
+          },
+          {
+            "label": "Integracions",
+            "icon": "pi pi-share-alt",
+            "document": "application-detail/integrations.md"
+          },
+          {
+            "label": "Documentació",
+            "icon": "pi pi-folder",
+            "document": "application-detail/documentation.md"
+          },
+          {
+            "label": "Detall d'un document",
+            "icon": "pi pi-file-edit",
+            "document": "application-detail/document-detail.md"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "label": "Manteniments",
+    "icon": "pi pi-wrench",
+    "items": [
+      {
+        "label": "General",
+        "icon": "pi pi-cog",
+        "items": [
+          {
+            "label": "Com funciona General",
+            "icon": "pi pi-info-circle",
+            "document": "maintenances/general.md"
+          },
+          {
+            "label": "Categories",
+            "icon": "pi pi-tags",
+            "document": "maintenances/categories.md"
+          },
+          {
+            "label": "Sistemes d'informació",
+            "icon": "pi pi-desktop",
+            "document": "maintenances/system-types.md"
+          },
+          {
+            "label": "Àmbits",
+            "icon": "pi pi-globe",
+            "document": "maintenances/fields.md"
+          },
+          {
+            "label": "Comissió informàtica",
+            "icon": "pi pi-briefcase",
+            "document": "maintenances/commissions.md"
+          }
+        ]
+      },
+      {
+        "label": "Responsables",
+        "icon": "pi pi-users",
+        "items": [
+          {
+            "label": "Com funciona Responsables",
+            "icon": "pi pi-info-circle",
+            "document": "maintenances/responsibles.md"
+          },
+          {
+            "label": "Transferència i revocació de rols",
+            "icon": "pi pi-arrows-h",
+            "document": "maintenances/role-transfer.md"
+          },
+          {
+            "label": "Personal extern",
+            "icon": "pi pi-user",
+            "document": "maintenances/people.md"
+          },
+          {
+            "label": "Autoritzacions",
+            "icon": "pi pi-key",
+            "document": "maintenances/authorizations.md"
+          },
+          {
+            "label": "Empreses",
+            "icon": "pi pi-building",
+            "document": "maintenances/companies.md"
+          }
+        ]
+      },
+      {
+        "label": "Sistemes i DB",
+        "icon": "pi pi-server",
+        "document": "maintenances/systems.md"
+      },
+      {
+        "label": "Desenvolupament",
+        "icon": "pi pi-code",
+        "document": "maintenances/development.md"
+      },
+      {
+        "label": "Accessibilitat",
+        "icon": "pi pi-eye",
+        "document": "maintenances/accessibility.md"
+      },
+      {
+        "label": "Seguretat",
+        "icon": "pi pi-shield",
+        "document": "maintenances/security.md"
+      },
+      {
+        "label": "Integracions",
+        "icon": "pi pi-sitemap",
+        "document": "maintenances/integrations.md"
+      },
+      {
+        "label": "Documentació",
+        "icon": "pi pi-folder",
+        "document": "maintenances/documentation.md"
+      },
+      {
+        "label": "Detall d’una categoria documental",
+        "icon": "pi pi-file-edit",
+        "document": "maintenances/document-category.md"
+      }
+    ]
+  }
+]

@@ -1726,7 +1726,7 @@
         <source>Ctrl + K</source>
         <target>Ctrl + K</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.html</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
       </trans-unit>
@@ -1734,40 +1734,40 @@
         <source>Centre d&apos;ajuda</source>
         <target>Centro de ayuda</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">1</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">2</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9144802843265396593" datatype="html">
         <source>Cerca en tota l&apos;ajuda</source>
         <target>Buscar en toda la ayuda</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">2</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3700544988914475699" datatype="html">
         <source>Temes d&apos;ajuda</source>
         <target>Temas de ayuda</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">5</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3837851089154424816" datatype="html">
         <source>Cercar en tota l&apos;ajuda...</source>
         <target>Buscar en toda la ayuda...</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9115321636464642612" datatype="html">
         <source>No s&apos;han trobat resultats</source>
         <target>No se han encontrado resultados</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">7</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/constants/table.constants.ts</context>
@@ -1778,8 +1778,88 @@
         <source>Seleccioneu un tema d&apos;ajuda a la llista de l&apos;esquerra</source>
         <target>Seleccione un tema de ayuda en la lista de la izquierda</target>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-menu/components/help-modal/help-modal.i18n.ts</context>
-          <context context-type="linenumber">5</context>
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6017411832613633294" datatype="html">
+        <source>(s&apos;obre en una pestanya nova)</source>
+        <target>(se abre en una pestaña nueva)</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4030901574723894119" datatype="html">
+        <source>Tema obert</source>
+        <target>Tema abierto</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8044125571857243326" datatype="html">
+        <source>1 tema trobat</source>
+        <target>1 tema encontrado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9088238858875426694" datatype="html">
+        <source><x id="count" equiv-text="count"/> temes trobats</source>
+        <target><x id="count" equiv-text="count"/> temas encontrados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8232870802096540067" datatype="html">
+        <source>Tanca el centre d&apos;ajuda</source>
+        <target>Cerrar el centro de ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8643514409263022518" datatype="html">
+        <source>Carregant els temes d&apos;ajuda</source>
+        <target>Cargando los temas de ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5538647063908320372" datatype="html">
+        <source>No s&apos;han pogut carregar els temes d&apos;ajuda.</source>
+        <target>No se han podido cargar los temas de ayuda.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7150460412241622427" datatype="html">
+        <source>Encara no hi ha temes d&apos;ajuda.</source>
+        <target>Todavía no hay temas de ayuda.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3448102828786452439" datatype="html">
+        <source>Carregant el tema d&apos;ajuda</source>
+        <target>Cargando el tema de ayuda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1785236987187464535" datatype="html">
+        <source>No s&apos;ha pogut carregar el tema d&apos;ajuda.</source>
+        <target>No se ha podido cargar el tema de ayuda.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/help-modal/help-modal.i18n.ts</context>
+          <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2932353828576119109" datatype="html">
@@ -7427,9 +7507,145 @@
         <source>Tanca la declaració d'accessibilitat</source>
         <target>Cierra la declaración de accesibilidad</target>
       </trans-unit>
-      <trans-unit id="accessibilityStatementPendingAudit" datatype="html">
-        <source>La primera auditoria d'accessibilitat d'aquesta aplicació encara està pendent de realitzar. La declaració d'accessibilitat es publicarà en aquest apartat un cop finalitzada.</source>
-        <target>La primera auditoría de accesibilidad de esta aplicación todavía está pendiente de realizar. La declaración de accesibilidad se publicará en este apartado una vez finalizada.</target>
+      <trans-unit id="accessibilityStatementCommitment" datatype="html">
+        <source>El Govern de les Illes Balears s'ha compromès a fer accessible l'aplicació <x id="INTERPOLATION" equiv-text="{{ evaluation.app }}"/>, de conformitat amb el <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.royalDecree&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Reial Decret 1112/2018<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>, de 7 de setembre, d'accessibilitat dels llocs web i aplicacions mòbils del sector públic.</source>
+        <target>El Gobierno de las Illes Balears se ha comprometido a hacer accesible la aplicación <x id="INTERPOLATION" equiv-text="{{ evaluation.app }}"/>, de conformidad con el <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.royalDecree&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Real Decreto 1112/2018<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>, de 7 de septiembre, de accesibilidad de los sitios web y aplicaciones para dispositivos móviles del sector público.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementScope" datatype="html">
+        <source>La present declaració d'accessibilitat s'aplica a l'entorn de l'aplicació: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;evaluation.urlApp&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/><x id="INTERPOLATION" equiv-text="{{ evaluation.urlApp }}"/><x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. S'exclouen de l'abast les pàgines que condueixen a enllaços externs.</source>
+        <target>La presente declaración de accesibilidad se aplica al entorno de la aplicación: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;evaluation.urlApp&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/><x id="INTERPOLATION" equiv-text="{{ evaluation.urlApp }}"/><x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. Se excluyen del alcance las páginas que conducen a enlaces externos.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementExternalLinks" datatype="html">
+        <source>Els enllaços externs d'aquesta declaració s'obren en una pestanya nova.</source>
+        <target>Los enlaces externos de esta declaración se abren en una pestaña nueva.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementComplianceTitle" datatype="html">
+        <source>Situació de compliment</source>
+        <target>Situación de cumplimiento</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementComplianceText" datatype="html">
+        <source>L'aplicació és parcialment conforme amb el <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.royalDecree&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Reial Decret 1112/2018<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>, a causa de les mancances de conformitat que s'indiquen a continuació.</source>
+        <target>La aplicación es parcialmente conforme con el <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.royalDecree&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Real Decreto 1112/2018<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>, debido a las faltas de conformidad que se indican a continuación.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementInaccessibleTitle" datatype="html">
+        <source>Contingut no accessible</source>
+        <target>Contenido no accesible</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementInaccessibleIntro" datatype="html">
+        <source>El contingut que es recull a continuació no és accessible pels següents motius (manca de conformitat amb el Reial Decret 1112/2018):</source>
+        <target>El contenido que se recoge a continuación no es accesible por los siguientes motivos (falta de conformidad con el Real Decreto 1112/2018):</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementInaccessibleDisabledLink" datatype="html">
+        <source>L'enllaç al codi font, quan no està disponible, és un element no interactiu amb l'atribut aria-label, que ARIA no permet en elements genèrics.</source>
+        <target>El enlace al código fuente, cuando no está disponible, es un elemento no interactivo con el atributo aria-label, que ARIA no permite en elementos genéricos.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementInaccessibleNumberFields" datatype="html">
+        <source>En alguns formularis, l'estat d'error dels camps numèrics (aria-invalid) no arriba a l'element d'entrada.</source>
+        <target>En algunos formularios, el estado de error de los campos numéricos (aria-invalid) no llega al elemento de entrada.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementPreparationTitle" datatype="html">
+        <source>Preparació de la present declaració d'accessibilitat</source>
+        <target>Preparación de la presente declaración de accesibilidad</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementPreparedOn" datatype="html">
+        <source>La present declaració va ser preparada el <x id="INTERPOLATION" equiv-text="{{ evaluation.dateText }}"/>.</source>
+        <target>La presente declaración fue preparada el <x id="INTERPOLATION" equiv-text="{{ evaluation.dateText }}"/>.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementMethod" datatype="html">
+        <source>El mètode emprat per preparar la declaració ha estat una validació manual amb eines assistides (Google Lighthouse i axe devTools) sobre una mostra representativa de pantalles.</source>
+        <target>El método empleado para preparar la declaración ha sido una validación manual con herramientas asistidas (Google Lighthouse y axe devTools) sobre una muestra representativa de pantallas.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactTitle" datatype="html">
+        <source>Observacions i dades de contacte</source>
+        <target>Observaciones y datos de contacto</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactIntro" datatype="html">
+        <source>Podeu comunicar qualsevol possible incompliment o dificultat d'accés al contingut i formular suggeriments de millora.</source>
+        <target>Puede comunicar cualquier posible incumplimiento o dificultad de acceso al contenido y formular sugerencias de mejora.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactChannels" datatype="html">
+        <source>Mitjançant el formulari de <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.contactForm&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>contacte<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/> o trucant al telèfon 971177140.</source>
+        <target>Mediante el formulario de <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.contactForm&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>contacto<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/> o llamando al teléfono 971177140.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactSubmit" datatype="html">
+        <source>Podeu presentar:</source>
+        <target>Puede presentar:</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactComplaint" datatype="html">
+        <source>Una queixa relativa al compliment dels requisits del Reial Decret 1112/2018 o</source>
+        <target>Una queja relativa al cumplimiento de los requisitos del Real Decreto 1112/2018 o</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactRequest" datatype="html">
+        <source>Una sol·licitud d'informació accessible relativa a:</source>
+        <target>Una solicitud de información accesible relativa a:</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactExcluded" datatype="html">
+        <source>Continguts exclosos de l'àmbit d'aplicació del Reial Decret 1112/2018 (article 3, apartat 4), o</source>
+        <target>Contenidos excluidos del ámbito de aplicación del Real Decreto 1112/2018 (artículo 3, apartado 4), o</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactExempt" datatype="html">
+        <source>Continguts exempts per càrrega desproporcionada.</source>
+        <target>Contenidos exentos por carga desproporcionada.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementContactProcedure" datatype="html">
+        <source>Mitjançant el procediment: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.informationRequests&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Peticions d'informació accessible i queixes relatives a accessibilitat de llocs web i aplicacions mòbils<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
+        <target>Mediante el procedimiento: <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.informationRequests&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Peticiones de información accesible y quejas relativas a accesibilidad de sitios web y aplicaciones móviles<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementEnforcementTitle" datatype="html">
+        <source>Procediment d'aplicació</source>
+        <target>Procedimiento de aplicación</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementEnforcementInForce" datatype="html">
+        <source>El procediment de reclamació que recull l'article 13 del <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.royalDecree&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Reial Decret 1112/2018<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/> va entrar en vigor el 20 de setembre de 2020.</source>
+        <target>El procedimiento de reclamación que recoge el artículo 13 del <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.royalDecree&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Real Decreto 1112/2018<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/> entró en vigor el 20 de septiembre de 2020.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementEnforcementClaim" datatype="html">
+        <source>Si un cop realitzada una sol·licitud d'informació accessible o queixa, aquesta hagués estat desestimada, no s'estigués d'acord amb la decisió adoptada, o la resposta no complís els requisits previstos a l'article 12.5, la persona interessada podrà iniciar una reclamació. Igualment, es podrà iniciar una reclamació en el cas que hagi passat el termini de vint dies hàbils sense haver obtingut resposta.</source>
+        <target>Si una vez realizada una solicitud de información accesible o queja, esta hubiera sido desestimada, no se estuviera de acuerdo con la decisión adoptada, o la respuesta no cumpliera los requisitos previstos en el artículo 12.5, la persona interesada podrá iniciar una reclamación. Igualmente, se podrá iniciar una reclamación en el caso de que hayan pasado veinte días hábiles sin haber obtenido respuesta.</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementEnforcementProcedure" datatype="html">
+        <source>La reclamació pot ser presentada a través del procediment <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.claims&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Reclamacions relatives a accessibilitat de llocs web i aplicacions mòbils<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
+        <target>La reclamación puede ser presentada a través del procedimiento <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [href]=&quot;links.claims&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;"/>Reclamaciones relativas a accesibilidad de sitios web y aplicaciones móviles<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementAdditionalTitle" datatype="html">
+        <source>Informació addicional</source>
+        <target>Información adicional</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementLastReview" datatype="html">
+        <source>L'última revisió d'accessibilitat s'ha fet el <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/><x id="INTERPOLATION" equiv-text="{{ evaluation.dateText }}"/>.<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/></source>
+        <target>La última revisión de accesibilidad se ha realizado el <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/><x id="INTERPOLATION" equiv-text="{{ evaluation.dateText }}"/>.<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/></target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementReviewTools" datatype="html">
+        <source>S'han utilitzat eines automàtiques i una revisió manual de pantalles. El resultat estimat és el següent:</source>
+        <target>Se han utilizado herramientas automáticas y una revisión manual de pantallas. El resultado estimado es el siguiente:</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementIndicatorHeader" datatype="html">
+        <source>Indicador</source>
+        <target>Indicador</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementResultHeader" datatype="html">
+        <source>Resultat</source>
+        <target>Resultado</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementScoreLabel" datatype="html">
+        <source>Puntuació mitjana del lloc web</source>
+        <target>Puntuación media del sitio web</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementLevelLabel" datatype="html">
+        <source>Nivell d'adequació estimat</source>
+        <target>Nivel de adecuación estimado</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementComplianceLabel" datatype="html">
+        <source>Situació d'acompliment estimada</source>
+        <target>Situación de cumplimiento estimada</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementWcagLevel" datatype="html">
+        <source>Nivell <x id="INTERPOLATION" equiv-text="{{ evaluation.level }}"/> WCAG 2.1</source>
+        <target>Nivel <x id="INTERPOLATION" equiv-text="{{ evaluation.level }}"/> WCAG 2.1</target>
+      </trans-unit>
+      <trans-unit id="accessibilityStatementResponsive" datatype="html">
+        <source>L'aplicació està dissenyada per a la visualització responsive, optimitzada per a tauletes i dispositius mòbils.</source>
+        <target>La aplicación está diseñada para la visualización responsive, optimizada para tabletas y dispositivos móviles.</target>
       </trans-unit>
       <trans-unit id="textFieldMaxBytes" datatype="html">
         <source>El text supera la mida màxima permesa. Redueix-lo (els accents i el format també ocupen espai).</source>
@@ -7807,6 +8023,10 @@
         <source>Accés total</source>
         <target>Acceso total</target>
       </trans-unit>
+      <trans-unit id="documentCategoryPermissionsEmpty" datatype="html">
+        <source>Cap rol de l&apos;aplicació té permisos en aquesta categoria.</source>
+        <target>Ningún rol de la aplicación tiene permisos en esta categoría.</target>
+      </trans-unit>
       <trans-unit id="documentCategoryPermissionsCheckbox" datatype="html">
         <source><x id="permission" equiv-text="permission"/> per a <x id="role" equiv-text="role"/></source>
         <target><x id="permission" equiv-text="permission"/> para <x id="role" equiv-text="role"/></target>
@@ -7856,8 +8076,12 @@
         <target>Permisos de acceso</target>
       </trans-unit>
       <trans-unit id="documentCategoryDetailPermissionsInfo" datatype="html">
-        <source>Defineix què pot fer cada rol amb els documents d&apos;aquesta categoria. Les subcategories hereten aquests permisos, excepte si es personalitzen.</source>
-        <target>Define qué puede hacer cada rol con los documentos de esta categoría. Las subcategorías heredan estos permisos, excepto si se personalizan.</target>
+        <source>Defineix què pot fer cada rol amb els documents d&apos;aquesta categoria i de les seves subcategories. Una categoria nova només dona permís de lectura a cada rol.</source>
+        <target>Define qué puede hacer cada rol con los documentos de esta categoría y de sus subcategorías. Una categoría nueva solo da permiso de lectura a cada rol.</target>
+      </trans-unit>
+      <trans-unit id="documentCategoryDetailPermissionsInactive" datatype="html">
+        <source>Els permisos només es poden consultar i modificar en les categories actives.</source>
+        <target>Los permisos solo se pueden consultar y modificar en las categorías activas.</target>
       </trans-unit>
       <trans-unit id="documentCategoryDetailSave" datatype="html">
         <source>Desa</source>
@@ -7931,10 +8155,6 @@
         <source>Títol</source>
         <target>Título</target>
       </trans-unit>
-      <trans-unit id="applicationAttachmentsColumnSection" datatype="html">
-        <source>Secció</source>
-        <target>Sección</target>
-      </trans-unit>
       <trans-unit id="applicationAttachmentsColumnDocumentType" datatype="html">
         <source>Tipus doc.</source>
         <target>Tipo doc.</target>
@@ -7963,9 +8183,9 @@
         <source>Descripció</source>
         <target>Descripción</target>
       </trans-unit>
-      <trans-unit id="applicationLinksColumnSection" datatype="html">
-        <source>Secció</source>
-        <target>Sección</target>
+      <trans-unit id="applicationLinksColumnCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
       </trans-unit>
       <trans-unit id="applicationLinksColumnUrl" datatype="html">
         <source>URL</source>
@@ -7978,10 +8198,6 @@
       <trans-unit id="applicationDocumentationInfoSummary" datatype="html">
         <source>Informació</source>
         <target>Información</target>
-      </trans-unit>
-      <trans-unit id="applicationDocumentationExportUnavailable" datatype="html">
-        <source>L&apos;exportació encara no està implementada.</source>
-        <target>La exportación todavía no está implementada.</target>
       </trans-unit>
       <trans-unit id="applicationDocumentationActionView" datatype="html">
         <source>Consulta</source>
@@ -7998,10 +8214,6 @@
       <trans-unit id="applicationDocumentationActionsHeader" datatype="html">
         <source>Accions</source>
         <target>Acciones</target>
-      </trans-unit>
-      <trans-unit id="applicationDocumentationFilterSection" datatype="html">
-        <source>Secció</source>
-        <target>Sección</target>
       </trans-unit>
       <trans-unit id="applicationDocumentationRequired" datatype="html">
         <source>Camp obligatori</source>
@@ -8062,10 +8274,6 @@
       <trans-unit id="applicationAttachmentsAddAriaLabel" datatype="html">
         <source>Afegeix un adjunt</source>
         <target>Añade un adjunto</target>
-      </trans-unit>
-      <trans-unit id="applicationAttachmentsExportAriaLabel" datatype="html">
-        <source>Exporta els adjunts</source>
-        <target>Exporta los adjuntos</target>
       </trans-unit>
       <trans-unit id="applicationAttachmentsColumnsAriaLabel" datatype="html">
         <source>Columnes dels adjunts</source>
@@ -8144,8 +8352,8 @@
         <target>No se han podido cargar las categorías documentales.</target>
       </trans-unit>
       <trans-unit id="applicationAttachmentCatalogsLoadError" datatype="html">
-        <source>No s&apos;han pogut carregar les seccions, els estats i els formats dels documents.</source>
-        <target>No se han podido cargar las secciones, los estados y los formatos de los documentos.</target>
+        <source>No s&apos;han pogut carregar els estats i els formats dels documents.</source>
+        <target>No se han podido cargar los estados y los formatos de los documentos.</target>
       </trans-unit>
       <trans-unit id="applicationAttachmentDeleteDialogTitle" datatype="html">
         <source>Eliminar l&apos;adjunt?</source>
@@ -8210,10 +8418,6 @@
       <trans-unit id="applicationAttachmentDialogTitleLabel" datatype="html">
         <source>Títol</source>
         <target>Título</target>
-      </trans-unit>
-      <trans-unit id="applicationAttachmentDialogSection" datatype="html">
-        <source>Secció</source>
-        <target>Sección</target>
       </trans-unit>
       <trans-unit id="applicationAttachmentDialogFile" datatype="html">
         <source>Fitxer</source>
@@ -8280,8 +8484,8 @@
         <target>Enlaces</target>
       </trans-unit>
       <trans-unit id="applicationLinksQuickSearchPlaceholder" datatype="html">
-        <source>Cerca per títol, descripció, URL o secció</source>
-        <target>Busca por título, descripción, URL o sección</target>
+        <source>Cerca per títol, descripció, URL o categoria</source>
+        <target>Busca por título, descripción, URL o categoría</target>
       </trans-unit>
       <trans-unit id="applicationLinksQuickSearchAriaLabel" datatype="html">
         <source>Cerca ràpida d&apos;enllaços</source>
@@ -8298,6 +8502,10 @@
       <trans-unit id="applicationLinksFiltersAriaLabel" datatype="html">
         <source>Filtres dels enllaços</source>
         <target>Filtros de los enlaces</target>
+      </trans-unit>
+      <trans-unit id="applicationLinksFilterCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
       </trans-unit>
       <trans-unit id="applicationLinksCaption" datatype="html">
         <source>Enllaços de l&apos;aplicació</source>
@@ -8319,9 +8527,9 @@
         <source>No s&apos;han pogut carregar els enllaços.</source>
         <target>No se han podido cargar los enlaces.</target>
       </trans-unit>
-      <trans-unit id="applicationLinksSectionsLoadError" datatype="html">
-        <source>No s&apos;han pogut carregar les seccions dels enllaços.</source>
-        <target>No se han podido cargar las secciones de los enlaces.</target>
+      <trans-unit id="applicationLinksCategoriesLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les categories documentals.</source>
+        <target>No se han podido cargar las categorías documentales.</target>
       </trans-unit>
       <trans-unit id="applicationLinkCreatedTitle" datatype="html">
         <source>Enllaç afegit</source>
@@ -8423,9 +8631,9 @@
         <source>Descripció (opcional)</source>
         <target>Descripción (opcional)</target>
       </trans-unit>
-      <trans-unit id="applicationLinkDialogSection" datatype="html">
-        <source>Secció</source>
-        <target>Sección</target>
+      <trans-unit id="applicationLinkDialogCategory" datatype="html">
+        <source>Categoria</source>
+        <target>Categoría</target>
       </trans-unit>
       <trans-unit id="applicationLinkDialogUrl" datatype="html">
         <source>URL</source>
@@ -8434,6 +8642,158 @@
       <trans-unit id="applicationLinkDialogUrlError" datatype="html">
         <source>Indica una URL que comenci per http:// o https://</source>
         <target>Indica una URL que empiece por http:// o https://</target>
+      </trans-unit>
+      <trans-unit id="sectionActionsEmailAriaLabel" datatype="html">
+        <source>Envia per correu</source>
+        <target>Envía por correo</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailTitle" datatype="html">
+        <source>Envia per correu</source>
+        <target>Envía por correo</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailOpen" datatype="html">
+        <source>Envia adjunts per correu</source>
+        <target>Envía adjuntos por correo</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRequiredHint" datatype="html">
+        <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
+        <target>Todos los campos son obligatorios, excepto los indicados como opcionales.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipients" datatype="html">
+        <source>Destinataris</source>
+        <target>Destinatarios</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSubject" datatype="html">
+        <source>Assumpte</source>
+        <target>Asunto</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailMessage" datatype="html">
+        <source>Missatge (opcional)</source>
+        <target>Mensaje (opcional)</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsHint" datatype="html">
+        <source>Escriu cada adreça i prem Retorn, espai o una coma per afegir-la. Fes doble clic en una adreça per canviar-la.</source>
+        <target>Escribe cada dirección y pulsa Intro, espacio o una coma para añadirla. Haz doble clic en una dirección para cambiarla.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientEdit" datatype="html">
+        <source>Canvia l&apos;adreça <x id="address" equiv-text="address"/></source>
+        <target>Cambia la dirección <x id="address" equiv-text="address"/></target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailDefaultSubject" datatype="html">
+        <source>Documentació de l&apos;aplicació <x id="application" equiv-text="application"/></source>
+        <target>Documentación de la aplicación <x id="application" equiv-text="application"/></target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectionTitle" datatype="html">
+        <source>Què vols enviar?</source>
+        <target>¿Qué quieres enviar?</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectedOne" datatype="html">
+        <source>1 element seleccionat</source>
+        <target>1 elemento seleccionado</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectedMany" datatype="html">
+        <source><x id="count" equiv-text="count"/> elements seleccionats</source>
+        <target><x id="count" equiv-text="count"/> elementos seleccionados</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailQuickSearchPlaceholder" datatype="html">
+        <source>Cerca ràpida</source>
+        <target>Búsqueda rápida</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailQuickSearchAriaLabel" datatype="html">
+        <source>Cerca adjunts per enviar pel títol</source>
+        <target>Busca adjuntos para enviar por título</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnSelection" datatype="html">
+        <source>Selecció</source>
+        <target>Selección</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnDocument" datatype="html">
+        <source>Document</source>
+        <target>Documento</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnFormat" datatype="html">
+        <source>Format</source>
+        <target>Formato</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailColumnVersion" datatype="html">
+        <source>Versió</source>
+        <target>Versión</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSelectDocument" datatype="html">
+        <source>Envia «<x id="title" equiv-text="title"/>»</source>
+        <target>Envía «<x id="title" equiv-text="title"/>»</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailVersionOf" datatype="html">
+        <source>Versió de «<x id="title" equiv-text="title"/>» que s&apos;envia</source>
+        <target>Versión de «<x id="title" equiv-text="title"/>» que se envía</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailEmpty" datatype="html">
+        <source>No hi ha cap adjunt per enviar.</source>
+        <target>No hay ningún adjunto para enviar.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsRequired" datatype="html">
+        <source>Indica com a mínim un destinatari.</source>
+        <target>Indica al menos un destinatario.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsInvalid" datatype="html">
+        <source>Aquestes adreces no són vàlides: <x id="addresses" equiv-text="addresses"/>.</source>
+        <target>Estas direcciones no son válidas: <x id="addresses" equiv-text="addresses"/>.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailRecipientsTooMany" datatype="html">
+        <source>No es pot enviar a més de <x id="max" equiv-text="max"/> destinataris alhora.</source>
+        <target>No se puede enviar a más de <x id="max" equiv-text="max"/> destinatarios a la vez.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSubjectLineBreak" datatype="html">
+        <source>L&apos;assumpte no pot contenir salts de línia.</source>
+        <target>El asunto no puede contener saltos de línea.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailAttachmentsRequired" datatype="html">
+        <source>Selecciona com a mínim un adjunt.</source>
+        <target>Selecciona al menos un adjunto.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailAttachmentsTooLarge" datatype="html">
+        <source>Els adjunts seleccionats superen la mida màxima de 15 MB.</source>
+        <target>Los adjuntos seleccionados superan el tamaño máximo de 15 MB.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailVersionsLoadError" datatype="html">
+        <source>No s&apos;han pogut carregar les versions de «<x id="title" equiv-text="title"/>»: s&apos;enviarà la versió vigent.</source>
+        <target>No se han podido cargar las versiones de «<x id="title" equiv-text="title"/>»: se enviará la versión vigente.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSentTitle" datatype="html">
+        <source>Correu enviat</source>
+        <target>Correo enviado</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSentOne" datatype="html">
+        <source>S&apos;ha enviat el correu a 1 destinatari.</source>
+        <target>Se ha enviado el correo a 1 destinatario.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSentMany" datatype="html">
+        <source>S&apos;ha enviat el correu a <x id="count" equiv-text="count"/> destinataris.</source>
+        <target>Se ha enviado el correo a <x id="count" equiv-text="count"/> destinatarios.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSendError" datatype="html">
+        <source>No s&apos;ha pogut enviar el correu.</source>
+        <target>No se ha podido enviar el correo.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailForbidden" datatype="html">
+        <source>No tens permís per enviar algun dels adjunts seleccionats.</source>
+        <target>No tienes permiso para enviar alguno de los adjuntos seleccionados.</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailCancelLabel" datatype="html">
+        <source>Cancel·la</source>
+        <target>Cancela</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailSendLabel" datatype="html">
+        <source>Envia</source>
+        <target>Envía</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailCancel" datatype="html">
+        <source>Cancel·la l&apos;enviament per correu</source>
+        <target>Cancela el envío por correo</target>
+      </trans-unit>
+      <trans-unit id="applicationDocumentationEmailClose" datatype="html">
+        <source>Tanca l&apos;enviament per correu</source>
+        <target>Cierra el envío por correo</target>
       </trans-unit>
       <trans-unit id="applicationLinkDialogRequiredHint" datatype="html">
         <source>Tots els camps són obligatoris, excepte els indicats com a opcionals.</source>
@@ -8558,6 +8918,526 @@
       <trans-unit id="documentDetailVersionActions" datatype="html">
         <source>Accions de la versió</source>
         <target>Acciones de la versión</target>
+      </trans-unit>
+      <trans-unit id="6058622090355517761" datatype="html">
+        <source>Cap element seleccionat</source>
+        <target>Ningún elemento seleccionado</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9085519188944778021" datatype="html">
+        <source>Tria l&apos;any</source>
+        <target>Elegir el año</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5359544360373045455" datatype="html">
+        <source>Tria el mes</source>
+        <target>Elegir el mes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7607021429621420703" datatype="html">
+        <source>Tria la data</source>
+        <target>Elegir la fecha</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3146021172346148507" datatype="html">
+        <source>Dècada anterior</source>
+        <target>Década anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="257664018989408713" datatype="html">
+        <source>Dècada següent</source>
+        <target>Década siguiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4414801213482825839" datatype="html">
+        <source>Any anterior</source>
+        <target>Año anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5575489577960859883" datatype="html">
+        <source>Any següent</source>
+        <target>Año siguiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1404571879946943597" datatype="html">
+        <source>Mes anterior</source>
+        <target>Mes anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7263801000352355396" datatype="html">
+        <source>Mes següent</source>
+        <target>Mes siguiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6139209876277199208" datatype="html">
+        <source>Setm.</source>
+        <target>Sem.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6274085861631014259" datatype="html">
+        <source>Cert</source>
+        <target>Verdadero</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4717095841261919088" datatype="html">
+        <source>Fals</source>
+        <target>Falso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8423730875171557990" datatype="html">
+        <source>Sense seleccionar</source>
+        <target>Sin seleccionar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5601478909891159863" datatype="html">
+        <source>1 estrella</source>
+        <target>1 estrella</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8684148282056039129" datatype="html">
+        <source>S&apos;han seleccionat tots els elements</source>
+        <target>Se han seleccionado todos los elementos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1193344901616840815" datatype="html">
+        <source>S&apos;han desseleccionat tots els elements</source>
+        <target>Se han deseleccionado todos los elementos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="452830638458584000" datatype="html">
+        <source>Anterior</source>
+        <target>Anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9026223044989784827" datatype="html">
+        <source>Següent</source>
+        <target>Siguiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2010866751460011307" datatype="html">
+        <source>Navegació</source>
+        <target>Navegación</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3720688558242605193" datatype="html">
+        <source>Torna a dalt</source>
+        <target>Volver arriba</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5523171768786138826" datatype="html">
+        <source>Mou al principi</source>
+        <target>Mover al principio</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2024857763129395253" datatype="html">
+        <source>Mou amunt</source>
+        <target>Mover arriba</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3222627459728922726" datatype="html">
+        <source>Mou avall</source>
+        <target>Mover abajo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4011641598732473797" datatype="html">
+        <source>Mou al final</source>
+        <target>Mover al final</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6486364275607662473" datatype="html">
+        <source>Mou a la destinació</source>
+        <target>Mover al destino</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1651794158346283546" datatype="html">
+        <source>Mou a l&apos;origen</source>
+        <target>Mover al origen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6210743537714407223" datatype="html">
+        <source>Mou-ho tot a la destinació</source>
+        <target>Mover todo al destino</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4789268356219999363" datatype="html">
+        <source>Mou-ho tot a l&apos;origen</source>
+        <target>Mover todo al origen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6338421950421783228" datatype="html">
+        <source>Primera pàgina</source>
+        <target>Primera página</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3562364558728492982" datatype="html">
+        <source>Última pàgina</source>
+        <target>Última página</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3043652780271174307" datatype="html">
+        <source>Pàgina següent</source>
+        <target>Página siguiente</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5649884260086383031" datatype="html">
+        <source>Pàgina anterior</source>
+        <target>Página anterior</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5059764831375203082" datatype="html">
+        <source>Files per pàgina</source>
+        <target>Filas por página</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6652794412677173276" datatype="html">
+        <source>Ves a la pàgina</source>
+        <target>Ir a la página</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="9090327713931556414" datatype="html">
+        <source>Número de pàgina</source>
+        <target>Número de página</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6338872571439109121" datatype="html">
+        <source>Fila seleccionada</source>
+        <target>Fila seleccionada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4696469049065246336" datatype="html">
+        <source>Fila desseleccionada</source>
+        <target>Fila deseleccionada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1050805466597459509" datatype="html">
+        <source>Fila desplegada</source>
+        <target>Fila desplegada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7292190454306488739" datatype="html">
+        <source>Fila plegada</source>
+        <target>Fila plegada</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">120</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8746278765637788565" datatype="html">
+        <source>Mostra el menú del filtre</source>
+        <target>Mostrar el menú del filtro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1656172722752342961" datatype="html">
+        <source>Amaga el menú del filtre</source>
+        <target>Ocultar el menú del filtro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2844796027581429065" datatype="html">
+        <source>Operador del filtre</source>
+        <target>Operador del filtro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5987540946524462321" datatype="html">
+        <source>Condició del filtre</source>
+        <target>Condición del filtro</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="276349104546289109" datatype="html">
+        <source>Edita la fila</source>
+        <target>Editar la fila</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4927308675098607723" datatype="html">
+        <source>Desa l&apos;edició</source>
+        <target>Guardar la edición</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">126</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2673204721578847714" datatype="html">
+        <source>Cancel·la l&apos;edició</source>
+        <target>Cancelar la edición</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">127</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1762601235129149192" datatype="html">
+        <source>Vista de llista</source>
+        <target>Vista de lista</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">128</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4174181005902808264" datatype="html">
+        <source>Vista de quadrícula</source>
+        <target>Vista de cuadrícula</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3488829378124674172" datatype="html">
+        <source>Diapositiva</source>
+        <target>Diapositiva</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">130</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8209700086783794146" datatype="html">
+        <source>Amplia la imatge</source>
+        <target>Ampliar la imagen</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1491367647315746159" datatype="html">
+        <source>Amplia</source>
+        <target>Ampliar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">133</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7163290323190073440" datatype="html">
+        <source>Redueix</source>
+        <target>Reducir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2664625022885328286" datatype="html">
+        <source>Gira a la dreta</source>
+        <target>Girar a la derecha</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">135</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6672054104933751740" datatype="html">
+        <source>Gira a l&apos;esquerra</source>
+        <target>Girar a la izquierda</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="438129575848883600" datatype="html">
+        <source>Llista d&apos;opcions</source>
+        <target>Lista de opciones</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6608912513183022251" datatype="html">
+        <source>Tria un color</source>
+        <target>Elegir un color</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5351339046026813019" datatype="html">
+        <source>Examina els fitxers</source>
+        <target>Examinar archivos</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4445892036466842561" datatype="html">
+        <source>Maximitza</source>
+        <target>Maximizar</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4998757939266386465" datatype="html">
+        <source>Restaura la mida</source>
+        <target>Restaurar el tamaño</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6828398184587011805" datatype="html">
+        <source>Tanca l&apos;avís</source>
+        <target>Cerrar el aviso</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/applications/pages/detail/sections/responsible/application-responsible-section.i18n.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7290980246983437700" datatype="html">
+        <source><x id="count" equiv-text="COUNT"/> resultats disponibles</source>
+        <target><x id="count" equiv-text="COUNT"/> resultados disponibles</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="964839581431107280" datatype="html">
+        <source><x id="count" equiv-text="COUNT"/> elements seleccionats</source>
+        <target><x id="count" equiv-text="COUNT"/> elementos seleccionados</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4291842788290946148" datatype="html">
+        <source><x id="star" equiv-text="STAR"/> estrelles</source>
+        <target><x id="star" equiv-text="STAR"/> estrellas</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="237551998767842626" datatype="html">
+        <source>Pàgina <x id="page" equiv-text="PAGE"/></source>
+        <target>Página <x id="page" equiv-text="PAGE"/></target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/primeng-locale.config.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
       </trans-unit>
     </body>
   </file>

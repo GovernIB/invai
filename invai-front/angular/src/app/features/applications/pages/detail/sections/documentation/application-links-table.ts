@@ -51,7 +51,7 @@ export class ApplicationLinksTable extends TableComponentBase<ApplicationLink> {
   private readonly locale = inject(LOCALE_ID);
 
   protected cellText(row: ApplicationLink, key: string): string {
-    if (key === 'section') return documentationLabel(row.section, this.locale);
+    if (key === 'category') return documentationLabel(row.category, this.locale);
     const value = row[key as keyof ApplicationLink];
     return value == null || value === '' ? '—' : String(value);
   }

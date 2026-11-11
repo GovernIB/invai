@@ -5,6 +5,7 @@
   @if (applicationId(); as applicationId) {
     <div class="application-documentation">
       <app-application-attachments-list
+        [applicationCode]="detailState.application()?.code ?? null"
         [applicationId]="applicationId"
         [canManage]="detailState.canEdit()"
         [initialPage]="attachments()"

@@ -1,0 +1,205 @@
+<p-dialog
+  styleClass="invai-dialog"
+  [style]="{ width: '95vw', height: '95vh' }"
+  [(visible)]="visible"
+  [blockScroll]="true"
+  [closable]="true"
+  [closeAriaLabel]="labels.close"
+  [closeOnEscape]="true"
+  [dismissableMask]="true"
+  [draggable]="false"
+  [maximizable]="true"
+  [modal]="true"
+  [pt]="dialogPassThrough"
+  (onHide)="restoreFocus()"
+>
+  <ng-template #header let-titleId="ariaLabelledBy">
+    <div class="flex items-center justify-between w-full min-w-0 gap-4">
+      <h2 class="m-0 min-w-0 font-semibold text-lg" [id]="titleId">{{ labels.title }}</h2>
+
+      <span class="text-xs text-muted-color mr-2" i18n>Ctrl + K</span>
+    </div>
+  </ng-template>
+
+  <!-- Description of the dialog (aria-describedby): hidden, so it is not read twice. -->
+  <span hidden [id]="openTopicDescriptionId">
+    @if (selectedTopic(); as topic) {
+      {{ labels.openTopic }}: {{ topic.label }}
+    }
+  </span>
+
+  <div class="help-layout">
+    <div class="help-search">
+      <p-autoComplete
+        inputStyleClass="w-full min-w-0 p-4 text-lg"
+        class="w-full min-w-0"
+        #autoCompleteRef
+        inputId="help-modal-search"
+        [ariaLabel]="labels.searchAriaLabel"
+        [autoOptionFocus]="true"
+        [dropdown]="false"
+        [forceSelection]="false"
+        [minLength]="2"
+        [showClear]="true"
+        [suggestions]="searchResults()"
+        (completeMethod)="onSearchComplete($event)"
+        (onSelect)="onSelectResult($event.value); autoCompleteRef.clear()"
+        (onClear)="clearSearchAnnouncement()"
+        (onHide)="onSearchClosed()"
+        appendTo="body"
+        optionLabel="name"
+        [emptyMessage]="labels.emptyMessage"
+        [selectionMessage]="silentMessage"
+        [emptySelectionMessage]="silentMessage"
+        [placeholder]="labels.searchPlaceholder"
+      >
+        <!-- PrimeNG names each option with its optionLabel: the topic and its groups, so two
+             topics with the same title can be told apart. The excerpt is visual context. -->
+        <ng-template let-result #item>
+          <div
+            class="flex min-w-0 flex-col gap-1 whitespace-normal"
+            data-testid="help-search-result"
+          >
+            <span class="font-semibold">{{ result.label }}</span>
+            @if (result.trail.length) {
+              <span class="text-xs">{{ result.trail.join(' › ') }}</span>
+            }
+            <span class="text-sm"
+              >{{ result.excerpt.before
+              }}<mark class="bg-transparent font-bold text-inherit">{{ result.excerpt.match }}</mark
+              >{{ result.excerpt.after }}</span
+            >
+          </div>
+        </ng-template>
+      </p-autoComplete>
+      <!-- Number of topics found (WCAG 4.1.3): PrimeNG AutoComplete does not announce it. -->
+      <span class="sr-only" role="status">{{ searchAnnouncement() }}</span>
+    </div>
+
+    @let topics = topicsState();
+    <nav
+      class="help-navigation"
+      tabindex="0"
+      [attr.aria-label]="labels.topicsAriaLabel"
+      [attr.aria-busy]="topics.status === 'loading'"
+    >
+      @if (topics.status === 'loading') {
+        <p class="m-0 p-4">{{ labels.loadingTopics }}</p>
+      } @else if (topics.status === 'error') {
+        <div class="flex flex-col items-start gap-3 p-4">
+          <p class="m-0" role="alert">{{ labels.topicsError }}</p>
+          <p-button
+            [label]="labels.retry"
+            [outlined]="true"
+            icon="pi pi-refresh"
+            severity="secondary"
+            size="small"
+            (onClick)="retryTopics()"
+          />
+        </div>
+      } @else if (topicTree().length) {
+        <ng-container
+          *ngTemplateOutlet="
+            topicList;
+            context: { $implicit: topicTree(), id: null, hidden: false }
+          "
+        />
+      } @else {
+        <p class="m-0 p-4">{{ labels.noTopics }}</p>
+      }
+    </nav>
+
+    <!-- The index: each group is a button that shows or hides its list, and each topic a button
+         that opens its document. The open topic is marked with aria-current, not only with color. -->
+    <ng-template #topicList let-nodes let-id="id" let-hidden="hidden">
+      <ul class="help-topics" [id]="id" [hidden]="hidden">
+        @for (node of nodes; track node.key) {
+          <li>
+            @if (node.children.length) {
+              @let expanded = isExpanded(node);
+              <button
+                type="button"
+                class="help-topics__item help-topics__group"
+                [style.--help-topic-level]="node.level"
+                [attr.aria-controls]="node.listId"
+                [attr.aria-expanded]="expanded"
+                (click)="toggleGroup(node)"
+              >
+                <span
+                  aria-hidden="true"
+                  class="help-topics__chevron pi"
+                  [class.pi-chevron-down]="expanded"
+                  [class.pi-chevron-right]="!expanded"
+                ></span>
+                @if (node.icon) {
+                  <span aria-hidden="true" class="help-topics__icon" [class]="node.icon"></span>
+                }
+                <span>{{ node.label }}</span>
+              </button>
+              <ng-container
+                *ngTemplateOutlet="
+                  topicList;
+                  context: { $implicit: node.children, id: node.listId, hidden: !expanded }
+                "
+              />
+            } @else if (node.document) {
+              <button
+                type="button"
+                class="help-topics__item"
+                [style.--help-topic-level]="node.level"
+                [attr.aria-current]="node.document === currentDocument() ? 'true' : null"
+                (click)="selectTopic(node.document)"
+              >
+                @if (node.icon) {
+                  <span aria-hidden="true" class="help-topics__icon" [class]="node.icon"></span>
+                }
+                <span>{{ node.label }}</span>
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    </ng-template>
+
+    @let document = documentState();
+    <p-card
+      class="help-document bg-surface-0"
+      role="region"
+      tabindex="0"
+      [attr.aria-label]="selectedTopic()?.label ?? labels.title"
+      [attr.aria-busy]="document.status === 'loading'"
+    >
+      @if (document.status === 'idle') {
+        <p class="m-0 mt-12 text-center text-primary font-semibold">
+          {{ labels.emptySelection }}
+        </p>
+      } @else if (document.status === 'loading') {
+        <p class="m-0">{{ labels.loadingDocument }}</p>
+      } @else if (document.status === 'error') {
+        <div class="flex flex-col items-start gap-3">
+          <p class="m-0" role="alert">{{ labels.documentError }}</p>
+          <p-button
+            [label]="labels.retry"
+            [outlined]="true"
+            icon="pi pi-refresh"
+            severity="secondary"
+            size="small"
+            (onClick)="retryDocument(document.path)"
+          />
+        </div>
+      } @else {
+        <!-- Only the document gets the Markdown styles, which are unlayered and would beat the
+             utilities of the state messages and the PrimeNG card. -->
+        <!-- The click listener only handles the links inside the document (onDocumentClick),
+             which the keyboard already activates with Enter. -->
+        <markdown
+          #documentContent
+          class="markdown-body block"
+          [data]="document.content"
+          (click)="onDocumentClick($event)"
+          (ready)="onDocumentRendered()"
+        />
+      }
+    </p-card>
+  </div>
+</p-dialog>

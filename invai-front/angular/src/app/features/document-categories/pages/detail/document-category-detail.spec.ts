@@ -125,6 +125,7 @@ describe('DocumentCategoryDetail', () => {
       'Manuals',
     );
     expect(detail.permissionsForm.getRawValue()).toEqual(PERMISSIONS);
+    expect(root().textContent).toContain('Una categoria nova només dona permís de lectura a cada rol.');
     expect(detail.form.pristine && detail.permissionsForm.pristine).toBe(true);
     expect(service.getById).not.toHaveBeenCalled();
     expect(permissions.getByCategory).not.toHaveBeenCalled();
@@ -255,6 +256,10 @@ describe('DocumentCategoryDetail', () => {
     // Saving goes back to consulting the category.
     expect(detail.isEditing()).toBe(false);
     expect(input('document-category-detail-name').readOnly).toBe(true);
+    // The table shows the saved rows, which cannot change until the next edition.
+    const checkboxes = [...root().querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
+    expect(checkboxes).toHaveLength(10);
+    expect(checkboxes.every((checkbox) => checkbox.disabled)).toBe(true);
     expect(document.activeElement?.id).toBe('document-category-detail-edit');
     expect(root().textContent).toContain('Manuals');
   });
@@ -269,6 +274,21 @@ describe('DocumentCategoryDetail', () => {
 
     expect(service.update).not.toHaveBeenCalled();
     expect(permissions.save).toHaveBeenCalledTimes(1);
+  });
+
+  it('only saves the names when the permissions did not change, keeping the permissions read', async () => {
+    await create({ category: TECHNICAL, permissions: PERMISSIONS, loadFailed: false });
+    detail.startEditing();
+    detail.form.controls.name.setValue('Tècnica i arquitectura');
+    detail.form.markAsDirty();
+
+    detail.save();
+    await render();
+
+    expect(service.update).toHaveBeenCalledTimes(1);
+    expect(permissions.save).not.toHaveBeenCalled();
+    expect(detail.permissionsForm.getRawValue()).toEqual(PERMISSIONS);
+    expect(detail.isEditing()).toBe(false);
   });
 
   it('reports a failed save other than a validation error', async () => {
@@ -317,18 +337,21 @@ describe('DocumentCategoryDetail', () => {
   });
 
   it('shows an inactive category without letting it change', async () => {
+    // The back-end gives no permissions for an inactive category, so the resolver brings none.
     await create({
       category: { ...TECHNICAL, deletedAt: '2026-10-01T10:00:00' },
-      permissions: PERMISSIONS,
+      permissions: [],
       loadFailed: false,
     });
 
     expect(root().textContent).toContain('Aquesta categoria està donada de baixa');
     expect(input('document-category-detail-name').readOnly).toBe(true);
     expect(input('document-category-detail-name-es').readOnly).toBe(true);
-    const checkboxes = [...root().querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
-    expect(checkboxes.length).toBeGreaterThan(0);
-    expect(checkboxes.every((checkbox) => checkbox.disabled)).toBe(true);
+    expect(root().textContent).toContain(
+      'Els permisos només es poden consultar i modificar en les categories actives.',
+    );
+    expect(root().querySelector('app-document-category-permissions-table')).toBeNull();
+    expect(root().querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
     expect(root().querySelector('button[aria-label="Desa els canvis de la categoria"]')).toBeNull();
     expect(root().querySelector('#document-category-detail-edit')).toBeNull();
 

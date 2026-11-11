@@ -1,0 +1,2 @@
+import{b as o,c as a}from"./chunk-6YVN4OB7.js";import{K as i,aa as r}from"./chunk-DMGFOOAC.js";var c=class e extends o{ENTITY_URI="mime-type";cache=new Map;getAll(){return a(this.cache,"all",()=>this.http.get(this.url()))}static \u0275fac=(()=>{let t;return function(p){return(t||(t=r(e)))(p||e)}})();static \u0275prov=i({token:e,factory:e.\u0275fac,providedIn:"root"})};export{c as a};
+/**i18n:9fa542c6f17f570893e5bfce6175f9bb9e1d1bb7ee096369aaf6dc5812a678f2*/

@@ -108,7 +108,7 @@ describe('ApplicationDocumentDetail', () => {
     expect(fixture.nativeElement.querySelector('h1').textContent.trim()).toBe('INVAI');
   });
 
-  it('validates the document, saves it with its section and most specific category, and clears dirty state', async () => {
+  it('validates the document, saves it with its category and subcategory, and clears dirty state', async () => {
     await create();
     page.startEditing();
     page.form.controls.title.setValue(' ');
@@ -119,7 +119,7 @@ describe('ApplicationDocumentDetail', () => {
 
     page.form.patchValue({ title: ' Manual renovat ', statusId: 2 });
     page.save();
-    expect(documents.updateDocument).toHaveBeenCalledWith(1, { title: 'Manual renovat', sectionId: 1, categoryId: 11, statusId: 2 });
+    expect(documents.updateDocument).toHaveBeenCalledWith(1, { title: 'Manual renovat', categoryId: 1, subcategoryId: 11, statusId: 2 });
     expect(page.form.pristine).toBe(true);
     expect(page.isEditing()).toBe(false);
     expect(page.detail()?.document.title).toBe('Manual renovat');
@@ -127,7 +127,7 @@ describe('ApplicationDocumentDetail', () => {
     page.startEditing();
     page.form.patchValue({ categoryId: 2, subcategoryId: null });
     page.save();
-    expect(documents.updateDocument).toHaveBeenLastCalledWith(1, expect.objectContaining({ categoryId: 2 }));
+    expect(documents.updateDocument).toHaveBeenLastCalledWith(1, expect.objectContaining({ categoryId: 2, subcategoryId: null }));
   });
 
   it('retains the edited form after a failed save', async () => {

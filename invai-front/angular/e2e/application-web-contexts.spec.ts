@@ -1,97 +1,58 @@
-import { expect, test } from './support/auth.fixture';
+import { expect, test } from './support/application.fixture';
+import { uniqueToken } from './support/data';
+import {
+  apiUrl,
+  expectApiJsonResponse,
+  expectJsonResponse,
+  waitForApiResponse,
+} from './support/http';
+import { registerSoftDeleteCleanup } from './support/systems';
 import { selectOption, selectRowAction } from './support/ui';
 
-// Isolate context mutations while exercising the real routed application and its dialogs.
+const WEB_CONTEXTS_API = '/invaiback/web-context';
+const DEVELOPMENT_CONTEXTS_API = '/invaiback/application/development/web-context';
+
+interface CatalogEntry {
+  id: number;
+  name: string;
+  deletedAt: string | null;
+}
+
+// Manages the web contexts of a disposable application, with a web context of its own.
 test('manages web contexts in Development and only consults or verifies them in Security', async ({
   page,
-}) => {
+  cleanupRegistry,
+  disposableApplication,
+}, testInfo) => {
   test.setTimeout(120_000);
-  await page.goto('/');
-  const applications = await page.request.get('/invaiback/application', {
-    params: { page: 0, size: 1, statusId: 1 },
+  const name = `E2E Context ${uniqueToken(testInfo)}`;
+  const catalog = await expectApiJsonResponse<CatalogEntry>(
+    await page.request.post(apiUrl(page, WEB_CONTEXTS_API), {
+      data: { name, nameEs: `${name} ES` },
+    }),
+    `POST ${WEB_CONTEXTS_API}`,
+  );
+  registerSoftDeleteCleanup<CatalogEntry>({
+    page,
+    cleanup: cleanupRegistry,
+    label: `web context ${name}`,
+    pathname: WEB_CONTEXTS_API,
+    target: { id: catalog.id, matches: (item) => item.id === catalog.id },
   });
-  expect(applications.ok()).toBeTruthy();
-  const applicationId = (await applications.json()).content[0].id as number;
-  const detailResponse = await page.request.get(`/invaiback/application/${applicationId}`);
-  expect(detailResponse.ok()).toBeTruthy();
-  const application = await detailResponse.json();
-  expect(application.appSecurityId).toBeTruthy();
-  expect(application.appDevelopmentId).toBeTruthy();
-
-  const catalog = { id: 901, name: 'Context E2E', nameEs: 'Contexto E2E', deletedAt: null };
-  const field = { id: 902, name: 'Àmbit E2E', nameEs: 'Ámbito E2E', deletedAt: null };
-  let records: Array<Record<string, unknown>> = [];
+  const field = { name: 'Educació i Formació' };
   const mutations: string[] = [];
-  const envelope = (content: unknown[]) => ({
-    content,
-    number: 0,
-    totalElements: content.length,
-    totalPages: 1,
-    first: true,
-    last: true,
-    size: 10,
-    numberOfElements: content.length,
-    empty: content.length === 0,
-  });
-  await page.route(/\/invaiback\/web-context(?:\?.*)?$/, (route) =>
-    route.fulfill({ json: envelope([catalog]) }),
-  );
-  await page.route(/\/invaiback\/field(?:\?.*)?$/, (route) =>
-    route.fulfill({ json: envelope([field]) }),
-  );
-  await page.route(/\/application\/security\/web-context\/\d+(?:\?.*)?$/, async (route) => {
-    expect(route.request().method()).toBe('GET');
-    await route.fulfill({ json: envelope(records) });
-  });
-  await page.route(/\/application\/development\/web-context(?:\/\d+)?(?:\?.*)?$/, async (route) => {
-    const method = route.request().method();
-    if (method === 'GET') {
-      await route.fulfill({ json: envelope(records) });
-      return;
+  page.on('request', (request) => {
+    const path = new URL(request.url()).pathname;
+    const method = request.method();
+    if (path.startsWith(DEVELOPMENT_CONTEXTS_API) && method !== 'GET') mutations.push(method);
+    if (/^\/invaiback\/application\/security\/web-context\/validate\/\d+$/.test(path)) {
+      expect(method).toBe('PUT');
+      expect(request.postDataJSON()).toEqual({ reason: 'Context comprovat' });
+      mutations.push('VALIDATE');
     }
-    mutations.push(method);
-    if (method === 'DELETE') {
-      records = [];
-      await route.fulfill({ status: 204 });
-      return;
-    }
-    const payload = route.request().postDataJSON();
-    expect(payload.appDevelopmentId).toBe(application.appDevelopmentId);
-    expect(payload.appSecurityId).toBeUndefined();
-    records = [
-      {
-        id: 903,
-        appSecurity: { id: application.appSecurityId },
-        appDevelopment: { id: application.appDevelopmentId },
-        webContext: catalog,
-        field,
-        url: payload.url,
-        observation: payload.observation,
-        validated: false,
-        validatedAt: null,
-        validatedBy: null,
-        validatedReason: null,
-        deletedAt: null,
-      },
-    ];
-    await route.fulfill({ json: records[0] });
-  });
-  await page.route(/\/application\/security\/web-context\/validate\/903$/, async (route) => {
-    expect(route.request().method()).toBe('PUT');
-    const payload = route.request().postDataJSON();
-    expect(payload).toEqual({ reason: 'Context comprovat' });
-    mutations.push('VALIDATE');
-    records = records.map((record) => ({
-      ...record,
-      validated: true,
-      validatedAt: '2026-09-23T09:00:00',
-      validatedBy: 'e2e',
-      validatedReason: payload.reason,
-    }));
-    await route.fulfill({ status: 204 });
   });
 
-  await page.goto(`/aplicacions/${applicationId}/development`);
+  await page.goto(`/aplicacions/${disposableApplication.id}/development`);
   const panel = page.locator(
     'section[aria-labelledby="application-development-web-contexts-title"]',
   );
@@ -109,7 +70,14 @@ test('manages web contexts in Development and only consults or verifies them in 
   await selectOption(page, 'application-security-dialog-field', field.name);
   await page.locator('#application-security-dialog-url').fill('https://example.test/context');
   await page.locator('#application-security-dialog-observation').fill('Created in Development');
+  const createPromise = waitForApiResponse(page, 'POST', DEVELOPMENT_CONTEXTS_API);
   await dialog.getByRole('button', { name: 'Afegeix el registre', exact: true }).click();
+  const created = await createPromise;
+  expect(created.request().postDataJSON()).toMatchObject({
+    appDevelopmentId: disposableApplication.appDevelopmentId,
+  });
+  expect(created.request().postDataJSON().appSecurityId).toBeUndefined();
+  await expectJsonResponse(created);
   await expect(dialog).toHaveCount(0);
   await expect(panel.getByText('Created in Development')).toBeVisible();
   expect(mutations).toEqual(['POST']);
@@ -151,8 +119,15 @@ test('manages web contexts in Development and only consults or verifies them in 
   await expect(security.locator('.application-security-verification-column')).toHaveCount(0);
   const pendingIcon = row.locator('.application-web-context-pending');
   await expect(pendingIcon).toBeVisible();
-  await pendingIcon.focus();
-  await expect(page.getByRole('tooltip')).toHaveText('Context web pendent de verificar.');
+  // The rows render again once the tab has loaded; focus the icon again if the first focus landed
+  // on the row that was replaced.
+  await expect(async () => {
+    await pendingIcon.blur();
+    await pendingIcon.focus();
+    await expect(page.getByRole('tooltip')).toHaveText('Context web pendent de verificar.', {
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 15_000 });
   await pendingIcon.press('Escape');
   await row.press('Enter');
   await expect(dialog.getByRole('heading', { name: 'Consulta el context web' })).toBeVisible();

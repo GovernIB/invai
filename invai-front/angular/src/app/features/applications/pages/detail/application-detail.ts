@@ -10,8 +10,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { HelpButton } from '@core/components/help-modal/help-button';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { BreadcrumbService } from '@core/components/breadcrumbs';
+import { OAuthService } from '@core/services/auth.service';
 import { SectionContainerComponent } from '@components/section-container/section-container.component';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -46,6 +48,7 @@ import {
 } from './application-detail.i18n';
 import { ApplicationDetailSection, ApplicationDetailState } from './application-detail-state';
 import { isApplicationGeneralEditNavigation } from './application-detail-navigation';
+import { canOpenApplicationTab } from './application-detail-permissions';
 import {
   APPLICATION_DETAIL_RESOLVE_KEY,
   ApplicationDetailResolvedData,
@@ -55,6 +58,7 @@ import {
   standalone: true,
   selector: 'app-application-detail',
   imports: [
+    HelpButton,
     Button,
     Dialog,
     RouterLink,
@@ -74,6 +78,7 @@ export class ApplicationDetail implements OnDestroy {
   );
   private readonly sectionTabs = viewChild<ElementRef<HTMLElement>>('sectionTabs');
   private readonly breadcrumbService = inject(BreadcrumbService);
+  private readonly permissions = inject(OAuthService).permissions;
   private readonly paramMap = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
@@ -96,7 +101,11 @@ export class ApplicationDetail implements OnDestroy {
   protected readonly unsavedChangesCloseLabel = APPLICATION_DETAIL_UNSAVED_CHANGES_CLOSE_LABEL;
   protected readonly unsavedChangesCloseAriaLabel =
     APPLICATION_DETAIL_UNSAVED_CHANGES_CLOSE_ARIA_LABEL;
-  protected readonly tabs = computed(() => [
+  // Only the tabs the user can use: the others would answer with HTTP 403.
+  protected readonly tabs = computed(() =>
+    this.allTabs().filter(({ route }) => canOpenApplicationTab(this.permissions(), route)),
+  );
+  private readonly allTabs = computed(() => [
     {
       label: APPLICATION_DETAIL_TABS.general,
       route: 'general' as const,

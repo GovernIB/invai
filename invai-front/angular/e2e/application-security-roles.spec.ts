@@ -1,12 +1,22 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-import { openSecurityTab, roleRow } from './support/application-security-mocks';
+import {
+  assignRoles,
+  borrowRolePrefix,
+  manualValidationLabel,
+  OTHER_PREFIXED_ROLE,
+  OTHER_SYSTEM_ROLE,
+  PREFIXED_ROLE,
+  type RealSoffidRole,
+  recordSecurityRequests,
+  ROLE_PREFIX,
+  signedInUsername,
+  WEBLOGIC_ROLE,
+} from './support/application-security';
+import { type DisposableApplication, expect, test } from './support/application.fixture';
+import { apiUrl } from './support/http';
 
-test.use({ storageState: { cookies: [], origins: [] } });
-
-const NOT_VALIDATED = "Rol no validat: el codi no comença pel prefix de l'aplicació.";
-const PREFIX_NOTE =
-  'Aquest rol no comença per «INV_». Es desarà com a validat manualment al teu nom.';
+const PREFIX_NOTE = `Aquest rol no comença per «${ROLE_PREFIX}_». Es desarà com a validat manualment al teu nom.`;
 const ROW_ACTIONS = 'Obre les accions del registre';
 
 const rolesRegion = (page: Page) => page.getByRole('region', { name: "Rols de l'aplicació" });
@@ -21,6 +31,18 @@ const rowMenuItems = (page: Page) => page.locator('.p-menu-overlay').getByRole('
 // The shared CRUD shell does not name its dialog yet, so it is located by its visible heading.
 const dialogTitled = (page: Page, title: string) =>
   page.getByRole('dialog').filter({ has: page.getByRole('heading', { name: title }) });
+// Options are named after the code and show "<system> · <description>" below it; the same code
+// can exist in several systems (weblogic and weblogic-pre).
+const roleOption = (page: Page, role: RealSoffidRole) =>
+  page
+    .getByRole('option', { name: role.name, exact: true })
+    .filter({ hasText: new RegExp(`${role.system}(?!-)`) });
+
+async function openSecurityTab(page: Page, application: DisposableApplication) {
+  const recorded = recordSecurityRequests(page);
+  await page.goto(`/aplicacions/${application.id}/security`);
+  return recorded;
+}
 
 async function startEditing(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Editar Seguretat', exact: true }).click();
@@ -31,21 +53,32 @@ async function openRowMenu(page: Page, code: string): Promise<void> {
   await rowWith(page, code).getByRole('button', { name: ROW_ACTIONS }).click();
 }
 
+// Filters the Soffid roles of the role picker by code and picks one.
+async function pickRole(page: Page, role: RealSoffidRole): Promise<void> {
+  await page.locator('#application-security-dialog-role').click();
+  const search = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === '/invaiback/security-role/soffid-search' &&
+      new URL(response.url()).searchParams.get('name') === role.name,
+  );
+  await page.getByRole('searchbox', { name: 'Codi' }).fill(role.name);
+  await search;
+  await roleOption(page, role).click();
+}
+
 test('loads the weblogic roles and filters them by quick search and the filters panel', async ({
   page,
+  disposableApplication,
 }, testInfo) => {
-  const mock = await openSecurityTab(page, 'roles-test');
+  await assignRoles(page, disposableApplication, [PREFIXED_ROLE, WEBLOGIC_ROLE, OTHER_SYSTEM_ROLE]);
+  const tab = await openSecurityTab(page, disposableApplication);
 
   await expect(roleRows(page)).toHaveCount(2);
-  await expect(rolesRegion(page).locator('thead th')).toHaveText([
-    'Codi',
-    'Sistema',
-    'Descripció',
-  ]);
-  await expect(roleRows(page).nth(0)).toContainText('INV_ADMIN');
-  await expect(roleRows(page).nth(1)).toContainText('ADM_ROOT');
-  expect(mock.roleRequests).toHaveLength(1);
-  expect(Object.fromEntries(mock.roleRequests[0].searchParams)).toEqual({
+  await expect(rolesRegion(page).locator('thead th')).toHaveText(['Codi', 'Sistema', 'Descripció']);
+  await expect(roleRows(page).nth(0)).toContainText(PREFIXED_ROLE.name);
+  await expect(roleRows(page).nth(1)).toContainText(WEBLOGIC_ROLE.name);
+  expect(tab.roleRequests).toHaveLength(1);
+  expect(Object.fromEntries(tab.roleRequests[0].searchParams)).toEqual({
     page: '0',
     size: '10',
     sort: 'id,asc',
@@ -69,21 +102,21 @@ test('loads the weblogic roles and filters them by quick search and the filters 
   await expect(code).toHaveValue('');
   await expect(system).toHaveValue('weblogic');
   await code.fill('INV_');
-  await system.fill('SEYCON');
+  await system.fill(OTHER_SYSTEM_ROLE.system);
   await expect(filtersButton(page)).toHaveAccessibleName(
     'Mostra o oculta els filtres de rols (2 filtres aplicats)',
   );
   await expect(filtersBadge(page)).toHaveText('2');
-  expect(mock.roleRequests).toHaveLength(1);
+  expect(tab.roleRequests).toHaveLength(1);
   await page.screenshot({ path: testInfo.outputPath('roles-filters.png') });
 
   await filters.getByRole('button', { name: 'Cerca' }).click();
   await expect(roleRows(page)).toHaveCount(1);
-  await expect(roleRows(page).first()).toContainText('INV_CONSULTA');
-  const applied = mock.roleRequests.at(-1)!.searchParams;
+  await expect(roleRows(page).first()).toContainText(OTHER_SYSTEM_ROLE.name);
+  const applied = tab.roleRequests.at(-1)!.searchParams;
   expect(applied.get('page')).toBe('0');
   expect(applied.get('securityRoleName')).toBe('INV_');
-  expect(applied.get('system')).toBe('SEYCON');
+  expect(applied.get('system')).toBe(OTHER_SYSTEM_ROLE.system);
 
   await filters.getByRole('button', { name: 'Neteja' }).click();
   await expect(code).toHaveValue('');
@@ -95,13 +128,13 @@ test('loads the weblogic roles and filters them by quick search and the filters 
     name: "Cerca rols de l'aplicació per codi o descripció",
   });
   await expect(quickSearch).toHaveAttribute('placeholder', 'Cerca per codi o descripció');
-  await quickSearch.pressSequentially('root');
+  await quickSearch.pressSequentially('centres');
   await expect(roleRows(page)).toHaveCount(1);
-  await expect(roleRows(page).first()).toContainText('ADM_ROOT');
+  await expect(roleRows(page).first()).toContainText(PREFIXED_ROLE.name);
   // One debounced request for the whole word, combined with the restored weblogic default.
-  const searches = mock.roleRequests.filter((url) => url.searchParams.has('search'));
+  const searches = tab.roleRequests.filter((url) => url.searchParams.has('search'));
   expect(searches).toHaveLength(1);
-  expect(searches[0].searchParams.get('search')).toBe('root');
+  expect(searches[0].searchParams.get('search')).toBe('centres');
   expect(searches[0].searchParams.get('system')).toBe('weblogic');
   expect(searches[0].searchParams.has('securityRoleName')).toBe(false);
   expect(searches[0].searchParams.get('page')).toBe('0');
@@ -110,20 +143,24 @@ test('loads the weblogic roles and filters them by quick search and the filters 
   await expect(filtersButton(page)).toHaveAccessibleName('Mostra o oculta els filtres de rols');
   await expect(filtersBadge(page)).toBeHidden();
   await filters.getByRole('button', { name: 'Cerca' }).click();
-  await expect.poll(() => mock.roleRequests.at(-1)?.searchParams.has('system')).toBe(false);
-  expect(mock.roleRequests.at(-1)?.searchParams.get('search')).toBe('root');
+  await expect.poll(() => tab.roleRequests.at(-1)?.searchParams.has('system')).toBe(false);
+  expect(tab.roleRequests.at(-1)?.searchParams.get('search')).toBe('centres');
 
   await page.getByRole('button', { name: 'Esborra la cerca de rols' }).click();
   await expect(roleRows(page)).toHaveCount(3);
-  expect(mock.roleRequests.at(-1)?.searchParams.has('search')).toBe(false);
-  expect(mock.writes).toEqual([]);
+  expect(tab.roleRequests.at(-1)?.searchParams.has('search')).toBe(false);
+  expect(tab.writes).toEqual([]);
 });
 
 test('adds a Soffid role and warns when it does not start with the application prefix', async ({
   page,
+  cleanupRegistry,
+  disposableApplication,
 }, testInfo) => {
-  const mock = await openSecurityTab(page, 'roles-test');
-  await expect(roleRows(page)).toHaveCount(2);
+  await borrowRolePrefix(page, cleanupRegistry, disposableApplication);
+  const username = await signedInUsername(page);
+  const tab = await openSecurityTab(page, disposableApplication);
+  await expect(roleRows(page)).toHaveText(["No s'han trobat resultats"]);
   await expect(addRoleButton(page)).toHaveCount(0);
   await startEditing(page);
 
@@ -132,65 +169,63 @@ test('adds a Soffid role and warns when it does not start with the application p
   await expect(dialog).toBeVisible();
   await dialog.getByRole('button', { name: 'Afegeix el registre', exact: true }).click();
   await expect(dialog.getByRole('alert')).toHaveText('Selecciona un rol de Soffid.');
-  expect(mock.writes).toEqual([]);
+  expect(tab.writes).toEqual([]);
 
-  const select = page.locator('#application-security-dialog-role');
   const prefixNote = page.locator('#application-security-dialog-role-prefix-note');
-  await select.click();
-  await expect(page.getByRole('option', { name: /^INV_USER/ })).toBeVisible();
-  expect(Object.fromEntries(mock.soffidRequests[0].searchParams)).toEqual({
+  await pickRole(page, PREFIXED_ROLE);
+  expect(Object.fromEntries(tab.soffidRequests[0].searchParams)).toEqual({
     page: '0',
     size: '20',
   });
-  await page.getByRole('option', { name: /^INV_USER/ }).click();
   await expect(dialog.getByRole('alert')).toHaveCount(0);
   await expect(prefixNote).toHaveText('');
-  await expect(dialog.getByLabel('Sistema')).toHaveText('weblogic');
-  await expect(dialog.getByLabel('Descripció')).toHaveText('Usuari');
+  await expect(dialog.getByLabel('Sistema')).toHaveText(PREFIXED_ROLE.system);
+  await expect(dialog.getByLabel('Descripció')).toHaveText(PREFIXED_ROLE.description);
 
-  await select.click();
-  await page.getByRole('searchbox', { name: 'Codi' }).fill('adm');
-  await expect.poll(() => mock.soffidRequests.at(-1)?.searchParams.get('name')).toBe('adm');
-  await expect(page.getByRole('option', { name: /^INV_GESTOR/ })).toHaveCount(0);
-  await page.getByRole('option', { name: /^ADM_AUDIT/ }).click();
+  await pickRole(page, WEBLOGIC_ROLE);
   await expect(prefixNote).toHaveText(PREFIX_NOTE);
-  await expect(dialog.getByLabel('Descripció')).toHaveText('Auditoria');
+  await expect(dialog.getByLabel('Descripció')).toHaveText(WEBLOGIC_ROLE.description);
   await dialog.screenshot({ path: testInfo.outputPath('roles-create-prefix-note.png') });
 
   await dialog.getByRole('button', { name: 'Afegeix el registre', exact: true }).click();
   await expect(dialog).toBeHidden();
-  expect(mock.writes).toEqual([
+  expect(tab.writes).toEqual([
     {
       method: 'POST',
       path: '/application/security/role',
-      body: { appSecurityId: 9, securityRoleId: 504 },
+      body: {
+        appSecurityId: disposableApplication.appSecurityId,
+        securityRoleId: WEBLOGIC_ROLE.roleId,
+      },
     },
   ]);
   await expect(page.getByText("El registre s'ha desat correctament.")).toBeVisible();
-  await expect(roleRows(page)).toHaveCount(3);
+  await expect(roleRows(page)).toHaveCount(1);
   await expect(
-    rowWith(page, 'ADM_AUDIT').getByRole('img', {
-      name: 'Rol validat manualment per roles-test el 14/10/2026 10:30',
-    }),
+    rowWith(page, WEBLOGIC_ROLE.name).getByRole('img', { name: manualValidationLabel(username) }),
   ).toBeVisible();
 });
 
-test('consults a role, then changes and deactivates it while editing', async ({ page }) => {
-  const mock = await openSecurityTab(page, 'roles-test');
-  await expect(roleRows(page)).toHaveCount(2);
+test('consults a role, then changes and deactivates it while editing', async ({
+  page,
+  disposableApplication,
+}) => {
+  const [assigned] = await assignRoles(page, disposableApplication, [PREFIXED_ROLE]);
+  const tab = await openSecurityTab(page, disposableApplication);
+  await expect(roleRows(page)).toHaveCount(1);
 
-  await rowWith(page, 'INV_ADMIN').dblclick();
+  await rowWith(page, PREFIXED_ROLE.name).dblclick();
   const consult = dialogTitled(page, "Consulta el rol de l'aplicació");
   await expect(consult).toBeVisible();
-  await expect(consult.getByLabel('Codi')).toHaveText('INV_ADMIN');
-  await expect(consult.getByLabel('Sistema')).toHaveText('weblogic');
-  await expect(consult.getByLabel('Descripció')).toHaveText('Administració');
+  await expect(consult.getByLabel('Codi')).toHaveText(PREFIXED_ROLE.name);
+  await expect(consult.getByLabel('Sistema')).toHaveText(PREFIXED_ROLE.system);
+  await expect(consult.getByLabel('Descripció')).toHaveText(PREFIXED_ROLE.description);
   await expect(consult.getByRole('button', { name: 'Edita el registre' })).toHaveCount(0);
   await consult.getByRole('button', { name: 'Accepta i tanca el diàleg' }).click();
   await expect(consult).toBeHidden();
 
   await startEditing(page);
-  await rowWith(page, 'INV_ADMIN').focus();
+  await rowWith(page, PREFIXED_ROLE.name).focus();
   await page.keyboard.press('Enter');
   await expect(consult).toBeVisible();
   await consult.getByRole('button', { name: 'Edita el registre' }).click();
@@ -201,24 +236,26 @@ test('consults a role, then changes and deactivates it while editing', async ({ 
   await consult.getByRole('button', { name: 'Tanca el diàleg' }).click();
   await expect(consult).toBeHidden();
 
-  await openRowMenu(page, 'INV_ADMIN');
+  await openRowMenu(page, PREFIXED_ROLE.name);
   await expect(rowMenuItems(page)).toHaveText(['Consulta', 'Edita', 'Dona de baixa']);
   await page.getByRole('menuitem', { name: 'Edita' }).click();
   await expect(edit).toBeVisible();
-  await page.locator('#application-security-dialog-role').click();
-  await page.getByRole('option', { name: /^INV_GESTOR/ }).click();
+  await pickRole(page, OTHER_PREFIXED_ROLE);
   await edit.getByRole('button', { name: 'Desa el registre', exact: true }).click();
   await expect(edit).toBeHidden();
-  await expect(rowWith(page, 'INV_GESTOR')).toHaveCount(1);
-  expect(mock.writes).toEqual([
+  await expect(rowWith(page, OTHER_PREFIXED_ROLE.name)).toHaveCount(1);
+  expect(tab.writes).toEqual([
     {
       method: 'PUT',
-      path: '/application/security/role/12',
-      body: { appSecurityId: 9, securityRoleId: 503 },
+      path: `/application/security/role/${assigned.id}`,
+      body: {
+        appSecurityId: disposableApplication.appSecurityId,
+        securityRoleId: OTHER_PREFIXED_ROLE.roleId,
+      },
     },
   ]);
 
-  await openRowMenu(page, 'INV_GESTOR');
+  await openRowMenu(page, OTHER_PREFIXED_ROLE.name);
   await page.getByRole('menuitem', { name: 'Dona de baixa' }).click();
   const confirmation = dialogTitled(page, 'Dona de baixa el registre?');
   await expect(confirmation).toContainText(
@@ -227,134 +264,88 @@ test('consults a role, then changes and deactivates it while editing', async ({ 
   await confirmation.getByRole('button', { name: 'Confirma la baixa del registre' }).click();
   await expect(confirmation).toBeHidden();
   await expect(page.getByText("El registre s'ha donat de baixa correctament.")).toBeVisible();
-  await expect(roleRows(page)).toHaveCount(1);
-  expect(mock.writes.at(-1)).toEqual({
+  await expect(roleRows(page)).toHaveText(["No s'han trobat resultats"]);
+  expect(tab.writes.at(-1)).toEqual({
     method: 'DELETE',
-    path: '/application/security/role/12',
+    path: `/application/security/role/${assigned.id}`,
     body: undefined,
   });
 });
 
-test('flags the roles outside the prefix and validates one manually', async ({
+// The back-end only saves a role NOT_VALIDATED when the prefix of its application changes, and no
+// longer recalculates them then, so "Validar manualment" cannot be reached: the action, its
+// confirmation and the focus afterwards are covered by the unit tests of ApplicationSecuritySection
+// and ApplicationSecurityResourceTable.
+test('marks the roles validated by hand and offers no manual validation for them', async ({
   page,
+  cleanupRegistry,
+  disposableApplication,
 }, testInfo) => {
-  const mock = await openSecurityTab(page, 'roles-test', {
-    roles: [
-      roleRow(12, { roleId: 501, name: 'INV_ADMIN', system: 'weblogic', description: null }),
-      roleRow(
-        13,
-        { roleId: 505, name: 'ADM_ROOT', system: 'weblogic', description: null },
-        'NOT_VALIDATED',
-      ),
-      roleRow(
-        14,
-        { roleId: 506, name: 'OPS_READ', system: 'weblogic', description: null },
-        'MANUAL',
-        { by: 'maria', at: '2026-10-07T16:21:12' },
-      ),
-    ],
-  });
-  await expect(roleRows(page)).toHaveCount(3);
+  await borrowRolePrefix(page, cleanupRegistry, disposableApplication);
+  const username = await signedInUsername(page);
+  const assigned = await assignRoles(page, disposableApplication, [PREFIXED_ROLE, WEBLOGIC_ROLE]);
+  expect(assigned.map(({ validationStatus }) => validationStatus)).toEqual(['VALIDATED', 'MANUAL']);
+  await openSecurityTab(page, disposableApplication);
+  await expect(roleRows(page)).toHaveCount(2);
 
-  await expect(rowWith(page, 'INV_ADMIN').getByRole('img')).toHaveCount(0);
-  const pending = rowWith(page, 'ADM_ROOT').getByRole('img', { name: NOT_VALIDATED });
-  await expect(pending.locator('i')).toHaveClass(/pi-exclamation-circle/);
-  await pending.focus();
-  await expect(page.getByRole('tooltip')).toHaveText(NOT_VALIDATED);
-  await pending.press('Escape');
-  const manual = rowWith(page, 'OPS_READ').getByRole('img', {
-    name: 'Rol validat manualment per maria el 07/10/2026 16:21',
+  await expect(rowWith(page, PREFIXED_ROLE.name).getByRole('img')).toHaveCount(0);
+  const manual = rowWith(page, WEBLOGIC_ROLE.name).getByRole('img', {
+    name: manualValidationLabel(username),
   });
   await expect(manual.locator('i')).toHaveClass(/pi-check-circle/);
-  // Outside edit mode nothing can be validated: there is no row menu at all.
+  await manual.focus();
+  await expect(page.getByRole('tooltip')).toHaveText(manualValidationLabel(username));
+  await manual.press('Escape');
+  // Outside edit mode nothing can be changed: there is no row menu at all.
   await expect(rolesRegion(page).getByRole('button', { name: ROW_ACTIONS })).toHaveCount(0);
   await rolesRegion(page).screenshot({ path: testInfo.outputPath('roles-validation-states.png') });
 
   await startEditing(page);
-  await openRowMenu(page, 'ADM_ROOT');
-  await expect(rowMenuItems(page)).toHaveText([
-    'Consulta',
-    'Validar manualment',
-    'Edita',
-    'Dona de baixa',
-  ]);
-  await page.getByRole('menuitem', { name: 'Validar manualment' }).click();
-  const confirmation = dialogTitled(page, 'Validar manualment el rol?');
-  await expect(confirmation).toContainText(
-    "El rol «ADM_ROOT» no comença pel prefix de l'aplicació. Si el valides, quedarà registrat al teu nom.",
+  for (const role of [PREFIXED_ROLE, WEBLOGIC_ROLE]) {
+    await openRowMenu(page, role.name);
+    await expect(rowMenuItems(page)).toHaveText(['Consulta', 'Edita', 'Dona de baixa']);
+    await page.keyboard.press('Escape');
+  }
+});
+
+test('keeps the roles read-only for an inactive application', async ({
+  page,
+  disposableApplication,
+}) => {
+  const username = await signedInUsername(page);
+  await assignRoles(page, disposableApplication, [PREFIXED_ROLE, WEBLOGIC_ROLE]);
+  const deactivated = await page.request.delete(
+    apiUrl(page, `/invaiback/application/${disposableApplication.id}`),
   );
-  await confirmation
-    .getByRole('button', { name: 'Cancel·la la validació manual del rol' })
-    .click();
-  await expect(confirmation).toBeHidden();
-  await expect(rowWith(page, 'ADM_ROOT')).toBeFocused();
-  expect(mock.writes).toEqual([]);
-
-  await openRowMenu(page, 'ADM_ROOT');
-  await page.getByRole('menuitem', { name: 'Validar manualment' }).click();
-  await confirmation.getByRole('button', { name: 'Confirma la validació manual del rol' }).click();
-  await expect(confirmation).toBeHidden();
-  expect(mock.writes).toEqual([
-    { method: 'PUT', path: '/application/security/role/validate/13', body: {} },
-  ]);
-  await expect(page.getByText("El rol s'ha validat manualment.")).toBeVisible();
-  await expect(
-    rowWith(page, 'ADM_ROOT').getByRole('img', {
-      name: 'Rol validat manualment per roles-test el 14/10/2026 10:30',
-    }),
-  ).toBeVisible();
-  await openRowMenu(page, 'ADM_ROOT');
-  await expect(rowMenuItems(page)).toHaveText(['Consulta', 'Edita', 'Dona de baixa']);
-  await openRowMenu(page, 'ADM_ROOT');
-  await expect(rowMenuItems(page)).toHaveCount(0);
-  await openRowMenu(page, 'INV_ADMIN');
-  await expect(rowMenuItems(page)).toHaveText(['Consulta', 'Edita', 'Dona de baixa']);
-});
-
-// App bug: focus moves before the reloaded rows render, so it ends up on <body>.
-test.fixme('returns focus to the role row after validating it manually', async ({ page }) => {
-  await openSecurityTab(page, 'roles-test');
-  await startEditing(page);
-  await openRowMenu(page, 'ADM_ROOT');
-  await page.getByRole('menuitem', { name: 'Validar manualment' }).click();
-  await page.getByRole('button', { name: 'Confirma la validació manual del rol' }).click();
-  await expect(
-    rowWith(page, 'ADM_ROOT').getByRole('img', { name: /manualment per/ }),
-  ).toBeVisible();
-  await expect(rowWith(page, 'ADM_ROOT')).toBeFocused();
-});
-
-test('keeps the roles read-only for an inactive application', async ({ page }) => {
-  await openSecurityTab(page, 'roles-test', { status: 'INACTIVE' });
+  expect(deactivated.ok(), await deactivated.text()).toBeTruthy();
+  await openSecurityTab(page, disposableApplication);
   await expect(roleRows(page)).toHaveCount(2);
 
   await expect(page.getByRole('button', { name: 'Editar Seguretat', exact: true })).toHaveCount(0);
   await expect(addRoleButton(page)).toHaveCount(0);
   await expect(rolesRegion(page).getByRole('button', { name: ROW_ACTIONS })).toHaveCount(0);
-  await expect(rowWith(page, 'ADM_ROOT').getByRole('img', { name: NOT_VALIDATED })).toBeVisible();
+  await expect(
+    rowWith(page, WEBLOGIC_ROLE.name).getByRole('img', { name: manualValidationLabel(username) }),
+  ).toBeVisible();
 
-  await rowWith(page, 'ADM_ROOT').dblclick();
+  await rowWith(page, WEBLOGIC_ROLE.name).dblclick();
   const dialog = dialogTitled(page, "Consulta el rol de l'aplicació");
-  await expect(dialog.getByLabel('Codi')).toHaveText('ADM_ROOT');
+  await expect(dialog.getByLabel('Codi')).toHaveText(WEBLOGIC_ROLE.name);
   await expect(dialog.getByRole('button', { name: 'Edita el registre' })).toHaveCount(0);
   await expect(dialog.getByRole('button', { name: 'Accepta i tanca el diàleg' })).toBeVisible();
 });
 
-test('disables adding roles until the Seguretat data exists', async ({ page }) => {
-  const mock = await openSecurityTab(page, 'roles-test', { appSecurityId: null });
-  await expect(page.getByRole('heading', { name: "Rols de l'aplicació" })).toBeVisible();
-  await expect(roleRows(page)).toHaveText(["No s'han trobat resultats"]);
-  expect(mock.roleRequests).toEqual([]);
-
-  await startEditing(page);
-  await expect(addRoleButton(page)).toBeDisabled();
-});
+// The Seguretat record is created with its application; one without it only exists among those
+// created before the record did. Adding roles without it is covered by the unit tests of
+// ApplicationSecuritySection.
 
 test('reflows the roles toolbar at 320 px without horizontal scrolling', async ({
   page,
+  disposableApplication,
 }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 800 });
-  await openSecurityTab(page, 'roles-test');
+  await assignRoles(page, disposableApplication, [PREFIXED_ROLE, WEBLOGIC_ROLE]);
+  await openSecurityTab(page, disposableApplication);
   await expect(roleRows(page)).toHaveCount(2);
 
   const toolbar = page.locator('.application-security__resource-header--toolbar');

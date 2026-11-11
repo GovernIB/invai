@@ -1,3 +1,4 @@
+import { HELP_TOPICS } from '@core/components/help-modal/help-topics';
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -27,6 +28,7 @@ export interface ResponsibleNameDialogCopy {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResponsibleNameDialog {
+  protected readonly helpTopic = HELP_TOPICS.maintenanceCompanies;
   visible = model(false);
   form = input.required<ResponsibleCompanyFormGroup>();
   mode = input.required<CrudEntityDialogMode>();

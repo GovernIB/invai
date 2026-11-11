@@ -1,0 +1,92 @@
+// Index of topics, drawn with the navigation tokens of the PrimeNG theme so it matches the
+// menus of the app. The open topic is marked by weight and a bar as well as by color.
+.help-topics {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help-topics__item {
+  display: flex;
+  align-items: center;
+  gap: var(--p-navigation-item-gap, 0.5rem);
+  width: 100%;
+  padding: var(--p-navigation-item-padding, 0.625rem 1rem);
+  padding-inline-start: calc(1rem + var(--help-topic-level, 0) * 1.25rem);
+  border: 0;
+  border-radius: var(--p-border-radius-md);
+  background: transparent;
+  color: var(--p-navigation-item-color);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--p-navigation-item-focus-background);
+    color: var(--p-navigation-item-focus-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: -2px;
+  }
+
+  &[aria-current='true'] {
+    background: var(--p-highlight-background);
+    box-shadow: inset 4px 0 0 var(--p-primary-color);
+    color: var(--p-highlight-color);
+    font-weight: 600;
+  }
+}
+
+.help-topics__group {
+  font-weight: 600;
+}
+
+.help-topics__chevron {
+  flex-shrink: 0;
+  font-size: var(--p-navigation-submenu-icon-size, 0.875rem);
+}
+
+.help-topics__icon {
+  flex-shrink: 0;
+  color: var(--p-navigation-item-icon-color);
+
+  [aria-current='true'] > & {
+    color: inherit;
+  }
+}
+.help-layout {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(5rem, 25%) minmax(0, 1fr);
+}
+
+.help-search {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.help-navigation,
+.help-document {
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color);
+    outline-offset: -2px;
+  }
+}
+
+@media (min-width: 768px) {
+  .help-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+}

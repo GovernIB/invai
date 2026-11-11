@@ -19,9 +19,11 @@
     font-size: 0.875rem;
   }
 
+  // The title takes its own row so that the category and its subcategory stay side by side.
   @media (width >= 640px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
+    .application-attachment-field--full,
     .application-attachment-upload-field {
       grid-column: 1 / -1;
     }

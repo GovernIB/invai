@@ -9,7 +9,8 @@ export interface DocumentCategory {
   name: string | null;
   nameEs: string | null;
   parentId: number | null;
-  // Subcategories of a category, active and inactive, sorted by name; empty for a subcategory.
+  // Subcategories of a category, sorted by name; empty for a subcategory. A category read by its
+  // ID has all of them, active and inactive; a page has only the ones its filters match.
   subcategories: DocumentCategory[] | null;
   deletedAt: string | null;
 }
@@ -37,15 +38,17 @@ export interface DocumentCategoryFilters {
 }
 
 // `name` and `search` match the Catalan or Spanish name of a category or of any of its
-// subcategories; `statusId` only filters the categories.
+// subcategories; `statusId` filters both the categories and their subcategories. Of the
+// subcategories in that state, a category keeps all of them if its own name matches the text, and
+// otherwise only those whose name does.
 export interface DocumentCategoryPageParams extends PageParams {
   name?: string;
   statusId?: SoftDeleteStatus;
   search?: string;
 }
 
-// What a role can do with the documents of a category. The subcategories inherit the permissions
-// of their category unless they are customized.
+// What a role can do with the documents of a category. The permissions are only set on
+// categories: the documents of a subcategory follow those of its category.
 export const DOCUMENT_PERMISSIONS = ['read', 'upload', 'modify', 'delete'] as const;
 
 export type DocumentPermission = (typeof DOCUMENT_PERMISSIONS)[number];
