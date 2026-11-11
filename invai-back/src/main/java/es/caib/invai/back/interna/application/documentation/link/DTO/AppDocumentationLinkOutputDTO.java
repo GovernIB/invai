@@ -1,6 +1,6 @@
 package es.caib.invai.back.interna.application.documentation.link.DTO;
 
-import es.caib.invai.back.interna.catalog.appSection.DTO.AppSectionOutputDTO;
+import es.caib.invai.back.interna.maintenance.documentation.category.DTO.DocumentCategoryOutputDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,8 +28,8 @@ public class AppDocumentationLinkOutputDTO {
     /** Description of the link, or {@code null} if it has none. */
     private String description;
 
-    /** Section of the application the link belongs to. */
-    private AppSectionOutputDTO section;
+    /** Category the link is filed under. */
+    private DocumentCategoryOutputDTO category;
 
     /** Address the link points to. */
     private String url;

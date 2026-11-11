@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
-import es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextEntity;
+import es.caib.invai.back.persistence.model.maintenance.development.webContext.WebContextEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.field.FieldEntity;
 
 import java.io.Serial;

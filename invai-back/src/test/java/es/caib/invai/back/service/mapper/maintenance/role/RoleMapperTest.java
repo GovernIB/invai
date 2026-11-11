@@ -1,0 +1,104 @@
+package es.caib.invai.back.service.mapper.maintenance.role;
+
+import es.caib.invai.back.interna.maintenance.security.securityRole.DTO.SecurityRoleOutputDTO;
+import es.caib.invai.back.persistence.model.maintenance.role.RoleEntity;
+import es.caib.invai.back.rest.soffid.SoffidRole;
+import es.caib.invai.back.service.model.maintenance.role.Role;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+/**
+ * Unit tests for {@link RoleMapper}, locking in the entity/model/DTO field mappings.
+ */
+class RoleMapperTest {
+
+    private final RoleMapper mapper = Mappers.getMapper(RoleMapper.class);
+
+    @Test
+    void toModel_mapsAllFields() {
+        RoleEntity entity = new RoleEntity();
+        entity.setId(1L);
+        entity.setRoleId(52L);
+        entity.setName("OWS_ADMIN_ROLE");
+        entity.setSystem("OWS");
+        entity.setDescription("Administrator OWS role");
+
+        Role model = mapper.toModel(entity);
+
+        assertEquals(1L, model.getId());
+        assertEquals(52L, model.getRoleId());
+        assertEquals("OWS_ADMIN_ROLE", model.getName());
+        assertEquals("OWS", model.getSystem());
+        assertEquals("Administrator OWS role", model.getDescription());
+    }
+
+    @Test
+    void toModel_null_returnsNull() {
+        assertNull(mapper.toModel(null));
+    }
+
+    @Test
+    void toModelFromSoffid_mapsSoffidIdToRoleIdAndLeavesLocalIdEmpty() {
+        SoffidRole soffidRole = new SoffidRole();
+        soffidRole.setId(393195L);
+        soffidRole.setName("OWS_ADMIN_ROLE");
+        soffidRole.setSystem("OWS");
+        soffidRole.setDescription("Administrator OWS role");
+
+        Role model = mapper.toModelFromSoffid(soffidRole);
+
+        assertNull(model.getId());
+        assertEquals(393195L, model.getRoleId());
+        assertEquals("OWS_ADMIN_ROLE", model.getName());
+        assertEquals("OWS", model.getSystem());
+        assertEquals("Administrator OWS role", model.getDescription());
+    }
+
+    @Test
+    void toModelFromSoffid_null_returnsNull() {
+        assertNull(mapper.toModelFromSoffid(null));
+    }
+
+    @Test
+    void toResponseFromSoffid_mapsSoffidIdToRoleIdAndLeavesLocalIdEmpty() {
+        SoffidRole soffidRole = new SoffidRole();
+        soffidRole.setId(393195L);
+        soffidRole.setName("OWS_ADMIN_ROLE");
+        soffidRole.setSystem("OWS");
+        soffidRole.setDescription("Administrator OWS role");
+
+        SecurityRoleOutputDTO dto = mapper.toResponseFromSoffid(soffidRole);
+
+        assertNull(dto.getId());
+        assertEquals(393195L, dto.getRoleId());
+        assertEquals("OWS_ADMIN_ROLE", dto.getName());
+        assertEquals("OWS", dto.getSystem());
+        assertEquals("Administrator OWS role", dto.getDescription());
+    }
+
+    @Test
+    void toResponseFromSoffid_null_returnsNull() {
+        assertNull(mapper.toResponseFromSoffid(null));
+    }
+
+    @Test
+    void toResponse_mapsAllFields() {
+        Role model = new Role(1L, 52L, "OWS_ADMIN_ROLE", "OWS", "Administrator OWS role");
+
+        SecurityRoleOutputDTO dto = mapper.toResponse(model);
+
+        assertEquals(1L, dto.getId());
+        assertEquals(52L, dto.getRoleId());
+        assertEquals("OWS_ADMIN_ROLE", dto.getName());
+        assertEquals("OWS", dto.getSystem());
+        assertEquals("Administrator OWS role", dto.getDescription());
+    }
+
+    @Test
+    void toResponse_null_returnsNull() {
+        assertNull(mapper.toResponse(null));
+    }
+}

@@ -6,6 +6,7 @@ import es.caib.invai.back.interna.application.data.DTO.AppDataOutputDTO;
 import es.caib.invai.back.interna.application.data.DTO.AppDataUrlInputDTO;
 import es.caib.invai.back.interna.application.data.DTO.AppDataUrlOutputDTO;
 import es.caib.invai.back.service.facade.application.data.AppDataService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import jakarta.validation.Valid;
  * REST controller exposing CRUD endpoints for the "data" anchor, covering both the "Open Data"
  * and "Reutilització" tabs. The URL of the swagger of each tab is set on its own, tab by tab, so
  * that changing one can never touch the other, and checked URL by URL with its own endpoint. All
- * endpoints require {@code ROLE_INV_SUPER}.
+ * endpoints require {@code INV_DADES} or {@code INV_SUPER}.
  *
  * @since 1.0.5
  */
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/data")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_DATA)
 public class AppDataController {
 
     /** Service facade handling business operations for data anchors. */

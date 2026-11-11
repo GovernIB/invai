@@ -96,7 +96,7 @@ public class ApplicationDetailOutputDTO extends ApplicationOutputDTO {
      * {@code true} if, as of the last bulk DIR3 audit run, at least one active, Personal CAIB
      * responsible/authorized assignment's DIR3 no longer matches this application's administrative
      * unit. A {@code MANUAL} assignment (a mismatch already reviewed and accepted by a {@code
-     * ROLE_INV_SUPER} user) never counts toward this flag.
+     * INV_SUPER} user) never counts toward this flag.
      */
     private boolean dir3Mismatch;
 

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * Service Facade boundary interface declaring business use cases and orchestration rules
- * targeting Security Roles ({@code SecurityRole}).
+ * targeting Security Roles ({@code Role}).
  * Acts as the primary application service boundary exposed to external API web controllers.
  * <p>
  * Currently limited to searching/listing candidates against Soffid: local CRUD is not exposed
@@ -21,7 +21,7 @@ public interface SecurityRoleService {
     /**
      * Lists roles that can be assigned to an application (feeding {@code INV_APP_ROLE}) against
      * the Soffid SCIM API, to feed the security role typeahead. Does not touch the local
-     * {@code SecurityRole} catalog: results are unpersisted Soffid candidates, mapped into
+     * {@code Role} catalog: results are unpersisted Soffid candidates, mapped into
      * {@link SecurityRoleOutputDTO} with {@code id} left {@code null} (no local row exists yet) -
      * the same "null id means not yet cached locally" convention already used elsewhere in this
      * codebase for external-source search results (see {@code Person.searchSoffid}). There is no

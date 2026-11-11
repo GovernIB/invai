@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.catalog.validationStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.catalog.validationStatus.DTO.ValidationStatusOutputDTO;
 import es.caib.invai.back.service.facade.catalog.validationStatus.ValidationStatusService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("validation-status")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class ValidationStatusController {
 
     /** Service facade providing access to the validation status lookup dictionary. */

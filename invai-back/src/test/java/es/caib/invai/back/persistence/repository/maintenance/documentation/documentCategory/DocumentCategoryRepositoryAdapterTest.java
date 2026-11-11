@@ -146,7 +146,7 @@ class DocumentCategoryRepositoryAdapterTest {
         when(documentCategoryMapper.toModel(childOfFirst)).thenReturn(child);
         when(documentCategoryMapper.toModel(anotherChildOfFirst)).thenReturn(anotherChild);
 
-        Page<DocumentCategory> result = adapter.findAll(new DocumentCategoryCriteria(), pageable);
+        Page<DocumentCategory> result = adapter.findAll(new DocumentCategoryCriteria(), null, pageable);
 
         assertEquals(List.of(child, anotherChild), first.getSubcategories());
         assertTrue(second.getSubcategories().isEmpty());
@@ -158,7 +158,7 @@ class DocumentCategoryRepositoryAdapterTest {
     void findAll_noCategories_doesNotLookForSubcategories() {
         when(documentCategoryJPARepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
 
-        Page<DocumentCategory> result = adapter.findAll(null, Pageable.unpaged());
+        Page<DocumentCategory> result = adapter.findAll(null, null, Pageable.unpaged());
 
         assertTrue(result.isEmpty());
         verify(documentCategoryJPARepository, never()).findAllByParentIdInOrderByNameAsc(anyCollection());
@@ -189,7 +189,7 @@ class DocumentCategoryRepositoryAdapterTest {
         }
         when(documentCategoryJPARepository.findAllByParentIdInOrderByNameAsc(List.of(category.getId()))).thenReturn(childEntities);
 
-        return adapter.findAll(criteria, Pageable.unpaged()).getContent().get(0).getSubcategories();
+        return adapter.findAll(criteria, null, Pageable.unpaged()).getContent().get(0).getSubcategories();
     }
 
     @Test
@@ -256,6 +256,25 @@ class DocumentCategoryRepositoryAdapterTest {
                 named(1L, null, "Manuals", "Manuales", false), both, onlyOne);
 
         assertEquals(List.of(both), result);
+    }
+
+    // ------------------------------------------------------------------
+    // findActiveCategoryIds
+    // ------------------------------------------------------------------
+
+    @Test
+    void findActiveCategoryIds_returnsTheIdsOfTheActiveCategories() {
+        when(documentCategoryJPARepository.findAllByParentIsNullAndDeletedAtIsNull())
+                .thenReturn(List.of(entity(1L, null), entity(5L, null)));
+
+        assertEquals(List.of(1L, 5L), adapter.findActiveCategoryIds());
+    }
+
+    @Test
+    void findActiveCategoryIds_withoutActiveCategories_returnsAnEmptyList() {
+        when(documentCategoryJPARepository.findAllByParentIsNullAndDeletedAtIsNull()).thenReturn(List.of());
+
+        assertTrue(adapter.findActiveCategoryIds().isEmpty());
     }
 
     // ------------------------------------------------------------------

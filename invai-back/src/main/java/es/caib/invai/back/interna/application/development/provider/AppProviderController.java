@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.development.provider.DTO.AppProvid
 import es.caib.invai.back.interna.application.development.provider.DTO.AppProviderOutputDTO;
 import es.caib.invai.back.persistence.repository.application.development.provider.AppProviderCriteria;
 import es.caib.invai.back.service.facade.application.development.provider.AppProviderService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ import jakarta.validation.Valid;
 
 /**
  * REST endpoints for the "AppProvider" list: provider (company) assignments hanging many-to-one off
- * a single {@code AppDevelopment} record. All endpoints require {@code ROLE_INV_SUPER}.
+ * a single {@code AppDevelopment} record. All endpoints require {@code INV_DESENVO} or {@code INV_SUPER}.
  *
  * @since 1.0.2
  */
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/development/provider")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_DEVELOPMENT)
 public class AppProviderController {
 
     /** Facade service handling the business logic for AppProvider operations. */

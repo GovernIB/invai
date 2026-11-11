@@ -1,6 +1,7 @@
 package es.caib.invai.back.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import es.caib.invai.back.utils.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -101,7 +102,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/", "/index.html", "/swagger-ui/**", "/swagger.json", "/v3/api-docs/**").authenticated()
                                 .requestMatchers("/auth/**").authenticated()
-                                .requestMatchers("/**").hasAnyRole("INV_SUPER")
+                                .requestMatchers("/**").hasAnyRole(Constants.ALL_ROLES)
                 )
                 .oauth2Login(oauth -> {
                     oauth.authorizationEndpoint(authorization ->

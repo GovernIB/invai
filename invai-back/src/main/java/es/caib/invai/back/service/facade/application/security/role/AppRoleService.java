@@ -33,7 +33,8 @@ public interface AppRoleService {
      *
      * @param inputDTO the creation payload
      * @return the created assignment, mapped to its output transfer representation
-     * @throws es.caib.invai.back.exception.BusinessRuleException if Soffid has no role with the given Soffid id
+     * @throws es.caib.invai.back.exception.BusinessRuleException if Soffid has no role with the given Soffid id,
+     *                                                            or the security anchor already has an active assignment to it
      */
     AppRoleOutputDTO create(AppRoleInputDTO inputDTO);
 
@@ -54,7 +55,7 @@ public interface AppRoleService {
      * Assigns to a security anchor the roles Soffid has for an application: those whose name starts
      * with the application's prefix followed by an underscore (case-sensitive, so prefix {@code AP2}
      * matches {@code AP2_ADMIN} but not {@code ap2_admin} nor {@code XAP2_ADMIN}). Each role's data -
-     * as Soffid reports it now - is stored in {@code INV_SECURITY_ROLE}. It is idempotent: a role the
+     * as Soffid reports it now - is stored in {@code INV_ROLE}. It is idempotent: a role the
      * anchor already has an active assignment to (matched by its Soffid id) is skipped, so calling it
      * again only adds the roles Soffid has gained since. Roles are never removed. The roles are all
      * read from Soffid before any is assigned, so a Soffid failure leaves the anchor untouched.
@@ -75,6 +76,8 @@ public interface AppRoleService {
      * @param id       identifier of the assignment to update
      * @param inputDTO the update payload
      * @return the updated assignment, mapped to its output transfer representation
+     * @throws es.caib.invai.back.exception.BusinessRuleException if the assignment doesn't exist, or
+     *                                                            the new role is already assigned to the security anchor by another assignment
      */
     AppRoleOutputDTO update(Long id, AppRoleInputDTO inputDTO);
 

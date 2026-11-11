@@ -13,10 +13,10 @@ import es.caib.invai.back.persistence.repository.application.documentation.attac
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationAttachmentRepository;
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationAttachmentVersionRepository;
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationMetadataRepository;
-import es.caib.invai.back.persistence.repository.catalog.appSection.AppSectionRepository;
 import es.caib.invai.back.persistence.repository.catalog.documentStatus.DocumentStatusRepository;
 import es.caib.invai.back.persistence.repository.catalog.mimeType.MimeTypeRepository;
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryRepository;
+import es.caib.invai.back.service.facade.maintenance.documentation.documentRolePermission.DocumentRolePermissionService;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationAttachmentVersionMapper;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationAttachmentMapper;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationMetadataMapper;
@@ -24,10 +24,10 @@ import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.application.documentation.attachment.AppDocumentationAttachment;
 import es.caib.invai.back.service.model.application.documentation.attachment.AppDocumentationAttachmentVersion;
 import es.caib.invai.back.service.model.application.documentation.attachment.AppDocumentationMetadata;
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
 import es.caib.invai.back.service.model.catalog.documentStatus.DocumentStatus;
 import es.caib.invai.back.service.model.catalog.mimeType.MimeType;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
+import es.caib.invai.back.service.model.maintenance.documentation.documentRolePermission.DocumentPermission;
 import es.caib.invai.back.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,12 +40,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,10 +60,14 @@ import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -88,13 +94,13 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     @Mock
     private ApplicationRepository applicationRepository;
     @Mock
-    private AppSectionRepository appSectionRepository;
-    @Mock
     private DocumentStatusRepository documentStatusRepository;
     @Mock
     private MimeTypeRepository mimeTypeRepository;
     @Mock
     private DocumentCategoryRepository documentCategoryRepository;
+    @Mock
+    private DocumentRolePermissionService documentRolePermissionService;
 
     @InjectMocks
     private AppDocumentationAttachmentServiceFacadeBean facade;
@@ -111,14 +117,26 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
         pdf.setMimeType("application/pdf");
         pdf.setName("PDF");
 
-        DocumentCategory category = new DocumentCategory();
-        category.setId(5L);
-
         stored = new AppDocumentationAttachment();
         stored.setId(10L);
         stored.setApplicationId(3L);
         stored.setTitle("Manual API v2");
-        stored.setDocumentCategory(category);
+        stored.setCategory(category(5L));
+    }
+
+    /** A category (a root one, with no parent). */
+    private static DocumentCategory category(Long id) {
+        DocumentCategory category = new DocumentCategory();
+        category.setId(id);
+        return category;
+    }
+
+    /** A subcategory of the given category. */
+    private static DocumentCategory subcategory(Long id, Long parentId) {
+        DocumentCategory subcategory = new DocumentCategory();
+        subcategory.setId(id);
+        subcategory.setParentId(parentId);
+        return subcategory;
     }
 
     private static BusinessRuleException rule(org.junit.jupiter.api.function.Executable executable) {
@@ -130,7 +148,7 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     private static AppDocumentationAttachmentInputDTO createInput() {
-        return new AppDocumentationAttachmentInputDTO(3L, "  Manual API v2  ", 7L, 5L, 9L, " 1.0 ", "  first  ", null);
+        return new AppDocumentationAttachmentInputDTO(3L, "  Manual API v2  ", 5L, 7L, 9L, " 1.0 ", "  first  ", null);
     }
 
     private static AppDocumentationAttachmentVersion version(Long id, Long documentationAttachmentId) {
@@ -143,9 +161,9 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     /** Lets a document be created and read back: every reference exists and the detail can be assembled. */
     private void stubCreate() {
         when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
-        when(documentCategoryRepository.findById(5L)).thenReturn(new DocumentCategory());
+        when(documentCategoryRepository.findById(5L)).thenReturn(category(5L));
+        lenient().when(documentCategoryRepository.findById(7L)).thenReturn(subcategory(7L, 5L));
         when(mimeTypeRepository.findByExtension("pdf")).thenReturn(pdf);
         AppDocumentationAttachment toSave = new AppDocumentationAttachment();
         when(appDocumentationAttachmentMapper.toModelFromInput(any(AppDocumentationAttachmentInputDTO.class))).thenReturn(toSave);
@@ -169,7 +187,7 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
         Pageable pageable = Pageable.unpaged();
         AppDocumentationAttachmentVersion current = version(100L, 10L);
         AppDocumentationAttachmentSimpleOutputDTO dto = new AppDocumentationAttachmentSimpleOutputDTO();
-        when(appDocumentationAttachmentRepository.findAll(filter, pageable)).thenReturn(new PageImpl<>(List.of(stored)));
+        when(appDocumentationAttachmentRepository.findAll(eq(filter), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of(stored)));
         when(appDocumentationAttachmentVersionRepository.findCurrentByDocumentationAttachmentIds(List.of(10L))).thenReturn(Map.of(10L, current));
         when(appDocumentationAttachmentMapper.toSimpleResponse(stored)).thenReturn(dto);
 
@@ -183,13 +201,63 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     void getAll_aDocumentWithoutACurrentAttachment_keepsItNull() {
         AppDocumentationAttachmentCriteria filter = new AppDocumentationAttachmentCriteria();
         Pageable pageable = Pageable.unpaged();
-        when(appDocumentationAttachmentRepository.findAll(filter, pageable)).thenReturn(new PageImpl<>(List.of(stored)));
+        when(appDocumentationAttachmentRepository.findAll(eq(filter), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of(stored)));
         when(appDocumentationAttachmentVersionRepository.findCurrentByDocumentationAttachmentIds(List.of(10L))).thenReturn(Map.of());
         when(appDocumentationAttachmentMapper.toSimpleResponse(stored)).thenReturn(new AppDocumentationAttachmentSimpleOutputDTO());
 
         facade.getAll(filter, pageable);
 
         assertNull(stored.getCurrentAttachment());
+    }
+
+    @Test
+    void getAll_restrictsTheListingToTheCategoriesTheUserCanRead() {
+        AppDocumentationAttachmentCriteria filter = new AppDocumentationAttachmentCriteria();
+        Pageable pageable = Pageable.unpaged();
+        Set<Long> readable = Set.of(5L, 6L);
+        when(documentRolePermissionService.getReadableCategoryIds()).thenReturn(readable);
+        when(appDocumentationAttachmentRepository.findAll(eq(filter), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of()));
+
+        facade.getAll(filter, pageable);
+
+        verify(appDocumentationAttachmentRepository).findAll(filter, readable, pageable);
+        verify(documentRolePermissionService, never()).requirePermission(any(DocumentPermission.class), anyLong());
+    }
+
+    @Test
+    void getAll_aUserWithoutCategoryRestriction_queriesWithoutAllowedCategories() {
+        AppDocumentationAttachmentCriteria filter = new AppDocumentationAttachmentCriteria();
+        Pageable pageable = Pageable.unpaged();
+        when(documentRolePermissionService.getReadableCategoryIds()).thenReturn(null);
+        when(appDocumentationAttachmentRepository.findAll(eq(filter), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of()));
+
+        facade.getAll(filter, pageable);
+
+        verify(appDocumentationAttachmentRepository).findAll(filter, null, pageable);
+    }
+
+    @Test
+    void getAll_withACategoryFilter_requiresReadPermissionOnIt() {
+        AppDocumentationAttachmentCriteria filter = new AppDocumentationAttachmentCriteria();
+        filter.setCategoryId(5L);
+        Pageable pageable = Pageable.unpaged();
+        when(appDocumentationAttachmentRepository.findAll(eq(filter), any(), eq(pageable))).thenReturn(new PageImpl<>(List.of()));
+
+        facade.getAll(filter, pageable);
+
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.READ, 5L);
+    }
+
+    @Test
+    void getAll_withACategoryTheUserCannotRead_isDeniedBeforeQueryingAnything() {
+        AppDocumentationAttachmentCriteria filter = new AppDocumentationAttachmentCriteria();
+        filter.setCategoryId(5L);
+        denyPermission(DocumentPermission.READ, 5L);
+
+        assertThrows(AccessDeniedException.class, () -> facade.getAll(filter, Pageable.unpaged()));
+
+        verifyNoInteractions(appDocumentationAttachmentRepository, appDocumentationAttachmentVersionRepository);
+        verify(documentRolePermissionService, never()).getReadableCategoryIds();
     }
 
     @Test
@@ -205,10 +273,21 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void getById_notFound_throwsBusinessRuleException() {
+    void getById_notFound_throwsBusinessRuleExceptionWithoutCheckingAnyPermission() {
         when(appDocumentationAttachmentRepository.findById(99L)).thenReturn(null);
 
         assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, rule(() -> facade.getById(99L)).getMessage());
+        verifyNoInteractions(documentRolePermissionService);
+    }
+
+    @Test
+    void getById_requiresReadPermissionOnTheCategoryOfTheDocument() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
+
+        facade.getById(10L);
+
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.READ, 5L);
     }
 
     @Test
@@ -273,17 +352,8 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void create_sectionNotFound_throws() {
-        when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
-        when(appSectionRepository.findById(7L)).thenReturn(null);
-
-        assertEquals(Constants.ERR_DOCUMENTATION_SECTION_NOT_FOUND, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
-    }
-
-    @Test
     void create_statusNotFound_throws() {
         when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(null);
 
         assertEquals(Constants.ERR_DOCUMENTATION_STATUS_NOT_FOUND, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
@@ -292,7 +362,6 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     @Test
     void create_categoryNotFound_throws() {
         when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
         when(documentCategoryRepository.findById(5L)).thenReturn(null);
 
@@ -301,14 +370,87 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
 
     @Test
     void create_categoryDeleted_throws() {
-        DocumentCategory deleted = new DocumentCategory();
+        DocumentCategory deleted = category(5L);
         deleted.setDeletedAt(LocalDateTime.now());
         when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
         when(documentCategoryRepository.findById(5L)).thenReturn(deleted);
 
         assertEquals(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
+    }
+
+    @Test
+    void create_categoryThatIsASubcategory_throws() {
+        when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(5L)).thenReturn(subcategory(5L, 1L));
+
+        assertEquals(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
+        verify(appDocumentationAttachmentRepository, never()).create(any());
+    }
+
+    @Test
+    void create_subcategoryNotFound_throws() {
+        when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(5L)).thenReturn(category(5L));
+        when(documentCategoryRepository.findById(7L)).thenReturn(null);
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_FOUND, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
+    }
+
+    @Test
+    void create_subcategoryDeleted_throws() {
+        DocumentCategory deleted = subcategory(7L, 5L);
+        deleted.setDeletedAt(LocalDateTime.now());
+        when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(5L)).thenReturn(category(5L));
+        when(documentCategoryRepository.findById(7L)).thenReturn(deleted);
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_ACTIVE, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
+    }
+
+    @Test
+    void create_subcategoryOfAnotherCategory_throws() {
+        when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(5L)).thenReturn(category(5L));
+        when(documentCategoryRepository.findById(7L)).thenReturn(subcategory(7L, 4L));
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_IN_CATEGORY, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
+        verify(appDocumentationAttachmentRepository, never()).create(any());
+    }
+
+    @Test
+    void create_subcategoryThatIsACategory_isNotInTheCategory_throws() {
+        when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(5L)).thenReturn(category(5L));
+        when(documentCategoryRepository.findById(7L)).thenReturn(category(7L));
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_IN_CATEGORY, rule(() -> facade.create(createInput(), file("a.pdf", PDF_BYTES))).getMessage());
+    }
+
+    @Test
+    void create_withoutSubcategory_onlyTheCategoryIsLookedUp() {
+        stubCreate();
+        AppDocumentationAttachmentInputDTO inputDTO = createInput();
+        inputDTO.setSubcategoryId(null);
+
+        facade.create(inputDTO, file("manual.pdf", PDF_BYTES));
+
+        verify(documentCategoryRepository).findById(5L);
+        verify(documentCategoryRepository, never()).findById(7L);
+    }
+
+    @Test
+    void create_requiresUploadPermissionOnTheCategoryOfTheDocument() {
+        stubCreate();
+
+        facade.create(createInput(), file("manual.pdf", PDF_BYTES));
+
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.UPLOAD, 5L);
     }
 
     @Test
@@ -362,9 +504,9 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     /** Stubs the application and the references so the failure under test happens in the file checks. */
     private void stubReferencesOnly() {
         when(applicationRepository.findById(3L)).thenReturn(mock(Application.class));
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
-        when(documentCategoryRepository.findById(5L)).thenReturn(new DocumentCategory());
+        when(documentCategoryRepository.findById(5L)).thenReturn(category(5L));
+        when(documentCategoryRepository.findById(7L)).thenReturn(subcategory(7L, 5L));
     }
 
     // ------------------------------------------------------------------
@@ -392,12 +534,29 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void createAttachment_documentNotFound_throws() {
+    void createAttachment_documentNotFound_throwsWithoutCheckingAnyPermission() {
         when(appDocumentationAttachmentRepository.findById(99L)).thenReturn(null);
 
         BusinessRuleException ex = rule(() -> facade.createAttachment(99L, new AppDocumentationAttachmentVersionInputDTO("2.0", null, null), file("a.pdf", PDF_BYTES)));
 
         assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, ex.getMessage());
+        verifyNoInteractions(documentRolePermissionService);
+    }
+
+    @Test
+    void createAttachment_requiresUploadPermissionOnTheCategoryOfTheDocument() {
+        AppDocumentationAttachmentVersionInputDTO inputDTO = new AppDocumentationAttachmentVersionInputDTO("2.0", null, null);
+        MockMultipartFile upload = file("manual-v2.pdf", PDF_BYTES);
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(appDocumentationAttachmentVersionRepository.existsActiveWithLabel(10L, "2.0")).thenReturn(false);
+        when(mimeTypeRepository.findByExtension("pdf")).thenReturn(pdf);
+        when(appDocumentationAttachmentVersionMapper.toModelFromInput(eq(inputDTO), eq(10L), eq(upload), eq(pdf), aryEq(PDF_BYTES))).thenReturn(new AppDocumentationAttachmentVersion());
+        when(appDocumentationAttachmentVersionRepository.create(any(), aryEq(PDF_BYTES))).thenReturn(version(101L, 10L));
+        when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
+
+        facade.createAttachment(10L, inputDTO, upload);
+
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.UPLOAD, 5L);
     }
 
     @Test
@@ -440,11 +599,10 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
 
     @Test
     void update_changedCategory_isValidatedAndOnlyTheMainRecordIsPersisted() {
-        AppDocumentationAttachmentUpdateInputDTO inputDTO = new AppDocumentationAttachmentUpdateInputDTO("  New title ", 7L, 6L, 9L);
+        AppDocumentationAttachmentUpdateInputDTO inputDTO = new AppDocumentationAttachmentUpdateInputDTO("  New title ", 6L, null, 9L);
         when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
-        when(documentCategoryRepository.findById(6L)).thenReturn(new DocumentCategory());
+        when(documentCategoryRepository.findById(6L)).thenReturn(category(6L));
         when(appDocumentationAttachmentVersionRepository.findActiveByDocumentationAttachmentId(10L)).thenReturn(List.of());
         when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
 
@@ -458,10 +616,50 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void update_unchangedCategory_isNotCheckedAgain_soAnInactiveOneStillWorks() {
-        AppDocumentationAttachmentUpdateInputDTO inputDTO = new AppDocumentationAttachmentUpdateInputDTO("Title", 7L, 5L, 9L);
+    void update_changedCategory_requiresEditPermissionOnBothTheCurrentAndTheNewOne() {
         when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(6L)).thenReturn(category(6L));
+        when(appDocumentationAttachmentVersionRepository.findActiveByDocumentationAttachmentId(10L)).thenReturn(List.of());
+        when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
+
+        facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 6L, null, 9L));
+
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.EDIT, 5L);
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.EDIT, 6L);
+    }
+
+    @Test
+    void update_unchangedCategory_requiresEditPermissionOnlyOnceOnTheCurrentOne() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(appDocumentationAttachmentVersionRepository.findActiveByDocumentationAttachmentId(10L)).thenReturn(List.of());
+        when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
+
+        facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, null, 9L));
+
+        verify(documentRolePermissionService, times(1)).requirePermission(eq(DocumentPermission.EDIT), anyLong());
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.EDIT, 5L);
+    }
+
+    @Test
+    void update_changedCategoryWithSubcategory_isValidatedAndPersisted() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(6L)).thenReturn(category(6L));
+        when(documentCategoryRepository.findById(8L)).thenReturn(subcategory(8L, 6L));
+        when(appDocumentationAttachmentVersionRepository.findActiveByDocumentationAttachmentId(10L)).thenReturn(List.of());
+        when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
+
+        facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 6L, 8L, 9L));
+
+        verify(appDocumentationAttachmentRepository).update(stored, 10L);
+    }
+
+    @Test
+    void update_unchangedCategory_isNotCheckedAgain_soAnInactiveOneStillWorks() {
+        AppDocumentationAttachmentUpdateInputDTO inputDTO = new AppDocumentationAttachmentUpdateInputDTO("Title", 5L, null, 9L);
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
         when(appDocumentationAttachmentVersionRepository.findActiveByDocumentationAttachmentId(10L)).thenReturn(List.of());
         when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
@@ -473,25 +671,106 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
+    void update_unchangedSubcategory_isNotCheckedForBeingActiveAgain_soADeletedOneStillWorks() {
+        DocumentCategory deleted = subcategory(7L, 5L);
+        deleted.setDeletedAt(LocalDateTime.now());
+        stored.setSubcategory(deleted);
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(7L)).thenReturn(deleted);
+        when(appDocumentationAttachmentVersionRepository.findActiveByDocumentationAttachmentId(10L)).thenReturn(List.of());
+        when(appDocumentationAttachmentMapper.toResponse(stored)).thenReturn(new AppDocumentationAttachmentOutputDTO());
+
+        facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, 7L, 9L));
+
+        verify(appDocumentationAttachmentRepository).update(stored, 10L);
+    }
+
+    @Test
     void update_newCategoryDeleted_throws() {
-        DocumentCategory deleted = new DocumentCategory();
+        DocumentCategory deleted = category(6L);
         deleted.setDeletedAt(LocalDateTime.now());
         when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
-        when(appSectionRepository.findById(7L)).thenReturn(new AppSection());
         when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
         when(documentCategoryRepository.findById(6L)).thenReturn(deleted);
 
-        BusinessRuleException ex = rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 7L, 6L, 9L)));
+        BusinessRuleException ex = rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 6L, null, 9L)));
 
         assertEquals(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE, ex.getMessage());
         verify(appDocumentationAttachmentRepository, never()).update(any(), anyLong());
     }
 
     @Test
-    void update_documentNotFound_throws() {
+    void update_newCategoryNotFound_throws() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(6L)).thenReturn(null);
+
+        assertEquals(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_FOUND,
+                rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 6L, null, 9L))).getMessage());
+    }
+
+    @Test
+    void update_newCategoryThatIsASubcategory_throws() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(6L)).thenReturn(subcategory(6L, 1L));
+
+        BusinessRuleException ex = rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 6L, null, 9L)));
+
+        assertEquals(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE, ex.getMessage());
+        verify(appDocumentationAttachmentRepository, never()).update(any(), anyLong());
+    }
+
+    @Test
+    void update_statusNotFound_throws() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(null);
+
+        assertEquals(Constants.ERR_DOCUMENTATION_STATUS_NOT_FOUND,
+                rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, null, 9L))).getMessage());
+    }
+
+    @Test
+    void update_subcategoryNotFound_throws() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(7L)).thenReturn(null);
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_FOUND,
+                rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, 7L, 9L))).getMessage());
+    }
+
+    @Test
+    void update_newSubcategoryDeleted_throws() {
+        DocumentCategory deleted = subcategory(7L, 5L);
+        deleted.setDeletedAt(LocalDateTime.now());
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(7L)).thenReturn(deleted);
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_ACTIVE,
+                rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, 7L, 9L))).getMessage());
+        verify(appDocumentationAttachmentRepository, never()).update(any(), anyLong());
+    }
+
+    @Test
+    void update_subcategoryOfAnotherCategory_throws() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+        when(documentStatusRepository.findById(9L)).thenReturn(new DocumentStatus());
+        when(documentCategoryRepository.findById(7L)).thenReturn(subcategory(7L, 4L));
+
+        assertEquals(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_IN_CATEGORY,
+                rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, 7L, 9L))).getMessage());
+        verify(appDocumentationAttachmentRepository, never()).update(any(), anyLong());
+    }
+
+    @Test
+    void update_documentNotFound_throwsWithoutCheckingAnyPermission() {
         when(appDocumentationAttachmentRepository.findById(99L)).thenReturn(null);
 
-        assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, rule(() -> facade.update(99L, new AppDocumentationAttachmentUpdateInputDTO("T", 7L, 5L, 9L))).getMessage());
+        assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, rule(() -> facade.update(99L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, null, 9L))).getMessage());
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     @Test
@@ -499,15 +778,7 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
         stored.setDeletedAt(LocalDateTime.now());
         when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
 
-        assertEquals(Constants.ERR_DOCUMENTATION_NOT_ACTIVE, rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 7L, 5L, 9L))).getMessage());
-    }
-
-    @Test
-    void update_sectionNotFound_throws() {
-        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
-        when(appSectionRepository.findById(7L)).thenReturn(null);
-
-        assertEquals(Constants.ERR_DOCUMENTATION_SECTION_NOT_FOUND, rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 7L, 5L, 9L))).getMessage());
+        assertEquals(Constants.ERR_DOCUMENTATION_NOT_ACTIVE, rule(() -> facade.update(10L, new AppDocumentationAttachmentUpdateInputDTO("T", 5L, null, 9L))).getMessage());
     }
 
     // ------------------------------------------------------------------
@@ -529,10 +800,11 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void delete_documentNotFound_throws() {
+    void delete_documentNotFound_throwsWithoutCheckingAnyPermission() {
         when(appDocumentationAttachmentRepository.findById(99L)).thenReturn(null);
 
         assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, rule(() -> facade.delete(99L)).getMessage());
+        verifyNoInteractions(documentRolePermissionService);
         verify(appDocumentationAttachmentVersionRepository, never()).deleteAllByDocumentationAttachmentId(anyLong(), any(), any());
     }
 
@@ -568,10 +840,11 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void download_documentNotFound_throws() {
+    void download_documentNotFound_throwsWithoutCheckingAnyPermission() {
         when(appDocumentationAttachmentRepository.findById(99L)).thenReturn(null);
 
         assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, rule(() -> facade.download(99L, 100L, false)).getMessage());
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     @Test
@@ -797,10 +1070,11 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
     }
 
     @Test
-    void deleteAttachment_documentNotFound_throws() {
+    void deleteAttachment_documentNotFound_throwsWithoutCheckingAnyPermission() {
         when(appDocumentationAttachmentRepository.findById(99L)).thenReturn(null);
 
         assertEquals(Constants.ERR_DOCUMENTATION_NOT_FOUND, rule(() -> facade.deleteAttachment(99L, 100L)).getMessage());
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     @Test
@@ -837,5 +1111,86 @@ class AppDocumentationAttachmentServiceFacadeBeanTest {
 
         assertEquals(Constants.ERR_DOCUMENTATION_ATTACHMENT_NOT_FOUND, rule(() -> facade.deleteAttachment(10L, 100L)).getMessage());
         verify(appDocumentationAttachmentVersionRepository, never()).delete(any());
+    }
+
+    // -- Permissions of the role of the logged user on the category of the document: each action needs its own one, and is rejected before changing anything
+
+    private void denyPermission(DocumentPermission permission, Long categoryId) {
+        // lenient: update asks for the permission on two categories, so strict stubs would reject the other call
+        lenient().doThrow(new AccessDeniedException("denied")).when(documentRolePermissionService).requirePermission(permission, categoryId);
+    }
+
+    /** Denies the permission on the category and checks that the action fails without writing anything. */
+    private void assertDenied(DocumentPermission permission, Long categoryId, org.junit.jupiter.api.function.Executable action) {
+        denyPermission(permission, categoryId);
+        assertThrows(AccessDeniedException.class, action);
+        verifyNoInteractions(appDocumentationAttachmentVersionRepository, appDocumentationMetadataRepository, applicationRepository);
+        verify(appDocumentationAttachmentRepository, never()).create(any());
+        verify(appDocumentationAttachmentRepository, never()).update(any(), anyLong());
+        verify(appDocumentationAttachmentRepository, never()).delete(any());
+    }
+
+    @Test
+    void getById_withoutReadPermission_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.READ, 5L, () -> facade.getById(10L));
+    }
+
+    @Test
+    void download_withoutReadPermission_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.READ, 5L, () -> facade.download(10L, 100L, false));
+    }
+
+    @Test
+    void create_withoutUploadPermission_isDenied() {
+        denyPermission(DocumentPermission.UPLOAD, 5L);
+
+        assertThrows(AccessDeniedException.class, () -> facade.create(createInput(), file("a.pdf", PDF_BYTES)));
+
+        verifyNoInteractions(appDocumentationAttachmentRepository, appDocumentationAttachmentVersionRepository,
+                appDocumentationMetadataRepository, applicationRepository);
+    }
+
+    @Test
+    void createAttachment_withoutUploadPermission_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.UPLOAD, 5L, () -> facade.createAttachment(10L,
+                new AppDocumentationAttachmentVersionInputDTO("2.0", null, null), file("a.pdf", PDF_BYTES)));
+    }
+
+    @Test
+    void update_withoutEditPermissionOnTheCurrentCategory_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.EDIT, 5L, () -> facade.update(10L,
+                new AppDocumentationAttachmentUpdateInputDTO("T", 5L, null, 9L)));
+    }
+
+    @Test
+    void update_withoutEditPermissionOnTheNewCategory_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.EDIT, 6L, () -> facade.update(10L,
+                new AppDocumentationAttachmentUpdateInputDTO("T", 6L, null, 9L)));
+        verifyNoInteractions(documentCategoryRepository, documentStatusRepository);
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.EDIT, 5L);
+    }
+
+    @Test
+    void delete_withoutDeletePermission_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.DELETE, 5L, () -> facade.delete(10L));
+    }
+
+    @Test
+    void deleteAttachment_withoutDeletePermission_isDenied() {
+        when(appDocumentationAttachmentRepository.findById(10L)).thenReturn(stored);
+
+        assertDenied(DocumentPermission.DELETE, 5L, () -> facade.deleteAttachment(10L, 100L));
     }
 }

@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.security.personalDataProcessing.DT
 import es.caib.invai.back.interna.maintenance.security.personalDataProcessing.DTO.PersonalDataProcessingOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.security.personalDataProcessing.PersonalDataProcessingCriteria;
 import es.caib.invai.back.service.facade.maintenance.security.personalDataProcessing.PersonalDataProcessingService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for PersonalDataProcessing assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.4
  */
 @Tag(name = "Tractaments de dades personals", description = "Manteniment del catàleg de tractaments de dades personals.")
 @RestController
 @Slf4j
 @RequestMapping("personal-data-processing")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class PersonalDataProcessingController {
 
     /** Service facade handling PersonalDataProcessing business use cases. */
@@ -73,6 +78,7 @@ public class PersonalDataProcessingController {
      * @param inputDTO the data for the new personal data processing entry
      * @return the created personal data processing entry, with HTTP 201 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<PersonalDataProcessingOutputDTO> create(@Valid @RequestBody PersonalDataProcessingInputDTO inputDTO) {
         return new ResponseEntity<>(personalDataProcessingService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class PersonalDataProcessingController {
      * @param inputDTO the new data to apply
      * @return the updated personal data processing entry
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<PersonalDataProcessingOutputDTO> update(@PathVariable Long id, @Valid @RequestBody PersonalDataProcessingInputDTO inputDTO) {
         return ResponseEntity.ok(personalDataProcessingService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class PersonalDataProcessingController {
      * @param id the identifier of the personal data processing entry to delete
      * @return an empty response with HTTP 204 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         personalDataProcessingService.delete(id);
@@ -108,6 +116,7 @@ public class PersonalDataProcessingController {
      * @param id the identifier of the personal data processing entry to reactivate
      * @return the reactivated personal data processing entry
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<PersonalDataProcessingOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(personalDataProcessingService.reactivate(id));

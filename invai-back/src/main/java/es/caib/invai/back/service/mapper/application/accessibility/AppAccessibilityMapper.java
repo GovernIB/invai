@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
-import es.caib.invai.back.service.mapper.maintenance.complianceSituation.ComplianceSituationMapper;
-import es.caib.invai.back.service.mapper.maintenance.classificationSegment.ClassificationSegmentMapper;
+import es.caib.invai.back.service.mapper.maintenance.accessibility.complianceSituation.ComplianceSituationMapper;
+import es.caib.invai.back.service.mapper.maintenance.accessibility.classificationSegment.ClassificationSegmentMapper;
 
 /**
  * MapStruct mapper converting between {@link AppAccessibility} domain models, {@link

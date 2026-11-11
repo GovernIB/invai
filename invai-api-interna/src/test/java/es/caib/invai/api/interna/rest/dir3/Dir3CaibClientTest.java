@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.rest.dir3;
 
+import es.caib.invai.api.interna.config.Dir3CaibConfig;
 import es.caib.invai.api.interna.exception.IntegrationUnavailableException;
 import es.caib.invai.api.interna.rest.dir3.Dir3CaibClient;
 import es.caib.invai.api.interna.rest.dir3.UnidadRest;
@@ -36,6 +37,9 @@ class Dir3CaibClientTest {
 
         Dir3CaibClient client = new Dir3CaibClient();
         ReflectionTestUtils.setField(client, "dir3CaibWebClient", webClient);
+        Dir3CaibConfig dir3CaibConfig = new Dir3CaibConfig();
+        ReflectionTestUtils.setField(dir3CaibConfig, "treePath", "/rest/unidades/obtenerArbolUnidades");
+        ReflectionTestUtils.setField(client, "dir3CaibConfig", dir3CaibConfig);
         return client;
     }
 

@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.general.commission.DTO.CommissionI
 import es.caib.invai.back.interna.maintenance.general.commission.DTO.CommissionOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.general.commission.CommissionCriteria;
 import es.caib.invai.back.service.facade.maintenance.general.commission.CommissionService;
+import es.caib.invai.back.utils.Constants;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +18,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Internal REST controller exposing operations and lifecycle endpoints for Commission domain resources.
  * <p>
- * Access control restrictions are enforced globally at the class level via Spring Method Security,
- * allowing access only to authenticated users who possess the corporate role {@code ROLE_INV_SUPER}.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.1
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Comissions", description = "Manteniment del catàleg de comissions.")
 @RestController
 @RequestMapping("commission")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class CommissionController {
 
     /** Service facade exposing Commission business use cases to this controller. */
@@ -62,6 +62,7 @@ public class CommissionController {
      * @param inputDTO validated data payload capturing target configuration fields for the new commission
      * @return a {@link ResponseEntity} containing the initialized tracking properties as a {@link CommissionOutputDTO} with an HTTP 201 Created status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<CommissionOutputDTO> create(@Valid @RequestBody CommissionInputDTO inputDTO) {
         return new ResponseEntity<>(commissionService.create(inputDTO), HttpStatus.CREATED);
@@ -74,6 +75,7 @@ public class CommissionController {
      * @param inputDTO updated properties mapping new configuration datasets fields
      * @return a {@link ResponseEntity} wrapping current modified properties as a {@link CommissionOutputDTO} with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<CommissionOutputDTO> update(@PathVariable Long id, @Valid @RequestBody CommissionInputDTO inputDTO) {
         return ResponseEntity.ok(commissionService.update(id, inputDTO));
@@ -85,6 +87,7 @@ public class CommissionController {
      * @param id system reference primary index targeting data deactivation
      * @return an empty {@link ResponseEntity} displaying success state variables with an HTTP 204 No Content status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         commissionService.delete(id);
@@ -99,6 +102,7 @@ public class CommissionController {
      * @return a {@link ResponseEntity} containing the current modified configuration state
      *         properties details (as an {@link CommissionOutputDTO}) with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<CommissionOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(commissionService.reactivate(id));

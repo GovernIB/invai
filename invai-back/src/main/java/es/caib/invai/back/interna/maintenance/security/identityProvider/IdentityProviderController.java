@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.security.identityProvider.DTO.Iden
 import es.caib.invai.back.interna.maintenance.security.identityProvider.DTO.IdentityProviderOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.security.identityProvider.IdentityProviderCriteria;
 import es.caib.invai.back.service.facade.maintenance.security.identityProvider.IdentityProviderService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for IdentityProvider assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.4
  */
 @Tag(name = "Proveïdors d'identitat", description = "Manteniment del catàleg de proveïdors d'identitat.")
 @RestController
 @Slf4j
 @RequestMapping("identity-provider")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class IdentityProviderController {
 
     /** Service facade handling IdentityProvider business use cases. */
@@ -73,6 +78,7 @@ public class IdentityProviderController {
      * @param inputDTO the data for the new identity provider
      * @return the created identity provider, with HTTP 201 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<IdentityProviderOutputDTO> create(@Valid @RequestBody IdentityProviderInputDTO inputDTO) {
         return new ResponseEntity<>(identityProviderService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class IdentityProviderController {
      * @param inputDTO the new data to apply
      * @return the updated identity provider
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<IdentityProviderOutputDTO> update(@PathVariable Long id, @Valid @RequestBody IdentityProviderInputDTO inputDTO) {
         return ResponseEntity.ok(identityProviderService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class IdentityProviderController {
      * @param id the identifier of the identity provider to delete
      * @return an empty response with HTTP 204 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         identityProviderService.delete(id);
@@ -108,6 +116,7 @@ public class IdentityProviderController {
      * @param id the identifier of the identity provider to reactivate
      * @return the reactivated identity provider
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<IdentityProviderOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(identityProviderService.reactivate(id));

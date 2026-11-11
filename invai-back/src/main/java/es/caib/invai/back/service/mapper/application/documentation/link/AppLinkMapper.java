@@ -4,21 +4,21 @@ import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocument
 import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocumentationLinkOutputDTO;
 import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocumentationLinkUpdateInputDTO;
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity;
-import es.caib.invai.back.service.mapper.catalog.appSection.AppSectionMapper;
+import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapper;
 import es.caib.invai.back.service.model.application.documentation.link.AppLink;
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
+import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 /**
  * MapStruct mapper converting links between entities, domain models and API transfer schemas. The
- * section of the inbound payloads is carried as a model holding only its identifier; the
+ * category of the inbound payloads is carried as a model holding only its identifier; the
  * repository turns it into a reference.
  *
  * @since 1.0.6
  */
-@Mapper(componentModel = "spring", uses = {AppSectionMapper.class})
+@Mapper(componentModel = "spring", uses = {DocumentCategoryMapper.class})
 public interface AppLinkMapper {
 
     /**
@@ -31,14 +31,14 @@ public interface AppLinkMapper {
     AppLink toModel(AppLinkEntity entity);
 
     /**
-     * Converts a domain model into the persistence entity, leaving the application and the section
+     * Converts a domain model into the persistence entity, leaving the application and the category
      * to be set by the repository.
      *
      * @param model the domain model to convert
      * @return the converted entity
      */
     @Mapping(target = "application", ignore = true)
-    @Mapping(target = "section", ignore = true)
+    @Mapping(target = "category", ignore = true)
     AppLinkEntity toEntity(AppLink model);
 
     /**
@@ -47,6 +47,7 @@ public interface AppLinkMapper {
      * @param model the domain model to convert
      * @return the converted response DTO
      */
+    @Mapping(target = "category", source = "category", qualifiedByName = "toSummaryResponse")
     AppDocumentationLinkOutputDTO toResponse(AppLink model);
 
     /**
@@ -56,7 +57,7 @@ public interface AppLinkMapper {
      * @return the converted domain model
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "section", expression = "java(newSection(inputDTO.getSectionId()))")
+    @Mapping(target = "category", expression = "java(newCategory(inputDTO.getCategoryId()))")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -74,7 +75,7 @@ public interface AppLinkMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "applicationId", ignore = true)
-    @Mapping(target = "section", expression = "java(newSection(inputDTO.getSectionId()))")
+    @Mapping(target = "category", expression = "java(newCategory(inputDTO.getCategoryId()))")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -84,14 +85,14 @@ public interface AppLinkMapper {
     void updateModelFromInput(AppDocumentationLinkUpdateInputDTO inputDTO, @MappingTarget AppLink model);
 
     /**
-     * Builds a section holding only the given identifier.
+     * Builds a category holding only the given identifier.
      *
-     * @param id the identifier of the section
-     * @return the section
+     * @param id the identifier of the category
+     * @return the category
      */
-    default AppSection newSection(Long id) {
-        AppSection section = new AppSection();
-        section.setId(id);
-        return section;
+    default DocumentCategory newCategory(Long id) {
+        DocumentCategory category = new DocumentCategory();
+        category.setId(id);
+        return category;
     }
 }

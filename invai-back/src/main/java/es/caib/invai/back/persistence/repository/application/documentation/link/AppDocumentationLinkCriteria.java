@@ -27,15 +27,15 @@ public class AppDocumentationLinkCriteria {
     /** Partial, case-insensitive filter on the description of the link. */
     private String description;
 
-    /** Identifier of the section the links belong to. */
-    private Long sectionId;
+    /** Identifier of the category the links are filed under. */
+    private Long categoryId;
 
     /** Partial, case-insensitive filter on the address of the link. */
     private String url;
 
     /**
      * Global text lookup, partial and case-insensitive, matching the title, the description, the
-     * address or the name of the section of the link.
+     * address or the name of the category of the link.
      */
     private String quickSearch;
 

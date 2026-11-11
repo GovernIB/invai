@@ -273,6 +273,11 @@
 			"type": "string"
 		},
 		{
+			"key": "documentRoleId",
+			"value": "1",
+			"type": "string"
+		},
+		{
 			"key": "appIntegrationConnectionId",
 			"value": "1",
 			"type": "string"
@@ -294,11 +299,6 @@
 			"type": "string"
 		},
 		{
-			"key": "appSectionId",
-			"value": "1",
-			"type": "string"
-		},
-		{
 			"key": "documentStatusId",
 			"value": "1",
 			"type": "string"
@@ -306,6 +306,16 @@
 		{
 			"key": "mimeTypeId",
 			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "appEmailDocumentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "appEmailVersionId",
+			"value": "",
 			"type": "string"
 		}
 	],
@@ -3404,71 +3414,6 @@
 											]
 										},
 										{
-											"name": "AppDatabase - Update",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/database/{{appDatabaseId}}",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"database",
-														"{{appDatabaseId}}"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"informationSystemDbId\": 1,\n  \"databaseId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.response.to.have.status(200);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response time is below 3000ms\", function () {",
-															"    pm.expect(pm.response.responseTime).to.be.below(3000);",
-															"});",
-															"pm.test(\"Response id matches path parameter\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData.id).to.eql(parseInt(pm.variables.get(\"appDatabaseId\"), 10));",
-															"});",
-															"pm.test(\"Response links reference the submitted ids\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData.informationSystemDb.id).to.eql(1);",
-															"    pm.expect(jsonData.database.id).to.eql(1);",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
 											"name": "AppDatabase - Delete (soft)",
 											"request": {
 												"method": "DELETE",
@@ -3802,122 +3747,6 @@
 											]
 										},
 										{
-											"name": "AppDatabase - Update - Not Found",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/database/999999",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"database",
-														"999999"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"informationSystemDbId\": 1,\n  \"databaseId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response contains error details\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData).to.have.property(\"error\");",
-															"    pm.expect(jsonData).to.have.property(\"message\");",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
-											"name": "AppDatabase - Update - Validation Error (informationSystemDbId)",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/database/{{appDatabaseId}}",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"database",
-														"{{appDatabaseId}}"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"databaseId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response contains error details\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData).to.have.property(\"error\");",
-															"    pm.expect(jsonData).to.have.property(\"message\");",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
 											"name": "AppDatabase - Delete - Not Found",
 											"request": {
 												"method": "DELETE",
@@ -3982,64 +3811,6 @@
 														"database",
 														"{{appDatabaseId}}"
 													]
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response contains error details\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData).to.have.property(\"error\");",
-															"    pm.expect(jsonData).to.have.property(\"message\");",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
-											"name": "AppDatabase - Update - Not Active",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/database/{{appDatabaseId}}",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"database",
-														"{{appDatabaseId}}"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"informationSystemDbId\": 1,\n  \"databaseId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
 												}
 											},
 											"response": [],
@@ -4214,71 +3985,6 @@
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.id).to.be.a(\"number\");",
 															"    pm.collectionVariables.set(\"appSystemId\", jsonData.id);",
-															"});",
-															"pm.test(\"Response links reference the submitted ids\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData.informationSystemDb.id).to.eql(1);",
-															"    pm.expect(jsonData.system.id).to.eql(1);",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
-											"name": "AppSystem - Update",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/system/{{appSystemId}}",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"system",
-														"{{appSystemId}}"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"informationSystemDbId\": 1,\n  \"systemId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 200\", function () {",
-															"    pm.response.to.have.status(200);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response time is below 3000ms\", function () {",
-															"    pm.expect(pm.response.responseTime).to.be.below(3000);",
-															"});",
-															"pm.test(\"Response id matches path parameter\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData.id).to.eql(parseInt(pm.variables.get(\"appSystemId\"), 10));",
 															"});",
 															"pm.test(\"Response links reference the submitted ids\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -4624,122 +4330,6 @@
 											]
 										},
 										{
-											"name": "AppSystem - Update - Not Found",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/system/999999",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"system",
-														"999999"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"informationSystemDbId\": 1,\n  \"systemId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response contains error details\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData).to.have.property(\"error\");",
-															"    pm.expect(jsonData).to.have.property(\"message\");",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
-											"name": "AppSystem - Update - Validation Error (informationSystemDbId)",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/system/{{appSystemId}}",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"system",
-														"{{appSystemId}}"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"systemId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response contains error details\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData).to.have.property(\"error\");",
-															"    pm.expect(jsonData).to.have.property(\"message\");",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
 											"name": "AppSystem - Delete - Not Found",
 											"request": {
 												"method": "DELETE",
@@ -4804,64 +4394,6 @@
 														"system",
 														"{{appSystemId}}"
 													]
-												}
-											},
-											"response": [],
-											"event": [
-												{
-													"listen": "test",
-													"script": {
-														"type": "text/javascript",
-														"exec": [
-															"pm.test(\"Status code is 400\", function () {",
-															"    pm.response.to.have.status(400);",
-															"});",
-															"pm.test(\"Response is JSON\", function () {",
-															"    pm.response.to.be.json;",
-															"});",
-															"pm.test(\"Response contains error details\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData).to.have.property(\"error\");",
-															"    pm.expect(jsonData).to.have.property(\"message\");",
-															"});"
-														]
-													}
-												}
-											]
-										},
-										{
-											"name": "AppSystem - Update - Not Active",
-											"request": {
-												"method": "PUT",
-												"header": [
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Cookie",
-														"value": "JSESSIONID={{sessionCookie}}"
-													}
-												],
-												"url": {
-													"raw": "{{baseUrl}}/application/system/{{appSystemId}}",
-													"host": [
-														"{{baseUrl}}"
-													],
-													"path": [
-														"application",
-														"system",
-														"{{appSystemId}}"
-													]
-												},
-												"body": {
-													"mode": "raw",
-													"raw": "{\n  \"informationSystemDbId\": 1,\n  \"systemId\": 1\n}",
-													"options": {
-														"raw": {
-															"language": "json"
-														}
-													}
 												}
 											},
 											"response": [],
@@ -17155,7 +16687,7 @@
 											"name": "Documentation - Create (document + first version)",
 											"request": {
 												"method": "POST",
-												"description": "Creates a document with its first version, which becomes the current one. multipart/form-data: 'data' is the JSON of the document (content type application/json) and 'file' the file. In the file field choose a file whose extension is in the format catalog (e.g. a .pdf of less than 5 MB). Needs applicationId, appSectionId, documentSubcategoryId and documentStatusId (collection variables) to point at existing records. categoryId is the most specific category of the document, and here it is a subcategory: documentSubcategoryId must be the id of a subcategory (the request 'DocumentCategory - Create Subcategory' sets it), so the document comes back with its subcategory and the category that subcategory belongs to. 'metadata' is optional: key-value pairs of the first version (the attachment), whose keys must not repeat.",
+												"description": "Creates a document with its first version, which becomes the current one. multipart/form-data: 'data' is the JSON of the document (content type application/json) and 'file' the file. In the file field choose a file whose extension is in the format catalog (e.g. a .pdf of less than 5 MB). Needs applicationId, documentCategoryId, documentSubcategoryId and documentStatusId (collection variables) to point at existing records. categoryId is always the root category of the document; subcategoryId is optional and, when sent, must be a subcategory of that category (the request 'DocumentCategory - Create Subcategory' sets documentSubcategoryId), so the document comes back with its category and its subcategory. 'metadata' is optional: key-value pairs of the first version (the attachment), whose keys must not repeat.",
 												"header": [
 													{
 														"key": "Cookie",
@@ -17167,7 +16699,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"sectionId\": {{appSectionId}}, \"categoryId\": {{documentSubcategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\", \"metadata\": [{\"key\": \"eni.claseDocumento\", \"value\": \"Manual\"}]}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": {{documentCategoryId}}, \"subcategoryId\": {{documentSubcategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\", \"metadata\": [{\"key\": \"eni.claseDocumento\", \"value\": \"Manual\"}]}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -17217,9 +16749,10 @@
 															"    pm.expect(version.fileSize).to.be.above(0);",
 															"    pm.expect(version.mimeType).to.have.property(\"name\");",
 															"});",
-															"pm.test(\"Section and status come with their catalog data\", function () {",
+															"pm.test(\"Category and status come with their catalog data\", function () {",
 															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData.section).to.have.property(\"code\");",
+															"    pm.expect(jsonData.category).to.have.property(\"name\");",
+															"    pm.expect(jsonData.category).to.have.property(\"nameEs\");",
 															"    pm.expect(jsonData.status).to.have.property(\"code\");",
 															"});",
 															"pm.test(\"Category data never shows subcategories nor deletedAt\", function () {",
@@ -17250,7 +16783,7 @@
 											"name": "Documentation - Get All (current version of each document)",
 											"request": {
 												"method": "GET",
-												"description": "One row per document, deleted ones included (deletedAt tells them apart), with the data of its current attachment. Sortable by title, section, mimeType, category, subcategory, versionLabel and status. Filters: search (title), sectionId, categoryId (a category also matches its subcategories), statusId (the state: active, in review, obsolete), mimeTypeId and deleted (true only the deleted ones, false only the others, absent all of them).",
+												"description": "One row per document, deleted ones included (deletedAt tells them apart), with the data of its current attachment. Sortable by title, mimeType, category, subcategory, versionLabel and status. Filters: search (title), categoryId (the exact category), subcategoryId, statusId (the state: active, in review, obsolete), mimeTypeId and deleted (true only the deleted ones, false only the others, absent all of them).",
 												"header": [
 													{
 														"key": "Cookie",
@@ -17306,7 +16839,7 @@
 															"        pm.expect(row).to.have.property(\"versionLabel\");",
 															"        pm.expect(row.currentAttachmentId).to.be.a(\"number\");",
 															"        pm.expect(row.mimeType).to.have.property(\"name\");",
-															"        pm.expect(row.section).to.have.property(\"code\");",
+															"        pm.expect(row.category).to.have.property(\"name\");",
 															"        pm.expect(row.status).to.have.property(\"code\");",
 															"        pm.expect(row).to.not.have.property(\"content\");",
 															"    });",
@@ -17454,7 +16987,7 @@
 											]
 										},
 										{
-											"name": "Documentation - Get All - Filtered (search, section, category, status, type)",
+											"name": "Documentation - Get All - Filtered (search, category, subcategory, status, type)",
 											"request": {
 												"method": "GET",
 												"description": "Combines every filter. Adjust the values to ones that exist.",
@@ -17465,7 +16998,7 @@
 													}
 												],
 												"url": {
-													"raw": "{{baseUrl}}/application/documentation?applicationId={{applicationId}}&search=manual&sectionId={{appSectionId}}&categoryId={{documentCategoryId}}&statusId={{documentStatusId}}&mimeTypeId={{mimeTypeId}}&page=0&size=10",
+													"raw": "{{baseUrl}}/application/documentation?applicationId={{applicationId}}&search=manual&categoryId={{documentCategoryId}}&subcategoryId={{documentSubcategoryId}}&statusId={{documentStatusId}}&mimeTypeId={{mimeTypeId}}&page=0&size=10",
 													"host": [
 														"{{baseUrl}}"
 													],
@@ -17483,12 +17016,12 @@
 															"value": "manual"
 														},
 														{
-															"key": "sectionId",
-															"value": "{{appSectionId}}"
-														},
-														{
 															"key": "categoryId",
 															"value": "{{documentCategoryId}}"
+														},
+														{
+															"key": "subcategoryId",
+															"value": "{{documentSubcategoryId}}"
 														},
 														{
 															"key": "statusId",
@@ -17840,7 +17373,7 @@
 											"name": "Documentation - Update (main record only)",
 											"request": {
 												"method": "PUT",
-												"description": "Changes title, section, category and state of the document. Its attachments and files are never modified. The metadata belongs to each attachment and is never modified.",
+												"description": "Changes title, category, subcategory and state of the document. Its attachments and files are never modified. The metadata belongs to each attachment and is never modified.",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -17853,7 +17386,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Manual API v2 (Postman, edited)\",\n  \"sectionId\": {{appSectionId}},\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
+													"raw": "{\n  \"title\": \"Manual API v2 (Postman, edited)\",\n  \"categoryId\": {{documentCategoryId}},\n  \"subcategoryId\": {{documentSubcategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -18523,7 +18056,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"\", \"sectionId\": {{appSectionId}}, \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"\", \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -18584,7 +18117,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"sectionId\": {{appSectionId}}, \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
 															"contentType": "application/json",
 															"type": "text"
 														}
@@ -18640,7 +18173,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": 999999, \"title\": \"Manual API v2 (Postman)\", \"sectionId\": {{appSectionId}}, \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
+															"value": "{\"applicationId\": 999999, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -18686,10 +18219,10 @@
 											]
 										},
 										{
-											"name": "Documentation - Create - Section Not Found",
+											"name": "Documentation - Create - Subcategory Not Found",
 											"request": {
 												"method": "POST",
-												"description": "sectionId points at no section. In the file field choose a file whose extension is in the format catalog (e.g. a .pdf of less than 5 MB).",
+												"description": "subcategoryId points at no subcategory. In the file field choose a file whose extension is in the format catalog (e.g. a .pdf of less than 5 MB).",
 												"header": [
 													{
 														"key": "Cookie",
@@ -18701,7 +18234,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"sectionId\": 999999, \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": {{documentCategoryId}}, \"subcategoryId\": 999999, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -18762,7 +18295,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"sectionId\": {{appSectionId}}, \"categoryId\": 999999, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": 999999, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -18823,7 +18356,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"sectionId\": {{appSectionId}}, \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\"}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -18894,7 +18427,7 @@
 													"formdata": [
 														{
 															"key": "data",
-															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual\", \"sectionId\": {{appSectionId}}, \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"metadata\": [{\"key\": \"k\", \"value\": \"1\"}, {\"key\": \"k\", \"value\": \"2\"}]}",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual\", \"categoryId\": {{documentCategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"metadata\": [{\"key\": \"k\", \"value\": \"1\"}, {\"key\": \"k\", \"value\": \"2\"}]}",
 															"contentType": "application/json",
 															"type": "text"
 														},
@@ -19007,7 +18540,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"\",\n  \"sectionId\": {{appSectionId}},\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
+													"raw": "{\n  \"title\": \"\",\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19050,7 +18583,7 @@
 											]
 										},
 										{
-											"name": "Documentation - Update - Section Not Found",
+											"name": "Documentation - Update - Subcategory Not Found",
 											"request": {
 												"method": "PUT",
 												"header": [
@@ -19065,7 +18598,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Title\",\n  \"sectionId\": 999999,\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
+													"raw": "{\n  \"title\": \"Title\",\n  \"categoryId\": {{documentCategoryId}},\n  \"subcategoryId\": 999999,\n  \"statusId\": {{documentStatusId}}\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19082,7 +18615,8 @@
 														"documentation",
 														"{{appDocumentationId}}"
 													]
-												}
+												},
+												"description": "subcategoryId points at no subcategory."
 											},
 											"response": [],
 											"event": [
@@ -19123,7 +18657,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Title\",\n  \"sectionId\": {{appSectionId}},\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
+													"raw": "{\n  \"title\": \"Title\",\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19373,7 +18907,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Title\",\n  \"sectionId\": {{appSectionId}},\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
+													"raw": "{\n  \"title\": \"Title\",\n  \"categoryId\": {{documentCategoryId}},\n  \"statusId\": {{documentStatusId}}\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19567,7 +19101,7 @@
 											"name": "Link - Create (first)",
 											"request": {
 												"method": "POST",
-												"description": "Creates a link of the application: title, optional description, section and URL (an absolute http or https one). The same title, section and URL cannot be used twice by the active links of an application. Stores its id in appLinkId.",
+												"description": "Creates a link of the application: title, optional description, category and URL (an absolute http or https one). The same title, category and URL cannot be used twice by the active links of an application. Stores its id in appLinkId.",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -19591,7 +19125,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19611,11 +19145,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The link is returned with its section and without the application\", function () {",
+															"pm.test(\"The link is returned with its category and without the application\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.id).to.be.a(\"number\");",
 															"    pm.collectionVariables.set(\"appLinkId\", jsonData.id);",
-															"    pm.expect(jsonData.section).to.have.property(\"code\");",
+															"    pm.expect(jsonData.category).to.have.property(\"name\");",
 															"    pm.expect(jsonData.deletedAt).to.be.null;",
 															"});"
 														]
@@ -19652,7 +19186,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman) B\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman) B\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19672,11 +19206,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The link is returned with its section and without the application\", function () {",
+															"pm.test(\"The link is returned with its category and without the application\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.id).to.be.a(\"number\");",
 															"    pm.collectionVariables.set(\"appLinkSecondId\", jsonData.id);",
-															"    pm.expect(jsonData.section).to.have.property(\"code\");",
+															"    pm.expect(jsonData.category).to.have.property(\"name\");",
 															"    pm.expect(jsonData.deletedAt).to.be.null;",
 															"});"
 														]
@@ -19713,7 +19247,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman) C\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman) C\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -19733,11 +19267,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The link is returned with its section and without the application\", function () {",
+															"pm.test(\"The link is returned with its category and without the application\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.id).to.be.a(\"number\");",
 															"    pm.collectionVariables.set(\"appLinkThirdId\", jsonData.id);",
-															"    pm.expect(jsonData.section).to.have.property(\"code\");",
+															"    pm.expect(jsonData.category).to.have.property(\"name\");",
 															"    pm.expect(jsonData.deletedAt).to.be.null;",
 															"});"
 														]
@@ -19750,7 +19284,7 @@
 											"name": "Link - Get All",
 											"request": {
 												"method": "GET",
-												"description": "Lists the links of the application, the deleted ones too (deletedAt tells them apart). Paginated and sorted by title by default; it can be sorted by title, description, section and url.",
+												"description": "Lists the links of the application, the deleted ones too (deletedAt tells them apart). Paginated and sorted by title by default; it can be sorted by title, description, category and url.",
 												"header": [
 													{
 														"key": "Cookie",
@@ -19787,11 +19321,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The page lists links, each with its section\", function () {",
+															"pm.test(\"The page lists links, each with its category\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.content).to.be.an(\"array\");",
 															"    jsonData.content.forEach(function (link) {",
-															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"section\", \"url\", \"deletedAt\");",
+															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"category\", \"url\", \"deletedAt\");",
 															"    });",
 															"});",
 															"pm.test(\"The links created before are listed\", function () {",
@@ -19805,10 +19339,10 @@
 											"response": []
 										},
 										{
-											"name": "Link - Get All - Filtered (title, section, url)",
+											"name": "Link - Get All - Filtered (title, category, url)",
 											"request": {
 												"method": "GET",
-												"description": "Filters by title, description, section and url; the text ones are partial and case-insensitive.",
+												"description": "Filters by title, description, category and url; the text ones are partial and case-insensitive.",
 												"header": [
 													{
 														"key": "Cookie",
@@ -19816,7 +19350,7 @@
 													}
 												],
 												"url": {
-													"raw": "{{baseUrl}}/application/documentation/link?applicationId={{applicationId}}&title=manual api&sectionId={{appSectionId}}&url=intranet.caib.es",
+													"raw": "{{baseUrl}}/application/documentation/link?applicationId={{applicationId}}&title=manual api&categoryId={{documentCategoryId}}&url=intranet.caib.es",
 													"host": [
 														"{{baseUrl}}"
 													],
@@ -19835,8 +19369,8 @@
 															"value": "manual api"
 														},
 														{
-															"key": "sectionId",
-															"value": "{{appSectionId}}"
+															"key": "categoryId",
+															"value": "{{documentCategoryId}}"
 														},
 														{
 															"key": "url",
@@ -19857,18 +19391,18 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The page lists links, each with its section\", function () {",
+															"pm.test(\"The page lists links, each with its category\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.content).to.be.an(\"array\");",
 															"    jsonData.content.forEach(function (link) {",
-															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"section\", \"url\", \"deletedAt\");",
+															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"category\", \"url\", \"deletedAt\");",
 															"    });",
 															"});",
 															"pm.test(\"Every link matches the filters\", function () {",
 															"    pm.response.json().content.forEach(function (link) {",
 															"        pm.expect(link.title.toLowerCase()).to.include(\"manual api\");",
 															"        pm.expect(link.url).to.include(\"intranet.caib.es\");",
-															"        pm.expect(String(link.section.id)).to.eql(String(pm.collectionVariables.get(\"appSectionId\")));",
+															"        pm.expect(String(link.category.id)).to.eql(String(pm.collectionVariables.get(\"documentCategoryId\")));",
 															"    });",
 															"});"
 														]
@@ -19881,7 +19415,7 @@
 											"name": "Link - Get All - Quick Search",
 											"request": {
 												"method": "GET",
-												"description": "quickSearch looks for the text, partial and case-insensitive, in the title, the description, the url and the name of the section at once.",
+												"description": "quickSearch looks for the text, partial and case-insensitive, in the title, the description, the url and the name of the category at once.",
 												"header": [
 													{
 														"key": "Cookie",
@@ -19922,18 +19456,18 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The page lists links, each with its section\", function () {",
+															"pm.test(\"The page lists links, each with its category\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.content).to.be.an(\"array\");",
 															"    jsonData.content.forEach(function (link) {",
-															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"section\", \"url\", \"deletedAt\");",
+															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"category\", \"url\", \"deletedAt\");",
 															"    });",
 															"});",
 															"pm.test(\"The links found carry the text somewhere\", function () {",
 															"    var content = pm.response.json().content;",
 															"    pm.expect(content).to.not.be.empty;",
 															"    content.forEach(function (link) {",
-															"        var text = [link.title, link.description, link.url, link.section.name, link.section.nameEs].join(\" \").toLowerCase();",
+															"        var text = [link.title, link.description, link.url, link.category.name, link.category.nameEs].join(\" \").toLowerCase();",
 															"        pm.expect(text).to.include(\"postman\");",
 															"    });",
 															"});"
@@ -19988,11 +19522,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The page lists links, each with its section\", function () {",
+															"pm.test(\"The page lists links, each with its category\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.content).to.be.an(\"array\");",
 															"    jsonData.content.forEach(function (link) {",
-															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"section\", \"url\", \"deletedAt\");",
+															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"category\", \"url\", \"deletedAt\");",
 															"    });",
 															"});",
 															"pm.test(\"The links come sorted by url, descending\", function () {",
@@ -20051,11 +19585,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The page lists links, each with its section\", function () {",
+															"pm.test(\"The page lists links, each with its category\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.content).to.be.an(\"array\");",
 															"    jsonData.content.forEach(function (link) {",
-															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"section\", \"url\", \"deletedAt\");",
+															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"category\", \"url\", \"deletedAt\");",
 															"    });",
 															"});",
 															"pm.test(\"None of them is deleted\", function () {",
@@ -20073,7 +19607,7 @@
 											"name": "Link - Update",
 											"request": {
 												"method": "PUT",
-												"description": "Changes the title, description, section and URL of an active link. The application it belongs to never changes. It cannot end up equal, in title, section and URL, to another active link of the application.",
+												"description": "Changes the title, description, category and URL of an active link. The application it belongs to never changes. It cannot end up equal, in title, category and URL, to another active link of the application.",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -20098,7 +19632,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Manual API (Postman, edited)\",\n  \"description\": \"Manual de la API editado\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"title\": \"Manual API (Postman, edited)\",\n  \"description\": \"Manual de la API editado\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20214,11 +19748,11 @@
 															"pm.test(\"Response is JSON\", function () {",
 															"    pm.response.to.be.json;",
 															"});",
-															"pm.test(\"The page lists links, each with its section\", function () {",
+															"pm.test(\"The page lists links, each with its category\", function () {",
 															"    var jsonData = pm.response.json();",
 															"    pm.expect(jsonData.content).to.be.an(\"array\");",
 															"    jsonData.content.forEach(function (link) {",
-															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"section\", \"url\", \"deletedAt\");",
+															"        pm.expect(link).to.have.keys(\"id\", \"title\", \"description\", \"category\", \"url\", \"deletedAt\");",
 															"    });",
 															"});",
 															"pm.test(\"All are deleted and the deleted link is there\", function () {",
@@ -20314,7 +19848,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20373,7 +19907,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"ftp://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"ftp://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20432,7 +19966,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": 999999,\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": 999999,\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20464,10 +19998,10 @@
 											"response": []
 										},
 										{
-											"name": "Link - Create - Section Not Found",
+											"name": "Link - Create - Category Not Found",
 											"request": {
 												"method": "POST",
-												"description": "No section exists with that id.",
+												"description": "No category exists with that id.",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -20491,7 +20025,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"sectionId\": 999999,\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman)\",\n  \"description\": \"Manual de la API\",\n  \"categoryId\": 999999,\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20526,7 +20060,7 @@
 											"name": "Link - Create - Duplicated",
 											"request": {
 												"method": "POST",
-												"description": "The application already has an active link with this title, section and URL (the first link, as it was left by the update).",
+												"description": "The application already has an active link with this title, category and URL (the first link, as it was left by the update).",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -20550,7 +20084,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman, edited)\",\n  \"description\": null,\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"title\": \"Manual API (Postman, edited)\",\n  \"description\": null,\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20610,7 +20144,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Title\",\n  \"description\": \"x\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"title\": \"Title\",\n  \"description\": \"x\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20642,10 +20176,10 @@
 											"response": []
 										},
 										{
-											"name": "Link - Update - Section Not Found",
+											"name": "Link - Update - Category Not Found",
 											"request": {
 												"method": "PUT",
-												"description": "No section exists with that id.",
+												"description": "No category exists with that id.",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -20670,7 +20204,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Title\",\n  \"description\": \"x\",\n  \"sectionId\": 999999,\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"title\": \"Title\",\n  \"description\": \"x\",\n  \"categoryId\": 999999,\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20705,7 +20239,7 @@
 											"name": "Link - Update - Duplicated",
 											"request": {
 												"method": "PUT",
-												"description": "Another active link of the application already has this title, section and URL (the first one).",
+												"description": "Another active link of the application already has this title, category and URL (the first one).",
 												"header": [
 													{
 														"key": "Content-Type",
@@ -20730,7 +20264,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Manual API (Postman, edited)\",\n  \"description\": \"x\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"title\": \"Manual API (Postman, edited)\",\n  \"description\": \"x\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20790,7 +20324,7 @@
 												},
 												"body": {
 													"mode": "raw",
-													"raw": "{\n  \"title\": \"Title\",\n  \"description\": \"x\",\n  \"sectionId\": {{appSectionId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
+													"raw": "{\n  \"title\": \"Title\",\n  \"description\": \"x\",\n  \"categoryId\": {{documentCategoryId}},\n  \"url\": \"https://intranet.caib.es/manual\"\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -20890,6 +20424,811 @@
 														"link",
 														"{{appLinkThirdId}}"
 													]
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Email",
+							"item": [
+								{
+									"name": "2XX",
+									"item": [
+										{
+											"name": "Email - Prepare Document (document + first version to send)",
+											"request": {
+												"method": "POST",
+												"description": "Creates the document whose first version the following requests send. multipart/form-data: choose in the 'file' field a small file whose extension is in the format catalog (e.g. a .pdf of a few KB). Stores the ids in appEmailDocumentId and appEmailVersionId.",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "data",
+															"value": "{\"applicationId\": {{applicationId}}, \"title\": \"Manual API v2 (Postman)\", \"categoryId\": {{documentCategoryId}}, \"subcategoryId\": {{documentSubcategoryId}}, \"statusId\": {{documentStatusId}}, \"versionLabel\": \"1.0\", \"changeNote\": \"First version\", \"metadata\": [{\"key\": \"eni.claseDocumento\", \"value\": \"Manual\"}]}",
+															"contentType": "application/json",
+															"type": "text"
+														},
+														{
+															"key": "file",
+															"type": "file",
+															"src": []
+														}
+													]
+												},
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 201\", function () {",
+															"    pm.response.to.have.status(201);",
+															"});",
+															"pm.test(\"The document and its first version are kept for the sendings\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData.id).to.be.a(\"number\");",
+															"    pm.collectionVariables.set(\"appEmailDocumentId\", jsonData.id);",
+															"    pm.expect(jsonData.attachments).to.have.lengthOf(1);",
+															"    pm.collectionVariables.set(\"appEmailVersionId\", jsonData.attachments[0].id);",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "Email - Send (attachment and message)",
+											"request": {
+												"method": "POST",
+												"description": "Sends from the address of the application, with the logged-in user as Reply-To, through the SMTP server of the application, one message with the chosen version of the document attached and the typed message. Answers 204 once the mail server has accepted it and keeps the sending in the history. Needs the SMTP server of the application (es.caib.invai.mail.*) and the user's e-mail (OIDC claim).",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Send (no message, repeated recipient)",
+											"request": {
+												"method": "POST",
+												"description": "The message is optional, and a recipient typed twice (ignoring case) receives the message once.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\",\n    \"DESTINATARI@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "4XX",
+									"item": [
+										{
+											"name": "Email - Validation Error (no recipients)",
+											"request": {
+												"method": "POST",
+												"description": "At least one recipient is required.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Validation Error (invalid recipient)",
+											"request": {
+												"method": "POST",
+												"description": "Every recipient must be an e-mail address.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"not-an-address\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Validation Error (subject with a line break)",
+											"request": {
+												"method": "POST",
+												"description": "The subject is a single line, so no header can be injected through it.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"one\\ntwo\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Validation Error (blank subject)",
+											"request": {
+												"method": "POST",
+												"description": "The subject is required.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"  \",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Validation Error (attachment without version)",
+											"request": {
+												"method": "POST",
+												"description": "Every attachment needs its document and its version.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Nothing Selected",
+											"request": {
+												"method": "POST",
+												"description": "At least one attachment must be chosen.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Application Not Found",
+											"request": {
+												"method": "POST",
+												"description": "No application exists with that id.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": 999999,\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Document Not Found",
+											"request": {
+												"method": "POST",
+												"description": "No document exists with that id (or it belongs to another application).",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": 999999,\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Version Not Found",
+											"request": {
+												"method": "POST",
+												"description": "The version does not exist or is not a version of that document.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": 999999\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												}
+											},
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											],
+											"response": []
+										},
+										{
+											"name": "Email - Cleanup (delete the document of the previous requests)",
+											"request": {
+												"method": "DELETE",
+												"description": "Logically deletes the document created by \"Email - Prepare Document\".",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/{{appEmailDocumentId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"{{appEmailDocumentId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 204\", function () {",
+															"    pm.response.to.have.status(204);",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "Email - Document Deleted",
+											"request": {
+												"method": "POST",
+												"description": "A deleted document cannot be sent any more.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/application/documentation/email",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"application",
+														"documentation",
+														"email"
+													]
+												},
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"applicationId\": {{applicationId}},\n  \"recipients\": [\n    \"destinatari@example.com\"\n  ],\n  \"subject\": \"Documentacio de l'aplicacio (Postman)\",\n  \"message\": \"Missatge de prova.\",\n  \"attachments\": [\n    {\n      \"documentId\": {{appEmailDocumentId}},\n      \"versionId\": {{appEmailVersionId}}\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
 												}
 											},
 											"event": [
@@ -46762,6 +47101,713 @@
 									]
 								}
 							]
+						},
+						{
+							"name": "Role Permission",
+							"item": [
+								{
+									"name": "2XX",
+									"item": [
+										{
+											"name": "DocumentRolePermission - Get By Category",
+											"request": {
+												"method": "GET",
+												"description": "Returns the documentation permissions every role of the INVAI application has in the category (documentCategoryId), sorted by role name. Every role that has permissions in any category is listed: one that has none configured in this category comes with the four permissions at false. A role has its permissions when it is added to the application (with read permission only), and loses them when it is taken off.",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Every role comes with its four permissions\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.be.an(\"array\");",
+															"    jsonData.forEach(function (role) {",
+															"        pm.expect(role.roleId).to.be.a(\"number\");",
+															"        pm.expect(role.name).to.be.a(\"string\");",
+															"        pm.expect(role.canRead).to.be.a(\"boolean\");",
+															"        pm.expect(role.canUpload).to.be.a(\"boolean\");",
+															"        pm.expect(role.canEdit).to.be.a(\"boolean\");",
+															"        pm.expect(role.canDelete).to.be.a(\"boolean\");",
+															"    });",
+															"});",
+															"pm.test(\"The first role is kept as documentRoleId for the next requests\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    if (jsonData.length > 0) {",
+															"        pm.collectionVariables.set(\"documentRoleId\", jsonData[0].roleId);",
+															"    }",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Get Current User Permissions",
+											"request": {
+												"method": "GET",
+												"description": "Returns what the logged user can do with the documents (read, upload, edit, delete) in each of the categories assigned to them: an array of {categoryId, canRead, canUpload, canEdit, canDelete}, adding up the permissions of all their roles. Only the categories where the user can do something are listed. INV_SUPER can do everything in every active category; a user whose roles have no permissions configured gets an empty array. The front uses it to show only the allowed actions; the back rejects the others with HTTP 403.",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/me",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"me"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"One entry per category with the four permissions of the user\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.be.an(\"array\");",
+															"    jsonData.forEach(function (entry) {",
+															"        pm.expect(entry.categoryId).to.be.a(\"number\");",
+															"        pm.expect(entry.canRead).to.be.a(\"boolean\");",
+															"        pm.expect(entry.canUpload).to.be.a(\"boolean\");",
+															"        pm.expect(entry.canEdit).to.be.a(\"boolean\");",
+															"        pm.expect(entry.canDelete).to.be.a(\"boolean\");",
+															"    });",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Get By Role",
+											"request": {
+												"method": "GET",
+												"description": "Returns the categories assigned to a role (query parameter role, the name of the role: INV_SISTEMES, INV_DESENVO...) and what the role can do in each of them: an array of {category, canRead, canUpload, canEdit, canDelete}, where category is the full category ({id, name, nameEs, parentId, subcategories, deletedAt}). A category is assigned to the role when the role has some permission in it; deleted categories are left out. A role with no permission at all in any category gets an empty array.",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/by-role?role=INV_SISTEMES",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"by-role"
+													],
+													"query": [
+														{
+															"key": "role",
+															"value": "INV_SISTEMES"
+														}
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"One entry per category, in full, with the four permissions of the role\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.be.an(\"array\");",
+															"    jsonData.forEach(function (entry) {",
+															"        pm.expect(entry.category).to.be.an(\"object\");",
+															"        pm.expect(entry.category.id).to.be.a(\"number\");",
+															"        pm.expect(entry.category.name).to.be.a(\"string\");",
+															"        pm.expect(entry.canRead).to.be.a(\"boolean\");",
+															"        pm.expect(entry.canUpload).to.be.a(\"boolean\");",
+															"        pm.expect(entry.canEdit).to.be.a(\"boolean\");",
+															"        pm.expect(entry.canDelete).to.be.a(\"boolean\");",
+															"    });",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update (read only)",
+											"request": {
+												"method": "PUT",
+												"description": "Sets the permissions of the listed roles in the category (documentCategoryId, in the path); the roles that are not listed are left as they are. Returns the permissions of every role in the category, once updated.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": [\n    {\n      \"roleId\": {{documentRoleId}},\n      \"canRead\": true,\n      \"canUpload\": false,\n      \"canEdit\": false,\n      \"canDelete\": false\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"The role has only the read permission\", function () {",
+															"    var role = pm.response.json().find(function (r) {",
+															"        return String(r.roleId) === String(pm.collectionVariables.get(\"documentRoleId\"));",
+															"    });",
+															"    pm.expect(role, \"role in the response\").to.exist;",
+															"    pm.expect(role.canRead).to.be.true;",
+															"    pm.expect(role.canUpload).to.be.false;",
+															"    pm.expect(role.canEdit).to.be.false;",
+															"    pm.expect(role.canDelete).to.be.false;",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update (every permission)",
+											"request": {
+												"method": "PUT",
+												"description": "Gives the role every permission in the category again, as when it is added to the application.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": [\n    {\n      \"roleId\": {{documentRoleId}},\n      \"canRead\": true,\n      \"canUpload\": true,\n      \"canEdit\": true,\n      \"canDelete\": true\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"The role has every permission\", function () {",
+															"    var role = pm.response.json().find(function (r) {",
+															"        return String(r.roleId) === String(pm.collectionVariables.get(\"documentRoleId\"));",
+															"    });",
+															"    pm.expect(role, \"role in the response\").to.exist;",
+															"    pm.expect(role.canRead).to.be.true;",
+															"    pm.expect(role.canUpload).to.be.true;",
+															"    pm.expect(role.canEdit).to.be.true;",
+															"    pm.expect(role.canDelete).to.be.true;",
+															"});"
+														]
+													}
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "4XX",
+									"item": [
+										{
+											"name": "DocumentRolePermission - Get By Category - Category Not Found",
+											"request": {
+												"method": "GET",
+												"description": "No category exists with that id.",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/999999",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"999999"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Get By Role - Unknown Role",
+											"request": {
+												"method": "GET",
+												"description": "No role with that name has documentation permissions configured.",
+												"header": [
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/by-role?role=INV_UNKNOWN",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"by-role"
+													],
+													"query": [
+														{
+															"key": "role",
+															"value": "INV_UNKNOWN"
+														}
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update - Role Without Permissions",
+											"request": {
+												"method": "PUT",
+												"description": "A role that is not a role with documentation permissions (it has none in any category) makes the whole request fail.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": [\n    {\n      \"roleId\": 999999,\n      \"canRead\": true,\n      \"canUpload\": true,\n      \"canEdit\": true,\n      \"canDelete\": true\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update - Role Listed Twice",
+											"request": {
+												"method": "PUT",
+												"description": "The same role twice in the request makes it fail before anything is saved.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": [\n    {\n      \"roleId\": {{documentRoleId}},\n      \"canRead\": true,\n      \"canUpload\": true,\n      \"canEdit\": true,\n      \"canDelete\": true\n    },\n    {\n      \"roleId\": {{documentRoleId}},\n      \"canRead\": false,\n      \"canUpload\": false,\n      \"canEdit\": false,\n      \"canDelete\": false\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update - Validation Error (no roles)",
+											"request": {
+												"method": "PUT",
+												"description": "At least one role has to be listed.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": []\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update - Validation Error (roleId)",
+											"request": {
+												"method": "PUT",
+												"description": "The role identifier is mandatory.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": [\n    {\n      \"canRead\": true,\n      \"canUpload\": true,\n      \"canEdit\": true,\n      \"canDelete\": true\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										},
+										{
+											"name": "DocumentRolePermission - Update - Validation Error (permission missing)",
+											"request": {
+												"method": "PUT",
+												"description": "Every one of the four permissions has to be told, true or false.",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Cookie",
+														"value": "JSESSIONID={{sessionCookie}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"permissions\": [\n    {\n      \"roleId\": {{documentRoleId}},\n      \"canRead\": true,\n      \"canUpload\": true,\n      \"canEdit\": true\n    }\n  ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/documentation/role-permission/{{documentCategoryId}}",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"documentation",
+														"role-permission",
+														"{{documentCategoryId}}"
+													]
+												}
+											},
+											"response": [],
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"type": "text/javascript",
+														"exec": [
+															"pm.test(\"Status code is 400\", function () {",
+															"    pm.response.to.have.status(400);",
+															"});",
+															"pm.test(\"Response is JSON\", function () {",
+															"    pm.response.to.be.json;",
+															"});",
+															"pm.test(\"Response contains error details\", function () {",
+															"    var jsonData = pm.response.json();",
+															"    pm.expect(jsonData).to.have.property(\"error\");",
+															"    pm.expect(jsonData).to.have.property(\"message\");",
+															"});"
+														]
+													}
+												}
+											]
+										}
+									]
+								}
+							]
 						}
 					]
 				}
@@ -47112,64 +48158,6 @@
 													"    pm.expect(jsonData).to.be.an(\"array\");",
 													"    pm.expect(jsonData.length).to.be.above(0);",
 													"    pm.expect(jsonData[0]).to.have.property(\"id\");",
-													"    pm.expect(jsonData[0]).to.have.property(\"name\");",
-													"    pm.expect(jsonData[0]).to.have.property(\"nameEs\");",
-													"});"
-												]
-											}
-										}
-									]
-								}
-							]
-						}
-					]
-				},
-				{
-					"name": "App Section",
-					"item": [
-						{
-							"name": "2XX",
-							"item": [
-								{
-									"name": "AppSection - Get All",
-									"request": {
-										"method": "GET",
-										"description": "Application sections (tabs) a document or link can be filed under, sorted by name.",
-										"header": [
-											{
-												"key": "Cookie",
-												"value": "JSESSIONID={{sessionCookie}}"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/app-section",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"app-section"
-											]
-										}
-									},
-									"response": [],
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"type": "text/javascript",
-												"exec": [
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});",
-													"pm.test(\"Response is JSON\", function () {",
-													"    pm.response.to.be.json;",
-													"});",
-													"pm.test(\"Response is a non-empty array of entries\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.be.an(\"array\");",
-													"    pm.expect(jsonData.length).to.be.above(0);",
-													"    pm.expect(jsonData[0]).to.have.property(\"id\");",
-													"    pm.expect(jsonData[0]).to.have.property(\"code\");",
 													"    pm.expect(jsonData[0]).to.have.property(\"name\");",
 													"    pm.expect(jsonData[0]).to.have.property(\"nameEs\");",
 													"});"

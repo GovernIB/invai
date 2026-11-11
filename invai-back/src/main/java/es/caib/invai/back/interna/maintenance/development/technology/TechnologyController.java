@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.development.technology.DTO.Technol
 import es.caib.invai.back.interna.maintenance.development.technology.DTO.TechnologyOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.development.technology.TechnologyCriteria;
 import es.caib.invai.back.service.facade.maintenance.development.technology.TechnologyService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for catalog Technology assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.2
  */
 @Tag(name = "Tecnologies", description = "Manteniment del catàleg de tecnologies.")
 @RestController
 @Slf4j
 @RequestMapping("technology")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class TechnologyController {
 
     /** Service facade handling business use cases for catalog Technologies. */
@@ -73,6 +78,7 @@ public class TechnologyController {
      * @param inputDTO the data for the technology to create
      * @return HTTP 201 with the created technology
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<TechnologyOutputDTO> create(@Valid @RequestBody TechnologyInputDTO inputDTO) {
         return new ResponseEntity<>(technologyService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class TechnologyController {
      * @param inputDTO the new data for the technology
      * @return HTTP 200 with the updated technology
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<TechnologyOutputDTO> update(@PathVariable Long id, @Valid @RequestBody TechnologyInputDTO inputDTO) {
         return ResponseEntity.ok(technologyService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class TechnologyController {
      * @param id the identifier of the technology to delete
      * @return HTTP 204 with no content
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         technologyService.delete(id);
@@ -108,6 +116,7 @@ public class TechnologyController {
      * @param id the identifier of the technology to reactivate
      * @return HTTP 200 with the reactivated technology
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<TechnologyOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(technologyService.reactivate(id));

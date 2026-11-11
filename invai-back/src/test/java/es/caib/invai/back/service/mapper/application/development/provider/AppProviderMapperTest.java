@@ -2,13 +2,13 @@ package es.caib.invai.back.service.mapper.application.development.provider;
 
 import es.caib.invai.back.interna.application.development.provider.DTO.AppProviderInputDTO;
 import es.caib.invai.back.interna.application.development.provider.DTO.AppProviderOutputDTO;
-import es.caib.invai.back.interna.maintenance.development.role.DTO.RoleOutputDTO;
+import es.caib.invai.back.interna.maintenance.development.providerRole.DTO.ProviderRoleOutputDTO;
 import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
 import es.caib.invai.back.persistence.model.application.development.provider.AppProviderEntity;
-import es.caib.invai.back.persistence.model.maintenance.development.role.RoleEntity;
+import es.caib.invai.back.persistence.model.maintenance.development.providerRole.ProviderRoleEntity;
 import es.caib.invai.back.service.model.application.development.provider.AppProvider;
 import es.caib.invai.back.service.model.application.development.core.AppDevelopment;
-import es.caib.invai.back.service.model.maintenance.development.role.Role;
+import es.caib.invai.back.service.model.maintenance.development.providerRole.ProviderRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,14 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
-import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper;
+import es.caib.invai.back.service.mapper.maintenance.development.providerRole.ProviderRoleMapper;
 
 /**
  * Unit tests for the generated {@link AppProviderMapperImpl}, exercising every conversion
  * direction declared on {@link AppProviderMapper}, including the {@code @AfterMapping}
  * {@code nullifyRoleWhenIdMissing} guard.
  *
- * <p>{@link AppProviderMapper} declares {@code uses = {DevelopmentMapper.class, RoleMapper.class}},
+ * <p>{@link AppProviderMapper} declares {@code uses = {DevelopmentMapper.class, ProviderRoleMapper.class}},
  * so the generated implementation depends on those two collaborators via field injection. Since
  * there is no Spring context in a pure unit test, the collaborators are mocked and wired into the
  * private {@code @Autowired} fields via reflection.
@@ -42,7 +42,7 @@ class AppProviderMapperTest {
     private es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper appDevelopmentMapper;
 
     @Mock
-    private RoleMapper roleMapper;
+    private ProviderRoleMapper providerRoleMapper;
 
     private AppProviderMapper mapper;
 
@@ -50,7 +50,7 @@ class AppProviderMapperTest {
     void setUp() throws Exception {
         AppProviderMapperImpl impl = new AppProviderMapperImpl();
         setField(impl, "appDevelopmentMapper", appDevelopmentMapper);
-        setField(impl, "roleMapper", roleMapper);
+        setField(impl, "providerRoleMapper", providerRoleMapper);
         mapper = impl;
     }
 
@@ -72,14 +72,14 @@ class AppProviderMapperTest {
         entity.setDeletedAt(LocalDateTime.of(2023, 6, 1, 0, 0));
         entity.setDeletedBy("deleter");
         AppDevelopmentEntity devEntity = new AppDevelopmentEntity();
-        RoleEntity roleEntity = new RoleEntity();
+        ProviderRoleEntity roleEntity = new ProviderRoleEntity();
         entity.setAppDevelopment(devEntity);
         entity.setRole(roleEntity);
 
         AppDevelopment devModel = new AppDevelopment();
-        Role roleModel = new Role();
+        ProviderRole roleModel = new ProviderRole();
         when(appDevelopmentMapper.toModel(devEntity)).thenReturn(devModel);
-        when(roleMapper.toModel(roleEntity)).thenReturn(roleModel);
+        when(providerRoleMapper.toModel(roleEntity)).thenReturn(roleModel);
 
         AppProvider model = mapper.toModel(entity);
 
@@ -106,14 +106,14 @@ class AppProviderMapperTest {
         model.setStartDate(LocalDateTime.of(2024, 2, 2, 0, 0));
         model.setExpireDate(LocalDateTime.of(2025, 2, 2, 0, 0));
         AppDevelopment devModel = new AppDevelopment();
-        Role roleModel = new Role();
+        ProviderRole roleModel = new ProviderRole();
         model.setAppDevelopment(devModel);
         model.setRole(roleModel);
 
         AppDevelopmentEntity devEntity = new AppDevelopmentEntity();
-        RoleEntity roleEntity = new RoleEntity();
+        ProviderRoleEntity roleEntity = new ProviderRoleEntity();
         when(appDevelopmentMapper.toEntity(devModel)).thenReturn(devEntity);
-        when(roleMapper.toEntity(roleModel)).thenReturn(roleEntity);
+        when(providerRoleMapper.toEntity(roleModel)).thenReturn(roleEntity);
 
         AppProviderEntity entity = mapper.toEntity(model);
 
@@ -138,11 +138,11 @@ class AppProviderMapperTest {
         model.setStartDate(LocalDateTime.of(2024, 3, 3, 0, 0));
         model.setExpireDate(LocalDateTime.of(2025, 3, 3, 0, 0));
         model.setDeletedAt(LocalDateTime.of(2024, 6, 1, 0, 0));
-        Role roleModel = new Role();
+        ProviderRole roleModel = new ProviderRole();
         model.setRole(roleModel);
 
-        RoleOutputDTO roleOutputDTO = new RoleOutputDTO();
-        when(roleMapper.toResponse(roleModel)).thenReturn(roleOutputDTO);
+        ProviderRoleOutputDTO roleOutputDTO = new ProviderRoleOutputDTO();
+        when(providerRoleMapper.toResponse(roleModel)).thenReturn(roleOutputDTO);
 
         AppProviderOutputDTO response = mapper.toResponse(model);
 
@@ -190,7 +190,7 @@ class AppProviderMapperTest {
         existing.setId(9L);
         existing.setCompanyName("Old Name");
         existing.setAppDevelopment(AppDevelopment.builder().id(1L).build());
-        existing.setRole(new Role());
+        existing.setRole(new ProviderRole());
         AppProviderInputDTO inputDTO = new AppProviderInputDTO(
                 4L, "Updated Name", 6L, LocalDateTime.of(2024, 4, 4, 0, 0), LocalDateTime.of(2025, 4, 4, 0, 0));
 
@@ -209,7 +209,7 @@ class AppProviderMapperTest {
     void updateModelFromInput_nullRoleId_nullifiesRoleReference() {
         AppProvider existing = new AppProvider();
         existing.setId(9L);
-        existing.setRole(new Role());
+        existing.setRole(new ProviderRole());
         AppProviderInputDTO inputDTO = new AppProviderInputDTO(4L, "Updated Name", null, null, null);
 
         mapper.updateModelFromInput(inputDTO, existing);

@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.catalog.securityLevel;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.catalog.securityLevel.DTO.SecurityLevelOutputDTO;
 import es.caib.invai.back.service.facade.catalog.securityLevel.SecurityLevelService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("security-level")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class SecurityLevelController {
 
     /** Service facade providing access to the Security level lookup dictionary. */

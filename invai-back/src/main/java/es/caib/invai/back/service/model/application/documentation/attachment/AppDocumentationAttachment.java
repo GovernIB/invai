@@ -1,6 +1,5 @@
 package es.caib.invai.back.service.model.application.documentation.attachment;
 
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
 import es.caib.invai.back.service.model.catalog.documentStatus.DocumentStatus;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import lombok.Getter;
@@ -9,12 +8,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
- * Domain model representing a document attached to an application. It carries the stored
- * {@link #documentCategory} (the most specific one) and, when that is a subcategory, its
- * {@link #parentCategory}, from which the category and the subcategory shown to the user derive.
+ * Domain model representing a document attached to an application, filed under a category and,
+ * optionally, one of its subcategories.
  *
  * @since 1.0.6
  */
@@ -31,14 +28,11 @@ public class AppDocumentationAttachment {
     /** Title of the document. */
     private String title;
 
-    /** Section of the application the document is filed under. */
-    private AppSection section;
+    /** Category the document is filed under. */
+    private DocumentCategory category;
 
-    /** Most specific category of the document, as stored: a subcategory if it has one, else a category. */
-    private DocumentCategory documentCategory;
-
-    /** Category the stored {@link #documentCategory} belongs to, or {@code null} if that is itself a category. */
-    private DocumentCategory parentCategory;
+    /** Subcategory of the document, or {@code null} if it only has a category. */
+    private DocumentCategory subcategory;
 
     /** Current state of the document. */
     private DocumentStatus status;
@@ -61,23 +55,4 @@ public class AppDocumentationAttachment {
     private LocalDateTime deletedAt;
     /** Username of the user who logically deleted the record. */
     private String deletedBy;
-
-    /**
-     * Gets the category shown to the user: the parent of the stored category when that is a
-     * subcategory, or the stored category itself.
-     *
-     * @return the category
-     */
-    public DocumentCategory getCategory() {
-        return Objects.nonNull(parentCategory) ? parentCategory : documentCategory;
-    }
-
-    /**
-     * Gets the subcategory shown to the user: the stored category when it has a parent.
-     *
-     * @return the subcategory, or {@code null} if the document only has a category
-     */
-    public DocumentCategory getSubcategory() {
-        return Objects.nonNull(parentCategory) ? documentCategory : null;
-    }
 }

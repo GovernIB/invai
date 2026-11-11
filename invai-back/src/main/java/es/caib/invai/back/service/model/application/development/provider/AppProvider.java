@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import es.caib.invai.back.service.model.application.development.core.AppDevelopment;
-import es.caib.invai.back.service.model.maintenance.development.role.Role;
+import es.caib.invai.back.service.model.maintenance.development.providerRole.ProviderRole;
 
 /**
  * Domain aggregate model representing a corporate provider (company) assigned to a
@@ -29,7 +29,7 @@ public class AppProvider {
     /** Corporate name of the provider company. */
     private String companyName;
     /** Provider's role catalog entry. */
-    private Role role;
+    private ProviderRole role;
     /** Start date for the provider service contract. */
     private LocalDateTime startDate;
     /** End date for the provider service contract. */

@@ -46,9 +46,9 @@ public class AppLinkAudEntity {
     @Column(name = "DESCRIPTION", length = 1000)
     private String description;
 
-    /** Identifier of the section captured at the time of the change. */
-    @Column(name = "SECTION_ID", nullable = false)
-    private Long sectionId;
+    /** Identifier of the category captured at the time of the change. */
+    @Column(name = "CATEGORY_ID", nullable = false)
+    private Long categoryId;
 
     /** Address captured at the time of the change. */
     @Column(name = "URL", nullable = false, length = 500)

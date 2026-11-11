@@ -5,10 +5,10 @@ import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocument
 import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocumentationLinkUpdateInputDTO;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
-import es.caib.invai.back.service.mapper.catalog.appSection.AppSectionMapperImpl;
+import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
+import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapperImpl;
 import es.caib.invai.back.service.model.application.documentation.link.AppLink;
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
+import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -29,52 +29,51 @@ class AppLinkMapperTest {
     @BeforeEach
     void setUp() {
         AppLinkMapperImpl impl = new AppLinkMapperImpl();
-        ReflectionTestUtils.setField(impl, "appSectionMapper", new AppSectionMapperImpl());
+        ReflectionTestUtils.setField(impl, "documentCategoryMapper", new DocumentCategoryMapperImpl());
         mapper = impl;
     }
 
     private static AppLinkEntity entity() {
         ApplicationEntity application = new ApplicationEntity();
         application.setId(3L);
-        LkupAppSectionEntity section = new LkupAppSectionEntity();
-        section.setId(5L);
-        section.setCode("GENERAL");
-        section.setName("General");
-        section.setNameEs("General es");
+        DocumentCategoryEntity category = new DocumentCategoryEntity();
+        category.setId(5L);
+        category.setName("General");
+        category.setNameEs("General es");
         AppLinkEntity entity = new AppLinkEntity();
         entity.setId(10L);
         entity.setApplication(application);
         entity.setTitle("Manual");
         entity.setDescription("desc");
-        entity.setSection(section);
+        entity.setCategory(category);
         entity.setUrl("https://intranet.caib.es/manual");
         return entity;
     }
 
     @Test
-    void toModel_keepsTheIdentifierOfItsApplicationAndItsSection() {
+    void toModel_keepsTheIdentifierOfItsApplicationAndItsCategory() {
         AppLink model = mapper.toModel(entity());
 
         assertEquals(10L, model.getId());
         assertEquals(3L, model.getApplicationId());
         assertEquals("Manual", model.getTitle());
         assertEquals("desc", model.getDescription());
-        assertEquals(5L, model.getSection().getId());
+        assertEquals(5L, model.getCategory().getId());
         assertEquals("https://intranet.caib.es/manual", model.getUrl());
     }
 
     @Test
-    void toEntity_leavesTheApplicationAndTheSectionToTheRepository() {
+    void toEntity_leavesTheApplicationAndTheCategoryToTheRepository() {
         AppLinkEntity back = mapper.toEntity(mapper.toModel(entity()));
 
         assertNull(back.getApplication());
-        assertNull(back.getSection());
+        assertNull(back.getCategory());
         assertEquals("Manual", back.getTitle());
         assertEquals("https://intranet.caib.es/manual", back.getUrl());
     }
 
     @Test
-    void toResponse_showsTheSectionAndTheDeletionTimestamp() {
+    void toResponse_showsTheCategoryAndTheDeletionTimestamp() {
         AppLink model = mapper.toModel(entity());
         LocalDateTime deletedAt = LocalDateTime.of(2026, 10, 21, 10, 0);
         model.setDeletedAt(deletedAt);
@@ -85,23 +84,33 @@ class AppLinkMapperTest {
         assertEquals("Manual", dto.getTitle());
         assertEquals("desc", dto.getDescription());
         assertEquals("https://intranet.caib.es/manual", dto.getUrl());
-        assertEquals(5L, dto.getSection().getId());
-        assertEquals("GENERAL", dto.getSection().getCode());
-        assertEquals("General", dto.getSection().getName());
-        assertEquals("General es", dto.getSection().getNameEs());
+        assertEquals(5L, dto.getCategory().getId());
+        assertEquals("General", dto.getCategory().getName());
+        assertEquals("General es", dto.getCategory().getNameEs());
         assertEquals(deletedAt, dto.getDeletedAt());
     }
 
     @Test
-    void toModelFromInput_buildsTheLinkWithTheSectionOnlyIdentified() {
+    void toResponse_showsTheCategoryWithoutItsSubcategoriesNorItsDeletionTimestamp() {
+        AppLink model = mapper.toModel(entity());
+        model.getCategory().setDeletedAt(LocalDateTime.of(2026, 10, 21, 10, 0));
+
+        AppDocumentationLinkOutputDTO dto = mapper.toResponse(model);
+
+        assertNull(dto.getCategory().getSubcategories());
+        assertNull(dto.getCategory().getDeletedAt());
+    }
+
+    @Test
+    void toModelFromInput_buildsTheLinkWithTheCategoryOnlyIdentified() {
         AppLink model = mapper.toModelFromInput(new AppDocumentationLinkInputDTO(3L, "Manual", "desc", 5L, "https://intranet.caib.es/manual"));
 
         assertNull(model.getId());
         assertEquals(3L, model.getApplicationId());
         assertEquals("Manual", model.getTitle());
         assertEquals("desc", model.getDescription());
-        assertEquals(5L, model.getSection().getId());
-        assertNull(model.getSection().getCode());
+        assertEquals(5L, model.getCategory().getId());
+        assertNull(model.getCategory().getName());
         assertEquals("https://intranet.caib.es/manual", model.getUrl());
         assertNull(model.getCreatedAt());
         assertNull(model.getDeletedAt());
@@ -119,15 +128,15 @@ class AppLinkMapperTest {
         assertEquals("someone", model.getCreatedBy());
         assertEquals("Manual v2", model.getTitle());
         assertNull(model.getDescription());
-        assertEquals(6L, model.getSection().getId());
+        assertEquals(6L, model.getCategory().getId());
         assertEquals("https://intranet.caib.es/v2", model.getUrl());
     }
 
     @Test
-    void newSection_holdsOnlyTheIdentifier() {
-        AppSection section = mapper.newSection(7L);
+    void newCategory_holdsOnlyTheIdentifier() {
+        DocumentCategory category = mapper.newCategory(7L);
 
-        assertEquals(7L, section.getId());
-        assertNull(section.getName());
+        assertEquals(7L, category.getId());
+        assertNull(category.getName());
     }
 }

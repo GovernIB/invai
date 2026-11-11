@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.general.category.DTO.CategoryInput
 import es.caib.invai.back.interna.maintenance.general.category.DTO.CategoryOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.general.category.CategoryCriteria;
 import es.caib.invai.back.service.facade.maintenance.general.category.CategoryService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,8 +22,7 @@ import jakarta.validation.Valid;
  * Internal REST controller that manages lifecycle endpoints and routing rules
  * for Category taxonomy assets.
  * <p>
- * Secured globally at the type level, allowing access exclusively to authenticated
- * corporate operators assigned the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.1
@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("category")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class CategoryController {
 
     /** Application service handling business logic and orchestration for Category resources. */
@@ -79,6 +79,7 @@ public class CategoryController {
      * @param inputDTO validated data payload capturing fields for the new category descriptor
      * @return a {@link ResponseEntity} containing the initialized tracking model properties as a {@link CategoryOutputDTO} with an HTTP 201 Created status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<CategoryOutputDTO> create(@Valid @RequestBody CategoryInputDTO inputDTO) {
         return new ResponseEntity<>(categoryService.create(inputDTO), HttpStatus.CREATED);
@@ -91,6 +92,7 @@ public class CategoryController {
      * @param inputDTO property data schema mapping updated dataset fields
      * @return a {@link ResponseEntity} wrapping current modified configuration variables as a {@link CategoryOutputDTO} with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<CategoryOutputDTO> update(@PathVariable Long id, @Valid @RequestBody CategoryInputDTO inputDTO) {
         return ResponseEntity.ok(categoryService.update(id, inputDTO));
@@ -102,6 +104,7 @@ public class CategoryController {
      * @param id entity target row metadata database reference identifier to change status flags
      * @return an empty {@link ResponseEntity} displaying success parameters with an HTTP 204 No Content status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.delete(id);
@@ -116,6 +119,7 @@ public class CategoryController {
      * @return a {@link ResponseEntity} containing the current modified configuration state
      *         properties details (as an {@link CategoryOutputDTO}) with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<CategoryOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.reactivate(id));

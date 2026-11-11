@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.integration.externalSystem.DTO.Ext
 import es.caib.invai.back.interna.maintenance.integration.externalSystem.DTO.ExternalSystemOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.integration.externalSystem.ExternalSystemCriteria;
 import es.caib.invai.back.service.facade.maintenance.integration.externalSystem.ExternalSystemService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for External System assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.5
  */
 @Tag(name = "Sistemes externs", description = "Manteniment del catàleg de sistemes externs.")
 @RestController
 @Slf4j
 @RequestMapping("external-system")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class ExternalSystemController {
 
     /** Facade service handling the business use cases for External System resources. */
@@ -73,6 +78,7 @@ public class ExternalSystemController {
      * @param inputDTO the external system data to create
      * @return HTTP 201 with the created external system
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<ExternalSystemOutputDTO> create(@Valid @RequestBody ExternalSystemInputDTO inputDTO) {
         return new ResponseEntity<>(externalSystemService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class ExternalSystemController {
      * @param inputDTO the new external system data
      * @return HTTP 200 with the updated external system
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<ExternalSystemOutputDTO> update(@PathVariable Long id, @Valid @RequestBody ExternalSystemInputDTO inputDTO) {
         return ResponseEntity.ok(externalSystemService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class ExternalSystemController {
      * @param id the identifier of the external system to delete
      * @return HTTP 204 with no content
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         externalSystemService.delete(id);
@@ -108,6 +116,7 @@ public class ExternalSystemController {
      * @param id the identifier of the external system to reactivate
      * @return HTTP 200 with the reactivated external system
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<ExternalSystemOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(externalSystemService.reactivate(id));

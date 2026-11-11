@@ -14,8 +14,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
-import es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationEntity;
-import es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentEntity;
+import es.caib.invai.back.persistence.model.maintenance.accessibility.complianceSituation.ComplianceSituationEntity;
+import es.caib.invai.back.persistence.model.maintenance.accessibility.classificationSegment.ClassificationSegmentEntity;
 import es.caib.invai.back.persistence.model.BaseEntity;
 
 import java.io.Serial;

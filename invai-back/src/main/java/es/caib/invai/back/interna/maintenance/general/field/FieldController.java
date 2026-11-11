@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldInputDTO;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.general.field.FieldCriteria;
 import es.caib.invai.back.service.facade.maintenance.general.field.FieldService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,8 +21,7 @@ import jakarta.validation.Valid;
  * Internal REST controller exposing CRUD operations and lifecycle routing endpoints
  * for managing operational Field records.
  * <p>
- * Authorization rules are handled at the controller level using Spring Method Security,
- * limiting all operations to authenticated corporate users carrying the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.1
@@ -30,7 +30,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("field")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class FieldController {
 
     /** Facade service handling the business logic for Field catalog operations. */
@@ -78,6 +78,7 @@ public class FieldController {
      * @param inputDTO validated data transfer object capturing metadata for the new record
      * @return a {@link ResponseEntity} detailing the persisted snapshot properties as a {@link FieldOutputDTO} with an HTTP 201 Created status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<FieldOutputDTO> create(@Valid @RequestBody FieldInputDTO inputDTO) {
         return new ResponseEntity<>(fieldService.create(inputDTO), HttpStatus.CREATED);
@@ -90,6 +91,7 @@ public class FieldController {
      * @param inputDTO property payload schema mapping updated dataset values
      * @return a {@link ResponseEntity} wrapping the newly modified configuration states as a {@link FieldOutputDTO} with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<FieldOutputDTO> update(@PathVariable Long id, @Valid @RequestBody FieldInputDTO inputDTO) {
         return ResponseEntity.ok(fieldService.update(id, inputDTO));
@@ -101,6 +103,7 @@ public class FieldController {
      * @param id reference index specifying the target architectural parameter row to disable
      * @return an empty {@link ResponseEntity} confirming success with an HTTP 204 No Content status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         fieldService.delete(id);
@@ -115,6 +118,7 @@ public class FieldController {
      * @return a {@link ResponseEntity} containing the current modified configuration state
      *         properties details (as an {@link FieldOutputDTO}) with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<FieldOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(fieldService.reactivate(id));

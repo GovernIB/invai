@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.systems.system.DTO.SystemInputDTO;
 import es.caib.invai.back.interna.maintenance.systems.system.DTO.SystemOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.systems.system.SystemCriteria;
 import es.caib.invai.back.service.facade.maintenance.systems.system.SystemService;
+import es.caib.invai.back.utils.Constants;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,11 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing System profiles metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.1
@@ -30,7 +35,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("system")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class SystemController {
 
     /** Facade service handling the business logic for System profile operations. */
@@ -81,6 +86,7 @@ public class SystemController {
      * @param inputDTO properties dataset containing system configurations, variables, parameters data profiles
      * @return a {@link ResponseEntity} wrapping the created snapshot parameters state with an HTTP 201 Created response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<SystemOutputDTO> create(@Valid @RequestBody SystemInputDTO inputDTO) {
         log.info("REST: Request to create new system");
@@ -95,6 +101,7 @@ public class SystemController {
      * @param inputDTO property data variables mapping structural items
      * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<SystemOutputDTO> update(@PathVariable Long id, @Valid @RequestBody SystemInputDTO inputDTO) {
         log.info("REST: Request to update system ID: {}", id);
@@ -107,6 +114,7 @@ public class SystemController {
      * @param id persistent tracking row database reference index targeting removal execution paths
      * @return a {@link ResponseEntity} providing an empty success feedback with an HTTP 204 No Content response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("REST: Request to logical delete system ID: {}", id);
@@ -128,6 +136,7 @@ public class SystemController {
      *         properties details (as an {@link SystemOutputDTO}) with an HTTP 200 OK status
      * @throws es.caib.invai.back.exception.BusinessRuleException if no system exists with the provided structural identifier
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<SystemOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to reactivate system ID: {}", id);

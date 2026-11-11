@@ -8,8 +8,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import es.caib.invai.back.service.model.application.core.Application;
-import es.caib.invai.back.service.model.maintenance.complianceSituation.ComplianceSituation;
-import es.caib.invai.back.service.model.maintenance.classificationSegment.ClassificationSegment;
+import es.caib.invai.back.service.model.maintenance.accessibility.complianceSituation.ComplianceSituation;
+import es.caib.invai.back.service.model.maintenance.accessibility.classificationSegment.ClassificationSegment;
 
 /**
  * Domain model representing the "Accessibilitat" tab anchor owned by an

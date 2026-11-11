@@ -8,7 +8,7 @@ import es.caib.invai.back.interna.maintenance.security.securityRole.DTO.Security
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
 import es.caib.invai.back.persistence.model.application.security.role.AppRoleEntity;
-import es.caib.invai.back.persistence.model.maintenance.security.securityRole.SecurityRoleEntity;
+import es.caib.invai.back.persistence.model.maintenance.role.RoleEntity;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
 import es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapperImpl;
@@ -16,11 +16,11 @@ import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMa
 import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapperImpl;
 import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.application.security.role.AppRole;
-import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
+import es.caib.invai.back.service.model.maintenance.role.Role;
 import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
 import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapperImpl;
 import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
@@ -37,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Unit tests for the generated {@link AppRoleMapperImpl}, exercising every conversion
  * direction declared on {@link AppRoleMapper}.
  * <p>
- * {@link AppRoleMapper} declares {@code uses = {AppSecurityMapper.class, SecurityRoleMapper.class}},
+ * {@link AppRoleMapper} declares {@code uses = {AppSecurityMapper.class, RoleMapper.class}},
  * so the generated implementation carries {@code @Autowired} {@link es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapper}
- * and {@link es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapper} fields.
+ * and {@link es.caib.invai.back.service.mapper.maintenance.role.RoleMapper} fields.
  * Since no Spring context is bootstrapped here, a fully wired {@link AppSecurityMapperImpl} (with its own
- * {@link ApplicationMapperImpl} sub-mapper) and a plain {@link SecurityRoleMapperImpl} are injected manually
+ * {@link ApplicationMapperImpl} sub-mapper) and a plain {@link RoleMapperImpl} are injected manually
  * via {@link ReflectionTestUtils}.
  * </p>
  */
@@ -63,7 +63,7 @@ class AppRoleMapperTest {
 
         AppRoleMapperImpl impl = new AppRoleMapperImpl();
         ReflectionTestUtils.setField(impl, "appSecurityMapper", appSecurityMapperImpl);
-        ReflectionTestUtils.setField(impl, "securityRoleMapper", new SecurityRoleMapperImpl());
+        ReflectionTestUtils.setField(impl, "roleMapper", new RoleMapperImpl());
         ReflectionTestUtils.setField(impl, "validationStatusMapper", new ValidationStatusMapperImpl());
         mapper = impl;
     }
@@ -91,7 +91,7 @@ class AppRoleMapperTest {
         appSecurityEntity.setDeletedAt(LocalDateTime.of(2018, 3, 1, 0, 0));
         appSecurityEntity.setDeletedBy("sec-deleter");
 
-        SecurityRoleEntity securityRoleEntity = new SecurityRoleEntity();
+        RoleEntity securityRoleEntity = new RoleEntity();
         securityRoleEntity.setId(20L);
         securityRoleEntity.setRoleId(120L);
         securityRoleEntity.setName("Administrator");
@@ -132,7 +132,7 @@ class AppRoleMapperTest {
         appSecurity.setDeletedAt(LocalDateTime.of(2021, 3, 1, 0, 0));
         appSecurity.setDeletedBy("sec-deleter2");
 
-        SecurityRole securityRole = new SecurityRole();
+        Role securityRole = new Role();
         securityRole.setId(21L);
         securityRole.setRoleId(121L);
         securityRole.setName("Viewer");
@@ -179,7 +179,7 @@ class AppRoleMapperTest {
         assertEquals("APP01", application.getCode());
         assertEquals("Application One", application.getName());
 
-        SecurityRole securityRole = model.getSecurityRole();
+        Role securityRole = model.getSecurityRole();
         assertEquals(20L, securityRole.getId());
         assertEquals(120L, securityRole.getRoleId());
         assertEquals("Administrator", securityRole.getName());
@@ -228,7 +228,7 @@ class AppRoleMapperTest {
         assertEquals("APP02", applicationEntity.getCode());
         assertEquals("Application Two", applicationEntity.getName());
 
-        SecurityRoleEntity securityRoleEntity = entity.getSecurityRole();
+        RoleEntity securityRoleEntity = entity.getSecurityRole();
         assertEquals(21L, securityRoleEntity.getId());
         assertEquals(121L, securityRoleEntity.getRoleId());
         assertEquals("Viewer", securityRoleEntity.getName());
@@ -334,7 +334,7 @@ class AppRoleMapperTest {
     void updateModelFromInput_mergesFieldsWithoutTouchingId() {
         AppSecurity existingAppSecurity = new AppSecurity();
         existingAppSecurity.setId(13L);
-        SecurityRole existingSecurityRole = new SecurityRole();
+        Role existingSecurityRole = new Role();
         existingSecurityRole.setId(23L);
         AppRole existing = new AppRole();
         existing.setId(4L);

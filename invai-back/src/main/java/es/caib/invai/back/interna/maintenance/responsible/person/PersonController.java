@@ -7,6 +7,7 @@ import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonInput
 import es.caib.invai.back.interna.maintenance.responsible.person.DTO.PersonOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.person.PersonCriteria;
 import es.caib.invai.back.service.facade.maintenance.responsible.person.PersonService;
+import es.caib.invai.back.utils.Constants;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,18 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Person catalog metadata.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to the roles
+ * of its area.
+ * </p>
+ *
  * @since 1.0.3
  */
 @Tag(name = "Persones", description = "Manteniment del catàleg de persones.")
 @RestController
 @Slf4j
 @RequestMapping("person")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_RESPONSIBLE_WRITE)
 public class PersonController {
 
     /** Facade service handling the business logic for Person catalog operations. */
@@ -79,6 +85,7 @@ public class PersonController {
      * @param inputDTO the data used to create the person
      * @return the created person, with HTTP 201 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<PersonOutputDTO> create(@Valid @RequestBody PersonInputDTO inputDTO) {
         log.info("REST: Request to create new person");
@@ -93,6 +100,7 @@ public class PersonController {
      * @param inputDTO the data used to update the person
      * @return the updated person
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<PersonOutputDTO> update(@PathVariable Long id, @Valid @RequestBody PersonInputDTO inputDTO) {
         log.info("REST: Request to update person ID: {}", id);
@@ -105,6 +113,7 @@ public class PersonController {
      * @param id the identifier of the person to delete
      * @return an empty response with HTTP 204 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("REST: Request to logical delete person ID: {}", id);
@@ -118,6 +127,7 @@ public class PersonController {
      * @param id the identifier of the person to reactivate
      * @return the reactivated person
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<PersonOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to reactivate person ID: {}", id);

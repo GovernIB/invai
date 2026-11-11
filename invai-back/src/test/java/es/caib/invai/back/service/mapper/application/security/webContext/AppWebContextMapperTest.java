@@ -6,13 +6,13 @@ import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebC
 import es.caib.invai.back.interna.application.security.core.DTO.AppSecurityOutputDTO;
 import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebContextOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
-import es.caib.invai.back.interna.maintenance.security.webContext.DTO.WebContextOutputDTO;
+import es.caib.invai.back.interna.maintenance.development.webContext.DTO.WebContextOutputDTO;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
 import es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.field.FieldEntity;
-import es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextEntity;
+import es.caib.invai.back.persistence.model.maintenance.development.webContext.WebContextEntity;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapperImpl;
 import es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapperImpl;
 import es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapperImpl;
@@ -23,13 +23,13 @@ import es.caib.invai.back.service.mapper.maintenance.general.category.CategoryMa
 import es.caib.invai.back.service.mapper.maintenance.general.commission.CommissionMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.general.systemType.SystemTypeMapperImpl;
-import es.caib.invai.back.service.mapper.maintenance.security.webContext.WebContextMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.development.webContext.WebContextMapperImpl;
 import es.caib.invai.back.service.model.application.core.Application;
 import es.caib.invai.back.service.model.application.development.core.AppDevelopment;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.application.security.webContext.AppWebContext;
 import es.caib.invai.back.service.model.maintenance.general.field.Field;
-import es.caib.invai.back.service.model.maintenance.security.webContext.WebContext;
+import es.caib.invai.back.service.model.maintenance.development.webContext.WebContext;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * so the generated implementation carries {@code @Autowired}
  * {@link es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper},
  * {@link es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapper},
- * {@link es.caib.invai.back.service.mapper.maintenance.security.webContext.WebContextMapper}, and
+ * {@link es.caib.invai.back.service.mapper.maintenance.development.webContext.WebContextMapper}, and
  * {@link es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapper} fields. Since no
  * Spring context is bootstrapped here, fully wired implementations (including the deep
  * {@link AppSecurityMapperImpl}/{@link AppDevelopmentMapperImpl} -&gt; {@link ApplicationMapperImpl}

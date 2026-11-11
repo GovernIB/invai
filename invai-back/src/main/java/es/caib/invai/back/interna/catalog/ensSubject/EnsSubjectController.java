@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.catalog.ensSubject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.catalog.ensSubject.DTO.EnsSubjectOutputDTO;
 import es.caib.invai.back.service.facade.catalog.ensSubject.EnsSubjectService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("ens-subject")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class EnsSubjectController {
 
     /** Service facade providing access to the ENS subjection lookup dictionary. */

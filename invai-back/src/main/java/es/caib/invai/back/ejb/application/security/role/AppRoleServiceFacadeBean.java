@@ -10,7 +10,7 @@ import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import es.caib.invai.back.rest.soffid.SoffidClient;
-import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
+import es.caib.invai.back.service.model.maintenance.role.Role;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.rest.soffid.SoffidRole;
 import es.caib.invai.back.exception.BusinessRuleException;
@@ -20,8 +20,9 @@ import es.caib.invai.back.persistence.repository.application.security.core.AppSe
 import es.caib.invai.back.persistence.repository.application.security.role.AppRoleCriteria;
 import es.caib.invai.back.persistence.repository.application.security.role.AppRoleRepository;
 import es.caib.invai.back.service.facade.application.security.role.AppRoleService;
+import es.caib.invai.back.service.facade.maintenance.documentation.documentRolePermission.DocumentRolePermissionService;
 import es.caib.invai.back.service.mapper.application.security.role.AppRoleMapper;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapper;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapper;
 import es.caib.invai.back.service.model.application.security.role.AppRole;
 import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
 import es.caib.invai.back.utils.Constants;
@@ -54,7 +55,7 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
 
     /** MapStruct mapper copying the data of a Soffid role into the security role saved with an assignment. */
     @Autowired
-    private SecurityRoleMapper securityRoleMapper;
+    private RoleMapper roleMapper;
 
     /** Soffid roles asked per call when looking for those named after an application's prefix. */
     private static final int ROLE_PAGE_SIZE = 100;
@@ -73,6 +74,10 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
     /** Port used to get from Soffid the data of each role being assigned. */
     @Autowired
     private SoffidClient soffidClient;
+
+    /** Service that gives the documentation permissions to the INVAI roles added, and takes them from those removed. */
+    @Autowired
+    private DocumentRolePermissionService documentRolePermissionService;
 
     /**
      * Streams partitioned chunk metrics using pagination layout boundaries, scoped to a single
@@ -99,6 +104,7 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
      *
      * @param inputDTO property dataset containing assignment mappings and configuration variables
      * @return the newly created snapshot parameters state model
+     * @throws BusinessRuleException if the security anchor already has an active assignment to that role
      */
     @Override
     public AppRoleOutputDTO create(AppRoleInputDTO inputDTO) {
@@ -107,6 +113,7 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
 
         Utils.sanitize(inputDTO);
 
+        requireNotAssigned(inputDTO.getAppSecurityId(), inputDTO.getSecurityRoleId());
         return assign(inputDTO.getAppSecurityId(), getSoffidRole(inputDTO.getSecurityRoleId()),
                 getPrefix(inputDTO.getAppSecurityId()), true);
     }
@@ -132,9 +139,13 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
         appSecurity.setId(appSecurityId);
         AppRole domainModel = new AppRole();
         domainModel.setAppSecurity(appSecurity);
-        domainModel.setSecurityRole(securityRoleMapper.toModelFromSoffid(soffidRole));
+        domainModel.setSecurityRole(roleMapper.toModelFromSoffid(soffidRole));
         applyValidation(domainModel, prefix, manual);
-        return appRoleMapper.toResponse(appRoleRepository.create(domainModel));
+        AppRole created = appRoleRepository.create(domainModel);
+        if (StringUtils.startsWith(soffidRole.getName(), Constants.INVAI_ROLE_PREFIX)) {
+            documentRolePermissionService.assignDefaultPermissions(created.getSecurityRole().getId(), soffidRole.getName());
+        }
+        return appRoleMapper.toResponse(created);
     }
 
     /** {@inheritDoc} */
@@ -161,7 +172,8 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
      * @param id       targeted structural identifier element index
      * @param inputDTO property data variables mapping structural items to be merged
      * @return current modified configuration state properties details wrapper
-     * @throws BusinessRuleException if the target record is missing
+     * @throws BusinessRuleException if the target record is missing, or the new role is already
+     *                               assigned to the security anchor by another assignment
      */
     @Override
     public AppRoleOutputDTO update(Long id, AppRoleInputDTO inputDTO) {
@@ -174,8 +186,14 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
 
         Utils.sanitize(inputDTO);
 
+        boolean sameRole = Objects.nonNull(existingModel.getSecurityRole())
+                && Objects.equals(existingModel.getSecurityRole().getRoleId(), inputDTO.getSecurityRoleId());
+        if (!sameRole) {
+            requireNotAssigned(inputDTO.getAppSecurityId(), inputDTO.getSecurityRoleId());
+        }
+
         appRoleMapper.updateModelFromInput(inputDTO, existingModel);
-        SecurityRole securityRole = securityRoleMapper.toModelFromSoffid(getSoffidRole(inputDTO.getSecurityRoleId()));
+        Role securityRole = roleMapper.toModelFromSoffid(getSoffidRole(inputDTO.getSecurityRoleId()));
         if (Objects.nonNull(existingModel.getSecurityRole())) {
             securityRole.setId(existingModel.getSecurityRole().getId());
         }
@@ -320,6 +338,18 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
     }
 
     /**
+     * Checks that a security anchor has no active assignment to the given Soffid role yet.
+     *
+     * @throws BusinessRuleException if it has
+     */
+    private void requireNotAssigned(Long appSecurityId, Long soffidRoleId) {
+        if (getAssignedSoffidRoleIds(appSecurityId).contains(soffidRoleId)) {
+            log.error("Facade: Soffid role ID: {} is already assigned to Security ID: {}", soffidRoleId, appSecurityId);
+            throw new BusinessRuleException(Constants.ERR_APP_ROLE_DUPLICATED);
+        }
+    }
+
+    /**
      * Executes soft deactivation over targeted application role assignments.
      * Updates structural tracking audit traces to mirror administrative termination states.
      *
@@ -343,6 +373,9 @@ public class AppRoleServiceFacadeBean implements AppRoleService {
         existingModel.setDeletedBy(Utils.resolveCurrentUsername());
 
         appRoleRepository.delete(existingModel);
+        if (StringUtils.startsWith(existingModel.getSecurityRole().getName(), Constants.INVAI_ROLE_PREFIX)) {
+            documentRolePermissionService.removePermissions(existingModel.getSecurityRole().getId());
+        }
         log.info("Facade: Completed logical deprecation process tree successfully for entity tracking mapping");
     }
 }

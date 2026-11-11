@@ -14,26 +14,26 @@ import org.springframework.stereotype.Repository;
 public interface AppLinkJPARepository extends JpaRepository<AppLinkEntity, Long>, JpaSpecificationExecutor<AppLinkEntity> {
 
     /**
-     * Tells whether an active link of the application has the given title, section and address.
+     * Tells whether an active link of the application has the given title, category and address.
      *
      * @param applicationId identifier of the application
      * @param title         title of the link
-     * @param sectionId     identifier of the section
+     * @param categoryId    identifier of the category
      * @param url           address of the link
      * @return {@code true} if such an active link exists
      */
-    boolean existsByApplicationIdAndTitleAndSectionIdAndUrlAndDeletedAtIsNull(Long applicationId, String title, Long sectionId, String url);
+    boolean existsByApplicationIdAndTitleAndCategoryIdAndUrlAndDeletedAtIsNull(Long applicationId, String title, Long categoryId, String url);
 
     /**
      * Tells whether an active link other than the given one has, in the same application, the
-     * given title, section and address.
+     * given title, category and address.
      *
      * @param applicationId identifier of the application
      * @param title         title of the link
-     * @param sectionId     identifier of the section
+     * @param categoryId    identifier of the category
      * @param url           address of the link
      * @param id            identifier of the link to leave out
      * @return {@code true} if such an active link exists
      */
-    boolean existsByApplicationIdAndTitleAndSectionIdAndUrlAndIdNotAndDeletedAtIsNull(Long applicationId, String title, Long sectionId, String url, Long id);
+    boolean existsByApplicationIdAndTitleAndCategoryIdAndUrlAndIdNotAndDeletedAtIsNull(Long applicationId, String title, Long categoryId, String url, Long id);
 }

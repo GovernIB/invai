@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.security.ensRequirement.DTO.EnsReq
 import es.caib.invai.back.interna.maintenance.security.ensRequirement.DTO.EnsRequirementOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.security.ensRequirement.EnsRequirementCriteria;
 import es.caib.invai.back.service.facade.maintenance.security.ensRequirement.EnsRequirementService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for EnsRequirement assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.4
  */
 @Tag(name = "Requeriments ENS", description = "Manteniment del catàleg de requeriments ENS.")
 @RestController
 @Slf4j
 @RequestMapping("ens-requirement")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class EnsRequirementController {
 
     /** Service facade handling EnsRequirement business use cases. */
@@ -73,6 +78,7 @@ public class EnsRequirementController {
      * @param inputDTO the data for the new ENS requirement entry
      * @return the created ENS requirement entry, with HTTP 201 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<EnsRequirementOutputDTO> create(@Valid @RequestBody EnsRequirementInputDTO inputDTO) {
         return new ResponseEntity<>(ensRequirementService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class EnsRequirementController {
      * @param inputDTO the new data to apply
      * @return the updated ENS requirement entry
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<EnsRequirementOutputDTO> update(@PathVariable Long id, @Valid @RequestBody EnsRequirementInputDTO inputDTO) {
         return ResponseEntity.ok(ensRequirementService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class EnsRequirementController {
      * @param id the identifier of the ENS requirement entry to delete
      * @return an empty response with HTTP 204 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         ensRequirementService.delete(id);
@@ -108,6 +116,7 @@ public class EnsRequirementController {
      * @param id the identifier of the ENS requirement entry to reactivate
      * @return the reactivated ENS requirement entry
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<EnsRequirementOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(ensRequirementService.reactivate(id));

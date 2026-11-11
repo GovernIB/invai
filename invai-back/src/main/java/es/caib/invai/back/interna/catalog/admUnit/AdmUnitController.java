@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.catalog.admUnit;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.catalog.admUnit.DTO.AdmUnitOutputDTO;
 import es.caib.invai.back.service.facade.catalog.admUnit.AdmUnitService;
+import es.caib.invai.back.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
  * create/update/delete lifecycle; every endpoint here reads through to DIR3CAIB (directly or via
  * a short-lived in-memory cache).
  * <p>
- * Secured at the class level via Spring Method Security permissions, restricting execution
- * exclusively to users holding the role {@code ROLE_INV_SUPER}.
+ * Secured at the class level via Spring Method Security permissions, allowing execution
+ * to users holding any of the application's roles.
  * </p>
  *
  * @since 1.0.4
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Unitats administratives", description = "Consulta d'unitats administratives (DIR3CAIB).")
 @RestController
 @RequestMapping("adm-unit")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class AdmUnitController {
 
     /** Service facade handling business logic for administrative unit operations. */

@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.documentation.category.DTO.Documen
 import es.caib.invai.back.interna.maintenance.documentation.category.DTO.DocumentCategoryOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryCriteria;
 import es.caib.invai.back.service.facade.maintenance.documentation.documentCategory.DocumentCategoryService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,13 +22,17 @@ import jakarta.validation.Valid;
  * Internal REST controller that manages lifecycle endpoints and routing rules for documentation
  * categories and subcategories, which share the same endpoints.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.6
  */
 @Tag(name = "Categories documentals", description = "Manteniment de les categories i subcategories documentals.")
 @RestController
 @Slf4j
 @RequestMapping("documentation/category")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class DocumentCategoryController {
 
     /** Facade service handling the business use cases for documentation categories. */
@@ -75,6 +80,7 @@ public class DocumentCategoryController {
      * @param inputDTO the data to create
      * @return HTTP 201 with the created record
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<DocumentCategoryOutputDTO> create(@Valid @RequestBody DocumentCategoryInputDTO inputDTO) {
         return new ResponseEntity<>(documentCategoryService.create(inputDTO), HttpStatus.CREATED);
@@ -87,6 +93,7 @@ public class DocumentCategoryController {
      * @param inputDTO the new data
      * @return HTTP 200 with the updated record
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<DocumentCategoryOutputDTO> update(@PathVariable Long id, @Valid @RequestBody DocumentCategoryInputDTO inputDTO) {
         return ResponseEntity.ok(documentCategoryService.update(id, inputDTO));
@@ -98,6 +105,7 @@ public class DocumentCategoryController {
      * @param id the identifier of the record to delete
      * @return HTTP 204 with no content
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         documentCategoryService.delete(id);
@@ -110,6 +118,7 @@ public class DocumentCategoryController {
      * @param id the identifier of the record to reactivate
      * @return HTTP 200 with the reactivated record
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<DocumentCategoryOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(documentCategoryService.reactivate(id));

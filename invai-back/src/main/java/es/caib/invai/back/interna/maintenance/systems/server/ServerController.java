@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.systems.server.DTO.ServerInputDTO;
 import es.caib.invai.back.interna.maintenance.systems.server.DTO.ServerOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.systems.server.ServerCriteria;
 import es.caib.invai.back.service.facade.maintenance.systems.server.ServerService;
+import es.caib.invai.back.utils.Constants;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,11 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Server infrastructure metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.2
@@ -30,7 +35,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("server")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class ServerController {
 
     /** Facade service handling the business logic for Server infrastructure operations. */
@@ -80,6 +85,7 @@ public class ServerController {
      * @param inputDTO properties dataset containing server configurations, variables, parameters data profiles
      * @return a {@link ResponseEntity} wrapping the created snapshot parameters state with an HTTP 201 Created response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<ServerOutputDTO> create(@Valid @RequestBody ServerInputDTO inputDTO) {
         log.info("REST: Request to create new server");
@@ -94,6 +100,7 @@ public class ServerController {
      * @param inputDTO property data variables mapping structural items
      * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<ServerOutputDTO> update(@PathVariable Long id, @Valid @RequestBody ServerInputDTO inputDTO) {
         log.info("REST: Request to update server ID: {}", id);
@@ -106,6 +113,7 @@ public class ServerController {
      * @param id persistent tracking row database reference index targeting removal execution paths
      * @return a {@link ResponseEntity} providing an empty success feedback with an HTTP 204 No Content response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("REST: Request to logical delete server ID: {}", id);
@@ -122,6 +130,7 @@ public class ServerController {
      *         properties details (as an {@link ServerOutputDTO}) with an HTTP 200 OK status
      * @throws es.caib.invai.back.exception.BusinessRuleException if no server exists with the provided structural identifier
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<ServerOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to reactivate server ID: {}", id);

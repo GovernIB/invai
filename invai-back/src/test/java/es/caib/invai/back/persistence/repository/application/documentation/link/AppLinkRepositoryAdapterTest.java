@@ -3,10 +3,10 @@ package es.caib.invai.back.persistence.repository.application.documentation.link
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkAudEntity;
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
+import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import es.caib.invai.back.service.mapper.application.documentation.link.AppLinkMapper;
 import es.caib.invai.back.service.model.application.documentation.link.AppLink;
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
+import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class AppLinkRepositoryAdapterTest {
     private AppLinkRepositoryAdapter adapter;
 
     private ApplicationEntity application;
-    private LkupAppSectionEntity sectionEntity;
+    private DocumentCategoryEntity categoryEntity;
     private AppLinkEntity entity;
     private AppLink model;
 
@@ -67,27 +67,27 @@ class AppLinkRepositoryAdapterTest {
     void setUp() {
         application = new ApplicationEntity();
         application.setId(3L);
-        sectionEntity = new LkupAppSectionEntity();
-        sectionEntity.setId(5L);
+        categoryEntity = new DocumentCategoryEntity();
+        categoryEntity.setId(5L);
         entity = new AppLinkEntity();
         entity.setId(10L);
         entity.setApplication(application);
-        entity.setSection(sectionEntity);
+        entity.setCategory(categoryEntity);
         entity.setTitle("Manual");
         entity.setDescription("desc");
         entity.setUrl("https://intranet.caib.es/manual");
-        AppSection section = new AppSection();
-        section.setId(5L);
+        DocumentCategory category = new DocumentCategory();
+        category.setId(5L);
         model = new AppLink();
         model.setId(10L);
         model.setApplicationId(3L);
-        model.setSection(section);
+        model.setCategory(category);
     }
 
     private void stubReferences() {
         when(appLinkMapper.toEntity(model)).thenReturn(entity);
         when(entityManager.getReference(ApplicationEntity.class, 3L)).thenReturn(application);
-        when(entityManager.getReference(LkupAppSectionEntity.class, 5L)).thenReturn(sectionEntity);
+        when(entityManager.getReference(DocumentCategoryEntity.class, 5L)).thenReturn(categoryEntity);
     }
 
     @Test
@@ -110,7 +110,7 @@ class AppLinkRepositoryAdapterTest {
         when(appLinkJPARepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(entity)));
         when(appLinkMapper.toModel(entity)).thenReturn(model);
 
-        Page<AppLink> result = adapter.findAll(new AppDocumentationLinkCriteria(), PageRequest.of(0, 10));
+        Page<AppLink> result = adapter.findAll(new AppDocumentationLinkCriteria(), null, PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
         assertSame(model, result.getContent().get(0));
@@ -120,7 +120,7 @@ class AppLinkRepositoryAdapterTest {
     void findAll_runsTheQueryUnsorted_becauseTheSpecificationAppliesTheSort() {
         when(appLinkJPARepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
 
-        adapter.findAll(new AppDocumentationLinkCriteria(), PageRequest.of(2, 5, Sort.by("section").descending()));
+        adapter.findAll(new AppDocumentationLinkCriteria(), null, PageRequest.of(2, 5, Sort.by("category").descending()));
 
         ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
         verify(appLinkJPARepository).findAll(any(Specification.class), captor.capture());
@@ -131,7 +131,7 @@ class AppLinkRepositoryAdapterTest {
 
     @Test
     void existsActiveDuplicate_asksForTheActiveLinksOfTheApplication() {
-        when(appLinkJPARepository.existsByApplicationIdAndTitleAndSectionIdAndUrlAndDeletedAtIsNull(3L, "Manual", 5L, "u")).thenReturn(true);
+        when(appLinkJPARepository.existsByApplicationIdAndTitleAndCategoryIdAndUrlAndDeletedAtIsNull(3L, "Manual", 5L, "u")).thenReturn(true);
 
         assertTrue(adapter.existsActiveDuplicate(3L, "Manual", 5L, "u"));
         assertFalse(adapter.existsActiveDuplicate(3L, "Other", 5L, "u"));
@@ -139,7 +139,7 @@ class AppLinkRepositoryAdapterTest {
 
     @Test
     void existsActiveDuplicateExcluding_leavesOutTheGivenLink() {
-        when(appLinkJPARepository.existsByApplicationIdAndTitleAndSectionIdAndUrlAndIdNotAndDeletedAtIsNull(3L, "Manual", 5L, "u", 10L)).thenReturn(true);
+        when(appLinkJPARepository.existsByApplicationIdAndTitleAndCategoryIdAndUrlAndIdNotAndDeletedAtIsNull(3L, "Manual", 5L, "u", 10L)).thenReturn(true);
 
         assertTrue(adapter.existsActiveDuplicateExcluding(3L, "Manual", 5L, "u", 10L));
         assertFalse(adapter.existsActiveDuplicateExcluding(3L, "Manual", 5L, "u", 11L));
@@ -164,7 +164,7 @@ class AppLinkRepositoryAdapterTest {
         assertEquals("INSERT", aud.getAudAction());
         assertEquals(10L, aud.getAppLinkId());
         assertEquals(3L, aud.getApplicationId());
-        assertEquals(5L, aud.getSectionId());
+        assertEquals(5L, aud.getCategoryId());
         assertEquals("Manual", aud.getTitle());
         assertEquals("desc", aud.getDescription());
         assertEquals("https://intranet.caib.es/manual", aud.getUrl());

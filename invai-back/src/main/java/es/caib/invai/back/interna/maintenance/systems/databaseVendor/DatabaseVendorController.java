@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.systems.databaseVendor.DTO.Databas
 import es.caib.invai.back.interna.maintenance.systems.databaseVendor.DTO.DatabaseVendorOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.systems.databaseVendor.DatabaseVendorCriteria;
 import es.caib.invai.back.service.facade.maintenance.systems.databaseVendor.DatabaseVendorService;
+import es.caib.invai.back.utils.Constants;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,11 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing DatabaseVendor catalog metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.2
@@ -30,7 +35,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("database-vendor")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class DatabaseVendorController {
 
     /** Service facade handling business use cases for DatabaseVendor maintenance. */
@@ -79,6 +84,7 @@ public class DatabaseVendorController {
      * @param inputDTO properties dataset containing database vendor configurations, variables, parameters data profiles
      * @return a {@link ResponseEntity} wrapping the created snapshot parameters state with an HTTP 201 Created response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<DatabaseVendorOutputDTO> create(@Valid @RequestBody DatabaseVendorInputDTO inputDTO) {
         log.info("REST: Request to create new database vendor");
@@ -93,6 +99,7 @@ public class DatabaseVendorController {
      * @param inputDTO property data variables mapping structural items
      * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<DatabaseVendorOutputDTO> update(@PathVariable Long id, @Valid @RequestBody DatabaseVendorInputDTO inputDTO) {
         log.info("REST: Request to update database vendor ID: {}", id);
@@ -105,6 +112,7 @@ public class DatabaseVendorController {
      * @param id persistent tracking row database reference index targeting removal execution paths
      * @return a {@link ResponseEntity} providing an empty success feedback with an HTTP 204 No Content response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("REST: Request to logical delete database vendor ID: {}", id);
@@ -121,6 +129,7 @@ public class DatabaseVendorController {
      *         properties details (as an {@link DatabaseVendorOutputDTO}) with an HTTP 200 OK status
      * @throws es.caib.invai.back.exception.BusinessRuleException if no database vendor exists with the provided structural identifier
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<DatabaseVendorOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to reactivate database vendor ID: {}", id);

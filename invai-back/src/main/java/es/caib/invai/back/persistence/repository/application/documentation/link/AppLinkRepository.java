@@ -4,6 +4,8 @@ import es.caib.invai.back.service.model.application.documentation.link.AppLink;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
+
 /**
  * Outbound port declaring the persistence mechanisms for the links of applications.
  *
@@ -24,35 +26,36 @@ public interface AppLinkRepository {
      * paginated and sorted as the pageable asks (see {@link AppLinkSpecification} for the sortable keys).
      *
      * @param filter   filter criteria, scoped by application
+     * @param allowedCategoryIds the only categories whose links are returned, {@code null} for no restriction and empty for none
      * @param pageable pagination and sorting information
      * @return a page of matching links
      */
-    Page<AppLink> findAll(AppDocumentationLinkCriteria filter, Pageable pageable);
+    Page<AppLink> findAll(AppDocumentationLinkCriteria filter, Collection<Long> allowedCategoryIds, Pageable pageable);
 
     /**
-     * Tells whether an active link of the application already has the given title, section and
+     * Tells whether an active link of the application already has the given title, category and
      * address.
      *
      * @param applicationId identifier of the application
      * @param title         title of the link
-     * @param sectionId     identifier of the section
+     * @param categoryId    identifier of the category
      * @param url           address of the link
      * @return {@code true} if such an active link exists
      */
-    boolean existsActiveDuplicate(Long applicationId, String title, Long sectionId, String url);
+    boolean existsActiveDuplicate(Long applicationId, String title, Long categoryId, String url);
 
     /**
      * Tells whether an active link other than the given one already has, in the same application,
-     * the given title, section and address.
+     * the given title, category and address.
      *
      * @param applicationId identifier of the application
      * @param title         title of the link
-     * @param sectionId     identifier of the section
+     * @param categoryId    identifier of the category
      * @param url           address of the link
      * @param id            identifier of the link to leave out
      * @return {@code true} if such an active link exists
      */
-    boolean existsActiveDuplicateExcluding(Long applicationId, String title, Long sectionId, String url, Long id);
+    boolean existsActiveDuplicateExcluding(Long applicationId, String title, Long categoryId, String url, Long id);
 
     /**
      * Persists a new link.

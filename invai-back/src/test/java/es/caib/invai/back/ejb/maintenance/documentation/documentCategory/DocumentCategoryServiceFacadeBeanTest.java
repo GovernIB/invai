@@ -5,8 +5,10 @@ import es.caib.invai.back.interna.maintenance.documentation.category.DTO.Documen
 import es.caib.invai.back.interna.maintenance.documentation.category.DTO.DocumentCategoryOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryCriteria;
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryRepository;
+import es.caib.invai.back.service.facade.maintenance.documentation.documentRolePermission.DocumentRolePermissionService;
 import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapper;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
+import es.caib.invai.back.service.model.maintenance.documentation.documentRolePermission.DocumentPermission;
 import es.caib.invai.back.utils.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,14 +31,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DocumentCategoryServiceFacadeBean}, exercising every branch of its
- * business rules with the {@link DocumentCategoryRepository} and {@link DocumentCategoryMapper}
- * collaborators fully mocked.
+ * business rules with the {@link DocumentCategoryRepository}, {@link DocumentCategoryMapper} and
+ * {@link DocumentRolePermissionService} collaborators fully mocked.
  */
 @ExtendWith(MockitoExtension.class)
 class DocumentCategoryServiceFacadeBeanTest {
@@ -44,6 +51,9 @@ class DocumentCategoryServiceFacadeBeanTest {
 
     @Mock
     private DocumentCategoryRepository documentCategoryRepository;
+
+    @Mock
+    private DocumentRolePermissionService documentRolePermissionService;
 
     @InjectMocks
     private DocumentCategoryServiceFacadeBean facade;
@@ -85,6 +95,27 @@ class DocumentCategoryServiceFacadeBeanTest {
         when(documentCategoryMapper.toResponse(category)).thenReturn(expected);
 
         assertSame(expected, facade.getById(1L));
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.READ, 1L);
+    }
+
+    @Test
+    void getById_subcategory_requiresToReadItsCategory() {
+        DocumentCategoryOutputDTO expected = new DocumentCategoryOutputDTO();
+        when(documentCategoryRepository.findById(2L)).thenReturn(subcategory);
+        when(documentCategoryMapper.toResponse(subcategory)).thenReturn(expected);
+
+        assertSame(expected, facade.getById(2L));
+        verify(documentRolePermissionService).requirePermission(DocumentPermission.READ, 1L);
+    }
+
+    @Test
+    void getById_withoutReadPermission_throwsAccessDeniedAndDoesNotMap() {
+        when(documentCategoryRepository.findById(1L)).thenReturn(category);
+        doThrow(new AccessDeniedException("denied")).when(documentRolePermissionService)
+                .requirePermission(DocumentPermission.READ, 1L);
+
+        assertThrows(AccessDeniedException.class, () -> facade.getById(1L));
+        verify(documentCategoryMapper, never()).toResponse(any());
     }
 
     @Test
@@ -101,13 +132,25 @@ class DocumentCategoryServiceFacadeBeanTest {
         DocumentCategoryCriteria filter = new DocumentCategoryCriteria();
         Pageable pageable = Pageable.unpaged();
         DocumentCategoryOutputDTO dto = new DocumentCategoryOutputDTO();
-        when(documentCategoryRepository.findAll(filter, pageable)).thenReturn(new PageImpl<>(List.of(category)));
+        Set<Long> readable = Set.of(1L);
+        when(documentRolePermissionService.getReadableCategoryIds()).thenReturn(readable);
+        when(documentCategoryRepository.findAll(filter, readable, pageable)).thenReturn(new PageImpl<>(List.of(category)));
         when(documentCategoryMapper.toResponse(category)).thenReturn(dto);
 
         Page<DocumentCategoryOutputDTO> result = facade.getAll(filter, pageable);
 
         assertEquals(1, result.getTotalElements());
         assertSame(dto, result.getContent().get(0));
+    }
+
+    @Test
+    void getAll_superUser_doesNotRestrictTheCategories() {
+        DocumentCategoryCriteria filter = new DocumentCategoryCriteria();
+        Pageable pageable = Pageable.unpaged();
+        when(documentRolePermissionService.getReadableCategoryIds()).thenReturn(null);
+        when(documentCategoryRepository.findAll(filter, null, pageable)).thenReturn(new PageImpl<>(List.of(category)));
+
+        assertEquals(1, facade.getAll(filter, pageable).getTotalElements());
     }
 
     // ------------------------------------------------------------------
@@ -118,7 +161,7 @@ class DocumentCategoryServiceFacadeBeanTest {
     void create_category_isPersistedWithoutLookingForAParent() {
         DocumentCategoryInputDTO inputDTO = input("  Tècnica  ", null);
         DocumentCategory toSave = new DocumentCategory();
-        DocumentCategory saved = new DocumentCategory();
+        DocumentCategory saved = model(7L, "Tècnica", null);
         DocumentCategoryOutputDTO dto = new DocumentCategoryOutputDTO();
         when(documentCategoryRepository.existsActiveWithName("Tècnica", null, null)).thenReturn(false);
         when(documentCategoryMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
@@ -133,10 +176,24 @@ class DocumentCategoryServiceFacadeBeanTest {
     }
 
     @Test
+    void create_category_givesTheRolesTheirDefaultPermissionsOnIt() {
+        DocumentCategoryInputDTO inputDTO = input("Tècnica", null);
+        DocumentCategory toSave = new DocumentCategory();
+        DocumentCategory saved = model(7L, "Tècnica", null);
+        when(documentCategoryMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
+        when(documentCategoryRepository.create(toSave)).thenReturn(saved);
+        when(documentCategoryMapper.toResponse(saved)).thenReturn(new DocumentCategoryOutputDTO());
+
+        facade.create(inputDTO);
+
+        verify(documentRolePermissionService).assignDefaultPermissionsToCategory(7L);
+    }
+
+    @Test
     void create_subcategory_ofAnActiveCategory_isPersisted() {
         DocumentCategoryInputDTO inputDTO = input("API", 1L);
         DocumentCategory toSave = new DocumentCategory();
-        DocumentCategory saved = new DocumentCategory();
+        DocumentCategory saved = model(8L, "API", 1L);
         when(documentCategoryRepository.findById(1L)).thenReturn(category);
         when(documentCategoryRepository.existsActiveWithName("API", 1L, null)).thenReturn(false);
         when(documentCategoryMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
@@ -146,6 +203,21 @@ class DocumentCategoryServiceFacadeBeanTest {
         facade.create(inputDTO);
 
         verify(documentCategoryRepository).create(toSave);
+    }
+
+    @Test
+    void create_subcategory_doesNotAssignPermissions() {
+        DocumentCategoryInputDTO inputDTO = input("API", 1L);
+        DocumentCategory toSave = new DocumentCategory();
+        DocumentCategory saved = model(8L, "API", 1L);
+        when(documentCategoryRepository.findById(1L)).thenReturn(category);
+        when(documentCategoryMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
+        when(documentCategoryRepository.create(toSave)).thenReturn(saved);
+        when(documentCategoryMapper.toResponse(saved)).thenReturn(new DocumentCategoryOutputDTO());
+
+        facade.create(inputDTO);
+
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     @Test
@@ -188,6 +260,7 @@ class DocumentCategoryServiceFacadeBeanTest {
 
         assertEquals(Constants.ERR_DOCUMENTCATEGORY_DUPLICATED, ex.getMessage());
         verify(documentCategoryRepository, never()).create(any());
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     @Test
@@ -205,7 +278,7 @@ class DocumentCategoryServiceFacadeBeanTest {
     void create_subcategoryWithItsOwnSpanishName_isPersisted() {
         DocumentCategoryInputDTO inputDTO = new DocumentCategoryInputDTO("Manuals", "Manuales", 1L);
         DocumentCategory toSave = new DocumentCategory();
-        DocumentCategory saved = new DocumentCategory();
+        DocumentCategory saved = model(8L, "Manuals", 1L);
         when(documentCategoryRepository.findById(1L)).thenReturn(category);
         when(documentCategoryMapper.toModelFromInput(inputDTO)).thenReturn(toSave);
         when(documentCategoryRepository.create(toSave)).thenReturn(saved);
@@ -236,6 +309,7 @@ class DocumentCategoryServiceFacadeBeanTest {
 
         assertSame(dto, result);
         verify(documentCategoryMapper).updateModelFromInput(inputDTO, category);
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     @Test
@@ -408,7 +482,7 @@ class DocumentCategoryServiceFacadeBeanTest {
     void reactivate_category_clearsTheDeletion() {
         category.setDeletedAt(LocalDateTime.now());
         category.setDeletedBy("jdoe");
-        DocumentCategory updated = new DocumentCategory();
+        DocumentCategory updated = model(1L, "Tècnica", null);
         DocumentCategoryOutputDTO dto = new DocumentCategoryOutputDTO();
         when(documentCategoryRepository.findById(1L)).thenReturn(category);
         when(documentCategoryRepository.existsActiveWithName("Tècnica", null, 1L)).thenReturn(false);
@@ -423,18 +497,32 @@ class DocumentCategoryServiceFacadeBeanTest {
     }
 
     @Test
+    void reactivate_category_givesTheRolesTheirDefaultPermissionsOnIt() {
+        category.setDeletedAt(LocalDateTime.now());
+        DocumentCategory updated = model(1L, "Tècnica", null);
+        when(documentCategoryRepository.findById(1L)).thenReturn(category);
+        when(documentCategoryRepository.update(category, 1L)).thenReturn(updated);
+        when(documentCategoryMapper.toResponse(updated)).thenReturn(new DocumentCategoryOutputDTO());
+
+        facade.reactivate(1L);
+
+        verify(documentRolePermissionService).assignDefaultPermissionsToCategory(1L);
+    }
+
+    @Test
     void reactivate_subcategoryOfAnActiveCategory_clearsTheDeletion() {
         subcategory.setDeletedAt(LocalDateTime.now());
         when(documentCategoryRepository.findById(2L)).thenReturn(subcategory);
         when(documentCategoryRepository.findById(1L)).thenReturn(category);
         when(documentCategoryRepository.existsActiveWithName("API", 1L, 2L)).thenReturn(false);
-        when(documentCategoryRepository.update(subcategory, 2L)).thenReturn(new DocumentCategory());
+        when(documentCategoryRepository.update(subcategory, 2L)).thenReturn(model(2L, "API", 1L));
         when(documentCategoryMapper.toResponse(any())).thenReturn(new DocumentCategoryOutputDTO());
 
         facade.reactivate(2L);
 
         assertNull(subcategory.getDeletedAt());
         verify(documentCategoryRepository).update(subcategory, 2L);
+        verify(documentRolePermissionService, never()).assignDefaultPermissionsToCategory(anyLong());
     }
 
     @Test

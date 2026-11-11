@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapper;
 import es.caib.invai.back.service.mapper.catalog.validationStatus.ValidationStatusMapper;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapper;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapper;
 
 /**
  * MapStruct data mapping abstraction interface providing structural state conversions across
@@ -17,7 +17,7 @@ import es.caib.invai.back.service.mapper.maintenance.security.securityRole.Secur
  *
  * @since 1.0.4
  */
-@Mapper(componentModel = "spring", uses = {AppSecurityMapper.class, SecurityRoleMapper.class, ValidationStatusMapper.class})
+@Mapper(componentModel = "spring", uses = {AppSecurityMapper.class, RoleMapper.class, ValidationStatusMapper.class})
 public interface AppRoleMapper {
 
     /**

@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.maintenance.security.securityRole;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.maintenance.security.securityRole.DTO.SecurityRoleOutputDTO;
 import es.caib.invai.back.service.facade.maintenance.security.securityRole.SecurityRoleService;
+import es.caib.invai.back.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,13 +15,11 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Internal REST controller for the Security Role maintenance module.
  * <p>
- * Currently limited to searching/listing candidates against Soffid: local CRUD is not exposed
- * yet, pending a future iteration that adds the resolve-or-create flow feeding
- * {@code INV_APP_ROLE} assignments.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
+ *
  * <p>
- * Secured at the class level via Spring Method Security permissions, restricting execution
- * exclusively to users holding the role {@code ROLE_INV_SUPER}.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.4
@@ -28,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Rols de seguretat", description = "Manteniment del catàleg de rols de seguretat.")
 @RestController
 @RequestMapping("security-role")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class SecurityRoleController {
 
     /** Service facade handling business logic for security role operations. */
@@ -38,7 +37,7 @@ public class SecurityRoleController {
     /**
      * Lists roles that can be assigned to an application (feeding {@code INV_APP_ROLE}) against
      * the Soffid SCIM API - a {@code getAll} when {@code name} is omitted, or restricted to matches when
-     * given - feeding the security role typeahead. Does not touch the local {@code SecurityRole}
+     * given - feeding the security role typeahead. Does not touch the local {@code Role}
      * catalog. There is no built-in namespace restriction: the shared Soffid instance also hosts
      * roles for many unrelated applications, so the caller must include a prefix such as
      * {@code "INV_"} as one of the words in {@code name} to scope the search to this project's

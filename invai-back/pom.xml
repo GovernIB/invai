@@ -5,7 +5,7 @@
     <parent>
         <artifactId>invai</artifactId>
         <groupId>es.caib.invai</groupId>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
     </parent>
 
     <artifactId>invai-back</artifactId>
@@ -44,13 +44,6 @@
             <version>${mapstruct.version}</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Jackson: scoped "provided" and imported from WildFly/EAP's own static modules (see
-             invai-ear's jboss-deployment-structure.xml) instead of bundled in the WAR. Hibernate 6.6's
-             built-in JSON format-mapper auto-detection also uses the server's Jackson (org.hibernate's
-             own optional module import); bundling a second copy in the WAR causes a classloader split
-             there (ObjectMapper.findAndRegisterModules() -> ServiceConfigurationError: ... not a
-             subtype) at persistence-unit boot. -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -75,6 +68,20 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>

@@ -2,7 +2,6 @@ package es.caib.invai.back.persistence.repository.application.documentation.atta
 
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentEntity;
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentVersionEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
 import es.caib.invai.back.persistence.model.catalog.documentStatus.LkupDocumentStatusEntity;
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,28 +40,27 @@ public final class AppDocumentationAttachmentSpecification {
      * runs the query must not carry it.
      *
      * @param criteria the filter criteria to translate into predicates, may be {@code null}
-     * @param sort     the requested order; the sortable keys are {@code title}, {@code section},
-     *                 {@code mimeType}, {@code category}, {@code subcategory}, {@code versionLabel}
-     *                 and {@code status}, anything else is ignored
+     * @param allowedCategoryIds the only categories whose documents are selected, {@code null} for
+     *                 no restriction and empty for none
+     * @param sort     the requested order; the sortable keys are {@code title}, {@code mimeType},
+     *                 {@code category}, {@code subcategory}, {@code versionLabel} and {@code status},
+     *                 anything else is ignored
      * @return a specification matching the documents fulfilling the given criteria
      */
-    public static Specification<AppDocumentationAttachmentEntity> filterByCriteria(AppDocumentationAttachmentCriteria criteria, Sort sort) {
+    public static Specification<AppDocumentationAttachmentEntity> filterByCriteria(AppDocumentationAttachmentCriteria criteria, Collection<Long> allowedCategoryIds, Sort sort) {
         return (root, query, cb) -> {
             boolean isCountQuery = Long.class.equals(query.getResultType());
 
-            Join<AppDocumentationAttachmentEntity, LkupAppSectionEntity> section;
             Join<AppDocumentationAttachmentEntity, DocumentCategoryEntity> category;
-            Join<DocumentCategoryEntity, DocumentCategoryEntity> parent;
+            Join<AppDocumentationAttachmentEntity, DocumentCategoryEntity> subcategory;
             Join<AppDocumentationAttachmentEntity, LkupDocumentStatusEntity> status;
             if (isCountQuery) {
-                section = root.join("section");
-                category = root.join("documentCategory");
-                parent = category.join("parent", JoinType.LEFT);
+                category = root.join("category");
+                subcategory = root.join("subcategory", JoinType.LEFT);
                 status = root.join("status");
             } else {
-                section = fetchAsJoin(root, "section", JoinType.INNER);
-                category = fetchAsJoin(root, "documentCategory", JoinType.INNER);
-                parent = fetchAsJoin(category, "parent", JoinType.LEFT);
+                category = fetchAsJoin(root, "category", JoinType.INNER);
+                subcategory = fetchAsJoin(root, "subcategory", JoinType.LEFT);
                 status = fetchAsJoin(root, "status", JoinType.INNER);
             }
 
@@ -77,17 +76,14 @@ public final class AppDocumentationAttachmentSpecification {
                 if (StringUtils.isNotBlank(criteria.getSearch())) {
                     predicates.add(cb.like(cb.lower(root.get("title")), "%" + criteria.getSearch().trim().toLowerCase() + "%"));
                 }
-                if (Objects.nonNull(criteria.getSectionId())) {
-                    predicates.add(cb.equal(section.get("id"), criteria.getSectionId()));
+                if (Objects.nonNull(criteria.getCategoryId())) {
+                    predicates.add(cb.equal(category.get("id"), criteria.getCategoryId()));
+                }
+                if (Objects.nonNull(criteria.getSubcategoryId())) {
+                    predicates.add(cb.equal(subcategory.get("id"), criteria.getSubcategoryId()));
                 }
                 if (Objects.nonNull(criteria.getStatusId())) {
                     predicates.add(cb.equal(status.get("id"), criteria.getStatusId()));
-                }
-                if (Objects.nonNull(criteria.getCategoryId())) {
-                    predicates.add(cb.or(
-                            cb.equal(category.get("id"), criteria.getCategoryId()),
-                            cb.equal(parent.get("id"), criteria.getCategoryId())
-                    ));
                 }
                 if (Objects.nonNull(criteria.getMimeTypeId())) {
                     Subquery<Long> withMimeType = query.subquery(Long.class);
@@ -101,8 +97,14 @@ public final class AppDocumentationAttachmentSpecification {
                 }
             }
 
+            if (Objects.nonNull(allowedCategoryIds)) {
+                predicates.add(allowedCategoryIds.isEmpty()
+                        ? cb.disjunction()
+                        : category.get("id").in(allowedCategoryIds));
+            }
+
             if (!isCountQuery) {
-                query.orderBy(buildOrders(sort, root, query, cb, section, category, parent, status));
+                query.orderBy(buildOrders(sort, root, query, cb, category, subcategory, status));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
@@ -116,25 +118,22 @@ public final class AppDocumentationAttachmentSpecification {
      * @param root     the document being queried
      * @param query    the query the ordering belongs to, used to build the current version subqueries
      * @param cb       the criteria builder
-     * @param section  the joined section of the document
-     * @param category the joined stored category of the document
-     * @param parent   the joined parent of the stored category, which may be missing
-     * @param status   the joined state of the document
+     * @param category    the joined category of the document
+     * @param subcategory the joined subcategory of the document, which may be missing
+     * @param status      the joined state of the document
      * @return the ordering to apply to the query
      */
     private static List<Order> buildOrders(Sort sort, Root<AppDocumentationAttachmentEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb,
-                                           Join<AppDocumentationAttachmentEntity, LkupAppSectionEntity> section,
                                            Join<AppDocumentationAttachmentEntity, DocumentCategoryEntity> category,
-                                           Join<DocumentCategoryEntity, DocumentCategoryEntity> parent,
+                                           Join<AppDocumentationAttachmentEntity, DocumentCategoryEntity> subcategory,
                                            Join<AppDocumentationAttachmentEntity, LkupDocumentStatusEntity> status) {
         List<Order> orders = new ArrayList<>();
         for (Sort.Order requested : sort) {
             Expression<?> expression = switch (requested.getProperty()) {
                 case "title" -> root.get("title");
-                case "section" -> section.get("name");
                 case "status" -> status.get("name");
-                case "category" -> cb.coalesce(parent.<String>get("name"), category.<String>get("name"));
-                case "subcategory" -> cb.<String>selectCase().when(cb.isNull(parent.get("id")), "").otherwise(category.<String>get("name"));
+                case "category" -> category.get("name");
+                case "subcategory" -> cb.coalesce(subcategory.<String>get("name"), "");
                 case "versionLabel" -> currentAttachmentValue(query, cb, root, "versionLabel");
                 case "mimeType" -> currentAttachmentMimeTypeName(query, cb, root);
                 default -> null;

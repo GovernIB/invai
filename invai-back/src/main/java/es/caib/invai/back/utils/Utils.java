@@ -78,6 +78,19 @@ public final class Utils {
     }
 
     /**
+     * Resolves the e-mail address of the user bound to the current security context, taken from the
+     * {@code email} claim of their OpenID Connect session.
+     *
+     * @return the e-mail address, or {@code null} if the actor is not an OIDC user or the session carries no address
+     */
+    public static String resolveCurrentUserEmail() {
+        if (SecurityUtils.getCurrentUser() instanceof OidcUserInfo currentUser) {
+            return currentUser.getEmail();
+        }
+        return null;
+    }
+
+    /**
      * Waits for the given future, unwrapping {@link CompletionException} so the original runtime
      * exception thrown by the future's task (e.g., a {@code BusinessRuleException} raised by an
      * outbound call run via {@link CompletableFuture#supplyAsync}) propagates as-is instead of

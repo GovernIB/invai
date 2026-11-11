@@ -4,7 +4,7 @@ import es.caib.invai.back.persistence.model.application.development.core.AppDeve
 import es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextAudEntity;
 import es.caib.invai.back.persistence.model.application.security.webContext.AppWebContextEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
-import es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextEntity;
+import es.caib.invai.back.persistence.model.maintenance.development.webContext.WebContextEntity;
 import es.caib.invai.back.persistence.model.maintenance.general.field.FieldEntity;
 import es.caib.invai.back.service.mapper.application.security.webContext.AppWebContextMapper;
 import es.caib.invai.back.service.model.application.security.webContext.AppWebContext;

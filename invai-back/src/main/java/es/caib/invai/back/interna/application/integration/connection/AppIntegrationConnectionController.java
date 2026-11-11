@@ -4,6 +4,7 @@ import es.caib.invai.back.interna.application.integration.connection.DTO.AppInte
 import es.caib.invai.back.interna.application.integration.connection.DTO.AppIntegrationConnectionOutputDTO;
 import es.caib.invai.back.persistence.repository.application.integration.connection.AppIntegrationConnectionCriteria;
 import es.caib.invai.back.service.facade.application.integration.connection.AppIntegrationConnectionService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("application/integration-connection")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_INTEGRATION)
 public class AppIntegrationConnectionController {
 
     private final AppIntegrationConnectionService appIntegrationConnectionService;

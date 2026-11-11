@@ -7,11 +7,9 @@ import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDo
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentEntity;
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentVersionEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
 import es.caib.invai.back.persistence.model.catalog.documentStatus.LkupDocumentStatusEntity;
 import es.caib.invai.back.persistence.model.catalog.mimeType.LkupMimeTypeEntity;
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
-import es.caib.invai.back.service.mapper.catalog.appSection.AppSectionMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.documentStatus.DocumentStatusMapperImpl;
 import es.caib.invai.back.service.mapper.catalog.mimeType.MimeTypeMapperImpl;
 import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapperImpl;
@@ -30,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * Unit tests for {@link AppDocumentationAttachmentMapper}, locking in how the stored category is split into the
- * category and the subcategory the user sees, that a document never shows the subcategories nor
+ * Unit tests for {@link AppDocumentationAttachmentMapper}, locking in how the category and the optional
+ * subcategory of a document are carried, that a document never shows the subcategories nor
  * the deletion timestamp of its categories, and what each inbound DTO writes onto the model.
  */
 class AppDocumentationAttachmentMapperTest {
@@ -44,7 +42,6 @@ class AppDocumentationAttachmentMapperTest {
         ReflectionTestUtils.setField(versionMapper, "mimeTypeMapper", new MimeTypeMapperImpl());
         ReflectionTestUtils.setField(versionMapper, "appDocumentationMetadataMapper", new AppDocumentationMetadataMapperImpl());
         AppDocumentationAttachmentMapperImpl impl = new AppDocumentationAttachmentMapperImpl();
-        ReflectionTestUtils.setField(impl, "appSectionMapper", new AppSectionMapperImpl());
         ReflectionTestUtils.setField(impl, "documentStatusMapper", new DocumentStatusMapperImpl());
         ReflectionTestUtils.setField(impl, "documentCategoryMapper", new DocumentCategoryMapperImpl());
         ReflectionTestUtils.setField(impl, "appDocumentationAttachmentVersionMapper", versionMapper);
@@ -60,14 +57,9 @@ class AppDocumentationAttachmentMapperTest {
         return entity;
     }
 
-    private static AppDocumentationAttachmentEntity entity(DocumentCategoryEntity documentCategory) {
+    private static AppDocumentationAttachmentEntity entity(DocumentCategoryEntity category, DocumentCategoryEntity subcategory) {
         ApplicationEntity application = new ApplicationEntity();
         application.setId(3L);
-        LkupAppSectionEntity section = new LkupAppSectionEntity();
-        section.setId(7L);
-        section.setCode("SECURITY");
-        section.setName("Seguretat");
-        section.setNameEs("Seguridad");
         LkupDocumentStatusEntity status = new LkupDocumentStatusEntity();
         status.setId(9L);
         status.setCode("ACTIVE");
@@ -78,10 +70,14 @@ class AppDocumentationAttachmentMapperTest {
         entity.setId(10L);
         entity.setApplication(application);
         entity.setTitle("Manual API v2");
-        entity.setSection(section);
-        entity.setDocumentCategory(documentCategory);
+        entity.setCategory(category);
+        entity.setSubcategory(subcategory);
         entity.setStatus(status);
         return entity;
+    }
+
+    private static AppDocumentationAttachmentEntity entity(DocumentCategoryEntity category) {
+        return entity(category, null);
     }
 
     private static AppDocumentationAttachmentVersion currentAttachment() {
@@ -104,22 +100,24 @@ class AppDocumentationAttachmentMapperTest {
     }
 
     @Test
-    void toModel_aSubcategory_keepsItAsStoredAndExposesItsParentAsTheCategory() {
+    void toModel_carriesTheCategoryAndTheSubcategoryOfTheDocument() {
         DocumentCategoryEntity technical = category(1L, "Tècnica", null);
         DocumentCategoryEntity api = category(2L, "API", technical);
 
-        AppDocumentationAttachment model = mapper.toModel(entity(api));
+        AppDocumentationAttachment model = mapper.toModel(entity(technical, api));
 
         assertEquals(3L, model.getApplicationId());
-        assertEquals(2L, model.getDocumentCategory().getId());
+        assertEquals(1L, model.getCategory().getId());
         assertEquals("Tècnica", model.getCategory().getName());
+        assertNull(model.getCategory().getParentId());
+        assertEquals(2L, model.getSubcategory().getId());
         assertEquals("API", model.getSubcategory().getName());
-        assertEquals("Seguretat", model.getSection().getName());
+        assertEquals(1L, model.getSubcategory().getParentId());
         assertEquals("ACTIVE", model.getStatus().getCode());
     }
 
     @Test
-    void toModel_aCategory_hasNoSubcategory() {
+    void toModel_aDocumentWithOnlyACategory_hasNoSubcategory() {
         AppDocumentationAttachment model = mapper.toModel(entity(category(1L, "Tècnica", null)));
 
         assertEquals("Tècnica", model.getCategory().getName());
@@ -128,7 +126,8 @@ class AppDocumentationAttachmentMapperTest {
 
     @Test
     void toSimpleResponse_takesTheVersionDataFromTheCurrentAttachment() {
-        AppDocumentationAttachment model = mapper.toModel(entity(category(2L, "API", category(1L, "Tècnica", null))));
+        DocumentCategoryEntity technical = category(1L, "Tècnica", null);
+        AppDocumentationAttachment model = mapper.toModel(entity(technical, category(2L, "API", technical)));
         model.setCurrentAttachment(currentAttachment());
 
         AppDocumentationAttachmentSimpleOutputDTO dto = mapper.toSimpleResponse(model);
@@ -141,7 +140,6 @@ class AppDocumentationAttachmentMapperTest {
         assertNull(dto.getCategory().getParentId());
         assertEquals("API", dto.getSubcategory().getName());
         assertEquals(1L, dto.getSubcategory().getParentId());
-        assertEquals("SECURITY", dto.getSection().getCode());
         assertEquals("Vigente", dto.getStatus().getNameEs());
     }
 
@@ -178,7 +176,7 @@ class AppDocumentationAttachmentMapperTest {
     void categoriesOfADocument_neverShowTheirSubcategoriesNorTheirDeletionTimestamp() {
         DocumentCategoryEntity technical = category(1L, "Tècnica", null);
         technical.setDeletedAt(LocalDateTime.now());
-        AppDocumentationAttachment model = mapper.toModel(entity(category(2L, "API", technical)));
+        AppDocumentationAttachment model = mapper.toModel(entity(technical, category(2L, "API", technical)));
         model.getCategory().setSubcategories(List.of(new es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory()));
 
         AppDocumentationAttachmentSimpleOutputDTO simple = mapper.toSimpleResponse(model);
@@ -208,18 +206,44 @@ class AppDocumentationAttachmentMapperTest {
 
     @Test
     void toModelFromInput_carriesOnlyTheIdentifiersOfTheRelatedRecords() {
-        AppDocumentationAttachmentInputDTO inputDTO = new AppDocumentationAttachmentInputDTO(3L, "Manual", 7L, 5L, 9L, "1.0", "note", null);
+        AppDocumentationAttachmentInputDTO inputDTO = new AppDocumentationAttachmentInputDTO(3L, "Manual", 5L, 7L, 9L, "1.0", "note", null);
 
         AppDocumentationAttachment model = mapper.toModelFromInput(inputDTO);
 
         assertNull(model.getId());
         assertEquals(3L, model.getApplicationId());
         assertEquals("Manual", model.getTitle());
-        assertEquals(7L, model.getSection().getId());
-        assertNull(model.getSection().getName());
-        assertEquals(5L, model.getDocumentCategory().getId());
+        assertEquals(5L, model.getCategory().getId());
+        assertNull(model.getCategory().getName());
+        assertEquals(7L, model.getSubcategory().getId());
+        assertNull(model.getSubcategory().getName());
         assertEquals(9L, model.getStatus().getId());
         assertNull(model.getCreatedAt());
+    }
+
+    @Test
+    void toModelFromInput_withoutSubcategory_leavesItNull() {
+        AppDocumentationAttachmentInputDTO inputDTO = new AppDocumentationAttachmentInputDTO(3L, "Manual", 5L, null, 9L, "1.0", "note", null);
+
+        AppDocumentationAttachment model = mapper.toModelFromInput(inputDTO);
+
+        assertEquals(5L, model.getCategory().getId());
+        assertNull(model.getSubcategory());
+    }
+
+    @Test
+    void toEntity_leavesTheRelatedRecordsToTheRepository() {
+        DocumentCategoryEntity technical = category(1L, "Tècnica", null);
+        AppDocumentationAttachment model = mapper.toModel(entity(technical, category(2L, "API", technical)));
+
+        AppDocumentationAttachmentEntity entity = mapper.toEntity(model);
+
+        assertEquals(10L, entity.getId());
+        assertEquals("Manual API v2", entity.getTitle());
+        assertNull(entity.getApplication());
+        assertNull(entity.getCategory());
+        assertNull(entity.getSubcategory());
+        assertNull(entity.getStatus());
     }
 
     @Test
@@ -227,15 +251,26 @@ class AppDocumentationAttachmentMapperTest {
         AppDocumentationAttachment model = mapper.toModel(entity(category(1L, "Tècnica", null)));
         model.setCreatedBy("creator");
 
-        mapper.updateModelFromInput(new AppDocumentationAttachmentUpdateInputDTO("New title", 8L, 6L, 11L), model);
+        mapper.updateModelFromInput(new AppDocumentationAttachmentUpdateInputDTO("New title", 6L, 8L, 11L), model);
 
         assertEquals("New title", model.getTitle());
-        assertEquals(8L, model.getSection().getId());
-        assertEquals(6L, model.getDocumentCategory().getId());
+        assertEquals(6L, model.getCategory().getId());
+        assertEquals(8L, model.getSubcategory().getId());
         assertEquals(11L, model.getStatus().getId());
         assertEquals(3L, model.getApplicationId());
         assertEquals(10L, model.getId());
         assertEquals("creator", model.getCreatedBy());
+    }
+
+    @Test
+    void updateModelFromInput_withoutSubcategory_clearsTheOneTheDocumentHad() {
+        DocumentCategoryEntity technical = category(1L, "Tècnica", null);
+        AppDocumentationAttachment model = mapper.toModel(entity(technical, category(2L, "API", technical)));
+
+        mapper.updateModelFromInput(new AppDocumentationAttachmentUpdateInputDTO("T", 1L, null, 9L), model);
+
+        assertEquals(1L, model.getCategory().getId());
+        assertNull(model.getSubcategory());
     }
 
     @Test

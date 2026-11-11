@@ -3,8 +3,8 @@
 
 ***Versions***
 
-> - Versió Estable: Tag [__invai-1.0.5__](RELATIVE URL TO TAG) (branca [invai-1.0.5](RELATIVE URL TO BRANCH))<br/>
-> - Versió en Desenvolupament: __invai-1.0.5__ (branca [invai-1.0-dev](../../tree/invai-1.0))
+> - Versió Estable: Tag [__invai-1.0.7__](RELATIVE URL TO TAG) (branca [invai-1.0.7](RELATIVE URL TO BRANCH))<br/>
+> - Versió en Desenvolupament: __invai-1.0.7__ (branca [invai-1.0-dev](../../tree/invai-1.0))
 
 ***Descripció***
 

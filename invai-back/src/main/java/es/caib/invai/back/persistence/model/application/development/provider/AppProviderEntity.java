@@ -18,7 +18,7 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
 import es.caib.invai.back.persistence.model.BaseEntity;
-import es.caib.invai.back.persistence.model.maintenance.development.role.RoleEntity;
+import es.caib.invai.back.persistence.model.maintenance.development.providerRole.ProviderRoleEntity;
 
 /**
  * Persistent entity mapping a corporate provider (company) assigned to a specific
@@ -54,7 +54,7 @@ public class AppProviderEntity extends BaseEntity {
     /** Provider's role catalog entry. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE")
-    private RoleEntity role;
+    private ProviderRoleEntity role;
 
     /** Start date for the provider service contract. */
     @Column(name = "START_DATE")

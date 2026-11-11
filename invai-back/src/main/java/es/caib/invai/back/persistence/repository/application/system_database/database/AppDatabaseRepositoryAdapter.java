@@ -151,40 +151,23 @@ public class AppDatabaseRepositoryAdapter implements AppDatabaseRepository {
     }
 
     /**
-     * Checks whether an application-database link already exists for the given
-     * information system database grouping and database.
+     * Resolves the application-database link of the given information system database grouping and
+     * database, whether it is active or logically deleted.
      *
      * @param informationSystemDbId identifier of the information system database grouping
      * @param databaseId            identifier of the database
-     * @return {@code true} if a matching link exists, {@code false} otherwise
+     * @return the matching model, or {@code null} if the database was never linked to the grouping
      * @throws DataAccessException if the underlying persistence operation fails
      */
     @Override
-    public boolean existsByInformationSystemDbIdAndDatabaseId(Long informationSystemDbId, Long databaseId) {
+    public AppDatabase findByInformationSystemDbIdAndDatabaseId(Long informationSystemDbId, Long databaseId) {
         try {
-            return appDatabaseJPARepository.existsByInformationSystemDbIdAndDatabaseId(informationSystemDbId, databaseId);
+            return appDatabaseJPARepository.findByInformationSystemDbIdAndDatabaseId(informationSystemDbId, databaseId)
+                    .map(appDatabaseMapper::toModel)
+                    .orElse(null);
         } catch (DataAccessException e) {
-            log.error("Repository error: Failed mapping constraint check verifying link matching tracking state unicity definitions", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Checks whether an application-database link already exists for the given
-     * information system database grouping and database, excluding a specific record.
-     *
-     * @param informationSystemDbId identifier of the information system database grouping
-     * @param databaseId            identifier of the database
-     * @param id                    identifier of the record to exclude from the check
-     * @return {@code true} if a matching link exists, {@code false} otherwise
-     * @throws DataAccessException if the underlying persistence operation fails
-     */
-    @Override
-    public boolean existsByUniqueCombinationExcludingId(Long informationSystemDbId, Long databaseId, Long id) {
-        try {
-            return appDatabaseJPARepository.existsByInformationSystemDbIdAndDatabaseIdAndIdNot(informationSystemDbId, databaseId, id);
-        } catch (DataAccessException e) {
-            log.error("Repository error: Multi-conditional anomaly tracking unique constraints indices parameters conflicts updates context", e);
+            log.error("Repository error: Failure resolving the link of information system database ID: {} and database ID: {}",
+                    informationSystemDbId, databaseId, e);
             throw e;
         }
     }

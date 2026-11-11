@@ -1,8 +1,8 @@
 package es.caib.invai.back.interna.application.accessibility.DTO;
 
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
-import es.caib.invai.back.interna.maintenance.complianceSituation.DTO.ComplianceSituationOutputDTO;
-import es.caib.invai.back.interna.maintenance.classificationSegment.DTO.ClassificationSegmentOutputDTO;
+import es.caib.invai.back.interna.maintenance.accessibility.complianceSituation.DTO.ComplianceSituationOutputDTO;
+import es.caib.invai.back.interna.maintenance.accessibility.classificationSegment.DTO.ClassificationSegmentOutputDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

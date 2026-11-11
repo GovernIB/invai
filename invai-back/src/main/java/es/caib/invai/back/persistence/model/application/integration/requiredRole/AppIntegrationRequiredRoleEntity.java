@@ -13,7 +13,7 @@ import java.io.Serial;
  * Soffid role id is stored, never a name/system/description snapshot: the frontend already
  * resolves those via {@code SoffidClient.searchRoles} when the user picks a role, so persisting
  * them again here would be redundant. Deliberately not a foreign key to any local catalog (e.g.
- * {@code SecurityRoleEntity}) either: Soffid is the source of truth.
+ * {@code RoleEntity}) either: Soffid is the source of truth.
  *
  * @since 1.0.5
  */

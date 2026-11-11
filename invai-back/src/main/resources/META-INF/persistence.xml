@@ -62,8 +62,8 @@
 
         <class>es.caib.invai.back.persistence.model.maintenance.systems.serverType.LkupServerTypeEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.maintenance.development.role.RoleEntity</class>
-        <class>es.caib.invai.back.persistence.model.maintenance.development.role.RoleAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.providerRole.ProviderRoleEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.providerRole.ProviderRoleAudEntity</class>
 
         <class>es.caib.invai.back.persistence.model.maintenance.development.layer.LayerEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.development.layer.LayerAudEntity</class>
@@ -105,10 +105,10 @@
         <class>es.caib.invai.back.persistence.model.maintenance.security.personalDataProcessing.PersonalDataProcessingEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.security.personalDataProcessing.PersonalDataProcessingAudEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextEntity</class>
-        <class>es.caib.invai.back.persistence.model.maintenance.security.webContext.WebContextAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.webContext.WebContextEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.development.webContext.WebContextAudEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.maintenance.security.securityRole.SecurityRoleEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.role.RoleEntity</class>
 
         <class>es.caib.invai.back.persistence.model.maintenance.security.securityMeasureType.SecurityMeasureTypeEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.security.securityMeasureType.SecurityMeasureTypeAudEntity</class>
@@ -139,17 +139,18 @@
         <class>es.caib.invai.back.persistence.model.application.data.AppDataEntity</class>
         <class>es.caib.invai.back.persistence.model.application.data.AppDataAudEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationEntity</class>
-        <class>es.caib.invai.back.persistence.model.maintenance.complianceSituation.ComplianceSituationAudEntity</class>
-        <class>es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentEntity</class>
-        <class>es.caib.invai.back.persistence.model.maintenance.classificationSegment.ClassificationSegmentAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.accessibility.complianceSituation.ComplianceSituationEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.accessibility.complianceSituation.ComplianceSituationAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.accessibility.classificationSegment.ClassificationSegmentEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.accessibility.classificationSegment.ClassificationSegmentAudEntity</class>
 
         <class>es.caib.invai.back.persistence.model.maintenance.integration.externalSystem.ExternalSystemEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.integration.externalSystem.ExternalSystemAudEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity</class>
         <class>es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.documentation.documentRolePermission.DocumentRolePermissionEntity</class>
+        <class>es.caib.invai.back.persistence.model.maintenance.documentation.documentRolePermission.DocumentRolePermissionAudEntity</class>
 
-        <class>es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity</class>
         <class>es.caib.invai.back.persistence.model.catalog.documentStatus.LkupDocumentStatusEntity</class>
         <class>es.caib.invai.back.persistence.model.catalog.mimeType.LkupMimeTypeEntity</class>
 
@@ -161,6 +162,9 @@
         <class>es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationMetadataAudEntity</class>
         <class>es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity</class>
         <class>es.caib.invai.back.persistence.model.application.documentation.link.AppLinkAudEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.email.AppEmailEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.email.AppEmailRecipientEntity</class>
+        <class>es.caib.invai.back.persistence.model.application.documentation.email.AppEmailItemEntity</class>
 
         <class>es.caib.invai.back.persistence.model.application.integration.core.AppIntegrationEntity</class>
         <class>es.caib.invai.back.persistence.model.application.integration.core.AppIntegrationAudEntity</class>

@@ -3,7 +3,7 @@ package es.caib.invai.back.persistence.repository.application.documentation.link
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkAudEntity;
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
+import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import es.caib.invai.back.service.mapper.application.documentation.link.AppLinkMapper;
 import es.caib.invai.back.service.model.application.documentation.link.AppLink;
 import es.caib.invai.back.utils.Utils;
@@ -18,11 +18,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
  * Infrastructure repository adapter implementing the outbound port {@link AppLinkRepository}. The
- * application and the section of a link are linked through references built from their
+ * application and the category of a link are linked through references built from their
  * identifiers, so everything that is read back afterwards is the stored data.
  *
  * @since 1.0.6
@@ -53,20 +54,20 @@ public class AppLinkRepositoryAdapter implements AppLinkRepository {
     }
 
     @Override
-    public Page<AppLink> findAll(AppDocumentationLinkCriteria filter, Pageable pageable) {
-        Specification<AppLinkEntity> spec = AppLinkSpecification.filterByCriteria(filter, pageable.getSort());
+    public Page<AppLink> findAll(AppDocumentationLinkCriteria filter, Collection<Long> allowedCategoryIds, Pageable pageable) {
+        Specification<AppLinkEntity> spec = AppLinkSpecification.filterByCriteria(filter, allowedCategoryIds, pageable.getSort());
         Pageable unsorted = pageable.isPaged() ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()) : Pageable.unpaged();
         return appLinkJPARepository.findAll(spec, unsorted).map(appLinkMapper::toModel);
     }
 
     @Override
-    public boolean existsActiveDuplicate(Long applicationId, String title, Long sectionId, String url) {
-        return appLinkJPARepository.existsByApplicationIdAndTitleAndSectionIdAndUrlAndDeletedAtIsNull(applicationId, title, sectionId, url);
+    public boolean existsActiveDuplicate(Long applicationId, String title, Long categoryId, String url) {
+        return appLinkJPARepository.existsByApplicationIdAndTitleAndCategoryIdAndUrlAndDeletedAtIsNull(applicationId, title, categoryId, url);
     }
 
     @Override
-    public boolean existsActiveDuplicateExcluding(Long applicationId, String title, Long sectionId, String url, Long id) {
-        return appLinkJPARepository.existsByApplicationIdAndTitleAndSectionIdAndUrlAndIdNotAndDeletedAtIsNull(applicationId, title, sectionId, url, id);
+    public boolean existsActiveDuplicateExcluding(Long applicationId, String title, Long categoryId, String url, Long id) {
+        return appLinkJPARepository.existsByApplicationIdAndTitleAndCategoryIdAndUrlAndIdNotAndDeletedAtIsNull(applicationId, title, categoryId, url, id);
     }
 
     @Override
@@ -97,7 +98,7 @@ public class AppLinkRepositoryAdapter implements AppLinkRepository {
     }
 
     /**
-     * Converts the link into its entity and links it to the application and the section it points
+     * Converts the link into its entity and links it to the application and the category it points
      * to, through references that hold only their identifiers.
      *
      * @param appLink the link to convert
@@ -106,7 +107,7 @@ public class AppLinkRepositoryAdapter implements AppLinkRepository {
     private AppLinkEntity toEntityWithReferences(AppLink appLink) {
         AppLinkEntity entity = appLinkMapper.toEntity(appLink);
         entity.setApplication(entityManager.getReference(ApplicationEntity.class, appLink.getApplicationId()));
-        entity.setSection(entityManager.getReference(LkupAppSectionEntity.class, appLink.getSection().getId()));
+        entity.setCategory(entityManager.getReference(DocumentCategoryEntity.class, appLink.getCategory().getId()));
         return entity;
     }
 
@@ -122,7 +123,7 @@ public class AppLinkRepositoryAdapter implements AppLinkRepository {
         aud.setApplicationId(entity.getApplication().getId());
         aud.setTitle(entity.getTitle());
         aud.setDescription(entity.getDescription());
-        aud.setSectionId(entity.getSection().getId());
+        aud.setCategoryId(entity.getCategory().getId());
         aud.setUrl(entity.getUrl());
         aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

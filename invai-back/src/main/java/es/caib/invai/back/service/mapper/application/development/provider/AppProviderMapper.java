@@ -8,7 +8,7 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import es.caib.invai.back.service.mapper.maintenance.development.role.RoleMapper;
+import es.caib.invai.back.service.mapper.maintenance.development.providerRole.ProviderRoleMapper;
 
 import java.util.Objects;
 
@@ -19,7 +19,7 @@ import java.util.Objects;
  *
  * @since 1.0.2
  */
-@Mapper(componentModel = "spring", uses = {es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper.class, RoleMapper.class})
+@Mapper(componentModel = "spring", uses = {es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper.class, ProviderRoleMapper.class})
 public interface AppProviderMapper {
 
     /**

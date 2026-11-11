@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.application.development.core.AppDevelopmentMapper;
 import es.caib.invai.back.service.mapper.application.security.core.AppSecurityMapper;
-import es.caib.invai.back.service.mapper.maintenance.security.webContext.WebContextMapper;
+import es.caib.invai.back.service.mapper.maintenance.development.webContext.WebContextMapper;
 import es.caib.invai.back.service.mapper.maintenance.general.field.FieldMapper;
 
 /**

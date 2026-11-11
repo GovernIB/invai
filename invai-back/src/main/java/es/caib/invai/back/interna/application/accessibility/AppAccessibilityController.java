@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.application.accessibility.DTO.AppAccessibilityInputDTO;
 import es.caib.invai.back.interna.application.accessibility.DTO.AppAccessibilityOutputDTO;
 import es.caib.invai.back.service.facade.application.accessibility.AppAccessibilityService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ import jakarta.validation.Valid;
 
 /**
  * REST controller exposing CRUD endpoints for the "AppAccessibility" (Accessibilitat) tab anchor.
- * All endpoints require {@code ROLE_INV_SUPER}.
+ * All endpoints require {@code INV_ACCESIBILITAT} or {@code INV_SUPER}.
  *
  * @since 1.0.4
  */
@@ -26,7 +27,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/accessibility")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ACCESSIBILITY)
 public class AppAccessibilityController {
 
     /** Service facade handling business operations for accessibility anchors. */

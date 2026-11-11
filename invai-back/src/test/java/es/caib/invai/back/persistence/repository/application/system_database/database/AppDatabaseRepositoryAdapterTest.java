@@ -111,19 +111,22 @@ class AppDatabaseRepositoryAdapterTest {
     }
 
     @Test
-    void existsByInformationSystemDbIdAndDatabaseId_delegatesToJPARepository() {
+    void findByInformationSystemDbIdAndDatabaseId_linked_returnsTheMappedModel() {
         adapter = buildAdapter();
-        when(appDatabaseJPARepository.existsByInformationSystemDbIdAndDatabaseId(10L, 20L)).thenReturn(true);
+        AppDatabaseEntity entity = entityWithRelations(1L);
+        AppDatabase model = new AppDatabase();
+        when(appDatabaseJPARepository.findByInformationSystemDbIdAndDatabaseId(10L, 20L)).thenReturn(Optional.of(entity));
+        when(appDatabaseMapper.toModel(entity)).thenReturn(model);
 
-        assertTrue(adapter.existsByInformationSystemDbIdAndDatabaseId(10L, 20L));
+        assertSame(model, adapter.findByInformationSystemDbIdAndDatabaseId(10L, 20L));
     }
 
     @Test
-    void existsByUniqueCombinationExcludingId_delegatesToJPARepository() {
+    void findByInformationSystemDbIdAndDatabaseId_neverLinked_returnsNull() {
         adapter = buildAdapter();
-        when(appDatabaseJPARepository.existsByInformationSystemDbIdAndDatabaseIdAndIdNot(10L, 20L, 1L)).thenReturn(true);
+        when(appDatabaseJPARepository.findByInformationSystemDbIdAndDatabaseId(10L, 20L)).thenReturn(Optional.empty());
 
-        assertTrue(adapter.existsByUniqueCombinationExcludingId(10L, 20L, 1L));
+        assertNull(adapter.findByInformationSystemDbIdAndDatabaseId(10L, 20L));
     }
 
     @Test

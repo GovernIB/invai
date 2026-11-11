@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -225,6 +226,36 @@ class GlobalExceptionHandlerTest {
         assertEquals("Soffid timed out", response.getBody().getMessage());
     }
 
+    // --- handleEmailSendExceptions ---
+
+    @Test
+    void handleEmailSendExceptions_returns502WithGenericMessage() {
+        when(messageSource.getMessage(eq("exception.email.sendfailed"), eq(null), any(Locale.class)))
+                .thenReturn("The e-mail could not be sent");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleEmailSendExceptions();
+
+        assertEquals(HttpStatus.BAD_GATEWAY, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Validation Error", response.getBody().getError());
+        assertEquals("The e-mail could not be sent", response.getBody().getMessage());
+    }
+
+    // --- handleAccessDeniedExceptions ---
+
+    @Test
+    void handleAccessDeniedExceptions_returns403WithGenericMessage() {
+        when(messageSource.getMessage(eq("exception.access.denied"), eq(null), any(Locale.class)))
+                .thenReturn("Access denied");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleAccessDeniedExceptions();
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("Validation Error", response.getBody().getError());
+        assertEquals("Access denied", response.getBody().getMessage());
+    }
+
     // --- handleResourceNotFoundExceptions ---
 
     @Test
@@ -300,6 +331,21 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals("The request body is invalid", response.getBody().getMessage());
+    }
+
+    // --- handleUnsupportedMediaTypeExceptions ---
+
+    @Test
+    void handleUnsupportedMediaTypeExceptions_returns415WithoutLeakingTheDetail() {
+        when(messageSource.getMessage(eq("exception.request.unsupportedmediatype"), eq(null), any(Locale.class)))
+                .thenReturn("The content type of the request is not supported");
+        HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException("Content-Type 'text/plain' is not supported");
+
+        ResponseEntity<ValidationErrorResponse> response = handler.handleUnsupportedMediaTypeExceptions(ex);
+
+        assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("The content type of the request is not supported", response.getBody().getMessage());
     }
 
     // --- handleUnexpectedExceptions (catch-all) ---

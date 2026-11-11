@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import es.caib.invai.back.persistence.model.application.development.core.AppDevelopmentEntity;
-import es.caib.invai.back.persistence.model.maintenance.development.role.RoleEntity;
+import es.caib.invai.back.persistence.model.maintenance.development.providerRole.ProviderRoleEntity;
 import es.caib.invai.back.persistence.model.application.development.provider.AppProviderAudEntity;
 import es.caib.invai.back.persistence.model.application.development.provider.AppProviderEntity;
 import org.mockito.ArgumentMatchers;
@@ -123,7 +123,7 @@ class AppProviderRepositoryAdapterTest {
         saved.setId(5L);
         saved.setAppDevelopment(developmentEntity(20L));
         saved.setCompanyName("Acme Corp");
-        RoleEntity role = new RoleEntity();
+        ProviderRoleEntity role = new ProviderRoleEntity();
         role.setId(7L);
         saved.setRole(role);
         saved.setStartDate(LocalDateTime.of(2026, 1, 1, 0, 0));

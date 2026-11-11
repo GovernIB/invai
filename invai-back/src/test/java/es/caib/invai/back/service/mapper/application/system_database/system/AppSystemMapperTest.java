@@ -729,7 +729,7 @@ class AppSystemMapperTest {
     }
 
     // ------------------------------------------------------------------
-    // toModelFromInput / updateModelFromInput
+    // toModelFromInput
     // ------------------------------------------------------------------
 
     @Test
@@ -752,53 +752,5 @@ class AppSystemMapperTest {
     @Test
     void toModelFromInput_null_returnsNull() {
         assertNull(mapper.toModelFromInput(null));
-    }
-
-    @Test
-    void updateModelFromInput_mergesFieldsWithoutTouchingId() {
-        AppInformationSystemDb existingInformationSystemDb = new AppInformationSystemDb();
-        existingInformationSystemDb.setId(13L);
-        System existingSystem = new System();
-        existingSystem.setId(23L);
-        AppSystem existing = new AppSystem();
-        existing.setId(4L);
-        existing.setInformationSystemDb(existingInformationSystemDb);
-        existing.setSystem(existingSystem);
-        AppSystemInputDTO inputDTO = new AppSystemInputDTO(70L, 80L);
-
-        mapper.updateModelFromInput(inputDTO, existing);
-
-        assertEquals(4L, existing.getId());
-        assertEquals(70L, existing.getInformationSystemDb().getId());
-        assertEquals(80L, existing.getSystem().getId());
-    }
-
-    @Test
-    void updateModelFromInput_withNullNestedTargets_initializesThem() {
-        AppSystem existing = new AppSystem();
-        existing.setId(5L);
-        existing.setInformationSystemDb(null);
-        existing.setSystem(null);
-        AppSystemInputDTO inputDTO = new AppSystemInputDTO(90L, 91L);
-
-        mapper.updateModelFromInput(inputDTO, existing);
-
-        assertEquals(5L, existing.getId());
-        assertEquals(90L, existing.getInformationSystemDb().getId());
-        assertEquals(91L, existing.getSystem().getId());
-    }
-
-    @Test
-    void updateModelFromInput_nullInput_doesNothing() {
-        AppInformationSystemDb existingInformationSystemDb = new AppInformationSystemDb();
-        existingInformationSystemDb.setId(13L);
-        AppSystem existing = new AppSystem();
-        existing.setId(6L);
-        existing.setInformationSystemDb(existingInformationSystemDb);
-
-        mapper.updateModelFromInput(null, existing);
-
-        assertEquals(6L, existing.getId());
-        assertEquals(13L, existing.getInformationSystemDb().getId());
     }
 }

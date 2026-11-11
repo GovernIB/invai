@@ -4,7 +4,7 @@ import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidat
 import es.caib.invai.back.persistence.model.application.security.role.AppRoleAudEntity;
 import es.caib.invai.back.persistence.model.application.security.role.AppRoleEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
-import es.caib.invai.back.persistence.model.maintenance.security.securityRole.SecurityRoleEntity;
+import es.caib.invai.back.persistence.model.maintenance.role.RoleEntity;
 import es.caib.invai.back.service.mapper.application.security.role.AppRoleMapper;
 import es.caib.invai.back.service.model.application.security.role.AppRole;
 import org.junit.jupiter.api.AfterEach;
@@ -67,7 +67,7 @@ class AppRoleRepositoryAdapterTest {
         AppSecurityEntity appSecurity = new AppSecurityEntity();
         appSecurity.setId(10L);
         entity.setAppSecurity(appSecurity);
-        SecurityRoleEntity securityRole = new SecurityRoleEntity();
+        RoleEntity securityRole = new RoleEntity();
         securityRole.setId(20L);
         entity.setSecurityRole(securityRole);
         LkupValidationStatusEntity validationStatus = new LkupValidationStatusEntity();

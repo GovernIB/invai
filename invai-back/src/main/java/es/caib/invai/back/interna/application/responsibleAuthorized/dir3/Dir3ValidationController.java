@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.application.responsibleAuthorized.dir3;
 import es.caib.invai.back.interna.application.responsibleAuthorized.dir3.DTO.Dir3ManualValidateInputDTO;
 import es.caib.invai.back.interna.application.responsibleAuthorized.dir3.DTO.Dir3ValidationOutputDTO;
 import es.caib.invai.back.service.facade.application.responsibleAuthorized.dir3.Dir3ValidationService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/dir3-validation")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_RESPONSIBLE_WRITE)
 public class Dir3ValidationController {
 
     /** Facade service handling the business logic for Dir3Validation operations. */

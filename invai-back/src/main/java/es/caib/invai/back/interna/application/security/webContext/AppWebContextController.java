@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.development.webContext.DTO.AppWebC
 import es.caib.invai.back.interna.application.security.webContext.DTO.AppWebContextValidateInputDTO;
 import es.caib.invai.back.persistence.repository.application.security.webContext.AppWebContextCriteria;
 import es.caib.invai.back.service.facade.application.security.webContext.AppWebContextService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ import jakarta.validation.Valid;
 @RestController("securityAppWebContextController")
 @RequiredArgsConstructor
 @RequestMapping("application/security/web-context")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SECURITY)
 public class AppWebContextController {
 
     /** Service facade handling business operations for application-web context links. */

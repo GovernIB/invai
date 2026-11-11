@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -102,6 +103,48 @@ class UtilsTest {
         String result = Utils.resolveCurrentUsername();
 
         assertEquals("mmartin", result);
+    }
+
+    @Test
+    void resolveCurrentUserEmail_unauthenticated_returnsNull() {
+        SecurityContextHolder.clearContext();
+
+        assertNull(Utils.resolveCurrentUserEmail());
+    }
+
+    @Test
+    void resolveCurrentUserEmail_stringPrincipal_returnsNull() {
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "jdoe", null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        assertNull(Utils.resolveCurrentUserEmail());
+    }
+
+    @Test
+    void resolveCurrentUserEmail_oidcPrincipalWithEmailClaim_returnsTheAddress() {
+        OidcIdToken idToken = new OidcIdToken("token-value", Instant.now(), Instant.now().plusSeconds(60),
+                Map.of("sub", "user-1"));
+        OidcUserInfo userInfo = new OidcUserInfo(Map.of("preferred_username", "mmartin", "email", "mmartin@caib.es"));
+        DefaultOidcUser oidcUser = new DefaultOidcUser(
+                List.of(new SimpleGrantedAuthority("ROLE_USER")), idToken, userInfo);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                oidcUser, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+        assertEquals("mmartin@caib.es", Utils.resolveCurrentUserEmail());
+    }
+
+    @Test
+    void resolveCurrentUserEmail_oidcPrincipalWithoutEmailClaim_returnsNull() {
+        OidcIdToken idToken = new OidcIdToken("token-value", Instant.now(), Instant.now().plusSeconds(60),
+                Map.of("sub", "user-1"));
+        OidcUserInfo userInfo = new OidcUserInfo(Map.of("preferred_username", "mmartin"));
+        DefaultOidcUser oidcUser = new DefaultOidcUser(
+                List.of(new SimpleGrantedAuthority("ROLE_USER")), idToken, userInfo);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                oidcUser, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+        assertNull(Utils.resolveCurrentUserEmail());
     }
 
     @Test

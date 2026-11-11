@@ -111,19 +111,22 @@ class AppSystemRepositoryAdapterTest {
     }
 
     @Test
-    void existsByInformationSystemDbAndSystem_delegatesToJPARepository() {
+    void findByInformationSystemDbIdAndSystemId_linked_returnsTheMappedModel() {
         adapter = buildAdapter();
-        when(appSystemJPARepository.existsByInformationSystemDbIdAndSystemId(10L, 20L)).thenReturn(true);
+        AppSystemEntity entity = entityWithRelations(1L);
+        AppSystem model = new AppSystem();
+        when(appSystemJPARepository.findByInformationSystemDbIdAndSystemId(10L, 20L)).thenReturn(Optional.of(entity));
+        when(appSystemMapper.toModel(entity)).thenReturn(model);
 
-        assertTrue(adapter.existsByInformationSystemDbAndSystem(10L, 20L));
+        assertSame(model, adapter.findByInformationSystemDbIdAndSystemId(10L, 20L));
     }
 
     @Test
-    void existsByInformationSystemDbAndSystemAndIdNot_delegatesToJPARepository() {
+    void findByInformationSystemDbIdAndSystemId_neverLinked_returnsNull() {
         adapter = buildAdapter();
-        when(appSystemJPARepository.existsByInformationSystemDbIdAndSystemIdAndIdNot(10L, 20L, 1L)).thenReturn(true);
+        when(appSystemJPARepository.findByInformationSystemDbIdAndSystemId(10L, 20L)).thenReturn(Optional.empty());
 
-        assertTrue(adapter.existsByInformationSystemDbAndSystemAndIdNot(10L, 20L, 1L));
+        assertNull(adapter.findByInformationSystemDbIdAndSystemId(10L, 20L));
     }
 
     @Test

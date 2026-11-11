@@ -4,6 +4,9 @@ import es.caib.invai.back.service.model.maintenance.documentation.documentCatego
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Core business domain outbound Port boundary interface declaring relational persistence mechanisms
  * for the documentation category and subcategory layer.
@@ -24,11 +27,12 @@ public interface DocumentCategoryRepository {
      * Finds the categories matching the given filter criteria, paginated. Each one comes with all
      * its subcategories.
      *
-     * @param filter   search and status filter criteria
-     * @param pageable pagination and sorting information
+     * @param filter             search and status filter criteria
+     * @param allowedCategoryIds the only categories returned, {@code null} for no restriction and empty for none
+     * @param pageable           pagination and sorting information
      * @return a page of matching categories
      */
-    Page<DocumentCategory> findAll(DocumentCategoryCriteria filter, Pageable pageable);
+    Page<DocumentCategory> findAll(DocumentCategoryCriteria filter, Collection<Long> allowedCategoryIds, Pageable pageable);
 
     /**
      * Persists a new category or subcategory.
@@ -82,4 +86,11 @@ public interface DocumentCategoryRepository {
      * @return {@code true} if it has one
      */
     boolean hasActiveSubcategories(Long categoryId);
+
+    /**
+     * Retrieves the identifiers of the active categories, the ones without a parent.
+     *
+     * @return the identifiers of the active categories
+     */
+    List<Long> findActiveCategoryIds();
 }

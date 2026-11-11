@@ -34,9 +34,9 @@ public class AppDocumentationLinkInputDTO {
     @Size(max = 1000, message = "{" + Constants.VALIDATION_LINK_DESCRIPTION_SIZE + "}")
     private String description;
 
-    /** Identifier of the section of the application the link belongs to. */
-    @NotNull(message = "{" + Constants.VALIDATION_LINK_SECTION_REQUIRED + "}")
-    private Long sectionId;
+    /** Identifier of the category the link is filed under. */
+    @NotNull(message = "{" + Constants.VALIDATION_LINK_CATEGORY_REQUIRED + "}")
+    private Long categoryId;
 
     /** Address the link points to: an absolute {@code http} or {@code https} URL. */
     @NotBlank(message = "{" + Constants.VALIDATION_LINK_URL_REQUIRED + "}")

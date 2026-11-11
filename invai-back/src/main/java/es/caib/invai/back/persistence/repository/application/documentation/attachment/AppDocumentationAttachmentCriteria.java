@@ -23,14 +23,11 @@ public class AppDocumentationAttachmentCriteria {
     /** Global text lookup, partial and case-insensitive, matching the title of the document. */
     private String search;
 
-    /** Identifier of the section the documents are filed under. */
-    private Long sectionId;
-
-    /**
-     * Identifier of a category or subcategory: a category matches the documents of that category
-     * and of any of its subcategories, a subcategory matches only its own documents.
-     */
+    /** Identifier of the category the documents are filed under. */
     private Long categoryId;
+
+    /** Identifier of the subcategory the documents are filed under. */
+    private Long subcategoryId;
 
     /** Identifier of the state of the documents (the "Estat" column: active, in review, obsolete). */
     private Long statusId;

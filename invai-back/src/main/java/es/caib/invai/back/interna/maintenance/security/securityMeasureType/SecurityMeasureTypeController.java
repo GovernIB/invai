@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.security.securityMeasureType.DTO.S
 import es.caib.invai.back.interna.maintenance.security.securityMeasureType.DTO.SecurityMeasureTypeOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.security.securityMeasureType.SecurityMeasureTypeCriteria;
 import es.caib.invai.back.service.facade.maintenance.security.securityMeasureType.SecurityMeasureTypeService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for SecurityMeasureType assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.4
  */
 @Tag(name = "Tipus de mesures de seguretat", description = "Manteniment del catàleg de tipus de mesures de seguretat.")
 @RestController
 @Slf4j
 @RequestMapping("security-measure-type")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class SecurityMeasureTypeController {
 
     /** Service facade handling SecurityMeasureType business use cases. */
@@ -73,6 +78,7 @@ public class SecurityMeasureTypeController {
      * @param inputDTO the data for the new security measure type entry
      * @return the created security measure type entry, with HTTP 201 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<SecurityMeasureTypeOutputDTO> create(@Valid @RequestBody SecurityMeasureTypeInputDTO inputDTO) {
         return new ResponseEntity<>(securityMeasureTypeService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class SecurityMeasureTypeController {
      * @param inputDTO the new data to apply
      * @return the updated security measure type entry
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<SecurityMeasureTypeOutputDTO> update(@PathVariable Long id, @Valid @RequestBody SecurityMeasureTypeInputDTO inputDTO) {
         return ResponseEntity.ok(securityMeasureTypeService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class SecurityMeasureTypeController {
      * @param id the identifier of the security measure type entry to delete
      * @return an empty response with HTTP 204 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         securityMeasureTypeService.delete(id);
@@ -108,6 +116,7 @@ public class SecurityMeasureTypeController {
      * @param id the identifier of the security measure type entry to reactivate
      * @return the reactivated security measure type entry
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<SecurityMeasureTypeOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(securityMeasureTypeService.reactivate(id));

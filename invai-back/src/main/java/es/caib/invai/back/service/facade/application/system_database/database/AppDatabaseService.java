@@ -32,16 +32,6 @@ public interface AppDatabaseService {
     AppDatabaseOutputDTO create(AppDatabaseInputDTO inputDTO);
 
     /**
-     * Updates the application-database link identified by {@code id} with the given
-     * input payload.
-     *
-     * @param id       identifier of the link to update
-     * @param inputDTO the update payload
-     * @return the updated link, mapped to its output transfer representation
-     */
-    AppDatabaseOutputDTO update(Long id, AppDatabaseInputDTO inputDTO);
-
-    /**
      * Deletes (logically) the application-database link identified by {@code id}.
      *
      * @param id identifier of the link to delete

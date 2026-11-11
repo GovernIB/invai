@@ -15,13 +15,14 @@ import es.caib.invai.back.interna.maintenance.security.securityRole.DTO.Security
 import es.caib.invai.back.service.model.catalog.status.StatusEnum;
 import org.mockito.ArgumentCaptor;
 import es.caib.invai.back.rest.soffid.SoffidRole;
-import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
+import es.caib.invai.back.service.model.maintenance.role.Role;
 import es.caib.invai.back.exception.BusinessRuleException;
 import es.caib.invai.back.interna.application.security.role.DTO.AppRoleInputDTO;
 import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.security.role.AppRoleCriteria;
 import es.caib.invai.back.persistence.repository.application.security.role.AppRoleRepository;
 import es.caib.invai.back.service.mapper.application.security.role.AppRoleMapper;
+import es.caib.invai.back.service.facade.maintenance.documentation.documentRolePermission.DocumentRolePermissionService;
 import es.caib.invai.back.service.model.application.security.role.AppRole;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.persistence.repository.application.security.core.AppSecurityRepository;
@@ -34,8 +35,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapper;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapper;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapperImpl;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -48,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -69,8 +71,11 @@ class AppRoleServiceFacadeBeanTest {
     @Mock
     private AppSecurityRepository appSecurityRepository;
 
+    @Mock
+    private DocumentRolePermissionService documentRolePermissionService;
+
     @Spy
-    private SecurityRoleMapper securityRoleMapper = new SecurityRoleMapperImpl();
+    private RoleMapper roleMapper = new RoleMapperImpl();
 
     @InjectMocks
     private AppRoleServiceFacadeBean appRoleServiceFacadeBean;
@@ -83,6 +88,7 @@ class AppRoleServiceFacadeBeanTest {
         activeModel.setId(1L);
         activeModel.setAppSecurity(appSecurityOf("AP2"));
         lenient().when(appSecurityRepository.findById(any())).thenReturn(activeModel.getAppSecurity());
+        lenient().when(appRoleRepository.findAll(any(), any(AppRoleCriteria.class), any(Pageable.class))).thenReturn(Page.empty());
     }
 
     /** A security anchor whose application has the given prefix. */
@@ -139,6 +145,42 @@ class AppRoleServiceFacadeBeanTest {
         assertEquals("AP2_ADMIN", persisted.getValue().getSecurityRole().getName());
         assertEquals("soffid", persisted.getValue().getSecurityRole().getSystem());
         assertEquals("Administrador", persisted.getValue().getSecurityRole().getDescription());
+    }
+
+    @Test
+    void create_roleAlreadyAssignedToTheAnchor_throwsAndPersistsNothing() {
+        stubAssignedAnchor5(7L);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> appRoleServiceFacadeBean.create(new AppRoleInputDTO(5L, 7L)));
+
+        assertEquals(Constants.ERR_APP_ROLE_DUPLICATED, ex.getMessage());
+        verify(appRoleRepository, never()).create(any());
+        verify(soffidClient, never()).getRolesByIds(any());
+    }
+
+    @Test
+    void create_anotherRoleOfTheAnchorIsAssigned_isAllowed() {
+        stubAssignedAnchor5(8L);
+        when(soffidClient.getRolesByIds(List.of(7L))).thenReturn(List.of(soffidRole(7L, "AP2_ADMIN", "soffid", "x")));
+        when(appRoleRepository.create(any(AppRole.class))).thenReturn(new AppRole());
+        when(appRoleMapper.toResponse(any(AppRole.class))).thenReturn(new AppRoleOutputDTO());
+
+        appRoleServiceFacadeBean.create(new AppRoleInputDTO(5L, 7L));
+
+        verify(appRoleRepository).create(any(AppRole.class));
+    }
+
+    /** The security anchor 5 already has active assignments to the given Soffid roles. */
+    private void stubAssignedAnchor5(Long... soffidRoleIds) {
+        List<AppRole> assigned = java.util.Arrays.stream(soffidRoleIds).map(id -> {
+            Role securityRole = new Role();
+            securityRole.setRoleId(id);
+            AppRole appRole = new AppRole();
+            appRole.setSecurityRole(securityRole);
+            return appRole;
+        }).toList();
+        when(appRoleRepository.findAll(eq(5L), any(AppRoleCriteria.class), any(Pageable.class))).thenReturn(new PageImpl<>(assigned));
     }
 
     @Test
@@ -206,7 +248,7 @@ class AppRoleServiceFacadeBeanTest {
         AppRoleInputDTO inputDTO = new AppRoleInputDTO(5L, 7L);
         AppRole updated = new AppRole();
         AppRoleOutputDTO response = new AppRoleOutputDTO();
-        SecurityRole currentRole = new SecurityRole();
+        Role currentRole = new Role();
         currentRole.setId(3L);
         currentRole.setRoleId(6L);
         currentRole.setName("AP2_OLD");
@@ -225,6 +267,38 @@ class AppRoleServiceFacadeBeanTest {
         assertEquals("soffid", activeModel.getSecurityRole().getSystem());
         assertEquals("Nova", activeModel.getSecurityRole().getDescription());
         assertEquals(response, result);
+    }
+
+    @Test
+    void update_toARoleAlreadyAssignedByAnotherAssignment_throwsAndPersistsNothing() {
+        Role currentRole = new Role();
+        currentRole.setRoleId(6L);
+        activeModel.setSecurityRole(currentRole);
+        when(appRoleRepository.findById(1L)).thenReturn(activeModel);
+        stubAssignedAnchor5(6L, 7L);
+
+        BusinessRuleException ex = assertThrows(BusinessRuleException.class,
+                () -> appRoleServiceFacadeBean.update(1L, new AppRoleInputDTO(5L, 7L)));
+
+        assertEquals(Constants.ERR_APP_ROLE_DUPLICATED, ex.getMessage());
+        verify(appRoleRepository, never()).update(any(), any());
+    }
+
+    @Test
+    void update_keepingItsOwnRole_isNotADuplicate() {
+        Role currentRole = new Role();
+        currentRole.setId(3L);
+        currentRole.setRoleId(7L);
+        activeModel.setSecurityRole(currentRole);
+        when(appRoleRepository.findById(1L)).thenReturn(activeModel);
+        when(soffidClient.getRolesByIds(List.of(7L))).thenReturn(List.of(soffidRole(7L, "AP2_ADMIN", "soffid", "x")));
+        when(appRoleRepository.update(activeModel, 1L)).thenReturn(new AppRole());
+        when(appRoleMapper.toResponse(any(AppRole.class))).thenReturn(new AppRoleOutputDTO());
+
+        appRoleServiceFacadeBean.update(1L, new AppRoleInputDTO(5L, 7L));
+
+        verify(appRoleRepository).update(activeModel, 1L);
+        verify(appRoleRepository, never()).findAll(any(), any(AppRoleCriteria.class), any(Pageable.class));
     }
 
     @Test
@@ -270,12 +344,85 @@ class AppRoleServiceFacadeBeanTest {
 
     @Test
     void delete_valid_softDeletesModel() {
+        activeModel.setSecurityRole(roleNamed(3L, "AP2_ADMIN"));
         when(appRoleRepository.findById(1L)).thenReturn(activeModel);
 
         appRoleServiceFacadeBean.delete(1L);
 
         assertNotNull(activeModel.getDeletedAt());
         verify(appRoleRepository).delete(activeModel);
+    }
+
+    private static Role roleNamed(Long id, String name) {
+        Role role = new Role();
+        role.setId(id);
+        role.setName(name);
+        return role;
+    }
+
+    // ------------------------------------------------------------------
+    // documentation permissions of the INVAI roles
+    // ------------------------------------------------------------------
+
+    @Test
+    void assign_roleNamedWithTheInvaiPrefix_givesItItsDefaultDocumentationPermissions() {
+        AppRole saved = new AppRole();
+        saved.setSecurityRole(roleNamed(30L, "INV_SISTEMES"));
+        when(appRoleRepository.create(any(AppRole.class))).thenReturn(saved);
+
+        appRoleServiceFacadeBean.assign(55L, soffidRole(5746L, "INV_SISTEMES", "domino-lweb2", "Rol"));
+
+        verify(documentRolePermissionService).assignDefaultPermissions(30L, "INV_SISTEMES");
+    }
+
+    @Test
+    void assign_roleNotNamedWithTheInvaiPrefix_getsNoPermissions() {
+        when(appRoleRepository.create(any(AppRole.class))).thenReturn(new AppRole());
+
+        appRoleServiceFacadeBean.assign(55L, soffidRole(1L, "AP2_ADMIN", "domino-lweb2", "Rol"));
+
+        verifyNoInteractions(documentRolePermissionService);
+    }
+
+    @Test
+    void assign_prefixIsCaseSensitive_lowercaseNameGetsNoPermissions() {
+        when(appRoleRepository.create(any(AppRole.class))).thenReturn(new AppRole());
+
+        appRoleServiceFacadeBean.assign(55L, soffidRole(2L, "inv_sistemes", "domino-lweb2", "Rol"));
+
+        verifyNoInteractions(documentRolePermissionService);
+    }
+
+    @Test
+    void create_invaiRole_givesItItsDefaultDocumentationPermissions() {
+        AppRole saved = new AppRole();
+        saved.setSecurityRole(roleNamed(30L, "INV_ADMIN"));
+        when(soffidClient.getRolesByIds(List.of(5745L))).thenReturn(List.of(soffidRole(5745L, "INV_ADMIN", "domino-lweb2", "Rol")));
+        when(appRoleRepository.create(any(AppRole.class))).thenReturn(saved);
+
+        appRoleServiceFacadeBean.create(new AppRoleInputDTO(5L, 5745L));
+
+        verify(documentRolePermissionService).assignDefaultPermissions(30L, "INV_ADMIN");
+    }
+
+    @Test
+    void delete_invaiPrefixedRole_removesItsDocumentationPermissions() {
+        activeModel.setSecurityRole(roleNamed(30L, "INV_SISTEMES"));
+        when(appRoleRepository.findById(1L)).thenReturn(activeModel);
+
+        appRoleServiceFacadeBean.delete(1L);
+
+        verify(documentRolePermissionService).removePermissions(30L);
+    }
+
+    @Test
+    void delete_roleNotNamedWithTheInvaiPrefix_doesNotTouchTheDocumentationPermissions() {
+        activeModel.setSecurityRole(roleNamed(30L, "AP2_ADMIN"));
+        when(appRoleRepository.findById(1L)).thenReturn(activeModel);
+
+        appRoleServiceFacadeBean.delete(1L);
+
+        verifyNoInteractions(documentRolePermissionService);
     }
 
     // ------------------------------------------------------------------
@@ -294,7 +441,7 @@ class AppRoleServiceFacadeBeanTest {
     /** The security anchor 55 already has active assignments to the given Soffid roles. */
     private void stubAssignedRoles(Long... soffidRoleIds) {
         List<AppRole> assigned = java.util.Arrays.stream(soffidRoleIds).map(id -> {
-            SecurityRole securityRole = new SecurityRole();
+            Role securityRole = new Role();
             securityRole.setRoleId(id);
             AppRole appRole = new AppRole();
             appRole.setSecurityRole(securityRole);
@@ -647,7 +794,7 @@ class AppRoleServiceFacadeBeanTest {
     // ------------------------------------------------------------------
 
     private static AppRole assignedRole(Long id, String roleName, ValidationStatusEnum status) {
-        SecurityRole securityRole = new SecurityRole();
+        Role securityRole = new Role();
         securityRole.setName(roleName);
         AppRole appRole = new AppRole();
         appRole.setId(id);

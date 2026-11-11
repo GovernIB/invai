@@ -6,7 +6,6 @@ import es.caib.invai.back.persistence.model.application.system_database.database
 import es.caib.invai.back.service.model.application.system_database.database.AppDatabase;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import es.caib.invai.back.service.mapper.application.core.ApplicationMapper;
 import es.caib.invai.back.service.mapper.catalog.status.StatusMapper;
 
@@ -61,22 +60,4 @@ public interface AppDatabaseMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
     AppDatabase toModelFromInput(AppDatabaseInputDTO inputDTO);
-
-    /**
-     * Integrates update parameters from flat payload tracking definitions directly over an active
-     * business entity, avoiding logical soft-delete and primary key attribute modifications.
-     *
-     * @param inputDTO delta parameter updates tracking values payload DTO
-     * @param model    the active operational business graph container targeted for modifier updates
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "informationSystemDb.id", source = "informationSystemDbId")
-    @Mapping(target = "database.id", source = "databaseId")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true)
-    @Mapping(target = "deletedAt", ignore = true)
-    @Mapping(target = "deletedBy", ignore = true)
-    void updateModelFromInput(AppDatabaseInputDTO inputDTO, @MappingTarget AppDatabase model);
 }

@@ -33,13 +33,12 @@ public class AppDocumentationAttachmentInputDTO {
     @Size(max = 250, message = "{" + Constants.VALIDATION_DOCUMENTATION_TITLE_SIZE + "}")
     private String title;
 
-    /** Identifier of the section of the application the document is filed under. */
-    @NotNull(message = "{" + Constants.VALIDATION_DOCUMENTATION_SECTION_REQUIRED + "}")
-    private Long sectionId;
-
-    /** Identifier of the most specific category: the subcategory if there is one, otherwise the category. */
+    /** Identifier of the category the document is filed under. */
     @NotNull(message = "{" + Constants.VALIDATION_DOCUMENTATION_CATEGORY_REQUIRED + "}")
     private Long categoryId;
+
+    /** Identifier of the subcategory of that category, optional. */
+    private Long subcategoryId;
 
     /** Identifier of the state of the document. */
     @NotNull(message = "{" + Constants.VALIDATION_DOCUMENTATION_STATUS_REQUIRED + "}")

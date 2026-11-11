@@ -15,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,8 +55,8 @@ public class DocumentCategoryRepositoryAdapter implements DocumentCategoryReposi
     }
 
     @Override
-    public Page<DocumentCategory> findAll(DocumentCategoryCriteria filter, Pageable pageable) {
-        Specification<DocumentCategoryEntity> spec = DocumentCategorySpecification.filterByCriteria(filter);
+    public Page<DocumentCategory> findAll(DocumentCategoryCriteria filter, Collection<Long> allowedCategoryIds, Pageable pageable) {
+        Specification<DocumentCategoryEntity> spec = DocumentCategorySpecification.filterByCriteria(filter, allowedCategoryIds);
         Page<DocumentCategory> page = documentCategoryJPARepository.findAll(spec, pageable).map(documentCategoryMapper::toModel);
         attachSubcategories(page.getContent(), filter);
         return page;
@@ -88,6 +89,13 @@ public class DocumentCategoryRepositoryAdapter implements DocumentCategoryReposi
     @Override
     public boolean hasActiveSubcategories(Long categoryId) {
         return documentCategoryJPARepository.existsByParentIdAndDeletedAtIsNull(categoryId);
+    }
+
+    @Override
+    public List<Long> findActiveCategoryIds() {
+        return documentCategoryJPARepository.findAllByParentIsNullAndDeletedAtIsNull().stream()
+                .map(DocumentCategoryEntity::getId)
+                .toList();
     }
 
     @Override

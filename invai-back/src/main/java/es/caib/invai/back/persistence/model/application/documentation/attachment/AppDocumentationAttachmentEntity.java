@@ -2,7 +2,6 @@ package es.caib.invai.back.persistence.model.application.documentation.attachmen
 
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
 import es.caib.invai.back.persistence.model.catalog.documentStatus.LkupDocumentStatusEntity;
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import jakarta.persistence.Column;
@@ -52,15 +51,15 @@ public class AppDocumentationAttachmentEntity extends BaseEntity {
     @Column(name = "TITLE", nullable = false, length = 250)
     private String title;
 
-    /** Section of the application the document is filed under. */
+    /** Category the document is filed under; the role permissions are set on it. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SECTION_ID", nullable = false)
-    private LkupAppSectionEntity section;
+    @JoinColumn(name = "CATEGORY_ID", nullable = false)
+    private DocumentCategoryEntity category;
 
-    /** Most specific category of the document: a subcategory if it has one, otherwise a category. */
+    /** Subcategory of the document, or {@code null} if it only has a category. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DOCUMENT_CATEGORY_ID", nullable = false)
-    private DocumentCategoryEntity documentCategory;
+    @JoinColumn(name = "SUBCATEGORY_ID")
+    private DocumentCategoryEntity subcategory;
 
     /** Current state of the document. */
     @ManyToOne(fetch = FetchType.LAZY)

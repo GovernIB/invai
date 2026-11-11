@@ -3,7 +3,6 @@ package es.caib.invai.back.persistence.repository.application.documentation.atta
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentAudEntity;
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
 import es.caib.invai.back.persistence.model.catalog.documentStatus.LkupDocumentStatusEntity;
 import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationAttachmentMapper;
@@ -20,11 +19,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
  * Infrastructure repository adapter implementing the outbound port {@link AppDocumentationAttachmentRepository}.
- * The related records (application, section, category and state) are linked through references
+ * The related records (application, category, subcategory and state) are linked through references
  * built from their identifiers, so everything that is read back afterwards is the stored data.
  *
  * @since 1.0.6
@@ -55,8 +55,8 @@ public class AppDocumentationAttachmentRepositoryAdapter implements AppDocumenta
     }
 
     @Override
-    public Page<AppDocumentationAttachment> findAll(AppDocumentationAttachmentCriteria filter, Pageable pageable) {
-        Specification<AppDocumentationAttachmentEntity> spec = AppDocumentationAttachmentSpecification.filterByCriteria(filter, pageable.getSort());
+    public Page<AppDocumentationAttachment> findAll(AppDocumentationAttachmentCriteria filter, Collection<Long> allowedCategoryIds, Pageable pageable) {
+        Specification<AppDocumentationAttachmentEntity> spec = AppDocumentationAttachmentSpecification.filterByCriteria(filter, allowedCategoryIds, pageable.getSort());
         Pageable unsorted = pageable.isPaged() ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()) : Pageable.unpaged();
         return appDocumentationAttachmentJPARepository.findAll(spec, unsorted).map(appDocumentationAttachmentMapper::toModel);
     }
@@ -89,8 +89,8 @@ public class AppDocumentationAttachmentRepositoryAdapter implements AppDocumenta
     }
 
     /**
-     * Converts the document into its entity and links it to the application, section, category
-     * and state it points to, through references that hold only their identifiers.
+     * Converts the document into its entity and links it to the application, category,
+     * subcategory and state it points to, through references that hold only their identifiers.
      *
      * @param appDocumentationAttachment the document to convert
      * @return the entity ready to be saved
@@ -98,8 +98,9 @@ public class AppDocumentationAttachmentRepositoryAdapter implements AppDocumenta
     private AppDocumentationAttachmentEntity toEntityWithReferences(AppDocumentationAttachment appDocumentationAttachment) {
         AppDocumentationAttachmentEntity entity = appDocumentationAttachmentMapper.toEntity(appDocumentationAttachment);
         entity.setApplication(entityManager.getReference(ApplicationEntity.class, appDocumentationAttachment.getApplicationId()));
-        entity.setSection(entityManager.getReference(LkupAppSectionEntity.class, appDocumentationAttachment.getSection().getId()));
-        entity.setDocumentCategory(entityManager.getReference(DocumentCategoryEntity.class, appDocumentationAttachment.getDocumentCategory().getId()));
+        entity.setCategory(entityManager.getReference(DocumentCategoryEntity.class, appDocumentationAttachment.getCategory().getId()));
+        entity.setSubcategory(Objects.isNull(appDocumentationAttachment.getSubcategory()) ? null
+                : entityManager.getReference(DocumentCategoryEntity.class, appDocumentationAttachment.getSubcategory().getId()));
         entity.setStatus(entityManager.getReference(LkupDocumentStatusEntity.class, appDocumentationAttachment.getStatus().getId()));
         return entity;
     }
@@ -115,8 +116,8 @@ public class AppDocumentationAttachmentRepositoryAdapter implements AppDocumenta
         aud.setAppDocumentationAttachmentId(entity.getId());
         aud.setApplicationId(entity.getApplication().getId());
         aud.setTitle(entity.getTitle());
-        aud.setSectionId(entity.getSection().getId());
-        aud.setDocumentCategoryId(entity.getDocumentCategory().getId());
+        aud.setCategoryId(entity.getCategory().getId());
+        aud.setSubcategoryId(Objects.isNull(entity.getSubcategory()) ? null : entity.getSubcategory().getId());
         aud.setStatusId(entity.getStatus().getId());
         aud.setCreatedAt(Objects.nonNull(entity.getCreatedAt()) ? entity.getCreatedAt() : LocalDateTime.now());
         aud.setCreatedBy(Objects.nonNull(entity.getCreatedBy()) ? entity.getCreatedBy() : Utils.resolveCurrentUsername());

@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.security.role.DTO.AppRoleInputDTO;
 import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.security.role.AppRoleCriteria;
 import es.caib.invai.back.service.facade.application.security.role.AppRoleService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/security/role")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SECURITY)
 public class AppRoleController {
 
     /** Service facade handling business operations for application-role assignments. */

@@ -1,7 +1,10 @@
 package es.caib.invai.back.interna.auth;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.auth.DTO.UserAuthDTO;
+import es.caib.invai.back.interna.auth.DTO.UserPermissionsDTO;
+import es.caib.invai.back.utils.Constants;
+import es.caib.invai.back.utils.SecurityUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +54,22 @@ public class AuthController {
         userAuth.setAuthenticated(true);
         userAuth.setUsername(principal.getName());
         userAuth.setFullName(((DefaultOidcUser) ((OAuth2AuthenticationToken) principal).getPrincipal()).getFullName());
+        userAuth.setPermissions(buildPermissions());
         return ResponseEntity.ok(userAuth);
+    }
+
+    /**
+     * Builds the areas of the application the logged-in user can use.
+     *
+     * @return the permissions of the user
+     */
+    private UserPermissionsDTO buildPermissions() {
+        return new UserPermissionsDTO(SecurityUtils.hasAccess(Constants.PRE_AUTH_SYSTEMS), SecurityUtils.hasAccess(Constants.PRE_AUTH_DEVELOPMENT),
+                SecurityUtils.hasAccess(Constants.PRE_AUTH_SECURITY), SecurityUtils.hasAccess(Constants.PRE_AUTH_DATA),
+                SecurityUtils.hasAccess(Constants.PRE_AUTH_ACCESSIBILITY), SecurityUtils.hasAccess(Constants.PRE_AUTH_INTEGRATION),
+                SecurityUtils.hasAccess(Constants.PRE_AUTH_ANY_ROLE), SecurityUtils.hasAccess(Constants.PRE_AUTH_ANY_ROLE),
+                SecurityUtils.hasAccess(Constants.PRE_AUTH_RESPONSIBLE_READ), SecurityUtils.hasAccess(Constants.PRE_AUTH_RESPONSIBLE_WRITE),
+                SecurityUtils.hasAccess(Constants.PRE_AUTH_SUPER));
     }
 
     /**

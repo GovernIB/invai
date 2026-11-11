@@ -65,18 +65,6 @@ class AppDatabaseControllerTest {
     }
 
     @Test
-    void update_returnsOkWithServiceResult() {
-        AppDatabaseInputDTO inputDTO = new AppDatabaseInputDTO(5L, 7L);
-        AppDatabaseOutputDTO dto = new AppDatabaseOutputDTO();
-        when(appDatabaseService.update(1L, inputDTO)).thenReturn(dto);
-
-        ResponseEntity<AppDatabaseOutputDTO> response = appDatabaseController.update(1L, inputDTO);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertSame(dto, response.getBody());
-    }
-
-    @Test
     void delete_returnsNoContentAndDelegatesToService() {
         ResponseEntity<Void> response = appDatabaseController.delete(1L);
 

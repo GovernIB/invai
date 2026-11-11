@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.system_database.database.DTO.AppDa
 import es.caib.invai.back.interna.application.system_database.database.DTO.AppDatabaseOutputDTO;
 import es.caib.invai.back.persistence.repository.application.system_database.database.AppDatabaseCriteria;
 import es.caib.invai.back.service.facade.application.system_database.database.AppDatabaseService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/database")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SYSTEMS)
 public class AppDatabaseController {
 
     /** Service facade handling business operations for application-database links. */
@@ -67,21 +68,6 @@ public class AppDatabaseController {
         log.info("REST: Processing persistence request for new structural application database relation");
         AppDatabaseOutputDTO completedPayload = appDatabaseService.create(inputDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(completedPayload);
-    }
-
-    /**
-     * Updates an active relational registry with modified enterprise metadata parameters.
-     *
-     * @param id primary corporate tracking reference key
-     * @param inputDTO mutated parameter dataset structures
-     * @return updated transfer data mapping payload state
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<AppDatabaseOutputDTO> update(
-            @PathVariable Long id,
-            @Valid @RequestBody AppDatabaseInputDTO inputDTO) {
-        log.info("REST: Merging mutation parameters for tracking relation reference target identity: {}", id);
-        return ResponseEntity.ok(appDatabaseService.update(id, inputDTO));
     }
 
     /**

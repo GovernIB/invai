@@ -50,6 +50,18 @@ public interface DocumentCategoryMapper {
     DocumentCategoryOutputDTO toResponse(DocumentCategory model);
 
     /**
+     * Converts a category or subcategory into its response DTO leaving out the subcategories and
+     * the deletion timestamp, which the documents and links that point to it never show.
+     *
+     * @param model the category or subcategory to convert
+     * @return the converted response DTO
+     */
+    @Named("toSummaryResponse")
+    @Mapping(target = "subcategories", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    DocumentCategoryOutputDTO toSummaryResponse(DocumentCategory model);
+
+    /**
      * Converts an inbound input DTO into a new domain model, leaving audit fields unset.
      *
      * @param inputDTO the input DTO to convert

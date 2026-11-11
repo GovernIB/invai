@@ -35,15 +35,6 @@ public interface AppSystemService {
     AppSystemOutputDTO create(AppSystemInputDTO inputDTO);
 
     /**
-     * Alters active configuration profiles mapping properties corresponding to target database references.
-     *
-     * @param id       targeted structural identifier element index
-     * @param inputDTO property data variables mapping structural items to be merged
-     * @return current modified configuration state properties details wrapper
-     */
-    AppSystemOutputDTO update(Long id, AppSystemInputDTO inputDTO);
-
-    /**
      * Routes explicit request signals targeting domain deactivation soft deletion routines.
      *
      * @param id persistent tracking row database reference index targeting removal execution paths

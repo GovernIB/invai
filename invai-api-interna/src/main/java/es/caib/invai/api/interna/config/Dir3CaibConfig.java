@@ -1,6 +1,7 @@
 package es.caib.invai.api.interna.config;
 
 import io.netty.channel.ChannelOption;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,8 @@ import java.time.Duration;
 
 /**
  * Configures the {@link WebClient} bean used to call the external DIR3CAIB service (the CAIB's
- * implementation of Spain's Directorio Común, a catalog of administrative organizational units).
+ * implementation of Spain's Directorio Común, a catalog of administrative organizational units), and
+ * holds the endpoint path of its tree of units.
  *
  * @since 1.0.5
  */
@@ -27,6 +29,15 @@ public class Dir3CaibConfig {
      */
     @Value("${es.caib.invai.dir3caib.base-url}")
     private String dir3CaibBaseUrl;
+
+    /**
+     * Path of the endpoint that returns the tree of organizational units under a root unit, relative
+     * to {@link #dir3CaibBaseUrl}. Exposed via a generated getter so {@code Dir3CaibClient} builds
+     * its request URI from configuration rather than from a hardcoded constant.
+     */
+    @Getter
+    @Value("${es.caib.invai.dir3caib.tree-path}")
+    private String treePath;
 
     /** Application username used to authenticate against DIR3CAIB via HTTP Basic Auth. */
     @Value("${es.caib.invai.dir3caib.username}")

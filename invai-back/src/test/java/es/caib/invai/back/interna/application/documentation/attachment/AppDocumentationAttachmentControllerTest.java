@@ -81,7 +81,7 @@ class AppDocumentationAttachmentControllerTest {
 
     @Test
     void create_returnsCreatedWithServiceResult() {
-        AppDocumentationAttachmentInputDTO inputDTO = new AppDocumentationAttachmentInputDTO(3L, "Title", 7L, 5L, 9L, "1.0", null, null);
+        AppDocumentationAttachmentInputDTO inputDTO = new AppDocumentationAttachmentInputDTO(3L, "Title", 5L, 7L, 9L, "1.0", null, null);
         MockMultipartFile file = new MockMultipartFile("file", "a.pdf", "application/pdf", CONTENT);
         AppDocumentationAttachmentOutputDTO dto = new AppDocumentationAttachmentOutputDTO();
         when(appDocumentationAttachmentService.create(inputDTO, file)).thenReturn(dto);
@@ -107,7 +107,7 @@ class AppDocumentationAttachmentControllerTest {
 
     @Test
     void update_returnsOkWithServiceResult() {
-        AppDocumentationAttachmentUpdateInputDTO inputDTO = new AppDocumentationAttachmentUpdateInputDTO("Title", 7L, 5L, 9L);
+        AppDocumentationAttachmentUpdateInputDTO inputDTO = new AppDocumentationAttachmentUpdateInputDTO("Title", 5L, 7L, 9L);
         AppDocumentationAttachmentOutputDTO dto = new AppDocumentationAttachmentOutputDTO();
         when(appDocumentationAttachmentService.update(10L, inputDTO)).thenReturn(dto);
 

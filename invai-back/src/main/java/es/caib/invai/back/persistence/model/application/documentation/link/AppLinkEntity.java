@@ -2,7 +2,7 @@ package es.caib.invai.back.persistence.model.application.documentation.link;
 
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.application.core.ApplicationEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
+import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -53,10 +53,10 @@ public class AppLinkEntity extends BaseEntity {
     @Column(name = "DESCRIPTION", length = 1000)
     private String description;
 
-    /** Section of the application the link belongs to. */
+    /** Category the link is filed under; the role permissions are set on it. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SECTION_ID", nullable = false)
-    private LkupAppSectionEntity section;
+    @JoinColumn(name = "CATEGORY_ID", nullable = false)
+    private DocumentCategoryEntity category;
 
     /** Address the link points to. */
     @Column(name = "URL", nullable = false, length = 500)

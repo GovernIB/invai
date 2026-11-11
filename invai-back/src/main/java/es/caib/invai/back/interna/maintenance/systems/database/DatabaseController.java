@@ -5,6 +5,7 @@ import es.caib.invai.back.persistence.repository.maintenance.systems.database.Da
 import es.caib.invai.back.service.facade.maintenance.systems.database.DatabaseService;
 import es.caib.invai.back.interna.maintenance.systems.database.DTO.DatabaseInputDTO;
 import es.caib.invai.back.interna.maintenance.systems.database.DTO.DatabaseOutputDTO;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,11 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Database profiles metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.2
@@ -29,7 +34,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("database")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class DatabaseController {
 
     /** Service facade handling business use cases for Database maintenance. */
@@ -85,6 +90,7 @@ public class DatabaseController {
      * @param inputDTO properties dataset containing database configurations, variables, parameters data profiles
      * @return a {@link ResponseEntity} wrapping the created snapshot parameters state with an HTTP 201 Created response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<DatabaseOutputDTO> create(@Valid @RequestBody DatabaseInputDTO inputDTO) {
         log.info("REST: Request to create new database");
@@ -99,6 +105,7 @@ public class DatabaseController {
      * @param inputDTO property data variables mapping structural items
      * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<DatabaseOutputDTO> update(@PathVariable Long id, @Valid @RequestBody DatabaseInputDTO inputDTO) {
         log.info("REST: Request to update database ID: {}", id);
@@ -111,6 +118,7 @@ public class DatabaseController {
      * @param id persistent tracking row database reference index targeting removal execution paths
      * @return a {@link ResponseEntity} providing an empty success feedback with an HTTP 204 No Content response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("REST: Request to logical delete database ID: {}", id);
@@ -132,6 +140,7 @@ public class DatabaseController {
      *         properties details (as an {@link DatabaseOutputDTO}) with an HTTP 200 OK status
      * @throws es.caib.invai.back.exception.BusinessRuleException if no database exists with the provided structural identifier
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<DatabaseOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to reactivate database ID: {}", id);

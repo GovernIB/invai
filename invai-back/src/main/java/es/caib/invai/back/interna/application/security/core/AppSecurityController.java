@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.application.security.core.DTO.AppSecurityInputDTO;
 import es.caib.invai.back.interna.application.security.core.DTO.AppSecurityOutputDTO;
 import es.caib.invai.back.service.facade.application.security.core.AppSecurityService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/security")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SECURITY)
 public class AppSecurityController {
 
     /** Service facade handling business operations for security anchors. */

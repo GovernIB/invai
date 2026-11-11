@@ -88,7 +88,7 @@ public interface ApplicationService {
      * with the application's prefix followed by an underscore (case-sensitive, so prefix {@code AP2}
      * matches {@code AP2_ADMIN} but not {@code ap2_admin} nor {@code XAP2_ADMIN}). Each is assigned
      * to the application's security anchor, and its data - as Soffid reports it now - is stored in
-     * {@code INV_SECURITY_ROLE}. It is idempotent: a role the application already has an active
+     * {@code INV_ROLE}. It is idempotent: a role the application already has an active
      * assignment to (matched by its Soffid id) is skipped, so calling it again only adds the roles
      * Soffid has gained since. Roles are never removed. A Soffid failure is not swallowed: it
      * propagates and nothing is assigned.

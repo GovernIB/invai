@@ -1,6 +1,6 @@
 package es.caib.invai.back.interna.application.development.provider.DTO;
 
-import es.caib.invai.back.interna.maintenance.development.role.DTO.RoleOutputDTO;
+import es.caib.invai.back.interna.maintenance.development.providerRole.DTO.ProviderRoleOutputDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class AppProviderOutputDTO {
     /** Name of the provider company. */
     private String companyName;
     /** Role held by the provider on this development. */
-    private RoleOutputDTO role;
+    private ProviderRoleOutputDTO role;
     /** Date the provider's engagement started. */
     private LocalDateTime startDate;
     /** Date the provider's engagement expires, or {@code null} if open-ended. */

@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.system_database.system.DTO.AppSyst
 import es.caib.invai.back.interna.application.system_database.system.DTO.AppSystemOutputDTO;
 import es.caib.invai.back.persistence.repository.application.system_database.system.AppSystemCriteria;
 import es.caib.invai.back.service.facade.application.system_database.system.AppSystemService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,7 +22,7 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Application to System assignment profiles.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Access is restricted at the type level to corporate users holding the {@code INV_SISTEMES} or {@code INV_SUPER} role.
  * </p>
  *
  * @since 1.0.2
@@ -32,7 +33,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/system")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SYSTEMS)
 public class AppSystemController {
 
     /** Service facade handling business operations for application-system links. */
@@ -71,19 +72,6 @@ public class AppSystemController {
         log.info("REST: Request to create new application-system link assignment");
         AppSystemOutputDTO created = appSystemService.create(inputDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
-
-    /**
-     * Alters active configuration profiles mapping properties corresponding to target database references.
-     *
-     * @param id       targeted structural identifier element index
-     * @param inputDTO property data variables mapping structural items
-     * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<AppSystemOutputDTO> update(@PathVariable Long id, @Valid @RequestBody AppSystemInputDTO inputDTO) {
-        log.info("REST: Request to update application-system link ID: {}", id);
-        return ResponseEntity.ok(appSystemService.update(id, inputDTO));
     }
 
     /**

@@ -26,4 +26,7 @@ public class UserAuthDTO {
     /** The unique corporate directory username credential principal login identifier of the logged-in user. */
     private String username;
     private String fullName;
+
+    /** Areas of the application the user can use, according to their roles. */
+    private UserPermissionsDTO permissions;
 }

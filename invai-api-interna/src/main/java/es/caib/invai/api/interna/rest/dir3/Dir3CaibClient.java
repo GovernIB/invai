@@ -1,5 +1,6 @@
 package es.caib.invai.api.interna.rest.dir3;
 
+import es.caib.invai.api.interna.config.Dir3CaibConfig;
 import es.caib.invai.api.interna.controller.dir3.Dir3CaibController;
 import es.caib.invai.api.interna.exception.IntegrationUnavailableException;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +31,14 @@ import java.util.Objects;
 @Slf4j
 public class Dir3CaibClient {
 
-    /** Pre-configured DIR3CAIB {@link WebClient}, see {@link es.caib.invai.api.interna.config.Dir3CaibConfig}. */
+    /** Pre-configured DIR3CAIB {@link WebClient}, see {@link Dir3CaibConfig}. */
     @Autowired
     @Qualifier("dir3CaibWebClient")
     private WebClient dir3CaibWebClient;
+
+    /** Holds the configured endpoint path, retrieved via {@link Dir3CaibConfig#getTreePath()}. */
+    @Autowired
+    private Dir3CaibConfig dir3CaibConfig;
 
     /**
      * Fetches the full, flattened tree of organizational units under the given root code.
@@ -46,7 +51,7 @@ public class Dir3CaibClient {
         log.debug("Fetching DIR3CAIB organizational unit tree rooted at: {}", rootCode);
         try {
             ResponseEntity<List<UnidadRest>> response = dir3CaibWebClient.get()
-                    .uri(uriBuilder -> uriBuilder.path("/rest/unidades/obtenerArbolUnidades")
+                    .uri(uriBuilder -> uriBuilder.path(dir3CaibConfig.getTreePath())
                             .queryParam("codigo", rootCode)
                             .queryParam("denominacionCooficial", coOfficial)
                             .build())

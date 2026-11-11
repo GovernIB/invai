@@ -42,13 +42,13 @@ public class AppDocumentationAttachmentAudEntity {
     @Column(name = "TITLE", nullable = false, length = 250)
     private String title;
 
-    /** Identifier of the section captured at the time of the change. */
-    @Column(name = "SECTION_ID", nullable = false)
-    private Long sectionId;
-
     /** Identifier of the category captured at the time of the change. */
-    @Column(name = "DOCUMENT_CATEGORY_ID", nullable = false)
-    private Long documentCategoryId;
+    @Column(name = "CATEGORY_ID", nullable = false)
+    private Long categoryId;
+
+    /** Identifier of the subcategory captured at the time of the change, or {@code null} if it had none. */
+    @Column(name = "SUBCATEGORY_ID")
+    private Long subcategoryId;
 
     /** Identifier of the status captured at the time of the change. */
     @Column(name = "STATUS_ID", nullable = false)

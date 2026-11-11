@@ -1,6 +1,6 @@
 package es.caib.invai.back.service.model.application.documentation.link;
 
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
+import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,8 +27,8 @@ public class AppLink {
     /** Optional description of the link. */
     private String description;
 
-    /** Section of the application the link belongs to. */
-    private AppSection section;
+    /** Category the link is filed under. */
+    private DocumentCategory category;
 
     /** Address the link points to. */
     private String url;

@@ -8,6 +8,7 @@ import es.caib.invai.back.interna.application.core.DTO.ApplicationDetailOutputDT
 import es.caib.invai.back.interna.application.core.DTO.ApplicationOutputDTO;
 import es.caib.invai.back.interna.application.security.role.DTO.AppRoleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.core.ApplicationCriteria;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,7 +27,8 @@ import java.util.List;
  * root inventory record each of the Development, Accessibility, Security, System/Database, and
  * Responsible/Authorized tabs hangs off of.
  * <p>
- * Every endpoint requires the {@code ROLE_INV_SUPER} role.
+ * Every endpoint requires the {@code INV_SUPER} role, except the list and the detail (any of the
+ * application's roles) and the assignment of the Soffid roles ({@code INV_SEGURETAT} or {@code INV_SUPER}).
  * </p>
  *
  * @since 1.0.1
@@ -35,7 +37,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("application")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SUPER)
 public class ApplicationController {
 
     /** Facade implementing the Application use cases invoked by this controller. */
@@ -59,6 +61,7 @@ public class ApplicationController {
      * @param pageable pagination and sorting parameters (defaults to size 10 sorted ascending by ID)
      * @return a {@link ResponseEntity} wrapping a page of mapped {@link ApplicationOutputDTO} results
      */
+    @PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
     @GetMapping
     public ResponseEntity<Page<ApplicationOutputDTO>> getAll(
             ApplicationCriteria criteria,
@@ -78,6 +81,7 @@ public class ApplicationController {
      * @return a {@link ResponseEntity} wrapping the mapped {@link ApplicationDetailOutputDTO}, HTTP 200
      * @throws BusinessRuleException if no application exists with the given ID
      */
+    @PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
     @GetMapping("/{id}")
     public ResponseEntity<ApplicationDetailOutputDTO> getById(@PathVariable Long id) {
         log.debug("REST: Fetching application by ID: {}", id);
@@ -160,6 +164,7 @@ public class ApplicationController {
      *                               has no security anchor, or Soffid can't be queried (HTTP 400; a
      *                               Soffid timeout is reported as HTTP 504)
      */
+    @PreAuthorize(Constants.PRE_AUTH_SECURITY)
     @PutMapping("assign-roles/{id}")
     public ResponseEntity<List<AppRoleOutputDTO>> assignSoffidRoles(@PathVariable Long id) {
         log.info("REST: Request to assign the Soffid roles named after the prefix of application ID: {}", id);

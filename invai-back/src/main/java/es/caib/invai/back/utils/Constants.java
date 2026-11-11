@@ -26,6 +26,59 @@ public interface Constants {
      */
     int APPLICATION_CODE_MAX_LENGTH = 10;
 
+    // =========================================================================
+    // ROLES AND METHOD SECURITY
+    // =========================================================================
+
+    /** Role of every user of the application: list and detail of applications, documentation and the DIR3 consultation. */
+    String ROLE_USER = "INV_USER";
+
+    /** Role of the systems team: systems and databases tab and its maintenances; also writes the responsibles tab. */
+    String ROLE_SISTEMES = "INV_SISTEMES";
+
+    /** Role of the development team: development tab and its maintenances. */
+    String ROLE_DESENVO = "INV_DESENVO";
+
+    /** Role of the security team: security tab and its maintenances; also writes the responsibles tab. */
+    String ROLE_SEGURETAT = "INV_SEGURETAT";
+
+    /** Role of the data team: open data and reuse tab. */
+    String ROLE_DADES = "INV_DADES";
+
+    /** Role of the integrations: the integration tab and its maintenance (plus what every role can use). */
+    String ROLE_WS = "INV_WS";
+
+    /** Role of the accessibility team: accessibility tab and its maintenances. */
+    String ROLE_ACCESIBILITAT = "INV_ACCESIBILITAT";
+
+    /** Role with access to everything. */
+    String ROLE_SUPER = "INV_SUPER";
+
+    /** Every role of the application; a user with none of them can't use it. */
+    String[] ALL_ROLES = {ROLE_USER, ROLE_SISTEMES, ROLE_DESENVO, ROLE_SEGURETAT, ROLE_DADES, ROLE_WS, ROLE_ACCESIBILITAT, ROLE_SUPER};
+
+    /**
+     * Method security expressions, one per group of roles. {@code INV_SUPER} is in every group.
+     * The controllers use them in {@code @PreAuthorize} and {@code AuthController} evaluates them to
+     * tell the front which areas the user can use, so both always agree.
+     */
+    String PRE_AUTH_SUPER = "hasRole('" + ROLE_SUPER + "')";
+    String PRE_AUTH_ANY_ROLE = "hasAnyRole('" + ROLE_USER + "','" + ROLE_SISTEMES + "','" + ROLE_DESENVO + "','" + ROLE_SEGURETAT
+            + "','" + ROLE_DADES + "','" + ROLE_WS + "','" + ROLE_ACCESIBILITAT + "','" + ROLE_SUPER + "')";
+    String PRE_AUTH_SYSTEMS = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_SISTEMES + "')";
+    String PRE_AUTH_INTEGRATION = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_WS + "')";
+    String PRE_AUTH_DEVELOPMENT = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_DESENVO + "')";
+    String PRE_AUTH_SECURITY = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_SEGURETAT + "')";
+    String PRE_AUTH_DATA = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_DADES + "')";
+    String PRE_AUTH_ACCESSIBILITY = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_ACCESIBILITAT + "')";
+
+    /** Responsibles tab (and the DIR3 manual validation): who can change it. */
+    String PRE_AUTH_RESPONSIBLE_WRITE = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_SEGURETAT + "','" + ROLE_SISTEMES + "')";
+
+    /** Responsibles tab: who can read it; neither {@code INV_USER} nor {@code INV_WS} can. */
+    String PRE_AUTH_RESPONSIBLE_READ = "hasAnyRole('" + ROLE_SUPER + "','" + ROLE_SISTEMES + "','" + ROLE_DESENVO + "','" + ROLE_SEGURETAT
+            + "','" + ROLE_DADES + "','" + ROLE_ACCESIBILITAT + "')";
+
     /**
      * Fallback literal name string assigned to system-driven historical lifecycle audit events.
      */
@@ -63,6 +116,9 @@ public interface Constants {
     /** Generic client-facing message for any otherwise-unhandled server-side exception. */
     String ERR_UNEXPECTED_GENERIC = "exception.unexpected.generic";
 
+    /** Client-facing message for a request the logged user has no permission to do. */
+    String ERR_ACCESS_DENIED = "exception.access.denied";
+
     /** Client-facing message for a request whose route/path matches no controller or static resource. */
     String ERR_RESOURCE_NOT_FOUND = "exception.resource.notfound";
 
@@ -74,6 +130,9 @@ public interface Constants {
 
     /** Client-facing message for a request body that could not be parsed (malformed JSON, wrong type, etc). */
     String ERR_MALFORMED_REQUEST_BODY = "exception.request.malformedbody";
+
+    /** Client-facing message for a request whose Content-Type the resource does not accept (e.g. an upload that is not multipart/form-data). */
+    String ERR_UNSUPPORTED_MEDIA_TYPE = "exception.request.unsupportedmediatype";
 
     // --- 2. CATEGORY VALIDATIONS ---
     String VALIDATION_CATEGORY_NAME_ES_REQUIRED = "validation.category.nameEs.required";
@@ -261,10 +320,12 @@ public interface Constants {
     String VALIDATION_DOCUMENTCATEGORY_NAME_SIZE = "validation.documentcategory.name.size";
     String VALIDATION_DOCUMENTCATEGORY_NAME_ES_REQUIRED = "validation.documentcategory.nameEs.required";
     String VALIDATION_DOCUMENTCATEGORY_NAME_ES_SIZE = "validation.documentcategory.nameEs.size";
+    String VALIDATION_DOCROLEPERM_ITEMS = "validation.documentrolepermission.items";
+    String VALIDATION_DOCROLEPERM_ROLE_ID_REQUIRED = "validation.documentrolepermission.roleId.required";
+    String VALIDATION_DOCROLEPERM_PERMISSION_REQUIRED = "validation.documentrolepermission.permission.required";
     String VALIDATION_DOCUMENTATION_APPLICATION_REQUIRED = "validation.documentation.application.required";
     String VALIDATION_DOCUMENTATION_TITLE_REQUIRED = "validation.documentation.title.required";
     String VALIDATION_DOCUMENTATION_TITLE_SIZE = "validation.documentation.title.size";
-    String VALIDATION_DOCUMENTATION_SECTION_REQUIRED = "validation.documentation.section.required";
     String VALIDATION_DOCUMENTATION_CATEGORY_REQUIRED = "validation.documentation.category.required";
     String VALIDATION_DOCUMENTATION_STATUS_REQUIRED = "validation.documentation.status.required";
     String VALIDATION_DOCUMENTATION_ATTACHMENT_VERSION_LABEL_REQUIRED = "validation.documentation.attachment.versionLabel.required";
@@ -278,10 +339,21 @@ public interface Constants {
     String VALIDATION_LINK_TITLE_REQUIRED = "validation.link.title.required";
     String VALIDATION_LINK_TITLE_SIZE = "validation.link.title.size";
     String VALIDATION_LINK_DESCRIPTION_SIZE = "validation.link.description.size";
-    String VALIDATION_LINK_SECTION_REQUIRED = "validation.link.section.required";
+    String VALIDATION_LINK_CATEGORY_REQUIRED = "validation.link.category.required";
     String VALIDATION_LINK_URL_REQUIRED = "validation.link.url.required";
     String VALIDATION_LINK_URL_SIZE = "validation.link.url.size";
     String VALIDATION_LINK_URL_INVALID = "validation.link.url.invalid";
+    String VALIDATION_EMAIL_APPLICATION_REQUIRED = "validation.email.application.required";
+    String VALIDATION_EMAIL_RECIPIENTS_REQUIRED = "validation.email.recipients.required";
+    String VALIDATION_EMAIL_RECIPIENTS_SIZE = "validation.email.recipients.size";
+    String VALIDATION_EMAIL_RECIPIENT_INVALID = "validation.email.recipient.invalid";
+    String VALIDATION_EMAIL_RECIPIENT_SIZE = "validation.email.recipient.size";
+    String VALIDATION_EMAIL_SUBJECT_REQUIRED = "validation.email.subject.required";
+    String VALIDATION_EMAIL_SUBJECT_SIZE = "validation.email.subject.size";
+    String VALIDATION_EMAIL_SUBJECT_INVALID = "validation.email.subject.invalid";
+    String VALIDATION_EMAIL_MESSAGE_SIZE = "validation.email.message.size";
+    String VALIDATION_EMAIL_DOCUMENT_REQUIRED = "validation.email.document.required";
+    String VALIDATION_EMAIL_VERSION_REQUIRED = "validation.email.version.required";
 
     // =========================================================================
     // EXCEPTION TRANSLATION BUNDLE KEYS (Business Rules Exceptions)
@@ -362,7 +434,6 @@ public interface Constants {
 
     // --- APPLICATION SYSTEM LINK ERRORS ---
     String ERR_APPLICATIONSYSTEM_LINK_DUPLICATED = "exception.applicationsystem.duplicated";
-    String ERR_APPLICATIONSYSTEM_LINK_OWNED_BY_OTHER = "exception.applicationsystem.owned";
     String ERR_APPLICATIONSYSTEM_NOT_ACTIVE = "exception.applicationsystem.notactive";
     String ERR_APPLICATIONSYSTEM_NOT_FOUND = "exception.applicationsystem.notfound";
 
@@ -404,6 +475,7 @@ public interface Constants {
     // --- APPLICATION SECURITY ROLE ERRORS ---
     String ERR_APP_ROLE_NOT_ACTIVE = "exception.approle.notactive";
     String ERR_APP_ROLE_NOT_FOUND = "exception.approle.notfound";
+    String ERR_APP_ROLE_DUPLICATED = "exception.approle.duplicated";
     String ERR_APP_ROLE_MANUAL_VALIDATION_NOT_ALLOWED = "exception.approle.manualvalidationnotallowed";
 
     // --- APPLICATION SECURITY WEB CONTEXT ERRORS ---
@@ -486,19 +558,38 @@ public interface Constants {
     String ERR_DOCUMENTCATEGORY_HAS_ACTIVE_SUBCATEGORIES = "exception.documentcategory.hasactivesubcategories";
     String ERR_DOCUMENTCATEGORY_NAME_ES_DUPLICATED = "exception.documentcategory.nameesduplicated";
     String ERR_DOCUMENTCATEGORY_NOT_ACTIVE = "exception.documentcategory.notactive";
+    String ERR_DOCUMENTCATEGORY_NOT_CATEGORY = "exception.documentcategory.notcategory";
     String ERR_DOCUMENTCATEGORY_NOT_FOUND = "exception.documentcategory.notfound";
     String ERR_DOCUMENTCATEGORY_PARENT_NOT_ACTIVE = "exception.documentcategory.parentnotactive";
     String ERR_DOCUMENTCATEGORY_PARENT_NOT_CATEGORY = "exception.documentcategory.parentnotcategory";
     String ERR_DOCUMENTCATEGORY_PARENT_NOT_FOUND = "exception.documentcategory.parentnotfound";
     String ERR_DOCUMENTCATEGORY_TYPE_CHANGE_NOT_ALLOWED = "exception.documentcategory.typechangenotallowed";
+
+    // --- DOCUMENT ROLE PERMISSION ERRORS ---
+    String ERR_DOCROLEPERM_ROLE_NOT_FOUND = "exception.documentrolepermission.rolenotfound";
+    String ERR_DOCROLEPERM_DUPLICATED_ROLE = "exception.documentrolepermission.duplicatedrole";
+    String ERR_DOCROLEPERM_UNKNOWN_ROLE = "exception.documentrolepermission.unknownrole";
+
+    // --- INVAI ROLES ---
+    /** Prefix of the names of the roles that belong to the INVAI application. */
+    String INVAI_ROLE_PREFIX = "INV_";
+
+    /** Prefix that Spring Security adds to the name of a role to build its authority. */
+    String ROLE_PREFIX = "ROLE_";
+
+    /** Authority of the role that can do everything with the documents, whatever the permissions table says. */
+    String SUPER_AUTHORITY = ROLE_PREFIX + ROLE_SUPER;
+
     String ERR_DOCUMENTATION_NOT_FOUND = "exception.documentation.notfound";
     String ERR_DOCUMENTATION_NOT_ACTIVE = "exception.documentation.notactive";
     String ERR_DOCUMENTATION_ATTACHMENT_NOT_FOUND = "exception.documentation.attachment.notfound";
     String ERR_DOCUMENTATION_ATTACHMENT_VERSION_DUPLICATED = "exception.documentation.attachment.versionduplicated";
-    String ERR_DOCUMENTATION_SECTION_NOT_FOUND = "exception.documentation.sectionnotfound";
     String ERR_DOCUMENTATION_STATUS_NOT_FOUND = "exception.documentation.statusnotfound";
     String ERR_DOCUMENTATION_CATEGORY_NOT_FOUND = "exception.documentation.categorynotfound";
     String ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE = "exception.documentation.categorynotactive";
+    String ERR_DOCUMENTATION_SUBCATEGORY_NOT_FOUND = "exception.documentation.subcategorynotfound";
+    String ERR_DOCUMENTATION_SUBCATEGORY_NOT_ACTIVE = "exception.documentation.subcategorynotactive";
+    String ERR_DOCUMENTATION_SUBCATEGORY_NOT_IN_CATEGORY = "exception.documentation.subcategorynotincategory";
     String ERR_DOCUMENTATION_ATTACHMENT_FILE_EMPTY = "exception.documentation.attachment.fileempty";
     String ERR_DOCUMENTATION_ATTACHMENT_FILE_TOO_LARGE = "exception.documentation.attachment.filetoolarge";
     String ERR_DOCUMENTATION_ATTACHMENT_FILE_TYPE_NOT_ALLOWED = "exception.documentation.attachment.filetypenotallowed";
@@ -506,8 +597,19 @@ public interface Constants {
     String ERR_DOCUMENTATION_METADATA_DUPLICATED = "exception.documentation.metadata.duplicated";
     String ERR_LINK_NOT_FOUND = "exception.link.notfound";
     String ERR_LINK_NOT_ACTIVE = "exception.link.notactive";
-    String ERR_LINK_SECTION_NOT_FOUND = "exception.link.sectionnotfound";
+    String ERR_LINK_CATEGORY_NOT_FOUND = "exception.link.categorynotfound";
+    String ERR_LINK_CATEGORY_NOT_ACTIVE = "exception.link.categorynotactive";
     String ERR_LINK_DUPLICATED = "exception.link.duplicated";
+
+    // --- DOCUMENTATION E-MAIL ERRORS ---
+    String ERR_EMAIL_NO_ITEMS = "exception.email.noitems";
+    String ERR_EMAIL_SENDER_NOT_FOUND = "exception.email.sendernotfound";
+    String ERR_EMAIL_ATTACHMENTS_TOO_LARGE = "exception.email.attachmentstoolarge";
+    String ERR_EMAIL_SEND_FAILED = "exception.email.sendfailed";
+
+    // --- DOCUMENTATION E-MAIL LIMITS ---
+    /** Largest total size, in bytes, of the files attached to one e-mail; mail servers usually refuse larger ones. */
+    long EMAIL_MAX_ATTACHMENTS_SIZE_BYTES = 15L * 1024 * 1024;
 
     // --- EXTERNAL SYSTEM CORE ERRORS ---
     String ERR_EXTERNALSYSTEM_ACTIVE = "exception.externalsystem.active";

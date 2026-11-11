@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.development.technology.DTO.AppTech
 import es.caib.invai.back.interna.application.development.technology.DTO.AppTechnologyOutputDTO;
 import es.caib.invai.back.persistence.repository.application.development.technology.AppTechnologyCriteria;
 import es.caib.invai.back.service.facade.application.development.technology.AppTechnologyService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ import jakarta.validation.Valid;
 
 /**
  * REST endpoints for the "AppTechnology" list: technology stack entries hanging many-to-one off a
- * single {@code AppDevelopment} record. All endpoints require {@code ROLE_INV_SUPER}.
+ * single {@code AppDevelopment} record. All endpoints require {@code INV_DESENVO} or {@code INV_SUPER}.
  *
  * @since 1.0.2
  */
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/development/technology")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_DEVELOPMENT)
 public class AppTechnologyController {
 
     /** Facade service handling the business logic for AppTechnology operations. */

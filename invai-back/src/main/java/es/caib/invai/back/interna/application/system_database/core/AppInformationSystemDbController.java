@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.application.system_database.core.DTO.AppInformationSystemDbInputDTO;
 import es.caib.invai.back.interna.application.system_database.core.DTO.AppInformationSystemDbOutputDTO;
 import es.caib.invai.back.service.facade.application.system_database.core.AppInformationSystemDbService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/system-database")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SYSTEMS)
 public class AppInformationSystemDbController {
 
     /** Service facade handling business operations for information system database groupings. */

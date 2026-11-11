@@ -2,6 +2,7 @@ package es.caib.invai.back.interna.catalog.mimeType;
 
 import es.caib.invai.back.interna.catalog.mimeType.DTO.MimeTypeOutputDTO;
 import es.caib.invai.back.service.facade.catalog.mimeType.MimeTypeService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("mime-type")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class MimeTypeController {
 
     /** Service facade providing access to the file format lookup. */

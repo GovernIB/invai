@@ -6,6 +6,7 @@ import es.caib.invai.back.interna.application.responsibleAuthorized.authorized.D
 import es.caib.invai.back.interna.application.responsibleAuthorized.authorized.DTO.AppAuthorizedOutputDTO;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.authorized.AppAuthorizedCriteria;
 import es.caib.invai.back.service.facade.application.responsibleAuthorized.authorized.AppAuthorizedService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/authorized")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_RESPONSIBLE_WRITE)
 public class AppAuthorizedController {
 
     /** Facade service handling the business logic for AppAuthorized operations. */
@@ -50,6 +51,7 @@ public class AppAuthorizedController {
      * @param pageable      pagination and sorting parameters
      * @return the matching page of authorizations, each carrying its resolved authorization types
      */
+    @PreAuthorize(Constants.PRE_AUTH_RESPONSIBLE_READ)
     @GetMapping("/{appResponsibleAuthorizedId}")
     public ResponseEntity<Page<AppAuthorizedOutputDTO>> getAllByAppResponsibleAuthorizedId(
             @PathVariable Long appResponsibleAuthorizedId,

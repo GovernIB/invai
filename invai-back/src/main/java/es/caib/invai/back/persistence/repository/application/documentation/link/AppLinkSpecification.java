@@ -1,7 +1,7 @@
 package es.caib.invai.back.persistence.repository.application.documentation.link;
 
 import es.caib.invai.back.persistence.model.application.documentation.link.AppLinkEntity;
-import es.caib.invai.back.persistence.model.catalog.appSection.LkupAppSectionEntity;
+import es.caib.invai.back.persistence.model.maintenance.documentation.documentCategory.DocumentCategoryEntity;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.From;
@@ -16,13 +16,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 /**
  * Utility factory class building the JPA {@link Specification} that lists the links of an
- * application. It also builds the ordering, because the section is a column of the listing and
+ * application. It also builds the ordering, because the category is a column of the listing and
  * belongs to another table.
  *
  * @since 1.0.6
@@ -36,17 +37,19 @@ public final class AppLinkSpecification {
      * must not carry it.
      *
      * @param criteria the filter criteria to translate into predicates, may be {@code null}
+     * @param allowedCategoryIds the only categories whose links are selected, {@code null} for no
+     *                 restriction and empty for none
      * @param sort     the requested order; the sortable keys are {@code title}, {@code description},
-     *                 {@code section} and {@code url}, anything else is ignored
+     *                 {@code category} and {@code url}, anything else is ignored
      * @return a specification matching the links fulfilling the given criteria
      */
-    public static Specification<AppLinkEntity> filterByCriteria(AppDocumentationLinkCriteria criteria, Sort sort) {
+    public static Specification<AppLinkEntity> filterByCriteria(AppDocumentationLinkCriteria criteria, Collection<Long> allowedCategoryIds, Sort sort) {
         return (root, query, cb) -> {
             boolean isCountQuery = Long.class.equals(query.getResultType());
 
-            Join<AppLinkEntity, LkupAppSectionEntity> section = isCountQuery
-                    ? root.join("section")
-                    : fetchAsJoin(root, "section", JoinType.INNER);
+            Join<AppLinkEntity, DocumentCategoryEntity> category = isCountQuery
+                    ? root.join("category")
+                    : fetchAsJoin(root, "category", JoinType.INNER);
 
             List<Predicate> predicates = new ArrayList<>();
 
@@ -63,8 +66,8 @@ public final class AppLinkSpecification {
                 if (StringUtils.isNotBlank(criteria.getDescription())) {
                     predicates.add(contains(cb, root.get("description"), criteria.getDescription()));
                 }
-                if (Objects.nonNull(criteria.getSectionId())) {
-                    predicates.add(cb.equal(section.get("id"), criteria.getSectionId()));
+                if (Objects.nonNull(criteria.getCategoryId())) {
+                    predicates.add(cb.equal(category.get("id"), criteria.getCategoryId()));
                 }
                 if (StringUtils.isNotBlank(criteria.getUrl())) {
                     predicates.add(contains(cb, root.get("url"), criteria.getUrl()));
@@ -74,14 +77,20 @@ public final class AppLinkSpecification {
                             contains(cb, root.get("title"), criteria.getQuickSearch()),
                             contains(cb, root.get("description"), criteria.getQuickSearch()),
                             contains(cb, root.get("url"), criteria.getQuickSearch()),
-                            contains(cb, section.get("name"), criteria.getQuickSearch()),
-                            contains(cb, section.get("nameEs"), criteria.getQuickSearch())
+                            contains(cb, category.get("name"), criteria.getQuickSearch()),
+                            contains(cb, category.get("nameEs"), criteria.getQuickSearch())
                     ));
                 }
             }
 
+            if (Objects.nonNull(allowedCategoryIds)) {
+                predicates.add(allowedCategoryIds.isEmpty()
+                        ? cb.disjunction()
+                        : category.get("id").in(allowedCategoryIds));
+            }
+
             if (!isCountQuery) {
-                query.orderBy(buildOrders(sort, root, cb, section));
+                query.orderBy(buildOrders(sort, root, cb, category));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
@@ -103,20 +112,20 @@ public final class AppLinkSpecification {
      * Translates the requested sort into the ordering of the query. The title and the id always
      * close the ordering, so pages are stable.
      *
-     * @param sort    the requested order
-     * @param root    the link being queried
-     * @param cb      the criteria builder
-     * @param section the joined section of the link
+     * @param sort     the requested order
+     * @param root     the link being queried
+     * @param cb       the criteria builder
+     * @param category the joined category of the link
      * @return the ordering to apply to the query
      */
     private static List<Order> buildOrders(Sort sort, Root<AppLinkEntity> root, CriteriaBuilder cb,
-                                           Join<AppLinkEntity, LkupAppSectionEntity> section) {
+                                           Join<AppLinkEntity, DocumentCategoryEntity> category) {
         List<Order> orders = new ArrayList<>();
         for (Sort.Order requested : sort) {
             Expression<?> expression = switch (requested.getProperty()) {
                 case "title" -> root.get("title");
                 case "description" -> root.get("description");
-                case "section" -> section.get("name");
+                case "category" -> category.get("name");
                 case "url" -> root.get("url");
                 default -> null;
             };

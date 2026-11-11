@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.systems.environment.DTO.Environmen
 import es.caib.invai.back.interna.maintenance.systems.environment.DTO.EnvironmentOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.systems.environment.EnvironmentCriteria;
 import es.caib.invai.back.service.facade.maintenance.systems.environment.EnvironmentService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,11 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller handling lifecycle endpoints for managing Environment profiles metadata.
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.1
@@ -29,7 +34,7 @@ import jakarta.validation.Valid;
 @RestController
 @Slf4j
 @RequestMapping("environment")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class EnvironmentController {
 
     /** Service facade handling business use cases for Environment maintenance. */
@@ -79,6 +84,7 @@ public class EnvironmentController {
      * @param inputDTO properties dataset containing environment configurations, variables, parameters data profiles
      * @return a {@link ResponseEntity} wrapping the created snapshot parameters state with an HTTP 201 Created response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<EnvironmentOutputDTO> create(@Valid @RequestBody EnvironmentInputDTO inputDTO) {
         log.info("REST: Request to create new environment");
@@ -93,6 +99,7 @@ public class EnvironmentController {
      * @param inputDTO property data variables mapping structural items
      * @return a {@link ResponseEntity} containing current modified configuration state properties details with an HTTP 200 OK status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<EnvironmentOutputDTO> update(@PathVariable Long id, @Valid @RequestBody EnvironmentInputDTO inputDTO) {
         log.info("REST: Request to update environment ID: {}", id);
@@ -105,6 +112,7 @@ public class EnvironmentController {
      * @param id persistent tracking row database reference index targeting removal execution paths
      * @return a {@link ResponseEntity} providing an empty success feedback with an HTTP 204 No Content response
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         log.info("REST: Request to logical delete environment ID: {}", id);
@@ -121,6 +129,7 @@ public class EnvironmentController {
      *         properties details (as an {@link EnvironmentOutputDTO}) with an HTTP 200 OK status
      * @throws es.caib.invai.back.exception.BusinessRuleException if no environment exists with the provided structural identifier
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<EnvironmentOutputDTO> reactivate(@PathVariable Long id) {
         log.info("REST: Request to reactivate environment ID: {}", id);

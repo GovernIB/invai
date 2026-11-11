@@ -8,8 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapper;
-import es.caib.invai.back.service.mapper.maintenance.security.securityRole.SecurityRoleMapperImpl;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapper;
+import es.caib.invai.back.service.mapper.maintenance.role.RoleMapperImpl;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,7 +35,7 @@ class SecurityRoleServiceFacadeBeanTest {
     private SoffidClient soffidClient;
 
     @Spy
-    private SecurityRoleMapper securityRoleMapper = new SecurityRoleMapperImpl();
+    private RoleMapper roleMapper = new RoleMapperImpl();
 
     @InjectMocks
     private SecurityRoleServiceFacadeBean securityRoleServiceFacadeBean;

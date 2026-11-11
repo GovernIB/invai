@@ -4,6 +4,8 @@ import es.caib.invai.back.persistence.model.application.system_database.database
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.Optional;
+
 /**
  * Spring Data Native Bridge Interface infrastructure for root Entity.
  *
@@ -12,23 +14,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface AppDatabaseJPARepository extends JpaRepository<AppDatabaseEntity, Long>, JpaSpecificationExecutor<AppDatabaseEntity> {
 
     /**
-     * Checks whether an application-database link already exists for the given
-     * information system database grouping and database.
+     * Finds the application-database link of the given information system database grouping and
+     * database, whether it is active or logically deleted.
      *
      * @param informationSystemDbId identifier of the information system database grouping
      * @param databaseId            identifier of the database
-     * @return {@code true} if a matching link exists, {@code false} otherwise
+     * @return the matching link, or empty if the database was never linked to the grouping
      */
-    boolean existsByInformationSystemDbIdAndDatabaseId(Long informationSystemDbId, Long databaseId);
-
-    /**
-     * Checks whether an application-database link already exists for the given
-     * information system database grouping and database, excluding a specific record.
-     *
-     * @param informationSystemDbId identifier of the information system database grouping
-     * @param databaseId            identifier of the database
-     * @param excludeId             identifier of the record to exclude from the check
-     * @return {@code true} if a matching link exists, {@code false} otherwise
-     */
-    boolean existsByInformationSystemDbIdAndDatabaseIdAndIdNot(Long informationSystemDbId, Long databaseId, Long excludeId);
+    Optional<AppDatabaseEntity> findByInformationSystemDbIdAndDatabaseId(Long informationSystemDbId, Long databaseId);
 }

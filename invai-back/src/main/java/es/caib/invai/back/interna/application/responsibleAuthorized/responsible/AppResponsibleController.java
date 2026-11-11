@@ -6,6 +6,7 @@ import es.caib.invai.back.interna.application.responsibleAuthorized.responsible.
 import es.caib.invai.back.interna.application.responsibleAuthorized.responsible.DTO.AppResponsibleOutputDTO;
 import es.caib.invai.back.persistence.repository.application.responsibleAuthorized.responsible.AppResponsibleCriteria;
 import es.caib.invai.back.service.facade.application.responsibleAuthorized.responsible.AppResponsibleService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/responsible")
-@PreAuthorize ("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_RESPONSIBLE_WRITE)
 public class AppResponsibleController {
 
     /** Facade service handling the business logic for AppResponsible operations. */
@@ -47,6 +48,7 @@ public class AppResponsibleController {
      * @param pageable pagination and sorting parameters
      * @return the matching page of responsible assignment rows
      */
+    @PreAuthorize(Constants.PRE_AUTH_RESPONSIBLE_READ)
     @GetMapping("/{appResponsibleAuthorizedId}")
     public ResponseEntity<Page<AppResponsibleOutputDTO>> getAllByAppResponsibleAuthorizedId(
             @PathVariable Long appResponsibleAuthorizedId,

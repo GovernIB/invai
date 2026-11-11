@@ -2,6 +2,7 @@ package es.caib.invai.back.interna.catalog.documentStatus;
 
 import es.caib.invai.back.interna.catalog.documentStatus.DTO.DocumentStatusOutputDTO;
 import es.caib.invai.back.service.facade.catalog.documentStatus.DocumentStatusService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("document-status")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class DocumentStatusController {
 
     /** Service facade providing access to the document status lookup. */

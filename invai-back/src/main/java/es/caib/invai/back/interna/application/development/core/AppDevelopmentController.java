@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentInputDTO;
 import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentOutputDTO;
 import es.caib.invai.back.service.facade.application.development.core.AppDevelopmentService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import jakarta.validation.Valid;
 /**
  * REST endpoints for the "AppDevelopment" tab (single development record per application, see
  * {@link es.caib.invai.back.service.model.application.development.core.AppDevelopment}). All
- * endpoints require {@code ROLE_INV_SUPER}.
+ * endpoints require {@code INV_DESENVO} or {@code INV_SUPER}.
  *
  * @since 1.0.2
  */
@@ -27,7 +28,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/development")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_DEVELOPMENT)
 public class AppDevelopmentController {
 
     /** Facade service handling the business logic for AppDevelopment operations. */

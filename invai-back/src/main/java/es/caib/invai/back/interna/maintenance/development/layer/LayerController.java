@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.development.layer.DTO.LayerInputDT
 import es.caib.invai.back.interna.maintenance.development.layer.DTO.LayerOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.development.layer.LayerCriteria;
 import es.caib.invai.back.service.facade.maintenance.development.layer.LayerService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for Layer assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.2
  */
 @Tag(name = "Capes", description = "Manteniment del catàleg de capes tecnològiques.")
 @RestController
 @Slf4j
 @RequestMapping("layer")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class LayerController {
 
     /** Facade service handling the business logic for Layer catalog operations. */
@@ -73,6 +78,7 @@ public class LayerController {
      * @param inputDTO the data used to create the layer
      * @return the created layer, with HTTP 201 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<LayerOutputDTO> create(@Valid @RequestBody LayerInputDTO inputDTO) {
         return new ResponseEntity<>(layerService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class LayerController {
      * @param inputDTO the data used to update the layer
      * @return the updated layer
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<LayerOutputDTO> update(@PathVariable Long id, @Valid @RequestBody LayerInputDTO inputDTO) {
         return ResponseEntity.ok(layerService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class LayerController {
      * @param id the identifier of the layer to delete
      * @return an empty response with HTTP 204 status
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         layerService.delete(id);
@@ -108,6 +116,7 @@ public class LayerController {
      * @param id the identifier of the layer to reactivate
      * @return the reactivated layer
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<LayerOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(layerService.reactivate(id));

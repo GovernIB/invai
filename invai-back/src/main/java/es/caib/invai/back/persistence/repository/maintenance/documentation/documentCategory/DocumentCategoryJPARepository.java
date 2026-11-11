@@ -34,6 +34,13 @@ public interface DocumentCategoryJPARepository extends JpaRepository<DocumentCat
     boolean existsByParentIdAndDeletedAtIsNull(Long parentId);
 
     /**
+     * Finds the active categories, the ones without a parent.
+     *
+     * @return the active categories
+     */
+    List<DocumentCategoryEntity> findAllByParentIsNullAndDeletedAtIsNull();
+
+    /**
      * Checks whether an active category exists with the given name.
      *
      * @param name the name to check

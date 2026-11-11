@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.security.ensClassification.DTO.App
 import es.caib.invai.back.interna.application.security.ensClassification.DTO.AppEnsClassificationOutputDTO;
 import es.caib.invai.back.persistence.repository.application.security.ensClassification.AppEnsClassificationCriteria;
 import es.caib.invai.back.service.facade.application.security.ensClassification.AppEnsClassificationService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/security/ens-classification")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SECURITY)
 public class AppEnsClassificationController {
 
     /** Service facade handling business operations for ENS classification records. */

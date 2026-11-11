@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.maintenance.systems.serverType;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.maintenance.systems.serverType.DTO.ServerTypeOutputDTO;
 import es.caib.invai.back.service.facade.maintenance.systems.serverType.ServerTypeService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,11 @@ import java.util.List;
  * Internal REST controller exposing read-only access to the Server Type lookup dictionary
  * (e.g. DATABASE, APPLICATION).
  * <p>
- * Access is restricted at the type level to corporate users holding the {@code ROLE_INV_SUPER} role.
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
  * </p>
  *
  * @since 1.0.2
@@ -26,7 +31,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("server-type")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class ServerTypeController {
 
     /** Facade service handling the business logic for Server Type lookup read operations. */

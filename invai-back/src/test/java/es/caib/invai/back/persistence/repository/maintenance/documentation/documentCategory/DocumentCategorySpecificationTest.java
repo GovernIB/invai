@@ -15,6 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Collection;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -73,7 +76,11 @@ class DocumentCategorySpecificationTest {
     }
 
     private Predicate build(DocumentCategoryCriteria criteria) {
-        Specification<DocumentCategoryEntity> spec = DocumentCategorySpecification.filterByCriteria(criteria);
+        return build(criteria, null);
+    }
+
+    private Predicate build(DocumentCategoryCriteria criteria, Collection<Long> allowedCategoryIds) {
+        Specification<DocumentCategoryEntity> spec = DocumentCategorySpecification.filterByCriteria(criteria, allowedCategoryIds);
         Predicate result = spec.toPredicate(root, query, cb);
         assertNotNull(result);
         return result;
@@ -96,6 +103,33 @@ class DocumentCategorySpecificationTest {
         verify(root).get("parent");
         verify(cb, never()).like(any(), anyString());
         verify(query, never()).subquery(any());
+    }
+
+    @Test
+    void filterByCriteria_allowedCategories_restrictsTheCategoriesToThem() {
+        Set<Long> allowed = Set.of(1L, 2L);
+
+        build(null, allowed);
+
+        verify(root).get("id");
+        verify(path).in(allowed);
+        verify(cb, never()).disjunction();
+    }
+
+    @Test
+    void filterByCriteria_noAllowedCategories_selectsNone() {
+        build(null, Set.of());
+
+        verify(cb).disjunction();
+        verify(root, never()).get("id");
+    }
+
+    @Test
+    void filterByCriteria_nullAllowedCategories_doesNotRestrict() {
+        build(null, null);
+
+        verify(root, never()).get("id");
+        verify(cb, never()).disjunction();
     }
 
     @Test

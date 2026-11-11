@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.maintenance.responsible.roleTransfer.DTO.RoleAssignmentOutputDTO;
 import es.caib.invai.back.interna.maintenance.responsible.roleTransfer.DTO.RoleTransferInputDTO;
 import es.caib.invai.back.service.facade.maintenance.responsible.roleTransfer.RoleTransferService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("role-transfer")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SUPER)
 public class RoleTransferController {
 
     /** Facade service handling the business logic for role transfer operations. */

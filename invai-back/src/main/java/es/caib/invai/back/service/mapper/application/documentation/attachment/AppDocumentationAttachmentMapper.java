@@ -4,19 +4,17 @@ import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDo
 import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDocumentationAttachmentOutputDTO;
 import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDocumentationAttachmentSimpleOutputDTO;
 import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDocumentationAttachmentUpdateInputDTO;
-import es.caib.invai.back.interna.maintenance.documentation.category.DTO.DocumentCategoryOutputDTO;
 import es.caib.invai.back.persistence.model.application.documentation.attachment.AppDocumentationAttachmentEntity;
-import es.caib.invai.back.service.mapper.catalog.appSection.AppSectionMapper;
 import es.caib.invai.back.service.mapper.catalog.documentStatus.DocumentStatusMapper;
 import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapper;
 import es.caib.invai.back.service.model.application.documentation.attachment.AppDocumentationAttachment;
-import es.caib.invai.back.service.model.catalog.appSection.AppSection;
 import es.caib.invai.back.service.model.catalog.documentStatus.DocumentStatus;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
+
+import java.util.Objects;
 
 /**
  * MapStruct mapper converting documents between entities, domain models and API transfer schemas.
@@ -25,7 +23,7 @@ import org.mapstruct.Named;
  *
  * @since 1.0.6
  */
-@Mapper(componentModel = "spring", uses = {AppSectionMapper.class, DocumentStatusMapper.class, DocumentCategoryMapper.class, AppDocumentationAttachmentVersionMapper.class})
+@Mapper(componentModel = "spring", uses = {DocumentStatusMapper.class, DocumentCategoryMapper.class, AppDocumentationAttachmentVersionMapper.class})
 public interface AppDocumentationAttachmentMapper {
 
     /**
@@ -36,7 +34,6 @@ public interface AppDocumentationAttachmentMapper {
      * @return the converted domain model
      */
     @Mapping(target = "applicationId", source = "application.id")
-    @Mapping(target = "parentCategory", source = "documentCategory.parent")
     @Mapping(target = "currentAttachment", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     AppDocumentationAttachment toModel(AppDocumentationAttachmentEntity entity);
@@ -49,8 +46,8 @@ public interface AppDocumentationAttachmentMapper {
      * @return the converted entity
      */
     @Mapping(target = "application", ignore = true)
-    @Mapping(target = "section", ignore = true)
-    @Mapping(target = "documentCategory", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "subcategory", ignore = true)
     @Mapping(target = "status", ignore = true)
     AppDocumentationAttachmentEntity toEntity(AppDocumentationAttachment model);
 
@@ -60,8 +57,8 @@ public interface AppDocumentationAttachmentMapper {
      * @param model the domain model to convert
      * @return the converted response DTO, with its attachments
      */
-    @Mapping(target = "category", source = "category", qualifiedByName = "toCategoryOutput")
-    @Mapping(target = "subcategory", source = "subcategory", qualifiedByName = "toCategoryOutput")
+    @Mapping(target = "category", source = "category", qualifiedByName = "toSummaryResponse")
+    @Mapping(target = "subcategory", source = "subcategory", qualifiedByName = "toSummaryResponse")
     AppDocumentationAttachmentOutputDTO toResponse(AppDocumentationAttachment model);
 
     /**
@@ -73,8 +70,8 @@ public interface AppDocumentationAttachmentMapper {
     @Mapping(target = "mimeType", source = "currentAttachment.mimeType")
     @Mapping(target = "versionLabel", source = "currentAttachment.versionLabel")
     @Mapping(target = "currentAttachmentId", source = "currentAttachment.id")
-    @Mapping(target = "category", source = "category", qualifiedByName = "toCategoryOutput")
-    @Mapping(target = "subcategory", source = "subcategory", qualifiedByName = "toCategoryOutput")
+    @Mapping(target = "category", source = "category", qualifiedByName = "toSummaryResponse")
+    @Mapping(target = "subcategory", source = "subcategory", qualifiedByName = "toSummaryResponse")
     AppDocumentationAttachmentSimpleOutputDTO toSimpleResponse(AppDocumentationAttachment model);
 
     /**
@@ -84,10 +81,9 @@ public interface AppDocumentationAttachmentMapper {
      * @return the converted domain model
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "section", expression = "java(newSection(inputDTO.getSectionId()))")
-    @Mapping(target = "documentCategory", expression = "java(newCategory(inputDTO.getCategoryId()))")
+    @Mapping(target = "category", expression = "java(newCategory(inputDTO.getCategoryId()))")
+    @Mapping(target = "subcategory", expression = "java(newCategory(inputDTO.getSubcategoryId()))")
     @Mapping(target = "status", expression = "java(newStatus(inputDTO.getStatusId()))")
-    @Mapping(target = "parentCategory", ignore = true)
     @Mapping(target = "currentAttachment", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -107,10 +103,9 @@ public interface AppDocumentationAttachmentMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "applicationId", ignore = true)
-    @Mapping(target = "section", expression = "java(newSection(inputDTO.getSectionId()))")
-    @Mapping(target = "documentCategory", expression = "java(newCategory(inputDTO.getCategoryId()))")
+    @Mapping(target = "category", expression = "java(newCategory(inputDTO.getCategoryId()))")
+    @Mapping(target = "subcategory", expression = "java(newCategory(inputDTO.getSubcategoryId()))")
     @Mapping(target = "status", expression = "java(newStatus(inputDTO.getStatusId()))")
-    @Mapping(target = "parentCategory", ignore = true)
     @Mapping(target = "currentAttachment", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -122,36 +117,15 @@ public interface AppDocumentationAttachmentMapper {
     void updateModelFromInput(AppDocumentationAttachmentUpdateInputDTO inputDTO, @MappingTarget AppDocumentationAttachment model);
 
     /**
-     * Converts a category or subcategory into its response DTO leaving out the subcategories and
-     * the deletion timestamp, which a document never shows.
+     * Builds a category or subcategory holding only the given identifier.
      *
-     * @param model the category or subcategory to convert
-     * @return the converted response DTO
-     */
-    @Named("toCategoryOutput")
-    @Mapping(target = "subcategories", ignore = true)
-    @Mapping(target = "deletedAt", ignore = true)
-    DocumentCategoryOutputDTO toCategoryOutput(DocumentCategory model);
-
-    /**
-     * Builds a section holding only the given identifier.
-     *
-     * @param id the identifier of the section
-     * @return the section
-     */
-    default AppSection newSection(Long id) {
-        AppSection section = new AppSection();
-        section.setId(id);
-        return section;
-    }
-
-    /**
-     * Builds a category holding only the given identifier.
-     *
-     * @param id the identifier of the category or subcategory
-     * @return the category
+     * @param id the identifier of the category or subcategory, may be {@code null}
+     * @return the category, or {@code null} if there is no identifier
      */
     default DocumentCategory newCategory(Long id) {
+        if (Objects.isNull(id)) {
+            return null;
+        }
         DocumentCategory category = new DocumentCategory();
         category.setId(id);
         return category;

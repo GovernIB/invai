@@ -2,7 +2,7 @@ package es.caib.invai.back.interna.application.development.webContext.DTO;
 
 import es.caib.invai.back.interna.application.development.core.DTO.DevelopmentOutputDTO;
 import es.caib.invai.back.interna.application.security.core.DTO.AppSecurityOutputDTO;
-import es.caib.invai.back.interna.maintenance.security.webContext.DTO.WebContextOutputDTO;
+import es.caib.invai.back.interna.maintenance.development.webContext.DTO.WebContextOutputDTO;
 import es.caib.invai.back.interna.maintenance.general.field.DTO.FieldOutputDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

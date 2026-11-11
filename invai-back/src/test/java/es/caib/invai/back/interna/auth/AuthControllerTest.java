@@ -1,6 +1,7 @@
 package es.caib.invai.back.interna.auth;
 
 import es.caib.invai.back.interna.auth.DTO.UserAuthDTO;
+import es.caib.invai.back.interna.auth.DTO.UserPermissionsDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,76 @@ class AuthControllerTest {
         assertTrue(body.isAuthenticated());
         assertEquals("jdoe", body.getUsername());
         assertEquals("John Doe", body.getFullName());
+    }
+
+    private static OAuth2AuthenticationToken loginWithRoles(String... roles) {
+        OidcIdToken idToken = new OidcIdToken("token-value", Instant.now(), Instant.now().plusSeconds(60),
+                Map.of("sub", "jdoe", "name", "John Doe"));
+        OidcUserInfo userInfo = new OidcUserInfo(Map.of("sub", "jdoe", "name", "John Doe"));
+        List<SimpleGrantedAuthority> authorities = java.util.Arrays.stream(roles).map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
+        DefaultOidcUser oidcUser = new DefaultOidcUser(authorities, idToken, userInfo);
+        OAuth2AuthenticationToken principal = new OAuth2AuthenticationToken(oidcUser, oidcUser.getAuthorities(), "soffid");
+        SecurityContextHolder.getContext().setAuthentication(principal);
+        return principal;
+    }
+
+    @Test
+    void getAuthInformation_superUser_hasEveryPermission() {
+        ResponseEntity<?> response = authController.getAuthInformation(loginWithRoles("INV_SUPER"));
+
+        UserPermissionsDTO permissions = ((UserAuthDTO) response.getBody()).getPermissions();
+        assertTrue(permissions.isSystems() && permissions.isDevelopment() && permissions.isSecurity() && permissions.isData()
+                && permissions.isAccessibility() && permissions.isIntegration() && permissions.isDocumentation()
+                && permissions.isDir3() && permissions.isResponsibleRead() && permissions.isResponsibleWrite() && permissions.isSuperUser());
+    }
+
+    @Test
+    void getAuthInformation_wsUser_hasIntegrationDocumentationAndDir3Only() {
+        ResponseEntity<?> response = authController.getAuthInformation(loginWithRoles("INV_WS"));
+
+        UserPermissionsDTO permissions = ((UserAuthDTO) response.getBody()).getPermissions();
+        assertTrue(permissions.isIntegration());
+        assertTrue(permissions.isDocumentation());
+        assertTrue(permissions.isDir3());
+        assertFalse(permissions.isSystems());
+        assertFalse(permissions.isDevelopment());
+        assertFalse(permissions.isSecurity());
+        assertFalse(permissions.isData());
+        assertFalse(permissions.isAccessibility());
+        assertFalse(permissions.isResponsibleRead());
+        assertFalse(permissions.isResponsibleWrite());
+        assertFalse(permissions.isSuperUser());
+    }
+
+    @Test
+    void getAuthInformation_securityUser_readsAndWritesTheResponsibles() {
+        UserPermissionsDTO permissions = ((UserAuthDTO) authController.getAuthInformation(loginWithRoles("INV_SEGURETAT")).getBody()).getPermissions();
+
+        assertTrue(permissions.isSecurity());
+        assertTrue(permissions.isResponsibleRead());
+        assertTrue(permissions.isResponsibleWrite());
+        assertFalse(permissions.isSystems());
+    }
+
+    @Test
+    void getAuthInformation_dataUser_onlyReadsTheResponsibles() {
+        UserPermissionsDTO permissions = ((UserAuthDTO) authController.getAuthInformation(loginWithRoles("INV_DADES")).getBody()).getPermissions();
+
+        assertTrue(permissions.isData());
+        assertTrue(permissions.isResponsibleRead());
+        assertFalse(permissions.isResponsibleWrite());
+    }
+
+    @Test
+    void getAuthInformation_plainUser_hasOnlyDocumentationAndDir3() {
+        ResponseEntity<?> response = authController.getAuthInformation(loginWithRoles("INV_USER"));
+
+        UserPermissionsDTO permissions = ((UserAuthDTO) response.getBody()).getPermissions();
+        assertTrue(permissions.isDocumentation());
+        assertTrue(permissions.isDir3());
+        assertFalse(permissions.isSystems() || permissions.isDevelopment() || permissions.isSecurity() || permissions.isData()
+                || permissions.isAccessibility() || permissions.isIntegration() || permissions.isResponsibleRead()
+                || permissions.isResponsibleWrite() || permissions.isSuperUser());
     }
 
     @Test

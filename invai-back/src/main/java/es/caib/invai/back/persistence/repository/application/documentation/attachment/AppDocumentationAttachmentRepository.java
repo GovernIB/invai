@@ -4,6 +4,8 @@ import es.caib.invai.back.service.model.application.documentation.attachment.App
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
+
 /**
  * Outbound port declaring the persistence mechanisms for the documents attached to applications.
  * The attachments of a document are handled by {@link AppDocumentationAttachmentVersionRepository}.
@@ -25,10 +27,11 @@ public interface AppDocumentationAttachmentRepository {
      * asks (see {@link AppDocumentationAttachmentSpecification} for the sortable keys).
      *
      * @param filter   filter criteria, scoped by application
+     * @param allowedCategoryIds the only categories whose documents are returned, {@code null} for no restriction and empty for none
      * @param pageable pagination and sorting information
      * @return a page of matching documents, without their attachments
      */
-    Page<AppDocumentationAttachment> findAll(AppDocumentationAttachmentCriteria filter, Pageable pageable);
+    Page<AppDocumentationAttachment> findAll(AppDocumentationAttachmentCriteria filter, Collection<Long> allowedCategoryIds, Pageable pageable);
 
     /**
      * Persists a new document.

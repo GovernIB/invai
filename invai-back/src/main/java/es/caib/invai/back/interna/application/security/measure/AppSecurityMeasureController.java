@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.security.measure.DTO.AppSecurityMe
 import es.caib.invai.back.interna.application.security.measure.DTO.AppSecurityMeasureOutputDTO;
 import es.caib.invai.back.persistence.repository.application.security.measure.AppSecurityMeasureCriteria;
 import es.caib.invai.back.service.facade.application.security.measure.AppSecurityMeasureService;
+import es.caib.invai.back.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("application/security/measure")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_SECURITY)
 public class AppSecurityMeasureController {
 
     /** Service facade handling business operations for application security measures. */

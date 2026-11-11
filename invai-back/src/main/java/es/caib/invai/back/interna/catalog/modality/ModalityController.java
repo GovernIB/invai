@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.catalog.modality;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import es.caib.invai.back.interna.catalog.modality.DTO.ModalityOutputDTO;
 import es.caib.invai.back.service.facade.catalog.modality.ModalityService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("modality")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class ModalityController {
 
     /** Service facade providing access to the Modality lookup dictionary. */

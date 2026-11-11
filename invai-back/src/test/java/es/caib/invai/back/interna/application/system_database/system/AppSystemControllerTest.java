@@ -65,18 +65,6 @@ class AppSystemControllerTest {
     }
 
     @Test
-    void update_returnsOkWithServiceResult() {
-        AppSystemInputDTO inputDTO = new AppSystemInputDTO(5L, 7L);
-        AppSystemOutputDTO dto = new AppSystemOutputDTO();
-        when(appSystemService.update(1L, inputDTO)).thenReturn(dto);
-
-        ResponseEntity<AppSystemOutputDTO> response = appSystemController.update(1L, inputDTO);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertSame(dto, response.getBody());
-    }
-
-    @Test
     void delete_returnsNoContentAndDelegatesToService() {
         ResponseEntity<Void> response = appSystemController.delete(1L);
 

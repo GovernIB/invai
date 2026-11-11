@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import es.caib.invai.back.service.model.application.security.core.AppSecurity;
 import es.caib.invai.back.service.model.catalog.validationStatus.ValidationStatusEnum;
-import es.caib.invai.back.service.model.maintenance.security.securityRole.SecurityRole;
+import es.caib.invai.back.service.model.maintenance.role.Role;
 
 /**
  * Domain model representing a security role assigned to an {@link AppSecurity}
@@ -24,7 +24,7 @@ public class AppRole {
     /** Security anchor this role assignment belongs to. */
     private AppSecurity appSecurity;
     /** Security role catalog entry assigned to the application's security profile. */
-    private SecurityRole securityRole;
+    private Role securityRole;
     /** Timestamp at which this record was created. */
     private LocalDateTime createdAt;
     /** Identifier of the user who created this record. */

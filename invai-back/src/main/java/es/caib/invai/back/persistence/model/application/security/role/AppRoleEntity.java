@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import es.caib.invai.back.persistence.model.BaseEntity;
 import es.caib.invai.back.persistence.model.application.security.core.AppSecurityEntity;
 import es.caib.invai.back.persistence.model.catalog.validationStatus.LkupValidationStatusEntity;
-import es.caib.invai.back.persistence.model.maintenance.security.securityRole.SecurityRoleEntity;
+import es.caib.invai.back.persistence.model.maintenance.role.RoleEntity;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ public class AppRoleEntity extends BaseEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "SECURITY_ROLE_ID", nullable = false)
-    private SecurityRoleEntity securityRole;
+    private RoleEntity securityRole;
 
     /**
      * Validation state of this assignment against the application's prefix: {@code VALIDATED} if

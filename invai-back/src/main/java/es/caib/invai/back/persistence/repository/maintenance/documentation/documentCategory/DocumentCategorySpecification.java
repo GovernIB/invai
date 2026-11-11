@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,13 +28,19 @@ public final class DocumentCategorySpecification {
      * Builds a JPA {@link Specification} selecting categories (records without a parent) that
      * fulfil the given criteria.
      *
-     * @param criteria the filter criteria to translate into predicates, may be {@code null}
+     * @param criteria           the filter criteria to translate into predicates, may be {@code null}
+     * @param allowedCategoryIds the only categories selected, {@code null} for no restriction and empty for none
      * @return a specification matching the categories fulfilling the given criteria
      */
-    public static Specification<DocumentCategoryEntity> filterByCriteria(DocumentCategoryCriteria criteria) {
+    public static Specification<DocumentCategoryEntity> filterByCriteria(DocumentCategoryCriteria criteria, Collection<Long> allowedCategoryIds) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isNull(root.get("parent")));
+            if (Objects.nonNull(allowedCategoryIds)) {
+                predicates.add(allowedCategoryIds.isEmpty()
+                        ? cb.disjunction()
+                        : root.get("id").in(allowedCategoryIds));
+            }
             if (Objects.isNull(criteria)) {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }

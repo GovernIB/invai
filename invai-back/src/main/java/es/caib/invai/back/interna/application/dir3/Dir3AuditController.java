@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.dir3.DTO.ApplicationDir3MismatchOu
 import es.caib.invai.back.interna.application.dir3.DTO.Dir3MismatchAuditStatusOutputDTO;
 import es.caib.invai.back.service.facade.application.dir3.Dir3CheckService;
 import es.caib.invai.back.service.facade.application.dir3.Dir3BackgroundAuditService;
+import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller exposing the DIR3 audit of the applications: the one of every application, run
  * in the background, and the one of a single application.
  * <p>
- * Every endpoint requires the {@code ROLE_INV_SUPER} role.
+ * Every endpoint is open to any of the application's roles, except the launch of the audit of every
+ * application, which requires the {@code INV_SUPER} role.
  * </p>
  *
  * @since 1.0.6
@@ -30,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequestMapping("application/dir3")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class Dir3AuditController {
 
     /** Facade implementing the single-application DIR3 audit. */
@@ -62,6 +64,7 @@ public class Dir3AuditController {
      * @return a {@link ResponseEntity} wrapping the status of the audit, HTTP 202
      * @throws BusinessRuleException if the caller's login session can't be renewed in the background
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("check-all")
     public ResponseEntity<Dir3MismatchAuditStatusOutputDTO> startDir3MismatchAudit() {
         log.info("REST: Request to launch the DIR3 mismatch audit of every application");

@@ -6,14 +6,17 @@ import es.caib.invai.back.interna.maintenance.documentation.category.DTO.Documen
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryCriteria;
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryRepository;
 import es.caib.invai.back.service.facade.maintenance.documentation.documentCategory.DocumentCategoryService;
+import es.caib.invai.back.service.facade.maintenance.documentation.documentRolePermission.DocumentRolePermissionService;
 import es.caib.invai.back.service.mapper.maintenance.documentation.documentCategory.DocumentCategoryMapper;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
+import es.caib.invai.back.service.model.maintenance.documentation.documentRolePermission.DocumentPermission;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +47,19 @@ public class DocumentCategoryServiceFacadeBean implements DocumentCategoryServic
     private DocumentCategoryRepository documentCategoryRepository;
 
     /**
+     * Service used to give the roles their permissions on the categories that are created or reactivated.
+     */
+    @Autowired
+    private DocumentRolePermissionService documentRolePermissionService;
+
+    /**
      * Retrieves a category or subcategory by its identifier.
      *
      * @param id the identifier
      * @return the matching record as a response DTO
      * @throws BusinessRuleException if no record exists with the given ID
+     * @throws AccessDeniedException if none of the roles of the user can read the category (or the
+     *                               category of the subcategory)
      */
     @Override
     @Transactional(readOnly = true)
@@ -59,13 +70,15 @@ public class DocumentCategoryServiceFacadeBean implements DocumentCategoryServic
         if (Objects.isNull(documentCategory)) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTCATEGORY_NOT_FOUND);
         }
+        documentRolePermissionService.requirePermission(DocumentPermission.READ,
+                documentCategory.isCategory() ? documentCategory.getId() : documentCategory.getParentId());
 
         return documentCategoryMapper.toResponse(documentCategory);
     }
 
     /**
      * Retrieves a paginated list of the categories matching the given filter criteria, each one
-     * with all its subcategories.
+     * with all its subcategories. Only the categories that some role of the user can read are returned.
      *
      * @param filter   search and status filter criteria
      * @param pageable pagination and sorting information
@@ -75,7 +88,7 @@ public class DocumentCategoryServiceFacadeBean implements DocumentCategoryServic
     @Transactional(readOnly = true)
     public Page<DocumentCategoryOutputDTO> getAll(DocumentCategoryCriteria filter, Pageable pageable) {
         log.debug("Facade: Fetching documentation categories via pagination boundaries");
-        return documentCategoryRepository.findAll(filter, pageable).map(documentCategoryMapper::toResponse);
+        return documentCategoryRepository.findAll(filter, documentRolePermissionService.getReadableCategoryIds(), pageable).map(documentCategoryMapper::toResponse);
     }
 
     /**
@@ -83,7 +96,8 @@ public class DocumentCategoryServiceFacadeBean implements DocumentCategoryServic
      * active category) after sanitizing the input and checking for name duplicates.
      *
      * @param inputDTO the data to create
-     * @return the created record as a response DTO
+     * @return the created record as a response DTO; a new category starts with read permission for
+     *         every role that has permissions
      * @throws BusinessRuleException if the parent doesn't exist, isn't active or is itself a
      *                               subcategory, or an active record with the same name (Catalan or Spanish) already exists in the same level
      */
@@ -100,7 +114,11 @@ public class DocumentCategoryServiceFacadeBean implements DocumentCategoryServic
         validateNames(inputDTO.getName(), inputDTO.getNameEs(), inputDTO.getParentId(), null);
 
         DocumentCategory model = documentCategoryMapper.toModelFromInput(inputDTO);
-        return documentCategoryMapper.toResponse(documentCategoryRepository.create(model));
+        DocumentCategory created = documentCategoryRepository.create(model);
+        if (created.isCategory()) {
+            documentRolePermissionService.assignDefaultPermissionsToCategory(created.getId());
+        }
+        return documentCategoryMapper.toResponse(created);
     }
 
     /**
@@ -202,7 +220,11 @@ public class DocumentCategoryServiceFacadeBean implements DocumentCategoryServic
         existing.setDeletedAt(null);
         existing.setDeletedBy(null);
 
-        return documentCategoryMapper.toResponse(documentCategoryRepository.update(existing, id));
+        DocumentCategory reactivated = documentCategoryRepository.update(existing, id);
+        if (reactivated.isCategory()) {
+            documentRolePermissionService.assignDefaultPermissionsToCategory(id);
+        }
+        return documentCategoryMapper.toResponse(reactivated);
     }
 
     /**

@@ -13,11 +13,11 @@ import es.caib.invai.back.persistence.repository.application.documentation.attac
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationAttachmentRepository;
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationAttachmentVersionRepository;
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationMetadataRepository;
-import es.caib.invai.back.persistence.repository.catalog.appSection.AppSectionRepository;
 import es.caib.invai.back.persistence.repository.catalog.documentStatus.DocumentStatusRepository;
 import es.caib.invai.back.persistence.repository.catalog.mimeType.MimeTypeRepository;
 import es.caib.invai.back.persistence.repository.maintenance.documentation.documentCategory.DocumentCategoryRepository;
 import es.caib.invai.back.service.facade.application.documentation.attachment.AppDocumentationAttachmentService;
+import es.caib.invai.back.service.facade.maintenance.documentation.documentRolePermission.DocumentRolePermissionService;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationAttachmentVersionMapper;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationAttachmentMapper;
 import es.caib.invai.back.service.mapper.application.documentation.attachment.AppDocumentationMetadataMapper;
@@ -26,6 +26,7 @@ import es.caib.invai.back.service.model.application.documentation.attachment.App
 import es.caib.invai.back.service.model.application.documentation.attachment.AppDocumentationMetadata;
 import es.caib.invai.back.service.model.catalog.mimeType.MimeType;
 import es.caib.invai.back.service.model.maintenance.documentation.documentCategory.DocumentCategory;
+import es.caib.invai.back.service.model.maintenance.documentation.documentRolePermission.DocumentPermission;
 import es.caib.invai.back.utils.Constants;
 import es.caib.invai.back.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -87,10 +89,6 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    /** Repository port used to check that the section of a document exists. */
-    @Autowired
-    private AppSectionRepository appSectionRepository;
-
     /** Repository port used to check that the state of a document exists. */
     @Autowired
     private DocumentStatusRepository documentStatusRepository;
@@ -99,24 +97,33 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
     @Autowired
     private MimeTypeRepository mimeTypeRepository;
 
-    /** Repository port used to check the category of a document. */
+    /** Repository port used to check the category and the subcategory of a document. */
     @Autowired
     private DocumentCategoryRepository documentCategoryRepository;
+
+    /** Service used to check that the logged user has the permission an action needs. */
+    @Autowired
+    private DocumentRolePermissionService documentRolePermissionService;
 
     /**
      * Retrieves a paginated list of the documents of an application matching the given filter
      * criteria, each one with the data of its current attachment and no file content. Deleted
-     * documents are listed too, told apart by their deletion timestamp, unless the filter excludes them.
+     * documents are listed too, told apart by their deletion timestamp, unless the filter excludes
+     * them. Only the documents of the categories the logged user can read are listed.
      *
      * @param filter   filter criteria, scoped by application
      * @param pageable pagination and sorting information
      * @return a page of documents as response DTOs
+     * @throws AccessDeniedException if the filter asks for a category the user can't read
      */
     @Override
     @Transactional(readOnly = true)
     public Page<AppDocumentationAttachmentSimpleOutputDTO> getAll(AppDocumentationAttachmentCriteria filter, Pageable pageable) {
         log.debug("Facade: Fetching application documents via pagination boundaries");
-        Page<AppDocumentationAttachment> page = appDocumentationAttachmentRepository.findAll(filter, pageable);
+        if (Objects.nonNull(filter.getCategoryId())) {
+            documentRolePermissionService.requirePermission(DocumentPermission.READ, filter.getCategoryId());
+        }
+        Page<AppDocumentationAttachment> page = appDocumentationAttachmentRepository.findAll(filter, documentRolePermissionService.getReadableCategoryIds(), pageable);
 
         Map<Long, AppDocumentationAttachmentVersion> currentAttachments = appDocumentationAttachmentVersionRepository
                 .findCurrentByDocumentationAttachmentIds(page.getContent().stream().map(AppDocumentationAttachment::getId).toList());
@@ -142,6 +149,7 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
         if (Objects.isNull(appDocumentationAttachment)) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_NOT_FOUND);
         }
+        documentRolePermissionService.requirePermission(DocumentPermission.READ, appDocumentationAttachment.getCategory().getId());
         boolean deleted = Objects.nonNull(appDocumentationAttachment.getDeletedAt());
         appDocumentationAttachment.setAttachments(deleted
                 ? appDocumentationAttachmentVersionRepository.findDeletedWithDocumentationAttachment(id, appDocumentationAttachment.getDeletedAt())
@@ -161,19 +169,21 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
      * @param inputDTO the data of the document and of its first version
      * @param file     the file of the first version
      * @return the created document with its version
-     * @throws BusinessRuleException if the application, section, state, or category doesn't exist,
-     *                               the category isn't active, or the file is empty, too large, or of a format that isn't allowed
+     * @throws BusinessRuleException if the application, state, category or subcategory doesn't
+     *                               exist, the category or the subcategory isn't active, the subcategory doesn't belong to the category,
+     *                               or the file is empty, too large, or of a format that isn't allowed
      */
     @Override
     public AppDocumentationAttachmentOutputDTO create(AppDocumentationAttachmentInputDTO inputDTO, MultipartFile file) {
         log.debug("Facade: Creating new application document with title: {}", inputDTO.getTitle());
+        documentRolePermissionService.requirePermission(DocumentPermission.UPLOAD, inputDTO.getCategoryId());
 
         Utils.sanitize(inputDTO);
 
         if (Objects.isNull(applicationRepository.findById(inputDTO.getApplicationId()))) {
             throw new BusinessRuleException(Constants.ERR_APP_NOT_FOUND);
         }
-        validateData(inputDTO.getSectionId(), inputDTO.getCategoryId(), inputDTO.getStatusId(), null);
+        validateData(inputDTO.getCategoryId(), inputDTO.getSubcategoryId(), inputDTO.getStatusId(), null, null);
         validateMetadata(inputDTO.getMetadata());
         MimeType mimeType = validateFile(file);
         byte[] content = Utils.readContent(file);
@@ -207,6 +217,7 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
         if (Objects.isNull(appDocumentationAttachment)) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_NOT_FOUND);
         }
+        documentRolePermissionService.requirePermission(DocumentPermission.UPLOAD, appDocumentationAttachment.getCategory().getId());
         if (Objects.nonNull(appDocumentationAttachment.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_NOT_ACTIVE);
         }
@@ -232,8 +243,10 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
      * @param id       the identifier of the document
      * @param inputDTO the new data
      * @return the updated document with its attachments
-     * @throws BusinessRuleException if the document doesn't exist or is deleted, the section or
-     *                               state doesn't exist, or the new category doesn't exist or isn't active
+     * @throws BusinessRuleException if the document doesn't exist or is deleted, the state doesn't
+     *                               exist, or the new category or subcategory doesn't exist, isn't active or doesn't match
+     * @throws AccessDeniedException if the user can't edit the
+     *                                                                   documents of the current category, or of the new one
      */
     @Override
     public AppDocumentationAttachmentOutputDTO update(Long id, AppDocumentationAttachmentUpdateInputDTO inputDTO) {
@@ -242,7 +255,12 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
         Utils.sanitize(inputDTO);
 
         AppDocumentationAttachment existing = findActiveById(id);
-        validateData(inputDTO.getSectionId(), inputDTO.getCategoryId(), inputDTO.getStatusId(), existing.getDocumentCategory().getId());
+        documentRolePermissionService.requirePermission(DocumentPermission.EDIT, existing.getCategory().getId());
+        if (!Objects.equals(inputDTO.getCategoryId(), existing.getCategory().getId())) {
+            documentRolePermissionService.requirePermission(DocumentPermission.EDIT, inputDTO.getCategoryId());
+        }
+        validateData(inputDTO.getCategoryId(), inputDTO.getSubcategoryId(), inputDTO.getStatusId(),
+                existing.getCategory().getId(), Objects.nonNull(existing.getSubcategory()) ? existing.getSubcategory().getId() : null);
 
         appDocumentationAttachmentMapper.updateModelFromInput(inputDTO, existing);
         appDocumentationAttachmentRepository.update(existing, id);
@@ -261,6 +279,7 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
     public void delete(Long id) {
         log.debug("Facade: Logically deleting application document with ID: {}", id);
         AppDocumentationAttachment existing = findActiveById(id);
+        documentRolePermissionService.requirePermission(DocumentPermission.DELETE, existing.getCategory().getId());
 
         LocalDateTime deletedAt = LocalDateTime.now();
         String deletedBy = Utils.resolveCurrentUsername();
@@ -289,7 +308,8 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
     @Override
     public void deleteAttachment(Long id, Long attachmentId) {
         log.debug("Facade: Logically deleting attachment ID: {} of application document ID: {}", attachmentId, id);
-        findActiveById(id);
+        AppDocumentationAttachment existing = findActiveById(id);
+        documentRolePermissionService.requirePermission(DocumentPermission.DELETE, existing.getCategory().getId());
         AppDocumentationAttachmentVersion attachment = appDocumentationAttachmentVersionRepository.findById(attachmentId);
         if (Objects.isNull(attachment) || Objects.nonNull(attachment.getDeletedAt()) || !Objects.equals(attachment.getAppDocumentationAttachmentId(), id)) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_ATTACHMENT_NOT_FOUND);
@@ -334,6 +354,7 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
         if (Objects.isNull(appDocumentationAttachment) || Objects.nonNull(appDocumentationAttachment.getDeletedAt())) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_NOT_FOUND);
         }
+        documentRolePermissionService.requirePermission(DocumentPermission.READ, appDocumentationAttachment.getCategory().getId());
         AppDocumentationAttachmentVersion currentVersionAttachment = appDocumentationAttachmentVersionRepository.findById(attachmentId);
         if (Objects.isNull(currentVersionAttachment) || Objects.nonNull(currentVersionAttachment.getDeletedAt()) || !Objects.equals(currentVersionAttachment.getAppDocumentationAttachmentId(), id)) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_ATTACHMENT_NOT_FOUND);
@@ -361,20 +382,18 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
     }
 
     /**
-     * Checks that the section and the state exist and that the category exists and is active. An
-     * unchanged category isn't checked again, so a document keeps working when its category is
-     * deleted later.
+     * Checks that the state exists, that the category exists, is active and is a category, and that
+     * the subcategory, if any, exists, is active and belongs to the category. An unchanged category
+     * or subcategory isn't checked again, so a document keeps working when it is deleted later.
      *
-     * @param sectionId         identifier of the section
-     * @param categoryId        identifier of the category or subcategory
-     * @param statusId          identifier of the state
-     * @param currentCategoryId identifier of the category the document already has, {@code null} when creating
+     * @param categoryId           identifier of the category
+     * @param subcategoryId        identifier of the subcategory, {@code null} if there is none
+     * @param statusId             identifier of the state
+     * @param currentCategoryId    identifier of the category the document already has, {@code null} when creating
+     * @param currentSubcategoryId identifier of the subcategory the document already has, {@code null} if none or when creating
      * @throws BusinessRuleException if any of those conditions fails
      */
-    private void validateData(Long sectionId, Long categoryId, Long statusId, Long currentCategoryId) {
-        if (Objects.isNull(appSectionRepository.findById(sectionId))) {
-            throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_SECTION_NOT_FOUND);
-        }
+    private void validateData(Long categoryId, Long subcategoryId, Long statusId, Long currentCategoryId, Long currentSubcategoryId) {
         if (Objects.isNull(documentStatusRepository.findById(statusId))) {
             throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_STATUS_NOT_FOUND);
         }
@@ -383,8 +402,20 @@ public class AppDocumentationAttachmentServiceFacadeBean implements AppDocumenta
             if (Objects.isNull(category)) {
                 throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_FOUND);
             }
-            if (Objects.nonNull(category.getDeletedAt())) {
+            if (Objects.nonNull(category.getDeletedAt()) || !category.isCategory()) {
                 throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_CATEGORY_NOT_ACTIVE);
+            }
+        }
+        if (Objects.nonNull(subcategoryId)) {
+            DocumentCategory subcategory = documentCategoryRepository.findById(subcategoryId);
+            if (Objects.isNull(subcategory)) {
+                throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_FOUND);
+            }
+            if (!Objects.equals(subcategoryId, currentSubcategoryId) && Objects.nonNull(subcategory.getDeletedAt())) {
+                throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_ACTIVE);
+            }
+            if (!Objects.equals(subcategory.getParentId(), categoryId)) {
+                throw new BusinessRuleException(Constants.ERR_DOCUMENTATION_SUBCATEGORY_NOT_IN_CATEGORY);
             }
         }
     }

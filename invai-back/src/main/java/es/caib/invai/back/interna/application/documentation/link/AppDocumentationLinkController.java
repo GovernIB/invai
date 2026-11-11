@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocument
 import es.caib.invai.back.interna.application.documentation.link.DTO.AppDocumentationLinkUpdateInputDTO;
 import es.caib.invai.back.persistence.repository.application.documentation.link.AppDocumentationLinkCriteria;
 import es.caib.invai.back.service.facade.application.documentation.link.AppDocumentationLinkService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequestMapping("application/documentation/link")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class AppDocumentationLinkController {
 
     /** Facade service handling the business use cases of the links. */
@@ -56,8 +57,8 @@ public class AppDocumentationLinkController {
      * Retrieves a paginated list of the links of an application. It lists the deleted links too
      * ({@code deletedAt} tells them apart); the {@code deleted} filter keeps only the deleted ones
      * ({@code true}) or only the others ({@code false}). It can be filtered by {@code title},
-     * {@code description}, {@code sectionId} and {@code url}, searched with {@code quickSearch}
-     * across all of them, and sorted by {@code title}, {@code description}, {@code section} and {@code url}.
+     * {@code description}, {@code categoryId} and {@code url}, searched with {@code quickSearch}
+     * across all of them, and sorted by {@code title}, {@code description}, {@code category} and {@code url}.
      *
      * @param applicationId identifier of the application whose links are listed
      * @param filter        search and filter criteria

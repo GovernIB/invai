@@ -8,6 +8,7 @@ import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDo
 import es.caib.invai.back.interna.application.documentation.attachment.DTO.AppDocumentationAttachmentVersionInputDTO;
 import es.caib.invai.back.persistence.repository.application.documentation.attachment.AppDocumentationAttachmentCriteria;
 import es.caib.invai.back.service.facade.application.documentation.attachment.AppDocumentationAttachmentService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @Slf4j
 @RequestMapping("application/documentation")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class AppDocumentationAttachmentController {
 
     /** Facade service handling the business use cases of the documents. */
@@ -65,7 +66,7 @@ public class AppDocumentationAttachmentController {
     /**
      * Retrieves a paginated list of the documents of an application, each one with the data of its
      * current version. It lists the deleted documents too ({@code deletedAt} tells them apart); the
-     * {@code deleted} filter keeps only the deleted ones ({@code true}) or only the others ({@code false}). It can be sorted by {@code title}, {@code section}, {@code mimeType},
+     * {@code deleted} filter keeps only the deleted ones ({@code true}) or only the others ({@code false}). It can be sorted by {@code title}, {@code mimeType},
      * {@code category}, {@code subcategory}, {@code versionLabel} and {@code status}.
      *
      * @param applicationId identifier of the application whose documents are listed

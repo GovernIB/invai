@@ -5,6 +5,7 @@ import es.caib.invai.back.interna.maintenance.responsible.company.DTO.CompanyInp
 import es.caib.invai.back.interna.maintenance.responsible.company.DTO.CompanyOutputDTO;
 import es.caib.invai.back.persistence.repository.maintenance.responsible.company.CompanyCriteria;
 import es.caib.invai.back.service.facade.maintenance.responsible.company.CompanyService;
+import es.caib.invai.back.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,17 @@ import jakarta.validation.Valid;
 /**
  * Internal REST controller that manages lifecycle endpoints and routing rules for Company assets.
  *
+ * <p>
+ * Every endpoint that changes data requires {@code INV_SUPER}; reading is open to every role.
+ * </p>
+ *
  * @since 1.0.3
  */
 @Tag(name = "Empreses", description = "Manteniment del catàleg d'empreses.")
 @RestController
 @Slf4j
 @RequestMapping("company")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_ANY_ROLE)
 public class CompanyController {
 
     /** Facade service handling the business use cases for Company resources. */
@@ -73,6 +78,7 @@ public class CompanyController {
      * @param inputDTO the company data to create
      * @return HTTP 201 with the created company
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PostMapping
     public ResponseEntity<CompanyOutputDTO> create(@Valid @RequestBody CompanyInputDTO inputDTO) {
         return new ResponseEntity<>(companyService.create(inputDTO), HttpStatus.CREATED);
@@ -85,6 +91,7 @@ public class CompanyController {
      * @param inputDTO the new company data
      * @return HTTP 200 with the updated company
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("/{id}")
     public ResponseEntity<CompanyOutputDTO> update(@PathVariable Long id, @Valid @RequestBody CompanyInputDTO inputDTO) {
         return ResponseEntity.ok(companyService.update(id, inputDTO));
@@ -96,6 +103,7 @@ public class CompanyController {
      * @param id the identifier of the company to delete
      * @return HTTP 204 with no content
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         companyService.delete(id);
@@ -108,6 +116,7 @@ public class CompanyController {
      * @param id the identifier of the company to reactivate
      * @return HTTP 200 with the reactivated company
      */
+    @PreAuthorize(Constants.PRE_AUTH_SUPER)
     @PutMapping("reactivate/{id}")
     public ResponseEntity<CompanyOutputDTO> reactivate(@PathVariable Long id) {
         return ResponseEntity.ok(companyService.reactivate(id));

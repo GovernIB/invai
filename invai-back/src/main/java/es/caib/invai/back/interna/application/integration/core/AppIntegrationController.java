@@ -3,6 +3,7 @@ package es.caib.invai.back.interna.application.integration.core;
 import es.caib.invai.back.interna.application.integration.core.DTO.AppIntegrationInputDTO;
 import es.caib.invai.back.interna.application.integration.core.DTO.AppIntegrationOutputDTO;
 import es.caib.invai.back.service.facade.application.integration.core.AppIntegrationService;
+import es.caib.invai.back.utils.Constants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequestMapping("application/integration")
-@PreAuthorize("hasRole('ROLE_INV_SUPER')")
+@PreAuthorize(Constants.PRE_AUTH_INTEGRATION)
 public class AppIntegrationController {
 
     /** Facade service handling the business use cases for the integration anchor. */

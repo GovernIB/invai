@@ -7,7 +7,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,7 +31,7 @@ import java.util.Objects;
  * <p>
  * It automatically extracts localization keys from validation constraints or business failures
  * and maps them into a standard, localized error payload structure: HTTP 400 (Bad Request) for
- * validation/business-rule/persistence failures, and HTTP 500 (Internal Server Error) as the
+ * validation/business-rule/persistence failures, HTTP 415 for a content type the resource does not accept, and HTTP 500 (Internal Server Error) as the
  * final catch-all for anything else otherwise unhandled.
  * </p>
  *
@@ -194,6 +196,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Intercepts a request whose {@code Content-Type} the resource does not accept (e.g. an upload that
+     * arrives without {@code multipart/form-data}). Without this it would reach the catch-all below and
+     * be reported as a confusing 500, when it is really a mistake of the client.
+     *
+     * @param ex the intercepted exception
+     * @return a localized HTTP 415 (Unsupported Media Type) response
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ValidationErrorResponse> handleUnsupportedMediaTypeExceptions(HttpMediaTypeNotSupportedException ex) {
+        log.warn("Unsupported media type: {}", ex.getMessage());
+        return buildLocalizedErrorResponse(Constants.ERR_UNSUPPORTED_MEDIA_TYPE, null, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    /**
      * Intercepts a Soffid SCIM call that exceeded its configured timeout (see
      * {@code SoffidClient}). Kept distinct from every other Soffid failure - handled via
      * {@link BusinessRuleException}/{@code SoffidClientException} and reported as a generic 400 -
@@ -220,6 +236,33 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ValidationErrorResponse> handleDataTimeoutExceptions() {
         log.warn("Open Data/Reutilització document fetch timed out");
         return buildLocalizedErrorResponse(Constants.ERR_DATA_TIMEOUT, null, HttpStatus.GATEWAY_TIMEOUT);
+    }
+
+    /**
+     * Intercepts an e-mail that could not be sent (see {@code AppMailSender}): the mail server
+     * can't be reached or refused the message. The failure is not in the
+     * request but in the mail server behind the application, so it is not reported as a 400.
+     *
+     * @return a localized HTTP 502 (Bad Gateway) response
+     */
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<ValidationErrorResponse> handleEmailSendExceptions() {
+        log.warn("E-mail could not be sent");
+        return buildLocalizedErrorResponse(Constants.ERR_EMAIL_SEND_FAILED, null, HttpStatus.BAD_GATEWAY);
+    }
+
+    /**
+     * Intercepts access denied by method security (the roles of the user don't reach the endpoint)
+     * or by the checks of the sections of the documentation and the documentation permissions of
+     * their roles. Without it the catch-all handler below
+     * would report it as HTTP 500.
+     *
+     * @return a localized HTTP 403 (Forbidden) response
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ValidationErrorResponse> handleAccessDeniedExceptions() {
+        log.warn("Access denied to the current user");
+        return buildLocalizedErrorResponse(Constants.ERR_ACCESS_DENIED, null, HttpStatus.FORBIDDEN);
     }
 
     /**
